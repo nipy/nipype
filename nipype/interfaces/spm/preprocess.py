@@ -718,16 +718,16 @@ class NewSegment(SPMCommand):
             if isdefined(self.inputs.tissues):
                 for i, tissue in enumerate(self.inputs.tissues):
                     if tissue[2][0]:
-                        outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+                        outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s.nii"%(i+1, base)))
                     if tissue[2][1]:
-                        outputs['dartel_input_images'][i].append(os.path.join(pth,"rc%d%s%s"%(i+1, base, ext)))
+                        outputs['dartel_input_images'][i].append(os.path.join(pth,"rc%d%s.nii"%(i+1, base)))
                     if tissue[3][0]:
-                        outputs['normalized_class_images'][i].append(os.path.join(pth,"wc%d%s%s"%(i+1, base, ext)))
+                        outputs['normalized_class_images'][i].append(os.path.join(pth,"wc%d%s.nii"%(i+1, base)))
                     if tissue[3][1]:
-                        outputs['modulated_class_images'][i].append(os.path.join(pth,"mwc%d%s%s"%(i+1, base, ext)))
+                        outputs['modulated_class_images'][i].append(os.path.join(pth,"mwc%d%s.nii"%(i+1, base)))
             else:
                 for i in range(n_classes):
-                    outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+                    outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s.nii"%(i+1, base)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
 
             if isdefined(self.inputs.write_deformation_fields):
@@ -738,9 +738,9 @@ class NewSegment(SPMCommand):
 
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
-                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
+                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%.nii" % (base)))
                 if self.inputs.channel_info[2][1]:
-                    outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s%s" % (base, ext)))
+                    outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s.nii" % (base)))
         return outputs
 
 class SmoothInputSpec(SPMCommandInputSpec):
