@@ -148,7 +148,7 @@ except Exception, e:
                               traceback=traceback))
     else:
         from nipype.pipeline.plugins.base import report_crash
-        report_crash(node, traceback, gethostname())
+        report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
     cmdstr = cmdstr % (pkl_file, batch_dir, node.config, suffix)
