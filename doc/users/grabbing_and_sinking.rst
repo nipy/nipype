@@ -147,7 +147,7 @@ iterables that have been used in the workflow. This makes navigating the working
 directory a not so pleasant experience. And typically the user is interested in
 preserving only a small percentage of these outputs. The DataSink interface can
 be used to extract components from this `cache` and store it at a different
-location. For XNAT-based storage, see :class:`nipype.interfaces.io.XNATSink` .
+location. For XNAT-based storage, see :ref:`nipype.interfaces.io.XNATSink` .
 
 .. note:: 
 
