@@ -39,13 +39,13 @@ Debian and Ubuntu
 ~~~~~~~~~~~~~~~~~
 
 Add the `NeuroDebian <http://neuro.debian.org>`_ repository and install
-the ``python-nipype`` package using ``apt-get`` or your favourite package
+the ``python-nipype`` package using ``apt-get`` or your favorite package
 manager.
 
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on MacOSX is to install EPD_ and then add
+The easiest way to get nipype running on Mac OS X is to install EPD_ and then add
 nibabel and nipype by executing::
 
 	easy_install nibabel

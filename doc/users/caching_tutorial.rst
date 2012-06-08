@@ -130,18 +130,18 @@ rather than workflows. Use it: instead of data grabber nodes, use for
 instance the `glob` module. To vary parameters, use `for` loops. To make
 reusable code, write Python functions.
 
-One good rule of thumb to respect is to avoid the usage of explicite
-filenames appart from the outermost inputs and outputs of your
+One good rule of thumb to respect is to avoid the usage of explicit
+filenames apart from the outermost inputs and outputs of your
 processing. The reason being that the caching mechanism of
 :mod:`nipy.caching` takes care of generating the unique hashes, ensuring
-that, when you vary parameters, files are not overriden by the output of
+that, when you vary parameters, files are not overridden by the output of
 different computations.
 
 .. topic:: Debuging
     
     If you need to inspect the running environment of the nodes, it may
     be useful to know where they were executed. With `nipype.caching`,
-    you do not control this location as it it encoded by hashes.
+    you do not control this location as it is encoded by hashes.
 
     To find out where an operation has been persisted, simply look in
     it's output variable::
