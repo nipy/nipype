@@ -1,4 +1,4 @@
-"""Parallel workflow execution via PBS/Torque
+"""Parallel workflow execution via SGE
 """
 
 import os
@@ -10,7 +10,7 @@ from ...interfaces.base import CommandLine
 
 
 class SGEGraphPlugin(GraphPluginBase):
-    """Execute using PBS/Torque
+    """Execute using SGE
 
     The plugin_args input to run can be used to control the SGE execution.
     Currently supported options are:
