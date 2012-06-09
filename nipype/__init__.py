@@ -91,6 +91,9 @@ def check_for_updates():
     print "Current stable version: %s" % rel_ver
     print "Current dev version: %s" % dev_ver
 
+"""
+Disabling check for current version due to portalocker issues.
+
 if int(config.get('check', 'interval')) > 0:
     from time import time
     t = time()
@@ -103,3 +106,4 @@ if int(config.get('check', 'interval')) > 0:
             print e
         finally:
             config.save_data('last_check', t)
+"""
