@@ -453,7 +453,7 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
                                     ('outputnode.skeleton_file', 'skeleton_file3'),
                                     ]),
                 (tbss4, outputnode, [('outputnode.projectedfa_file', 'projectedfa_file'),
-                                    ('outputnode.skeleton_file', 'skeleton_file4'),
+                                    ('outputnode.skeleton_file', 'skeleton_file'),
                                     ('outputnode.skeleton_mask', 'skeleton_mask'),
                                     ('outputnode.distance_map', 'distance_map'),
                                     ]),
