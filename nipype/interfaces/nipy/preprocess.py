@@ -15,7 +15,7 @@ except Exception, e:
 else:
     from nipy.labs.mask import compute_mask
     from nipy.algorithms.registration import FmriRealign4d as FR4d
-    from nipy import save_image
+    from nipy import save_image, load_image
 
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -85,13 +85,13 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                               desc="Assume smooth changes across time e.g.,\
                      fmri series. If you don't want slice timing \
                      correction set this to undefined")
-    loops = InputMultiPath(traits.Int(5), usedefault=True,
+    loops = InputMultiPath([5], traits.Int, usedefault=True,
                            desc="loops within each run")
-    between_loops = InputMultiPath(traits.Int(5),
+    between_loops = InputMultiPath([5], traits.Int,
                                    usedefault=True, desc="loops used to \
                                                           realign different \
                                                           runs")
-    speedup = InputMultiPath(traits.Int(5),
+    speedup = InputMultiPath([5], traits.Int,
                              usedefault=True,
                              desc="successive image \
                                   sub-sampling factors \
@@ -136,12 +136,7 @@ class FmriRealign4d(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        all_ims = []
-
-        for image in self.inputs.in_file:
-            im = nb.load(image)
-            im.affine = im.get_affine()
-            all_ims.append(im)
+        all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.tr_slices):
             TR_slices = None
