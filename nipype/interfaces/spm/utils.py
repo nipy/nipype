@@ -239,7 +239,7 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         desc='3-element list (opt)')
 
     
-class ApplyInverseDeformationOutput(SPMCommandInputSpec):
+class ApplyInverseDeformationOutput(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc='Transformed files')
 
