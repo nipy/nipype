@@ -78,7 +78,7 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     slice_order = traits.List(traits.Int(),
                               desc='0 based slice order',
                               requires=["time_interp"])
-    tr_slices = traits.Float(desc="TR slices")
+    tr_slices = traits.Float(desc="TR slices", requires=['time_interp'])
     start = traits.Float(0.0, usedefault=True,
                          desc="time offset into TR to align slices to")
     time_interp = traits.Enum(True, requires=["slice_order"],
