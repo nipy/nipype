@@ -458,6 +458,64 @@ class ImageStats(FSLCommand):
         outputs.out_stat = out_stat
         return outputs
 
+class AvScaleInputSpec(FSLCommandInputSpec):
+    mat_file = File(exists=True, argstr="%s", 
+        desc='mat file to read', position=0)
+
+
+class AvScaleOutputSpec(TraitedSpec):
+    rotation_translation_matrix=traits.Any(desc='Rotation and Translation Matrix')
+    scales = traits.Any(desc='Scales (x,y,z)')
+    skews = traits.Any(desc='Skews')
+    average_scaling = traits.Any(desc='Average Scaling')
+    determinant = traits.Any(desc='Determinant')
+    forward_half_transform = traits.Any(desc='Forward Half Transform')
+    backward_half_transform = traits.Any(desc='Backwards Half Transform')
+    left_right_orientation_preserved = traits.Bool(desc='True if LR orientation preserved')
+    
+class AvScale(FSLCommand):
+    """Use FSL avscale command to extract info from mat file output of FLIRT
+
+    Examples
+    --------
+    avscale = AvScale()
+    avscale.inputs.mat_file = 'flirt.mat'
+    res = avscale.run()  # doctest: +SKIP
+
+    """
+    input_spec = AvScaleInputSpec
+    output_spec = AvScaleOutputSpec
+
+    _cmd = 'avscale'
+
+    def _format_arg(self, name, trait_spec, value):
+        return super(AvScale, self)._format_arg(name, trait_spec, value)
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+
+        def lines_to_float(lines):
+            out = []
+            for line in lines:
+                values = line.split()
+                out.append([float(val) for val in values])
+            return out
+            
+        out = runtime.stdout.split('\n')
+
+        outputs.rotation_translation_matrix = lines_to_float(out[1:5])
+        outputs.scales = lines_to_float([out[6].split(" = ")[1]])
+        outputs.skews = lines_to_float([out[8].split(" = ")[1]])
+        outputs.average_scaling = lines_to_float([out[10].split(" = ")[1]])
+        outputs.determinant = lines_to_float([out[12].split(" = ")[1]])
+        if out[13].split(": ")[1] == 'preserved':
+            outputs.left_right_orientation_preserved = True
+        else:
+            outputs.left_right_orientation_preserved = False
+        outputs.forward_half_transform = lines_to_float(out[16:20])
+        outputs.backward_half_transform = lines_to_float(out[22:-1])
+
+        return outputs
 
 class OverlayInputSpec(FSLCommandInputSpec):
     transparency = traits.Bool(desc='make overlay colors semi-transparent',

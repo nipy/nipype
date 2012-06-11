@@ -133,7 +133,7 @@ class BET(FSLCommand):
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_brain')
-        return out_file
+        return os.path.abspath(out_file)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -471,16 +471,18 @@ class FLIRT(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         # Generate an out_file if one is not provided
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+        if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix='_flirt')
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+
         outputs['out_matrix_file'] = self.inputs.out_matrix_file
         # Generate an out_matrix file if one is not provided
-        if not isdefined(outputs['out_matrix_file']) and \
-                isdefined(self.inputs.in_file):
+        if not isdefined(outputs['out_matrix_file']):
             outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
                                                    suffix='_flirt.mat',
                                                    change_ext=False)
+        outputs['out_matrix_file'] = os.path.abspath(outputs['out_matrix_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -904,7 +906,7 @@ class ApplyWarp(FSLCommand):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                              suffix='_warp')
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -963,7 +965,7 @@ class SliceTimer(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_st')
-        outputs['slice_time_corrected_file'] = out_file
+        outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1041,7 +1043,7 @@ class SUSAN(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
-        outputs['smoothed_file'] = out_file
+        outputs['smoothed_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1143,7 +1145,7 @@ class FUGUE(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_unwarped')
-        outputs['unwarped_file'] = out_file
+        outputs['unwarped_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1196,7 +1198,8 @@ class PRELUDEInputSpec(FSLCommandInputSpec):
 
 
 class PRELUDEOutputSpec(TraitedSpec):
-    unwrapped_phase_file = File(desc='unwrapped phase file')
+    unwrapped_phase_file = File(exists=True,
+                                desc='unwrapped phase file')
 
 
 class PRELUDE(FSLCommand):
@@ -1220,13 +1223,17 @@ class PRELUDE(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.unwrapped_phase_file
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwrapped')
-        outputs['unwrapped_phase_file'] = out_file
+            if isdefined(self.inputs.phase_file):
+                out_file = self._gen_fname(self.inputs.phase_file,
+                                           suffix='_unwrapped')
+            elif isdefined(self.inputs.complex_phase_file):
+                out_file = self._gen_fname(self.inputs.complex_phase_file,
+                                           suffix='_phase_unwrapped')
+        outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwraped_phase_file':
+        if name == 'unwrapped_phase_file':
             return self._list_outputs()['unwrapped_phase_file']
         return None
 

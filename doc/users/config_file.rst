@@ -80,7 +80,9 @@ Execution
 *remove_unnecessary_outputs*
 	This will remove any interface outputs not needed by the workflow. If the
 	required outputs from a node changes, rerunning the workflow will rerun the
-	node. (possible values: ``true`` and ``false``; default value: ``true``)
+	node. Outputs of leaf nodes (nodes whose outputs are not connected to any 
+	other nodes) will never be deleted independent of this parameter. (possible 
+	values: ``true`` and ``false``; default value: ``true``)
 
 *use_relative_paths*
 	Should the paths stored in results (and used to look for inputs)

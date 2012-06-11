@@ -14,7 +14,6 @@ import warnings
 import numpy as np
 import tempfile
 from nipype.utils.misc import package_check
-package_check('matplotlib')
 
 from nipype.interfaces.base import (TraitedSpec, File, Undefined, traits,
                                     BaseInterface, isdefined,
@@ -220,7 +219,6 @@ class CoherenceAnalyzer(BaseInterface):
         self.inputs.output_figure_file
 
         """
-
         if self.inputs.figure_type == 'matrix':
             fig_coh = viz.drawmatrix_channels(self.coherence,
                                 channel_names=self.ROIs,

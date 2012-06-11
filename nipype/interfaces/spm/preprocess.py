@@ -718,16 +718,16 @@ class NewSegment(SPMCommand):
             if isdefined(self.inputs.tissues):
                 for i, tissue in enumerate(self.inputs.tissues):
                     if tissue[2][0]:
-                        outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+                        outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s.nii"%(i+1, base)))
                     if tissue[2][1]:
-                        outputs['dartel_input_images'][i].append(os.path.join(pth,"rc%d%s%s"%(i+1, base, ext)))
+                        outputs['dartel_input_images'][i].append(os.path.join(pth,"rc%d%s.nii"%(i+1, base)))
                     if tissue[3][0]:
-                        outputs['normalized_class_images'][i].append(os.path.join(pth,"wc%d%s%s"%(i+1, base, ext)))
+                        outputs['normalized_class_images'][i].append(os.path.join(pth,"wc%d%s.nii"%(i+1, base)))
                     if tissue[3][1]:
-                        outputs['modulated_class_images'][i].append(os.path.join(pth,"mwc%d%s%s"%(i+1, base, ext)))
+                        outputs['modulated_class_images'][i].append(os.path.join(pth,"mwc%d%s.nii"%(i+1, base)))
             else:
                 for i in range(n_classes):
-                    outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s%s"%(i+1, base, ext)))
+                    outputs['native_class_images'][i].append(os.path.join(pth,"c%d%s.nii"%(i+1, base)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
 
             if isdefined(self.inputs.write_deformation_fields):
@@ -738,9 +738,9 @@ class NewSegment(SPMCommand):
 
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
-                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%s" % (base, ext)))
+                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%.nii" % (base)))
                 if self.inputs.channel_info[2][1]:
-                    outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s%s" % (base, ext)))
+                    outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s.nii" % (base)))
         return outputs
 
 class SmoothInputSpec(SPMCommandInputSpec):
@@ -872,7 +872,7 @@ class DARTEL(SPMCommand):
                 new_param['slam'] = param[3]
                 params.append(new_param)
             return params
-        elif opt == 'optimization parameters':
+        elif opt == 'optimization_parameters':
             new_param = {}
             new_param['lmreg'] = val[0]
             new_param['cyc'] = val[1]
@@ -917,7 +917,7 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
                                 field='mni_norm.bb')
     modulate = traits.Bool(field='mni_norm.preserve',
                            desc="Modulate out images - no modulation preserves concentrations")
-    fwhm = traits.Either(traits.Tuple(traits.Float(), traits.Float, traits.Float),
+    fwhm = traits.Either(traits.List(traits.Float(), minlen=3, maxlen=3),
                          traits.Float(), field='mni_norm.fwhm',
                          desc='3-list of fwhm for each dimension')
 
@@ -961,10 +961,10 @@ class DARTELNorm2MNI(SPMCommand):
         elif opt == 'bounding_box':
             return list(val)
         elif opt == 'fwhm':
-            if not isinstance(val, tuple):
-                return [val, val, val]
-            if isinstance(val, tuple):
+            if isinstance(val, list):
                 return val
+            else:
+                return [val, val, val]
         elif opt == 'modulate':
             return int(val)
         else:

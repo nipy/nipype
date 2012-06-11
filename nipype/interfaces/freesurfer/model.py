@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The freesurfer module provides basic functions for interfacing with freesurfer tools.
+"""The freesurfer module provides basic functions for interfacing with
+   freesurfer tools.
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -768,3 +769,80 @@ class Label2Vol(FSCommand):
         if name == 'vol_label_file':
             return self._list_outputs()[name]
         return None
+
+
+class MS_LDAInputSpec(FSTraitedSpec):
+    lda_labels = traits.List(traits.Int(), argstr='-lda %s', mandatory=True,
+                             minlen=2, maxlen=2, sep=' ',
+                             desc='pair of class labels to optimize')
+    weight_file = traits.File(argstr='-weight %s', mandatory=True,
+                        desc='filename for the LDA weights (input or output)')
+    output_synth = traits.File(exists=False, argstr='-synth %s',
+                               mandatory=True,
+                             desc='filename for the synthesized output volume')
+    label_file = traits.File(exists=True, argstr='-label %s',
+                             desc='filename of the label volume')
+    mask_file = traits.File(exists=True, argstr='-mask %s',
+                            desc='filename of the brain mask volume')
+    shift = traits.Int(argstr='-shift %d',
+                      desc='shift all values equal to the given value to zero')
+    conform = traits.Bool(argstr='-conform',
+                          desc=('Conform the input volumes (brain mask '
+                                'typically already conformed)'))
+    use_weights = traits.Bool(argstr='-W',
+                              desc=('Use the weights from a previously '
+                                    'generated weight file'))
+    images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                            copyfile=False, desc='list of input FLASH images',
+                            position=-1)
+
+
+class MS_LDAOutputSpec(TraitedSpec):
+    weight_file = File(exists=True, desc='')
+    vol_synth_file = File(exists=True, desc='')
+
+
+class MS_LDA(FSCommand):
+    """Perform LDA reduction on the intensity space of an arbitrary # of FLASH images
+
+    Examples
+    --------
+
+    >>> grey_label = 2
+    >>> white_label = 3
+    >>> zero_value = 1
+    >>> optimalWeights = MS_LDA(lda_labels=[grey_label, white_label], \
+                                label_file='label.mgz', weight_file='weights.txt', \
+                                shift=zero_value, output_synth='synth_out.mgz', \
+                                conform=True, use_weights=True, \
+                                images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
+    >>> optimalWeights.cmdline
+    'mri_ms_LDA -conform -label label.mgz -lda 2 3 -synth synth_out.mgz -shift 1 -W -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
+    """
+
+    _cmd = 'mri_ms_LDA'
+    input_spec = MS_LDAInputSpec
+    output_spec = MS_LDAOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['vol_synth_file'] = os.path.abspath(self.inputs.output_synth)
+        if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
+            outputs['weight_file'] = os.path.abspath(self.inputs.weight_file)
+        return outputs
+
+    def _verify_weights_file_exists(self):
+        if not os.path.exists(os.path.abspath(self.inputs.weight_file)):
+            raise traits.TraitError("MS_LDA: use_weights must accompany an existing weights file")
+
+    def _format_arg(self, name, spec, value):
+        if name is 'use_weights':
+            if self.inputs.use_weights is True:
+                self._verify_weights_file_exists()
+            else:
+                return ''
+                # TODO: Fix bug when boolean values are set explicitly to false
+        return super(MS_LDA, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        pass

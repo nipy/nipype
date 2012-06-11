@@ -12,6 +12,7 @@
 __docformat__ = 'restructuredtext'
 
 import os
+import os.path as op
 from glob import glob
 #import itertools
 import numpy as np
@@ -660,27 +661,38 @@ class ReconAll(CommandLine):
 
 
 class BBRegisterInputSpec(FSTraitedSpec):
-    subject_id = traits.Str(argstr='--s %s', desc='freesurfer subject id',
+    subject_id = traits.Str(argstr='--s %s',
+                            desc='freesurfer subject id',
                             mandatory=True)
-    source_file = File(argstr='--mov %s', desc='source file to be registered',
-                      mandatory=True, copyfile=False)
-    init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s', mandatory=True,
-                       xor=['init_reg_file'],
+    source_file = File(argstr='--mov %s',
+                       desc='source file to be registered',
+                       mandatory=True, copyfile=False)
+    init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s',
+                       mandatory=True, xor=['init_reg_file'],
                        desc='initialize registration spm, fsl, header')
-    init_reg_file = File(exists=True, desc='existing registration file',
-                         xor=['init'],
-                         mandatory=True)
+    init_reg_file = File(exists=True,
+                         desc='existing registration file',
+                         xor=['init'], mandatory=True)
     contrast_type = traits.Enum('t1', 't2', argstr='--%s',
-                                desc='contrast type of image', mandatory=True)
-    out_reg_file = File(argstr='--reg %s', desc='output registration file',
-                      genfile=True)
+                                desc='contrast type of image',
+                                mandatory=True)
+    intermediate_file = File(exists=True, argstr="--int %s",
+                             desc="Intermediate image, e.g. in case of partial FOV")
+    reg_frame = traits.Int(argstr="--frame %d", xor=["reg_middle_frame"],
+                           desc="0-based frame index for 4D source file")
+    reg_middle_frame = traits.Bool(argstr="--mid-frame", xor=["reg_frame"],
+                                   desc="Register middle frame of 4D source file")
+    out_reg_file = File(argstr='--reg %s',
+                        desc='output registration file',
+                        genfile=True)
     spm_nifti = traits.Bool(argstr="--spm-nii",
                             desc="force use of nifti rather than analyze with SPM")
-    epi_mask = traits.Bool(argstr="--epi-mask", desc="mask out B0 regions in stages 1 and 2")
+    epi_mask = traits.Bool(argstr="--epi-mask",
+                           desc="mask out B0 regions in stages 1 and 2")
     out_fsl_file = traits.Either(traits.Bool, File, argstr="--fslmat %s",
-                                 desc="write the transformation matrix in FSL FLIRT format")
+                   desc="write the transformation matrix in FSL FLIRT format")
     registered_file = traits.Either(traits.Bool, File, argstr='--o %s',
-                            desc='output warped sourcefile either True or filename')
+                      desc='output warped sourcefile either True or filename')
 
 
 class BBRegisterOutputSpec(TraitedSpec):
@@ -713,26 +725,40 @@ class BBRegister(FSCommand):
     output_spec = BBRegisterOutputSpec
 
     def _list_outputs(self):
+
         outputs = self.output_spec().get()
-        outputs['out_reg_file'] = self.inputs.out_reg_file
-        if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
-            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
-                                         suffix='_bbreg_%s.dat' % self.inputs.subject_id,
-                                         use_ext=False)
-        if isdefined(self.inputs.registered_file):
-            outputs['registered_file'] = self.inputs.registered_file
-            if isinstance(self.inputs.registered_file, bool):
-                outputs['registered_file'] = fname_presuffix(self.inputs.source_file, suffix='_bbreg')
-        if isdefined(self.inputs.out_fsl_file):
-            outputs['out_fsl_file'] = self.inputs.out_fsl_file
-            if isinstance(self.inputs.out_fsl_file, bool):
-                outputs['out_fsl_file'] = fname_presuffix(self.inputs.source_file,
-                                                suffix='_bbreg_%s.mat' % self.inputs.subject_id,
-                                                use_ext=False)
+        _in = self.inputs
+
+        if isdefined(_in.out_reg_file):
+            outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
+        elif _in.source_file:
+            suffix = '_bbreg_%s.dat' % _in.subject_id
+            outputs['out_reg_file'] = fname_presuffix(_in.source_file,
+                                                      suffix=suffix,
+                                                      use_ext=False)
+
+        if isdefined(_in.registered_file):
+            if isinstance(_in.registered_file, bool):
+                outputs['registered_file'] = fname_presuffix(_in.source_file,
+                                                             suffix='_bbreg')
+            else:
+                outputs['registered_file'] = op.abspath(_in.registered_file)
+
+        if isdefined(_in.out_fsl_file):
+            if isinstance(_in.out_fsl_file, bool):
+                suffix='_bbreg_%s.mat' % _in.subject_id
+                out_fsl_file = fname_presuffix(_in.source_file,
+                                               suffix=suffix,
+                                               use_ext=False)
+                outputs['out_fsl_file'] = out_fsl_file
+            else:
+                outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
+
         outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
         return outputs
 
     def _format_arg(self, name, spec, value):
+
         if name in ['registered_file', 'out_fsl_file']:
             if isinstance(value, bool):
                 fname = self._list_outputs()[name]
@@ -742,6 +768,7 @@ class BBRegister(FSCommand):
         return super(BBRegister, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
+
         if name == 'out_reg_file':
             return self._list_outputs()[name]
         return None
