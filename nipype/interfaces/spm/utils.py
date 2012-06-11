@@ -211,7 +211,7 @@ class Reslice(SPMCommand):
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
-        File(exists=True),
+        traits.Either(traits.List(File(exists=True)),File(exists=True)),
         field='fnames',
         mandatory=True,
         desc='Files on which deformation is applied')
