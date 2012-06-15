@@ -39,23 +39,31 @@ def test_applyvoltransform():
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
 @skipif(no_freesurfer)
 def test_bbregister():
-    input_map = dict(args = dict(argstr='%s',),
-                     contrast_type = dict(argstr='--%s',mandatory=True,),
-                     environ = dict(),
-                     init = dict(argstr='--init-%s',xor=['init_reg_file'],),
-                     init_reg_file = dict(xor=['init'],mandatory=True,),
-                     out_reg_file = dict(argstr='--reg %s',),
-                     registered_file = dict(argstr='--o %s',),
-                     source_file = dict(copyfile=False,mandatory=True,argstr='--mov %s',),
-                     subject_id = dict(mandatory=True,argstr='--s %s',),
-                     subjects_dir = dict(),
+    input_map = dict(args=dict(argstr='%s',),
+                     contrast_type=dict(argstr='--%s',mandatory=True,),
+                     environ=dict(),
+                     init=dict(argstr='--init-%s',xor=['init_reg_file'],),
+                     init_reg_file=dict(xor=['init'],mandatory=True,),
+                     out_reg_file=dict(argstr='--reg %s',),
+                     registered_file=dict(argstr='--o %s',),
+                     reg_frame=dict(argstr="--frame %d",),
+                     reg_middle_frame=dict(argstr="--mid-frame",),
+                     intermediate_file=dict(argstr="--int %s",),
+                     source_file=dict(copyfile=False,
+                                        mandatory=True,
+                                        argstr='--mov %s',),
+                     subject_id=dict(mandatory=True,argstr='--s %s',),
+                     subjects_dir=dict(),
                      )
     instance = freesurfer.BBRegister()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+            yield (assert_equal,
+                   getattr(instance.inputs.traits()[key], metakey),
+                   value)
 
 @skipif(no_freesurfer)
 def test_dicomconvert():

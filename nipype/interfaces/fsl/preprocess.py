@@ -1198,7 +1198,8 @@ class PRELUDEInputSpec(FSLCommandInputSpec):
 
 
 class PRELUDEOutputSpec(TraitedSpec):
-    unwrapped_phase_file = File(desc='unwrapped phase file')
+    unwrapped_phase_file = File(exists=True,
+                                desc='unwrapped phase file')
 
 
 class PRELUDE(FSLCommand):
@@ -1222,13 +1223,17 @@ class PRELUDE(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.unwrapped_phase_file
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwrapped')
+            if isdefined(self.inputs.phase_file):
+                out_file = self._gen_fname(self.inputs.phase_file,
+                                           suffix='_unwrapped')
+            elif isdefined(self.inputs.complex_phase_file):
+                out_file = self._gen_fname(self.inputs.complex_phase_file,
+                                           suffix='_phase_unwrapped')
         outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwraped_phase_file':
+        if name == 'unwrapped_phase_file':
             return self._list_outputs()['unwrapped_phase_file']
         return None
 

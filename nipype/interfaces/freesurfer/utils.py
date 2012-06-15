@@ -294,9 +294,12 @@ class SurfaceSmooth(FSCommand):
 
 
 class SurfaceTransformInputSpec(FSTraitedSpec):
-
     source_file = File(exists=True, mandatory=True, argstr="--sval %s",
+                       xor=['source_annot_file'],
                        help="surface file with source values")
+    source_annot_file = File(exists=True, mandatory=True, argstr="--sval-annot %s",
+                             xor=['source_file'],
+                             help="surface annotation file")
     source_subject = traits.String(mandatory=True, argstr="--srcsubject %s",
                                    help="subject id for source surface")
     hemi = traits.Enum("lh", "rh", argstr="--hemi %s", mandatory=True,
@@ -305,14 +308,15 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
                                    help="subject id of target surface")
     target_ico_order = traits.Enum(1, 2, 3, 4, 5, 6, 7, argstr="--trgicoorder %d",
                                    help="order of the icosahedron if target_subject is 'ico'")
-    target_type = traits.Enum(filetypes, help="output format")
+    source_type = traits.Enum(filetypes, argstr='--sfmt %s', requires=['source_file'], 
+                              help="source file format")
+    target_type = traits.Enum(filetypes, argstr='--tfmt %s', help="output format")
     reshape = traits.Bool(argstr="--reshape", help="reshape output surface to conform with Nifti")
     reshape_factor = traits.Int(argstr="--reshape-factor", help="number of slices in reshaped image")
     out_file = File(argstr="--tval %s", genfile=True, desc="surface file to write")
 
 
 class SurfaceTransformOutputSpec(TraitedSpec):
-
     out_file = File(exists=True, desc="transformed surface file")
 
 
@@ -361,6 +365,8 @@ class SurfaceTransform(FSCommand):
                                                   suffix=".%s%s" % (self.inputs.target_subject, ext),
                                                   newpath=os.getcwd(),
                                                   use_ext=use_ext)
+        else:
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -748,13 +754,14 @@ class MRIsConvert(FSCommand):
     """
     Uses Freesurfer's mris_convert to convert surface files to various formats
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    mris = fs.MRIs_Convert()
-    mris.inputs.in_file = 'lh.pial'
-    mris.inputs.out_datatype = 'gii'
-    mris.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mris = fs.MRIsConvert()
+    >>> mris.inputs.in_file = 'lh.pial'
+    >>> mris.inputs.out_datatype = 'gii'
+    >>> mris.run() # doctest: +SKIP
     """
     _cmd = 'mris_convert'
     input_spec = MRIsConvertInputSpec
@@ -810,14 +817,15 @@ class MRITessellate(FSCommand):
     """
     Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    tess = fs.MRITessellate()
-    tess.inputs.in_file = 'aseg.mgz'
-    tess.inputs.label_value = 17
-    tess.inputs.out_file = 'lh.hippocampus'
-    tess.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> tess = fs.MRITessellate()
+    >>> tess.inputs.in_file = 'aseg.mgz'
+    >>> tess.inputs.label_value = 17
+    >>> tess.inputs.out_file = 'lh.hippocampus'
+    >>> tess.run() # doctest: +SKIP
     """
     _cmd = 'mri_tessellate'
     input_spec = MRITessellateInputSpec
@@ -864,14 +872,15 @@ class MRIMarchingCubes(FSCommand):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    mc = fs.MRIMarchingCubes()
-    mc.inputs.in_file = 'aseg.mgz'
-    mc.inputs.label_value = 17
-    mc.inputs.out_file = 'lh.hippocampus'
-    mc.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> mc = fs.MRIMarchingCubes()
+    >>> mc.inputs.in_file = 'aseg.mgz'
+    >>> mc.inputs.label_value = 17
+    >>> mc.inputs.out_file = 'lh.hippocampus'
+    >>> mc.run() # doctest: +SKIP
     """
     _cmd = 'mri_mc'
     input_spec = MRIMarchingCubesInputSpec
@@ -934,12 +943,13 @@ class SmoothTessellation(FSCommand):
         SurfaceSmooth() Interface
             For smoothing a scalar field along a surface manifold
 
-    Example:
+    Example
+    -------
 
-    import nipype.interfaces.freesurfer as fs
-    smooth = fs.SmoothTessellation()
-    smooth.inputs.in_file = 'lh.hippocampus.stl'
-    smooth.run() # doctest: +SKIP
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> smooth = fs.SmoothTessellation()
+    >>> smooth.inputs.in_file = 'lh.hippocampus.stl'
+    >>> smooth.run() # doctest: +SKIP
     """
     _cmd = 'mris_smooth'
     input_spec = SmoothTessellationInputSpec
@@ -963,3 +973,37 @@ class SmoothTessellation(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
 
+
+class MakeAverageSubjectInputSpec(FSTraitedSpec):
+    subjects_ids = traits.List(traits.Str(), argstr='--subjects %s',
+                               desc='freesurfer subjects ids to average',
+                               mandatory=True, sep=' ')
+    out_name = File('average', argstr='--out %s',
+                    desc='name for the average subject', usedefault=True)
+
+
+class MakeAverageSubjectOutputSpec(TraitedSpec):
+    average_subject_name = traits.Str(desc='Output registration file')
+
+
+class MakeAverageSubject(FSCommand):
+    """Make an average freesurfer subject
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import MakeAverageSubject
+    >>> avg = MakeAverageSubject(subjects_ids=['s1', 's2'])
+    >>> avg.cmdline
+    'make_average_subject --out average --subjects s1 s2'
+
+    """
+
+    _cmd = 'make_average_subject'
+    input_spec = MakeAverageSubjectInputSpec
+    output_spec = MakeAverageSubjectOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['average_subject_name'] = self.inputs.out_name
+        return outputs

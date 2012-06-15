@@ -5,9 +5,10 @@ from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
 import os
 from copy import deepcopy
 from nipype.utils.filemanip import split_filename
+import re
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
-    source_names = InputMultiPath(File(exists=True), argstr="%s", position=8, mandatory=True)
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=10, mandatory=True)
     gzip_output = traits.Bool(False, argstr='-g', position=0, usedefault=True)
     nii_output = traits.Bool(True, argstr='-n', position=1, usedefault=True)
     anonymize = traits.Bool(argstr='-a', position=2)
@@ -16,6 +17,8 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     reorient_and_crop = traits.Bool(argstr='-x', position=5)
     output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=6)
     config_file = File(exists=True, argstr="-b %s", genfile=True, position=7)
+    convert_all_pars = traits.Bool(argstr='-v', position=8)
+    args = traits.Str(argstr='%s', desc='Additional parameters to the command', position=9)
 
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
@@ -31,7 +34,7 @@ class Dcm2nii(CommandLine):
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename']:
+        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename', 'reorient', 'reorient_and_crop', 'convert_all_pars']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
@@ -75,6 +78,9 @@ class Dcm2nii(CommandLine):
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base,filename + ".bvec"))
                         bvals.append(os.path.join(base,filename + ".bval"))
+                elif re.search('-->(.*)', line):
+                    search = re.search('.*--> (.*)', line)
+                    file = search.groups()[0]
 
                 if file:
                     files.append(file)

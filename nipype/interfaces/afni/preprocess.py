@@ -722,10 +722,8 @@ class Volreg(AFNICommand):
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if not isdefined(self.inputs.oned_file):
-            outputs['oned_file'] = fname_presuffix(
-                self.inputs.in_file,
-                suffix = '%s.1D'%self.inputs.suffix,
-                use_ext = False, newpath = os.getcwd())
+            outputs['oned_file'] = self._gen_fname(self.inputs.in_file,
+                                            suffix = '%s.1D'%self.inputs.suffix)
         else:
              outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
         return outputs

@@ -148,7 +148,7 @@ except Exception, e:
                               traceback=traceback))
     else:
         from nipype.pipeline.plugins.base import report_crash
-        report_crash(node, traceback, gethostname())
+        report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
     cmdstr = cmdstr % (pkl_file, batch_dir, node.config, suffix)
@@ -266,7 +266,7 @@ class DistributedPluginBase(PluginBase):
 
     def _clean_queue(self, jobid, graph, result=None):
         if str2bool(self._config['execution']['stop_on_first_crash']):
-            raise RuntimeError(result)
+            raise RuntimeError("".join(result['traceback']))
         crashfile = self._report_crash(self.procs[jobid],
                                        result=result)
         if self._status_callback:
@@ -328,9 +328,8 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    _, hashvalue = self.procs[jobid]._get_hashval()
-                    logger.info('Executing: %s ID: %d H:%s' % \
-                                    (self.procs[jobid]._id, jobid, hashvalue))
+                    logger.info('Executing: %s ID: %d' % \
+                                    (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
