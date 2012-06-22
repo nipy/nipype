@@ -1123,6 +1123,8 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 class FUGUEOutputSpec(TraitedSpec):
     unwarped_file = File(desc='unwarped file')
     warped_file = File(desc='forward warped file')
+    shift_out_file = File(desc='voxel shift map file')
+    fmap_out_file = File(desc='fieldmap file')
 
 
 class FUGUE(FSLCommand):
@@ -1155,6 +1157,11 @@ class FUGUE(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_'+out_field[:-5])
         outputs[out_field] = os.path.abspath(out_file)
+        if isdefined(self.inputs.fmap_out_file):
+            outputs['fmap_out_file'] = os.path.abspath(self.inputs.fmap_out_file)
+        if isdefined(self.inputs.shift_out_file):
+            outputs['shift_out_file'] = os.path.abspath(self.inputs.shift_out_file)
+
         return outputs
 
     def _gen_filename(self, name):
