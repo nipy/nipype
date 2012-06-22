@@ -1057,6 +1057,9 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                    desc='filename of input volume')
     unwarped_file = File(argstr='--unwarp=%s', genfile=True,
                          desc='apply unwarping and save as filename')
+    forward_warping = traits.Bool(desc='apply forward warping instead of unwarping')
+    warped_file = File(argstr='--warp=%s', genfile=True,
+                         desc='apply forward warping and save as filename')
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
                          desc='filename for input phase image')
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1078,7 +1081,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     despike_2dfilter = traits.Bool(argstr='--despike',
                                    desc='apply a 2D de-spiking filter')
     no_gap_fill = traits.Bool(argstr='--nofill',
-                              desc='do not apply gap-filling measure to the fieldmap')
+                              desc='do not apply gap-filling measure to the fievldmap')
     no_extend = traits.Bool(argstr='--noextend',
                             desc='do not apply rigid-body extrapolation to the fieldmap')
     smooth2d = traits.Float(argstr='--smooth2=%.2f',
@@ -1118,7 +1121,8 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
 
 class FUGUEOutputSpec(TraitedSpec):
-    unwarped_file = File(exists=True, desc='unwarped file')
+    unwarped_file = File(desc='unwarped file')
+    warped_file = File(desc='forward warped file')
 
 
 class FUGUE(FSLCommand):
@@ -1141,18 +1145,33 @@ class FUGUE(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        out_file = self.inputs.unwarped_file
-        if not isdefined(out_file):
+        if self.inputs.forward_warping:
+            out_field = 'warped_file'
+        else: 
+            out_field = 'unwarped_file'
+
+        out_file = getattr(self.inputs,out_field)
+        if not isdefined(out_file) :
             out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwarped')
-        outputs['unwarped_file'] = os.path.abspath(out_file)
+                                      suffix='_'+out_field[:-5])
+        outputs[out_field] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwarped_file':
+        if name == 'unwarped_file' and not self.inputs.forward_warping:
             return self._list_outputs()['unwarped_file']
+        if name == 'warped_file' and self.inputs.forward_warping:
+            return self._list_outputs()['warped_file']
         return None
 
+    def _parse_inputs(self,skip=None):
+        if skip==None:
+            skip=[]
+        if self.inputs.forward_warping:
+            skip+=['unwarped_file']
+        else:
+            skip+=['warped_file']
+        return super(FUGUE,self)._parse_inputs(skip=skip)
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',
