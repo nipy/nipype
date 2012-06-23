@@ -43,7 +43,7 @@ class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     invmat = File( desc = 'Filename used to store inverse affine matrix')
 
 
-class CalcCoregAffineOutputSpec(SPMCommandInputSpec):
+class CalcCoregAffineOutputSpec(TraitedSpec):
     mat = File(exists = True, desc = 'Matlab file holding transform')
     invmat = File( desc = 'Matlab file holding inverse transform')
 
@@ -121,7 +121,7 @@ class ApplyTransformInputSpec(SPMCommandInputSpec):
                 desc='file holding transform to apply')
 
 
-class ApplyTransformOutputSpec(SPMCommandInputSpec):
+class ApplyTransformOutputSpec(TraitedSpec):
     out_file = File(exists = True, desc = 'File with updated header')
 
 
@@ -174,7 +174,7 @@ class ResliceInputSpec(SPMCommandInputSpec):
 
     out_file = File(desc = 'Optional file to save resliced volume')
 
-class ResliceOutputSpec(SPMCommandInputSpec):   
+class ResliceOutputSpec(TraitedSpec):   
     out_file = File( exists = True, desc = 'resliced volume')
 
 class Reslice(SPMCommand):
