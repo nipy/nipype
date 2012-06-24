@@ -100,7 +100,7 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(File(exists=True), 
+    out_file = OutputMultiPath(File(exists=True),
                                desc="Realigned files")
     par_file = OutputMultiPath(File(exists=True),
                                desc="Motion parameter files")
@@ -142,6 +142,14 @@ class FmriRealign4d(BaseInterface):
             TR_slices = None
         else:
             TR_slices = self.inputs.tr_slices
+        if not isdefined(self.inputs.loops):
+            loops = 5
+        else:
+            loops = self.inputs.loops
+        if not isdefined(self.inputs.speedup):
+            speedup=5
+        else:
+            speedup = self.inputs.speedup
 
         R = FR4d(all_ims, tr=self.inputs.tr,
             slice_order=self.inputs.slice_order,
@@ -149,9 +157,9 @@ class FmriRealign4d(BaseInterface):
             time_interp=self.inputs.time_interp,
             start=self.inputs.start)
 
-        R.estimate(loops=self.inputs.loops,
+        R.estimate(loops=loops,
                    between_loops=self.inputs.between_loops,
-                   speedup=self.inputs.speedup)
+                   speedup=speedup)
 
         corr_run = R.resample()
         self._out_file_path = []
