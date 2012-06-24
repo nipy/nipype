@@ -741,53 +741,8 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
             result[k] = v
     return result
 
-def write_graphml(graph, filename=None):
-    if not filename:
-        filename = os.path.join(os.getcwd(), 'graph_opm.xml')
-    import xml.etree.ElementTree as ET
-    docroot = ET.Element('workflow', dict(id='workflow_1'))
-    # add processes (nodes)
-    procs = ET.SubElement(docroot, 'processes')
-    for idx, node in enumerate(graph.nodes()):
-        process = ET.SubElement(procs, 'process', dict(id=str(node)))
-        ET.SubElement(process, 'interface', dict(value=get_print_name(node)))
-        inputs = ET.SubElement(process, 'inputs')
-        for inputval in sorted(node.inputs.get().items()):
-            if isdefined(inputval[1]):
-                input = ET.SubElement(inputs, 'param', dict(id=inputval[0]))
-                value = ET.SubElement(input, 'value')
-                value.text = str(inputval[1])
-        outputs = ET.SubElement(process, 'outputs')
-        if isinstance(node.result.outputs, Bunch):
-            outputdict = node.result.outputs.dictcopy()
-        else:
-            outputdict = node.result.outputs.get()
-        for outputval in sorted(outputdict.items()):
-            if isdefined(outputval[1]):
-                output = ET.SubElement(outputs, 'param', dict(id=outputval[0]))
-                value = ET.SubElement(output, 'value')
-                value.text = str(outputval[1])
-        runtime = ET.SubElement(process, 'runtime',
-                                dict(value='runtime info element'))
-    dependencies = ET.SubElement(docroot, 'dependencies')
-    # WTB: Process->Process
-    for idx, edgeinfo in enumerate(graph.in_edges_iter(data=True)):
-        edge = ET.SubElement(dependencies, 'edge', dict(id='d_%d'%idx))
-        ET.SubElement(edge, 'source', dict(value=str(edgeinfo[0]))),
-        ET.SubElement(edge, 'destination', dict(value=str(edgeinfo[1])))
-        portmap = ET.SubElement(edge, 'portmap')
-        for src, dest in edgeinfo[2]['connect']:
-            if isinstance(src, tuple):
-                outport = src[0]
-            else:
-                outport = src
-            ET.SubElement(portmap, 'connection', dict(srcport=outport,
-                                                   destport=dest))
-    ET.dump(docroot)
-    ET.ElementTree(docroot).write(filename)
-    return docroot
 
-def write_opmx(graph, filename=None):
+def write_prov(graph, filename=None):
     """Write Open Provenance Model XML file
     """
     if not filename:

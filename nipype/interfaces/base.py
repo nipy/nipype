@@ -14,12 +14,14 @@ import datetime
 import errno
 import os
 import re
+import pwd
 from socket import gethostname
 from string import Template
 import select
 import subprocess
 from textwrap import wrap
-from time import time, asctime
+from datetime import datetime as dt
+from dateutil.parser import parse as parseutc
 from warnings import warn
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -27,13 +29,15 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                isdefined, File, Directory,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp)
+                               hash_timestamp, save_json)
 from ..utils.misc import is_container, trim, str2bool
 from .. import config, logging, LooseVersion
 from .. import __version__
 from nipype.utils.filemanip import split_filename
 
 nipype_version = LooseVersion(__version__)
+
+from .. import get_info
 
 iflogger = logging.getLogger('interface')
 
@@ -910,16 +914,23 @@ class BaseInterface(Interface):
                         returncode=None,
                         duration=None,
                         environ=env,
-                        datetime=asctime(),
+                        startTime=dt.isoformat(dt.utcnow()),
+                        endTime=None,
                         hostname=gethostname())
-        t = time()
         try:
             runtime = self._run_interface(runtime)
-            runtime.duration = time() - t
+            outputs = self.aggregate_outputs(runtime)
+            runtime.endTime = dt.isoformat(dt.utcnow())
+            runtime.duration = (parseutc(runtime.endTime) -
+                                parseutc(runtime.endTime)).total_seconds()
             results = InterfaceResult(interface, runtime,
-                                      inputs=self.inputs.get_traitsfree())
-            results.outputs = self.aggregate_outputs(results.runtime)
+                                      inputs=self.inputs.get_traitsfree(),
+                                      outputs=outputs)
+            self.write_provenance(results)
         except Exception, e:
+            runtime.endTime = dt.isoformat(dt.utcnow())
+            runtime.duration = (parseutc(runtime.endTime) -
+                                parseutc(runtime.endTime)).total_seconds()
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -944,7 +955,14 @@ class BaseInterface(Interface):
                 import traceback
                 runtime.traceback = traceback.format_exc()
                 runtime.traceback_args = e.args
-                return InterfaceResult(interface, runtime)
+                inputs=None
+                try:
+                    inputs = self.inputs.get_traitsfree()
+                except Exception, e:
+                    pass
+                results = InterfaceResult(interface, runtime, inputs=inputs)
+                self.write_provenance(results)
+                return results
             else:
                 raise
         return results
@@ -994,6 +1012,92 @@ class BaseInterface(Interface):
                 raise ValueError('Interface %s has no version information' %
                                  self.__class__.__name__)
         return self._version
+
+    def write_provenance(self, results, filename='provenance.json'):
+        runtime = results.runtime
+        interface = results.interface
+        inputs = results.inputs
+        outputs = results.outputs.get_traitsfree()
+        classname = self.__class__.__name__
+        runid = 'nipype:run_%s' % classname
+        provenance = {'prefix': {'nipype': "http://nipy.org/nipype/"},
+                      'bundle': {runid: {}}}
+        bundle = provenance['bundle'][runid]
+        bundle['entity'] = {}
+        activityid = '_:a1_%s' % classname
+        activity = {activityid: {
+            "startTime": [runtime.startTime, "xsd:dateTime"],
+            "endTime": [runtime.endTime, "xsd:dateTime"],
+            "ex:host": runtime.hostname,
+            "prov:type": ["nipype:%s" % classname, "xsd:QName"],
+        }}
+        keys = runtime.dictcopy()
+        if 'cmdline' in keys:
+            activity[activityid].update({'cmdline': runtime.cmdline})
+        if 'merged' in keys:
+            bundle['entity'] = {'consoleoutput': {"prov:type": ["stdout"],
+                                           "value": runtime.merged}}
+            bundle['wasGeneratedBy'] = {'_:wGB1': {"prov:entity": 'consoleoutput',
+                                                  "prov:activity": activityid}}
+
+        bundle['activity'] = activity
+        if inputs:
+            inputid = "_:inputs_%s" % classname
+            inputbundle = provenance['bundle'][inputid] = {}
+            bundle['entity'][inputid] = {"prov:type": ["prov:Bundle",
+                                                       "xsd:QName"]}
+            # write input entities
+            for idx, (key, val) in enumerate(sorted(inputs.items())):
+                if 'entity' not in inputbundle:
+                    inputbundle['entity'] = {}
+                id = '_:e%d_in' % idx
+                inputbundle['entity'][id] = {'type': 'nipype:input'}
+                properties = inputbundle['entity'][id]
+                properties['name'] = key
+                properties['value'] = val
+            bundle['used'] = {'_:u1': {"prov:entity": inputid,
+                                       "prov:activity": activityid}}
+        # write output entities
+        if outputs:
+            outputid = "_:outputs_%s" % classname
+            outputbundle = provenance['bundle'][outputid] = {}
+            bundle['entity'][outputid] = {"prov:type": ["prov:Bundle",
+                                                        "xsd:QName"]}
+            # write input entities
+            for idx, (key, val) in enumerate(sorted(outputs.items())):
+                if 'entity' not in outputbundle:
+                    outputbundle['entity'] = {}
+                id = '_:e%d_out' % idx
+                outputbundle['entity'][id] = {'type': 'nipype:input'}
+                properties = outputbundle['entity'][id]
+                properties['name'] = key
+                properties['value'] = val
+            if 'wasGeneratedBy' in bundle:
+                wgb_id = '_:wGB2'
+            else:
+                bundle['wasGeneratedBy'] = {}
+                wgb_id = '_:wGB1'
+            bundle['wasGeneratedBy'].update(**{wgb_id: {"prov:entity": outputid,
+                                                   "prov:activity": activityid}})
+        user_agent = {'_:ag2': {"prov:type": ["Person", "xsd:QName"],
+                                "ex:login": pwd.getpwuid(os.geteuid()).pw_name}}
+        software_agent = {'_:ag1': {"prov:type": ["Software", "xsd:QName"],
+                                    "ex:name": "Nipype"}}
+        bundle['entity'].update(**user_agent)
+        bundle['entity'].update(**software_agent)
+        for key, value in get_info().items():
+            software_agent['_:ag1']['nipype:'+key] = value
+        bundle['agent'] = ["_:ag1", "_:ag2"]
+        bundle['wasAssociatedWith'] = {'_:wAW1': {"prov:agent": "_:ag2",
+                                               "prov:activity": activityid,
+                                               "prov:role": "LoggedInUser"},
+                                       '_:wAW2': {"prov:agent": "_:ag1",
+                                                  "prov:activity": activityid,
+                                                  "prov:role": "Software"}
+                                       }
+        # write dependencies
+        save_json(filename, provenance)
+        return provenance
 
 
 class Stream(object):
