@@ -1153,9 +1153,10 @@ class FUGUE(FSLCommand):
             out_field = 'unwarped_file'
 
         out_file = getattr(self.inputs,out_field)
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_'+out_field[:-5])
+        if not isdefined(out_file):
+            if isdefined(self.inputs.in_file):
+                out_file = self._gen_fname(self.inputs.in_file,
+                                           suffix='_'+out_field[:-5])
         else:
             os.path.abspath(out_file)
         outputs[out_field] = out_file
