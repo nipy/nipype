@@ -1107,16 +1107,12 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                              desc='apply intensity correction only')
     mask_file = File(exists=True, argstr='--mask=%s',
                      desc='filename for loading valid mask')
-    save_unmasked_fmap = traits.Either(traits.Bool,
-                                       traits.File,
-                                       argstr='--unmaskfmap=%s',
-                                       requires=['fmap_out_file'],
-                                       desc='saves the unmasked fieldmap when using --savefmap')
-    save_unmasked_shift = traits.Either(traits.Bool,
-                                       traits.File,
-                                       argstr='--unmaskshift=%s',
-                                       requires=['shift_out_file'],
-                                       desc='saves the unmasked shiftmap when using --saveshift')
+    save_unmasked_fmap = traits.Bool(argstr='--unmaskfmap',
+                                     requires=['fmap_out_file'],
+                                     desc='saves the unmasked fieldmap when using --savefmap')
+    save_unmasked_shift = traits.Bool(argstr='--unmaskshift',
+                                      requires=['shift_out_file'],
+                                      desc='saves the unmasked shiftmap when using --saveshift')
     nokspace = traits.Bool(argstr='--nokspace', desc='do not use k-space forward warping')
 
 
