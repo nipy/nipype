@@ -1177,9 +1177,9 @@ class FUGUE(FSLCommand):
     def _parse_inputs(self,skip=None):
         if skip==None:
             skip=[]
-        if self.inputs.forward_warping:
+        if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
             skip+=['unwarped_file']
-        else:
+        if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
             skip+=['warped_file']
         return super(FUGUE,self)._parse_inputs(skip=skip)
 
