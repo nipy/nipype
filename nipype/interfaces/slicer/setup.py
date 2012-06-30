@@ -6,9 +6,9 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('slicer', parent_package, top_path)
 
     config.add_data_dir('diffusion')
+    config.add_data_dir('segmentation')
     config.add_data_dir('filtering')
     config.add_data_dir('legacy')
-    config.add_data_dir('segmentation')
 
     return config
 
