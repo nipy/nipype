@@ -117,7 +117,7 @@ class Merge(IOBase):
             for idx in range(self.numinputs):
                 value = getattr(self.inputs, 'in%d' % (idx + 1))
                 if isdefined(value):
-                    if isinstance(value, list) and not no_flatten:
+                    if isinstance(value, list) and not self.inputs.no_flatten:
                         out.extend(value)
                     else:
                         out.append(value)
