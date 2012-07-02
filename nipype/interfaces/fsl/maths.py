@@ -23,7 +23,9 @@ class MathsInput(FSLCommandInputSpec):
     output_datatype = traits.Enum(*_dtypes,
                                   position=-1, argstr="-odt %s",
                                   desc="datatype to use for output (default uses input type)")
-
+    
+    nan2zeros = traits.Bool(position=3,
+                            desc='change NaNs to zeros before doing anything')
 
 class MathsOutput(TraitedSpec):
 
