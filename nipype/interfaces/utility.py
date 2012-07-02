@@ -80,7 +80,7 @@ class IdentityInterface(IOBase):
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                 desc='direction in which to merge, hstack requires same number of elements in each input')
-    no_flatten = trait.Bool(desc='append to outlist instead of extending in vstack mode')
+    no_flatten = traits.Bool(desc='append to outlist instead of extending in vstack mode')
 
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
