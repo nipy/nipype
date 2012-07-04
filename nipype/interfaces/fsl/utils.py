@@ -1147,3 +1147,42 @@ class EPIDeWarp(FSLCommand):
             outputs['exf_mask'] = self._gen_fname(cwd=self.inputs.tmpdir,
                                                   basename='maskexf')
         return outputs
+
+class SigLossInputSpec(FSLCommandInputSpec):
+    in_file = File(mandatory=True,
+                   exists=True,
+                   argstr='-i %s',
+                   desc='b0 fieldmap file')
+    out_file = File(argstr='-s %s',
+                    desc='output signal loss estimate file',
+                    genfile=True)
+    
+    mask_file = File(exists=True,
+                     argstr='-m %s',
+                     desc='brain mask file')
+    echo_time = traits.Float(argstr='--te=%f',
+                             desc='echo time in seconds')
+    slice_direction = traits.Enum('x','y','z',
+                                  argstr='-d %s',
+                                  desc='slicing direction')
+class SigLossOuputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc='signal loss estimate file')
+
+class SigLoss(FSLCommand):
+    input_spec = SigLossInputSpec
+    output_spec = SigLossOuputSpec
+    _cmd = 'sigloss'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file']=self._gen_fname(self.inputs.in_file,
+                                                suffix='_sigloss')
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name=='out_file':
+            return self._list_outputs()['out_file']
+        return None
