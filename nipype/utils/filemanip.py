@@ -261,6 +261,10 @@ def copyfile(originalfile, newfile, copy=False, create_new=False, hashmethod=Non
             matnfile = newfile[:-4] + ".mat"
             copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
+    elif originalfile.endswith(".BRIK"):
+        hdrofile = originalfile[:-4] + ".HEAD"
+        hdrnfile = newfile[:-4] + ".HEAD"
+        copyfile(hdrofile, hdrnfile, copy)
 
     return newfile
 

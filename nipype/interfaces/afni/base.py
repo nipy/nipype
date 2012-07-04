@@ -21,9 +21,9 @@ warnings.filterwarnings('always', category=UserWarning)
 class Info(object):
     """Handle afni output type and version information.
     """
-    __outputtype = 'NIFTI_GZ'
+    __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii',
-              'AFNI': '.BRIK',
+              'AFNI': '+orig.BRIK',
               'NIFTI_GZ': '.nii.gz'}
 
     @staticmethod
@@ -69,7 +69,7 @@ class Info(object):
     def outputtype(cls):
         """AFNI has no environment variables,
         Output filetypes get set in command line calls
-        Nipype uses NIFTI_GZ as default
+        Nipype uses AFNI as default
 
 
         Returns
@@ -78,7 +78,7 @@ class Info(object):
         """
         #warn(('AFNI has no environment variable that sets filetype '
         #      'Nipype uses NIFTI_GZ as default'))
-        return 'NIFTI_GZ'
+        return 'AFNI'
 
 
     @staticmethod
@@ -96,7 +96,7 @@ class Info(object):
 
 
 class AFNITraitedSpec(CommandLineInputSpec):
-    outputtype =  traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
+    outputtype =  traits.Enum('AFNI', Info.ftypes.keys(),
                               desc = 'AFNI output filetype')
 
 
