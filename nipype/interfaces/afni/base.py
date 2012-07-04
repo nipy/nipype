@@ -23,7 +23,7 @@ class Info(object):
     """
     __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii',
-              'AFNI': '.BRIK',
+              'AFNI': '+orig.BRIK',
               'NIFTI_GZ': '.nii.gz'}
 
     @staticmethod
