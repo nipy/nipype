@@ -224,6 +224,7 @@ class ExtractROI(FSLCommand):
         if not isdefined(outputs['roi_file']):
             outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix='_roi')
+        outputs['roi_file'] = os.path.abspath(outputs['roi_file'])
         return outputs
 
     def _gen_filename(self, name):
