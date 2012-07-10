@@ -4,7 +4,7 @@
     The maths module provides higher-level interfaces to some of the operations
     that can be performed with the fslmaths command-line program.
 """
-
+import os
 import numpy as np
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
@@ -39,7 +39,7 @@ class MathsCommand(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self.inputs.out_file
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
         return outputs
