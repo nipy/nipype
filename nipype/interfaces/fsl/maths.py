@@ -16,7 +16,7 @@ class MathsInput(FSLCommandInputSpec):
 
     in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
                 desc="image to operate on")
-    out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write")
+    out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write", hash_files=False)
     _dtypes = ["float", "char", "int", "short", "double", "input"]
     internal_datatype = traits.Enum(*_dtypes, position=1, argstr="-dt %s",
                                     desc="datatype to use for calculations (default is float)")
@@ -39,9 +39,10 @@ class MathsCommand(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
