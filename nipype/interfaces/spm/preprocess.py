@@ -738,7 +738,7 @@ class NewSegment(SPMCommand):
 
             if isdefined(self.inputs.channel_info):
                 if self.inputs.channel_info[2][0]:
-                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s%.nii" % (base)))
+                    outputs['bias_corrected_images'].append(os.path.join(pth, "m%s.nii" % (base)))
                 if self.inputs.channel_info[2][1]:
                     outputs['bias_field_images'].append(os.path.join(pth, "BiasField_%s.nii" % (base)))
         return outputs

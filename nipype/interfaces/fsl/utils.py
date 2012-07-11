@@ -224,6 +224,7 @@ class ExtractROI(FSLCommand):
         if not isdefined(outputs['roi_file']):
             outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
                                               suffix='_roi')
+        outputs['roi_file'] = os.path.abspath(outputs['roi_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -896,7 +897,7 @@ class ConvertXFMInputSpec(FSLCommandInputSpec):
                                   xor=_options, requires=["in_file2"],
                                   desc="use secondary matrix to fix scale and skew")
     out_file = File(genfile=True, argstr="-omat %s", position=1,
-                    desc="final transformation matrix")
+                    desc="final transformation matrix", hash_files=False)
 
 
 class ConvertXFMOutputSpec(TraitedSpec):
@@ -926,7 +927,7 @@ class ConvertXFM(FSLCommand):
         outputs = self._outputs().get()
         outfile = self.inputs.out_file
         if not isdefined(outfile):
-            path, infile1, ext = split_filename(self.inputs.in_file)
+            _, infile1, _ = split_filename(self.inputs.in_file)
             if self.inputs.invert_xfm:
                 outfile = fname_presuffix(infile1,
                                           suffix="_inv.mat",
@@ -934,7 +935,7 @@ class ConvertXFM(FSLCommand):
                                           use_ext=False)
             else:
                 if self.inputs.concat_xfm:
-                    path, infile2, ext = split_filename(self.inputs.in_file2)
+                    _, infile2, _ = split_filename(self.inputs.in_file2)
                     outfile = fname_presuffix("%s_%s" % (infile1, infile2),
                                               suffix=".mat",
                                               newpath=os.getcwd(),
@@ -944,7 +945,7 @@ class ConvertXFM(FSLCommand):
                                               suffix="_fix.mat",
                                               newpath=os.getcwd(),
                                               use_ext=False)
-        outputs["out_file"] = outfile
+        outputs["out_file"] = os.path.abspath(outfile)
         return outputs
 
     def _gen_filename(self, name):
