@@ -1153,9 +1153,7 @@ class FUGUE(FSLCommand):
             if isdefined(self.inputs.in_file):
                 out_file = self._gen_fname(self.inputs.in_file,
                                            suffix='_'+out_field[:-5])
-        else:
-            os.path.abspath(out_file)
-        outputs[out_field] = out_file
+        outputs[out_field] = os.path.abspath(out_file)
         if isdefined(self.inputs.fmap_out_file):
             outputs['fmap_out_file'] = os.path.abspath(self.inputs.fmap_out_file)
         if isdefined(self.inputs.shift_out_file):
