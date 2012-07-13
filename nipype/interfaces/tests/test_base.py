@@ -91,6 +91,18 @@ def test_TraitedSpec():
     #yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
+def test_TraitedSpec_dynamic():
+    from cPickle import dumps, loads
+    a = nib.BaseTraitedSpec()
+    a.add_trait('foo', nib.traits.Int)
+    a.foo = 1
+    assign_a = lambda : setattr(a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a
+    pkld_a = dumps(a)
+    unpkld_a = loads(pkld_a)
+    assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a_again
+
 def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
