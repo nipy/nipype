@@ -815,7 +815,7 @@ class DistanceMap(FSLCommand):
                                                            suffix="_lclmax",
                                                            use_ext=True,
                                                            newpath=os.getcwd())
-            outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"]))
+            outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"])
         return outputs
 
     def _gen_filename(self, name):
