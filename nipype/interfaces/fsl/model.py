@@ -1285,28 +1285,28 @@ class ClusterInputSpec(FSLCommandInputSpec):
                              desc='threshold for input volume')
     out_index_file = traits.Either(traits.Bool, File,
                                    argstr='--oindex=%s',
-                                   desc='output of cluster index (in size order)')
+                                   desc='output of cluster index (in size order)', hash_files=False)
     out_threshold_file = traits.Either(traits.Bool, File,
                                        argstr='--othresh=%s',
-                                       desc='thresholded image')
+                                       desc='thresholded image', hash_files=False)
     out_localmax_txt_file = traits.Either(traits.Bool, File,
                                           argstr='--olmax=%s',
-                                          desc='local maxima text file')
+                                          desc='local maxima text file', hash_files=False)
     out_localmax_vol_file = traits.Either(traits.Bool, File,
                                           argstr='--olmaxim=%s',
-                                          desc='output of local maxima volume')
+                                          desc='output of local maxima volume', hash_files=False)
     out_size_file = traits.Either(traits.Bool, File,
                                   argstr='--osize=%s',
-                                  desc='filename for output of size image')
+                                  desc='filename for output of size image', hash_files=False)
     out_max_file = traits.Either(traits.Bool, File,
                                  argstr='--omax=%s',
-                                 desc='filename for output of max image')
+                                 desc='filename for output of max image', hash_files=False)
     out_mean_file = traits.Either(traits.Bool, File,
                                   argstr='--omean=%s',
-                                  desc='filename for output of mean image')
+                                  desc='filename for output of mean image', hash_files=False)
     out_pval_file = traits.Either(traits.Bool, File,
                                   argstr='--opvals=%s',
-                                  desc='filename for image output of log pvals')
+                                  desc='filename for image output of log pvals', hash_files=False)
     pthreshold = traits.Float(argstr='--pthresh=%.10f',
                               requires=['dlh', 'volume'],
                               desc='p-threshold for clusters')
@@ -1387,7 +1387,7 @@ class Cluster(FSLCommand):
                                                           suffix='_' + suffix,
                                                           change_ext=change_ext)
                 else:
-                    outputs[outkey] = inval
+                    outputs[outkey] = os.pardir.abspath(inval)
         return outputs
 
     def _format_arg(self, name, spec, value):
