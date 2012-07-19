@@ -10,7 +10,7 @@ do is to define inputs, outputs, _run_interface() (not run()), and _list_outputs
 .. testcode::
 	
     from nipype.interfaces.base import BaseInterface, \
-        BaseInterfaceInputSpec, traits, File
+        BaseInterfaceInputSpec, traits, File, TraitedSpec
     from nipype.utils.filemanip import split_filename
         
     import nibabel as nb
