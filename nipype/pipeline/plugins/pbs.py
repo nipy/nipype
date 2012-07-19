@@ -39,7 +39,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         proc = subprocess.Popen(["qstat", taskid],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
-        o,e=proc.communicate()
+        _, e = proc.communicate()
         errmsg = 'Unknown Job Id' # %s' % taskid 
         return  errmsg not in e
 
