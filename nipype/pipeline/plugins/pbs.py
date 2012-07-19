@@ -36,12 +36,12 @@ class PBSPlugin(SGELikeBatchManagerBase):
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        proc = subprocess.Popen(["qstat","-i", taskid],
+        proc = subprocess.Popen(["qstat", taskid],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         o,e=proc.communicate()
-        errmsg = 'Unknown Job Id %s' % taskid 
-        return  errmsg not in o
+        errmsg = 'Unknown Job Id' # %s' % taskid 
+        return  errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)
