@@ -1326,11 +1326,11 @@ class FIRST(FSLCommand):
         return outputs
 
     def _gen_fname(self, name):
-        path, name, ext = split_filename(self.inputs.out_file)
+        path, outname, ext = split_filename(self.inputs.out_file)
         if name == 'original_segmentations':
-            return op.abspath(name + '_all_fast_origsegs.nii.gz')
+            return op.abspath(outname + '_all_fast_origsegs.nii.gz')
         if name == 'segmentation_file':
-            return op.abspath(name + '_all_fast_firstseg.nii.gz')
+            return op.abspath(outname + '_all_fast_firstseg.nii.gz')
         return None
 
     def _gen_mesh_names(self, name, structures):
