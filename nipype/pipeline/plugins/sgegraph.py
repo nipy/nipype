@@ -65,14 +65,22 @@ class SGEGraphPlugin(GraphPluginBase):
                     if 'job' in values:
                         values = values.rstrip(',')
                         deps = '-hold_jid%s' % values
-                fp.writelines('job%05d=`qsub -o %s -e %s' +
-                              ' %s %s -N job%05d %s`\n' % (
-                                                idx,
-                                                batchscriptoutfile,
-                                                batchscripterrfile,
-                                                self._qsub_args, deps,
-                                                idx,
-                                                batchscriptfile))
+                jobname = 'job%05d' % ( idx )
+                ## Do not use default output locations if they are set in self._qsub_args
+                stderrFile = ''
+                if self._qsub_args.count('-e ') == 0:
+                        stderrFile='-e {errFile}'.format(errFile=batchscripterrfile)
+                stdoutFile = ''
+                if self._qsub_args.count('-o ') == 0:
+                        stdoutFile='-o {outFile}'.format(outFile=batchscriptoutfile)
+                full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript})\n'.format(
+                             jobNm=jobname,
+                             outFileOption=stdoutFile,
+                             errFileOption=stderrFile,
+                             extraQSubArgs=self._qsub_args,
+                             dependantIndex=deps,
+                             batchscript=batchscriptfile)
+                fp.writelines( full_line )
 
         cmd = CommandLine('bash', environ=os.environ.data)
         cmd.inputs.args = '%s' % submitjobsfile
