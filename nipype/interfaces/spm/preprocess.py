@@ -411,7 +411,7 @@ class Normalize(SPMCommand):
         if opt in ['write_wrap']:
             if len(val) != 3:
                 raise ValueError('%s must have 3 elements' % opt)
-        return val
+        return super(Normalize, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
