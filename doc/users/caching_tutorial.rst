@@ -120,7 +120,7 @@ provides for this: :meth:`Memory.clear_previous_runs`,
 .. topic:: Example
 
    A full-blown example showing how to stage multiple operations can be
-   found in the :download:`caching_example.py <../../examples/caching_example.py>` file.
+   found in the :download:`caching_example.py <../../examples/howto_caching_example.py>` file.
 
 Usage patterns: working efficiently with caching
 ===================================================
