@@ -91,6 +91,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
     crawl_code_struct(all_code, os.getcwd())
 
 
+
 def generate_class(module,launcher):
     dom = grab_xml(module,launcher)
     inputTraits = []
@@ -100,6 +101,8 @@ def generate_class(module,launcher):
     #self._outputs_nodes = []
 
     class_string = "\"\"\""
+    
+    
 
     for desc_str in ['title', 'category', 'description', 'version',
                      'documentation-url', 'license', 'contributor',
@@ -112,6 +115,11 @@ def generate_class(module,launcher):
     class_string += "\"\"\""
 
     for paramGroup in dom.getElementsByTagName("parameters"):
+        indices = paramGroup.getElementsByTagName('index')
+        max_index = 0
+        for index in indices:
+            if int(index.firstChild.nodeValue) > max_index:
+                max_index = int(index.firstChild.nodeValue)
         for param in paramGroup.childNodes:
             if param.nodeName in ['label', 'description', '#text', '#comment']:
                 continue
@@ -154,7 +162,7 @@ def generate_class(module,launcher):
 
             index = param.getElementsByTagName('index')
             if index:
-                traitsParams["position"] = index[0].firstChild.nodeValue
+                traitsParams["position"] = int(index[0].firstChild.nodeValue)-(max_index+1)
 
             desc = param.getElementsByTagName('description')
             if index:
