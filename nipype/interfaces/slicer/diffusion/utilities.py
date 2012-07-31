@@ -7,8 +7,8 @@ from nipype.interfaces.slicer.base import SlicerCommandLine
 
 
 class ResampleDTIInputSpec(CommandLineInputSpec):
-    inputVolume = File(position="0", desc="Input volume to be resampled", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Resampled Volume", argstr="--outputVolume %s")
+    inputVolume = File(position="0", desc="Input volume to be resampled", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Resampled Volume", argstr="%s")
     Reference = File(desc="Reference Volume (spacing,size,orientation,origin)", exists=True, argstr="--Reference %s")
     transformationFile = File(exists=True, argstr="--transformationFile %s")
     defField = File(desc="File containing the deformation field (3D vector image containing vectors with 3 components)", exists=True, argstr="--defField %s")
@@ -67,10 +67,10 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
 
 class DiffusionTensorEstimationInputSpec(CommandLineInputSpec):
-    inputVolume = File(position="0", desc="Input DWI volume", exists=True, argstr="--inputVolume %s")
+    inputVolume = File(position="0", desc="Input DWI volume", exists=True, argstr="%s")
     mask = File(desc="Mask where the tensors will be computed", exists=True, argstr="--mask %s")
-    outputTensor = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Estimated DTI volume", argstr="--outputTensor %s")
-    outputBaseline = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Estimated baseline volume", argstr="--outputBaseline %s")
+    outputTensor = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Estimated DTI volume", argstr="%s")
+    outputBaseline = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Estimated baseline volume", argstr="%s")
     enumeration = traits.Enum("LS", "WLS", desc="LS: Least Squares, WLS: Weighted Least Squares", argstr="--enumeration %s")
     shiftNeg = traits.Bool(desc="Shift eigenvalues so all are positive (accounts for bad tensors related to noise or acquisition error)", argstr="--shiftNeg ")
 
@@ -114,9 +114,9 @@ acknowledgements: This command module is based on the estimation functionality p
 
 
 class DiffusionWeightedMaskingInputSpec(CommandLineInputSpec):
-    inputVolume = File(position="0", desc="Input DWI volume", exists=True, argstr="--inputVolume %s")
-    outputBaseline = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Estimated baseline volume", argstr="--outputBaseline %s")
-    thresholdMask = traits.Either(traits.Bool, File(), position="3", hash_files=False, desc="Otsu Threshold Mask", argstr="--thresholdMask %s")
+    inputVolume = File(position="0", desc="Input DWI volume", exists=True, argstr="%s")
+    outputBaseline = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Estimated baseline volume", argstr="%s")
+    thresholdMask = traits.Either(traits.Bool, File(), position="3", hash_files=False, desc="Otsu Threshold Mask", argstr="%s")
     otsuomegathreshold = traits.Float(desc="Control the sharpness of the threshold in the Otsu computation. 0: lower threshold, 1: higher threhold", argstr="--otsuomegathreshold %f")
     removeislands = traits.Bool(desc="Remove Islands in Threshold Mask?", argstr="--removeislands ")
 
@@ -154,8 +154,8 @@ contributor: Demian Wassermann
 
 
 class DiffusionTensorMathematicsInputSpec(CommandLineInputSpec):
-    inputVolume = File(position="0", desc="Input DTI volume", exists=True, argstr="--inputVolume %s")
-    outputScalar = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Scalar volume derived from tensor", argstr="--outputScalar %s")
+    inputVolume = File(position="0", desc="Input DTI volume", exists=True, argstr="%s")
+    outputScalar = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Scalar volume derived from tensor", argstr="%s")
     enumeration = traits.Enum("Trace", "Determinant", "RelativeAnisotropy", "FractionalAnisotropy", "Mode", "LinearMeasure", "PlanarMeasure", "SphericalMeasure", "MinEigenvalue", "MidEigenvalue", "MaxEigenvalue", "MaxEigenvalueProjectionX", "MaxEigenvalueProjectionY", "MaxEigenvalueProjectionZ", "RAIMaxEigenvecX", "RAIMaxEigenvecY", "RAIMaxEigenvecZ", "D11", "D22", "D33", "ParallelDiffusivity", "PerpendicularDffusivity", desc="An enumeration of strings", argstr="--enumeration %s")
 
 

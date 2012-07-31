@@ -132,7 +132,10 @@ def generate_class(module,launcher):
             else:
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
                 name = name.lstrip().rstrip()
-                traitsParams["argstr"] = "--" + name + " "
+                if param.getElementsByTagName('index'):
+                    traitsParams["argstr"] = ""
+                else:
+                    traitsParams["argstr"] = "--" + name + " "
 
             if param.getElementsByTagName('description'):
                 traitsParams["desc"] = param.getElementsByTagName('description')[0].firstChild.nodeValue.replace('"', "\\\"").replace("\n", ", ")
