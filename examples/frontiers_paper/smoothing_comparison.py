@@ -47,9 +47,8 @@ anisotropic_voxel_smooth = fsl_wf.create_susan_smooth(name="anisotropic_voxel_sm
 anisotropic_voxel_smooth.inputs.smooth.output_type = 'NIFTI'
 preprocessing.connect(realign, "realigned_files", anisotropic_voxel_smooth,
                       "inputnode.in_files")
-anisotropic_voxel_smooth.iterables("inputnode.fwhm", [3,4])
-#preprocessing.connect(iter_fwhm, "fwhm", anisotropic_voxel_smooth,
-#                      "inputnode.fwhm")
+preprocessing.connect(iter_fwhm, "fwhm", anisotropic_voxel_smooth,
+                      "inputnode.fwhm")
 preprocessing.connect(compute_mask, "brain_mask", anisotropic_voxel_smooth,
                       'inputnode.mask_file')
 
