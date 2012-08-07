@@ -1331,7 +1331,7 @@ class TCorrelate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        
+
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.xset,
                                                   suffix=self.inputs.suffix)

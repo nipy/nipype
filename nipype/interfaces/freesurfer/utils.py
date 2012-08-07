@@ -308,7 +308,7 @@ class SurfaceTransformInputSpec(FSTraitedSpec):
                                    help="subject id of target surface")
     target_ico_order = traits.Enum(1, 2, 3, 4, 5, 6, 7, argstr="--trgicoorder %d",
                                    help="order of the icosahedron if target_subject is 'ico'")
-    source_type = traits.Enum(filetypes, argstr='--sfmt %s', requires=['source_file'], 
+    source_type = traits.Enum(filetypes, argstr='--sfmt %s', requires=['source_file'],
                               help="source file format")
     target_type = traits.Enum(filetypes, argstr='--tfmt %s', help="output format")
     reshape = traits.Bool(argstr="--reshape", help="reshape output surface to conform with Nifti")
@@ -988,7 +988,7 @@ class MakeAverageSubjectOutputSpec(TraitedSpec):
 
 class MakeAverageSubject(FSCommand):
     """Make an average freesurfer subject
-    
+
     Examples
     --------
 
