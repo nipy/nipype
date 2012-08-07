@@ -90,13 +90,10 @@ By subclassing **MatlabCommand** for your main class, and **MatlabInputSpec** fo
 	    Examples
 	    --------
 
-            >>> hello = HelloWorld(matlab_cmd = 'mymatlab')
-            >>> hello.inputs.name = 'Monty'
-            >>> hello.inputs.mfile = True #creates mfile
-            >>> hello.inputs.paths = '/path/to/matlab/toolbox'
-            >>> hello.inputs.script_file = 'helloworld_pyscript.m'
+            >>> hello = HelloWorld()
+            >>> hello.inputs.name = 'hello_world'
             >>> out = hello.run()
-            >>> out.outputs['matlab_output'] 
+            >>> print out.outputs.matlab_output 
             """
             input_spec = HelloWorldInputSpec
             output_spec = HelloWorldOutputSpec

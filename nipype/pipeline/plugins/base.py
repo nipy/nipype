@@ -319,11 +319,17 @@ class DistributedPluginBase(PluginBase):
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids))
                 for jobid in jobids[:slots]:
-                    if isinstance(self.procs[jobid], MapNode) and \
-                            self.procs[jobid].num_subnodes() > 1:
-                        submit = self._submit_mapnode(jobid)
-                        if not submit:
+                    if isinstance(self.procs[jobid], MapNode):
+                        try:
+                            num_subnodes = self.procs[jobid].num_subnodes()
+                        except Exception:
+                            self._clean_queue(jobid, graph)
+                            self.proc_pending[jobid] = False
                             continue
+                        if num_subnodes > 1:
+                            submit = self._submit_mapnode(jobid)
+                            if not submit:
+                                continue
                     # change job status in appropriate queues
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True

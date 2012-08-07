@@ -102,7 +102,7 @@ class DTIFit(FSLCommand):
 
 class EddyCorrectInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='%s', position=0, mandatory=True)
-    out_file = File(desc='4D output file', argstr='%s', position=1, genfile=True)
+    out_file = File(desc='4D output file', argstr='%s', position=1, genfile=True, hash_files=False)
     ref_num = traits.Int(argstr='%d', position=2, desc='reference number', mandatory=True)
 
 
@@ -143,6 +143,7 @@ class EddyCorrect(FSLCommand):
         outputs['eddy_corrected'] = self.inputs.out_file
         if not isdefined(outputs['eddy_corrected']):
             outputs['eddy_corrected'] = self._gen_fname(self.inputs.in_file, suffix='_edc')
+        outputs['eddy_corrected'] = os.path.abspath(outputs['eddy_corrected'])
         return outputs
 
     def _gen_filename(self, name):
@@ -492,7 +493,7 @@ class VecRegInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-i %s', desc='filename for input vector or tensor field',
                   mandatory=True)
     out_file = File(argstr='-o %s', desc='filename for output registered vector or tensor field',
-                   genfile=True)
+                   genfile=True, hash_files=False)
     ref_vol = File(exists=True, argstr='-r %s', desc='filename for reference (target) volume',
                   mandatory=True)
     affine_mat = File(exists=True, argstr='-t %s',
@@ -554,6 +555,7 @@ class VecReg(FSLCommand):
             pth, base_name = os.path.split(self.inputs.in_file)
             outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(pth),
                                                  suffix='_vreg')
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -610,7 +612,7 @@ class ProjThresh(FSLCommand):
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File, exists=True, argstr='%s', desc='a list of input volumes or a singleMatrixFile',
                           position=0, mandatory=True)
-    out_file = File(argstr='%s', desc='file with the resulting segmentation', position=2, genfile=True)
+    out_file = File(argstr='%s', desc='file with the resulting segmentation', position=2, genfile=True, hash_files=False)
 
 
 class FindTheBiggestOutputSpec(TraitedSpec):
@@ -648,6 +650,7 @@ class FindTheBiggest(FSLCommand):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname('biggestSegmentation', suffix='')
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -762,8 +765,8 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
                      desc="binary mask to contrain calculations")
     invert_input = traits.Bool(argstr="--invert", desc="invert input image")
     local_max_file = traits.Either(traits.Bool, File, argstr="--localmax=%s",
-                                   desc="write an image of the local maxima")
-    distance_map = File(genfile=True, argstr="--out=%s", desc="distance map to write")
+                                   desc="write an image of the local maxima", hash_files=False)
+    distance_map = File(genfile=True, argstr="--out=%s", desc="distance map to write", hash_files=False)
 
 
 class DistanceMapOutputSpec(TraitedSpec):
@@ -804,6 +807,7 @@ class DistanceMap(FSLCommand):
                                                       suffix="_dstmap",
                                                       use_ext=True,
                                                       newpath=os.getcwd())
+        outputs["distance_map"] = os.path.abspath(outputs["distance_map"])
         if isdefined(_si.local_max_file):
             outputs["local_max_file"] = _si.local_max_file
             if isinstance(_si.local_max_file, bool):
@@ -811,6 +815,7 @@ class DistanceMap(FSLCommand):
                                                            suffix="_lclmax",
                                                            use_ext=True,
                                                            newpath=os.getcwd())
+            outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"])
         return outputs
 
     def _gen_filename(self, name):
@@ -905,7 +910,7 @@ class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
     theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
     phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
     mask = File(exists=True, position=2, argstr="%s")
-    output = File("dyads", position=3, usedefault=True, argstr="%s")
+    output = File("dyads", position=3, usedefault=True, argstr="%s", hash_files=False)
     perc = traits.Float(desc="the {perc}% angle of the output cone of \
 uncertainty (output will be in degrees)",
                         position=4,

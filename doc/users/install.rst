@@ -9,8 +9,8 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.5.3: [`zip <http://github.com/nipy/nipype/zipball/0.5.3>`_ `tar
-<http://github.com/nipy/nipype/tarball/0.5.3>`_]
+Release 0.6.0: [`zip <http://github.com/nipy/nipype/zipball/0.6.0>`_ `tar
+<http://github.com/nipy/nipype/tarball/0.6.0>`_]
 
 Development: [`zip <http://github.com/nipy/nipype/zipball/master>`_ `tar
 <http://github.com/nipy/nipype/tarball/master>`_]
@@ -114,7 +114,7 @@ Must Have
 
 Python_ 2.6 -2.7
 
-Nibabel_ 1.0
+Nibabel_ 1.0 - 1.2
   Neuroimaging file i/o library
 
 NetworkX_ 1.0 - 1.4
@@ -135,7 +135,7 @@ Enthought_ Traits_ 4.0.0
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_ 0.10.2 - 0.12
+IPython_ 0.10.2 - 0.13
   Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
 

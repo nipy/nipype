@@ -16,6 +16,7 @@ Beginner's guide
 ================
 
 Introductory slides. `Available here`__
+
 Michael Notter's guide. `Available here`__
 
 __ http://satra.github.com/intro2nipype
