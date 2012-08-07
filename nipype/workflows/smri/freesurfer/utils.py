@@ -365,7 +365,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
                          name="outputspec")
-           
+
     if out_format == 'gii':
         tessflow.connect([
             (smoother, stl_to_gifti, [("mesh_file", "in_file")]),

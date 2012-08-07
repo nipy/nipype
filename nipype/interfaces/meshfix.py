@@ -32,7 +32,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     x_shift = traits.Int(argstr='--smooth %d', desc="Shifts the coordinates of the vertices when saving. Output must be in FreeSurfer format")
 
-    # Cutting, decoupling, dilation 
+    # Cutting, decoupling, dilation
     cut_outer = traits.Int(argstr='--cut-outer %d', desc="Remove triangles of 1st that are outside of the 2nd shell.")
     cut_inner = traits.Int(argstr='--cut-inner %d', desc="Remove triangles of 1st that are inside of the 2nd shell. Dilate 2nd by N; Fill holes and keep only 1st afterwards.")
     decouple_inin = traits.Int(argstr='--decouple-inin %d', desc="Treat 1st file as inner, 2nd file as outer component." \
@@ -53,7 +53,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
     dilation = traits.Int(argstr='--dilate %d', desc="Dilate the surface by d. d < 0 means shrinking.")
     set_intersections_to_one = traits.Bool(argstr='--intersect', desc="If the mesh contains intersections, return value = 1." \
         "If saved in gmsh format, intersections will be highlighted.")
-    
+
     in_file1 = File(exists=True, argstr="%s", position=1, mandatory=True)
     in_file2 = File(exists=True, argstr="%s", position=2)
     output_type = traits.Enum('off', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
@@ -100,7 +100,7 @@ class MeshFix(CommandLine):
             path, name, ext = split_filename(self.inputs.out_filename)
             ext = ext.replace('.', '')
             out_types = ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off']
-            # Make sure that the output filename uses one of the possible file types        
+            # Make sure that the output filename uses one of the possible file types
             if any(ext == out_type.lower() for out_type in out_types):
                 outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
             else:

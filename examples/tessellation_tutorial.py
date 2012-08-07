@@ -102,7 +102,7 @@ tesspipe.base_dir = output_dir
 tesspipe.connect([(tessflow, datasink,[('outputspec.meshes', '@meshes.all')])])
 
 """
-If the surfaces are to be packaged, this will connect the CFFConverter 
+If the surfaces are to be packaged, this will connect the CFFConverter
 node to the tessellation and smoothing workflow, as well as to the datasink.
 """
 
