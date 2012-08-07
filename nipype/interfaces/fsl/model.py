@@ -1488,11 +1488,9 @@ class Randomise(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['tstat_files'] = glob(self._gen_fname(\
-                '%s_tstat*.nii' % self.inputs.base_name,
-                cwd=os.getcwd()))
+                '%s_tstat*.nii' % self.inputs.base_name))
         outputs['fstat_files'] = glob(self._gen_fname(\
-                '%s_fstat*.nii' % self.inputs.base_name,
-                cwd=os.getcwd()))
+                '%s_fstat*.nii' % self.inputs.base_name))
         prefix = False
         if self.inputs.tfce or self.inputs.tfce2D:
             prefix = 'tfce'
@@ -1504,17 +1502,12 @@ class Randomise(FSLCommand):
             prefix = 'clusterm'
         if prefix:
             outputs['t_p_files'] = glob(self._gen_fname(\
-                     '%s_%s_p_tstat*' % (self.inputs.base_name, prefix),
-                     cwd=os.getcwd()))
+                     '%s_%s_p_tstat*' % (self.inputs.base_name, prefix)))
             outputs['t_corrected_p_files'] = glob(self._gen_fname(\
-                '%s_%s_corrp_tstat*.nii' % (self.inputs.base_name, prefix),
-                cwd=os.getcwd()))
+                '%s_%s_corrp_tstat*.nii' % (self.inputs.base_name, prefix)))
 
             outputs['f_p_files'] = glob(self._gen_fname(\
-                '%s_%s_p_fstat*.nii' % (self.inputs.base_name, prefix),
-                cwd=os.getcwd()))
+                '%s_%s_p_fstat*.nii' % (self.inputs.base_name, prefix)))
             outputs['f_corrected_p_files'] = glob(self._gen_fname(\
-                '%s_%s_corrp_fstat*.nii' % (self.inputs.base_name, prefix),
-                cwd=os.getcwd()))
-        print outputs
+                '%s_%s_corrp_fstat*.nii' % (self.inputs.base_name, prefix)))
         return outputs
