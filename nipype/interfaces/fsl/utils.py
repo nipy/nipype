@@ -990,10 +990,8 @@ class SwapDimensions(FSLCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
-                                                  suffix="_newdims",
-                                                  use_ext=True,
-                                                  newpath=os.getcwd())
+            outputs["out_file"] = self._gen_fname(self.inputs.in_file,
+                                                  suffix='_newdims')
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 

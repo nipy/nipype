@@ -2,12 +2,13 @@
 """
 
 import os
+import subprocess
+from time import sleep
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
-from time import sleep
 
 class SGEPlugin(SGELikeBatchManagerBase):
     """Execute using SGE (OGE not tested)
@@ -36,16 +37,11 @@ class SGEPlugin(SGELikeBatchManagerBase):
         super(SGEPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        cmd = CommandLine('qstat')
-        cmd.inputs.args = '-j %d' % taskid
-        # check sge task
-        oldlevel = iflogger.level
-        iflogger.setLevel(logging.getLevelName('CRITICAL'))
-        result = cmd.run(ignore_exception=True)
-        iflogger.setLevel(oldlevel)
-        if result.runtime.stdout.startswith('='):
-            return True
-        return False
+        proc = subprocess.Popen(["qstat", '-j', taskid],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        o, _ = proc.communicate()
+        return o.startswith('=')
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)

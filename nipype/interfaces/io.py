@@ -221,6 +221,9 @@ class DataSink(IOBase):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _get_dst(self, src):
+        ## If path is directory with trailing os.path.sep,
+        ## then remove that for a more robust behavior
+        src = src.rstrip(os.path.sep)
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
             dst = path
