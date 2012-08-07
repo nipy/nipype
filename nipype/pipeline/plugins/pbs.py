@@ -40,7 +40,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         _, e = proc.communicate()
-        errmsg = 'Unknown Job Id' # %s' % taskid 
+        errmsg = 'Unknown Job Id' # %s' % taskid
         return  errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):

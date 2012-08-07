@@ -464,7 +464,7 @@ class ImageStats(FSLCommand):
         return outputs
 
 class AvScaleInputSpec(FSLCommandInputSpec):
-    mat_file = File(exists=True, argstr="%s", 
+    mat_file = File(exists=True, argstr="%s",
         desc='mat file to read', position=0)
 
 
@@ -477,7 +477,7 @@ class AvScaleOutputSpec(TraitedSpec):
     forward_half_transform = traits.Any(desc='Forward Half Transform')
     backward_half_transform = traits.Any(desc='Backwards Half Transform')
     left_right_orientation_preserved = traits.Bool(desc='True if LR orientation preserved')
-    
+
 class AvScale(FSLCommand):
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
@@ -505,7 +505,7 @@ class AvScale(FSLCommand):
                 values = line.split()
                 out.append([float(val) for val in values])
             return out
-            
+
         out = runtime.stdout.split('\n')
 
         outputs.rotation_translation_matrix = lines_to_float(out[1:5])

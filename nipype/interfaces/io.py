@@ -1117,7 +1117,7 @@ def capture_provenance():
 def push_provenance():
     pass
 
-    
+
 class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     database_file = File(exists=True, mandatory = True)
     table_name = traits.Str(mandatory=True)
@@ -1206,7 +1206,7 @@ class MySQLSink(IOBase):
         """
         import MySQLdb
         if isdefined(self.inputs.config):
-            conn = MySQLdb.connect(db=self.inputs.database_name, 
+            conn = MySQLdb.connect(db=self.inputs.database_name,
                                    read_default_file=self.inputs.config)
         else:
             conn = MySQLdb.connect(host=self.inputs.host,
