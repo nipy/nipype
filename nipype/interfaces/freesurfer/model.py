@@ -756,10 +756,10 @@ class Label2Vol(FSCommand):
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:
                 if isdefined(getattr(self.inputs,key)):
-                    foo = getattr(self.inputs, key)
-                    if isinstance(foo,list):
-                        foo = foo[0]
-                    _, src = os.path.split(foo)
+                    path = getattr(self.inputs, key)
+                    if isinstance(path,list):
+                        path = path[0]
+                    _, src = os.path.split(path)
             if isdefined(self.inputs.aparc_aseg):
                 src = 'aparc+aseg.mgz'
             outfile = fname_presuffix(src, suffix='_vol.nii.gz',
