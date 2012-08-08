@@ -932,7 +932,7 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, timeout=0.2):
+def run_command(runtime, timeout=0.01):
     """
     Run a command, read stdout and stderr, prefix with timestamp. The returned
     runtime contains a merged stdout+stderr log with timestamps
@@ -1033,11 +1033,6 @@ class CommandLine(BaseInterface):
             raise Exception("Missing command")
         if command:
             self._cmd = command
-        try:
-            display_var = config.get('execution', 'display_variable')
-            self.inputs.environ['DISPLAY'] = display_var
-        except NoOptionError:
-            pass
 
     @property
     def cmd(self):
@@ -1087,7 +1082,16 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        runtime.environ.update(self.inputs.environ)
+        out_environ = {}
+        try:
+            display_var = config.get('execution', 'display_variable')
+            out_environ = {'DISPLAY': display_var}
+        except NoOptionError:
+            pass
+        iflogger.debug(out_environ)
+        if isdefined(self.inputs.environ):
+            out_environ.update(self.inputs.environ)
+        runtime.environ.update(out_environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))

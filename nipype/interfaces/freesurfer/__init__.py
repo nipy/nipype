@@ -8,7 +8,7 @@ from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
                          DICOMConvert, RobustRegister, FitMSParams,
                          SynthesizeFLASH)
 from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
-                    SegStats, Label2Vol)
+                    SegStats, Label2Vol, MS_LDA)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform,
                     SurfaceSnapshots,ApplyMask, MRIsConvert, MRITessellate,
-                    MRIMarchingCubes)
+                    MRIMarchingCubes, SmoothTessellation, MakeAverageSubject)

@@ -194,6 +194,9 @@ Common
 	    TraitError: The 'infile' trait of a BetInputSpec instance must be a file 
 	    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
 	    
+``hash_files``
+	To be used with inputs that are defining output filenames. When this flag is set to false any Nipype will not try to hash any files described by this input. This is useful to avoid rerunning when the specified output file already exists and has changed.
+	    
 ``desc``
 	All trait objects have a set of default metadata attributes.  ``desc``
 	is one of those and is used as a simple, one-line docstring.  The

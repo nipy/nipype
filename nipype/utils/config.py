@@ -32,6 +32,7 @@ log_rotate = 4
 [execution]
 create_report = true
 crashdump_dir = %s
+display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false
@@ -141,3 +142,7 @@ class NipypeConfig(object):
                 for key, val in config_dict[section].items():
                     if not key.startswith('__'):
                         self._config.set(section, key, str(val))
+
+    def update_matplotlib(self):
+        import matplotlib
+        matplotlib.use(self.get('execution', 'matplotlib_backend'))

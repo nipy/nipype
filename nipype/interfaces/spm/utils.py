@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
+from nipype.interfaces.base import (TraitedSpec, BaseInterface,
                                     BaseInterfaceInputSpec, isdefined)
 from nipype.interfaces.base import File, traits
 from nipype.utils.filemanip import split_filename, fname_presuffix
@@ -37,13 +37,13 @@ class Analyze2nii(SPMCommand):
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File( exists = True, mandatory = True,
                    desc = 'target for generating affine transform')
-    moving = File( exists = True, mandatory = True, 
+    moving = File( exists = True, mandatory = True,
                    desc = 'volume transform can be applied to register with target')
     mat = File( desc = 'Filename used to store affine matrix')
     invmat = File( desc = 'Filename used to store inverse affine matrix')
 
 
-class CalcCoregAffineOutputSpec(SPMCommandInputSpec):
+class CalcCoregAffineOutputSpec(TraitedSpec):
     mat = File(exists = True, desc = 'Matlab file holding transform')
     invmat = File( desc = 'Matlab file holding inverse transform')
 
@@ -52,7 +52,7 @@ class CalcCoregAffine(SPMCommand):
     """ Uses SPM (spm_coreg) to calculate the transform mapping
     moving to target. Saves Transform in mat (matlab binary file)
     Also saves inverse transform
-    
+
     Examples
     --------
 
@@ -64,34 +64,34 @@ class CalcCoregAffine(SPMCommand):
     >>> coreg.run() # doctest: +SKIP
 
     .. note::
-    
+
      * the output file mat is saves as a matlab binary file
      * calculating the transforms does NOT change either input image
        it does not **move** the moving image, only calculates the transform
-       that can be used to move it 
+       that can be used to move it
     """
-    
+
     input_spec = CalcCoregAffineInputSpec
     output_spec = CalcCoregAffineOutputSpec
 
     def _make_inv_file(self):
         """ makes filename to hold inverse transform if not specified"""
         invmat = fname_presuffix(self.inputs.mat, prefix = 'inverse_')
-        return invmat 
- 
+        return invmat
+
     def _make_mat_file(self):
         """ makes name for matfile if doesn exist"""
         pth, mv, _  = split_filename(self.inputs.moving)
         _, tgt, _ = split_filename(self.inputs.target)
         mat = os.path.join(pth, '%s_to_%s.mat'%(mv,tgt))
-        return mat    
+        return mat
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
         if not isdefined(self.inputs.mat):
             self.inputs.mat = self._make_mat_file()
         if not isdefined(self.inputs.invmat):
-            self.inputs.invmat = self._make_inv_file() 
+            self.inputs.invmat = self._make_inv_file()
         script = """
         target = '%s';
         moving = '%s';
@@ -99,15 +99,15 @@ class CalcCoregAffine(SPMCommand):
         movingv = spm_vol(moving);
         x = spm_coreg(movingv, targetv);
         M = spm_matrix(x(:)');
-        save('%s' , 'M' );            
+        save('%s' , 'M' );
         M = inv(spm_matrix(x(:)'));
-        save('%s','M') 
-        """%(self.inputs.target, 
+        save('%s','M')
+        """%(self.inputs.target,
              self.inputs.moving,
              self.inputs.mat,
              self.inputs.invmat)
-        return script        
-        
+        return script
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['mat'] = os.path.abspath(self.inputs.mat)
@@ -121,13 +121,13 @@ class ApplyTransformInputSpec(SPMCommandInputSpec):
                 desc='file holding transform to apply')
 
 
-class ApplyTransformOutputSpec(SPMCommandInputSpec):
+class ApplyTransformOutputSpec(TraitedSpec):
     out_file = File(exists = True, desc = 'File with updated header')
 
 
 class ApplyTransform(SPMCommand):
     """ Uses spm to apply transform stored in a .mat file to given file
- 
+
     Examples
     --------
 
@@ -138,7 +138,7 @@ class ApplyTransform(SPMCommand):
     >>> applymat.run() # doctest: +SKIP
 
     .. warning::
-    
+
        CHANGES YOUR INPUT FILE (applies transform by updating the header)
        except when used with nipype caching or workflow.
     """
@@ -170,11 +170,11 @@ class ResliceInputSpec(SPMCommandInputSpec):
     interp = traits.Range(low = 0, high = 7, usedefault = True,
                           desc='degree of b-spline used for interpolation'\
                                 '0 is nearest neighbor (default)')
-    
+
 
     out_file = File(desc = 'Optional file to save resliced volume')
 
-class ResliceOutputSpec(SPMCommandInputSpec):   
+class ResliceOutputSpec(TraitedSpec):
     out_file = File( exists = True, desc = 'resliced volume')
 
 class Reslice(SPMCommand):
@@ -195,7 +195,7 @@ class Reslice(SPMCommand):
         flags.interp = %d;
         infiles = strvcat(\'%s\', \'%s\');
         invols = spm_vol(infiles);
-        spm_reslice(invols, flags);     
+        spm_reslice(invols, flags);
         """%(self.inputs.interp,
              self.inputs.space_defining,
              self.inputs.in_file)

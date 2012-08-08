@@ -12,8 +12,9 @@ import warnings
 import os
 from .base import AFNITraitedSpec, AFNICommand
 from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec,
-                    traits, isdefined, File)
+                    traits, isdefined, File, InputMultiPath)
 from ...utils.filemanip import (load_json, save_json, split_filename)
+from nipype.utils.filemanip import fname_presuffix
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -26,7 +27,7 @@ class To3DInputSpec(AFNITraitedSpec):
         mandatory=True,
         exists=True)
 
-    outfile = File(desc='converted image file',
+    out_file = File(desc='converted image file',
         argstr='-prefix %s',
         position=-2,
         mandatory=True)
@@ -80,7 +81,7 @@ class To3D(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.outfile
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -93,7 +94,8 @@ class TShiftInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dTshift',
         argstr='-prefix %s',
         position=0,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
 
     tr = traits.Str(desc='manually set the TR' +
         'You can attach suffix "s" for seconds or "ms" for milliseconds.',
@@ -127,12 +129,11 @@ class TShiftInputSpec(AFNITraitedSpec):
         'later put back the mean',
         argstr="-rlt+")
 
-    suffix = traits.Str(desc="out_file suffix")
-        # todo: give it a default-value
+    suffix = traits.Str('_tshift',desc="out_file suffix",usedefault=True)
 
 
-class TShiftOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='post slice time shifted 4D image')
+class TShiftOutputSpec(TraitedSpec):
+    out_file = File(desc='post slice time shifted 4D image', exists=True)
 
 
 class TShift(AFNICommand):
@@ -168,15 +169,11 @@ class TShift(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-
-            if isdefined(self.inputs.suffix):
-                suffix = self.inputs.suffix
-            else:
-                suffix = "_tshift"
-        outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-             suffix=suffix)
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -200,8 +197,10 @@ class RefitInputSpec(AFNITraitedSpec):
     zorigin = traits.Str(desc='z distance for edge voxel offset',
         argstr='-zorigin %s')
 
+    suffix = traits.Str('_refit',desc="out_file suffix",usedefault=True)
 
-class RefitOutputSpec(AFNITraitedSpec):
+
+class RefitOutputSpec(TraitedSpec):
     out_file = File(desc='Same file as original infile with modified matrix',
         exists=True)
 
@@ -228,9 +227,15 @@ class Refit(AFNICommand):
     input_spec = RefitInputSpec
     output_spec = RefitOutputSpec
 
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.in_file
+        outputs['out_file'] = self._gen_fname(
+            self.inputs.in_file, suffix=self.inputs.suffix)
         return outputs
 
 
@@ -245,7 +250,8 @@ class WarpInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dWarp',
         argstr='-prefix %s',
         position=0,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
 
     tta2mni = traits.Bool(desc='transform dataset from Talairach to MNI152',
         argstr='-tta2mni')
@@ -270,13 +276,11 @@ class WarpInputSpec(AFNITraitedSpec):
 
     zpad = traits.Int(desc="pad input dataset with N planes" +
         " of zero on all sides.",
-        argstr="-zpad %s")
+        argstr="-zpad %d")
 
-    suffix = traits.Str(desc="out_file suffix")
-        # todo: give it a default-value
+    suffix = traits.Str('_warp',desc="out_file suffix",usedefault=True)
 
-
-class WarpOutputSpec(AFNITraitedSpec):
+class WarpOutputSpec(TraitedSpec):
     out_file = File(desc='spatially transformed input image', exists=True)
 
 
@@ -310,14 +314,10 @@ class Warp(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            if isdefined(self.inputs.suffix):
-                suffix = self.inputs.suffix
-            else:
-                suffix = "_warp"
-            outputs['out_file'] = self._gen_fname(
-                self.inputs.in_file, suffix=suffix)
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -332,16 +332,16 @@ class ResampleInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dresample',
         argstr='-prefix %s',
         position=-2,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
 
     orientation = traits.Str(desc='new orientation code',
         argstr='-orient %s')
 
-    suffix = traits.Str(desc="out_file suffix")
-        # todo: give it a default-value
+    suffix = traits.Str('_resample', desc="out_file suffix",usedefault=True)
 
 
-class ResampleOutputSpec(AFNITraitedSpec):
+class ResampleOutputSpec(TraitedSpec):
     out_file = File(desc='reoriented or resampled file',
         exists=True)
 
@@ -376,17 +376,10 @@ class Resample(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            if isdefined(self.inputs.suffix):
-                suffix = self.inputs.suffix
-            else:
-                suffix = []  # allow for resampling command later!
-                if self.inputs.orientation:
-                    suffix.append("_RPI")
-                suffix = "".join(suffix)
-            outputs['out_file'] = self._gen_fname(
-                self.inputs.in_file, suffix=suffix)
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -400,13 +393,13 @@ class TStatInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dTstat',
         argstr='-prefix %s',
         position=-2,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
 
-    options = traits.Str(desc='selected statistical output',
-        argstr='%s')
+    suffix = traits.Str('_tstat', desc="out_file suffix", usedefault=True)
 
 
-class TStatOutputSpec(AFNITraitedSpec):
+class TStatOutputSpec(TraitedSpec):
     out_file = File(desc='statistical file',
         exists=True)
 
@@ -424,7 +417,7 @@ class TStat(AFNICommand):
     >>> from nipype.testing import  example_data
     >>> tstat = afni.TStat()
     >>> tstat.inputs.in_file = example_data('functional.nii')
-    >>> tstat.inputs.options= '-mean'
+    >>> tstat.inputs.args= '-mean'
     >>> res = tstat.run() # doctest: +SKIP
 
     """
@@ -434,17 +427,15 @@ class TStat(AFNICommand):
     output_spec = TStatOutputSpec
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
-
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dT', ext)))
+            return self._list_outputs()[name]
+        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -459,12 +450,12 @@ class DetrendInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dDetrend',
          argstr='-prefix %s',
          position=-2,
-         genfile=True)
-    options = traits.Str(desc='selected statistical output',
-        argstr='%s')
+         genfile=True,
+         hash_files=False)
+    suffix = traits.Str('_detrend', desc="out_file suffix", usedefault=True)
 
 
-class DetrendOutputSpec(AFNITraitedSpec):
+class DetrendOutputSpec(TraitedSpec):
     out_file = File(desc='statistical file',
         exists=True)
 
@@ -483,7 +474,7 @@ class Detrend(AFNICommand):
     >>> from nipype.testing import  example_data
     >>> detrend = afni.Detrend()
     >>> detrend.inputs.in_file = example_data('functional.nii')
-    >>> detrend.inputs.options = '-polort 2'
+    >>> detrend.inputs.args = '-polort 2'
     >>> res = detrend.run() # doctest: +SKIP
 
     """
@@ -493,18 +484,15 @@ class Detrend(AFNICommand):
     output_spec = DetrendOutputSpec
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
-
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dD', ext)))
+            return self._list_outputs()[name]
+        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -520,13 +508,13 @@ class DespikeInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dDespike',
          argstr='-prefix %s',
          position=-2,
-         genfile=True)
+         genfile=True,
+         hash_files=False)
 
-    options = traits.Str(desc='additional args',
-        argstr='%s')
+    suffix = traits.Str('_despike', desc="out_file suffix", usedefault=True)
 
 
-class DespikeOutputSpec(AFNITraitedSpec):
+class DespikeOutputSpec(TraitedSpec):
     out_file = File(desc='despiked img',
                exists=True)
 
@@ -553,18 +541,15 @@ class Despike(AFNICommand):
     output_spec = DespikeOutputSpec
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dDe', ext)))
+            return self._list_outputs()[name]
+        return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        #outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -580,7 +565,8 @@ class AutomaskInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dAutomask (a brain mask)',
         argstr='-prefix %s',
         position=-2,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
 
     apply_mask = File(desc="output file from 3dAutomask",
         argstr='-apply_prefix %s')
@@ -596,14 +582,12 @@ class AutomaskInputSpec(AFNITraitedSpec):
     erode = traits.Int(desc='erode the mask inwards',
         argstr="-erode %s")
 
-    options = traits.Str(desc='automask settings',
-        argstr='%s')
-
-    suffix = traits.Str(desc="out_file suffix")
-        # todo: give it a default-value
+    mask_suffix = traits.Str('_mask',desc="out_file suffix",usedefault=True)
+    apply_suffix = traits.Str('_masked',desc="out_file suffix",usedefault=True)
 
 
-class AutomaskOutputSpec(AFNITraitedSpec):
+
+class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
         exists=True)
 
@@ -634,24 +618,23 @@ class Automask(AFNICommand):
     output_spec = AutomaskOutputSpec
 
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == 'out_file' or name == 'brain_file':
             return self._list_outputs()[name]
         return None
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['brain_file'] = self.inputs.apply_mask
-
         if not isdefined(self.inputs.out_file):
-            if isdefined(self.inputs.suffix):
-                suffix = self.inputs.suffix
-            else:
-                suffix = "_automask"
-
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix=suffix)
+            outputs['out_file'] = self._gen_fname(
+                self.inputs.in_file, suffix=self.inputs.mask_suffix)
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+
+        if not isdefined(self.inputs.apply_mask):
+            outputs['brain_file'] = self._gen_fname(
+                self.inputs.in_file, suffix=self.inputs.apply_suffix)
+        else:
+            outputs['brain_file'] = os.path.abspath(self.inputs.apply_mask)
         return outputs
 
 
@@ -665,13 +648,15 @@ class VolregInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dvolreg',
        argstr='-prefix %s',
        position=-2,
-       genfile=True)
+       genfile=True,
+       hash_files=False)
     basefile = File(desc='base file for registration',
         argstr='-base %s',
-        position=-6)
-    zpad = File(desc='Zeropad around the edges' +
+        position=-6,
+        exists=True)
+    zpad = traits.Int(desc='Zeropad around the edges' +
         ' by \'n\' voxels during rotations',
-        argstr='-zpad %s',
+        argstr='-zpad %d',
         position=-5)
     md1dfile = File(desc='max displacement output file',
         argstr='-maxdisp1D %s',
@@ -679,22 +664,21 @@ class VolregInputSpec(AFNITraitedSpec):
     oned_file = File(desc='1D movement parameters output file',
         argstr='-1Dfile %s',
         position=-3,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
     verbose = traits.Bool(desc='more detailed description of the process',
         argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
         argstr='-tshift 0')
     copyorigin = traits.Bool(desc='copy base file origin coords to output',
         argstr='-twodup')
-    other = traits.Str(desc='other options',
-        argstr='%s')
+    suffix = traits.Str('_volreg', desc="out_file suffix", usedefault=True)
 
 
-class VolregOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='registered file',
-        exists=True)
-    md1d_file = File(desc='max displacement info file')
-    oned_file = File(desc='movement parameters info file')
+class VolregOutputSpec(TraitedSpec):
+    out_file = File(desc='registered file', exists=True)
+    md1d_file = File(desc='max displacement info file', exists=True)
+    oned_file = File(desc='movement parameters info file', exists=True)
 
 
 class Volreg(AFNICommand):
@@ -721,52 +705,46 @@ class Volreg(AFNICommand):
     output_spec = VolregOutputSpec
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
-        if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dv', ext)))
-
-        if name == 'oned_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dv1D', '.1D')))
+        if name == 'out_file' or name == 'oned_file':
+            return self._list_outputs()[name]
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                     suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if not isdefined(self.inputs.oned_file):
-            outputs['oned_file'] = self._gen_filename('oned_file')
+            outputs['oned_file'] = self._gen_fname(self.inputs.in_file,
+                                            suffix = '%s.1D'%self.inputs.suffix)
         else:
             outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
-
         return outputs
 
 
 class MergeInputSpec(AFNITraitedSpec):
-    infile = File(desc='input file to 3dvolreg',
+    in_files = InputMultiPath(
+        File(desc='input file to 3dmerge', exists=True),
         argstr='%s',
         position=-1,
-        mandatory=True,
-        exists=True)
-    outfile = File(desc='output file from 3dvolreg',
+        mandatory=True)
+    out_file = File(desc='output file from 3dmerge',
          argstr='-prefix %s',
          position=-2,
-         mandatory=True)
+         genfile=True,
+         hash_files=False)
     doall = traits.Bool(desc='apply options to all sub-bricks in dataset',
         argstr='-doall')
     blurfwhm = traits.Int(desc='FWHM blur value (mm)',
           argstr='-1blur_fwhm %d',
           units='mm')
-    other = traits.Str(desc='other options',
-         argstr='%s')
+    suffix = traits.Str('_merge', desc="out_file suffix", usedefault=True)
 
 
-class MergeOutputSpec(AFNITraitedSpec):
+class MergeOutputSpec(TraitedSpec):
     out_file = File(desc='smoothed file',
         exists=True)
 
@@ -797,8 +775,16 @@ class Merge(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.outfile
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
+                                                  suffix=self.inputs.suffix)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
 
 
 class CopyInputSpec(AFNITraitedSpec):
@@ -810,11 +796,13 @@ class CopyInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dcopy',
         argstr='%s',
         position=-1,
-        genfile=True)
+        genfile=True,
+        hash_files=False)
+    suffix = traits.Str('_copy', desc="out_file suffix", usedefault=True)
 
 
-class CopyOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='copied file')
+class CopyOutputSpec(TraitedSpec):
+    out_file = File(desc='copied file', exists=True)
 
 
 class Copy(AFNICommand):
@@ -840,21 +828,18 @@ class Copy(AFNICommand):
     input_spec = CopyInputSpec
     output_spec = CopyOutputSpec
 
-    def _gen_filename(self, name):
-        """Generate output file name
-        """
-        if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_copy', ext)))
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                  suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
 
 
 class FourierInputSpec(AFNITraitedSpec):
@@ -866,7 +851,8 @@ class FourierInputSpec(AFNITraitedSpec):
     out_file = File(desc='output file from 3dFourier',
          argstr='-prefix %s',
          position=-2,
-         genfile=True)
+         genfile=True,
+         hash_files=False)
     lowpass = traits.Float(desc='lowpass',
         argstr='-lowpass %f',
         position=0,
@@ -875,13 +861,11 @@ class FourierInputSpec(AFNITraitedSpec):
         argstr='-highpass %f',
         position=1,
         mandatory=True)
-    other = traits.Str(desc='other options',
-        argstr='%s')
+    suffix = traits.Str('_fourier', desc="out_file suffix", usedefault=True)
 
 
-class FourierOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='band-pass filtered file',
-        exists=True)
+class FourierOutputSpec(TraitedSpec):
+    out_file = File(desc='band-pass filtered file', exists=True)
 
 
 class Fourier(AFNICommand):
@@ -898,7 +882,7 @@ class Fourier(AFNICommand):
     >>> from nipype.testing import  example_data
     >>> fourier = afni.Fourier()
     >>> fourier.inputs.in_file = example_data('functional.nii')
-    >>> fourier.inputs.other = '-retrend'
+    >>> fourier.inputs.args = '-retrend'
     >>> fourier.inputs.highpass = 0.005
     >>> fourier.inputs.lowpass = 0.1
     >>> res = fourier.run() # doctest: +SKIP
@@ -909,42 +893,38 @@ class Fourier(AFNICommand):
     input_spec = FourierInputSpec
     output_spec = FourierOutputSpec
 
-    def _gen_filename(self, name):
-        """Generate output file name
-        """
-        if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dF', ext)))
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+
 
 class ZCutUpInputSpec(AFNITraitedSpec):
-    infile = File(desc='input file to 3dZcutup',
+    in_file = File(desc='input file to 3dZcutup',
         argstr='%s',
         position=-1,
         mandatory=True,
         exists=True)
-    outfile = File(desc='output file from 3dZcutup',
+    out_file = File(desc='output file from 3dZcutup',
          argstr='-prefix %s',
          position=-2,
-         mandatory=True)
+         mandatory=True,
+         hash_files=False)
     keep = traits.Str(desc='slice range to keep in output',
             argstr='-keep %s')
-    other = traits.Str(desc='other options',
-               argstr='%s')
+    suffix = traits.Str('_zcutup', desc="out_file suffix", usedefault=True)
 
 
-class ZCutUpOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='cut file',
-        exists=True)
+class ZCutUpOutputSpec(TraitedSpec):
+    out_file = File(desc='cut file', exists=True)
 
 
 class ZCutUp(AFNICommand):
@@ -972,28 +952,38 @@ class ZCutUp(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.outfile
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
 
 
 class AllineateInputSpec(AFNITraitedSpec):
-    infile = File(desc='input file to 3dAllineate',
+    in_file = File(desc='input file to 3dAllineate',
         argstr='-source %s',
         position=-1,
         mandatory=True,
         exists=True)
-    outfile = File(desc='output file from 3dAllineate',
+    out_file = File(desc='output file from 3dAllineate',
          argstr='-prefix %s',
          position=-2,
-         mandatory=True)
+         genfile=True,
+         hash_files=False)
     matrix = File(desc='matrix to align input file',
         argstr='-1dmatrix_apply %s',
-        position=-3)
+        position=-3,
+        exists=True)
+    suffix = traits.Str('_allineate', desc="out_file suffix", usedefault=True)
 
 
-class AllineateOutputSpec(AFNITraitedSpec):
-    out_file = File(desc='cut file',
-          exists=True)
+class AllineateOutputSpec(TraitedSpec):
+    out_file = File(desc='cut file', exists=True)
 
 
 class Allineate(AFNICommand):
@@ -1021,8 +1011,16 @@ class Allineate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.outfile
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
 
 
 class MaskaveInputSpec(AFNITraitedSpec):
@@ -1034,17 +1032,20 @@ class MaskaveInputSpec(AFNITraitedSpec):
     out_file = File(desc='output to the file',
          argstr='> %s',
          position=-1,
-         genfile=True)
+         genfile=True,
+         hash_files=False)
     mask = File(desc='matrix to align input file',
         argstr='-mask %s',
-        position=1)
+        position=1,
+        exists=True)
 
     quiet = traits.Bool(desc='matrix to align input file',
         argstr='-quiet',
         position=2)
+    suffix = traits.Str('_maskave', desc="out_file suffix", usedefault=True)
 
 
-class MaskaveOutputSpec(AFNITraitedSpec):
+class MaskaveOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
           exists=True)
 
@@ -1074,22 +1075,19 @@ class Maskave(AFNICommand):
     input_spec = MaskaveInputSpec
     output_spec = MaskaveOutputSpec
 
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            out_file = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
-            out_file = os.path.abspath(self.inputs.out_file)
-        outputs['out_file'] = out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dm', '.1D')))
-
+            return self._list_outputs()[name]
 
 class SkullStripInputSpec(AFNITraitedSpec):
     in_file = File(desc='input file to 3dSkullStrip',
@@ -1100,11 +1098,12 @@ class SkullStripInputSpec(AFNITraitedSpec):
     out_file = File(desc='output to the file',
          argstr='%s',
          position=-1,
-        genfile=True)
-    options = traits.Str(desc='options', argstr='%s', position=2)
+        genfile=True,
+        hash_files=False)
+    suffix = traits.Str('_skullstrip', desc="out_file suffix", usedefault=True)
 
 
-class SkullStripOutputSpec(AFNITraitedSpec):
+class SkullStripOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1123,7 +1122,7 @@ class SkullStrip(AFNICommand):
     >>> from nipype.testing import  example_data
     >>> skullstrip = afni.Skullstrip()
     >>> skullstrip.inputs.in_file = example_data('functional.nii')
-    >>> skullstrip.inputs.options = '-o_ply'
+    >>> skullstrip.inputs.args = '-o_ply'
     >>> res = skullstrip.run() # doctest: +SKIP
 
     """
@@ -1131,38 +1130,38 @@ class SkullStrip(AFNICommand):
     input_spec = SkullStripInputSpec
     output_spec = SkullStripOutputSpec
 
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            out_file = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
-            out_file = os.path.abspath(self.inputs.out_file)
-
-        outputs['out_file'] = out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-        return os.path.join(os.getcwd(), ''.join((fname, '_3dT', ext)))
+            return self._list_outputs()[name]
 
 
 class TCatInputSpec(AFNITraitedSpec):
-    in_file = File(desc='input file to 3dTcat',
+    in_files = InputMultiPath(
+        File(exists=True),
+        desc='input file to 3dTcat',
         argstr=' %s',
         position=-1,
-        mandatory=True,
-        exists=True)
+        mandatory=True)
     out_file = File(desc='output to the file',
          argstr='-prefix %s',
          position=-2,
-         genfile=True)
+         genfile=True,
+         hash_files=False)
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
+    suffix = traits.Str('_tcat', desc="out_file suffix", usedefault=True)
 
 
-class TCatOutputSpec(AFNITraitedSpec):
+class TCatOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1194,19 +1193,15 @@ class TCat(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            out_file = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_files[0],
+                                                  suffix=self.inputs.suffix)
         else:
-            out_file = os.path.abspath(self.inputs.out_file)
-
-        outputs['out_file'] = out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-        return os.path.join(os.getcwd(), ''.join((fname, '_3dT', ext)))
+            return self._list_outputs()[name]
 
 
 class FimInputSpec(AFNITraitedSpec):
@@ -1215,10 +1210,11 @@ class FimInputSpec(AFNITraitedSpec):
         position=1,
         mandatory=True,
         exists=True)
-    ideal_file = File(desc='output to the file',
+    ideal_file = File(desc='ideal time series file name',
         argstr='-ideal_file %s',
         position=2,
-        mandatory=True)
+        mandatory=True,
+        exists=True)
     fim_thr = traits.Float(desc='fim internal mask threshold value',
         argstr='-fim_thr %f', position=3)
 
@@ -1226,10 +1222,11 @@ class FimInputSpec(AFNITraitedSpec):
         argstr='-out %s', position=4)
 
     out_file = File(desc='output file from 3dfim+', argstr='-bucket %s',
-        position=-1, genfile=True)
+        position=-1, genfile=True, hash_files=False)
+    suffix = traits.Str('_fim', desc="out_file suffix", usedefault=True)
 
 
-class FimOutputSpec(AFNITraitedSpec):
+class FimOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1263,21 +1260,16 @@ class Fim(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-
         if not isdefined(self.inputs.out_file):
-            out_file = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = self.inputs.suffix)
         else:
-            out_file = os.path.abspath(self.inputs.out_file)
-
-        outputs['out_file'] = out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.in_file)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3df', ext)))
+            return self._list_outputs()[name]
 
 
 class TCorrelateInputSpec(AFNITraitedSpec):
@@ -1300,13 +1292,12 @@ class TCorrelateInputSpec(AFNITraitedSpec):
 
     out_file = File(desc='Save output into dataset with prefix ',
         argstr='-prefix %s',
-        position=3, genfile=True)
+        position=3, genfile=True, hash_files=False)
 
-    options = traits.Str(desc='other options',
-        argstr='%s', position=4)
+    suffix = traits.Str('_tcor', desc="out_file suffix", usedefault=True)
 
 
-class TCorrelateOutputSpec(AFNITraitedSpec):
+class TCorrelateOutputSpec(TraitedSpec):
     out_file = File(desc='outfile',
         exists=True)
 
@@ -1340,18 +1331,17 @@ class TCorrelate(AFNICommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.xset,
+                                                  suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
-        """Generate output file name
-        """
         if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.xset)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dTcor', ext)))
+            return self._list_outputs()[name]
 
 
 class BrickStatInputSpec(AFNITraitedSpec):
@@ -1363,14 +1353,15 @@ class BrickStatInputSpec(AFNITraitedSpec):
 
     mask = File(desc='-mask dset = use dset as mask to include/exclude voxels',
         argstr='-mask %s',
-        position=2)
+        position=2,
+        exists=True)
 
     min = traits.Bool(desc='print the minimum value in dataset',
         argstr='-min',
         position=1)
 
 
-class BrickStatOutputSpec(AFNITraitedSpec):
+class BrickStatOutputSpec(TraitedSpec):
     min_val = traits.Float(desc='output')
 
 
@@ -1434,7 +1425,8 @@ class ROIStatsInputSpec(AFNITraitedSpec):
 
     mask = File(desc='input mask',
         argstr='-mask %s',
-        position=3)
+        position=3,
+        exists=True)
 
     mask_f2short = traits.Bool(
         desc='Tells the program to convert a float mask ' +
@@ -1447,8 +1439,8 @@ class ROIStatsInputSpec(AFNITraitedSpec):
         position=1)
 
 
-class ROIStatsOutputSpec(AFNITraitedSpec):
-    stats = File(desc='output')
+class ROIStatsOutputSpec(TraitedSpec):
+    stats = File(desc='output', exists=True)
 
 
 class ROIStats(AFNICommand):
@@ -1517,11 +1509,11 @@ ${rest}_ss.nii.gz
 """
 
 
-class CalcInputSpec(CommandLineInputSpec):
-    infile_a = File(desc='input file to 3dcalc',
-        argstr='-a %s', position=0, mandatory=True)
-    infile_b = File(desc='operand file to 3dcalc',
-        argstr=' -b %s', position=1)
+class CalcInputSpec(AFNITraitedSpec):
+    in_file_a = File(desc='input file to 3dcalc',
+        argstr='-a %s', position=0, mandatory=True, exists=True)
+    in_file_b = File(desc='operand file to 3dcalc',
+        argstr=' -b %s', position=1, exists=True)
     expr = traits.Str(desc='expr', argstr='-expr %s', position=2,
         mandatory=True)
     out_file = File(desc='output file from 3dFourier', argstr='-prefix %s',
@@ -1531,14 +1523,14 @@ class CalcInputSpec(CommandLineInputSpec):
     stop_idx = traits.Int(desc='stop index for infile_a',
         requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for infile_a')
-    other = File(desc='other options', argstr='')
+    suffix = traits.Str('_calc', desc="out_file suffix", usedefault=True)
 
 
 class CalcOutputSpec(TraitedSpec):
     out_file = File(desc=' output file', exists=True)
 
 
-class Calc(CommandLine):
+class Calc(AFNICommand):
     """This program does voxel-by-voxel arithmetic on 3D datasets
 
     For complete details, see the `3dcalc Documentation.
@@ -1565,10 +1557,15 @@ class Calc(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file_a,
+                                                  suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'infile_a':
@@ -1586,10 +1583,3 @@ class Calc(CommandLine):
         """
         return super(Calc, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'other'))
-
-    def _gen_filename(self, name):
-        """Generate output file name
-        """
-        if name == 'out_file':
-            _, fname, ext = split_filename(self.inputs.infile_a)
-            return os.path.join(os.getcwd(), ''.join((fname, '_3dc', ext)))

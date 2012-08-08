@@ -36,7 +36,7 @@ class BETInputSpec(FSLCommandInputSpec):
                   desc='input file to skull strip',
                   argstr='%s', position=0, mandatory=True)
     out_file = File(desc='name of output skull stripped image',
-                   argstr='%s', position=1, genfile=True)
+                   argstr='%s', position=1, genfile=True, hash_files=False)
     outline = traits.Bool(desc='create surface outline image',
                           argstr='-o')
     mask = traits.Bool(desc='create binary mask image',
@@ -133,7 +133,7 @@ class BET(FSLCommand):
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_brain')
-        return out_file
+        return os.path.abspath(out_file)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -356,10 +356,10 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     reference = File(exists=True, argstr='-ref %s', mandatory=True,
                      position=1, desc='reference file')
     out_file = File(argstr='-out %s', desc='registered output file',
-                   genfile=True, position=2)
+                   genfile=True, position=2, hash_files=False)
     out_matrix_file = File(argstr='-omat %s',
                      desc='output affine matrix in 4x4 asciii format',
-                     genfile=True, position=3)
+                     genfile=True, position=3, hash_files=False)
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(argstr='-applyxfm', requires=['in_matrix_file'],
                      desc='apply transformation supplied by in_matrix_file')
@@ -471,16 +471,18 @@ class FLIRT(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         # Generate an out_file if one is not provided
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+        if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                  suffix='_flirt')
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+
         outputs['out_matrix_file'] = self.inputs.out_matrix_file
         # Generate an out_matrix file if one is not provided
-        if not isdefined(outputs['out_matrix_file']) and \
-                isdefined(self.inputs.in_file):
+        if not isdefined(outputs['out_matrix_file']):
             outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
                                                    suffix='_flirt.mat',
                                                    change_ext=False)
+        outputs['out_matrix_file'] = os.path.abspath(outputs['out_matrix_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -518,7 +520,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
                    desc="timeseries to motion-correct")
     out_file = File(argstr='-out %s', genfile=True,
-                    desc="file to write")
+                    desc="file to write", hash_files=False)
     cost = traits.Enum('mutualinfo', 'woods', 'corratio', 'normcorr', 'normmi', 'leastsquares',
                        argstr='-cost %s', desc="cost function to optimize")
     bins = traits.Int(argstr='-bins %d', desc="number of histogram bins")
@@ -621,7 +623,7 @@ class MCFLIRT(FSLCommand):
         if not isdefined(out_file) and isdefined(self.inputs.in_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_mcf')
-        return out_file
+        return os.path.abspath(out_file)
 
 
 class FNIRTInputSpec(FSLCommandInputSpec):
@@ -639,24 +641,24 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     fieldcoeff_file = traits.Either(traits.Bool, File, argstr='--cout=%s',
                            desc='name of output file with field coefficients or true')
     warped_file = File(argstr='--iout=%s',
-                       desc='name of output image', genfile=True)
+                       desc='name of output image', genfile=True, hash_files=False)
     field_file = traits.Either(traits.Bool, File,
                                argstr='--fout=%s',
-                               desc='name of output file with field or true')
+                               desc='name of output file with field or true', hash_files=False)
     jacobian_file = traits.Either(traits.Bool, File,
                                   argstr='--jout=%s',
                                   desc='name of file for writing out the Jacobian'\
-                                  'of the field (for diagnostic or VBM purposes)')
+                                  'of the field (for diagnostic or VBM purposes)', hash_files=False)
     modulatedref_file = traits.Either(traits.Bool, File,
                                       argstr='--refout=%s',
                                       desc='name of file for writing out intensity modulated'\
-                                      '--ref (for diagnostic purposes)')
+                                      '--ref (for diagnostic purposes)', hash_files=False)
     out_intensitymap_file = traits.Either(traits.Bool, File,
                                       argstr='--intout=%s',
                                       desc='name of files for writing information pertaining '\
-                                          'to intensity mapping')
+                                          'to intensity mapping', hash_files=False)
     log_file = File(argstr='--logout=%s',
-                             desc='Name of log-file', genfile=True)
+                             desc='Name of log-file', genfile=True, hash_files=False)
     config_file = File(exists=True, argstr='--config=%s',
                        desc='Name of config file specifying command line arguments')
     refmask_file = File(exists=True, argstr='--refmask=%s',
@@ -804,7 +806,7 @@ class FNIRT(FSLCommand):
                                                        suffix='_' + suffix,
                                                        change_ext=change_ext)
                 else:
-                    outputs[key] = inval
+                    outputs[key] = os.path.abspath(inval)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -841,7 +843,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                   mandatory=True,
                   desc='image to be warped')
     out_file = File(argstr='--out=%s', genfile=True,
-                   desc='output filename')
+                   desc='output filename', hash_files=False)
     ref_file = File(exists=True, argstr='--ref=%s',
                      mandatory=True,
                      desc='reference image')
@@ -904,7 +906,7 @@ class ApplyWarp(FSLCommand):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                              suffix='_warp')
         else:
-            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -918,7 +920,7 @@ class SliceTimerInputSpec(FSLCommandInputSpec):
                   mandatory=True, position=0,
                   desc='filename of input timeseries')
     out_file = File(argstr='--out=%s', genfile=True,
-                   desc='filename of output timeseries')
+                   desc='filename of output timeseries', hash_files=False)
     index_dir = traits.Bool(argstr='--down',
               desc='slice indexing from top to bottom')
     time_repetition = traits.Float(argstr='--repeat=%f',
@@ -963,7 +965,7 @@ class SliceTimer(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_st')
-        outputs['slice_time_corrected_file'] = out_file
+        outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -995,7 +997,7 @@ class SUSANInputSpec(FSLCommandInputSpec):
                   'value for any brightness threshold will auto-set the '
                   'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
-                    desc='output file name')
+                    desc='output file name', hash_files=False)
 
 
 class SUSANOutputSpec(TraitedSpec):
@@ -1041,7 +1043,7 @@ class SUSAN(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
-        outputs['smoothed_file'] = out_file
+        outputs['smoothed_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1054,7 +1056,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
                    desc='filename of input volume')
     unwarped_file = File(argstr='--unwarp=%s', genfile=True,
-                         desc='apply unwarping and save as filename')
+                         desc='apply unwarping and save as filename', hash_files=False)
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
                          desc='filename for input phase image')
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1064,11 +1066,11 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     asym_se_time = traits.Float(argstr='--asym=%.10f',
                                 desc='set the fieldmap asymmetric spin echo time (sec)')
     fmap_out_file = File(argstr='--savefmap=%s',
-                     desc='filename for saving fieldmap (rad/s)')
+                     desc='filename for saving fieldmap (rad/s)', hash_files=False)
     fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
                         desc='filename for loading fieldmap (rad/s)')
     shift_out_file = File(argstr='--saveshift=%s',
-                          desc='filename for saving pixel shift volume')
+                          desc='filename for saving pixel shift volume', hash_files=False)
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
                          desc='filename for reading pixel shift volume')
     median_2dfilter = traits.Bool(argstr='--median',
@@ -1106,12 +1108,12 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                        traits.File,
                                        argstr='--unmaskfmap=%s',
                                        requires=['fmap_out_file'],
-                                       desc='saves the unmasked fieldmap when using --savefmap')
+                                       desc='saves the unmasked fieldmap when using --savefmap', hash_files=False)
     save_unmasked_shift = traits.Either(traits.Bool,
                                        traits.File,
                                        argstr='--unmaskshift=%s',
                                        requires=['shift_out_file'],
-                                       desc='saves the unmasked shiftmap when using --saveshift')
+                                       desc='saves the unmasked shiftmap when using --saveshift', hash_files=False)
     nokspace = traits.Bool(argstr='--nokspace', desc='do not use k-space forward warping')
 
 
@@ -1143,7 +1145,7 @@ class FUGUE(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_unwarped')
-        outputs['unwarped_file'] = out_file
+        outputs['unwarped_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1166,7 +1168,7 @@ class PRELUDEInputSpec(FSLCommandInputSpec):
                       desc='raw phase file')
     unwrapped_phase_file = File(genfile=True,
                                 argstr='--unwrap=%s',
-                                desc='file containing unwrapepd phase')
+                                desc='file containing unwrapepd phase', hash_files=False)
     num_partitions = traits.Int(argstr='--numphasesplit=%d',
                                 desc='number of phase partitions to use')
     labelprocess2d = traits.Bool(argstr='--labelslices',
@@ -1186,17 +1188,18 @@ class PRELUDEInputSpec(FSLCommandInputSpec):
     end = traits.Int(argstr='--end=%d',
                      desc='final image number to process (default Inf)')
     savemask_file = File(argstr='--savemask=%s',
-                         desc='saving the mask volume')
+                         desc='saving the mask volume', hash_files=False)
     rawphase_file = File(argstr='--rawphase=%s',
-                         desc='saving the raw phase output')
+                         desc='saving the raw phase output', hash_files=False)
     label_file = File(argstr='--labels=%s',
-                      desc='saving the area labels output')
+                      desc='saving the area labels output', hash_files=False)
     removeramps = traits.Bool(argstr='--removeramps',
                               desc='remove phase ramps during unwrapping')
 
 
 class PRELUDEOutputSpec(TraitedSpec):
-    unwrapped_phase_file = File(desc='unwrapped phase file')
+    unwrapped_phase_file = File(exists=True,
+                                desc='unwrapped phase file')
 
 
 class PRELUDE(FSLCommand):
@@ -1220,13 +1223,17 @@ class PRELUDE(FSLCommand):
         outputs = self._outputs().get()
         out_file = self.inputs.unwrapped_phase_file
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwrapped')
-        outputs['unwrapped_phase_file'] = out_file
+            if isdefined(self.inputs.phase_file):
+                out_file = self._gen_fname(self.inputs.phase_file,
+                                           suffix='_unwrapped')
+            elif isdefined(self.inputs.complex_phase_file):
+                out_file = self._gen_fname(self.inputs.complex_phase_file,
+                                           suffix='_phase_unwrapped')
+        outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwraped_phase_file':
+        if name == 'unwrapped_phase_file':
             return self._list_outputs()['unwrapped_phase_file']
         return None
 
@@ -1237,7 +1244,7 @@ class FIRSTInputSpec(FSLCommandInputSpec):
                   desc='input data file')
     out_file = File('segmented', usedefault=True, mandatory=True, position=-1,
                   argstr='-o %s',
-                  desc='output data file')
+                  desc='output data file', hash_files=False)
     verbose = traits.Bool(argstr='-v', position=1,
         desc="Use verbose logging.")
     brain_extracted = traits.Bool(argstr='-b', position=2,
@@ -1319,11 +1326,11 @@ class FIRST(FSLCommand):
         return outputs
 
     def _gen_fname(self, name):
-        path, name, ext = split_filename(self.inputs.out_file)
+        path, outname, ext = split_filename(self.inputs.out_file)
         if name == 'original_segmentations':
-            return op.abspath(name + '_all_fast_origsegs.nii.gz')
+            return op.abspath(outname + '_all_fast_origsegs.nii.gz')
         if name == 'segmentation_file':
-            return op.abspath(name + '_all_fast_firstseg.nii.gz')
+            return op.abspath(outname + '_all_fast_firstseg.nii.gz')
         return None
 
     def _gen_mesh_names(self, name, structures):
