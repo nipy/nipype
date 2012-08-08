@@ -1,12 +1,24 @@
-Since last release
-==================
+Release 0.6.0 (Jun 30, 2012)
+============================
 
 * API: display variable no longer encoded as inputs in commandline interfaces
 
-* ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM,
+* ENH: input hash not modified when environment DISPLAY is changed
+* ENH: support for 3d files for TSNR calculation
+* ENH: Preliminary support for graph submission with SGE, PBS and Soma Workflow
+* ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM, MRIsSmooth,
        NetworkBasedStatistic, Atropos, N4BiasFieldCorrection, ApplyTransforms,
-       fs.MakeAverageSubject
+       fs.MakeAverageSubject, epidewarp.fsl, WarpTimeSeriesImageMultiTransform,
+       AVScale, mri_ms_LDA
+* ENH: simple interfaces for spm
 
+* FIX: CompCor component calculation was erroneous
+* FIX: filename generation for AFNI and PRELUDE
+* FIX: improved slicer module autogeneration
+* FIX: added missing options for BBRegsiter
+* FIX: functionality of remove_unnecessary_ouputs cleaned up
+* FIX: local hash check works with appropriate inputs
+* FIX: Captures all stdout from commandline programs
 * FIX: Afni outputs should inherit from TraitedSpec
 
 Release 0.5.3 (Mar 23, 2012)

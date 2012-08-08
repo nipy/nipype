@@ -262,7 +262,7 @@ def test_outputs_removal_wf():
                                                                    wf.name,
                                                                    n4.name,
                                                                    'file1.txt')) == keep_inputs
-            
+
     rmtree(out_dir)
 
 def fwhm(fwhm):

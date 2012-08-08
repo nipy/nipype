@@ -15,7 +15,7 @@ except Exception, e:
 else:
     from nipy.labs.mask import compute_mask
     from nipy.algorithms.registration import FmriRealign4d as FR4d
-    from nipy import save_image
+    from nipy import save_image, load_image
 
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -69,41 +69,38 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
+
     in_file = InputMultiPath(exists=True,
                              mandatory=True,
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
     slice_order = traits.List(traits.Int(),
-                              desc='0 based slice order', 
+                              desc='0 based slice order',
                               requires=["time_interp"])
-    tr_slices = traits.Float(desc="TR slices")
+    tr_slices = traits.Float(desc="TR slices", requires=['time_interp'])
     start = traits.Float(0.0, usedefault=True,
                          desc="time offset into TR to align slices to")
     time_interp = traits.Enum(True, requires=["slice_order"],
-                    desc="Assume smooth changes across time e.g.,\
+                              desc="Assume smooth changes across time e.g.,\
                      fmri series. If you don't want slice timing \
                      correction set this to undefined")
-    loops = traits.Either(traits.Int(5,usedefault=True), 
-                          traits.List(traits.Int), 
-                          usedefault=True, 
-                          desc="loops within each run")
-    between_loops = traits.Either(traits.Int(5),
-                                  traits.List(traits.Int), 
-                                  usedefault=True, desc="loops used to \
+    loops = InputMultiPath([5], traits.Int, usedefault=True,
+                           desc="loops within each run")
+    between_loops = InputMultiPath([5], traits.Int,
+                                   usedefault=True, desc="loops used to \
                                                           realign different \
                                                           runs")
-    speedup = traits.Either(traits.Int(5),
-                            traits.List(traits.Int(5)),
-                            usedefault=True, 
-                            desc="successive image \
+    speedup = InputMultiPath([5], traits.Int,
+                             usedefault=True,
+                             desc="successive image \
                                   sub-sampling factors \
                                   for acceleration")
 
 
 class FmriRealign4dOutputSpec(TraitedSpec):
 
-    out_file = OutputMultiPath(File(exists=True), 
+    out_file = OutputMultiPath(File(exists=True),
                                desc="Realigned files")
     par_file = OutputMultiPath(File(exists=True),
                                desc="Motion parameter files")
@@ -139,12 +136,7 @@ class FmriRealign4d(BaseInterface):
 
     def _run_interface(self, runtime):
 
-        all_ims = []
-
-        for image in self.inputs.in_file:
-            im = nb.load(image)
-            im.affine = im.get_affine()
-            all_ims.append(im)
+        all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.tr_slices):
             TR_slices = None

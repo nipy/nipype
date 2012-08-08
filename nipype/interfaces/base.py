@@ -932,7 +932,7 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, timeout=0.2):
+def run_command(runtime, timeout=0.01):
     """
     Run a command, read stdout and stderr, prefix with timestamp. The returned
     runtime contains a merged stdout+stderr log with timestamps

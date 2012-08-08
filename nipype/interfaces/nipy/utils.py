@@ -61,14 +61,14 @@ class Similarity(BaseInterface):
 
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)
-        
+
         if isdefined(self.inputs.mask1):
             mask1_nii = nb.load(self.inputs.mask1)
             mask1_nii = nb.Nifti1Image(nb.load(self.inputs.mask1).get_data() == 1, mask1_nii.get_affine(),
                                        mask1_nii.get_header())
         else:
             mask1_nii = None
-            
+
         if isdefined(self.inputs.mask2):
             mask2_nii = nb.load(self.inputs.mask2)
             mask2_nii = nb.Nifti1Image(nb.load(self.inputs.mask2).get_data() == 1, mask2_nii.get_affine(),

@@ -1,3 +1,10 @@
+.. admonition:: Announcement
+
+   Nipype Connectivity Workshop 2012 in Magdeburg, Germany: Sep 8-9, 2012: 
+   `Information and Registration`__
+
+   __ http://nipype.blogspot.com
+
 .. list-table::
 
  * -  .. image:: images/nipype_architecture_overview2.png
