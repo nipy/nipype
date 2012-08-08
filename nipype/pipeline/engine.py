@@ -1641,7 +1641,7 @@ class MapNode(Node):
                         values.insert(i, node.result.outputs.get()[key])
                     else:
                         values.insert(i, None)
-                    if any([val != Undefined for val in values]) and \
+                    if any([isdefined(val) for val in values]) and \
                        self._result.outputs:
                         setattr(self._result.outputs, key, values)
         if returncode and any([code is not None for code in returncode]):

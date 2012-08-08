@@ -679,7 +679,7 @@ class Label2VolInputSpec(FSTraitedSpec):
                                desc='list of label files')
     annot_file = File(exists=True, argstr='--annot %s',
                      xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
-                     requires=('subjectid', 'hemi'),
+                     requires=('subject_id', 'hemi'),
                      mandatory=True,
                      copyfile=False,
                      desc='surface annotation file')
@@ -712,7 +712,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     proj = traits.Tuple(traits.Enum('abs', 'frac'), traits.Float,
                         traits.Float, traits.Float,
                         argstr='--proj %s %f %f %f',
-                        requries=('subjectid', 'hemi'),
+                        requries=('subject_id', 'hemi'),
                         desc='project along surface normal')
     subject_id = traits.Str(argstr='--subject %s',
                            desc='subject id')
@@ -755,9 +755,9 @@ class Label2Vol(FSCommand):
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:
-                if isdefined(self.inputs.label_file):
+                if isdefined(getattr(self.inputs,key)):
                     _, src = os.path.split(getattr(self.inputs, key))
-            if isdefined(self.inputs.aparcaaseg):
+            if isdefined(self.inputs.aparc_aseg):
                 src = 'aparc+aseg.mgz'
             outfile = fname_presuffix(src, suffix='_vol.nii.gz',
                                       newpath=os.getcwd(),

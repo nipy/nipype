@@ -24,6 +24,8 @@ class MathsInput(FSLCommandInputSpec):
                                   position=-1, argstr="-odt %s",
                                   desc="datatype to use for output (default uses input type)")
 
+    nan2zeros = traits.Bool(position=3, argstr='-nan',
+                            desc='change NaNs to zeros before doing anything')
 
 class MathsOutput(TraitedSpec):
 
@@ -42,7 +44,7 @@ class MathsCommand(FSLCommand):
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
     def _gen_filename(self, name):
@@ -69,7 +71,7 @@ class ChangeDataType(MathsCommand):
 
 class ThresholdInputSpec(MathsInput):
 
-    thresh = traits.Float(mandatory=True, position=3, argstr="%s",
+    thresh = traits.Float(mandatory=True, position=4, argstr="%s",
                           desc="threshold value")
     direction = traits.Enum("below", "above", usedefault=True,
                             desc="zero-out either below or above thresh value")
@@ -104,7 +106,7 @@ class Threshold(MathsCommand):
 
 class MeanImageInput(MathsInput):
 
-    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%smean", position=3,
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%smean", position=4,
                             desc="dimension to mean across")
 
 
@@ -118,9 +120,9 @@ class MeanImage(MathsCommand):
 
 class IsotropicSmoothInput(MathsInput):
 
-    fwhm = traits.Float(mandatory=True, xor=["sigma"], position=3, argstr="-s %.5f",
+    fwhm = traits.Float(mandatory=True, xor=["sigma"], position=4, argstr="-s %.5f",
                         desc="fwhm of smoothing kernel")
-    sigma = traits.Float(mandatory=True, xor=["fwhm"], position=3, argstr="-s %.5f",
+    sigma = traits.Float(mandatory=True, xor=["fwhm"], position=4, argstr="-s %.5f",
                          desc="sigma of smoothing kernel")
 
 
@@ -140,7 +142,7 @@ class IsotropicSmooth(MathsCommand):
 
 class ApplyMaskInput(MathsInput):
 
-    mask_file = File(exists=True, mandatory=True, argstr="-mas %s", position=3,
+    mask_file = File(exists=True, mandatory=True, argstr="-mas %s", position=4,
                       desc="binary image defining mask space")
 
 
@@ -155,16 +157,16 @@ class ApplyMask(MathsCommand):
 class KernelInput(MathsInput):
 
     kernel_shape = traits.Enum("3D", "2D", "box", "boxv", "gauss", "sphere", "file",
-                               argstr="-kernel %s", position=3, desc="kernel shape to use")
-    kernel_size = traits.Float(argstr="%.4f", position=4, xor=["kernel_file"],
+                               argstr="-kernel %s", position=4, desc="kernel shape to use")
+    kernel_size = traits.Float(argstr="%.4f", position=5, xor=["kernel_file"],
                              desc="kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss")
-    kernel_file = File(exists=True, argstr="%s", position=4, xor=["kernel_size"],
+    kernel_file = File(exists=True, argstr="%s", position=5, xor=["kernel_size"],
                        desc="use external file for kernel")
 
 
 class DilateInput(KernelInput):
 
-    operation = traits.Enum("mean", "modal", "max", argstr="-dil%s", position=5, mandatory=True,
+    operation = traits.Enum("mean", "modal", "max", argstr="-dil%s", position=6, mandatory=True,
                             desc="filtering operation to perfoem in dilation")
 
 
@@ -183,7 +185,7 @@ class DilateImage(MathsCommand):
 
 class ErodeInput(KernelInput):
 
-    minimum_filter = traits.Bool(argstr="%s", position=5, usedefault=True, default_value=False,
+    minimum_filter = traits.Bool(argstr="%s", position=6, usedefault=True, default_value=False,
                                  desc="if true, minimum filter rather than erosion by zeroing-out")
 
 
@@ -204,7 +206,7 @@ class ErodeImage(MathsCommand):
 
 class SpatialFilterInput(KernelInput):
 
-    operation = traits.Enum("mean", "median", "meanu", argstr="-f%s", position=5, mandatory=True,
+    operation = traits.Enum("mean", "median", "meanu", argstr="-f%s", position=6, mandatory=True,
                             desc="operation to filter with")
 
 
@@ -219,7 +221,7 @@ class SpatialFilter(MathsCommand):
 class UnaryMathsInput(MathsInput):
 
     operation = traits.Enum("exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index",
-                            argstr="-%s", position=3, mandatory=True,
+                            argstr="-%s", position=4, mandatory=True,
                             desc="operation to perform")
 
 
@@ -237,11 +239,11 @@ class UnaryMaths(MathsCommand):
 class BinaryMathsInput(MathsInput):
 
     operation = traits.Enum("add", "sub", "mul", "div", "rem", "max", "min",
-                            mandatory=True, argstr="-%s", position=3,
+                            mandatory=True, argstr="-%s", position=4,
                             desc="operation to perform")
-    operand_file = File(exists=True, argstr="%s", mandatory=True, position=4, xor=["operand_value"],
+    operand_file = File(exists=True, argstr="%s", mandatory=True, position=5, xor=["operand_value"],
                         desc="second image to perform operation with")
-    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=4, xor=["operand_file"],
+    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=5, xor=["operand_file"],
                                  desc="value to perform operation with")
 
 
@@ -254,7 +256,7 @@ class BinaryMaths(MathsCommand):
 
 class MultiImageMathsInput(MathsInput):
 
-    op_string = traits.String(position=3, argstr="%s", mandatory=True,
+    op_string = traits.String(position=4, argstr="%s", mandatory=True,
                               desc="python formatted string of operations to perform")
     operand_files = InputMultiPath(File(exists=True), mandatory=True,
                                  desc="list of file names to plug into op string")
@@ -285,9 +287,9 @@ class MultiImageMaths(MathsCommand):
 
 class TemporalFilterInput(MathsInput):
 
-    lowpass_sigma = traits.Float(-1, argstr="%.6f", position=4, usedefault=True,
+    lowpass_sigma = traits.Float(-1, argstr="%.6f", position=5, usedefault=True,
                                  desc="lowpass filter sigma (in volumes)")
-    highpass_sigma = traits.Float(-1, argstr="-bptf %.6f", position=3, usedefault=True,
+    highpass_sigma = traits.Float(-1, argstr="-bptf %.6f", position=4, usedefault=True,
                                   desc="highpass filter sigma (in volumes)")
 
 

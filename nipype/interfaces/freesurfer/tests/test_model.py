@@ -132,7 +132,7 @@ def test_glmfit():
 def test_label2vol():
     input_map = dict(annot_file = dict(copyfile=False, mandatory=True,
                                        xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
-                                       requires=('subjectid', 'hemi'), argstr='--annot %s',),
+                                       requires=('subject_id', 'hemi'), argstr='--annot %s',),
                      aparc_aseg = dict(xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
                                        argstr='--aparc+aseg', mandatory=True,),
                      args = dict(argstr='%s',),

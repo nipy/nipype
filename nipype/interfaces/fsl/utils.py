@@ -464,7 +464,7 @@ class ImageStats(FSLCommand):
         return outputs
 
 class AvScaleInputSpec(FSLCommandInputSpec):
-    mat_file = File(exists=True, argstr="%s", 
+    mat_file = File(exists=True, argstr="%s",
         desc='mat file to read', position=0)
 
 
@@ -477,7 +477,7 @@ class AvScaleOutputSpec(TraitedSpec):
     forward_half_transform = traits.Any(desc='Forward Half Transform')
     backward_half_transform = traits.Any(desc='Backwards Half Transform')
     left_right_orientation_preserved = traits.Bool(desc='True if LR orientation preserved')
-    
+
 class AvScale(FSLCommand):
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
@@ -505,7 +505,7 @@ class AvScale(FSLCommand):
                 values = line.split()
                 out.append([float(val) for val in values])
             return out
-            
+
         out = runtime.stdout.split('\n')
 
         outputs.rotation_translation_matrix = lines_to_float(out[1:5])
@@ -990,10 +990,8 @@ class SwapDimensions(FSLCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
-                                                  suffix="_newdims",
-                                                  use_ext=True,
-                                                  newpath=os.getcwd())
+            outputs["out_file"] = self._gen_fname(self.inputs.in_file,
+                                                  suffix='_newdims')
         outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 

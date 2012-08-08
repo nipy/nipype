@@ -46,7 +46,6 @@ def test_skullstrip():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-input %s',mandatory=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='%s',),
                      outputtype = dict(),
                      )
@@ -64,12 +63,11 @@ def test_volreg():
                      in_file = dict(argstr='%s',mandatory=True,),
                      md1dfile = dict(argstr='-maxdisp1D %s',),
                      oned_file = dict(argstr='-1Dfile %s',),
-                     other = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      timeshift = dict(argstr='-tshift 0',),
                      verbose = dict(argstr='-verbose',),
-                     zpad = dict(argstr='-zpad %s',),
+                     zpad = dict(argstr='-zpad %d',),
                      )
     instance = afni.Volreg()
     for key, metadata in input_map.items():
@@ -83,7 +81,6 @@ def test_calc():
                      ignore_exception = dict(usedefault=True,),
                      in_file_a = dict(argstr='-a %s',mandatory=True,),
                      in_file_b = dict(argstr=' -b %s',),
-                     other = dict(argstr='',),
                      out_file = dict(argstr='-prefix %s',),
                      single_idx = dict(),
                      start_idx = dict(requires=['stop_idx'],),
@@ -162,7 +159,6 @@ def test_despike():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      )
@@ -201,7 +197,7 @@ def test_warp():
                      outputtype = dict(),
                      suffix = dict(),
                      tta2mni = dict(argstr='-tta2mni',),
-                     zpad = dict(argstr='-zpad %s',),
+                     zpad = dict(argstr='-zpad %d',),
                      )
     instance = afni.Warp()
     for key, metadata in input_map.items():
@@ -213,7 +209,6 @@ def test_detrend():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      )
@@ -254,7 +249,6 @@ def test_tcorrelate():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      pearson = dict(argstr='-pearson',),
@@ -273,7 +267,6 @@ def test_zcutup():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      keep = dict(argstr='-keep %s',),
-                     other = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',mandatory=True,),
                      outputtype = dict(),
                      )
@@ -289,7 +282,6 @@ def test_merge():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_files = dict(argstr='%s',mandatory=True,),
-                     other = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',genfile=True,),
                      outputtype = dict(),
                      )
@@ -305,7 +297,6 @@ def test_fourier():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      lowpass = dict(argstr='-lowpass %f',mandatory=True,),
-                     other = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      )
@@ -341,7 +332,6 @@ def test_tstat():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      )
@@ -374,7 +364,6 @@ def test_automask():
                      erode = dict(argstr='-erode %s',),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     options = dict(argstr='%s',),
                      out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      suffix = dict(),

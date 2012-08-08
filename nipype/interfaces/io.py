@@ -221,6 +221,9 @@ class DataSink(IOBase):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _get_dst(self, src):
+        ## If path is directory with trailing os.path.sep,
+        ## then remove that for a more robust behavior
+        src = src.rstrip(os.path.sep)
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
             dst = path
@@ -1114,7 +1117,7 @@ def capture_provenance():
 def push_provenance():
     pass
 
-    
+
 class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     database_file = File(exists=True, mandatory = True)
     table_name = traits.Str(mandatory=True)
@@ -1203,7 +1206,7 @@ class MySQLSink(IOBase):
         """
         import MySQLdb
         if isdefined(self.inputs.config):
-            conn = MySQLdb.connect(db=self.inputs.database_name, 
+            conn = MySQLdb.connect(db=self.inputs.database_name,
                                    read_default_file=self.inputs.config)
         else:
             conn = MySQLdb.connect(host=self.inputs.host,
