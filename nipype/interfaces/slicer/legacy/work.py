@@ -7,12 +7,12 @@ from nipype.interfaces.slicer.base import SlicerCommandLine
 
 
 class DiffusionTensorTestInputSpec(CommandLineInputSpec):
-    inputVolume = File(position="0", desc="Input tensor volume to be filtered", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Filtered tensor volume", argstr="--outputVolume %s")
+    inputVolume = File(position=-2, desc="Input tensor volume to be filtered", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Filtered tensor volume", argstr="%s")
 
 
 class DiffusionTensorTestOutputSpec(TraitedSpec):
-    outputVolume = File(position="1", desc="Filtered tensor volume", exists=True)
+    outputVolume = File(position=-1, desc="Filtered tensor volume", exists=True)
 
 
 class DiffusionTensorTest(SlicerCommandLine):

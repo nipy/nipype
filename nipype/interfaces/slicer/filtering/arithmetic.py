@@ -7,13 +7,13 @@ from nipype.interfaces.slicer.base import SlicerCommandLine
 
 
 class CastInputSpec(CommandLineInputSpec):
-    InputVolume = File(position="0", desc="Input volume, the volume to cast.", exists=True, argstr="--InputVolume %s")
-    OutputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Output volume, cast to the new type.", argstr="--OutputVolume %s")
+    InputVolume = File(position=-2, desc="Input volume, the volume to cast.", exists=True, argstr="%s")
+    OutputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output volume, cast to the new type.", argstr="%s")
     type = traits.Enum("Char", "UnsignedChar", "Short", "UnsignedShort", "Int", "UnsignedInt", "Float", "Double", desc="Type for the new output volume.", argstr="--type %s")
 
 
 class CastOutputSpec(TraitedSpec):
-    OutputVolume = File(position="1", desc="Output volume, cast to the new type.", exists=True)
+    OutputVolume = File(position=-1, desc="Output volume, cast to the new type.", exists=True)
 
 
 class Cast(SlicerCommandLine):
@@ -45,14 +45,14 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
 
 class AddInputSpec(CommandLineInputSpec):
-    inputVolume1 = File(position="0", desc="Input volume 1", exists=True, argstr="--inputVolume1 %s")
-    inputVolume2 = File(position="1", desc="Input volume 2", exists=True, argstr="--inputVolume2 %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="2", hash_files=False, desc="Volume1 + Volume2", argstr="--outputVolume %s")
+    inputVolume1 = File(position=-3, desc="Input volume 1", exists=True, argstr="%s")
+    inputVolume2 = File(position=-2, desc="Input volume 2", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Volume1 + Volume2", argstr="%s")
     order = traits.Enum("0", "1", "2", "3", desc="Interpolation order if two images are in different coordinate frames or have different sampling.", argstr="--order %s")
 
 
 class AddOutputSpec(TraitedSpec):
-    outputVolume = File(position="2", desc="Volume1 + Volume2", exists=True)
+    outputVolume = File(position=-1, desc="Volume1 + Volume2", exists=True)
 
 
 class Add(SlicerCommandLine):
