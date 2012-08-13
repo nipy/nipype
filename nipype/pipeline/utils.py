@@ -742,6 +742,143 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     return result
 
 
+def write_prov2(graph, filename=None):
+    """Write W3C PROV Model JSON file
+    """
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'workflow_provenance.json')
+    provenance = {'prefix': {'nipype': "http://nipy.org/nipype/"},
+                  'bundle': {runid: {}}}
+    bundle = provenance['bundle'][runid]
+    bundle['entity'] = {}
+
+    import xml.etree.ElementTree as ET
+    docroot = ET.Element('opmGraph', dict(id='graph_1'))
+    annot = ET.SubElement(docroot, 'annotation')
+    ET.SubElement(annot, 'created-by', dict(value='nipype'))
+    ET.SubElement(annot, 'version', dict(value=nipype_version))
+    # add accounts
+    accounts = ET.SubElement(docroot, 'accounts')
+    userinfo = pwd.getpwuid(os.geteuid())
+    accountref = '%s'%userinfo.pw_name
+    ET.SubElement(accounts, 'account', dict(id=accountref))
+    # add processes (nodes)
+    procs = ET.SubElement(docroot, 'processes')
+    for idx, node in enumerate(graph.nodes()):
+        process = ET.SubElement(procs, 'process', dict(id=str(node)))
+        ET.SubElement(process, 'account', dict(ref=accountref))
+        ET.SubElement(process, 'label', dict(value=str(node)))
+        annot = ET.SubElement(process, 'annotation')
+        ET.SubElement(annot, 'interface', dict(value=get_print_name(node),
+                                               version=node._interface.version))
+        inputs = ET.SubElement(annot, 'inputs')
+        for idx, inputval in enumerate(sorted(node.inputs.get().items())):
+            if isdefined(inputval[1]):
+                inport = inputval[0]
+                used_ports = []
+                for _,_,d in graph.in_edges_iter([node], data=True):
+                    for _, dest in d['connect']:
+                        used_ports.append(dest)
+                if inport not in used_ports:
+                    input = ET.SubElement(inputs, 'param', dict(id=inport))
+                    #value = ET.SubElement(input, 'value')
+                    input.text = str(inputval[1])
+        runtime = ET.SubElement(annot, 'runtime')
+        node_runtime = node.result.runtime
+        if isinstance(node_runtime, list):
+            pass
+        for key, value in sorted(node_runtime.items()):
+            runtime_key = ET.SubElement(runtime, 'key', dict(name=key))
+            #runtime_value = ET.SubElement(runtime_key, 'value')
+            runtime_key.text = str(value)
+
+    # add dependencies (edges)
+    dependencies = ET.SubElement(docroot, 'dependencies')
+    # add artifacts (files)
+    artifacts = ET.SubElement(docroot, 'artifacts')
+    counter = 0
+    for idx, node in enumerate(graph.nodes()):
+        if isinstance(node.result.outputs, Bunch):
+            outputs = node.result.outputs.dictcopy()
+        else:
+            outputs = node.result.outputs.get()
+        used_ports = {}
+        for _,v,d in graph.out_edges_iter([node], data=True):
+            for src, dest in d['connect']:
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if srcname not in used_ports:
+                    used_ports[srcname] = []
+                used_ports[srcname].append((v, dest))
+        for outidx, nameval in enumerate(sorted(outputs.items())):
+            if not isdefined(nameval[1]):
+                continue
+            artifactref = 'a%d_o%d'%(idx, outidx)
+            artifact = ET.SubElement(artifacts, 'artifact', dict(id=artifactref))
+            ET.SubElement(artifact, 'account', dict(ref=accountref))
+            ET.SubElement(artifact, 'label', dict(value=nameval[0]))
+            #value = ET.SubElement(artifact, 'value')
+            artifact.text = str(nameval[1])
+            if nameval[0] in used_ports:
+                for destnode, portname in used_ports[nameval[0]]:
+                    counter += 1
+                    # Used: Artifact->Process
+                    used = ET.SubElement(dependencies, 'used', dict(id='u_%d'%counter))
+                    ET.SubElement(used, 'cause', dict(ref=artifactref))
+                    ET.SubElement(used, 'effect', dict(ref=str(destnode)))
+                    ET.SubElement(used, 'account', dict(ref=accountref))
+                    ET.SubElement(used, 'label', dict(value=portname))
+        if not graph.in_edges(nbunch=node):
+            for inidx, nameval in enumerate(sorted(node.inputs.get().items())):
+                if not isdefined(nameval[1]):
+                    continue
+                artifactref = 'a%d_i%d'%(idx, inidx)
+                artifact = ET.SubElement(artifacts, 'artifact', dict(id=artifactref))
+                ET.SubElement(artifact, 'account', dict(ref=accountref))
+                #ET.SubElement(artifact, 'label', dict(value=nameval[0]))
+                artifact.text = str(nameval[1])
+                counter += 1
+                used = ET.SubElement(dependencies, 'used', dict(id='u_%d'%counter))
+                ET.SubElement(used, 'cause', dict(ref=artifactref))
+                ET.SubElement(used, 'effect', dict(ref=str(node)))
+                ET.SubElement(used, 'account', dict(ref=accountref))
+                ET.SubElement(used, 'label', dict(value=nameval[0]))
+
+    # add agents (users)
+    agents = ET.SubElement(docroot, 'agents')
+    agent = ET.SubElement(agents, 'agent', dict(id='%s'%userinfo.pw_name))
+    ET.SubElement(agent, 'account', dict(ref=accountref))
+    ET.SubElement(agent, 'label', dict(value=userinfo.pw_gecos))
+    # WGB: Process->Artifact
+    counter=0
+    for idx, node in enumerate(graph.nodes()):
+        if isinstance(node.result.outputs, Bunch):
+            outputs = node.result.outputs.dictcopy()
+        else:
+            outputs = node.result.outputs.get()
+        for outidx, nameval in enumerate(sorted(outputs.items())):
+            if not isdefined(nameval[1]):
+                continue
+            counter+=1
+            wgb = ET.SubElement(dependencies, 'wasGeneratedBy', dict(id='g_%d'%counter))
+            ET.SubElement(wgb, 'cause', dict(ref=str(node)))
+            ET.SubElement(wgb, 'effect', dict(ref='a%d_o%d'%(idx, outidx)))
+            ET.SubElement(wgb, 'account', dict(ref=accountref))
+            ET.SubElement(wgb, 'label', dict(value=nameval[0]))
+    # WDF: Artifact->Artifact
+    # WCB: Agent->Process
+    # WTB: Process->Process
+    for idx, edgeinfo in enumerate(graph.in_edges_iter()):
+        wtb = ET.SubElement(dependencies, 'wasTriggeredBy', dict(id='d_%d'%idx))
+        ET.SubElement(wtb, 'cause', dict(ref=str(edgeinfo[0])))
+        ET.SubElement(wtb, 'effect', dict(ref=str(edgeinfo[1])))
+        ET.SubElement(wtb, 'account', dict(ref=accountref))
+    ET.dump(docroot)
+    ET.ElementTree(docroot).write(filename)
+    return docroot
+
 def write_prov(graph, filename=None):
     """Write Open Provenance Model XML file
     """
@@ -862,7 +999,7 @@ def write_prov(graph, filename=None):
             ET.SubElement(wgb, 'effect', dict(ref='a%d_o%d'%(idx, outidx)))
             ET.SubElement(wgb, 'account', dict(ref=accountref))
             ET.SubElement(wgb, 'label', dict(value=nameval[0]))
-    # WDF: Artifact->Artifact
+        # WDF: Artifact->Artifact
     # WCB: Agent->Process
     # WTB: Process->Process
     for idx, edgeinfo in enumerate(graph.in_edges_iter()):
