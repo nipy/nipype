@@ -1017,11 +1017,11 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline
     'ls -al'
 
-    >>> cli.inputs.trait_get() #doctest: +SKIP
+    >>> cli.inputs.trait_get()
     {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
 
     >>> cli.inputs.get_hashval()
-    ({'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}, 'b1faf85652295456a906f053d48daef6')
+    ({'args': '-al'}, 'a2f45e04a34630c5f33a75ea2a533cdd')
 
     """
 
