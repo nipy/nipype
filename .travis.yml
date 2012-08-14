@@ -17,8 +17,6 @@ install:
     - sudo apt-get install $PYTHON-setuptools
     - sudo easy_install$PYSUF nibabel # Latest pypi
     - sudo apt-get install $PYTHON-nose
-    - $PYTHON setup.py build
-    - sudo $PYTHON setup.py install
 script:
     # Change into an innocuous directory and find tests from installation
     - make test
