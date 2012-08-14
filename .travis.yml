@@ -13,7 +13,7 @@ install:
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install $PYTHON-networkx
-    - sudo apt-get install $PYTHON-traits4
+    - sudo apt-get install $PYTHON-traits
     - sudo apt-get install $PYTHON-setuptools
     - sudo easy_install$PYSUF nibabel # Latest pypi
     - sudo apt-get install $PYTHON-nose
