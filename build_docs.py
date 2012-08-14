@@ -105,7 +105,8 @@ def relative_path(filename):
 try:
     from sphinx.setup_command import BuildDoc
 except:
-
+    MyBuildDoc = None
+else:
     class MyBuildDoc(BuildDoc):
         """ Sub-class the standard sphinx documentation building system, to
             add logics for API generation and matplotlib's plot directive.
@@ -160,8 +161,6 @@ except:
             """
             self.build_dir = os.path.join(*DOC_BUILD_DIR.split(os.sep)[:-1])
             BuildDoc.finalize_options(self)
-else:
-    MyBuildDoc = None
 
 ################################################################################
 # Distutils Command class to clean
