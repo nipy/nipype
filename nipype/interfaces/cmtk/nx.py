@@ -395,7 +395,7 @@ class NetworkXMetrics(BaseInterface):
 
         node_measures = compute_node_measures(ntwk, calculate_cliques)
         for key in node_measures.keys():
-            newntwk = add_node_data(node_measures[key], self.inputs.in_file)
+            newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, 'pck'))
             nx.write_gpickle(newntwk, out_file)
             nodentwks.append(out_file)
