@@ -1042,16 +1042,12 @@ class BaseInterface(Interface):
         keys = runtime.dictcopy()
         if 'cmdline' in keys:
             a0_attrs.update({nipype['cmdline']: runtime.cmdline})
-        """
-        if 'merged' in keys:
-            bundle['entity'] = {'consoleoutput': {"prov:type": ["stdout"],
-                                           "value": runtime.merged}}
-            bundle['wasGeneratedBy'] = {'_:wGB1': {"prov:entity": 'consoleoutput',
-                                                  "prov:activity": activityid}}
-        """
         a0 = g.activity(nipype[classname],runtime.startTime, runtime.endTime,
                         a0_attrs)
-
+        if 'merged' in keys and runtime.merged:
+            co = g.entity(nipype['consoleoutput'], {prov.PROV["type"]: nipype["stdout"],
+                                                    foaf["value"]: runtime.merged})
+            g.wasGeneratedBy(co, a0)
         if inputs:
             g.entity(nipype['inputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
             inputbundle = g.bundle(nipype['inputs_%s' % classname])
