@@ -12,6 +12,7 @@ from ConfigParser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
+import json
 import os
 import re
 import pwd
@@ -24,6 +25,7 @@ from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
 
+import nipype.external.prov as prov
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
                                isdefined, File, Directory,
@@ -1019,85 +1021,74 @@ class BaseInterface(Interface):
         inputs = results.inputs
         outputs = results.outputs.get_traitsfree()
         classname = self.__class__.__name__
-        runid = 'nipype:run_%s' % classname
-        provenance = {'prefix': {'nipype': "http://nipy.org/nipype/"},
-                      'bundle': {runid: {}}}
-        bundle = provenance['bundle'][runid]
-        bundle['entity'] = {}
-        activityid = '_:a1_%s' % classname
-        activity = {activityid: {
-            "startTime": [runtime.startTime, "xsd:dateTime"],
-            "endTime": [runtime.endTime, "xsd:dateTime"],
-            "ex:host": runtime.hostname,
-            "prov:type": ["nipype:%s" % classname, "xsd:QName"],
-        }}
+
+        foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
+        nif = prov.Namespace("nif","http://neurolex.org/")
+        dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
+        nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/")
+
+        # create a provenance container
+        g = prov.ProvBundle()
+
+        # Set the default _namespace name
+        g.set_default_namespace(nif.get_uri())
+        g.add_namespace(foaf)
+        g.add_namespace(dcterms)
+        g.add_namespace(nipype)
+
+        a0_attrs = {foaf["host"]: runtime.hostname,
+                    prov.PROV["type"]: nipype[classname],
+                    }
         keys = runtime.dictcopy()
         if 'cmdline' in keys:
-            activity[activityid].update({'cmdline': runtime.cmdline})
+            a0_attrs.update({nipype['cmdline']: runtime.cmdline})
+        """
         if 'merged' in keys:
             bundle['entity'] = {'consoleoutput': {"prov:type": ["stdout"],
                                            "value": runtime.merged}}
             bundle['wasGeneratedBy'] = {'_:wGB1': {"prov:entity": 'consoleoutput',
                                                   "prov:activity": activityid}}
+        """
+        a0 = g.activity(nipype[classname],runtime.startTime, runtime.endTime,
+                        a0_attrs)
 
-        bundle['activity'] = activity
         if inputs:
-            inputid = "_:inputs_%s" % classname
-            inputbundle = provenance['bundle'][inputid] = {}
-            bundle['entity'][inputid] = {"prov:type": ["prov:Bundle",
-                                                       "xsd:QName"]}
+            g.entity(nipype['inputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
+            inputbundle = g.bundle(nipype['inputs_%s' % classname])
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                if 'entity' not in inputbundle:
-                    inputbundle['entity'] = {}
-                id = '_:e%d_in' % idx
-                inputbundle['entity'][id] = {'type': 'nipype:input'}
-                properties = inputbundle['entity'][id]
-                properties['name'] = key
-                properties['value'] = val
-            bundle['used'] = {'_:u1': {"prov:entity": inputid,
-                                       "prov:activity": activityid}}
+                in_attr = {prov.PROV["type"]: nipype["input"],
+                           nipype[key]: val}
+                inputbundle.entity(nipype['in_%02d' % idx], in_attr)
+            g.used(a0, inputbundle)
+
         # write output entities
         if outputs:
-            outputid = "_:outputs_%s" % classname
-            outputbundle = provenance['bundle'][outputid] = {}
-            bundle['entity'][outputid] = {"prov:type": ["prov:Bundle",
-                                                        "xsd:QName"]}
+            g.entity(nipype['outputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
+            outputbundle = g.bundle(nipype['outputs_%s' % classname])
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                if 'entity' not in outputbundle:
-                    outputbundle['entity'] = {}
-                id = '_:e%d_out' % idx
-                outputbundle['entity'][id] = {'type': 'nipype:input'}
-                properties = outputbundle['entity'][id]
-                properties['name'] = key
-                properties['value'] = val
-            if 'wasGeneratedBy' in bundle:
-                wgb_id = '_:wGB2'
-            else:
-                bundle['wasGeneratedBy'] = {}
-                wgb_id = '_:wGB1'
-            bundle['wasGeneratedBy'].update(**{wgb_id: {"prov:entity": outputid,
-                                                   "prov:activity": activityid}})
-        user_agent = {'_:ag2': {"prov:type": ["Person", "xsd:QName"],
-                                "ex:login": pwd.getpwuid(os.geteuid()).pw_name}}
-        software_agent = {'_:ag1': {"prov:type": ["Software", "xsd:QName"],
-                                    "ex:name": "Nipype"}}
-        bundle['entity'].update(**user_agent)
-        bundle['entity'].update(**software_agent)
+                out_attr = {prov.PROV["type"]: nipype["output"],
+                           nipype[key]: val}
+                outputbundle.entity(nipype['out_%02d' % idx], in_attr)
+            g.wasGeneratedBy(outputbundle, a0)
+
+        user_agent = g.agent(nipype["ag2"],
+                             {prov.PROV["type"]: prov.PROV["Person"],
+                              foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
+        agent_attr = {prov.PROV["type"]: prov.PROV["Software"],
+                      foaf["name"]: "Nipype"}
         for key, value in get_info().items():
-            software_agent['_:ag1']['nipype:'+key] = value
-        bundle['agent'] = ["_:ag1", "_:ag2"]
-        bundle['wasAssociatedWith'] = {'_:wAW1': {"prov:agent": "_:ag2",
-                                               "prov:activity": activityid,
-                                               "prov:role": "LoggedInUser"},
-                                       '_:wAW2': {"prov:agent": "_:ag1",
-                                                  "prov:activity": activityid,
-                                                  "prov:role": "Software"}
-                                       }
-        # write dependencies
-        save_json(filename, provenance)
-        return provenance
+            agent_attr.update({nipype[key]: foaf[value]})
+        software_agent = g.agent(nipype["ag1"], agent_attr)
+        g.wasAssociatedWith(a0, user_agent, None, None,
+                            {prov.PROV["Role"]: "LoggedInUser"})
+        g.wasAssociatedWith(a0, software_agent, None, None,
+                            {prov.PROV["Role"]: "Software"})
+        # write provenance
+        with open(filename, 'wt') as fp:
+            json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+        return g
 
 
 class Stream(object):
