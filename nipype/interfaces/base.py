@@ -1025,39 +1025,34 @@ class BaseInterface(Interface):
         foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
         nif = prov.Namespace("nif","http://neurolex.org/")
         dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
-        nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/")
+        nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6")
 
         # create a provenance container
         g = prov.ProvBundle()
 
         # Set the default _namespace name
-        g.set_default_namespace(nif.get_uri())
+        g.set_default_namespace(nipype.get_uri())
         g.add_namespace(foaf)
         g.add_namespace(dcterms)
         g.add_namespace(nipype)
 
         a0_attrs = {foaf["host"]: runtime.hostname,
                     prov.PROV["type"]: nipype[classname],
+                    prov.PROV["label"]: classname,
                     }
-        keys = runtime.dictcopy()
-        if 'cmdline' in keys:
-            a0_attrs.update({nipype['cmdline']: runtime.cmdline})
         a0 = g.activity(nipype[classname],runtime.startTime, runtime.endTime,
                         a0_attrs)
-        if 'merged' in keys and runtime.merged:
-            co = g.entity(nipype['consoleoutput'], {prov.PROV["type"]: nipype["stdout"],
-                                                    foaf["value"]: runtime.merged})
-            g.wasGeneratedBy(co, a0)
+        # write input entities
         if inputs:
             g.entity(nipype['inputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
             inputbundle = g.bundle(nipype['inputs_%s' % classname])
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {prov.PROV["type"]: nipype["input"],
+                           prov.PROV["label"]: key,
                            nipype[key]: val}
                 inputbundle.entity(nipype['in_%02d' % idx], in_attr)
             g.used(a0, inputbundle)
-
         # write output entities
         if outputs:
             g.entity(nipype['outputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
@@ -1065,14 +1060,29 @@ class BaseInterface(Interface):
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {prov.PROV["type"]: nipype["output"],
-                           nipype[key]: val}
-                outputbundle.entity(nipype['out_%02d' % idx], in_attr)
+                            prov.PROV["label"]: key,
+                            nipype[key]: val}
+                outputbundle.entity(nipype['out_%02d' % idx], out_attr)
             g.wasGeneratedBy(outputbundle, a0)
-
+        # write runtime entities
+        g.entity(nipype['runtime_%s' % classname],
+                 {prov.PROV['type']: prov.PROV['Bundle']})
+        runtimebundle = g.bundle(nipype['runtime_%s' % classname])
+        for key, value in sorted(runtime.items()):
+            if not value:
+                continue
+            attr = {prov.PROV["type"]: nipype["runtime"],
+                    prov.PROV["label"]: key,
+                    nipype[key]: value}
+            runtimebundle.entity(nipype['runtime_%s' % key], attr)
+        g.wasGeneratedBy(runtimebundle, a0)
+        # create agents
         user_agent = g.agent(nipype["ag2"],
                              {prov.PROV["type"]: prov.PROV["Person"],
+                              prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
                               foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
         agent_attr = {prov.PROV["type"]: prov.PROV["Software"],
+                      prov.PROV["label"]: "Nipype",
                       foaf["name"]: "Nipype"}
         for key, value in get_info().items():
             agent_attr.update({nipype[key]: foaf[value]})
