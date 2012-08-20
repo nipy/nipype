@@ -1085,7 +1085,7 @@ class BaseInterface(Interface):
                       prov.PROV["label"]: "Nipype",
                       foaf["name"]: "Nipype"}
         for key, value in get_info().items():
-            agent_attr.update({nipype[key]: foaf[value]})
+            agent_attr.update({nipype[key]: value})
         software_agent = g.agent(nipype["ag1"], agent_attr)
         g.wasAssociatedWith(a0, user_agent, None, None,
                             {prov.PROV["Role"]: "LoggedInUser"})
