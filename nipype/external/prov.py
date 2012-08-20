@@ -10,13 +10,13 @@ PROV-DM: http://www.w3.org/TR/prov-dm/
 @copyright: University of Southampton 2012
 '''
 
-import logging
 import datetime
 import json
 import re
 import collections
 from collections import OrderedDict, defaultdict
-logger = logging.getLogger(__name__)
+from .. import logging
+logger = logging.getLogger('interface')
 
 ## PROV record constants - PROV-DM LC
 # C1. Entities/Activities

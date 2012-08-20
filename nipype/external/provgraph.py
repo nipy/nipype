@@ -11,6 +11,8 @@ DOT Language:   http://www.graphviz.org/doc/info/lang.html
 
 @author: Dong Huynh <trungdong@donggiang.com>
 '''
+from ..utils.misc import package_check
+package_check('pydot')
 import pydot
 
 from .prov import *
