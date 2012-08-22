@@ -37,7 +37,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
         super(SGEPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        proc = subprocess.Popen(["qstat", '-j', taskid],
+        #  subprocess.Popen requires taskid to be a string
+        proc = subprocess.Popen(["qstat", '-j', str(taskid)],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         o, _ = proc.communicate()
