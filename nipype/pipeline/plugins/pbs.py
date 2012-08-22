@@ -36,7 +36,8 @@ class PBSPlugin(SGELikeBatchManagerBase):
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        proc = subprocess.Popen(["qstat", taskid],
+        #  subprocess.Popen requires taskid to be a string
+        proc = subprocess.Popen(["qstat", str(taskid)],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         _, e = proc.communicate()
