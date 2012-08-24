@@ -378,6 +378,17 @@ class ProvRecord(object):
     def get_identifier(self):
         return self._identifier
 
+    def get_label(self):
+        label = None
+        for attribute in self._extra_attributes:
+            if attribute[0]:
+                if attribute[0] == PROV['label']:
+                    label = attribute[1]
+        if label is None:
+            return self._identifier
+        else:
+            return label
+
     def add_extra_attributes(self, extra_attributes):
         if extra_attributes:
             if self._extra_attributes is None:

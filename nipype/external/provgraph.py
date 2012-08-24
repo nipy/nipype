@@ -58,13 +58,13 @@ def prov_to_dot(prov_g):
                 if isinstance(rec, ProvBundle):
                     count[2] = count[2] + 1
                     subdot = pydot.Cluster(graph_name='c%d' % count[2])
-                    subdot.set_label('"%s"' % str(rec.get_identifier()))
+                    subdot.set_label('"%s"' % str(rec.get_label()))
                     _bundle_to_dot(subdot, rec)
                     dot.add_subgraph(subdot)
                 else:
                     count[0] = count[0] + 1
                     node_id = 'n%d' % count[0]
-                    node_label = '"%s"' % str(rec.get_identifier())
+                    node_label = '"%s"' % str(rec.get_label())
                     style = DOT_PROV_STYLE[rec.get_type()]
                     node = pydot.Node(node_id, label=node_label, **style)
                     node_map[rec] = node
