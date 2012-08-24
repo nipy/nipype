@@ -9,6 +9,7 @@ import os
 import pickle
 import pwd
 import re
+from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
@@ -751,7 +752,6 @@ def write_prov(graph, name="workflow", filename=None):
     if not filename:
         filename = os.path.join(os.getcwd(), 'workflow_provenance.json')
     foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
-    nif = prov.Namespace("nif","http://neurolex.org/")
     dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
     nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6/")
 
@@ -764,22 +764,22 @@ def write_prov(graph, name="workflow", filename=None):
     g.add_namespace(dcterms)
     g.add_namespace(nipype)
 
-    user_agent = g.agent(nipype["ag2"],
+    user_agent = g.agent(uuid1().hex,
             {prov.PROV["type"]: prov.PROV["Person"],
              prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
              foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
-    agent_attr = {prov.PROV["type"]: prov.PROV["Software"],
+    agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
                   prov.PROV["label"]: "Nipype",
                   foaf["name"]: "Nipype"}
     for key, value in get_info().items():
         agent_attr.update({nipype[key]: value})
-    software_agent = g.agent(nipype["ag1"], agent_attr)
+    software_agent = g.agent(uuid1().hex, agent_attr)
 
     processes = []
     nodes = graph.nodes()
     for idx, node in enumerate(nodes):
         result = node.result
-        nodename = '%s_%d' % (node, idx)
+        classname = node._interface.__class__.__name__
         if isinstance(result.runtime, list):
             hostname = []
             cmdline = []
@@ -805,22 +805,24 @@ def write_prov(graph, name="workflow", filename=None):
             attrs = {foaf["host"]: str(hostname),
                      prov.PROV["type"]: nipype[classname],
                      prov.PROV["type"]: nipype["MapNode"],
-                     prov.PROV["label"]: str(node),
+                     prov.PROV["label"]: '_'.join((classname,
+                                                   node.name))
                      }
             if 'cmdline' in keys:
                 attrs.update({nipype['cmdline']: str(cmdline)})
-            process = g.activity(nodename, startTime,
+            process = g.activity(uuid1().hex, startTime,
                                  endTime, attrs)
         else:
             attrs = {foaf["host"]: result.runtime.hostname,
                      prov.PROV["type"]: nipype[str(node)],
-                     prov.PROV["label"]: str(node),
-                     }
+                     prov.PROV["label"]: '_'.join((classname,
+                                                   node.name))
+            }
             runtime = result.runtime
             keys = runtime.dictcopy()
             if 'cmdline' in keys:
                 attrs.update({nipype['cmdline']: runtime.cmdline})
-            process = g.activity(nodename, runtime.startTime,
+            process = g.activity(uuid1().hex, runtime.startTime,
                                  runtime.endTime, attrs)
         processes.append(process)
         g.wasAssociatedWith(process, user_agent, None, None,
@@ -835,9 +837,10 @@ def write_prov(graph, name="workflow", filename=None):
                     for _, dest in d['connect']:
                         used_ports.append(dest)
                 if inport not in used_ports:
-                    param = g.entity(nipype['%s_%d' % (inport, idx)],
+                    param = g.entity(uuid1().hex,
                                      {prov.PROV["type"]: nipype['input'],
                                       prov.PROV["label"]: inport,
+                                      nipype['port']: inport,
                                       prov.PROV["value"]: str(inputval[1])
                                      })
                     g.used(process, param)
@@ -863,11 +866,10 @@ def write_prov(graph, name="workflow", filename=None):
         for outidx, nameval in enumerate(sorted(outputs.items())):
             if not isdefined(nameval[1]):
                 continue
-            artifact = g.entity(nipype["%s_%s_%d" % (str(node),
-                                                     nameval[0],
-                                                     idx)],
+            artifact = g.entity(uuid1().hex,
                                 {prov.PROV["type"]: nipype['artifact'],
                                  prov.PROV["label"]: nameval[0],
+                                 nipype['port'] : nameval[0],
                                  prov.PROV["value"]: str(nameval[1])
                                 })
             g.wasGeneratedBy(artifact, processes[idx])

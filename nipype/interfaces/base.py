@@ -24,6 +24,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
+from uuid import uuid1
 
 import nipype.external.prov as prov
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -1023,7 +1024,6 @@ class BaseInterface(Interface):
         classname = self.__class__.__name__
 
         foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
-        nif = prov.Namespace("nif","http://neurolex.org/")
         dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
         nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6")
 
@@ -1040,53 +1040,58 @@ class BaseInterface(Interface):
                     prov.PROV["type"]: nipype[classname],
                     prov.PROV["label"]: classname,
                     }
-        a0 = g.activity(nipype[classname],runtime.startTime, runtime.endTime,
+        a0 = g.activity(uuid1().hex,runtime.startTime, runtime.endTime,
                         a0_attrs)
         # write input entities
         if inputs:
-            g.entity(nipype['inputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
-            inputbundle = g.bundle(nipype['inputs_%s' % classname])
+            id = uuid1().hex
+            g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
+                          prov.PROV['type']: nipype['inputs']})
+            inputbundle = g.bundle(id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {prov.PROV["type"]: nipype["input"],
                            prov.PROV["label"]: key,
                            nipype[key]: val}
-                inputbundle.entity(nipype['in_%02d' % idx], in_attr)
+                inputbundle.entity(uuid1().hex, in_attr)
             g.used(a0, inputbundle)
         # write output entities
         if outputs:
-            g.entity(nipype['outputs_%s' % classname], {prov.PROV['type']: prov.PROV['Bundle']})
-            outputbundle = g.bundle(nipype['outputs_%s' % classname])
+            id = uuid1().hex
+            g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
+                          prov.PROV['type']: nipype['outputs']})
+            outputbundle = g.bundle(id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {prov.PROV["type"]: nipype["output"],
                             prov.PROV["label"]: key,
                             nipype[key]: val}
-                outputbundle.entity(nipype['out_%02d' % idx], out_attr)
+                outputbundle.entity(uuid1().hex, out_attr)
             g.wasGeneratedBy(outputbundle, a0)
         # write runtime entities
-        g.entity(nipype['runtime_%s' % classname],
-                 {prov.PROV['type']: prov.PROV['Bundle']})
-        runtimebundle = g.bundle(nipype['runtime_%s' % classname])
+        id = uuid1().hex
+        g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
+                      prov.PROV['type']: nipype['runtime']})
+        runtimebundle = g.bundle(id)
         for key, value in sorted(runtime.items()):
             if not value:
                 continue
             attr = {prov.PROV["type"]: nipype["runtime"],
                     prov.PROV["label"]: key,
                     nipype[key]: value}
-            runtimebundle.entity(nipype['runtime_%s' % key], attr)
+            runtimebundle.entity(uuid1().hex, attr)
         g.wasGeneratedBy(runtimebundle, a0)
         # create agents
-        user_agent = g.agent(nipype["ag2"],
+        user_agent = g.agent(uuid1().hex,
                              {prov.PROV["type"]: prov.PROV["Person"],
                               prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
                               foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
-        agent_attr = {prov.PROV["type"]: prov.PROV["Software"],
+        agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
                       prov.PROV["label"]: "Nipype",
                       foaf["name"]: "Nipype"}
         for key, value in get_info().items():
             agent_attr.update({nipype[key]: value})
-        software_agent = g.agent(nipype["ag1"], agent_attr)
+        software_agent = g.agent(uuid1().hex, agent_attr)
         g.wasAssociatedWith(a0, user_agent, None, None,
                             {prov.PROV["Role"]: "LoggedInUser"})
         g.wasAssociatedWith(a0, software_agent, None, None,
