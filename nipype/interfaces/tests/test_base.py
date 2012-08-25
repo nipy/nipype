@@ -236,6 +236,7 @@ def test_Commandline():
                               position=-1)
         noo = nib.traits.Int(argstr='-x %d', desc='an int')
         roo = nib.traits.Str(desc='not on command line')
+        soo = nib.traits.Bool(argstr="-soo")
     nib.CommandLine.input_spec = CommandLineInputSpec1
     ci4 = nib.CommandLine(command='cmd')
     ci4.inputs.foo = 'foo'
@@ -244,10 +245,15 @@ def test_Commandline():
     ci4.inputs.moo = [1, 2, 3]
     ci4.inputs.noo = 0
     ci4.inputs.roo = 'hello'
+    ci4.inputs.soo = False
     cmd = ci4._parse_inputs()
     yield assert_equal, cmd[0], '-g'
     yield assert_equal, cmd[-1], '-i 1 -i 2 -i 3'
     yield assert_true, 'hello' not in ' '.join(cmd)
+    yield assert_true, '-soo' not in ' '.join(cmd)
+    ci4.inputs.soo = True
+    cmd = ci4._parse_inputs()
+    yield assert_true, '-soo' in ' '.join(cmd)
 
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
