@@ -52,7 +52,7 @@ DOT_PROV_STYLE = {
     PROV_REC_MEMBERSHIP: {'label': 'hadMember', 'fontsize': '10.0'},
     }
 
-def prov_to_dot(prov_g):
+def prov_to_dot(prov_g, use_labels=False):
     maindot = pydot.Dot(graph_type='digraph', rankdir='BT')
 
     node_map = {}
@@ -66,13 +66,19 @@ def prov_to_dot(prov_g):
                 if isinstance(rec, ProvBundle):
                     count[2] = count[2] + 1
                     subdot = pydot.Cluster(graph_name='c%d' % count[2])
-                    subdot.set_label('"%s"' % str(rec.get_label()))
+                    if use_labels:
+                        subdot.set_label('"%s"' % str(rec.get_label()))
+                    else:
+                        subdot.set_label('"%s"' % str(rec.get_identifier()))
                     _bundle_to_dot(subdot, rec)
                     dot.add_subgraph(subdot)
                 else:
                     count[0] = count[0] + 1
                     node_id = 'n%d' % count[0]
-                    node_label = '"%s"' % str(rec.get_label())
+                    if use_labels:
+                        node_label = '"%s"' % str(rec.get_label())
+                    else:
+                        node_label = '"%s"' % str(rec.get_identifier())
                     style = DOT_PROV_STYLE[rec.get_type()]
                     node = pydot.Node(node_id, label=node_label, **style)
                     node_map[rec] = node
@@ -107,11 +113,12 @@ def prov_to_dot(prov_g):
     _bundle_to_dot(maindot, prov_g)
     return maindot
 
-def provjson_to_filename(prov_g, filepath, format='png', dpi=150):
+def provjson_to_filename(prov_g, filepath, use_labels=False, format='png',
+                         dpi=150):
     """Write a prov json object to an image file
     """
     # Convert it to DOT
-    dot = prov_to_dot(prov_g)
+    dot = prov_to_dot(prov_g, use_labels=use_labels)
     dot.set_dpi(dpi)
     dot.write(filepath, format=format)
 
