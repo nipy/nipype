@@ -1138,14 +1138,7 @@ class CommandLine(BaseInterface):
                 # if True.
                 return argstr
             else:
-                # If we end up here we're trying to add a Boolean to
-                # the arg string but whose value is False.  This
-                # should not happen, something went wrong upstream.
-                # Raise an error.
-                msg = "Object '%s' attempting to format argument " \
-                    "string for attr '%s' with value '%s'."  \
-                    % (self, trait_spec.name, value)
-                raise ValueError(msg)
+                return None
         #traits.Either turns into traits.TraitCompound and does not have any inner_traits
         elif trait_spec.is_trait_type(traits.List) \
         or (trait_spec.is_trait_type(traits.TraitCompound) \
@@ -1201,6 +1194,8 @@ class CommandLine(BaseInterface):
                 else:
                     continue
             arg = self._format_arg(name, spec, value)
+            if arg is None:
+                continue
             pos = spec.position
             if pos is not None:
                 if pos >= 0:
