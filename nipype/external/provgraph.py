@@ -15,7 +15,15 @@ from ..utils.misc import package_check
 package_check('pydot')
 import pydot
 
-from .prov import *
+from .prov import (ProvBundle, ProvElement,
+                   PROV_REC_ACTIVITY, PROV_REC_AGENT,
+                   PROV_REC_ALTERNATE, PROV_REC_ASSOCIATION,
+                   PROV_REC_ATTRIBUTION, PROV_REC_BUNDLE,
+                   PROV_REC_COMMUNICATION, PROV_REC_DERIVATION,
+                   PROV_REC_DELEGATION, PROV_REC_ENTITY, PROV_REC_GENERATION,
+                   PROV_REC_INFLUENCE, PROV_REC_INVALIDATION, PROV_REC_END,
+                   PROV_REC_MEMBERSHIP, PROV_REC_MENTION,
+                   PROV_REC_SPECIALIZATION, PROV_REC_START, PROV_REC_USAGE)
 
 # Visual styles for various elements (nodes) and relations (edges)
 # see http://graphviz.org/content/attrs
@@ -99,6 +107,13 @@ def prov_to_dot(prov_g):
     _bundle_to_dot(maindot, prov_g)
     return maindot
 
+def provjson_to_filename(prov_g, filepath, format='png', dpi=150):
+    """Write a prov json object to an image file
+    """
+    # Convert it to DOT
+    dot = prov_to_dot(prov_g)
+    dot.set_dpi(dpi)
+    dot.write(filepath, format=format)
 
 ### Testing code
 if __name__=="__main__":
@@ -113,10 +128,7 @@ if __name__=="__main__":
     # Get an example PROV graph
     prov_g = ex.w3c_publication_1()
     # Convert it to DOT
-    dot = prov_to_dot(prov_g)
-    dot.set_dpi(120)
-    # Write it to a temporary PNG file
-    dot.write_png(filepath)
+    dot = provjson_to_filename(prov_g, filepath)
 
     # Display it using matplotlib
     img=mpimg.imread(filepath)
