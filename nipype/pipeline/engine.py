@@ -1472,8 +1472,7 @@ class Node(WorkflowBase):
                     except FileNotFoundError:
                         logger.debug(('conversion to full path results in '
                                       'non existent file'))
-                    else:
-                        aggregate = False
+                aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
         return result, aggregate, attribute_error
