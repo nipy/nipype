@@ -1020,7 +1020,7 @@ class BaseInterface(Interface):
         runtime = results.runtime
         interface = results.interface
         inputs = results.inputs
-        outputs = results.outputs.get_traitsfree()
+        outputs = results.outputs
         classname = self.__class__.__name__
 
         foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
@@ -1057,6 +1057,7 @@ class BaseInterface(Interface):
             g.used(a0, inputbundle)
         # write output entities
         if outputs:
+            outputs = outputs.get_traitsfree()
             id = uuid1().hex
             g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
                           prov.PROV['type']: nipype['outputs']})

@@ -849,6 +849,8 @@ def write_prov(graph, name="workflow", filename=None):
     # add artifacts (files)
     counter = 0
     for idx, node in enumerate(nodes):
+        if node.result.outputs is None:
+            continue
         if isinstance(node.result.outputs, Bunch):
             outputs = node.result.outputs.dictcopy()
         else:
