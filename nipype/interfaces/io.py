@@ -138,6 +138,12 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                 self._outputs[key] = value
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
+
+class DataSinkOutputSpec(TraitedSpec):
+
+    out_file = traits.Any(desc='datasink output')
+
+
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
 
@@ -200,6 +206,7 @@ class DataSink(IOBase):
 
     """
     input_spec = DataSinkInputSpec
+    output_spec = DataSinkOutputSpec
 
     def __init__(self, infields=None, **kwargs):
         """
@@ -266,6 +273,8 @@ class DataSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
+        outputs = self.output_spec().get()
+        out_files = []
         outdir = self.inputs.base_directory
         if not isdefined(outdir):
             outdir = '.'
@@ -313,6 +322,7 @@ class DataSink(IOBase):
                                 raise(inst)
                     iflogger.debug("copyfile: %s %s"%(src, dst))
                     copyfile(src, dst, copy=True, hashmethod='content')
+                    out_files.append(dst)
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src,''))
                     dst = os.path.join(tempoutdir, dst)
@@ -331,7 +341,10 @@ class DataSink(IOBase):
                         shutil.rmtree(dst)
                     iflogger.debug("copydir: %s %s"%(src, dst))
                     copytree(src, dst)
-        return None
+                    out_files.append(dst)
+        outputs['out_file'] = out_files
+
+        return outputs
 
 
 class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): #InterfaceInputSpec):
