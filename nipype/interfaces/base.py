@@ -1052,7 +1052,7 @@ class BaseInterface(Interface):
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {prov.PROV["type"]: nipype["input"],
                            prov.PROV["label"]: key,
-                           nipype[key]: val}
+                           nipype[key]: str(val)}
                 inputbundle.entity(uuid1().hex, in_attr)
             g.used(a0, inputbundle)
         # write output entities
@@ -1066,7 +1066,7 @@ class BaseInterface(Interface):
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {prov.PROV["type"]: nipype["output"],
                             prov.PROV["label"]: key,
-                            nipype[key]: val}
+                            nipype[key]: str(val)}
                 outputbundle.entity(uuid1().hex, out_attr)
             g.wasGeneratedBy(outputbundle, a0)
         # write runtime entities
@@ -1091,7 +1091,7 @@ class BaseInterface(Interface):
                       prov.PROV["label"]: "Nipype",
                       foaf["name"]: "Nipype"}
         for key, value in get_info().items():
-            agent_attr.update({nipype[key]: value})
+            agent_attr.update({nipype[key]: str(value)})
         software_agent = g.agent(uuid1().hex, agent_attr)
         g.wasAssociatedWith(a0, user_agent, None, None,
                             {prov.PROV["Role"]: "LoggedInUser"})
