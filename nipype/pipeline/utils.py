@@ -780,6 +780,7 @@ def write_prov(graph, name="workflow", filename=None):
     for idx, node in enumerate(nodes):
         result = node.result
         classname = node._interface.__class__.__name__
+        _, hashval, _, _ = node.hash_exists()
         if isinstance(result.runtime, list):
             hostname = []
             cmdline = []
@@ -804,31 +805,32 @@ def write_prov(graph, name="workflow", filename=None):
                     cmdline += [runtime.cmdline]
             attrs = {foaf["host"]: str(hostname),
                      prov.PROV["type"]: nipype[classname],
-                     prov.PROV["type"]: nipype["MapNode"],
                      prov.PROV["label"]: '_'.join((classname,
-                                                   node.name))
-                     }
+                                                   node.name)),
+                     nipype['hashval']: hashval}
             if 'cmdline' in keys:
                 attrs.update({nipype['cmdline']: str(cmdline)})
             process = g.activity(uuid1().hex, startTime,
                                  endTime, attrs)
+            process.add_extra_attributes({prov.PROV["type"]: nipype["MapNode"]})
         else:
             attrs = {foaf["host"]: result.runtime.hostname,
-                     prov.PROV["type"]: nipype[str(node)],
+                     prov.PROV["type"]: nipype[classname],
                      prov.PROV["label"]: '_'.join((classname,
-                                                   node.name))
-            }
+                                                   node.name)),
+                     nipype['hashval']: hashval}
             runtime = result.runtime
             keys = runtime.dictcopy()
             if 'cmdline' in keys:
                 attrs.update({nipype['cmdline']: runtime.cmdline})
             process = g.activity(uuid1().hex, runtime.startTime,
                                  runtime.endTime, attrs)
+            process.add_extra_attributes({prov.PROV["type"]: nipype["Node"]})
         processes.append(process)
         g.wasAssociatedWith(process, user_agent, None, None,
                 {prov.PROV["Role"]: "LoggedInUser"})
         g.wasAssociatedWith(process, software_agent, None, None,
-                {prov.PROV["Role"]: "Software"})
+                {prov.PROV["Role"]: prov.PROV["SoftwareAgent"]})
         for inidx, inputval in enumerate(sorted(node.inputs.get().items())):
             if isdefined(inputval[1]):
                 inport = inputval[0]

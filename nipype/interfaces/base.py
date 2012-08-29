@@ -1045,8 +1045,8 @@ class BaseInterface(Interface):
         # write input entities
         if inputs:
             id = uuid1().hex
-            g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
-                          prov.PROV['type']: nipype['inputs']})
+            eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
+            eref.add_extra_attributes({prov.PROV['type']: nipype['inputs']})
             inputbundle = g.bundle(id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
@@ -1059,8 +1059,8 @@ class BaseInterface(Interface):
         if outputs:
             outputs = outputs.get_traitsfree()
             id = uuid1().hex
-            g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
-                          prov.PROV['type']: nipype['outputs']})
+            eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
+            eref.add_extra_attributes({prov.PROV['type']: nipype['outputs']})
             outputbundle = g.bundle(id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
@@ -1071,8 +1071,8 @@ class BaseInterface(Interface):
             g.wasGeneratedBy(outputbundle, a0)
         # write runtime entities
         id = uuid1().hex
-        g.entity(id, {prov.PROV['type']: prov.PROV['Bundle'],
-                      prov.PROV['type']: nipype['runtime']})
+        eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
+        eref.add_extra_attributes({prov.PROV['type']: nipype['runtime']})
         runtimebundle = g.bundle(id)
         for key, value in sorted(runtime.items()):
             if not value:
