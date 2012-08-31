@@ -52,7 +52,7 @@ class FileProxyNode(pe.Node):
         self._process_output_files()
         self._clean_proxy_files()
         for t,v in proxy_outputs.items():
-            results[t] = v
+            setattr(results.outputs,t,v)
         return results
 
 
