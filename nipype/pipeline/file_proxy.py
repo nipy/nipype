@@ -34,14 +34,14 @@ class FileProxyNode(pe.Node):
                     if spec.is_trait_type(File):
                         if os.path.is_file(value):
                             value = self._transform_input_file(value,copyfiles)
-                            self.inputs.trait(name).copyfile = False
+                            self.inputs.trait(name).copyfile = None
                         else:
                             value = self._add_output_file2proxy(value)
                     elif spec.is_trait_type(InputMultiPath):
                         rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._transform_input_file(x,copyfiles)
                         if value:
                             value = map(rec_add, value)
-                        self.inputs.trait(name).copyfile = False
+                        self.inputs.trait(name).copyfile = None
                     elif spec.is_trait_type(OutputMultiPath):
                         rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._add_output_file2proxy(x)
                         if value:
