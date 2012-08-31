@@ -93,7 +93,7 @@ class GunzipNode(FileProxyNode):
         
     def _process_output_files(self):
         if hasattr(self,'_file2gzip'):
-            for in_f, out_f in _file2gzip:
+            for in_f, out_f in self._file2gzip:
                 f_in = open(f_out,'rb')
                 f_out = gzip.open(f_in,'wb')
                 f_out.write(f_in.read())
