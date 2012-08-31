@@ -51,7 +51,7 @@ class FileProxyNode(pe.Node):
         results = super(FileProxyNode,self)._run_command(execute,copyfiles)
         self._process_output_files()
         self._clean_proxy_files()
-        for t,v in proxy_outputs:
+        for t,v in proxy_outputs.items():
             results[t] = v
         return results
 
