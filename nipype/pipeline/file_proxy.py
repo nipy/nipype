@@ -103,7 +103,9 @@ class GunzipNode(FileProxyNode):
     def _clean_proxy_files(self):
         if hasattr(self,'_gunzipped_files'):
             for f in self._gunzipped_files:
-                os.remove(f)
+                if os.path.isfile(f):
+                    os.remove(f)
         if hasattr(self,'_file2gzip'):
             for f in self._file2gzip:
-                os.remove(f)
+                if os.path.isfile(f):
+                    os.remove(f)
