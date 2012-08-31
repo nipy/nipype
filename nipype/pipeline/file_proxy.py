@@ -32,7 +32,7 @@ class FileProxyNode(pe.Node):
                 value = getattr(self.inputs, name)
                 if isdefined(value):
                     if spec.is_trait_type(File):
-                        if os.path.is_file(value):
+                        if os.path.isfile(value):
                             value = self._transform_input_file(value,copyfiles)
                             self.inputs.trait(name).copyfile = None
                         else:
