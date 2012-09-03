@@ -27,7 +27,7 @@ class FileProxyNode(pe.Node):
     def _run_command(self,execute,copyfiles=True):
         self._file2 = []
         if execute and copyfiles:
-            proxy_outputs = self.interface._list_outputs()
+            self._proxy_outputs = self.interface._list_outputs()
             self._proxy_originputs = deepcopy(self._interface.inputs)
             for name, spec in self.inputs.traits(transient=None).items():
                 value = getattr(self.inputs, name)
@@ -49,11 +49,18 @@ class FileProxyNode(pe.Node):
                             value = map(rec_add, value)
                 setattr(self.inputs,name,value)
         results = super(FileProxyNode,self)._run_command(execute,copyfiles)
+        return results
+    
+    def _save_results(self, result, cwd):
         self._process_output_files()
         self._clean_proxy_files()
-        for t,v in proxy_outputs.items():
-            setattr(results.outputs,t,v)
-        return results
+        if hasattr(self,'_proxy_outputs'):
+            print self._proxy_outputs
+            for t,v in self._proxy_outputs.items():
+                setattr(result.outputs,t,v)
+        return super(FileProxyNode,self)._save_results(result,cwd)
+        
+
 
 
 class GunzipNode(FileProxyNode):
