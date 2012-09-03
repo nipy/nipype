@@ -16,9 +16,6 @@ class ICCInputSpec(BaseInterfaceInputSpec):
 
 class ICCOutputSpec(TraitedSpec):
     icc_map = File(exists=True)
-    sessions_F_map = File(exists=True, desc="F statistics for the effect of session")
-    sessions_df_1 = traits.Int()
-    sessions_df_2 = traits.Int()
     session_var_map = File(exists=True, desc="variance between sessions")
     subject_var_map = File(exists=True, desc="variance between subjects")
 
@@ -47,18 +44,13 @@ class ICC(BaseInterface):
 
         for x in range(icc.shape[0]):
             Y = all_data[x, :, :]
-            icc[x], subject_var[x], session_var[x],  session_F[x], self._df1, self._df2 = ICC_rep_anova(Y)
+            icc[x], subject_var[x], session_var[x],  session_F[x], _, _ = ICC_rep_anova(Y)
 
         nim = nb.load(self.inputs.subjects_sessions[0][0])
         new_data = np.zeros(nim.get_shape())
         new_data[maskdata] = icc.reshape(-1,)
         new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
         nb.save(new_img, 'icc_map.nii')
-
-        new_data = np.zeros(nim.get_shape())
-        new_data[maskdata] = session_F.reshape(-1,)
-        new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
-        nb.save(new_img, 'sessions_F_map.nii')
         
         new_data = np.zeros(nim.get_shape())
         new_data[maskdata] = session_var.reshape(-1,)
@@ -76,8 +68,6 @@ class ICC(BaseInterface):
         outputs = self._outputs().get()
         outputs['icc_map'] = os.path.abspath('icc_map.nii')
         outputs['sessions_F_map'] = os.path.abspath('sessions_F_map.nii')
-        outputs['sessions_df_1'] = self._df1
-        outputs['sessions_df_2'] = self._df2
         outputs['session_var_map'] = os.path.abspath('session_var_map.nii')
         outputs['subject_var_map'] = os.path.abspath('subject_var_map.nii')
         return outputs
