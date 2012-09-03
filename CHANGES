@@ -1,3 +1,8 @@
+Next release
+============
+
+*ENH: New interfaces: ICC
+
 Release 0.6.0 (Jun 30, 2012)
 ============================
 
@@ -9,7 +14,7 @@ Release 0.6.0 (Jun 30, 2012)
 * ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM, MRIsSmooth,
        NetworkBasedStatistic, Atropos, N4BiasFieldCorrection, ApplyTransforms,
        fs.MakeAverageSubject, epidewarp.fsl, WarpTimeSeriesImageMultiTransform,
-       AVScale, mri_ms_LDA. ICC
+       AVScale, mri_ms_LDA
 * ENH: simple interfaces for spm
 
 * FIX: CompCor component calculation was erroneous
@@ -25,8 +30,6 @@ Release 0.5.3 (Mar 23, 2012)
 ============================
 
 * FIX: SPM model generation when output units is in scans
-
-* ENH: Added ICC interface
 
 Release 0.5.2 (Mar 14, 2012)
 ============================
