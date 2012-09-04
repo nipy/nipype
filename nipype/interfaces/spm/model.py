@@ -117,7 +117,7 @@ class Level1Design(SPMCommand):
                 return [val]
             else:
                 return val
-        return val
+        return super(Level1Design, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
@@ -200,7 +200,7 @@ class EstimateModel(SPMCommand):
                 return {'%s' % val: 1}
             else:
                 return val
-        return val
+        return super(EstimateModel, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
@@ -747,7 +747,7 @@ class FactorialDesign(SPMCommand):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
-        return val
+        return super(FactorialDesign, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
@@ -893,8 +893,6 @@ class MultipleRegressionDesign(FactorialDesign):
         """
         if opt in ['in_files']:
             return np.array(val, dtype=object)
-        if opt in ['include_intercept']:
-            return int(val)
         if opt in ['user_covariates']:
             outlist = []
             mapping = {'name': 'cname', 'vector': 'c',
