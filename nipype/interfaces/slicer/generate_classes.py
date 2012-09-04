@@ -101,8 +101,8 @@ def generate_class(module,launcher):
     #self._outputs_nodes = []
 
     class_string = "\"\"\""
-    
-    
+
+
 
     for desc_str in ['title', 'category', 'description', 'version',
                      'documentation-url', 'license', 'contributor',
