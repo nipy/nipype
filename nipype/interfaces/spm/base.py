@@ -253,8 +253,10 @@ class SPMCommand(BaseInterface):
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for SPM."""
-
-        return val
+        if spec.is_trait_type(traits.Bool):
+            return int(val)
+        else:
+            return val
 
     def _parse_inputs(self, skip=()):
         spmdict = {}
