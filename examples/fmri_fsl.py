@@ -612,7 +612,7 @@ Set up complete workflow
 
 l1pipeline = pe.Workflow(name= "level1")
 l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
-l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl/crashdumps'))
+l1pipeline.config = {"execution": {"crashdump_dir":os.path.abspath('./fsl/crashdumps')}}
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),

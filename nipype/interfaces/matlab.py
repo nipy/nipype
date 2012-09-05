@@ -32,16 +32,20 @@ class MatlabInputSpec(CommandLineInputSpec):
                          mandatory=True, position=-1)
     uses_mcr = traits.Bool(desc='use MCR interface',
                            xor=['nodesktop', 'nosplash',
-                                'single_comp_thread'])
+                                'single_comp_thread'],
+                           nohash=True)
     nodesktop = traits.Bool(True, argstr='-nodesktop',
                             usedefault=True,
-                            desc='Switch off desktop mode on unix platforms')
+                            desc='Switch off desktop mode on unix platforms',
+                            nohash=True)
     nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
-                           descr='Switch of splash screen')
+                           descr='Switch of splash screen',
+                           nohash=True)
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
     single_comp_thread = traits.Bool(argstr="-singleCompThread",
-                                   desc="force single threaded operation")
+                                   desc="force single threaded operation",
+                                   nohash=True)
     # non-commandline options
     mfile   = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)

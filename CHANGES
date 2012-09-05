@@ -1,3 +1,11 @@
+Next release
+============
+
+*ENH: New interfaces: ICC, Meshfix
+*ENH: added no_flatten option to Merge
+
+*FIX: fixed dynamic traits bug
+
 Release 0.6.0 (Jun 30, 2012)
 ============================
 
