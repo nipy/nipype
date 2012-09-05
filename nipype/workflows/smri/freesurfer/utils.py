@@ -5,6 +5,7 @@ import nipype.pipeline.engine as pe
 
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs
+import nipype.interfaces.meshfix as mf
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
 import nipype.algorithms.misc as misc
@@ -316,15 +317,18 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     tessellate = pe.MapNode(fs.MRIMarchingCubes(),
                         iterfield=['label_value','out_file'],
                         name='tessellate')
-    surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
+    surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype='stl'),
                           iterfield=['in_file'],
                           name='surfconvert')
-    smoother = pe.MapNode(fs.SmoothTessellation(),
-                          iterfield=['in_file'],
+    smoother = pe.MapNode(mf.MeshFix(),
+			  iterfield=['in_file1'],
                           name='smoother')
-
-    smoother.inputs.curvature_averaging_iterations = 1
-    smoother.inputs.smoothing_iterations = 1
+    if out_format == 'gii':
+	stl_to_gifti = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
+			      iterfield=['in_file'],
+			      name='stl_to_gifti')
+    smoother.inputs.save_as_stl = True
+    smoother.inputs.laplacian_smoothing_steps = 1
 
     region_list_from_volume_interface = Function(input_names=["in_file"],
                              output_names=["region_list"],
@@ -352,7 +356,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
             (tessellate, surfconvert, [('surface','in_file')]),
-            (surfconvert, smoother, [('converted','in_file')]),
+	    (surfconvert, smoother, [('converted','in_file1')]),
             ])
 
     """
@@ -360,8 +364,17 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
-                         name="outputspec")
-    tessflow.connect([
-            (smoother, outputnode, [("surface", "meshes")]),
+			 name="outputspec")
+
+    if out_format == 'gii':
+	tessflow.connect([
+	    (smoother, stl_to_gifti, [("mesh_file", "in_file")]),
+	    ])
+	tessflow.connect([
+	    (stl_to_gifti, outputnode, [("converted", "meshes")]),
+	    ])
+    else:
+	tessflow.connect([
+	    (smoother, outputnode, [("mesh_file", "meshes")]),
             ])
     return tessflow

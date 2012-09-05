@@ -10,12 +10,12 @@ class jointLMMSEInputSpec(CommandLineInputSpec):
     re = InputMultiPath(traits.Int, desc="Estimation radius.", sep=",", argstr="--re %s")
     rf = InputMultiPath(traits.Int, desc="Filtering radius.", sep=",", argstr="--rf %s")
     ng = traits.Int(desc="The number of the closest gradients that are used to jointly filter a given gradient direction (0 to use all).", argstr="--ng %d")
-    inputVolume = File(position="0", desc="Input DWI volume.", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Output DWI volume.", argstr="--outputVolume %s")
+    inputVolume = File(position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DWI volume.", argstr="%s")
 
 
 class jointLMMSEOutputSpec(TraitedSpec):
-    outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
+    outputVolume = File(position=-1, desc="Output DWI volume.", exists=True)
 
 
 class jointLMMSE(SlicerCommandLine):
@@ -55,12 +55,12 @@ class dwiNoiseFilterInputSpec(CommandLineInputSpec):
     maxnstd = traits.Int(desc="Maximum allowed noise standard deviation.", argstr="--maxnstd %d")
     hrf = traits.Float(desc="How many histogram bins per unit interval.", argstr="--hrf %f")
     uav = traits.Bool(desc="Use absolute value in case of negative square.", argstr="--uav ")
-    inputVolume = File(position="0", desc="Input DWI volume.", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Output DWI volume.", argstr="--outputVolume %s")
+    inputVolume = File(position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DWI volume.", argstr="%s")
 
 
 class dwiNoiseFilterOutputSpec(TraitedSpec):
-    outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
+    outputVolume = File(position=-1, desc="Output DWI volume.", exists=True)
 
 
 class dwiNoiseFilter(SlicerCommandLine):

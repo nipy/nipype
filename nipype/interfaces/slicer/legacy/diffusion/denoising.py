@@ -12,12 +12,12 @@ class dwiUNLMInputSpec(CommandLineInputSpec):
     hp = traits.Float(desc="This parameter is related to noise; the larger the parameter, the more agressive the filtering. Should be near 1, and only values between 0.8 and 1.2 are allowed", argstr="--hp %f")
     ng = traits.Int(desc="The number of the closest gradients that are used to jointly filter a given gradient direction (a maximum of 5 is allowed).", argstr="--ng %d")
     re = InputMultiPath(traits.Int, desc="A neighborhood of this size is used to compute the statistics for noise estimation.", sep=",", argstr="--re %s")
-    inputVolume = File(position="0", desc="Input DWI volume.", exists=True, argstr="--inputVolume %s")
-    outputVolume = traits.Either(traits.Bool, File(), position="1", hash_files=False, desc="Output DWI volume.", argstr="--outputVolume %s")
+    inputVolume = File(position=-2, desc="Input DWI volume.", exists=True, argstr="%s")
+    outputVolume = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output DWI volume.", argstr="%s")
 
 
 class dwiUNLMOutputSpec(TraitedSpec):
-    outputVolume = File(position="1", desc="Output DWI volume.", exists=True)
+    outputVolume = File(position=-1, desc="Output DWI volume.", exists=True)
 
 
 class dwiUNLM(SlicerCommandLine):

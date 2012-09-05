@@ -87,7 +87,7 @@ class SliceTiming(SPMCommand):
             return scans_for_fnames(filename_to_list(val),
                                     keep4d=False,
                                     separate_sessions=True)
-        return val
+        return super(SliceTiming, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -177,9 +177,7 @@ class Realign(SPMCommand):
             return scans_for_fnames(val,
                                     keep4d=True,
                                     separate_sessions=True)
-        if opt == 'register_to_mean': # XX check if this is necessary
-            return int(val)
-        return val
+        return super(Realign, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
@@ -296,7 +294,7 @@ class Coregister(SPMCommand):
                 return scans_for_fnames(val+self.inputs.apply_to_files)
             else:
                 return scans_for_fnames(val)
-        return val
+        return super(Coregister, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm coregister options if set to None ignore
@@ -411,7 +409,7 @@ class Normalize(SPMCommand):
         if opt in ['write_wrap']:
             if len(val) != 3:
                 raise ValueError('%s must have 3 elements' % opt)
-        return val
+        return super(Normalize, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
         """validate spm realign options if set to None ignore
@@ -560,13 +558,11 @@ class Segment(SPMCommand):
                 return scans_for_fname(val)
         if 'output_type' in opt:
             return [int(v) for v in val]
-        if opt == 'save_bias_corrected':
-            return int(val)
         if opt == 'mask_image':
             return scans_for_fname(val)
         if opt == 'clean_masks':
             return clean_masks_dict[val]
-        return val
+        return super(Segment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -785,10 +781,8 @@ class Smooth(SPMCommand):
                     return [val[0], val[0], val[0]]
                 else:
                     return val
-        if opt == 'implicit_masking':
-            return int(val)
 
-        return val
+        return super(Smooth, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -879,7 +873,7 @@ class DARTEL(SPMCommand):
             new_param['its'] = val[2]
             return [new_param]
         else:
-            return val
+            return super(DARTEL, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -965,10 +959,8 @@ class DARTELNorm2MNI(SPMCommand):
                 return val
             else:
                 return [val, val, val]
-        elif opt == 'modulate':
-            return int(val)
         else:
-            return val
+            return super(DARTELNorm2MNI, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -1040,7 +1032,7 @@ class CreateWarped(SPMCommand):
         if opt in ['flowfield_files']:
             return scans_for_fnames(val, keep4d=True)
         else:
-            return val
+            return super(CreateWarped, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

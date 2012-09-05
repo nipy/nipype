@@ -299,7 +299,6 @@ def compute_network_measures(ntwk):
 
 
 def add_node_data(node_array, ntwk):
-    ntwk = read_unknown_ntwk(ntwk)
     node_ntwk = nx.Graph()
     newdata = {}
     for idx, data in ntwk.nodes_iter(data=True):
@@ -311,7 +310,6 @@ def add_node_data(node_array, ntwk):
 
 
 def add_edge_data(edge_array, ntwk, above=0, below=0):
-    ntwk = read_unknown_ntwk(ntwk)
     edge_ntwk = ntwk.copy()
     data = {}
     for x, row in enumerate(edge_array):
@@ -395,7 +393,7 @@ class NetworkXMetrics(BaseInterface):
 
         node_measures = compute_node_measures(ntwk, calculate_cliques)
         for key in node_measures.keys():
-            newntwk = add_node_data(node_measures[key], self.inputs.in_file)
+            newntwk = add_node_data(node_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, 'pck'))
             nx.write_gpickle(newntwk, out_file)
             nodentwks.append(out_file)
@@ -409,7 +407,7 @@ class NetworkXMetrics(BaseInterface):
 
         edge_measures = compute_edge_measures(ntwk)
         for key in edge_measures.keys():
-            newntwk = add_edge_data(edge_measures[key], self.inputs.in_file)
+            newntwk = add_edge_data(edge_measures[key], ntwk)
             out_file = op.abspath(self._gen_outfilename(key, 'pck'))
             nx.write_gpickle(newntwk, out_file)
             edgentwks.append(out_file)
