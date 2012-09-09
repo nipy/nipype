@@ -115,7 +115,9 @@ pklfile = '%s'
 batchdir = '%s'
 try:
     from nipype import config, logging
-    from ordereddict import OrderedDict
+    import sys
+    if not sys.version_info < (2, 7):
+        from ordereddict import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
     config.update_matplotlib()
