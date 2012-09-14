@@ -1,6 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The ants module provides basic functions for interfacing with ants functions.
+"""The ants module provides a wrapper for the buildtemplateparallel.sh
+   shell script provided by ANTS.
+
+   The functionality of the shell script has been re-writen in nipype
+   to take advanage of many inherent parallelisms.  Consider usinging
+   the native nipype implementations of:
+   ANTS_buildtemplate (uses the historical ANTS program and WarpMultiTransform)
+      -- OR --
+  antsRegistration_buildtemplate (uses new antsRegistration and antsApplyTransform)
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -19,8 +27,7 @@ from ..base import (TraitedSpec, File, traits, OutputMultiPath)
 from ...utils.filemanip import split_filename
 from .base import ANTSCommand, ANTSCommandInputSpec
 
-
-class BuildTemplateInputSpec(ANTSCommandInputSpec):
+class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
                              desc='image dimension (2 or 3)', position=1)
     out_prefix = traits.Str('antsTMPL_', argstr='-o %s', usedefault=True,
@@ -72,7 +79,7 @@ class BuildTemplateInputSpec(ANTSCommandInputSpec):
                                             'to start.'))
 
 
-class BuildTemplateOutputSpec(TraitedSpec):
+class buildtemplateparallelOutputSpec(TraitedSpec):
     final_template_file = File(exists=True, desc='final ANTS template')
     template_files = OutputMultiPath(File(exists=True),
                            desc='Templates from different stages of iteration')
@@ -82,7 +89,7 @@ class BuildTemplateOutputSpec(TraitedSpec):
                               '(repaired) and warped image (deformed)'))
 
 
-class BuildTemplate(ANTSCommand):
+class buildtemplateparallel(ANTSCommand):
     """Generate a optimal average template
 
     .. warning::
@@ -92,8 +99,8 @@ class BuildTemplate(ANTSCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.ants import BuildTemplate
-    >>> tmpl = BuildTemplate()
+    >>> from nipype.interfaces.ants import buildtemplateparallel
+    >>> tmpl = buildtemplateparallel()
     >>> tmpl.inputs.in_files = ['T1.nii', 'structural.nii']
     >>> tmpl.inputs.max_iterations = [30, 90, 20]
     >>> tmpl.cmdline
@@ -102,8 +109,8 @@ class BuildTemplate(ANTSCommand):
     """
 
     _cmd = 'buildtemplateparallel.sh'
-    input_spec = BuildTemplateInputSpec
-    output_spec = BuildTemplateOutputSpec
+    input_spec = buildtemplateparallelInputSpec
+    output_spec = buildtemplateparallelOutputSpec
 
     def _format_arg(self, opt, spec, val):
         if opt == 'num_cores':
@@ -117,7 +124,7 @@ class BuildTemplate(ANTSCommand):
             else:
                 start = ''
             return start + ' '.join([os.path.split(name)[1] for name in val])
-        return super(BuildTemplate, self)._format_arg(opt, spec, val)
+        return super(buildtemplateparallel, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

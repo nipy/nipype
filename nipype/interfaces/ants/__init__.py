@@ -3,9 +3,30 @@
 
 """Top-level namespace for ants."""
 
-from .coregister import GenWarpFields
-from .normalize import BuildTemplate
-from .preprocess import N4BiasFieldCorrection
-from .segment import Atropos
-from .utils import (ApplyTransforms, WarpImageMultiTransform,
-                    WarpTimeSeriesImageMultiTransform)
+# Registraiton programs
+from .ANTS import ANTS
+from .antsRegistration import antsRegistration
+# deprecated
+from .antsIntroduction import antsIntroduction
+
+# Resampling Programs
+from .antsApplyTransforms import antsApplyTransforms
+from .WarpImageMultiTransform import WarpImageMultiTransform
+from .WarpTimeSeriesImageMultiTransform import WarpTimeSeriesImageMultiTransform
+# deprecated
+from .alternateInterfaceApplyTransforms import ApplyTransforms
+
+# Segmentation Programs
+from .Atropos import Atropos
+from .N4BiasFieldCorrection import N4BiasFieldCorrection
+
+# Utility Programs
+from .AverageAffineTransform import AverageAffineTransform
+from .AverageImages import AverageImages
+from .MultiplyImages import MultiplyImages
+
+# Workflows using many of the above tools
+from .antsRegistrationBuildTemplate import antsRegistrationTemplateBuildSingleIterationWF
+from .ANTSBuildTemplate import ANTSTemplateBuildSingleIterationWF
+# deprecated
+from .buildtemplateparallel import buildtemplateparallel  ## This has many components, but it runs it as a single node

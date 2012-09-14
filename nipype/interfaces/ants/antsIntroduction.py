@@ -5,7 +5,6 @@
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
-
 """
 
 from ..base import (TraitedSpec, File, traits)
@@ -13,7 +12,7 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 import os
 
 
-class AntsIntroductionInputSpec(ANTSCommandInputSpec):
+class antsIntroductionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
                              desc='image dimension (2 or 3)', position=1)
     reference_image = File(exists=True,
@@ -57,7 +56,7 @@ class AntsIntroductionInputSpec(ANTSCommandInputSpec):
                              desc='Perform a quality check of the result')
 
 
-class AntsIntroductionOutputSpec(TraitedSpec):
+class antsIntroductionOutputSpec(TraitedSpec):
     affine_transformation = File(exists=True, desc='affine (prefix_Affine.txt)')
     warp_field = File(exists=True, desc='warp field (prefix_Warp.nii)')
     inverse_warp_field = File(exists=True,
@@ -66,7 +65,7 @@ class AntsIntroductionOutputSpec(TraitedSpec):
     output_file = File(exists=True, desc='output image (prefix_deformed.nii)')
 
 
-class GenWarpFields(ANTSCommand):
+class antsIntroduction(ANTSCommand):
     """Uses ANTS to generate matrices to warp data from one space to another.
 
     Examples
@@ -83,8 +82,8 @@ class GenWarpFields(ANTSCommand):
     """
 
     _cmd = 'antsIntroduction.sh'
-    input_spec = AntsIntroductionInputSpec
-    output_spec = AntsIntroductionOutputSpec
+    input_spec = antsIntroductionInputSpec
+    output_spec = antsIntroductionOutputSpec
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -106,3 +105,7 @@ class GenWarpFields(ANTSCommand):
                                               'deformed.nii.gz')
 
         return outputs
+
+## How do we make a pass through so that GenWarpFields is just an alias for  antsIntroduction ?
+class GenWarpFields(antsIntroduction):
+    pass
