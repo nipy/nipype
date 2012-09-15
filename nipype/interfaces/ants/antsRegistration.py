@@ -2,19 +2,21 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # \authors David M. Welch, Jessica Forbes, Hans Johnson
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 
-"""The antsRegistration module provides basic functions for interfacing with ants functions.
 """
 # Standard library imports
 import os
-from glob import glob
 
 # Local imports
 from ..base import (CommandLine, CommandLineInputSpec,
                                     InputMultiPath, traits, TraitedSpec,
-                                    OutputMultiPath, isdefined,
-                                    File, Directory)
-from ...utils.filemanip import split_filename
+                                    isdefined, File)
 
 
 class antsRegistrationInputSpec(CommandLineInputSpec):
@@ -45,7 +47,7 @@ class antsRegistrationInputSpec(CommandLineInputSpec):
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.List(traits.Bool(argstr='%s'), default=True, usedefault=True)
     # Transform flags
-    write_composite_transform = traits.Bool(argstr='%s', default=False, usedefault=True, desc='')
+    write_composite_transform = traits.Bool(argstr='--write-composite-transform %d', default=False, usedefault=True, desc='')
     transforms = traits.List(traits.Enum('Rigid', 'Affine', 'CompositeAffine',
                                         'Similarity', 'Translation', 'BSpline',
                                         'GaussianDisplacementField', 'TimeVaryingVelocityField',
@@ -84,7 +86,31 @@ class antsRegistration(CommandLine):
     """
     Examples
     --------
-    >>>
+    >>> from nipype.interfaces.ants.antsRegistration import antsRegistration
+    >>> reg = antsRegistration()
+    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg.inputs.output_transform_prefix = "t1_average_BRAINSABC_To_template_t1_clipped"
+    >>> reg.inputs.initial_moving_transform = 'trans.mat'
+    >>> reg.inputs.transforms = ['Affine', 'SyN']
+    >>> reg.inputs.transform_parameters = [(2.0,), (0.25, 3.0, 0.0)]
+    >>> reg.inputs.number_of_iterations = [[1500, 200], [100, 50, 30]]
+    >>> reg.inputs.dimension = 3
+    >>> reg.inputs.write_composite_transform = True
+    >>> reg.inputs.metric = ['Mattes']*2
+    >>> reg.inputs.metric_weight = [1]*2 # Default (value ignored currently by ANTs)
+    >>> reg.inputs.radius_or_number_of_bins = [32]*2
+    >>> reg.inputs.sampling_strategy = ['Random', None]
+    >>> reg.inputs.sampling_percentage = [0.05, None]
+    >>> reg.inputs.convergence_threshold = [1.e-8, 1.e-9]
+    >>> reg.inputs.convergence_window_size = [20]*2
+    >>> reg.inputs.smoothing_sigmas = [[1,0], [2,1,0]]
+    >>> reg.inputs.shrink_factors = [[2,1], [3,2,1]]
+    >>> reg.inputs.use_estimate_learning_rate_once = [True, True]
+    >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
+    >>> reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
+    >>> reg.cmdline
+    'antsRegistration --dimensionality 3 --initial-moving-transform [trans.mat,0] --output [t1_average_BRAINSABC_To_template_t1_clipped,t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz] --transform Affine[2.0] --metric Mattes[fixed1.nii,moving1.nii,1,32,Random,0.05] --convergence [1500x200,1e-08,20] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[0.25,3.0,0.0] --metric Mattes[fixed1.nii,moving1.nii,1,32] --convergence [100x50x30,1e-09,20] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --write-composite-transform 1'
     """
     _cmd = 'antsRegistration'
     input_spec = antsRegistrationInputSpec
@@ -163,11 +189,6 @@ class antsRegistration(CommandLine):
                 return '--output [%s,%s]'     % (self.inputs.output_transform_prefix, self.inputs.output_warped_image )
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
-        elif opt == 'write_composite_transform':
-            if self.inputs.write_composite_transform:
-                return '--write-composite-transform 1'
-            else:
-                return '--write-composite-transform 0'
         return super(antsRegistration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
@@ -232,140 +253,3 @@ class antsRegistration(CommandLine):
             outputs['inverse_composite_transform'] = [os.path.abspath(fileName)]
 
         return outputs
-
-
-"""
-COMMAND:
-     antsRegistration
-          This program is a user-level registration application meant to utilize
-          ITKv4-only classes. The user can specify any number of "stages" where a stage
-          consists of a transform; an image metric; and iterations, shrink factors, and
-          smoothing sigmas for each level.
-
-OPTIONS:
-     -d, --dimensionality 2/3
-          This option forces the image to be treated as a specified-dimensional image. If
-          not specified, N4 tries to infer the dimensionality from the input image.
-
-     -o, --output outputTransformPrefix
-                  [outputTransformPrefix,<outputWarpedImage>,<outputInverseWarpedImage>]
-          Specify the output transform prefix (output format is .nii.gz ). Optionally, one
-          can choose to warp the moving image to the fixed space and, if the inverse
-          transform exists, one can also output the warped fixed image.
-
-     -q, --initial-fixed-transform initialTransform
-                                   [initialTransform,<useInverse>]
-          Specify the initial fixed transform(s) which get immediately incorporated into
-          the composite transform. The order of the transforms is stack-esque in that the
-          last transform specified on the command line is the first to be applied. See
-          antsApplyTransforms for additional information.
-
-     -a, --composite-transform-file compositeFile
-          Specify name of a composite transform file to write out after registration
-
-     -r, --initial-moving-transform initialTransform
-                                    [initialTransform,<useInverse>]
-          Specify the initial moving transform(s) which get immediately incorporated into
-          the composite transform. The order of the transforms is stack-esque in that the
-          last transform specified on the command line is the first to be applied. See
-          antsApplyTransforms for additional information.
-
-     -m, --metric          CC[fixedImage,movingImage,metricWeight,radius,      <samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-                  MeanSquares[fixedImage,movingImage,metricWeight,radius,      <samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-                       Demons[fixedImage,movingImage,metricWeight,radius,      <samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-                           GC[fixedImage,movingImage,metricWeight,radius,      <samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-                           MI[fixedImage,movingImage,metricWeight,numberOfBins,<samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-                       Mattes[fixedImage,movingImage,metricWeight,numberOfBins,<samplingStrategy={Regular,Random}>,<samplingPercentage=[0,1]>]
-          These image metrics are available--- CC: ANTS neighborhood cross correlation,
-          MI: Mutual information, Demons: (Thirion), MeanSquares, and GC: Global
-          Correlation. Note that the metricWeight is currently not used. Rather, it is a
-          temporary place holder until multivariate metrics are available for a single
-          stage. The metrics can also employ a sampling strategy defined by a sampling
-          percentage. The sampling strategy defaults to dense, otherwise it defines a
-          point set over which to optimize the metric. The point set can be on a regular
-          lattice or a random lattice of points slightly perturbed to minimize aliasing
-          artifacts. samplingPercentage defines the fraction of points to select from the
-          domain.
-
-     -t, --transform Rigid[gradientStep]
-                     Affine[gradientStep]
-                     CompositeAffine[gradientStep]
-                     Similarity[gradientStep]
-                     Translation[gradientStep]
-                     BSpline[gradientStep,meshSizeAtBaseLevel]
-                     GaussianDisplacementField[gradientStep,updateFieldVarianceInVoxelSpace,totalFieldVarianceInVoxelSpace]
-                     BSplineDisplacementField[gradientStep,updateFieldMeshSizeAtBaseLevel,totalFieldMeshSizeAtBaseLevel,<splineOrder=3>]
-                     TimeVaryingVelocityField[gradientStep,numberOfTimeIndices,updateFieldVarianceInVoxelSpace,updateFieldTimeVariance,totalFieldVarianceInVoxelSpace,totalFieldTimeVariance]
-                     TimeVaryingBSplineVelocityField[gradientStep,velocityFieldMeshSize,<numberOfTimePointSamples=4>,<splineOrder=3>]
-                     SyN[gradientStep,updateFieldVarianceInVoxelSpace,totalFieldVarianceInVoxelSpace]
-                     BSplineSyN[gradientStep,updateFieldMeshSizeAtBaseLevel,totalFieldMeshSizeAtBaseLevel,<splineOrder=3>]
-          Several transform options are available. The gradientStep or learningRate
-          characterizes the gradient descent optimization and is scaled appropriately for
-          each transform using the shift scales estimator. Subsequent parameters are
-          transform-specific and can be determined from the usage.
-
-     -c, --convergence MxNxO
-                       [MxNxO,<convergenceThreshold=1e-6>,<convergenceWindowSize=10>]
-          Convergence is determined from the number of iterations per leveland is
-          determined by fitting a line to the normalized energy profile of the last N
-          iterations (where N is specified by the window size) and determining the slope
-          which is then compared with the convergence threshold.
-
-     -s, --smoothing-sigmas MxNxO...
-          Specify the amount of smoothing at each level.
-
-     -f, --shrink-factors MxNxO...
-          Specify the shrink factor for the virtual domain (typically the fixed image) at
-          each level.
-
-     -u, --use-histogram-matching
-          Histogram match the images before registration.
-
-     -l, --use-estimate-learning-rate-once
-          turn on the option that lets you estimate the learning rate step size only at
-          the beginning of each level. * useful as a second stage of fine-scale
-          registration.
-
-     -w, --winsorize-image-intensities [lowerQuantile,upperQuantile]
-          Winsorize data based on specified quantiles.
-
-     -x, --masks [fixedImageMask,movingImageMask]
-          Image masks to limit voxels considered by the metric.
-
-     -h
-          Print the help menu (short version).
-          <VALUES>: 0
-
-     --help
-          Print the help menu.
-          <VALUES>: 0
-
-=======================================================================
-
-How to run the test case:
-
-cd {TEST_DATA}/EXPERIEMENTS/ANTS_NIPYPE_SMALL_TEST
-{BINARIES_DIRECTORY}/bin/antsRegistration \
-    -d 3 \
-    --mask '[SUBJ_A_small_T2_mask.nii.gz,SUBJ_B_small_T2_mask.nii.gz]' \
-    -r '[20120430_1348_txfmv2fv_affine.mat,0]' \
-    -o '[20120430_1348_ANTS6_,BtoA.nii.gz,AtoB.nii.gz]' \
-    -m 'CC[SUBJ_A_T1_resampled.nii.gz,SUBJ_B_T1_resampled.nii.gz,1,5]' \
-    -t 'SyN[0.25,3.0,0.0]' \
-    -c '[100x70x20,1e-6,10]' \
-    -f 3x2x1 \
-    -s 0x0x0 \
-    -u 1
-
-//OPTIONAL INTERFACE FOR MULTI_MODAL_REGISTRATION:
-#    -m 'CC[SUBJ_A_T2.nii.gz,SUBJ_B_T2.nii.gz,1,5]' \
-
-=======================================================================
-
-  Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
-
-"""
