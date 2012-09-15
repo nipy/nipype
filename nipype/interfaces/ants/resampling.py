@@ -189,7 +189,7 @@ class WarpImageMultiTransform(ANTSCommand):
         return outputs
 
 
-class antsApplyTransformsInputSpec(ANTSCommandInputSpec):
+class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input %s', mandatory=True,
@@ -221,18 +221,18 @@ class antsApplyTransformsInputSpec(ANTSCommandInputSpec):
     default_value = traits.Int(argstr='--default-value %d', mandatory = True)
     print_out_composite_warp_file = traits.Enum(0, 1, requires=["output_image"], desc=('')) # TODO: Change to boolean
 
-class antsApplyTransformsOutputSpec(TraitedSpec):
+class ApplyTransformsOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
 
-class antsApplyTransforms(ANTSCommand):
-    """antsApplyTransforms, applied to an input image, transforms it according to a
+class ApplyTransforms(ANTSCommand):
+    """ApplyTransforms, applied to an input image, transforms it according to a
     reference image and a transform (or a set of transforms).
 
     Examples
     --------
 
-    >>> from nipype.interfaces.ants import antsApplyTransforms
-    >>> at = antsApplyTransforms()
+    >>> from nipype.interfaces.ants import ApplyTransforms
+    >>> at = ApplyTransforms()
     >>> at.inputs.dimension = 3
     >>> at.inputs.input_image = 'moving1.nii'
     >>> at.inputs.reference_image = 'fixed1.nii'
@@ -245,8 +245,8 @@ class antsApplyTransforms(ANTSCommand):
 
     """
     _cmd = 'antsApplyTransforms'
-    input_spec = antsApplyTransformsInputSpec
-    output_spec = antsApplyTransformsOutputSpec
+    input_spec = ApplyTransformsInputSpec
+    output_spec = ApplyTransformsOutputSpec
 
     def _gen_filename(self, name):
         if name == 'output_image':
@@ -283,7 +283,7 @@ class antsApplyTransforms(ANTSCommand):
         elif opt == 'interpolation':
             # TODO: handle multilabel, gaussian, and bspline options
             return '--interpolation %s' % self.inputs.interpolation
-        return super(antsApplyTransforms, self)._format_arg(opt, spec, val)
+        return super(ApplyTransforms, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

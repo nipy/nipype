@@ -5,8 +5,6 @@
 
 # Registraiton programs
 from .registration import ANTS, Registration
-# deprecated
-from .legacy import antsIntroduction, buildtemplateparallel
 
 # Resampling Programs
 from resampling import ApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
