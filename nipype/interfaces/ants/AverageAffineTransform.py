@@ -1,9 +1,16 @@
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 # Standard library imports
 import os
 
 # Local imports
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
+from ..base import TraitedSpec, File, traits, InputMultiPath
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
@@ -18,7 +25,13 @@ class AverageAffineTransform(ANTSCommand):
     """
     Examples
     --------
-    >>>
+    >>> from nipype.interfaces.ants.AverageAffineTransform import AverageAffineTransform
+    >>> avg = AverageAffineTransform()
+    >>> avg.inputs.dimension = 3
+    >>> avg.inputs.transforms = ['trans.mat', 'func_to_struct.mat']
+    >>> avg.inputs.output_affine_transform = 'MYtemplatewarp.mat'
+    >>> avg.cmdline
+    'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
     _cmd = 'AverageAffineTransform'
     input_spec = AverageAffineTransformInputSpec
@@ -31,32 +44,3 @@ class AverageAffineTransform(ANTSCommand):
         outputs = self._outputs().get()
         outputs['affine_transform'] = os.path.abspath(self.inputs.output_affine_transform)
         return outputs
-
-"""
-Usage:
-
-AverageAffineTransform ImageDimension output_affine_transform [-R reference_affine_transform] {[-i] affine_transform_txt [weight(=1)] ]}
-
-Compute weighted average of input affine transforms.
-For 2D and 3D transform, the affine transform is first decomposed into scale x shearing
-x rotation. Then these parameters are averaged, using the weights if they provided. For
-3D transform, the rotation component is the quaternion. After averaging, the quaternion
-will also be normalized to have unit norm. For 2D transform, the rotation component is
-the rotation angle. The weight for each transform is a non-negative number. The sum of
-all weights will be normalized to 1 before averaging. The default value for each weight
-is 1.0.
-
-All affine transforms is a "centerd" transform, following ITK convention. A
-reference_affine_transform defines the center for the output transform. The first provided
-transform is the default reference transform
-
-Output affine transform is a MatrixOffsetBaseTransform.
-
- -i option takes the inverse of the affine mapping.
-
- For example:
-
- 2 output_affine.txt -R A.txt A1.txt 1.0 -i A2.txt 2.0 A3.txt A4.txt 6.0 A5.txt
-
-This computes: (1*A1 + 2*(A2)^-1 + A3 + A4*6 + A5 ) / (1+2+1+6+5)
-"""
