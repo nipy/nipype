@@ -25,8 +25,5 @@ from .AverageAffineTransform import AverageAffineTransform
 from .AverageImages import AverageImages
 from .MultiplyImages import MultiplyImages
 
-# Workflows using many of the above tools
-from .antsRegistrationBuildTemplate import antsRegistrationTemplateBuildSingleIterationWF
-from .ANTSBuildTemplate import ANTSTemplateBuildSingleIterationWF
 # deprecated
 from .buildtemplateparallel import buildtemplateparallel  ## This has many components, but it runs it as a single node

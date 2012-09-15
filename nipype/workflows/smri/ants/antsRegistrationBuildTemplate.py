@@ -12,10 +12,11 @@
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-from nipype.interfaces.io import DataGrabber
-from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface
+from nipype.interfaces.utility import Function
 
-from nipype.interfaces.ants import AverageImages, AverageAffineTransform, MultiplyImages, ANTS, WarpImageMultiTransform
+from nipype.interfaces.ants import (AverageImages, MultiplyImages, 
+                                    WarpImageMultiTransform, antsRegistration,
+                                    antsApplyTransforms, AverageAffineTransform)
 
 def GetFirstListElement(this_list):
     return this_list[0]
@@ -176,7 +177,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_
     TemplateBuildSingleIterationWF.connect(wimtdeformed, "output_image", AvgDeformedImages, 'images')
 
     ## Now average all affine transforms together
-    AvgAffineTransform = pe.Node(interface=AntsAverageAffineTransform(), name = 'AvgAffineTransform')
+    AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name = 'AvgAffineTransform')
     AvgAffineTransform.inputs.dimension = 3
     AvgAffineTransform.inputs.output_affine_transform = iterationPhasePrefix+'Affine.mat'
     TemplateBuildSingleIterationWF.connect(sortForward, 'invertable', AvgAffineTransform, 'transforms')
