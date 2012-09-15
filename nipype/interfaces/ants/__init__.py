@@ -4,12 +4,12 @@
 """Top-level namespace for ants."""
 
 # Registraiton programs
-from .registration import ANTS, antsRegistration
+from .registration import ANTS, Registration
 # deprecated
-from .legacy import antsIntroduction, ApplyTransforms, buildtemplateparallel
+from .legacy import antsIntroduction, buildtemplateparallel
 
 # Resampling Programs
-from resampling import antsApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
+from resampling import ApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
 
 
 # Segmentation Programs

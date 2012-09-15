@@ -158,7 +158,7 @@ class ANTS(ANTSCommand):
         #outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
         return outputs
 
-class antsRegistrationInputSpec(ANTSCommandInputSpec):
+class RegistrationInputSpec(ANTSCommandInputSpec):
     # Initial inputs
     fixed_image_mask = File(mandatory=False, desc=(''), requires=['moving_image_mask'], exists=True)
     moving_image_mask = File(argstr='%s', mandatory=False, desc='', requires=['fixed_image_mask'], exists=True)
@@ -212,7 +212,7 @@ class antsRegistrationInputSpec(ANTSCommandInputSpec):
     output_inverse_warped_image = traits.Either(traits.Bool, File(), hash_files=False, requires=['output_warped_image'], desc="")
 
 
-class antsRegistrationOutputSpec(TraitedSpec):
+class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(File(exists=True), desc='List of output transforms for forward registration')
     reverse_transforms = traits.List(File(exists=True), desc='List of output transforms for reverse registration')
     forward_invert_flags = traits.List(traits.Bool(), desc='List of flags corresponding to the forward transforms')
@@ -221,12 +221,12 @@ class antsRegistrationOutputSpec(TraitedSpec):
     inverse_composite_transform = traits.List(File(exists=True), desc='Inverse composite transform file')
 
 
-class antsRegistration(ANTSCommand):
+class Registration(ANTSCommand):
     """
     Examples
     --------
-    >>> from nipype.interfaces.ants import antsRegistration
-    >>> reg = antsRegistration()
+    >>> from nipype.interfaces.ants import Registration
+    >>> reg = Registration()
     >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.output_transform_prefix = "t1_average_BRAINSABC_To_template_t1_clipped"
@@ -249,11 +249,11 @@ class antsRegistration(ANTSCommand):
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
     >>> reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
     >>> reg.cmdline
-    'antsRegistration --dimensionality 3 --initial-moving-transform [trans.mat,0] --output [t1_average_BRAINSABC_To_template_t1_clipped,t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz] --transform Affine[2.0] --metric Mattes[fixed1.nii,moving1.nii,1,32,Random,0.05] --convergence [1500x200,1e-08,20] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[0.25,3.0,0.0] --metric Mattes[fixed1.nii,moving1.nii,1,32] --convergence [100x50x30,1e-09,20] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --write-composite-transform 1'
+    'Registration --dimensionality 3 --initial-moving-transform [trans.mat,0] --output [t1_average_BRAINSABC_To_template_t1_clipped,t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz] --transform Affine[2.0] --metric Mattes[fixed1.nii,moving1.nii,1,32,Random,0.05] --convergence [1500x200,1e-08,20] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[0.25,3.0,0.0] --metric Mattes[fixed1.nii,moving1.nii,1,32] --convergence [100x50x30,1e-09,20] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --write-composite-transform 1'
     """
-    _cmd = 'antsRegistration'
-    input_spec = antsRegistrationInputSpec
-    output_spec = antsRegistrationOutputSpec
+    _cmd = 'Registration'
+    input_spec = RegistrationInputSpec
+    output_spec = RegistrationOutputSpec
 
 
     def _optionalMetricParameters(self, index):
@@ -328,7 +328,7 @@ class antsRegistration(ANTSCommand):
                 return '--output [%s,%s]'     % (self.inputs.output_transform_prefix, self.inputs.output_warped_image )
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
-        return super(antsRegistration, self)._format_arg(opt, spec, val)
+        return super(Registration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.transformMap = {'Rigid':'Rigid.mat',
