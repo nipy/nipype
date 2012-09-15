@@ -4,26 +4,16 @@
 """Top-level namespace for ants."""
 
 # Registraiton programs
-from .ANTS import ANTS
-from .antsRegistration import antsRegistration
+from .registration import ANTS, antsRegistration
 # deprecated
-from .antsIntroduction import antsIntroduction
+from .legacy import antsIntroduction, ApplyTransforms, buildtemplateparallel
 
 # Resampling Programs
-from .antsApplyTransforms import antsApplyTransforms
-from .WarpImageMultiTransform import WarpImageMultiTransform
-from .WarpTimeSeriesImageMultiTransform import WarpTimeSeriesImageMultiTransform
-# deprecated
-from .alternateInterfaceApplyTransforms import ApplyTransforms
+from resampling import antsApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
+
 
 # Segmentation Programs
-from .Atropos import Atropos
-from .N4BiasFieldCorrection import N4BiasFieldCorrection
+from .segmentation import Atropos, N4BiasFieldCorrection
 
 # Utility Programs
-from .AverageAffineTransform import AverageAffineTransform
-from .AverageImages import AverageImages
-from .MultiplyImages import MultiplyImages
-
-# deprecated
-from .buildtemplateparallel import buildtemplateparallel  ## This has many components, but it runs it as a single node
+from .utils import AverageAffineTransform, AverageImages, MultiplyImages
