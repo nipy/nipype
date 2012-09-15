@@ -15,8 +15,8 @@ import nipype.interfaces.utility as util
 from nipype.interfaces.utility import Function
 
 from nipype.interfaces.ants import (AverageImages, MultiplyImages, 
-                                    WarpImageMultiTransform, antsRegistration,
-                                    antsApplyTransforms, AverageAffineTransform)
+                                    WarpImageMultiTransform, Registration,
+                                    ApplyTransforms, AverageAffineTransform)
 
 def GetFirstListElement(this_list):
     return this_list[0]
@@ -53,7 +53,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
     return nested_imagetype_list,outputAverageImageName_list,image_type_list
 
 def sortTransforms(invert_flags, transforms):
-    ### Nota bene: The outputs will include the initial_moving_transform from antsRegistration (which depends on what
+    ### Nota bene: The outputs will include the initial_moving_transform from Registration (which depends on what
     ###            the invert_initial_moving_transform is set to)
     matched = map(list, zip(invert_flags, transforms))
     non_invertable = []
@@ -130,7 +130,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_
 
 
     ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
-    BeginANTS=pe.MapNode(interface=antsRegistration(), name = 'BeginANTS', iterfield=['moving_image'])
+    BeginANTS=pe.MapNode(interface=Registration(), name = 'BeginANTS', iterfield=['moving_image'])
     many_cpu_BeginANTS_options_dictionary={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null '+CLUSTER_QUEUE, 'overwrite': True}
     BeginANTS.plugin_args=many_cpu_BeginANTS_options_dictionary
     BeginANTS.inputs.dimension = 3
@@ -152,7 +152,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_
     TemplateBuildSingleIterationWF.connect(inputSpec, 'fixed_image', BeginANTS, 'fixed_image')
 
     ## Now transform all the images
-    wimtdeformed = pe.MapNode(interface = antsApplyTransforms(), name ='wimtdeformed',
+    wimtdeformed = pe.MapNode(interface = ApplyTransforms(), name ='wimtdeformed',
                               iterfield=['transforms',
                                          'invert_transforms_flags',
                                          'reference_image'])
