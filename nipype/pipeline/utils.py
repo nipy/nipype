@@ -746,7 +746,7 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     return result
 
 
-def write_prov(graph, name="workflow", filename=None):
+def write_prov(graph, filename=None):
     """Write W3C PROV Model JSON file
     """
     if not filename:
