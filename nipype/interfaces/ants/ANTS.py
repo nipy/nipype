@@ -1,15 +1,17 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-# Standard library imports
-import os
-from glob import glob
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 
-# Local imports
-from ..base import (CommandLine, CommandLineInputSpec,
-                                    InputMultiPath, traits, TraitedSpec,
-                                    OutputMultiPath, isdefined,
-                                    File, Directory)
-from ...utils.filemanip import split_filename
+"""
+
+import os
+
+from ..base import InputMultiPath, traits, TraitedSpec, File
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 class ANTSInputSpec(ANTSCommandInputSpec):
@@ -51,8 +53,35 @@ class ANTSOutputSpec(TraitedSpec):
     metaheader = File(exists=True, desc='VTK metaheader .mhd file')
     metaheader_raw = File(exists=True, desc='VTK metaheader .raw file')
 
-#class ANTS(ANTSCommand):
-class ANTS(CommandLine):
+
+class ANTS(ANTSCommand):
+    """
+
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants.ANTS import ANTS
+    >>> ants = ANTS()
+    >>> ants.inputs.dimension = 3
+    >>> ants.inputs.output_transform_prefix = 'MY'
+    >>> ants.inputs.metric = ['CC']
+    >>> ants.inputs.fixed_image = ['T1.nii']
+    >>> ants.inputs.moving_image = ['resting.nii']
+    >>> ants.inputs.metric_weight = [1.0]
+    >>> ants.inputs.radius = [5]
+    >>> ants.inputs.transformation_model = 'SyN'
+    >>> ants.inputs.gradient_step_length = 0.25
+    >>> ants.inputs.number_of_iterations = [50, 35, 15]
+    >>> ants.inputs.use_histogram_matching = True
+    >>> ants.inputs.mi_option = [32, 16000]
+    >>> ants.inputs.regularization = 'Gauss'
+    >>> ants.inputs.regularization_gradient_field_sigma = 3
+    >>> ants.inputs.regularization_deformation_field_sigma = 0
+    >>> ants.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
+    >>> ants.cmdline
+    'ANTS 3 --MI-option 32x16000 --image-metric CC[T1.nii,resting.nii,1,5] --number-of-affine-iterations 10000x10000x10000x10000x10000 --number-of-iterations 50x35x15 --output-naming MY --regularization Gauss[3.0,0.0] --transformation-model SyN[0.25] --use-Histogram-Matching 1'
+    """
     _cmd = 'ANTS'
     input_spec = ANTSInputSpec
     output_spec = ANTSOutputSpec
