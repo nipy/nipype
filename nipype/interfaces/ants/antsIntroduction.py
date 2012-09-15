@@ -71,8 +71,8 @@ class antsIntroduction(ANTSCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.ants import GenWarpFields
-    >>> warp = GenWarpFields()
+    >>> from nipype.interfaces.ants import antsIntroduction
+    >>> warp = antsIntroduction()
     >>> warp.inputs.reference_image = 'Template_6.nii'
     >>> warp.inputs.input_image = 'structural.nii'
     >>> warp.inputs.max_iterations = [30,90,20]

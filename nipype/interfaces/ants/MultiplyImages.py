@@ -1,12 +1,18 @@
 #o emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 # Standard library imports
 import os
-from glob import glob
 
 # Local imports
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
+from ..base import TraitedSpec, File, traits
 from .base import ANTSCommand, ANTSCommandInputSpec
 
 class MultiplyImagesInputSpec(ANTSCommandInputSpec):
@@ -22,7 +28,14 @@ class MultiplyImages(ANTSCommand):
     """
     Examples
     --------
-    >>>
+    >>> from nipype.interfaces.ants.MultiplyImages import MultiplyImages
+    >>> test = MultiplyImages()
+    >>> test.inputs.dimension = 3
+    >>> test.inputs.first_input = 'moving2.nii'
+    >>> test.inputs.second_input = 0.25
+    >>> test.inputs.output_product_image = "out.nii"
+    >>> test.cmdline
+    'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
     _cmd = 'MultiplyImages'
     input_spec = MultiplyImagesInputSpec

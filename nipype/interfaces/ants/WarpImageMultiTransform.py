@@ -1,10 +1,18 @@
+"""The ants module provides basic functions for interfacing with ants functions.
 
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+   >>> os.chdir(datadir)
+
+"""
 # Standard library imports
 import os
 
 # Local imports
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined)
+from ..base import TraitedSpec, File, traits, InputMultiPath, isdefined
 from ...utils.filemanip import split_filename
 
 
@@ -48,7 +56,7 @@ class WarpImageMultiTransform(ANTSCommand):
     Examples
     --------
 
-    >>> from nipype.interfaces.ants import WarpImageMultiTransform
+    >>> from nipype.interfaces.ants.WarpImageMultiTransform import WarpImageMultiTransform
     >>> wimt = WarpImageMultiTransform()
     >>> wimt.inputs.moving_image = 'structural.nii'
     >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
@@ -56,8 +64,6 @@ class WarpImageMultiTransform(ANTSCommand):
     >>> wimt.cmdline
     'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
 
-
-    >>> from nipype.interfaces.ants import WarpImageMultiTransform
     >>> wimt = WarpImageMultiTransform()
     >>> wimt.inputs.moving_image = 'diffusion_weighted.nii'
     >>> wimt.inputs.reference_image = 'functional.nii'
