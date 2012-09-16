@@ -239,8 +239,9 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.interpolation = 'Linear'
     >>> at.inputs.default_value = 0
     >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at.inputs.invert_transforms_flags = [False, False]
     >>> at.cmdline
-    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output moving1_trans.nii --reference-image fixed1.nii --transform trans.mat --transform ants_Warp.nii.gz'
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output moving1_trans.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
 
 
     """

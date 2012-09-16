@@ -171,7 +171,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Metric flags
     metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI", "Mattes"),
                          mandatory=True, desc="")
-    metric_weight = traits.List(traits.Int(1), usedefault=True,
+    metric_weight = traits.List(traits.Float(1.0), usedefault=True,
                                 requires=['metric'], mandatory=True,
                                 desc="Note that the metricWeight is currently not used. \
                                 Rather, it is a temporary place holder until multivariate \
