@@ -1,0 +1,87 @@
+import os
+import csv
+import sys
+import string
+import argparse
+
+########################################
+########################################
+#####  Download some test data
+########################################
+########################################
+import urllib2
+homeDir=os.getenv("HOME")
+requestedPath=os.path.join(homeDir,'nipypeTestPath')
+mydatadir=os.path.realpath(requestedPath)
+if not os.path.exists(mydatadir):
+    os.makedirs(mydatadir)
+print mydatadir
+
+#### Download some test data from the web.
+MyFileURLs=[
+           ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
+           ]
+for tt in MyFileURLs:
+    myURL=tt[0]
+    localFilename=os.path.join(mydatadir,tt[1])
+    if not os.path.exists(localFilename):
+        remotefile = urllib2.urlopen(myURL)
+
+        localFile = open(localFilename, 'wb')
+        localFile.write(remotefile.read())
+        localFile.close()
+        print("Downloaded file: {0}".format(localFilename))
+    else:
+        print("File previously downloaded {0}".format(localFilename))
+
+
+
+input_images=[
+os.path.join(mydatadir,'01_T1_half.nii.gz'),
+os.path.join(mydatadir,'02_T1_half.nii.gz'),
+]
+
+###################################
+###################################
+####### Run a single registration
+###################################
+###################################
+from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, BaseInterface
+from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface
+import nipype.interfaces.io as nio   # Data i/o
+import nipype.pipeline.engine as pe  # pypeline engine
+
+from nipype.interfaces.ants.registration import Registration
+
+
+########################
+## The work for template builder
+########################
+
+from nipype.interfaces.ants import Registration
+reg = Registration()
+#reg.inputs.initial_moving_transform = 'trans.mat'
+reg.inputs.fixed_image =  [input_images[0], input_images[0] ]
+reg.inputs.moving_image = [input_images[1], input_images[1] ]
+reg.inputs.transforms = ['Affine', 'SyN']
+reg.inputs.transform_parameters = [(2.0,), (0.25, 3.0, 0.0)]
+reg.inputs.number_of_iterations = [[1500, 200], [100, 50, 30]]
+reg.inputs.dimension = 3
+reg.inputs.write_composite_transform = True
+reg.inputs.metric = ['Mattes']*2
+reg.inputs.metric_weight = [1]*2 # Default (value ignored currently by ANTs)
+reg.inputs.radius_or_number_of_bins = [32]*2
+reg.inputs.sampling_strategy = ['Random', None]
+reg.inputs.sampling_percentage = [0.05, None]
+reg.inputs.convergence_threshold = [1.e-8, 1.e-9]
+reg.inputs.convergence_window_size = [20]*2
+reg.inputs.smoothing_sigmas = [[1,0], [2,1,0]]
+reg.inputs.shrink_factors = [[2,1], [3,2,1]]
+reg.inputs.use_estimate_learning_rate_once = [True, True]
+reg.inputs.use_histogram_matching = [True, True] # This is the default
+reg.inputs.output_transform_prefix = "t1_average_BRAINSABC_To_template_t1_clipped"
+reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
+reg.cmdline
+reg.run()
+
