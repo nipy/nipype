@@ -160,14 +160,14 @@ class ANTS(ANTSCommand):
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
     # Initial inputs
-    fixed_image_mask = File(mandatory=False, desc=(''), requires=['moving_image_mask'], exists=True)
-    moving_image_mask = File(argstr='%s', mandatory=False, desc='', requires=['fixed_image_mask'], exists=True)
-    initial_moving_transform = File(argstr='%s', desc='', exists=True)
     fixed_image = InputMultiPath(File(exists=True), mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)') )
     moving_image = InputMultiPath(File(exists=True), mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)') )
+    fixed_image_mask = File(mandatory=False, desc=(''), requires=['moving_image_mask'], exists=True)
+    moving_image_mask = File(argstr='%s', mandatory=False, desc='', requires=['fixed_image_mask'], exists=True)
+    initial_moving_transform = File(argstr='%s', mandatory=False, desc='', exists=True)
+    invert_initial_moving_transform = traits.Bool(default=False, usedefault=True, mandatory=False, desc='', requires=["initial_moving_transform"])
     # Input flags
     dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True, desc='image dimension (2 or 3)')
-    invert_initial_moving_transform = traits.Bool(default=False, usedefault=True, desc='', requires=["initial_moving_transform"])
     # Metric flags
     metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI", "Mattes"),
                          mandatory=True, desc="")
@@ -210,7 +210,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     output_transform_prefix = traits.Str("transform", usedefault=True, argstr="%s", desc="")
     output_warped_image = traits.Either(traits.Bool, File(), hash_files=False, desc="")
     output_inverse_warped_image = traits.Either(traits.Bool, File(), hash_files=False, requires=['output_warped_image'], desc="")
-
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(File(exists=True), desc='List of output transforms for forward registration')

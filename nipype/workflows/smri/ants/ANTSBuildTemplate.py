@@ -168,7 +168,6 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='
     TemplateBuildSingleIterationWF.connect(inputSpec, 'images', wimtdeformed, 'moving_image')
     TemplateBuildSingleIterationWF.connect(MakeTransformsLists, 'out', wimtdeformed, 'transformation_series')
 
-
     ##  Shape Update Next =====
     ## Now  Average All moving_images deformed images together to create an updated template average
     AvgDeformedImages=pe.Node(interface=AverageImages(), name='AvgDeformedImages')
@@ -238,7 +237,6 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='
                                   run_without_submitting=True, name="99_FlattenTransformAndImagesList")
     TemplateBuildSingleIterationWF.connect( inputSpec,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries' )
     TemplateBuildSingleIterationWF.connect( MakeTransformsLists ,'out', FlattenTransformAndImagesListNode, 'transformation_series' )
-
     wimtPassivedeformed = pe.MapNode(interface = WarpImageMultiTransform(),
                      iterfield=['transformation_series', 'moving_image'],
                      name ='wimtPassivedeformed')
