@@ -263,7 +263,8 @@ class ApplyTransforms(ANTSCommand):
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transforms_flags):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transforms_flags):
-                    retval.append("--transform [%s,%s]"%(self.inputs.transforms[ii], self.inputs.invert_transforms_flags[ii]))
+                    invert_code=1 if self.inputs.invert_transforms_flags[ii] else 0
+                    retval.append("--transform [%s,%d]"%(self.inputs.transforms[ii], invert_code))
                 else:
                     raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
             else:
