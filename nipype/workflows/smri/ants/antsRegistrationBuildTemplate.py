@@ -133,19 +133,20 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_
     #BeginANTS.plugin_args=many_cpu_BeginANTS_options_dictionary
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
-    BeginANTS.inputs.transforms =               ["Affine",           "SyN"]
-    BeginANTS.inputs.transform_parameters =     [[1],                [0.25,3.0,0.0]]
-    BeginANTS.inputs.metric =                   ['CC',               'CC']
-    BeginANTS.inputs.metric_weight =            [1.0,                1.0]
-    BeginANTS.inputs.radius_or_number_of_bins = [5,                  5]
+    BeginANTS.inputs.transforms =               ["Affine",          "SyN"]
+    BeginANTS.inputs.transform_parameters =     [[0.9],             [0.25,3.0,0.0]]
+    BeginANTS.inputs.metric =                   ['Mattes',          'CC']
+    BeginANTS.inputs.metric_weight =            [1.0,               1.0]
+    BeginANTS.inputs.radius_or_number_of_bins = [32,                5]
     if mode == 'SINGLE_IMAGE_IMAGE':
         ## HACK:  Just short circuit time consuming step if only registering a single image.
         BeginANTS.inputs.number_of_iterations = [[1],                [1]]
     else:
         BeginANTS.inputs.number_of_iterations = [[1000, 1000, 1000], [50, 35, 15]]
     BeginANTS.inputs.use_histogram_matching =   [True,               True]
+    BeginANTS.inputs.use_estimate_learning_rate_once = [True,        True]
     BeginANTS.inputs.shrink_factors =           [[3,2,1],            [3,2,1]]
-    BeginANTS.inputs.smoothing_sigmas =         [[0,0,0],            [0,0,0]]
+    BeginANTS.inputs.smoothing_sigmas =         [[3,2,0],            [3,2,0]]
     TemplateBuildSingleIterationWF.connect(inputSpec, 'images', BeginANTS, 'moving_image')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'fixed_image', BeginANTS, 'fixed_image')
     ## Now warp all the moving_images images

@@ -92,8 +92,10 @@ class ANTS(ANTSCommand):
         pointSetBased = ['PSE', 'JTB']
         for ii in range(len(self.inputs.moving_image)):
             if self.inputs.metric[ii] in intensityBased:
-                retval.append('--image-metric %s[%s,%s,%g,%d]' % (self.inputs.metric[ii], self.inputs.fixed_image[ii],
-                                                                  self.inputs.moving_image[ii], self.inputs.metric_weight[ii],
+                retval.append('--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
+                                                                  self.inputs.fixed_image[ii],
+                                                                  self.inputs.moving_image[ii],
+                                                                  self.inputs.metric_weight[ii],
                                                                   self.inputs.radius[ii]))
             elif self.inputs.metric[ii] == pointSetBased:
                 pass
@@ -179,7 +181,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     ##  This is interpreted as number_of_bins for MI and Mattes, and as radius for all other metrics
     radius_or_number_of_bins = traits.List(traits.Int(5), usedefault=True,
                                  requires=['metric_weight'], desc='')
-    sampling_strategy = traits.List(trait=traits.Enum("Regular", "Random", None), value=['Regular'], minlen=1, usedefault=True,
+    sampling_strategy = traits.List(trait=traits.Enum("Dense","Regular", "Random", None), value=['Dense'], minlen=1, usedefault=True,
                                     requires=['metric_weight'], desc='')
     sampling_percentage = traits.List(value=[None],minlen=1,
                                       requires=['sampling_strategy'], desc='')
@@ -252,7 +254,9 @@ class Registration(ANTSCommand):
 
     def _optionalMetricParameters(self, index):
         if (len(self.inputs.sampling_strategy) > index) and (self.inputs.sampling_strategy[index] is not None):
-            if isdefined(self.inputs.sampling_percentage):
+            if self.inputs.sampling_strategy[index] == "Dense":
+                return '' ## The default when nothing is specified
+            if isdefined(self.inputs.sampling_percentage) and (self.inputs.sampling_percentage is not None):
                 return ',%s,%g' % (self.inputs.sampling_strategy[index], self.inputs.sampling_percentage[index])
             else:
                 return ',%s' % self.inputs.sampling_strategy[index]
@@ -260,19 +264,19 @@ class Registration(ANTSCommand):
 
     def _formatMetric(self, index):
         retval = []
-        retval.append('%s[%s,%s,%g,%d' % (self.inputs.metric[index], self.inputs.fixed_image[0],
+        retval.append('%s[ %s, %s, %g, %d' % (self.inputs.metric[index], self.inputs.fixed_image[0],
                                         self.inputs.moving_image[0], self.inputs.metric_weight[index],
                                         self.inputs.radius_or_number_of_bins[index]))
-        retval.append(self._optionalMetricParameters(index))
-        retval.append(']')
+        retval.append(' %s' % self._optionalMetricParameters(index))
+        retval.append(' ]')
         return "".join(retval)
 
     def _formatTransform(self, index):
         retval = []
-        retval.append('%s[' % self.inputs.transforms[index])
-        parameters = ','.join([str(element) for element in self.inputs.transform_parameters[index]])
+        retval.append('%s[ ' % self.inputs.transforms[index])
+        parameters = ', '.join([str(element) for element in self.inputs.transform_parameters[index]])
         retval.append('%s' % parameters)
-        retval.append(']')
+        retval.append(' ]')
         return "".join(retval)
 
     def _formatRegistration(self):
@@ -302,24 +306,24 @@ class Registration(ANTSCommand):
             convergence_ws=self.inputs.convergence_window_size[ii]
         else:
             convergence_ws=self.inputs.convergence_window_size[0]
-        return '[%s,%g,%d]' % (convergence_iter, convergence_value, convergence_ws)
+        return '[ %s, %g, %d ]' % (convergence_iter, convergence_value, convergence_ws)
 
     def _format_arg(self, opt, spec, val):
         if opt == 'moving_image_mask':
-            return '--masks [%s,%s]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
+            return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
         elif opt == 'transforms':
             self.numberOfTransforms = len(self.inputs.transforms)
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
             if self.inputs.invert_initial_moving_transform:
-                return '--initial-moving-transform [%s,1]' % self.inputs.initial_moving_transform
+                return '--initial-moving-transform [ %s, 1 ]' % self.inputs.initial_moving_transform
             else:
-                return '--initial-moving-transform [%s,0]' % self.inputs.initial_moving_transform
+                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform
         elif opt == 'output_transform_prefix':
             if isdefined(self.inputs.output_inverse_warped_image) and self.inputs.output_inverse_warped_image:
-                return '--output [%s,%s,%s]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image, self.inputs.output_inverse_warped_image )
+                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image, self.inputs.output_inverse_warped_image )
             elif isdefined(self.inputs.output_warped_image) and self.inputs.output_warped_image:
-                return '--output [%s,%s]'     % (self.inputs.output_transform_prefix, self.inputs.output_warped_image )
+                return '--output [ %s, %s ]'     % (self.inputs.output_transform_prefix, self.inputs.output_warped_image )
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
         return super(Registration, self)._format_arg(opt, spec, val)
