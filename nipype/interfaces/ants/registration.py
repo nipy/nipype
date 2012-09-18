@@ -31,7 +31,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     delta_time = traits.Float(requires=['number_of_time_steps'], desc='')
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
-    use_histogram_matching = traits.Bool(argstr='--use-Histogram-Matching %d', default=True, usedefault=True)
+#    use_histogram_matching = traits.Bool(argstr='--use-Histogram-Matching %d', default=True, usedefault=True)
     number_of_iterations = traits.List(traits.Int(), argstr='--number-of-iterations %s', sep='x')
     smoothing_sigmas = traits.List(traits.Int(), argstr='--gaussian-smoothing-sigmas %s', sep='x')
     subsampling_factors = traits.List(traits.Int(), argstr='--subsampling-factors %s', sep='x')
@@ -176,13 +176,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                 desc="Note that the metricWeight is currently not used. \
                                 Rather, it is a temporary place holder until multivariate \
                                 metrics are available for a single stage.")
-    ###  This is interpreted as number_of_bins for MI and Mattes, and as radius for all other metrics
+    ##  This is interpreted as number_of_bins for MI and Mattes, and as radius for all other metrics
     radius_or_number_of_bins = traits.List(traits.Int(5), usedefault=True,
                                  requires=['metric_weight'], desc='')
     sampling_strategy = traits.List(trait=traits.Enum("Regular", "Random", None), value=['Regular'], minlen=1, usedefault=True,
                                     requires=['metric_weight'], desc='')
-    sampling_percentage = traits.List(trait=traits.Either(traits.Range(low=0.0, high=1.0),None),value=[None],minlen=1,
+    sampling_percentage = traits.List(value=[None],minlen=1,
                                       requires=['sampling_strategy'], desc='')
+
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.List(traits.Bool(argstr='%s'), default=True, usedefault=True)
     # Transform flags
@@ -193,13 +194,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                         'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
                                         'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
     # TODO: transform_parameters currently supports rigid, affine, composite affine, translation, bspline, gaussian displacement field (gdf), and SyN -----ONLY-----!
-    transform_parameters = traits.List(
-        traits.Either(
-            traits.Float(),
-            traits.Tuple(traits.Float()),
-            traits.Tuple(traits.Float(), # gdf & syn
-                         traits.Float(),
-                         traits.Float())))
+    transform_parameters = traits.List()
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Int()))
@@ -208,8 +203,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     convergence_window_size = traits.List(trait=traits.Int(), value=[10],minlen=1, requires=['convergence_threshold'], usedefault=True)
     # Output flags
     output_transform_prefix = traits.Str("transform", usedefault=True, argstr="%s", desc="")
-    output_warped_image = traits.Either(traits.Bool, File(), hash_files=False, desc="")
-    output_inverse_warped_image = traits.Either(traits.Bool, File(), hash_files=False, requires=['output_warped_image'], desc="")
+    output_warped_image = traits.Any(hash_files=False, desc="")
+    output_inverse_warped_image = traits.Any(hash_files=False, requires=['output_warped_image'], desc="")
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(File(exists=True), desc='List of output transforms for forward registration')
