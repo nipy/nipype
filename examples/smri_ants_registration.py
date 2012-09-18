@@ -1,15 +1,25 @@
-import os
-import csv
-import sys
-import string
-import argparse
+#!/usr/bin/env python
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+==================================
+sMRI: Using ANTS for registration
+==================================
 
-########################################
-########################################
-#####  Download some test data
-########################################
-########################################
+In this simple tutorial we will use the Registration interface from ANTS to 
+coregister two T1 volumes.
+
+1. Tell python where to find the appropriate functions.
+"""
+
+import os
 import urllib2
+from nipype.interfaces.ants import Registration
+
+"""
+2. Download T1 volumes into home directory
+"""
+
 homeDir=os.getenv("HOME")
 requestedPath=os.path.join(homeDir,'nipypeTestPath')
 mydatadir=os.path.realpath(requestedPath)
@@ -17,7 +27,6 @@ if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
 print mydatadir
 
-#### Download some test data from the web.
 MyFileURLs=[
            ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
            ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
@@ -35,33 +44,16 @@ for tt in MyFileURLs:
     else:
         print("File previously downloaded {0}".format(localFilename))
 
-
-
 input_images=[
 os.path.join(mydatadir,'01_T1_half.nii.gz'),
 os.path.join(mydatadir,'02_T1_half.nii.gz'),
 ]
 
-###################################
-###################################
-####### Run a single registration
-###################################
-###################################
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, BaseInterface
-from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface
-import nipype.interfaces.io as nio   # Data i/o
-import nipype.pipeline.engine as pe  # pypeline engine
+"""
+3. Define the parameters of the registration
+"""
 
-from nipype.interfaces.ants.registration import Registration
-
-
-########################
-## The work for template builder
-########################
-
-from nipype.interfaces.ants import Registration
 reg = Registration()
-#reg.inputs.initial_moving_transform = 'trans.mat'
 reg.inputs.fixed_image =  [input_images[0], input_images[0] ]
 reg.inputs.moving_image = [input_images[1], input_images[1] ]
 reg.inputs.transforms = ['Affine', 'SyN']
@@ -83,5 +75,11 @@ reg.inputs.use_histogram_matching = [True, True] # This is the default
 reg.inputs.output_transform_prefix = "t1_average_BRAINSABC_To_template_t1_clipped"
 reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
 reg.cmdline
+
+
+"""
+3. Run the registration
+"""
+
 reg.run()
 
