@@ -39,8 +39,6 @@ for tt in MyFileURLs:
     else:
         print("File previously downloaded {0}".format(localFilename))
 
-
-
 input_images=[
 os.path.join(mydatadir,'01_T1_half.nii.gz'),
 os.path.join(mydatadir,'02_T1_half.nii.gz'),
@@ -58,7 +56,7 @@ input_passive_images=[
 ###################################
 ###################################
 from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, BaseInterface
-from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface
+from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface, Function
 import nipype.interfaces.io as nio   # Data i/o
 import nipype.pipeline.engine as pe  # pypeline engine
 
@@ -81,7 +79,7 @@ passiveDeformedImages.inputs.ListOfPassiveImagesDictionaries=input_passive_image
 ## The work for template builder
 ########################
 
-tbuilder=pe.Workflow(name="TemplateBuilder")
+tbuilder=pe.Workflow(name="antsRegistrationTemplateBuilder")
 tbuilder.base_dir=requestedPath
 
 myInitAvgWF = antsSimpleAverageWF()
@@ -92,10 +90,26 @@ tbuilder.connect(myInitAvgWF, 'OutputSpec.average_image', buildTemplateIteration
 tbuilder.connect(inputID, 'imageList', buildTemplateIteration1, 'InputSpec.images')
 tbuilder.connect(passiveDeformedImages, 'ListOfPassiveImagesDictionaries', buildTemplateIteration1, 'InputSpec.ListOfPassiveImagesDictionaries')
 
-#buildTemplateIteration2 = buildTemplateIteration1.clone(name='buildTemplateIteration2')
-#buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('Iteration02',CLUSTER_QUEUE,TEMPLATE_BUILD_RUN_MODE)
-#tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
-#tbuilder.connect(MergeT1s[subjectid], 'out', buildTemplateIteration2, 'InputSpec.images')
-#tbuilder.connect(MergeByExtendListElementsNode, 'ListOfExtendedPassiveImages', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')
+buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('Iteration02',"",'MULTI')
+tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
+tbuilder.connect(inputID, 'imageList', buildTemplateIteration2, 'InputSpec.images')
+tbuilder.connect(passiveDeformedImages, 'ListOfPassiveImagesDictionaries', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')
+
+def PrintOutputPath(preRegisterAverage,outputPrimaryTemplate,outputPassiveTemplate):
+    print("Template Building Complete:")
+    print("Original pre-warp average: {0}".format(preRegisterAverage))
+    print("Primary Template: {0}".format(outputPrimaryTemplate))
+    print("Passive Templates: {0}".format(outputPassiveTemplate))
+
+
+ReportOutputsToScreen = pe.Node(interface=Function(function=PrintOutputPath,
+                                      input_names=['preRegisterAverage','outputPrimaryTemplate','outputPassiveTemplate'],
+                                      output_names=[]),
+                                      run_without_submitting=True,
+                                      name='99_ReportOutputsToScreen')
+
+tbuilder.connect(buildTemplateIteration2, 'OutputSpec.template',ReportOutputsToScreen,'outputPrimaryTemplate')
+tbuilder.connect(buildTemplateIteration2, 'OutputSpec.passive_deformed_templates',ReportOutputsToScreen,'outputPassiveTemplate')
+tbuilder.connect(myInitAvgWF, 'OutputSpec.average_image', ReportOutputsToScreen,'preRegisterAverage')
 
 tbuilder.run()

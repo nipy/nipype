@@ -292,3 +292,9 @@ class ApplyTransforms(ANTSCommand):
         outputs = self._outputs().get()
         outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
         return outputs
+
+
+if __name__ is "__main__":
+    import doctest
+    doctest.testmod()
+

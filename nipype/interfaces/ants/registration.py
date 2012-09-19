@@ -31,7 +31,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     delta_time = traits.Float(requires=['number_of_time_steps'], desc='')
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
-#    use_histogram_matching = traits.Bool(argstr='--use-Histogram-Matching %d', default=True, usedefault=True)
+    use_histogram_matching = traits.Bool(argstr='%s', default=True, usedefault=True)
     number_of_iterations = traits.List(traits.Int(), argstr='--number-of-iterations %s', sep='x')
     smoothing_sigmas = traits.List(traits.Int(), argstr='--gaussian-smoothing-sigmas %s', sep='x')
     subsampling_factors = traits.List(traits.Int(), argstr='--subsampling-factors %s', sep='x')
@@ -149,6 +149,11 @@ class ANTS(ANTSCommand):
             return self._regularization_constructor()
         elif opt == 'affine_gradient_descent_option':
             return self._affine_gradient_descent_option_constructor()
+        elif opt == 'use_histogram_matching':
+            if self.inputs.use_histogram_matching:
+                return '--use-Histogram-Matching 1'
+            else:
+                return '--use-Histogram-Matching 0'
         return super(ANTS, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -328,24 +333,24 @@ class Registration(ANTSCommand):
                 return '--output %s' % self.inputs.output_transform_prefix
         return super(Registration, self)._format_arg(opt, spec, val)
 
-    def _outputFileNames(self, prefix, count, transform, inverse=False):
-        self.transformMap = {'Rigid':'Rigid.mat',
+    def _outputFileNames(self, prefix, count, transform, inverse):
+        self.lowDimensionalTransformMap = {'Rigid':'Rigid.mat',
                         'Affine':'Affine.mat',
                         'CompositeAffine':'Affine.mat',
                         'Similarity':'Similarity.mat',
                         'Translation':'Translation.mat',
                         'BSpline':'BSpline.txt'}
-        if transform in self.transformMap.keys():
-            suffix = self.transformMap[transform]
-            return ['%s%d%s' % (prefix, count, suffix)]
+        if transform in self.lowDimensionalTransformMap.keys():
+            suffix = self.lowDimensionalTransformMap[transform]
+            inverse_mode = inverse
         else:
-            suffix = 'Warp.nii.gz'
             if inverse:
-                # Happens only on recursive call below.
-                # Return a string, NOT a list!
-                return '%s%dInverse%s' % (prefix, count, suffix)
-        return [ self._outputFileNames(prefix, count, transform, True),
-                '%s%d%s' % (prefix, count, suffix)]
+                suffix='InverseWarp.nii.gz'
+                inverse_mode = False ## These are not analytically invertable
+            else:
+                suffix = 'Warp.nii.gz'
+                inverse_mode = False ## These are not analytically invertable
+        return '%s%d%s' % (prefix, count, suffix), inverse_mode
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -357,32 +362,21 @@ class Registration(ANTSCommand):
         if isdefined(self.inputs.initial_moving_transform):
             outputs['forward_transforms'].append(self.inputs.initial_moving_transform)
             outputs['forward_invert_flags'].append(self.inputs.invert_initial_moving_transform)
-            outputs['reverse_transforms'].append(self.inputs.initial_moving_transform)
-            outputs['reverse_invert_flags'].append(not self.inputs.invert_initial_moving_transform)
+            outputs['reverse_transforms'].insert(0,self.inputs.initial_moving_transform)
+            outputs['reverse_invert_flags'].insert(0,not self.inputs.invert_initial_moving_transform) ## Prepend
             transformCount += 1
         for count in range(self.numberOfTransforms):
-            fileNames = self._outputFileNames(self.inputs.output_transform_prefix,
+            forward_fileName, forward_inverse_mode = self._outputFileNames(self.inputs.output_transform_prefix,
                                               transformCount,
-                                              self.inputs.transforms[count])
-            if len(fileNames) == 1:
-                is_invertable = True
-                outputs['forward_transforms'].append(os.path.abspath(fileNames[0]))
-            elif len(fileNames) == 2:
-                is_invertable = False
-                outputs['forward_transforms'].append(os.path.abspath(fileNames[1]))
-            else:
-                assert len(fileNames) <= 2
-                assert len(fileNames) > 0
-            outputs['forward_invert_flags'].append(not is_invertable)
-            outputs['reverse_transforms'].append(os.path.abspath(fileNames[0]))
-            outputs['reverse_invert_flags'].append(is_invertable)
-            # if self.inputs.invert_initial_moving_transform:
-            #     outputs['forward_invert_flags'].append(True)
-            # else:
-            #     outputs['forward_invert_flags'].append(False)
+                                              self.inputs.transforms[count],False)
+            reverse_fileName, reverse_inverse_mode = self._outputFileNames(self.inputs.output_transform_prefix,
+                                              transformCount,
+                                              self.inputs.transforms[count],True)
+            outputs['forward_transforms'].append(os.path.abspath(forward_fileName))
+            outputs['forward_invert_flags'].append(forward_inverse_mode)
+            outputs['reverse_transforms'].insert(0,os.path.abspath(reverse_fileName))
+            outputs['reverse_invert_flags'].insert(0,reverse_inverse_mode)
             transformCount += 1
-        outputs['reverse_transforms'].reverse()
-        outputs['reverse_invert_flags'].reverse()
         if self.inputs.write_composite_transform:
             fileName = self.inputs.output_transform_prefix + 'Composite.h5'
             outputs['composite_transform'] = [os.path.abspath(fileName)]
