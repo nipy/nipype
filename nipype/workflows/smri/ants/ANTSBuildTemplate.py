@@ -181,7 +181,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='
     ## Now average all affine transforms together
     AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name = 'AvgAffineTransform')
     AvgAffineTransform.inputs.dimension = 3
-    AvgAffineTransform.inputs.output_affine_transform = str(iterationPhasePrefix)+'Affine.mat'
+    AvgAffineTransform.inputs.output_affine_transform = 'Avererage_'+str(iterationPhasePrefix)+'_Affine.mat'
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'affine_transform', AvgAffineTransform, 'transforms')
 
     ## Now average the warp fields togther
@@ -197,7 +197,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='
     GradientStepWarpImage=pe.Node(interface=MultiplyImages(), name='GradientStepWarpImage')
     GradientStepWarpImage.inputs.dimension = 3
     GradientStepWarpImage.inputs.second_input = -1.0 * GradientStep
-    GradientStepWarpImage.inputs.output_product_image = str(iterationPhasePrefix)+'warp.nii.gz'
+    GradientStepWarpImage.inputs.output_product_image = 'GradientStep0.25_'+str(iterationPhasePrefix)+'_warp.nii.gz'
     TemplateBuildSingleIterationWF.connect(AvgWarpImages, 'output_average_image', GradientStepWarpImage, 'first_input')
 
     ## Now create the new template shape based on the average of all deformed images
@@ -242,6 +242,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='
     wimtPassivedeformed = pe.MapNode(interface = WarpImageMultiTransform(),
                      iterfield=['transformation_series', 'input_image'],
                      name ='wimtPassivedeformed')
+    TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image',wimtPassivedeformed,'reference_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_images',     wimtPassivedeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_transforms', wimtPassivedeformed, 'transformation_series')
 

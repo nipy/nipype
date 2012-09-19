@@ -80,7 +80,7 @@ class ANTS(ANTSCommand):
     >>> ants.inputs.regularization_deformation_field_sigma = 0
     >>> ants.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
     >>> ants.cmdline
-    'ANTS 3 --MI-option 32x16000 --image-metric CC[T1.nii,resting.nii,1,5] --number-of-affine-iterations 10000x10000x10000x10000x10000 --number-of-iterations 50x35x15 --output-naming MY --regularization Gauss[3.0,0.0] --transformation-model SyN[0.25] --use-Histogram-Matching 1'
+    'ANTS 3 --MI-option 32x16000 --image-metric CC[ T1.nii, resting.nii, 1, 5 ] --number-of-affine-iterations 10000x10000x10000x10000x10000 --number-of-iterations 50x35x15 --output-naming MY --regularization Gauss[3.0,0.0] --transformation-model SyN[0.25] --use-Histogram-Matching 1'
     """
     _cmd = 'ANTS'
     input_spec = ANTSInputSpec
@@ -250,7 +250,7 @@ class Registration(ANTSCommand):
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
     >>> reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
     >>> reg.cmdline
-    'antsRegistration --dimensionality 3 --initial-moving-transform [trans.mat,0] --output [t1_average_BRAINSABC_To_template_t1_clipped,t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz] --transform Affine[2.0] --metric Mattes[fixed1.nii,moving1.nii,1,32,Random,0.05] --convergence [1500x200,1e-08,20] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[0.25,3.0,0.0] --metric Mattes[fixed1.nii,moving1.nii,1,32] --convergence [100x50x30,1e-09,20] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --write-composite-transform 1'
+    'antsRegistration --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] --output [ t1_average_BRAINSABC_To_template_t1_clipped, t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --write-composite-transform 1'
     """
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
