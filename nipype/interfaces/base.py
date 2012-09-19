@@ -1154,7 +1154,7 @@ class CommandLine(BaseInterface):
 
         Called when trait.genfile = True and trait is Undefined
         """
-        raise NotImplementedError
+        raise NotImplementedError("NotImplementedError: %s" % name)
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
