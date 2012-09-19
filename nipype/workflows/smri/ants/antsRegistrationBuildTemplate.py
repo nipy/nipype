@@ -153,6 +153,8 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_
     wimtdeformed = pe.MapNode(interface = ApplyTransforms(),
                      iterfield=['input_image','transforms','invert_transforms_flags'],
                      name ='wimtdeformed')
+    wimtdeformed.inputs.default_value = 0
+    wimtdeformed.inputs.interpolation = 'Linear'
     TemplateBuildSingleIterationWF.connect(inputSpec, 'images', wimtdeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'fixed_image', wimtdeformed, 'reference_image')
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', wimtdeformed, 'transforms')
