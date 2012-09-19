@@ -18,9 +18,12 @@ def test_allineate():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-source %s',mandatory=True,),
-                     matrix = dict(argstr='-1dmatrix_apply %s',),
-                     out_file = dict(argstr='-prefix %s',genfile=True,),
+                     onedmatrix = dict(argstr='-1Dmatrix_apply %s',),
+                     out_file = dict(argstr='-prefix %s', ),
+                     onedmatrix_save = dict(argstr='%s', ),
                      outputtype = dict(),
+                     base_file = dict(argstr='-base %s', ),
+                     master_file = dict(argstr='-master %s', ),
                      )
     instance = afni.Allineate()
     for key, metadata in input_map.items():
@@ -93,14 +96,15 @@ def test_calc():
 
 def test_to3d():
     input_map = dict(args = dict(argstr='%s',),
-                     assumemosaic = dict(argstr='-assume_dicom_mosaic',),
-                     datatype = dict(argstr='-datum %s',),
+                     assume_dicom_mosaic = dict(argstr='-assume_dicom_mosaic',),
+                     datum = dict(argstr='-datum %s',),
                      environ = dict(usedefault=True,),
                      filetype = dict(argstr='-%s',),
+                     orient = dict(argstr='%s',),
                      funcparams = dict(argstr='-time:zt %s alt+z2',),
                      ignore_exception = dict(usedefault=True,),
                      infolder = dict(argstr='%s/*.dcm',mandatory=True,),
-                     out_file = dict(argstr='-prefix %s',mandatory=True,),
+                     prefix = dict(argstr='-prefix %s',mandatory=False,),
                      outputtype = dict(),
                      skipoutliers = dict(argstr='-skip_outliers',),
                      )
@@ -312,7 +316,7 @@ def test_tshift():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      interp = dict(argstr='-%s',),
-                     out_file = dict(argstr='-prefix %s',),
+                     prefix = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      rlt = dict(argstr='-rlt',),
                      rltplus = dict(argstr='-rlt+',),
