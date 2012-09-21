@@ -18,9 +18,6 @@ import shutil
 from distutils.cmd import Command
 from distutils.command.clean import clean
 
-# Sphinx import.
-from sphinx.setup_command import BuildDoc
-
 _info_fname = pjoin(os.path.dirname(__file__), 'nipype', 'info.py')
 INFO_VARS = {}
 exec(open(_info_fname, 'rt').read(), {}, INFO_VARS)
@@ -104,61 +101,66 @@ def relative_path(filename):
 
 ################################################################################
 # Distutils Command class build the docs
-class MyBuildDoc(BuildDoc):
-    """ Sub-class the standard sphinx documentation building system, to
-        add logics for API generation and matplotlib's plot directive.
-    """
-
-    def run(self):
-        self.run_command('api_docs')
-        # We need to be in the doc directory for to plot_directive
-        # and API generation to work
+# Sphinx import.
+try:
+    from sphinx.setup_command import BuildDoc
+except:
+    MyBuildDoc = None
+else:
+    class MyBuildDoc(BuildDoc):
+        """ Sub-class the standard sphinx documentation building system, to
+            add logics for API generation and matplotlib's plot directive.
         """
-        os.chdir('doc')
-        try:
+
+        def run(self):
+            self.run_command('api_docs')
+            # We need to be in the doc directory for to plot_directive
+            # and API generation to work
+            """
+            os.chdir('doc')
+            try:
+                BuildDoc.run(self)
+            finally:
+                os.chdir('..')
+            """
+            # It put's the build in a doc/doc/_build directory with the
+            # above?!?!  I'm leaving the code above here but commented out
+            # in case I'm missing something?
             BuildDoc.run(self)
-        finally:
-            os.chdir('..')
-        """
-        # It put's the build in a doc/doc/_build directory with the
-        # above?!?!  I'm leaving the code above here but commented out
-        # in case I'm missing something?
-        BuildDoc.run(self)
-        self.zip_docs()
+            self.zip_docs()
 
-    def zip_docs(self):
-        if not os.path.exists(DOC_BUILD_DIR):
-            raise OSError, 'Doc directory does not exist.'
-        target_file = os.path.join('doc', 'documentation.zip')
-        # ZIP_DEFLATED actually compresses the archive. However, there
-        # will be a RuntimeError if zlib is not installed, so we check
-        # for it. ZIP_STORED produces an uncompressed zip, but does not
-        # require zlib.
-        try:
-            zf = zipfile.ZipFile(target_file, 'w',
-                                        compression=zipfile.ZIP_DEFLATED)
-        except RuntimeError:
-            warnings.warn('zlib not installed, storing the docs '
-                            'without compression')
-            zf = zipfile.ZipFile(target_file, 'w',
-                                        compression=zipfile.ZIP_STORED)
+        def zip_docs(self):
+            if not os.path.exists(DOC_BUILD_DIR):
+                raise OSError, 'Doc directory does not exist.'
+            target_file = os.path.join('doc', 'documentation.zip')
+            # ZIP_DEFLATED actually compresses the archive. However, there
+            # will be a RuntimeError if zlib is not installed, so we check
+            # for it. ZIP_STORED produces an uncompressed zip, but does not
+            # require zlib.
+            try:
+                zf = zipfile.ZipFile(target_file, 'w',
+                                            compression=zipfile.ZIP_DEFLATED)
+            except RuntimeError:
+                warnings.warn('zlib not installed, storing the docs '
+                                'without compression')
+                zf = zipfile.ZipFile(target_file, 'w',
+                                            compression=zipfile.ZIP_STORED)
 
-        for root, dirs, files in os.walk(DOC_BUILD_DIR):
-            relative = relative_path(root)
-            if not relative.startswith('.doctrees'):
-                for f in files:
-                    zf.write(os.path.join(root, f),
-                            os.path.join(relative, 'html_docs', f))
-        zf.close()
+            for root, dirs, files in os.walk(DOC_BUILD_DIR):
+                relative = relative_path(root)
+                if not relative.startswith('.doctrees'):
+                    for f in files:
+                        zf.write(os.path.join(root, f),
+                                os.path.join(relative, 'html_docs', f))
+            zf.close()
 
 
-    def finalize_options(self):
-        """ Override the default for the documentation build
-            directory.
-        """
-        self.build_dir = os.path.join(*DOC_BUILD_DIR.split(os.sep)[:-1])
-        BuildDoc.finalize_options(self)
-
+        def finalize_options(self):
+            """ Override the default for the documentation build
+                directory.
+            """
+            self.build_dir = os.path.join(*DOC_BUILD_DIR.split(os.sep)[:-1])
+            BuildDoc.finalize_options(self)
 
 ################################################################################
 # Distutils Command class to clean

@@ -3,6 +3,7 @@
 
 import os
 from time import sleep
+import subprocess
 
 from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
@@ -35,16 +36,13 @@ class PBSPlugin(SGELikeBatchManagerBase):
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
-        cmd = CommandLine('qstat')
-        cmd.inputs.args = '%s' % taskid
-        # check pbs task
-        oldlevel = iflogger.level
-        iflogger.setLevel(logging.getLevelName('CRITICAL'))
-        result = cmd.run(ignore_exception=True)
-        iflogger.setLevel(oldlevel)
-        if 'Unknown Job Id' in result.runtime.stderr:
-            return False
-        return True
+        #  subprocess.Popen requires taskid to be a string
+        proc = subprocess.Popen(["qstat", str(taskid)],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        _, e = proc.communicate()
+        errmsg = 'Unknown Job Id' # %s' % taskid
+        return  errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data)

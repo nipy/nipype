@@ -126,7 +126,10 @@ class FitGLM(BaseInterface):
                 duration += cond['duration']
 
 
-        paradigm =  BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
+        if conditions:
+            paradigm =  BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
+        else:
+            paradigm = None
         design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=drift_model, hfcut=hpf,
                hrf_model=self.inputs.hrf_model,
                add_regs=reg_vals,

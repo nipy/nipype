@@ -5,13 +5,8 @@
 PYTHON ?= python
 NOSETESTS ?= nosetests
 
-zipdoc:
-	@echo "Clean documentation directory."
-	python setup.py clean
-	@echo "Build documentation.zip..."
-	python setup.py build_sphinx
-	@echo "Clean documentation directory."
-	python setup.py clean
+zipdoc: html
+	zip documentation.zip doc/_build/html
 
 sdist: zipdoc
 	@echo "Building source distribution..."
@@ -75,6 +70,3 @@ check-before-commit: trailing-spaces html test
 	@echo "removed spaces"
 	@echo "built docs"
 	@echo "ran test"
-
-
-
