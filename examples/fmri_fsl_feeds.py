@@ -534,7 +534,7 @@ Set up complete workflow
 
 l1pipeline = pe.Workflow(name= "level1")
 l1pipeline.base_dir = os.path.abspath('./fsl_feeds/workingdir')
-l1pipeline.config = dict(crashdump_dir=os.path.abspath('./fsl_feeds/crashdumps'))
+l1pipeline.config['execution']['crashdump_dir'] = os.path.abspath('./fsl_feeds/crashdumps')
 
 l1pipeline.connect([(datasource, firstlevel, [('struct','preproc.inputspec.struct'),
                                               ('func', 'preproc.inputspec.func'),
