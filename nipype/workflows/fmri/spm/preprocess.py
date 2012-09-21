@@ -256,7 +256,7 @@ def create_DARTEL_template(name='dartel_template'):
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
     if not no_matlab:
         version = spm.Info.version()
-        if version['name'] == 'SPM8':
+        if version and version['name'] == 'SPM8':
             spm_path = version['path']
             tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
             tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
