@@ -1,8 +1,4 @@
 import os
-import csv
-import sys
-import string
-import argparse
 
 ########################################
 ########################################
@@ -55,9 +51,7 @@ input_passive_images=[
 ####### Run a template build with ANTS
 ###################################
 ###################################
-from nipype.interfaces.base import CommandLine, CommandLineInputSpec, TraitedSpec, File, Directory, traits, isdefined, BaseInterface
-from nipype.interfaces.utility import Merge, Split, Function, Rename, IdentityInterface, Function
-import nipype.interfaces.io as nio   # Data i/o
+from nipype.interfaces.utility import IdentityInterface, Function
 import nipype.pipeline.engine as pe  # pypeline engine
 
 from nipype.workflows.smri.ants.antsRegistrationBuildTemplate import antsRegistrationTemplateBuildSingleIterationWF
