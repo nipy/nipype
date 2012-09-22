@@ -94,7 +94,7 @@ tbuilder.connect(datasource, "imageList", initAvg, "images")
 6. Define the first iteration of template building
 """
 
-buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01',"",'MULTI')
+buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01')
 tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'InputSpec.images')
 tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'InputSpec.ListOfPassiveImagesDictionaries')
@@ -103,7 +103,7 @@ tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateItera
 7. Define the second iteration of template building
 """
 
-buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02',"",'MULTI')
+buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
 tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'imageList', buildTemplateIteration2, 'InputSpec.images')
 tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')

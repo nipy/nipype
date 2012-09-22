@@ -96,7 +96,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation
 ##        'SINGLE_IMAGE' is quick shorthand when you are building an atlas with a single subject, then registration can
 ##                    be short-circuted
 ##        any other string indicates the normal mode that you would expect and replicates the shell script build_template_parallel.sh
-def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix,CLUSTER_QUEUE,mode='MULTI'):
+def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE='',mode='MULTI'):
 
     TemplateBuildSingleIterationWF = pe.Workflow(name = 'ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)) )
 
