@@ -101,9 +101,9 @@ Here we are fine tuning parameters of the SGE job (memory limit, numebr of cores
 BeginANTS = buildTemplateIteration1.get_node("BeginANTS")
 BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
 
-tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'InputSpec.images')
-tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'InputSpec.ListOfPassiveImagesDictionaries')
+tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'inputspec.fixed_image')
+tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'inputspec.images')
+tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'inputspec.ListOfPassiveImagesDictionaries')
 
 """
 7. Define the second iteration of template building
@@ -112,9 +112,9 @@ tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateItera
 buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
 BeginANTS = buildTemplateIteration2.get_node("BeginANTS")
 BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
-tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'imageList', buildTemplateIteration2, 'InputSpec.images')
-tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')
+tbuilder.connect(buildTemplateIteration1, 'outputspec.template', buildTemplateIteration2, 'inputspec.fixed_image')
+tbuilder.connect(datasource, 'imageList', buildTemplateIteration2, 'inputspec.images')
+tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration2, 'inputspec.ListOfPassiveImagesDictionaries')
 
 """
 8. Move selected files to a designated results folder
@@ -123,8 +123,8 @@ tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateItera
 datasink = pe.Node(io.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(requestedPath, "results")
 
-tbuilder.connect(buildTemplateIteration2, 'OutputSpec.template',datasink,'PrimaryTemplate')
-tbuilder.connect(buildTemplateIteration2, 'OutputSpec.passive_deformed_templates',datasink,'PassiveTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.template',datasink,'PrimaryTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates',datasink,'PassiveTemplate')
 tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
 
 """
