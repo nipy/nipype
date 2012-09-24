@@ -2,12 +2,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
-======================================================
-sMRI: Using new ANTS for creating a T1 template (ITK4)
-======================================================
+===============================================
+sMRI: Using new ANTS for creating a T1 template
+===============================================
 
-In this tutorial we will use ANTS (new ITK4 version aka "antsRegistration") based workflow  to
-create a template out of multiple T1 volumes. We will also showcase how to fine tune SGE jobs requirements.
+In this tutorial we will use ANTS (old version aka "ANTS") based workflow  to
+create a template out of multiple T1 volumes.
 
 1. Tell python where to find the appropriate functions.
 """
@@ -18,7 +18,7 @@ import nipype.interfaces.ants as ants
 import nipype.interfaces.io as io
 import nipype.pipeline.engine as pe  # pypeline engine
 
-from nipype.workflows.smri.ants import antsRegistrationTemplateBuildSingleIterationWF
+from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 
 """
 2. Download T1 volumes into home directory
@@ -68,7 +68,7 @@ input_passive_images=[
 """
 3. Define the workflow and its working directory
 """
-tbuilder=pe.Workflow(name="antsRegistrationTemplateBuilder")
+tbuilder=pe.Workflow(name="ANTSTemplateBuilder")
 tbuilder.base_dir=requestedPath
 
 """
@@ -94,13 +94,7 @@ tbuilder.connect(datasource, "imageList", initAvg, "images")
 6. Define the first iteration of template building
 """
 
-buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01')
-"""
-Here we are fine tuning parameters of the SGE job (memory limit, numebr of cores etc.)
-"""
-BeginANTS = buildTemplateIteration1.get_node("BeginANTS")
-BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
-
+buildTemplateIteration1=ANTSTemplateBuildSingleIterationWF('iteration01')
 tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'InputSpec.images')
 tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'InputSpec.ListOfPassiveImagesDictionaries')
@@ -109,9 +103,7 @@ tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateItera
 7. Define the second iteration of template building
 """
 
-buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
-BeginANTS = buildTemplateIteration2.get_node("BeginANTS")
-BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
+buildTemplateIteration2 = ANTSTemplateBuildSingleIterationWF('iteration02')
 tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'imageList', buildTemplateIteration2, 'InputSpec.images')
 tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')
@@ -131,4 +123,4 @@ tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
 8. Run the workflow
 """
 
-tbuilder.run(plugin="SGE")
+tbuilder.run()

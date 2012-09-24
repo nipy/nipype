@@ -91,19 +91,30 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation
     print("HACK: flattened nametypes {0}\n".format(flattened_image_nametypes))
     print("HACK: flattened txfms     {0}\n".format(flattened_transforms))
     return flattened_images,flattened_transforms,flattened_image_nametypes
-##
-## NOTE:  The modes can be either 'SINGLE_IMAGE' or 'MULTI'
-##        'SINGLE_IMAGE' is quick shorthand when you are building an atlas with a single subject, then registration can
-##                    be short-circuted
-##        any other string indicates the normal mode that you would expect and replicates the shell script build_template_parallel.sh
-def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE='',mode='MULTI'):
+
+def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
+    """
+
+    Inputs::
+
+           inputspec.images :
+           inputspec.fixed_image : 
+           inputspec.ListOfPassiveImagesDictionaries :
+
+    Outputs::
+
+           outputspec.template :
+           outputspec.transforms_list :
+           outputspec.passive_deformed_templates : 
+    """
+
 
     TemplateBuildSingleIterationWF = pe.Workflow(name = 'ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)) )
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=['images', 'fixed_image',
                 'ListOfPassiveImagesDictionaries']),
                 run_without_submitting=True,
-                name='InputSpec')
+                name='inputspec')
     ## HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
     ##             they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
     ##             their hash to change.
@@ -112,26 +123,10 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE='',
     outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template','transforms_list',
                 'passive_deformed_templates']),
                 run_without_submitting=True,
-                name='OutputSpec')
-
-    if mode == 'SINGLE_IMAGEXX':
-        ### HACK:  A more general utility that is reused should be created.
-        print "HACK: DOING SINGLE_IMAGE ", mode
-        TemplateBuildSingleIterationWF.connect( [ (inputSpec, outputSpec, [(('images', GetFirstListElement ), 'template')] ), ])
-        ##HACK THIS DOES NOT WORK BECAUSE FILE NAMES ARE WRONG.
-        TemplateBuildSingleIterationWF.connect( [ (inputSpec, outputSpec, [(('ListOfPassiveImagesDictionaries', GetFirstListElement ), 'passive_deformed_templates')] ), ])
-        return TemplateBuildSingleIterationWF
-
-    print "HACK: DOING MULTI_IMAGE ", mode
-    ##import sys
-    ##sys.exit(-1)
-
-
+                name='outputspec')
 
     ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
     BeginANTS=pe.MapNode(interface=ANTS(), name = 'BeginANTS', iterfield=['moving_image'])
-    many_cpu_BeginANTS_options_dictionary={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null '+CLUSTER_QUEUE, 'overwrite': True}
-    BeginANTS.plugin_args=many_cpu_BeginANTS_options_dictionary
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
     BeginANTS.inputs.metric = ['CC']
@@ -139,13 +134,8 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE='',
     BeginANTS.inputs.radius = [5]
     BeginANTS.inputs.transformation_model = 'SyN'
     BeginANTS.inputs.gradient_step_length = 0.25
-    if mode == 'SINGLE_IMAGE_IMAGE':
-        ## HACK:  Just short circuit time consuming step if only registering a single image.
-        BeginANTS.inputs.number_of_iterations = [1]
-        BeginANTS.inputs.number_of_affine_iterations = [1]
-    else:
-        BeginANTS.inputs.number_of_iterations = [50, 35, 15]
-        BeginANTS.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
+    BeginANTS.inputs.number_of_iterations = [50, 35, 15]
+    BeginANTS.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
     BeginANTS.inputs.use_histogram_matching = True
     BeginANTS.inputs.mi_option = [32, 16000]
     BeginANTS.inputs.regularization = 'Gauss'

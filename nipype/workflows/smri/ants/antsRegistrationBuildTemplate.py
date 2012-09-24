@@ -109,14 +109,27 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
 ##        'SINGLE_IMAGE' is quick shorthand when you are building an atlas with a single subject, then registration can
 ##                    be short-circuted
 ##        any other string indicates the normal mode that you would expect and replicates the shell script build_template_parallel.sh
-def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE='',mode='MULTI'):
+def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
+    """
 
+    Inputs::
+
+           inputspec.images :
+           inputspec.fixed_image : 
+           inputspec.ListOfPassiveImagesDictionaries :
+
+    Outputs::
+
+           outputspec.template :
+           outputspec.transforms_list :
+           outputspec.passive_deformed_templates : 
+    """
     TemplateBuildSingleIterationWF = pe.Workflow(name = 'antsRegistrationTemplateBuildSingleIterationWF_'+str(iterationPhasePrefix) )
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=['images', 'fixed_image',
                 'ListOfPassiveImagesDictionaries']),
                 run_without_submitting=True,
-                name='InputSpec')
+                name='inputspec')
     ## HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
     ##             they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
     ##             their hash to change.
@@ -125,20 +138,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUST
     outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template','transforms_list',
                 'passive_deformed_templates']),
                 run_without_submitting=True,
-                name='OutputSpec')
-
-    if mode == 'SINGLE_IMAGEXX':
-        ### HACK:  A more general utility that is reused should be created.
-        print "HACK: DOING SINGLE_IMAGE ", mode
-        TemplateBuildSingleIterationWF.connect( [ (inputSpec, outputSpec, [(('images', GetFirstListElement ), 'template')] ), ])
-        ##HACK THIS DOES NOT WORK BECAUSE FILE NAMES ARE WRONG.
-        TemplateBuildSingleIterationWF.connect( [ (inputSpec, outputSpec, [(('ListOfPassiveImagesDictionaries', GetFirstListElement ), 'passive_deformed_templates')] ), ])
-        return TemplateBuildSingleIterationWF
-
-    print "HACK: DOING MULTI_IMAGE ", mode
-    ##import sys
-    ##sys.exit(-1)
-
+                name='outputspec')
 
 
     ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
@@ -152,11 +152,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUST
     BeginANTS.inputs.metric =                   ['Mattes',          'CC']
     BeginANTS.inputs.metric_weight =            [1.0,               1.0]
     BeginANTS.inputs.radius_or_number_of_bins = [32,                5]
-    if mode == 'SINGLE_IMAGE_IMAGE':
-        ## HACK:  Just short circuit time consuming step if only registering a single image.
-        BeginANTS.inputs.number_of_iterations = [[1],                [1]]
-    else:
-        BeginANTS.inputs.number_of_iterations = [[1000, 1000, 1000], [50, 35, 15]]
+    BeginANTS.inputs.number_of_iterations = [[1000, 1000, 1000], [50, 35, 15]]
     BeginANTS.inputs.use_histogram_matching =   [True,               True]
     BeginANTS.inputs.use_estimate_learning_rate_once = [False,       False]
     BeginANTS.inputs.shrink_factors =           [[3,2,1],            [3,2,1]]
