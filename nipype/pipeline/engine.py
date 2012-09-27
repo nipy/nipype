@@ -1515,20 +1515,19 @@ class MapNode(Node):
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
         """
-        output = DynamicTraitedSpec()
+        output = deepcopy(basetraits)
         if fields is None:
             fields = basetraits.copyable_trait_names()
         for name, spec in basetraits.items():
             if name in fields and ((nitems is None) or (nitems > 1)):
                 logger.debug('adding multipath trait: %s' % name)
+                output.remove_trait(name)
                 output.add_trait(name, InputMultiPath(spec.trait_type))
-            else:
-                output.add_trait(name, traits.Trait(spec))
-            setattr(output, name, Undefined)
-            value = getattr(basetraits, name)
-            if isdefined(value):
-                setattr(output, name, value)
-            value = getattr(output, name)
+                setattr(output, name, Undefined)
+                value = getattr(basetraits, name)
+                if isdefined(value):
+                    setattr(output, name, value)
+                value = getattr(output, name)
         return output
 
     def set_input(self, parameter, val):
@@ -1545,9 +1544,8 @@ class MapNode(Node):
         logger.debug('setting mapnode(%s) input: %s -> %s' % (str(self),
                                                               name,
                                                               str(newvalue)))
-        if name in self.iterfield:
-            setattr(self._inputs, name, newvalue)
-        else:
+        setattr(self._inputs, name, newvalue)
+        if name not in self.iterfield:
             setattr(self._interface.inputs, name, newvalue)
 
     def _get_hashval(self):
@@ -1557,15 +1555,7 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        hashinputs = deepcopy(self._interface.inputs)
-        for name in self.iterfield:
-            hashinputs.remove_trait(name)
-            hashinputs.add_trait(name,
-                                 InputMultiPath(self._interface.inputs.traits()[name].trait_type))
-            logger.debug('setting hashinput %s-> %s' %
-                         (name, getattr(self._inputs, name)))
-            setattr(hashinputs, name, getattr(self._inputs, name))
-        hashed_inputs, hashvalue = hashinputs.get_hashval(hash_method=self.config['execution']['hash_method'])
+        hashed_inputs, hashvalue = self.inputs.get_hashval(hash_method=self.config['execution']['hash_method'])
         if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
         self.needed_outputs:
             hashobject = md5()

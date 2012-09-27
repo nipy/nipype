@@ -511,12 +511,6 @@ class BaseTraitedSpec(traits.HasTraits):
             self.add_trait(attr, trait)
         super(BaseTraitedSpec, self).__setstate__(state)
 
-class DynamicTraitedSpec(BaseTraitedSpec):
-    """ A subclass to handle dynamic traits
-
-    This class is a workaround for add_traits and clone_traits not
-    functioning well together.
-    """
     def __deepcopy__(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
@@ -524,10 +518,19 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         id_self = id(self)
         if id_self in memo:
             return memo[id_self]
-        dup_dict = deepcopy(self.__getstate__(), memo)
+        dup_dict = deepcopy(self.__getstate__(), memo=memo)
         dup = self.clone_traits(memo=memo)
         dup.__setstate__(dup_dict)
         return dup
+
+
+class DynamicTraitedSpec(BaseTraitedSpec):
+    """ A subclass to handle dynamic traits
+
+    This class is a workaround for add_traits and clone_traits not
+    functioning well together.
+    """
+    pass
 
 
 class TraitedSpec(BaseTraitedSpec):
@@ -1330,3 +1333,8 @@ class InputMultiPath(MultiPath):
 
     """
     pass
+
+
+class TestSpec(TraitedSpec):
+    intval = traits.Int(-1)
+    eitherval = traits.Either(traits.Bool, traits.File)

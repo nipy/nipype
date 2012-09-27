@@ -5,10 +5,12 @@ import tempfile
 import shutil
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                        assert_true, assert_false, with_setup, package_check,
-                        skipif)
+                            assert_true, assert_false, skipif)
 import nipype.interfaces.base as nib
-from nipype.interfaces.base import Undefined, config
+from nipype.interfaces.base import Undefined, isdefined
+
+from nipype import logging
+iflogger = logging.getLogger('interface')
 
 #test Bunch
 def test_bunch():
@@ -103,7 +105,7 @@ def test_TraitedSpec_pickle():
     assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
     yield assert_raises, Exception, assign_a_again
 
-def test_TraitedSpec_deepcopy():
+def test_DynamicTraitedSpec_deepcopy():
     from copy import deepcopy
     a = nib.DynamicTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
@@ -113,6 +115,51 @@ def test_TraitedSpec_deepcopy():
     unpkld_a = deepcopy(a)
     assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
     yield assert_raises, Exception, assign_a_again
+
+def test_TraitedSpec_deepcopy():
+    from copy import deepcopy
+    a = nib.TestSpec()
+    a.intval = 1
+    a.add_trait('foo', nib.traits.Int)
+    a.foo = 1
+    assign_a = lambda : setattr(a, 'intval', 'a')
+    yield assert_raises, Exception, assign_a
+    assign_a = lambda : setattr(a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a
+    unpkld_a = deepcopy(a)
+    assign_a_again = lambda : setattr(unpkld_a, 'intval', 'a')
+    yield assert_raises, Exception, assign_a_again
+    assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a_again
+
+
+def test_TraitedSpec_pickle2():
+    from cPickle import dumps, loads
+    from copy import deepcopy
+    #a = nib.DynamicTraitedSpec()
+    basetraits = nib.TestSpec()
+    a = deepcopy(basetraits)
+    fields = ['intval']
+    for name, spec in basetraits.items():
+        if name in fields:
+            iflogger.debug('adding multipath trait: %s' % name)
+            a.remove_trait(name)
+            a.add_trait(name, nib.InputMultiPath(spec.trait_type))
+        #else:
+        #    a.add_trait(name, nib.traits.Trait(spec))
+            setattr(a, name, Undefined)
+            value = getattr(basetraits, name)
+            if isdefined(value):
+                setattr(a, name, value)
+            value = getattr(a, name)
+    a.intval = [1, 2]
+    assign_a = lambda : setattr(a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a
+    pkld_a = dumps(a)
+    unpkld_a = loads(pkld_a)
+    assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
+    yield assert_raises, Exception, assign_a_again
+
 
 def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
@@ -141,16 +188,6 @@ def test_TraitedSpec_logic():
     myif.inputs.kung = 2
     yield assert_equal, myif.inputs.kung, 2.0
 
-
-def checknose():
-    """check version of nose for known incompatability"""
-    mod = __import__('nose')
-    if mod.__versioninfo__[1] <= 11:
-        return 0
-    else:
-        return 1
-
-@skipif(checknose)
 def test_TraitedSpec_withFile():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
@@ -163,7 +200,21 @@ def test_TraitedSpec_withFile():
     yield assert_equal, hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
     teardown_file(tmpd)
 
-@skipif(checknose)
+def test_TraitedSpec_withEither():
+    inputs = nib.TestSpec
+    inputs.intval = 1
+    inputs.eitherval = [True]
+    from cPickle import dumps
+    from copy import deepcopy
+    exception_raised = False
+    try:
+        pickled_input = dumps(deepcopy(inputs))
+        iflogger.info(pickled_input)
+    except Exception, e:
+        iflogger.info(e)
+        exception_raised = True
+    yield assert_false, exception_raised
+
 def test_TraitedSpec_withNoFileHashing():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
