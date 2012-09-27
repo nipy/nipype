@@ -529,7 +529,6 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         dup.set(**dup_dict)
         return dup
 
-
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
 
