@@ -53,17 +53,32 @@ for tt in MyFileURLs:
     else:
         print("File previously downloaded {0}".format(localFilename))
 
-input_images=[
-os.path.join(mydatadir,'01_T1_half.nii.gz'),
-os.path.join(mydatadir,'02_T1_half.nii.gz'),
-os.path.join(mydatadir,'03_T1_half.nii.gz')
-]
-input_passive_images=[
-{'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+
+"""
+ListOfImagesDictionaries - a list of dictionaries where each dictionary is
+for one scan session, and the mappings in the dictionary are for all the
+co-aligned images for that one scan session
+"""
+ListOfImagesDictionaries=[
+{'T1':os.path.join(mydatadir,'01_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
+{'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
+{'T1':os.path.join(mydatadir,'03_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
 ]
 
+"""
+registrationImageTypes - A list of the image types to be used actively during
+the estimation process of registration, any image type not in this list
+will be passively resampled with the estimated transforms.
+['T1','T2']
+"""
+registrationImageTypes=['T1']
+
+"""
+interpolationMap - A map of image types to interpolation modes.  If an
+image type is not listed, it will be linearly interpolated.
+{ 'labelmap':'NearestNeighbor', 'FLAIR':'WindowedSinc' }
+"""
+interpolationMapping={'INV_T1':'LanczosWindowedSinc','LABEL_MAP':'NearestNeighbor','T1':'Linear'}
 
 """
 3. Define the workflow and its working directory
@@ -74,21 +89,27 @@ tbuilder.base_dir=requestedPath
 """
 4. Define data sources. In real life these would be replace by DataGrabbers
 """
+InitialTemplateInputs=[ mdict['T1'] for mdict in ListOfImagesDictionaries ]
+
 datasource = pe.Node(interface=util.IdentityInterface(fields=
-                    ['imageList', 'passiveImagesDictionariesList']),
+                    ['InitialTemplateInputs', 'ListOfImagesDictionaries',
+                     'registrationImageTypes','interpolationMapping']),
                     run_without_submitting=True,
                     name='InputImages' )
-datasource.inputs.imageList=input_images
-datasource.inputs.passiveImagesDictionariesList=input_passive_images
+datasource.inputs.InitialTemplateInputs=InitialTemplateInputs
+datasource.inputs.ListOfImagesDictionaries=ListOfImagesDictionaries
+datasource.inputs.registrationImageTypes=registrationImageTypes
+datasource.inputs.interpolationMapping=interpolationMapping
 
 """
-5. Template is initialized by a simple average
+5. Template is initialized by a simple average in this simple example,
+   any reference image could be used (i.e. a previously created template)
 """
 initAvg = pe.Node(interface=ants.AverageImages(), name ='initAvg')
 initAvg.inputs.dimension = 3
 initAvg.inputs.normalize = True
 
-tbuilder.connect(datasource, "imageList", initAvg, "images")
+tbuilder.connect(datasource, "InitialTemplateInputs", initAvg, "images")
 
 """
 6. Define the first iteration of template building
@@ -96,22 +117,22 @@ tbuilder.connect(datasource, "imageList", initAvg, "images")
 
 buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01')
 tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'InputSpec.images')
-tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'InputSpec.ListOfPassiveImagesDictionaries')
+tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration1, 'InputSpec.ListOfImagesDictionaries')
+tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration1, 'InputSpec.registrationImageTypes')
+tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'InputSpec.interpolationMapping')
 
 """
 7. Define the second iteration of template building
 """
-
 buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
 tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'imageList', buildTemplateIteration2, 'InputSpec.images')
-tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration2, 'InputSpec.ListOfPassiveImagesDictionaries')
+tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration2, 'InputSpec.ListOfImagesDictionaries')
+tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration2, 'InputSpec.registrationImageTypes')
+tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration2, 'InputSpec.interpolationMapping')
 
 """
 8. Move selected files to a designated results folder
 """
-
 datasink = pe.Node(io.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(requestedPath, "results")
 

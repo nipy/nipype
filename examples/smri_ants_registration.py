@@ -72,8 +72,8 @@ reg.inputs.smoothing_sigmas = [[1,0], [2,1,0]]
 reg.inputs.shrink_factors = [[2,1], [3,2,1]]
 reg.inputs.use_estimate_learning_rate_once = [True, True]
 reg.inputs.use_histogram_matching = [True, True] # This is the default
-reg.inputs.output_transform_prefix = "t1_average_BRAINSABC_To_template_t1_clipped"
-reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
+reg.inputs.output_transform_prefix = 'thisTransform'
+reg.inputs.output_warped_image = 'INTERNAL_WARPED.nii.gz'
 reg.cmdline
 
 
