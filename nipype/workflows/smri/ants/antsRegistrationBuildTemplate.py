@@ -145,15 +145,33 @@ def GetPassiveImages(ListOfImagesDictionaries,registrationImageTypes):
     return passive_images
 
 ##
-def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUSTER_QUEUE=''):
+## NOTE:  The modes can be either 'SINGLE_IMAGE' or 'MULTI'
+##        'SINGLE_IMAGE' is quick shorthand when you are building an atlas with a single subject, then registration can
+##                    be short-circuted
+##        any other string indicates the normal mode that you would expect and replicates the shell script build_template_parallel.sh
+def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
+    """
 
+    Inputs::
+
+           inputspec.images :
+           inputspec.fixed_image : 
+           inputspec.ListOfPassiveImagesDictionaries :
+           inputspec.interpolationMapping :
+
+    Outputs::
+
+           outputspec.template :
+           outputspec.transforms_list :
+           outputspec.passive_deformed_templates : 
+    """
     TemplateBuildSingleIterationWF = pe.Workflow(name = 'antsRegistrationTemplateBuildSingleIterationWF_'+str(iterationPhasePrefix) )
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=[
                 'ListOfImagesDictionaries', 'registrationImageTypes',
                 'interpolationMapping','fixed_image']),
                 run_without_submitting=True,
-                name='InputSpec')
+                name='inputspec')
     ## HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
     ##             they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
     ##             their hash to change.
@@ -162,12 +180,11 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix='',CLUST
     outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template','transforms_list',
                 'passive_deformed_templates']),
                 run_without_submitting=True,
-                name='OutputSpec')
+                name='outputspec')
+
 
     ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
     BeginANTS=pe.MapNode(interface=Registration(), name = 'BeginANTS', iterfield=['moving_image'])
-    many_cpu_BeginANTS_options_dictionary={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null '+CLUSTER_QUEUE, 'overwrite': True}
-    BeginANTS.plugin_args=many_cpu_BeginANTS_options_dictionary
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
     BeginANTS.inputs.transforms =               ["Affine",          "SyN"]

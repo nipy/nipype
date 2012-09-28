@@ -7,7 +7,7 @@ sMRI: Using new ANTS for creating a T1 template (ITK4)
 ======================================================
 
 In this tutorial we will use ANTS (new ITK4 version aka "antsRegistration") based workflow  to
-create a template out of multiple T1 volumes.
+create a template out of multiple T1 volumes. We will also showcase how to fine tune SGE jobs requirements.
 
 1. Tell python where to find the appropriate functions.
 """
@@ -64,6 +64,11 @@ ListOfImagesDictionaries=[
 {'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
 {'T1':os.path.join(mydatadir,'03_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
 ]
+input_passive_images=[
+{'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
+{'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
+{'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+]
 
 """
 registrationImageTypes - A list of the image types to be used actively during
@@ -116,15 +121,23 @@ tbuilder.connect(datasource, "InitialTemplateInputs", initAvg, "images")
 """
 
 buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01')
+"""
+Here we are fine tuning parameters of the SGE job (memory limit, numebr of cores etc.)
+"""
+BeginANTS = buildTemplateIteration1.get_node("BeginANTS")
+BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
+
 tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration1, 'InputSpec.ListOfImagesDictionaries')
 tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration1, 'InputSpec.registrationImageTypes')
 tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'InputSpec.interpolationMapping')
-
 """
 7. Define the second iteration of template building
 """
+
 buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
+BeginANTS = buildTemplateIteration2.get_node("BeginANTS")
+BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
 tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
 tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration2, 'InputSpec.ListOfImagesDictionaries')
 tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration2, 'InputSpec.registrationImageTypes')
@@ -133,15 +146,16 @@ tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration2, 'I
 """
 8. Move selected files to a designated results folder
 """
+
 datasink = pe.Node(io.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(requestedPath, "results")
 
-tbuilder.connect(buildTemplateIteration2, 'OutputSpec.template',datasink,'PrimaryTemplate')
-tbuilder.connect(buildTemplateIteration2, 'OutputSpec.passive_deformed_templates',datasink,'PassiveTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.template',datasink,'PrimaryTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates',datasink,'PassiveTemplate')
 tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
 
 """
 8. Run the workflow
 """
 
-tbuilder.run()
+tbuilder.run(plugin="SGE")
