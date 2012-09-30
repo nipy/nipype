@@ -193,6 +193,17 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
 
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.List(traits.Bool(argstr='%s'), default=True, usedefault=True)
+    # Interpolation flag  
+    interpolation = traits.Enum('Linear',
+                                'NearestNeighbor',
+                                'CosineWindowedSinc',
+                                'WelchWindowedSinc',
+                                'HammingWindowedSinc',
+                                'LanczosWindowedSinc',
+                                # 'MultiLabel',
+                                # 'Gaussian',
+                                # 'BSpline',
+                                argstr='%s', usedefault = True)
     # Transform flags
     write_composite_transform = traits.Bool(argstr='--write-composite-transform %d', default=False, usedefault=True, desc='')
     transforms = traits.List(traits.Enum('Rigid', 'Affine', 'CompositeAffine',
@@ -323,7 +334,10 @@ class Registration(ANTSCommand):
             if self.inputs.invert_initial_moving_transform:
                 return '--initial-moving-transform [ %s, 1 ]' % self.inputs.initial_moving_transform
             else:
-                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform
+                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform    
+        elif opt == 'interpolation':  
+            # TODO: handle multilabel, gaussian, and bspline options  
+            return '--interpolation %s' % self.inputs.interpolation
         elif opt == 'output_transform_prefix':
             if isdefined(self.inputs.output_inverse_warped_image) and self.inputs.output_inverse_warped_image:
                 return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image, self.inputs.output_inverse_warped_image )

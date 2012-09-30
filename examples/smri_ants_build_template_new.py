@@ -127,10 +127,10 @@ Here we are fine tuning parameters of the SGE job (memory limit, numebr of cores
 BeginANTS = buildTemplateIteration1.get_node("BeginANTS")
 BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
 
-tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration1, 'InputSpec.ListOfImagesDictionaries')
-tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration1, 'InputSpec.registrationImageTypes')
-tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'InputSpec.interpolationMapping')
+tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'inputspec.fixed_image')
+tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration1, 'inputspec.ListOfImagesDictionaries')
+tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration1, 'inputspec.registrationImageTypes')
+tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'inputspec.interpolationMapping')
 """
 7. Define the second iteration of template building
 """
@@ -138,10 +138,10 @@ tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'I
 buildTemplateIteration2 = antsRegistrationTemplateBuildSingleIterationWF('iteration02')
 BeginANTS = buildTemplateIteration2.get_node("BeginANTS")
 BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
-tbuilder.connect(buildTemplateIteration1, 'OutputSpec.template', buildTemplateIteration2, 'InputSpec.fixed_image')
-tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration2, 'InputSpec.ListOfImagesDictionaries')
-tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration2, 'InputSpec.registrationImageTypes')
-tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration2, 'InputSpec.interpolationMapping')
+tbuilder.connect(buildTemplateIteration1, 'outputspec.template', buildTemplateIteration2, 'inputspec.fixed_image')
+tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration2, 'inputspec.ListOfImagesDictionaries')
+tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration2, 'inputspec.registrationImageTypes')
+tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration2, 'inputspec.interpolationMapping')
 
 """
 8. Move selected files to a designated results folder
