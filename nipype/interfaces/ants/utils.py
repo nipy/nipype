@@ -1,268 +1,119 @@
-# Local imports
-from ..base import (TraitedSpec, File, traits, InputMultiPath,
-                    isdefined)
-from ...utils.filemanip import split_filename
-from .base import ANTSCommand, ANTSCommandInputSpec
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft = python sts = 4 ts = 4 sw = 4 et:
+"""ANTS Apply Transforms interface
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+   >>> os.chdir(datadir)
+"""
 import os
 
+from .base import ANTSCommand, ANTSCommandInputSpec
+from ..base import (TraitedSpec, File, traits,
+                    isdefined)
+from ...utils.filemanip import split_filename
+from nipype.interfaces.base import InputMultiPath
 
-class ApplyTransformsInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True,
-                            desc='image dimension (2 or 3)')
-    input_image = File(argstr='--input %s', mandatory=True,
-                        desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'))
-    output_image = traits.Str(argstr='--output %s',
-                             desc=('output file name'), genfile=True,
-                             hash_file=False)
-    reference_image = File(argstr='--reference-image %s',
-                       desc='reference image space that you wish to warp INTO')
-    interpolation = traits.Str(argstr='--interpolation %s',
-                              desc='Use nearest neighbor interpolation')
-    transformation_files = InputMultiPath(File(exists=True), argstr='%s',
-                             desc='transformation file(s) to be applied',
-                             mandatory=True)
-    invert_transforms = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
-                          'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
-    default_value = traits.Float(argstr="--default-value %g", desc="Default " +
-    "voxel value to be used with input images only. Specifies the voxel value " +
-          "when the input point maps outside the output domain")
+class AverageAffineTransformInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0, desc='image dimension (2 or 3)')
+    output_affine_transform = File(argstr='%s', mandatory=True, position=1, desc='Outputfname.txt: the name of the resulting transform.')
+    transforms = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, position=3, desc=('transforms to average') )
 
+class AverageAffineTransformOutputSpec(TraitedSpec):
+    affine_transform = File(exists=True, desc='average transform file')
 
-class ApplyTransformsOutputSpec(TraitedSpec):
-    output_image = File(exists=True, desc='Warped image')
-
-
-class ApplyTransforms(ANTSCommand):
-    """antsApplyTransforms, applied to an input image, transforms it according to a
-    reference image and a transform (or a set of transforms).
-
+class AverageAffineTransform(ANTSCommand):
+    """
     Examples
     --------
-
-    >>> from nipype.interfaces.ants import ApplyTransforms
-    >>> atms = ApplyTransforms()
-    >>> atms.inputs.input_image = 'structural.nii'
-    >>> atms.inputs.reference_image = 'ants_deformed.nii.gz'
-    >>> atms.inputs.transformation_files = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> atms.cmdline
-    'antsApplyTransforms --dimensionality 3 --input structural.nii --output structural_trans.nii --reference-image ants_deformed.nii.gz --transform ants_Warp.nii.gz --transform ants_Affine.txt'
-
+    >>> from nipype.interfaces.ants import AverageAffineTransform
+    >>> avg = AverageAffineTransform()
+    >>> avg.inputs.dimension = 3
+    >>> avg.inputs.transforms = ['trans.mat', 'func_to_struct.mat']
+    >>> avg.inputs.output_affine_transform = 'MYtemplatewarp.mat'
+    >>> avg.cmdline
+    'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
-
-    _cmd = 'antsApplyTransforms'
-    input_spec = ApplyTransformsInputSpec
-    output_spec = ApplyTransformsOutputSpec
-
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_trans' + ext
-            return output
-        return None
+    _cmd = 'AverageAffineTransform'
+    input_spec = AverageAffineTransformInputSpec
+    output_spec = AverageAffineTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'transformation_files':
-            series = []
-            tmpl = "--transform "
-            for i, transformation_file in enumerate(val):
-                tmpl
-                if isdefined(self.inputs.invert_transforms) and i + 1 in self.inputs.invert_transforms:
-                    series.append(tmpl + "[%s,1]" % transformation_file)
-                else:
-                    series.append(tmpl + "%s" % transformation_file)
-            return ' '.join(series)
-        return super(ApplyTransforms, self)._format_arg(opt, spec, val)
+        return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
+        outputs['affine_transform'] = os.path.abspath(self.inputs.output_affine_transform)
         return outputs
 
 
-class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=True,
-                            desc='image dimension (2 or 3)', position=1)
-    moving_image = File(argstr='%s', mandatory=True, copyfile=True,
-                        desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'))
-    out_postfix = traits.Str('_wimt', argstr='%s', usedefault=True,
-                             desc=('Postfix that is prepended to all output '
-                                   'files (default = _wimt)'))
-    reference_image = File(argstr='-R %s', xor=['tightest_box'],
-                       desc='reference image space that you wish to warp INTO')
-    tightest_box = traits.Bool(argstr='--tightest-bounding-box',
-                          desc=('computes tightest bounding box (overrided by '  \
-                                'reference_image if given)'),
-                          xor=['reference_image'])
-    reslice_by_header = traits.Bool(argstr='--reslice-by-header',
-                     desc=('Uses orientation matrix and origin encoded in '
-                           'reference image file header. Not typically used '
-                           'with additional transforms'))
-    use_nearest = traits.Bool(argstr='--use-NN',
-                              desc='Use nearest neighbor interpolation')
-    use_bspline = traits.Bool(argstr='--use-Bspline',
-                              desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiPath(File(exists=True), argstr='%s',
-                             desc='transformation file(s) to be applied',
-                             mandatory=True, copyfile=False)
-    invert_affine = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
-                          'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
+class AverageImagesInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='%d', mandatory=True, position=0, desc='image dimension (2 or 3)')
+    output_average_image = File("average.nii", argstr='%s', position=1, desc='the name of the resulting image.', usedefault=True, hash_files=False)
+    normalize = traits.Bool(argstr="%d", mandatory=True, position=2, desc='Normalize: if true, the 2nd image' +
+                            'is divided by its mean. This will select the largest image to average into.')
+    images = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, position=3, desc=('image to apply transformation to (generally a coregistered functional)') )
 
+class AverageImagesOutputSpec(TraitedSpec):
+    output_average_image = File(exists=True, desc='average image file')
 
-class WarpImageMultiTransformOutputSpec(TraitedSpec):
-    output_image = File(exists=True, desc='Warped image')
-
-
-class WarpImageMultiTransform(ANTSCommand):
-    """Warps an image from one space to another
-
+class AverageImages(ANTSCommand):
+    """
     Examples
     --------
-
-    >>> from nipype.interfaces.ants import WarpImageMultiTransform
-    >>> wimt = WarpImageMultiTransform()
-    >>> wimt.inputs.moving_image = 'structural.nii'
-    >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
-    >>> wimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> wimt.cmdline
-    'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
-
-
-    >>> from nipype.interfaces.ants import WarpImageMultiTransform
-    >>> wimt = WarpImageMultiTransform()
-    >>> wimt.inputs.moving_image = 'diffusion_weighted.nii'
-    >>> wimt.inputs.reference_image = 'functional.nii'
-    >>> wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz','dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
-    >>> wimt.inputs.invert_affine = [1]
-    >>> wimt.cmdline
-    'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii -i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt'
-
+    >>> from nipype.interfaces.ants import AverageImages
+    >>> avg = AverageImages()
+    >>> avg.inputs.dimension = 3
+    >>> avg.inputs.output_average_image = "average.nii.gz"
+    >>> avg.inputs.normalize = True
+    >>> avg.inputs.images = ['rc1s1.nii', 'rc1s1.nii']
+    >>> avg.cmdline
+    'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
     """
-
-    _cmd = 'WarpImageMultiTransform'
-    input_spec = WarpImageMultiTransformInputSpec
-    output_spec = WarpImageMultiTransformOutputSpec
+    _cmd = 'AverageImages'
+    input_spec = AverageImagesInputSpec
+    output_spec = AverageImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'out_postfix':
-            _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-            return name + val + ext
-        if opt == 'transformation_series':
-            series = []
-            affine_counter = 0
-            for transformation in val:
-                if 'Affine' in transformation and \
-                    isdefined(self.inputs.invert_affine):
-                    affine_counter += 1
-                    if affine_counter in self.inputs.invert_affine:
-                       series += '-i',
-                series += [transformation]
-            return ' '.join(series)
-        return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
+        return super(AverageImages, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-        outputs['output_image'] = os.path.join(os.getcwd(),
-                                             ''.join((name,
-                                                      self.inputs.out_postfix,
-                                                      ext)))
+        outputs['output_average_image'] = os.path.realpath(self.inputs.output_average_image)
         return outputs
 
+class MultiplyImagesInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0, desc='image dimension (2 or 3)')
+    first_input = File(argstr='%s', exists=True, mandatory=True, position=1, desc='image 1')
+    second_input = traits.Either(File(exists=True), traits.Float, argstr='%s', mandatory=True, position=2, desc='image 2 or multiplication weight')
+    output_product_image = File(argstr='%s', mandatory=True, position=3, desc='Outputfname.nii.gz: the name of the resulting image.')
 
-class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(4, 3, argstr='%d', usedefault=True,
-                            desc='image dimension (3 or 4)', position=1)
-    moving_image = File(argstr='%s', mandatory=True, copyfile=True,
-                        desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'))
-    out_postfix = traits.Str('_wtsimt', argstr='%s', usedefault=True,
-                             desc=('Postfix that is prepended to all output '
-                                   'files (default = _wtsimt)'))
-    reference_image = File(argstr='-R %s', xor=['tightest_box'],
-                       desc='reference image space that you wish to warp INTO')
-    tightest_box = traits.Bool(argstr='--tightest-bounding-box',
-                          desc=('computes tightest bounding box (overrided by '  \
-                                'reference_image if given)'),
-                          xor=['reference_image'])
-    reslice_by_header = traits.Bool(argstr='--reslice-by-header',
-                     desc=('Uses orientation matrix and origin encoded in '
-                           'reference image file header. Not typically used '
-                           'with additional transforms'))
-    use_nearest = traits.Bool(argstr='--use-NN',
-                              desc='Use nearest neighbor interpolation')
-    use_bspline = traits.Bool(argstr='--use-Bspline',
-                              desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiPath(File(exists=True), argstr='%s',
-                             desc='transformation file(s) to be applied',
-                             mandatory=True, copyfile=False)
-    invert_affine = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
-                          'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
+class MultiplyImagesOutputSpec(TraitedSpec):
+    output_product_image = File(exists=True, desc='average image file')
 
-
-class WarpTimeSeriesImageMultiTransformOutputSpec(TraitedSpec):
-    output_image = File(exists=True, desc='Warped image')
-
-
-class WarpTimeSeriesImageMultiTransform(ANTSCommand):
-    """Warps a time-series from one space to another
-
+class MultiplyImages(ANTSCommand):
+    """
     Examples
     --------
-
-    >>> from nipype.interfaces.ants import WarpTimeSeriesImageMultiTransform
-    >>> wtsimt = WarpTimeSeriesImageMultiTransform()
-    >>> wtsimt.inputs.moving_image = 'resting.nii'
-    >>> wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
-    >>> wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
-    >>> wtsimt.cmdline
-    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
-
-    >>> from nipype.interfaces.ants import WarpTimeSeriesImageMultiTransform
-    >>> wtsimt = WarpTimeSeriesImageMultiTransform()
-    >>> wtsimt.inputs.moving_image = 'resting.nii'
-    >>> wtsimt.inputs.reference_image = 'diffusion_weighted.nii'
-    >>> wtsimt.inputs.transformation_series = ['dwi2anat_coreg_Affine.txt','dwi2anat_InverseWarp.nii.gz','resting2anat_Warp.nii.gz','resting2anat_coreg_Affine.txt']
-    >>> wtsimt.inputs.invert_affine = [1]
-    >>> wtsimt.cmdline
-    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R diffusion_weighted.nii -i dwi2anat_coreg_Affine.txt dwi2anat_InverseWarp.nii.gz resting2anat_Warp.nii.gz resting2anat_coreg_Affine.txt'
+    >>> from nipype.interfaces.ants import MultiplyImages
+    >>> test = MultiplyImages()
+    >>> test.inputs.dimension = 3
+    >>> test.inputs.first_input = 'moving2.nii'
+    >>> test.inputs.second_input = 0.25
+    >>> test.inputs.output_product_image = "out.nii"
+    >>> test.cmdline
+    'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
-
-    _cmd = 'WarpTimeSeriesImageMultiTransform'
-    input_spec = WarpTimeSeriesImageMultiTransformInputSpec
-    output_spec = WarpTimeSeriesImageMultiTransformOutputSpec
+    _cmd = 'MultiplyImages'
+    input_spec = MultiplyImagesInputSpec
+    output_spec = MultiplyImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'out_postfix':
-            _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-            return name + val + ext
-        if opt == 'transformation_series':
-            series = []
-            affine_counter = 0
-            for transformation in val:
-                if 'Affine' in transformation and \
-                    isdefined(self.inputs.invert_affine):
-                    affine_counter += 1
-                    if affine_counter in self.inputs.invert_affine:
-                        series += '-i',
-                series += [transformation]
-            return ' '.join(series)
-        return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(opt, spec, val)
+        return super(MultiplyImages, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.moving_image))
-        outputs['output_image'] = os.path.join(os.getcwd(),
-                                             ''.join((name,
-                                                      self.inputs.out_postfix,
-                                                      ext)))
+        outputs['output_product_image'] = os.path.abspath(self.inputs.output_product_image)
         return outputs
