@@ -9,6 +9,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                         skipif)
 import nipype.interfaces.base as nib
 from nipype.interfaces.base import Undefined, config
+from traits.testing.nose_tools import skip
 
 #test Bunch
 def test_bunch():
@@ -91,6 +92,7 @@ def test_TraitedSpec():
     #yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
+@skip
 def test_TraitedSpec_dynamic():
     from cPickle import dumps, loads
     a = nib.BaseTraitedSpec()
