@@ -59,6 +59,7 @@ ListOfImagesDictionaries - a list of dictionaries where each dictionary is
 for one scan session, and the mappings in the dictionary are for all the
 co-aligned images for that one scan session
 """
+
 ListOfImagesDictionaries=[
 {'T1':os.path.join(mydatadir,'01_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
 {'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
@@ -76,6 +77,7 @@ the estimation process of registration, any image type not in this list
 will be passively resampled with the estimated transforms.
 ['T1','T2']
 """
+
 registrationImageTypes=['T1']
 
 """
@@ -83,17 +85,20 @@ interpolationMap - A map of image types to interpolation modes.  If an
 image type is not listed, it will be linearly interpolated.
 { 'labelmap':'NearestNeighbor', 'FLAIR':'WindowedSinc' }
 """
+
 interpolationMapping={'INV_T1':'LanczosWindowedSinc','LABEL_MAP':'NearestNeighbor','T1':'Linear'}
 
 """
 3. Define the workflow and its working directory
 """
+
 tbuilder=pe.Workflow(name="antsRegistrationTemplateBuilder")
 tbuilder.base_dir=requestedPath
 
 """
 4. Define data sources. In real life these would be replace by DataGrabbers
 """
+
 InitialTemplateInputs=[ mdict['T1'] for mdict in ListOfImagesDictionaries ]
 
 datasource = pe.Node(interface=util.IdentityInterface(fields=
@@ -110,6 +115,7 @@ datasource.inputs.interpolationMapping=interpolationMapping
 5. Template is initialized by a simple average in this simple example,
    any reference image could be used (i.e. a previously created template)
 """
+
 initAvg = pe.Node(interface=ants.AverageImages(), name ='initAvg')
 initAvg.inputs.dimension = 3
 initAvg.inputs.normalize = True
@@ -121,9 +127,11 @@ tbuilder.connect(datasource, "InitialTemplateInputs", initAvg, "images")
 """
 
 buildTemplateIteration1=antsRegistrationTemplateBuildSingleIterationWF('iteration01')
+
 """
 Here we are fine tuning parameters of the SGE job (memory limit, numebr of cores etc.)
 """
+
 BeginANTS = buildTemplateIteration1.get_node("BeginANTS")
 BeginANTS.plugin_args={'qsub_args': '-S /bin/bash -pe smp1 8-12 -l mem_free=6000M -o /dev/null -e /dev/null queue_name', 'overwrite': True}
 
@@ -131,6 +139,7 @@ tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'inpu
 tbuilder.connect(datasource, 'ListOfImagesDictionaries', buildTemplateIteration1, 'inputspec.ListOfImagesDictionaries')
 tbuilder.connect(datasource, 'registrationImageTypes', buildTemplateIteration1, 'inputspec.registrationImageTypes')
 tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration1, 'inputspec.interpolationMapping')
+
 """
 7. Define the second iteration of template building
 """
@@ -155,7 +164,7 @@ tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates
 tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
 
 """
-8. Run the workflow
+9. Run the workflow
 """
 
 tbuilder.run(plugin="SGE")
