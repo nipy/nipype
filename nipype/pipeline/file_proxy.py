@@ -65,7 +65,19 @@ class FileProxyNode(pe.Node):
 
 class GunzipNode(FileProxyNode):
     """ Handle gunziped file (as .nii.gz) for Matlab/SPM interfaces.
-    Only the one which allows output file specification can gzip output."""
+    Only the one which allows output file specification can gzip output.
+    
+    Any inputs having .nii.gz extension will be temporarily gunzipped and provided as input to interface.
+    Any output file name having .nii.gz extension they will be provided to interface as .nii and then gzipped after interface runs.
+
+    Example
+    ========
+
+    >>> import nipype.pipeline.file_proxy as fileproxy
+    >>> realign = fileproxy.GunzipNode(interface=spm.Realign(),name='realign')
+    >>> realign.inputs.in_files = 'functional.nii.gz'
+    >>> realign.run()
+    """
     
     def _transform_input_file(self,fname, incwd=True):
         path,base,ext = split_filename(fname)
