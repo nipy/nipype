@@ -17,9 +17,12 @@ Beginner's guide
 
 Introductory slides. `Available here`__
 
+Beginner's tutorials (IPython Notebooks). `Availible here`__
+
 Michael Notter's guide. `Available here`__
 
 __ http://satra.github.com/intro2nipype
+__ https://github.com/mwaskom/nipype_concepts
 __ http://miykael.github.com/nipype-beginner-s-guide/index.html
 
 User guides
