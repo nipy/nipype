@@ -338,19 +338,7 @@ class ArtifactDetect(BaseInterface):
                 voxel_coords = np.nonzero(mask)
                 coords = np.vstack((voxel_coords[0],
                                     np.vstack((voxel_coords[1], voxel_coords[2])))).T
-                brain_pts = np.dot(affine, np.hstack((coords, np.ones((coords.shape[0], 1)))).T) #.T
-                '''
-                demeaned_brain_pts = brain_pts - np.mean(brain_pts, axis=0)
-                _, _, v = np.linalg.svd(demeaned_brain_pts, full_matrices=False)
-                transformed_coordinates = np.dot(demeaned_brain_pts, v.T)
-                maxc = np.dot(np.max(transformed_coordinates, axis=0) * np.eye(4)[:3, :], v)
-                minc = np.dot(np.min(transformed_coordinates, axis=0) * np.eye(4)[:3, :], v)
-                eig1 = np.vstack((maxc[0, :], minc[0, :]))[:, :3]
-                eig2 = np.vstack((maxc[1, :], minc[1, :]))[:, :3]
-                eig3 = np.vstack((maxc[2, :], minc[2, :]))[:, :3]
-                brain_pts = np.hstack((np.vstack((eig1, np.vstack((eig2, eig3)))),
-                                       np.ones((6, 1)))).T
-                '''
+                brain_pts = np.dot(affine, np.hstack((coords, np.ones((coords.shape[0], 1)))).T)
             # calculate the norm of the motion parameters
             normval = self._calc_norm(mc, self.inputs.use_differences[0], brain_pts=brain_pts)
             tidx = find_indices(normval > self.inputs.norm_threshold)
