@@ -71,6 +71,10 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
                             usedefault=True)
     plot_type = traits.Enum('png', 'svg', 'eps', 'pdf', desc="file type of the outlier plot",
                             usedefault=True)
+    bound_by_brainmask = traits.Bool(False, desc=("use the brain mask to "
+                                                 "determine bounding box"
+                                                 "for composite norm"),
+                                     usedefault=True)
 
 
 class ArtifactDetectOutputSpec(TraitedSpec):
@@ -156,15 +160,6 @@ class ArtifactDetect(BaseInterface):
                 outputs['norm_files'].insert(i, normfile)
             if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
                 outputs['plot_files'].insert(i, plotfile)
-        '''
-        outputs['outlier_files'] = list_to_filename(outputs['outlier_files'])
-        outputs['intensity_files'] = list_to_filename(outputs['intensity_files'])
-        outputs['statistic_files'] = list_to_filename(outputs['statistic_files'])
-        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
-            outputs['norm_files'] = list_to_filename(outputs['norm_files'])
-        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-            outputs['plot_files'] = list_to_filename(outputs['plot_files'])
-        '''
         return outputs
 
     def _get_affine_matrix(self, params):
@@ -199,7 +194,7 @@ class ArtifactDetect(BaseInterface):
 
         return np.dot(T, np.dot(Rx, np.dot(Ry, np.dot(Rz, np.dot(S, Sh)))))
 
-    def _calc_norm(self, mc, use_differences):
+    def _calc_norm(self, mc, use_differences, brain_pts=None):
         """Calculates the maximum overall displacement of the midpoints
         of the faces of a cube due to translation and rotation.
 
@@ -215,19 +210,22 @@ class ArtifactDetect(BaseInterface):
         norm : at each time point
 
         """
-        respos = np.diag([70, 70, 75])
-        resneg = np.diag([-70, -110, -45])
-        # respos=np.diag([50, 50, 50]);resneg=np.diag([-50,-50,-50]);
-        # XXX - SG why not the above box
-        cube_pts = np.vstack((np.hstack((respos, resneg)), np.ones((1, 6))))
-        newpos = np.zeros((mc.shape[0], 18))
+
+        if brain_pts is None:
+            respos = np.diag([70, 70, 75])
+            resneg = np.diag([-70, -110, -45])
+            cube_pts = np.vstack((np.hstack((respos, resneg)), np.ones((1, 6))))
+        else:
+            cube_pts = brain_pts
+        n_pts = cube_pts.size - cube_pts.shape[1]
+        newpos = np.zeros((mc.shape[0], n_pts))
         for i in range(mc.shape[0]):
             newpos[i, :] = np.dot(self._get_affine_matrix(mc[i, :]), cube_pts)[0:3, :].ravel()
         normdata = np.zeros(mc.shape[0])
         if use_differences:
-            newpos = np.concatenate((np.zeros((1, 18)), np.diff(newpos, n=1, axis=0)), axis=0)
+            newpos = np.concatenate((np.zeros((1, n_pts)), np.diff(newpos, n=1, axis=0)), axis=0)
             for i in range(newpos.shape[0]):
-                normdata[i] = np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2), (3, 6)), axis=0)))
+                normdata[i] = np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2), (3, cube_pts.shape[1])), axis=0)))
         else:
             #if not registered to mean we may want to use this
             #mc_sum = np.sum(np.abs(mc), axis=1)
@@ -262,30 +260,6 @@ class ArtifactDetect(BaseInterface):
         """
         if not cwd:
             cwd = os.getcwd()
-        # read in motion parameters
-        mc_in = np.loadtxt(motionfile)
-        mc = deepcopy(mc_in)
-        if self.inputs.parameter_source == 'SPM':
-            pass
-        elif self.inputs.parameter_source == 'FSL':
-            mc = mc[:, [3, 4, 5, 0, 1, 2]]
-        elif self.inputs.parameter_source == 'Siemens':
-            Exception("Siemens PACE format not implemented yet")
-        else:
-            Exception("Unknown source for movement parameters")
-
-        if self.inputs.use_norm:
-            # calculate the norm of the motion parameters
-            normval = self._calc_norm(mc, self.inputs.use_differences[0])
-            tidx = find_indices(normval > self.inputs.norm_threshold)
-            ridx = find_indices(normval < 0)
-        else:
-            if self.inputs.use_differences[0]:
-                mc = np.concatenate((np.zeros((1, 6)), np.diff(mc_in, n=1, axis=0)), axis=0)
-            traval = mc[:, 0:3]  # translation parameters (mm)
-            rotval = mc[:, 3:6]  # rotation parameters (rad)
-            tidx = find_indices(np.sum(abs(traval) > self.inputs.translation_threshold, 1) > 0)
-            ridx = find_indices(np.sum(abs(rotval) > self.inputs.rotation_threshold, 1) > 0)
 
         # read in functional image
         if isinstance(imgfile, str):
@@ -301,6 +275,7 @@ class ArtifactDetect(BaseInterface):
         (x, y, z, timepoints) = nim.get_shape()
 
         data = nim.get_data()
+        affine = nim.get_affine()
         g = np.zeros((timepoints, 1))
         masktype = self.inputs.mask_type
         if  masktype == 'spm_global':  # spm_global like calculation
@@ -322,7 +297,9 @@ class ArtifactDetect(BaseInterface):
                     mask = vol > (self._nanmean(vol) / 8)
                     g[t0] = self._nanmean(vol[mask])
         elif masktype == 'file':  # uses a mask image to determine intensity
-            mask = load(self.inputs.mask_file).get_data()
+            maskimg = load(self.inputs.mask_file)
+            mask = maskimg.get_data()
+            affine = maskimg.get_affine()
             mask = mask > 0.5
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]
@@ -342,6 +319,47 @@ class ArtifactDetect(BaseInterface):
             gz = np.concatenate((np.zeros((1, 1)), np.diff(gz, n=1, axis=0)), axis=0)
         gz = (gz - np.mean(gz)) / np.std(gz)    # normalize the detrended signal
         iidx = find_indices(abs(gz) > self.inputs.zintensity_threshold)
+
+        # read in motion parameters
+        mc_in = np.loadtxt(motionfile)
+        mc = deepcopy(mc_in)
+        if self.inputs.parameter_source == 'SPM':
+            pass
+        elif self.inputs.parameter_source == 'FSL':
+            mc = mc[:, [3, 4, 5, 0, 1, 2]]
+        elif self.inputs.parameter_source == 'Siemens':
+            Exception("Siemens PACE format not implemented yet")
+        else:
+            Exception("Unknown source for movement parameters")
+
+        if self.inputs.use_norm:
+            brain_pts = None
+            if self.inputs.bound_by_brainmask:
+                voxel_coords = np.nonzero(mask)
+                coords = np.vstack((voxel_coords[0],
+                                    np.vstack((voxel_coords[1], voxel_coords[2])))).T
+                brain_pts = np.dot(affine, np.hstack((coords, np.ones((coords.shape[0], 1)))).T)
+                demeaned_brain_pts = brain_pts - np.mean(brain_pts, axis=0)
+                _, _, v = np.linalg.svd(demeaned_brain_pts, full_matrices=False)
+                transformed_coordinates = np.dot(demeaned_brain_pts, v.T)
+                maxc = np.dot(np.max(transformed_coordinates, axis=0) * np.eye(4)[:3, :], v)
+                minc = np.dot(np.min(transformed_coordinates, axis=0) * np.eye(4)[:3, :], v)
+                eig1 = np.vstack((maxc[0, :], minc[0, :]))[:, :3]
+                eig2 = np.vstack((maxc[1, :], minc[1, :]))[:, :3]
+                eig3 = np.vstack((maxc[2, :], minc[2, :]))[:, :3]
+                brain_pts = np.hstack((np.vstack((eig1, np.vstack((eig2, eig3)))),
+                                       np.ones((6, 1)))).T
+            # calculate the norm of the motion parameters
+            normval = self._calc_norm(mc, self.inputs.use_differences[0], brain_pts=brain_pts)
+            tidx = find_indices(normval > self.inputs.norm_threshold)
+            ridx = find_indices(normval < 0)
+        else:
+            if self.inputs.use_differences[0]:
+                mc = np.concatenate((np.zeros((1, 6)), np.diff(mc_in, n=1, axis=0)), axis=0)
+            traval = mc[:, 0:3]  # translation parameters (mm)
+            rotval = mc[:, 3:6]  # rotation parameters (rad)
+            tidx = find_indices(np.sum(abs(traval) > self.inputs.translation_threshold, 1) > 0)
+            ridx = find_indices(np.sum(abs(rotval) > self.inputs.rotation_threshold, 1) > 0)
 
         outliers = np.unique(np.union1d(iidx, np.union1d(tidx, ridx)))
         artifactfile, intensityfile, statsfile, normfile, plotfile = self._get_output_filenames(imgfile, cwd)
