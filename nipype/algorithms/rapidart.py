@@ -20,17 +20,21 @@ These functions include:
 
 import os
 from copy import deepcopy
+from warnings import warn
 
 from nibabel import load, funcs
 import numpy as np
 from scipy import signal
 import scipy.io as sio
 
-from nipype.interfaces.base import (BaseInterface, traits, InputMultiPath,
+from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     OutputMultiPath, TraitedSpec, File,
                                     BaseInterfaceInputSpec, isdefined)
-from nipype.utils.filemanip import filename_to_list, save_json
-from nipype.utils.misc import find_indices
+from ..utils.filemanip import filename_to_list, save_json
+from ..utils.misc import find_indices
+
+from .. import logging, config
+iflogger = logging.getLogger('interface')
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realigned_files = InputMultiPath(File(exists=True),
@@ -115,6 +119,12 @@ class ArtifactDetect(BaseInterface):
 
     input_spec = ArtifactDetectInputSpec
     output_spec = ArtifactDetectOutputSpec
+
+    def __init__(self, **inputs):
+        warn(('Deprecation warning: "bound_by_brainmask" will be set to True'
+              'in release 0.8'))
+        super(ArtifactDetect, self).__init__(**inputs)
+
 
     def _get_output_filenames(self, motionfile, output_dir):
         """Generate output files based on motion filenames
@@ -361,6 +371,8 @@ class ArtifactDetect(BaseInterface):
             np.savetxt(normfile, normval, fmt='%.4f', delimiter=' ')
 
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            import matplotlib
+            matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt
             fig = plt.figure()
             if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
