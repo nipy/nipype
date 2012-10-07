@@ -14,7 +14,11 @@ import datetime
 import json
 import re
 import collections
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 from .. import logging
 logger = logging.getLogger('interface')
 
@@ -45,7 +49,7 @@ PROV_REC_ALTERNATE              = 51
 PROV_REC_SPECIALIZATION         = 52
 PROV_REC_MENTION                = 53
 # C6. Collections
-#PROV_REC_COLLECTION             = 6
+PROV_REC_COLLECTION             = 6
 PROV_REC_MEMBERSHIP             = 61
 
 PROV_RECORD_TYPES = (
@@ -62,6 +66,7 @@ PROV_RECORD_TYPES = (
     (PROV_REC_ATTRIBUTION,          u'Attribution'),
     (PROV_REC_ASSOCIATION,          u'Association'),
     (PROV_REC_DELEGATION,           u'Delegation'),
+    (PROV_REC_INFLUENCE,            u'Influence'),
     (PROV_REC_BUNDLE,               u'Bundle'),
     (PROV_REC_ALTERNATE,            u'Alternate'),
     (PROV_REC_SPECIALIZATION,       u'Specialization'),
@@ -85,10 +90,11 @@ PROV_N_MAP = {
     PROV_REC_ATTRIBUTION:          u'wasAttributedTo',
     PROV_REC_ASSOCIATION:          u'wasAssociatedWith',
     PROV_REC_DELEGATION:           u'actedOnBehalfOf',
+    PROV_REC_INFLUENCE:            u'wasInfluencedBy',
     PROV_REC_ALTERNATE:            u'alternateOf',
     PROV_REC_SPECIALIZATION:       u'specializationOf',
     PROV_REC_MENTION:              u'mentionOf',
-#    PROV_REC_COLLECTION:           u'Collection',
+    PROV_REC_COLLECTION:           u'collection',
     PROV_REC_MEMBERSHIP:           u'memberOf',
     PROV_REC_BUNDLE:               u'bundle',
 }
@@ -147,6 +153,7 @@ PROV_RECORD_ATTRIBUTES = (
     (PROV_ATTR_BUNDLE, u'prov:bundle'),
     (PROV_ATTR_INFLUENCEE, u'prov:influencee'),
     (PROV_ATTR_INFLUENCER, u'prov:influencer'),
+    (PROV_ATTR_COLLECTION, u'prov:collection'),
     # Literal properties
     (PROV_ATTR_TIME, u'prov:time'),
     (PROV_ATTR_STARTTIME, u'prov:startTime'),
@@ -212,9 +219,10 @@ def parse_datatype(value, datatype):
         raise Exception(u'No parser found for the data type <%s>' % str(datatype))
         
 class Literal(object):
-    def __init__(self, value, datatype):
+    def __init__(self, value, datatype=None, langtag=None):
         self._value = value
         self._datatype = datatype
+        self._langtag = langtag
         
     def __str__(self):
         return self.provn_representation()
@@ -226,14 +234,22 @@ class Literal(object):
         return self._datatype
     
     def provn_representation(self):
-        return u'%s %%%% %s' % (str(self._value), str(self._datatype))
+        if self._langtag:
+            # a langtag can only goes with string
+            return u'"%s"@%s' % (str(self._value), str(self._langtag))
+        else:
+            return u'"%s" %%%% %s' % (str(self._value), str(self._datatype))
         
     def json_representation(self):
-        if isinstance(self._datatype, QName):
-            return u'"%s"^^%s' % (str(self._value), str(self._datatype))
+        if self._langtag:
+            # a langtag can only goes with string
+            return { '$': str(self._value), 'lang': self._langtag}
         else:
-            # Assuming it is a valid identifier
-            return u'"%s"^^<%s>' % (str(self._value), self._datatype.get_uri())
+            if isinstance(self._datatype, QName):
+                return { '$': str(self._value), 'type': str(self._datatype)}
+            else:
+                # Assuming it is a valid identifier
+                return { '$': str(self._value), 'type': self._datatype.get_uri()}
 
 class Identifier(object):
     def __init__(self, uri):
@@ -252,10 +268,10 @@ class Identifier(object):
         return hash(self.get_uri())
     
     def provn_representation(self):
-        return self._uri + u' %% xsd:anyURI'
+        return u'"%s" %%%% xsd:anyURI' % self._uri
     
     def json_representation(self):
-        return u'"%s"^^%s' % (self._uri, u'xsd:anyURI')
+        return { '$': self._uri, 'type': u'xsd:anyURI'}
     
 
 class QName(Identifier):
@@ -280,7 +296,7 @@ class QName(Identifier):
         return u"'%s'" % self._str
     
     def json_representation(self):
-        return u'"%s"^^%s' % (str(self), u'xsd:QName')
+        return { '$': self._str, 'type': u'xsd:QName'}
     
 
 class Namespace(object):
@@ -384,10 +400,9 @@ class ProvRecord(object):
             if attribute[0]:
                 if attribute[0] == PROV['label']:
                     label = attribute[1]
-        if label is None:
-            return self._identifier
-        else:
-            return label
+                    # use the first label found
+                    break
+        return label if label else self._identifier 
 
     def add_extra_attributes(self, extra_attributes):
         if extra_attributes:
@@ -543,12 +558,14 @@ class ProvRecord(object):
             extra = []
             for (attr, value) in self._extra_attributes:
                 try:
+                    # try if there is a prov-n representation defined
                     provn_represenation = value.provn_representation()
                 except:
                     if isinstance(value, basestring):
                         provn_represenation = '"%s"' % value
                     else:
-                        provn_represenation = '"%s %%%% xsd:dateTime"' % value.isoformat() if isinstance(value, datetime.datetime) else str(value)
+                        # asssuming it is datetime, otherwise, fallback to str
+                        provn_represenation = '"%s" %%%% xsd:dateTime' % value.isoformat() if isinstance(value, datetime.datetime) else str(value)
                 extra.append('%s=%s' % (str(attr), provn_represenation))
             if extra:
                 items.append('[%s]' % ', '.join(extra))
@@ -722,9 +739,6 @@ class ProvInvalidation(ProvRelation):
         # Optional attributes
         activity = self.optional_attribute(attributes, PROV_ATTR_ACTIVITY, ProvActivity)
         time = self.optional_attribute(attributes, PROV_ATTR_TIME, datetime.datetime)
-        # Constraint: activity, time, and extra_attributes cannot be missing at the same time
-        if (activity is None) and (time is None) and (not extra_attributes):
-            raise ProvException(u'At least one of "actitivy", "time", or "extra_attributes" must be present in an Invalidation assertion.') 
         
         attributes = OrderedDict()
         attributes[PROV_ATTR_ENTITY] = entity
@@ -806,25 +820,6 @@ class ProvAssociation(ProvRelation):
         attributes[PROV_ATTR_AGENT]= agent
         attributes[PROV_ATTR_PLAN]= plan
         ProvRelation.add_attributes(self, attributes, extra_attributes)
-        
-    def get_provn(self, _indent_level=0):
-        items = []
-        if self._attributes:
-            items.append(str(self._attributes[PROV_ATTR_ACTIVITY].get_identifier()))
-            agent_id = self._attributes[PROV_ATTR_AGENT].get_identifier()
-            if PROV_ATTR_PLAN in self._attributes and self._attributes[PROV_ATTR_PLAN]:
-                plan_id = self._attributes[PROV_ATTR_PLAN].get_identifier()
-                items.append('%s @ %s' % (str(agent_id), str(plan_id)))
-            else:
-                items.append(str(agent_id))
-        if self._extra_attributes:
-            extra = []
-            for (attr, value) in self._extra_attributes:
-                extra.append('%s="%s"' % (str(attr), '%s %%%% xsd:dateTime' % value.isoformat() if isinstance(value, datetime.datetime) else str(value)))
-            if extra:
-                items.append('[%s]' % ', '.join(extra))
-        
-        return '%s(%s)' % (PROV_N_MAP[self.get_type()], ', '.join(items))
 
 
 class ProvDelegation(ProvRelation):
@@ -938,6 +933,13 @@ class ProvMention(ProvSpecialization):
 
 ### Component 6: Collections
 
+class ProvCollection(ProvEntity):
+    def get_type(self):
+        return PROV_REC_COLLECTION
+    
+    def get_prov_type(self):
+        return PROV['Collection']
+
 class ProvMembership(ProvRelation):
     def get_type(self):
         return PROV_REC_MEMBERSHIP
@@ -974,6 +976,7 @@ PROV_REC_CLS = {
     PROV_REC_SPECIALIZATION         : ProvSpecialization,
     PROV_REC_ALTERNATE              : ProvAlternate,
     PROV_REC_MENTION                : ProvMention,
+    PROV_REC_COLLECTION             : ProvCollection,
     PROV_REC_MEMBERSHIP             : ProvMembership,
 }
 
@@ -1160,39 +1163,29 @@ class ProvBundle(ProvEntity):
             return value.json_representation()
         except AttributeError:
             if isinstance(value, datetime.datetime):
-                return u'"%s"^^%s' % (value.isoformat(), u'xsd:dateTime')
+                return { '$': value.isoformat(), 'type': u'xsd:dateTime'}
             else:
                 return value
     
-    def _decode_json_representation(self, value):
+    def _decode_json_representation(self, literal):
         try:
-            # If the value is a string
-            # try matching a typed literal with uri pattern 
-            m = _r_typed_literal_uri.match(value)
-            if m is None:
-                # try matching a typed literal with qname pattern
-                m = _r_typed_literal_qname.match(value)
-            if m is not None:
-                # found one of the typed literal patterns
-                component = m.groupdict()
-                value_str = component['value']
-                datatype = component['datatype']
-                # Check for common data types
-                # TODO Add a proper XSD datatype converter to replace this
-                if datatype == u'xsd:anyURI':
-                    return Identifier(value_str)
-                elif datatype == u'xsd:QName':
-                    return self.valid_identifier(value_str)
-                elif datatype == u'xsd:dateTime':
-                    return parse_xsd_dateTime(value_str)
-                else:
-                    return Literal(value_str, self.valid_identifier(datatype))
+            value = literal['$']
+            if 'lang' in literal:
+                return Literal(value, langtag=literal['lang'])
             else:
-                # cannot match the patterns, just return the string
-                return value
+                datatype = literal['type']
+                # TODO Add a proper XSD datatype converter to replace this, e.g. for integers or floats
+                if datatype == u'xsd:anyURI':
+                    return Identifier(value)
+                elif datatype == u'xsd:QName':
+                    return self.valid_identifier(value)
+                elif datatype == u'xsd:dateTime':
+                    return parse_xsd_dateTime(value)
+                else:
+                    return Literal(value, self.valid_identifier(datatype))
         except:
-            # not a string, just return it
-            return value
+            # simple type, just return it
+            return literal
         
     def _encode_JSON_container(self):
         container = defaultdict(dict)
@@ -1272,21 +1265,32 @@ class ProvBundle(ProvEntity):
         for (record_type, identifier, attributes) in records:
             if record_type <> PROV_REC_BUNDLE:
                 record = record_map[identifier]
-                prov_attributes = {}
-                extra_attributes = []
-                # Splitting PROV attributes and the others
-                for attr, value in attributes.items():
-                    if attr in PROV_ATTRIBUTES_ID_MAP:
-                        prov_attributes[PROV_ATTRIBUTES_ID_MAP[attr]] = record_map[value] if (isinstance(value, (str, unicode)) and value in record_map) else self._decode_json_representation(value)
-                    else:
-                        attr_id = self.valid_identifier(attr)
-                        if isinstance(value, list):
-                            # Parsing multi-value attribute
-                            extra_attributes.append((attr_id, self._decode_json_representation(value_single)) for value_single in value)
+                
+                if hasattr(attributes, 'items'): # it is a dict
+                    # There is only one element, create a singleton list
+                    elements = [attributes] 
+                else: # expect it to be a list
+                    # There are more than one element
+                    # TODO: Fix this, we only accept one element (the first one)
+                    elements = [attributes[0]]
+                    
+                for element in elements:    
+                    prov_attributes = {}
+                    extra_attributes = []
+                    # Splitting PROV attributes and the others
+                    for attr, value in element.items():
+                        if attr in PROV_ATTRIBUTES_ID_MAP:
+                            prov_attributes[PROV_ATTRIBUTES_ID_MAP[attr]] = record_map[value] if (isinstance(value, (str, unicode)) and value in record_map) else self._decode_json_representation(value)
                         else:
-                            # add the single-value attribute
-                            extra_attributes.append((attr_id, self._decode_json_representation(value)))
-                record.add_attributes(prov_attributes, extra_attributes)
+                            attr_id = self.valid_identifier(attr)
+                            if isinstance(value, list):
+                                # Parsing multi-value attribute
+                                extra_attributes.append((attr_id, self._decode_json_representation(value_single)) for value_single in value)
+                            else:
+                                # add the single-value attribute
+                                extra_attributes.append((attr_id, self._decode_json_representation(value)))
+                    # TODO: This won't work when there are more than one element
+                    record.add_attributes(prov_attributes, extra_attributes)
         
     # Miscellaneous functions
     def get_type(self):
@@ -1362,6 +1366,15 @@ class ProvBundle(ProvEntity):
                 self._id_map[new_record._identifier] = new_record
         return new_record
     
+        
+    def add_bundle(self, identifier, bundle):
+        '''Add a sub-bundle to the current bundle
+        '''
+        valid_id = self.valid_identifier(identifier)
+        self._bundles[valid_id] = bundle
+        bundle._bundle = self
+        # TODO: Check namespace duplications, existing identifier
+    
     def add_element(self, record_type, identifier, attributes=None, other_attributes=None):
         return self.add_record(record_type, identifier, attributes, other_attributes)
         
@@ -1400,6 +1413,9 @@ class ProvBundle(ProvEntity):
     
     def delegation(self, delegate, responsible, activity=None, identifier=None, other_attributes=None):
         return self.add_record(PROV_REC_DELEGATION, identifier, {PROV_ATTR_DELEGATE: delegate, PROV_ATTR_RESPONSIBLE: responsible, PROV_ATTR_ACTIVITY: activity}, other_attributes)
+        
+    def influence(self, influencee, influencer, identifier=None, other_attributes=None):
+        return self.add_record(PROV_REC_INFLUENCE, identifier, {PROV_ATTR_INFLUENCEE: influencee, PROV_ATTR_INFLUENCER: influencer}, other_attributes)
         
     def derivation(self, generatedEntity, usedEntity, activity=None, generation=None, usage=None, time=None, identifier=None, other_attributes=None):
         attributes = {PROV_ATTR_GENERATED_ENTITY: generatedEntity,
@@ -1446,6 +1462,9 @@ class ProvBundle(ProvEntity):
                 generalEntity = bundle.get_record(generalEntity)
         return self.add_record(PROV_REC_MENTION, identifier, {PROV_ATTR_SPECIFIC_ENTITY: specificEntity, PROV_ATTR_GENERAL_ENTITY: generalEntity, PROV_ATTR_BUNDLE: bundle}, other_attributes)
     
+    def collection(self, identifier, other_attributes=None):
+        return self.add_element(PROV_REC_COLLECTION, identifier, None, other_attributes)
+    
     def membership(self, collection, entity, identifier=None, other_attributes=None):
         return self.add_record(PROV_REC_MEMBERSHIP, identifier, {PROV_ATTR_COLLECTION: collection, PROV_ATTR_ENTITY: entity}, other_attributes)
     
@@ -1462,6 +1481,7 @@ class ProvBundle(ProvEntity):
     wasAttributedTo = attribution
     wasAssociatedWith = association
     actedOnBehalfOf = delegation
+    wasInfluencedBy = influence
     wasDerivedFrom = derivation
     wasRevisionOf = revision
     wasQuotedFrom = quotation
