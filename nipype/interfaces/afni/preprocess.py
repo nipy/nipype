@@ -1514,7 +1514,7 @@ class CalcInputSpec(AFNITraitedSpec):
         argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
         argstr=' -b %s', position=1, exists=True)
-    expr = traits.Str(desc='expr', argstr='-expr %s', position=2,
+    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
         mandatory=True)
     out_file = File(desc='output file from 3dFourier', argstr='-prefix %s',
         position=-1, genfile=True)
