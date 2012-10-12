@@ -77,7 +77,7 @@ def test_volreg():
 def test_calc():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
-                     expr = dict(argstr='-expr %s',mandatory=True,),
+                     expr = dict(argstr='-expr "%s"',mandatory=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file_a = dict(argstr='-a %s',mandatory=True,),
                      in_file_b = dict(argstr=' -b %s',),
