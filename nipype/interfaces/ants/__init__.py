@@ -3,9 +3,15 @@
 
 """Top-level namespace for ants."""
 
-from .coregister import GenWarpFields
-from .normalize import BuildTemplate
-from .preprocess import N4BiasFieldCorrection
-from .segment import Atropos
-from .utils import (ApplyTransforms, WarpImageMultiTransform,
-                    WarpTimeSeriesImageMultiTransform)
+# Registraiton programs
+from .registration import ANTS, Registration
+
+# Resampling Programs
+from resampling import ApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
+
+
+# Segmentation Programs
+from .segmentation import Atropos, N4BiasFieldCorrection
+
+# Utility Programs
+from .utils import AverageAffineTransform, AverageImages, MultiplyImages

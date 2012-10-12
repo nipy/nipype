@@ -499,17 +499,6 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = object
         return out
 
-    def __getstate__(self):
-        state = super(BaseTraitedSpec, self).__getstate__()
-        inst_traits = self._instance_traits()
-        state['__instance_traits__'] = inst_traits
-        return state
-
-    def __setstate__(self, state):
-        inst_traits = state.pop('__instance_traits__', {})
-        for attr, trait in inst_traits.iteritems():
-            self.add_trait(attr, trait)
-        super(BaseTraitedSpec, self).__setstate__(state)
 
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
@@ -524,11 +513,21 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         id_self = id(self)
         if id_self in memo:
             return memo[id_self]
-        dup_dict = deepcopy(self.__getstate__(), memo)
+        dup_dict = deepcopy(self.get(), memo)
+        # access all keys
+        for key in self.copyable_trait_names():
+            _ = getattr(self, key)
+        # clone once
         dup = self.clone_traits(memo=memo)
-        dup.__setstate__(dup_dict)
+        for key in self.copyable_trait_names():
+            try:
+                _ = getattr(dup, key)
+            except:
+                pass
+        # clone twice
+        dup = self.clone_traits(memo=memo)
+        dup.set(**dup_dict)
         return dup
-
 
 class TraitedSpec(BaseTraitedSpec):
     """ Create a subclass with strict traits.
@@ -1133,7 +1132,7 @@ class CommandLine(BaseInterface):
         """
         argstr = trait_spec.argstr
         iflogger.debug('%s_%s' %(name, str(value)))
-        if trait_spec.is_trait_type(traits.Bool):
+        if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options
                 # if True.
