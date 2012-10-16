@@ -21,8 +21,6 @@ from distutils.command.clean import clean
 _info_fname = pjoin(os.path.dirname(__file__), 'nipype', 'info.py')
 INFO_VARS = {}
 exec(open(_info_fname, 'rt').read(), {}, INFO_VARS)
-if sys.version_info < (2, 7):
-    INFO_VARS['REQUIRES'].append('ordereddict')
 
 DOC_BUILD_DIR = os.path.join('doc', '_build', 'html')
 DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')

@@ -116,9 +116,7 @@ info = None
 pklfile = '%s'
 batchdir = '%s'
 try:
-    if sys.version_info < (2, 7):
-        from ordereddict import OrderedDict
-    else:
+    if not sys.version_info < (2, 7):
         from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
