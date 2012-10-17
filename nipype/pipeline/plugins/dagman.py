@@ -35,7 +35,7 @@ class CondorDAGManPlugin(GraphPluginBase):
         self._template = "universe = vanilla\nnotification = Never"
         self._submit_specs = ""
         self._dagman_args = ""
-        if 'plugin_args' in kwargs:
+        if 'plugin_args' in kwargs and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
