@@ -690,7 +690,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                           'to intensity mapping', hash_files=False)
     log_file = File(argstr='--logout=%s',
                              desc='Name of log-file', genfile=True, hash_files=False)
-    config_file = File(exists=True, argstr='--config=%s',
+    config_file = traits.Either(traits.Enum("T1_2_MNI152_2mm", "FA_2_FMRIB58_1mm"), File(exists=True), argstr='--config=%s',
                        desc='Name of config file specifying command line arguments')
     refmask_file = File(exists=True, argstr='--refmask=%s',
                         desc='name of file with mask in reference space')
