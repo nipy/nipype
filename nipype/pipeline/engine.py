@@ -1596,6 +1596,7 @@ class MapNode(Node):
             node = Node(deepcopy(self._interface), name=nodename)
             node.overwrite = self.overwrite
             node.run_without_submitting = self.run_without_submitting
+            node.plugin_args = self.plugin_args
             node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))
