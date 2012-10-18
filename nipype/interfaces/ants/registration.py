@@ -390,6 +390,12 @@ Test collapse transforms flag
         else:
             return ''
 
+    def _formatCollapseLinearTransformsToFixedImageHeader(self):
+            if self.inputs.collapse_linear_transforms_to_fixed_image_header:
+                return '--collapse-linear-transforms-to-fixed-image-header 1'
+            else:
+                return '--collapse-linear-transforms-to-fixed-image-header 0'
+
     def _format_arg(self, opt, spec, val):
         if opt == 'moving_image_mask':
             return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
@@ -417,10 +423,7 @@ Test collapse transforms flag
         elif opt == 'winsorize_upper_quantile':
             return self._formatWinsorizeImageIntensities()
         elif opt == 'collapse_linear_transforms_to_fixed_image_header':
-            if self.inputs.collapse_linear_transforms_to_fixed_image_header:
-                return '--collapse-linear-transforms-to-fixed-image-header 1'
-            else:
-                return '--collapse-linear-transforms-to-fixed-image-header 0'
+            return self._formatCollapseLinearTransformsToFixedImageHeader()
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
