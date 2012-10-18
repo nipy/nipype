@@ -184,46 +184,32 @@ class ANTS(ANTSCommand):
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--dimensionality %d',
-                            usedefault=True, desc='image dimension (2 or 3)')
+    dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(
-        mandatory=False, requires=['moving_image_mask'], exists=True, desc='')
+    fixed_image_mask = File(mandatory=False, requires=['moving_image_mask'], exists=True, desc='')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(argstr='%s', mandatory=False, requires=[
-                             'fixed_image_mask'], exists=True, desc='')
-    initial_moving_transform = File(
-        argstr='%s', mandatory=False, exists=True, desc='')
-    invert_initial_moving_transform = traits.Bool(
-        default=False, usedefault=True, mandatory=False,
-        requires=["initial_moving_transform"], desc='')
-    metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons",
-                         "GC", "MI", "Mattes"), mandatory=True, desc='')
-    metric_weight = traits.List(
-        traits.Float(1.0), usedefault=True, requires=['metric'], mandatory=True,
-        desc="Note that the metricWeight is currently not used. Rather, it is a temporary place \
-    holder until multivariate metrics are available for a single stage.")
-    ###  This is interpreted as number_of_bins for MI and Mattes, and as radius for all other metrics
-    radius_or_number_of_bins = traits.List(
-        traits.Int(5), usedefault=True, requires=['metric_weight'], desc='')
-    sampling_strategy = traits.List(
-        trait=traits.Enum("Dense", "Regular", "Random", None), value=['Dense'], minlen=1,
-        usedefault=True, requires=['metric_weight'], desc='')
-    sampling_percentage = traits.List(
-        trait=traits.Either(traits.Range(low=0.0, high=1.0), None), value=[None], minlen=1,
-        requires=['sampling_strategy'], desc='')
+    moving_image_mask = File(argstr='%s', mandatory=False, requires=['fixed_image_mask'], exists=True, desc='')
+    initial_moving_transform = File(argstr='%s', mandatory=False, exists=True, desc='')
+    invert_initial_moving_transform = traits.Bool(default=False, usedefault=True, mandatory=False,
+                                                  requires=["initial_moving_transform"], desc='')
+    metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI", "Mattes"), 
+                         mandatory=True, desc='')
+    metric_weight = traits.List(traits.Float(1.0), usedefault=True, requires=['metric'], mandatory=True,
+                                desc="Note that the metricWeight is currently not used. Rather, it is a temporary place \
+                                holder until multivariate metrics are available for a single stage.")
+    radius_or_number_of_bins = traits.List(traits.Int(5), usedefault=True, requires=['metric_weight'], desc='')
+    sampling_strategy = traits.List(trait=traits.Enum("Dense", "Regular", "Random", None), value=['Dense'],
+                                    minlen=1, usedefault=True, requires=['metric_weight'], desc='')
+    sampling_percentage = traits.List(trait=traits.Either(traits.Range(low=0.0, high=1.0), None), value=[None], 
+                                      minlen=1, requires=['sampling_strategy'], desc='')
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
-    use_histogram_matching = traits.List(
-        traits.Bool(argstr='%s'), default=True, usedefault=True)
-    interpolation = traits.Enum(
-        'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
-        'HammingWindowedSinc', 'LanczosWindowedSinc',
-        # 'MultiLabel',
-        # 'Gaussian',
-        # 'BSpline',
-        argstr='%s', usedefault=True)
+    use_histogram_matching = traits.List(traits.Bool(argstr='%s'), default=True, usedefault=True)
+    interpolation = traits.Enum('Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
+                                'HammingWindowedSinc', 'LanczosWindowedSinc',
+                                # 'MultiLabel', 'Gaussian', 'BSpline',
+                                argstr='%s', usedefault=True)
     write_composite_transform = traits.Bool(argstr='--write-composite-transform %d', default=False, usedefault=True, desc='')
     collapse_output_transforms = traits.Bool(
         argstr='--collapse-output-transforms %d', default=False,
@@ -249,17 +235,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     shrink_factors = traits.List(traits.List(traits.Int()))
     convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
     convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
-    # Output flags
-    output_transform_prefix = traits.Str(
-        "transform", usedefault=True, argstr="%s", desc="")
-    output_warped_image = traits.Either(
-        traits.Bool, File(), hash_files=False, desc="")
-    output_inverse_warped_image = traits.Either(traits.Bool, File(
-    ), hash_files=False, requires=['output_warped_image'], desc="")
+    output_transform_prefix = traits.Str("transform", usedefault=True, argstr="%s", desc="")
+    output_warped_image = traits.Either(traits.Bool, File(), hash_files=False, desc="")
+    output_inverse_warped_image = traits.Either(traits.Bool, File(), hash_files=False, requires=['output_warped_image'], desc="")
     winsorize_upper_quantile = traits.Range(low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
-    collapse_linear_transforms_to_fixed_image_header = traits.Bool(
-        argstr='%s', default=False, usedefault=True, desc='')
+    collapse_linear_transforms_to_fixed_image_header = traits.Bool(argstr='%s', default=False, usedefault=True, desc='')
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -404,16 +385,10 @@ Test collapse transforms flag
         return '[ %s, %g, %d ]' % (convergence_iter, convergence_value, convergence_ws)
 
     def _formatWinsorizeImageIntensities(self):
-        assert(self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile), "Upper bound MUST be more than lower bound: %g > %g" \
-            % (self.inputs.winsorize_upper_quantile, self.inputs.winsorize_lower_quantile)
-        self._quantilesDone = True
-        return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
-
-    def _formatCollapseLinearTransformsToFixedImageHeader(self):
-        if self.inputs.collapse_linear_transforms_to_fixed_image_header:
-            return '--collapse-linear-transforms-to-fixed-image-header 1'
+        if self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile:
+            return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
         else:
-            return '--collapse-linear-transforms-to-fixed-image-header 0'
+            return ''
 
     def _format_arg(self, opt, spec, val):
         if opt == 'moving_image_mask':
@@ -439,12 +414,13 @@ Test collapse transforms flag
                 return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image)
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
-        elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
-            if not self._quantilesDone:
-                return self._formatWinsorizeImageIntensities()
-            return ''  # Must return something for argstr!
+        elif opt == 'winsorize_upper_quantile':
+            return self._formatWinsorizeImageIntensities()
         elif opt == 'collapse_linear_transforms_to_fixed_image_header':
-            return self._formatCollapseLinearTransformsToFixedImageHeader()
+            if self.inputs.collapse_linear_transforms_to_fixed_image_header:
+                return '--collapse-linear-transforms-to-fixed-image-header 1'
+            else:
+                return '--collapse-linear-transforms-to-fixed-image-header 0'
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
