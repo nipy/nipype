@@ -228,8 +228,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     output_transform_prefix = traits.Str("transform", usedefault=True, argstr="%s", desc="")
     output_warped_image = traits.Either(traits.Bool, File(), hash_files=False, desc="")
     output_inverse_warped_image = traits.Either(traits.Bool, File(), hash_files=False, requires=['output_warped_image'], desc="")
-    winsorize_lower_quantile = traits.Range(low=0.0, high=1.0, requires=['winsorize_upper_quantile'])
     winsorize_upper_quantile = traits.Range(low=0.0, high=1.0, argstr="%s", requires=['winsorize_lower_quantile'])
+    winsorize_lower_quantile = traits.Range(low=0.0, high=1.0, requires=['winsorize_upper_quantile'])
     collapse_linear_transforms_to_fixed_image_header = traits.Bool(argstr='%s', default=False, usedefault=True, desc='')
 
 
@@ -269,8 +269,8 @@ class Registration(ANTSCommand):
     >>> reg.inputs.use_estimate_learning_rate_once = [True, True]
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
     >>> reg.inputs.output_warped_image = 't1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz'
-    >>> reg.inputs.winsorize-lowerQuantile = 0.025
-    >>> reg.inputs.winsorize-upperQuantile = 0.975
+    >>> reg.inputs.winsorize_lower_quantile = 0.025
+    >>> reg.inputs.winsorize_upper_quantile = 0.975
     >>> reg.inputs.collapse-linear-transforms-to-fixed-image-header = False
     >>> reg.cmdline
     'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] --interpolation Linear --output [ t1_average_BRAINSABC_To_template_t1_clipped, t1_average_BRAINSABC_To_template_t1_clipped_INTERNAL_WARPED.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ] --write-composite-transform 1'
@@ -340,7 +340,7 @@ class Registration(ANTSCommand):
         if self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile:
             return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
         else:
-            return ''
+            return '' # TODO: raise error: upper_quantile should NEVER be lower than lower_quantile!!!
 
     def _formatCollapseLinearTransformsToFixedImageHeader(self):
             if self.inputs.collapse_linear_transforms_to_fixed_image_header:
