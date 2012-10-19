@@ -302,7 +302,7 @@ def gen_filename_from_param(param, base):
         firstFileExtension = fileExtensions.split(',')[0]
         ext = firstFileExtension
     else:
-        ext = {'image': '.nii', 'transform': '.mat', 'file': '', 'directory': '', 'geometry': '.mesh'}[param.nodeName]
+        ext = {'image': '.nii', 'transform': '.mat', 'file': '', 'directory': '', 'geometry': '.vtk'}[param.nodeName]
     return base + ext
 
 if __name__ == "__main__":
