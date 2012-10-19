@@ -19,7 +19,7 @@ If you spot a bug, please report it on the mailing list and/or change the genera
 import os
 from nipype.interfaces.slicer.base import SlicerCommandLine\n\n\n"""
     f_m.write(imports)
-    f_m.write("\n\n".join(class_codes))
+    f_m.write("\n\n".join(class_codes).encode('utf8') )
     f_i.write("from %s import %s\n" % (module_name, ", ".join(class_names)))
     f_m.close()
     f_i.close()
@@ -33,19 +33,32 @@ def crawl_code_struct(code_struct, package_dir):
             class_name = k
             class_code = v
             add_class_to_package([class_code], [class_name], module_name, package_dir)
-        elif isinstance(v[v.keys()[0]], str) or isinstance(v[v.keys()[0]], unicode):
-            module_name = k.lower()
-            add_class_to_package(v.values(), v.keys(), module_name, package_dir)
         else:
-            subpackages.append(k.lower())
-            f_i = open(os.path.join(package_dir, "__init__.py"), 'a+')
-            f_i.write("from %s import *\n" % k.lower())
-            f_i.close()
-            new_pkg_dir = os.path.join(package_dir, k.lower())
-            if os.path.exists(new_pkg_dir):
-                rmtree(new_pkg_dir)
-            os.mkdir(new_pkg_dir)
-            crawl_code_struct(v, new_pkg_dir)
+            l1 = {}
+            l2 = {}
+            for key in v.keys():
+                if (isinstance(v[key], str) or isinstance(v[key], unicode)):
+                    l1[key] = v[key]
+                else:
+                    l2[key] = v[key]
+            if l2:
+                v = l2
+                subpackages.append(k.lower())
+                f_i = open(os.path.join(package_dir, "__init__.py"), 'a+')
+                f_i.write("from %s import *\n" % k.lower())
+                f_i.close()
+                new_pkg_dir = os.path.join(package_dir, k.lower())
+                if os.path.exists(new_pkg_dir):
+                    rmtree(new_pkg_dir)
+                os.mkdir(new_pkg_dir)
+                crawl_code_struct(v, new_pkg_dir)
+                if l1:
+                    for ik, iv in l1.iteritems():
+                        crawl_code_struct({ik:{ik:iv}}, new_pkg_dir)
+            elif l1:
+                v = l1
+                module_name = k.lower()
+                add_class_to_package(v.values(), v.keys(), module_name, package_dir)
         if subpackages:
             f = open(os.path.join(package_dir, "setup.py"), 'w')
             f.write("""# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
@@ -145,7 +158,7 @@ def generate_class(module,launcher):
                 else:
                     traitsParams["argstr"] = "--" + name + " "
 
-            if param.getElementsByTagName('description'):
+            if param.getElementsByTagName('description') and param.getElementsByTagName('description')[0].firstChild:
                 traitsParams["desc"] = param.getElementsByTagName('description')[0].firstChild.nodeValue.replace('"', "\\\"").replace("\n", ", ")
 
             argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d",
@@ -153,7 +166,7 @@ def generate_class(module,launcher):
                         'transform': "%s", 'boolean': '',
                         'string-enumeration': '%s', 'string': "%s",
                         'integer-enumeration': '%s',
-                        'table': '%s', 'point': '%s', 'region': '%s'}
+                        'table': '%s', 'point': '%s', 'region': '%s', 'geometry': '%s'}
 
             if param.nodeName.endswith('-vector'):
                 traitsParams["argstr"] += "%s"
@@ -171,7 +184,7 @@ def generate_class(module,launcher):
             typesDict = {'integer': "traits.Int", 'double': "traits.Float",
                          'float': "traits.Float", 'image': "File",
                          'transform': "File", 'boolean': "traits.Bool",
-                         'string': "traits.Str", 'file': "File",
+                         'string': "traits.Str", 'file': "File", 'geometry': "File",
                          'directory': "Directory", 'table': "File",
                          'point': "traits.List", 'region': "traits.List"}
 
@@ -180,14 +193,14 @@ def generate_class(module,launcher):
                 values = ['"%s"' % el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
                 type = "InputMultiPath"
-                if param.nodeName in ['file', 'directory', 'image', 'transform', 'table']:
+                if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
                     values = ["%s(exists=True)" % typesDict[param.nodeName.replace('-vector', '')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector', '')]]
                 traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "InputMultiPath"
-                if param.nodeName in ['file', 'directory', 'image', 'transform', 'table']:
+                if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
                     values = ["%s(exists=True)" % typesDict[param.nodeName]]
                 elif param.nodeName in ['point', 'region']:
                     values = ["%s(traits.Float(), minlen=3, maxlen=3)" % typesDict[param.nodeName]]
@@ -198,7 +211,7 @@ def generate_class(module,launcher):
                 values = []
                 type = typesDict[param.nodeName]
 
-            if param.nodeName in ['file', 'directory', 'image', 'transform', 'table'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
+            if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
                 traitsParams["hash_files"] = False
                 inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)" % (name,
                                                                                  type,
@@ -211,7 +224,7 @@ def generate_class(module,launcher):
 
                 outputs_filenames[name] = gen_filename_from_param(param, name)
             else:
-                if param.nodeName in ['file', 'directory', 'image', 'transform', 'table'] and type not in ["InputMultiPath", "traits.List"]:
+                if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and type not in ["InputMultiPath", "traits.List"]:
                     traitsParams["exists"] = True
 
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(values), parse_params(traitsParams)))
@@ -289,7 +302,7 @@ def gen_filename_from_param(param, base):
         firstFileExtension = fileExtensions.split(',')[0]
         ext = firstFileExtension
     else:
-        ext = {'image': '.nii', 'transform': '.mat', 'file': '', 'directory': ''}[param.nodeName]
+        ext = {'image': '.nii', 'transform': '.mat', 'file': '', 'directory': '', 'geometry': '.mesh'}[param.nodeName]
     return base + ext
 
 if __name__ == "__main__":
