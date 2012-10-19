@@ -506,7 +506,10 @@ class DataGrabber(IOBase):
                             argtuple.append(arg)
                     filledtemplate = template
                     if argtuple:
-                        filledtemplate = template%tuple(argtuple)
+                        try:
+                            filledtemplate = template%tuple(argtuple)
+                        except TypeError as e:
+                            raise TypeError(e.message + ": Template %s failed to convert with args %s"%(template, str(tuple(argtuple))))
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
                         msg = 'Output key: %s Template: %s returned no files'%(key, filledtemplate)
