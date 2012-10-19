@@ -211,18 +211,21 @@ def generate_class(module,launcher):
                 values = []
                 type = typesDict[param.nodeName]
 
-            if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
-                traitsParams["hash_files"] = False
-                inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)" % (name,
-                                                                                 type,
-                                                                                 parse_values(values).replace("exists=True", ""),
-                                                                                 parse_params(traitsParams)))
-                traitsParams["exists"] = True
-                traitsParams.pop("argstr")
-                traitsParams.pop("hash_files")
-                outputTraits.append("%s = %s(%s%s)" % (name, type.replace("Input", "Output"), parse_values(values), parse_params(traitsParams)))
-
-                outputs_filenames[name] = gen_filename_from_param(param, name)
+            if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
+                if not param.getElementsByTagName('channel'):
+                    raise RuntimeError("Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.")
+                elif param.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
+                    traitsParams["hash_files"] = False
+                    inputTraits.append("%s = traits.Either(traits.Bool, %s(%s), %s)" % (name,
+                                                                                     type,
+                                                                                     parse_values(values).replace("exists=True", ""),
+                                                                                     parse_params(traitsParams)))
+                    traitsParams["exists"] = True
+                    traitsParams.pop("argstr")
+                    traitsParams.pop("hash_files")
+                    outputTraits.append("%s = %s(%s%s)" % (name, type.replace("Input", "Output"), parse_values(values), parse_params(traitsParams)))
+    
+                    outputs_filenames[name] = gen_filename_from_param(param, name)
             else:
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and type not in ["InputMultiPath", "traits.List"]:
                     traitsParams["exists"] = True
