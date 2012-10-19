@@ -115,6 +115,7 @@ from traceback import format_exception
 info = None
 pklfile = '%s'
 batchdir = '%s'
+from nipype.utils.filemanip import loadpkl, savepkl
 try:
     if not sys.version_info < (2, 7):
         from collections import OrderedDict

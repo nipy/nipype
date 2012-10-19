@@ -9,8 +9,8 @@ available plugins allow local and distributed execution of workflows and
 debugging. Each available plugin is described below.
 
 Current plugins are available for Linear, Multiprocessing, IPython_ distributed
-processing platforms and for direct processing on SGE_, PBS_, and Condor_. We
-anticipate future plugins for the Soma_ workflow and LSF_.
+processing platforms and for direct processing on SGE_, PBS_, Condor_, and LSF_. We
+anticipate future plugins for the Soma_ workflow.
 
 .. note::
 
@@ -34,7 +34,7 @@ Optional arguments::
 .. note::
 
    Except for the status_callback, the remaining arguments only apply to the
-   distributed plugins: MultiProc/IPython(X)/SGE/PBS/Condor
+   distributed plugins: MultiProc/IPython(X)/SGE/PBS/Condor/LSF
 
 For example:
 
@@ -102,7 +102,7 @@ SGE/PBS
 In order to use nipype with SGE_ or PBS_ you simply need to call::
 
        workflow.run(plugin='SGE')
-       workflow.run(plugin='PBS)
+       workflow.run(plugin='PBS')
 
 Optional arguments::
 
@@ -130,6 +130,17 @@ particular node might use more resources than other nodes in a workflow.
 
      node.plugin_args = {'qsub_args': '-l nodes=1:ppn=3', 'overwrite': True}
 
+LSF
+---
+
+Submitting via LSF is almost identical to SGE above:
+
+       workflow.run(plugin='LSF')
+
+Optional arguments::
+
+  template: custom template file to use
+  bsub_args: any other command line args to be passed to bsub.
 
 Condor
 ------
