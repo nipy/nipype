@@ -20,4 +20,4 @@ class C3dAffineTool(SlicerCommandLine):
     output_spec=C3dAffineToolOutputSpec
 
     _cmd = 'c3d_affine_tool'
-    _outputs_filenames = {'itk_transform':'itkTransform.txt'}
+    _outputs_filenames = {'itk_transform':'affine.txt'}
