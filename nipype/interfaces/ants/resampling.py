@@ -129,9 +129,12 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                              desc='transformation file(s) to be applied',
                              mandatory=True)
     invert_affine = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
+                    desc=('List of Affine transformations to invert.'
                           'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
+                          'found in transformation_series. Note that indexing '
+                          'starts with 1 and does not include warp fields. Affine '
+                          'transformations are distinguished '
+                          'from warp fields by the word "affine" included in their filenames.'))
 
 class WarpImageMultiTransformOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
@@ -175,7 +178,7 @@ class WarpImageMultiTransform(ANTSCommand):
             series = []
             affine_counter = 0
             for transformation in val:
-                if transformation.lower().endswith("txt") and \
+                if "affine" in transformation.lower() and \
                     isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
