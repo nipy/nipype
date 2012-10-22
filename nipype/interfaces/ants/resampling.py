@@ -106,7 +106,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     input_image = File(argstr='%s', mandatory=True,
                         desc=('image to apply transformation to (generally a '
                               'coregistered functional)'), position=2)
-    output_image = File(genfile=True, usedefault=True, hash_files=False, argstr='%s', 
+    output_image = File(genfile=True, hash_files=False, argstr='%s', 
                         desc=('name of the output warped image'), position = 3, xor=['out_postfix'])
     out_postfix = File("_wimt", usedefault=True, hash_files=False, 
                         desc=('Postfix that is prepended to all output '
