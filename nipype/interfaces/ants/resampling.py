@@ -168,7 +168,7 @@ class WarpImageMultiTransform(ANTSCommand):
     output_spec = WarpImageMultiTransformOutputSpec
     
     def _gen_filename(self, name):
-        if name == 'out_file':
+        if name == 'output_image':
             _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
             return ''.join((name, self.inputs.out_postfix, ext))
         return None
