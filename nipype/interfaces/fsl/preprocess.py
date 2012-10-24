@@ -398,13 +398,13 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                            argstr='-datatype %s',
                            desc='force output data type')
     cost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                       'leastsq', 'labeldiff',
+                       'leastsq', 'labeldiff','bbr',
                        argstr='-cost %s',
                        desc='cost function')
     # XXX What is the difference between 'cost' and 'searchcost'?  Are
     # these both necessary or do they map to the same variable.
     cost_func = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                             'leastsq', 'labeldiff',
+                             'leastsq', 'labeldiff','bbr',
                              argstr='-searchcost %s',
                              desc='cost function')
     uses_qform = traits.Bool(argstr='-usesqform',
@@ -463,6 +463,37 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                           desc='use 2D rigid body mode - ignores dof')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
+
+    # BBR options
+    wm_seg = File(
+        argstr='-wmseg %s',
+        desc='white matter segmentation volume needed by BBR cost function')
+    wmcoords = File(
+        argstr='-wmcoords %s',
+        desc='white matter boundary coordinates for BBR cost function')
+    wmnorms = File(
+        argstr='-wmnorms %s',
+        desc='white matter boundary normals for BBR cost function')
+    fieldmap = File(
+        argstr='-fieldmap %s',
+        desc='fieldmap image in rads/s - must be already registered to the reference image')
+    fieldmapmask = File(
+        argstr='-fieldmapmask %s',
+        desc='mask for fieldmap image')
+    pedir = traits.Int(
+        argstr='-pedir %d',
+        desc='phase encode direction of EPI - 1/2/3=x/y/z & -1/-2/-3=-x/-y/-z')
+    echospacing = traits.Float(
+        argstr='echospacing %f',
+        desc='value of EPI echo spacing - units of seconds')
+    bbrtype = traits.Enum(
+        'signed', 'global_abs', 'local_abs',
+        argstr='-bbrtype %s',
+        desc='type of bbr cost function: signed [default], global_abs, local_abs')
+    bbrslope = traits.Float(
+        argstr='-bbrslope %f',
+        desc='value of bbr slope')
+    
 
 
 class FLIRTOutputSpec(TraitedSpec):
