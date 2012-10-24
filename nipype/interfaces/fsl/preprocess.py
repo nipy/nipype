@@ -484,7 +484,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
         argstr='-pedir %d',
         desc='phase encode direction of EPI - 1/2/3=x/y/z & -1/-2/-3=-x/-y/-z')
     echospacing = traits.Float(
-        argstr='echospacing %f',
+        argstr='-echospacing %f',
         desc='value of EPI echo spacing - units of seconds')
     bbrtype = traits.Enum(
         'signed', 'global_abs', 'local_abs',
