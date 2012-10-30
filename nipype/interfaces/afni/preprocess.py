@@ -9,14 +9,15 @@
     >>> os.chdir(datadir)
 """
 import os
+import re
 import warnings
 
 from .base import AFNICommandInputSpec, AFNICommand
 from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec, traits,
                     isdefined, File, InputMultiPath, DynamicTraitedSpec)
+from ..io import add_traits
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
-# from ..utility import Merge
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -77,10 +78,12 @@ class To3D(AFNICommand):
     Examples
     ========
 
+    >>> import os.path as path
     >>> from nipype.interfaces import afni
+    >>> from nipype.testing import basedir
     >>> To3D = afni.To3D()
     >>> To3D.inputs.datum = 'float'
-    >>> To3D.inputs.infolder = 'dicomdir'
+    >>> To3D.inputs.infolder = path.join(basedir, 'data')
     >>> To3D.inputs.filetype = 'anat'
     >>> To3D.inputs.orient = 'RAS'
     >>> To3D.inputs.funcparams = '-time:zt %s alt+z2'
@@ -156,9 +159,10 @@ class TShift(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> tshift = afni.TShift()
-    >>> tshift.inputs.in_file = 'functional.nii'
-    >>> tshift.inputs.out_file = 'functional_tshift.nii'
+    >>> tshift.inputs.in_file = example_data('functional.nii')
+    >>> tshift.inputs.prefix = 'functional_tshift.nii'
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
     >>> res = tshift.run()   # doctest: +SKIP
@@ -693,8 +697,10 @@ class Volreg(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> volreg = afni.Volreg()
-    >>> volreg.inputs.in_file = 'functional.nii'
-    >>> volreg.inputs.args = '-Fourier -twopass'
+    >>> volreg.inputs.in_file = example_data('functional.nii')
+    >>> volreg.inputs.interp = 'quintic'
+    >>> volreg.inputs.final = 'Fourier'
+    >>> volreg.inputs.twopass = True
     >>> volreg.inputs.zpad = 4
     >>> res = volreg.run() # doctest: +SKIP
 
@@ -741,8 +747,8 @@ class MergeInputSpec(AFNICommandInputSpec):
          hash_files=False)
     doall = traits.Bool(desc='apply options to all sub-bricks in dataset',
         argstr='-doall')
-    blurfwhm = traits.Int(desc='FWHM blur value (mm)',
-          argstr='-1blur_fwhm %d',
+    blurfwhm = traits.Float(desc='FWHM blur value (mm)',
+          argstr='-1blur_fwhm %g',
           units='mm')
     suffix = traits.Str('_merge', desc="out_file suffix", usedefault=True)
 
@@ -761,9 +767,10 @@ class Merge(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> merge = afni.Merge()
-    >>> merge.inputs.in_files = ['functional.nii', 'functional2.nii']
-    >>> merge.inputs.blurfwhm = 4
+    >>> merge.inputs.in_files = example_data('functional.nii')
+    >>> merge.inputs.blurfwhm = 4.0
     >>> merge.inputs.doall = True
     >>> merge.inputs.out_file = 'e7.nii'
     >>> res = merge.run() # doctest: +SKIP
@@ -937,10 +944,11 @@ class ZCutUp(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> zcutup = afni.ZCutUp()
-    >>> zcutup.inputs.in_file = 'functional.nii'
+    >>> zcutup.inputs.in_file = example_data('functional.nii')
     >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
-    >>> zcutup.inputs.keep= '0 10'
+    >>> zcutup.inputs.keep = '0 10'
     >>> res = zcutup.run() # doctest: +SKIP
 
     """
@@ -1112,16 +1120,10 @@ class Maskave(AFNICommand):
             return self._list_outputs()[name]
 
 class SkullStripInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dSkullStrip',
-        argstr='-input %s',
-        position=1,
-        mandatory=True,
-        exists=True)
-    out_file = File(desc='output to the file',
-         argstr='%s',
-         position=-1,
-        genfile=True,
-        hash_files=False)
+    in_file = File(argstr='-input %s', position=1, mandatory=True, exists=True,
+                   desc='input file to 3dSkullStrip')
+    out_file = File(argstr='%s', position=-1, genfile=True, hash_files=False,
+                    desc='output to the file')
     suffix = traits.Str('_skullstrip', desc="out_file suffix", usedefault=True)
 
 
@@ -1140,9 +1142,11 @@ class SkullStrip(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> skullstrip = afni.SkullStrip()
-    >>> skullstrip.inputs.in_file = 'functional.nii'
+    >>> skullstrip.inputs.in_file = example_data('functional.nii')
     >>> skullstrip.inputs.args = '-o_ply'
+    >>> skullstrip.inputs.out_file = 'benchmark'
     >>> res = skullstrip.run() # doctest: +SKIP
 
     """
@@ -1166,17 +1170,10 @@ class SkullStrip(AFNICommand):
 
 
 class TCatInputSpec(AFNICommandInputSpec):
-    in_files = InputMultiPath(
-        File(exists=True),
-        desc='input file to 3dTcat',
-        argstr=' %s',
-        position=-1,
-        mandatory=True)
-    out_file = File(desc='output to the file',
-         argstr='-prefix %s',
-         position=-2,
-         genfile=True,
-         hash_files=False)
+    in_files = InputMultiPath(File(exists=True), argstr=' %s', position=-1,
+                              mandatory=True, desc='input file to 3dTcat')
+    out_file = File(argstr='-prefix %s', position=-2, genfile=True,
+                    hash_files=False, desc='output to the file')
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
     suffix = traits.Str('_tcat', desc="out_file suffix", usedefault=True)
 
@@ -1196,9 +1193,10 @@ class TCat(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> tcat = afni.TCat()
-    >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
-    >>> tcat.inputs.out_file= 'functional_tcat.nii'
+    >>> tcat.inputs.in_files = example_data('functional.nii')
+    >>> tcat.inputs.out_file = 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
     >>> res = tcat.run() # doctest: +SKIP
 
@@ -1263,9 +1261,10 @@ class Fim(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> fim = afni.Fim()
-    >>> fim.inputs.in_file = 'functional.nii'
-    >>> fim.inputs.ideal_file= 'seed.1D'
+    >>> fim.inputs.in_file = example_data('functional.nii')
+    >>> fim.inputs.ideal_file = example_data('seed.1D') #doctest: +SKIP
     >>> fim.inputs.out_file = 'functional_corr.nii'
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
@@ -1292,27 +1291,15 @@ class Fim(AFNICommand):
 
 
 class TCorrelateInputSpec(AFNICommandInputSpec):
-    xset = File(desc='input xset',
-        argstr=' %s',
-        position=-2,
-        mandatory=True,
-        exists=True)
-    yset = File(desc='input yset',
-        argstr=' %s',
-        position=-1,
-        mandatory=True,
-        exists=True)
-    pearson = traits.Bool(desc='Correlation is the normal' +
-        ' Pearson correlation coefficient',
-        argstr='-pearson',
-        position=1)
-    polort = traits.Int(desc='Remove polynomical trend of order m',
-        argstr='-polort %d', position=2)
-
-    out_file = File(desc='Save output into dataset with prefix ',
-                    argstr='-prefix %s',
-                    position=3, genfile=True, hash_files=False)
-
+    xset = File(argstr='%s', position=-2, mandatory=True, exists=True, desc='input xset')
+    yset = File(argstr='%s', position=-1, mandatory=True, exists=True, desc='input yset')
+    correlation = traits.Enum('pearson', 'spearman', 'quadrant', 'ktaub', argstr='-%s', usedefault=True,
+                              position=1, desc='Correlation is "pearson", "spearman", "quadrant", or "ktaub"')
+    covariance = traits.Bool(default=False, usedefault=True, xor=['correlation'], argstr='-covariance',
+                             desc='Use covariance instead of correlation')
+    polort = traits.Int(argstr='-polort %d', position=2, desc='Remove polynomical trend of order m')
+    prefix = File(argstr='-prefix %s', position=3, genfile=True, hash_files=False,
+                  desc='Save output into dataset with prefix')
     suffix = traits.Str('_tcor', desc="out_file suffix", usedefault=True)
 
 
@@ -1332,11 +1319,11 @@ class TCorrelate(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> tcorrelate = afni.TCorrelate()
-    >>> tcorrelate.inputs.xset= 'u_rc1s1_Template.nii'
-    >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
-    >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
+    >>> tcorrelate.inputs.xset= example_data('u_rc1s1_Template.nii')
+    >>> tcorrelate.inputs.yset = example_data('u_rc1s2_Template.nii')
+    >>> tcorrelate.inputs.prefix = 'functional_tcorrelate.nii.gz'
     >>> tcorrelate.inputs.polort = -1
-    >>> tcorrelate.inputs.pearson = True
+    >>> tcorrelate.inputs.correlation = 'pearson'
     >>> res = tcarrelate.run() # doctest: +SKIP
 
     """
@@ -1556,13 +1543,13 @@ class Calc(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
+    >>> from nipype.testing import example_data
     >>> calc = afni.Calc()
-    >>> calc.inputs.in_file_a = 'functional.nii'
-    >>> calc.inputs.in_file_b = 'functional2.nii'
+    >>> calc.inputs.in_file_a = example_data('functional.nii')
+    >>> calc.inputs.in_file_b = example_data('functional2.nii')
     >>> calc.inputs.expr='a*b'
-    >>> calc.inputs.out_file =  'functional_calc.nii.gz'
-    >>> calc.cmdline
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
+    >>> calc.inputs.out_file = 'functional_calc.nii.gz'
+    >>> res = calc.run() # doctest: +SKIP
 
     """
 
@@ -1602,15 +1589,11 @@ class Calc(AFNICommand):
 
 class DeconvolveInputSpec(AFNICommandInputSpec, DynamicTraitedSpec):
     in_file = InputMultiPath(File(exists=True), argstr="%s", mandatory=True, desc="Filename(s) of 3D+time input dataset")
-
     mask = File(argstr="-mask %s", exists=True, desc="Filename of 3D mask dataset")
     ignoreWarnings = traits.Either(traits.Bool(), traits.Int(), desc="GOFORIT [g]: Proceed even if the matrix has \
     problems, optional value 'g' specifies number of warnings to ignore")
     nullHypothesisPolynomialDegree = traits.Either(traits.Enum('auto'), traits.Int(), argstr="-polort %d", desc="degree of \
     polynomial corresponding to the null hypothesis")
-    numberOfStimulusFiles = traits.Int(1, mandatory=True, usedefault=True, desc="The number of input files for the stimulus \
-    time series")
-    numberOfStimulusTimeSeries = traits.Int(requires=['numberOfStimulusFiles'], desc="The number of stimulus time series")
     full_first = traits.Bool(argstr="-full_first", desc="")
     is_float = traits.Bool(argstr="-float", desc="")
     tout = traits.Bool(argstr="-tout", desc="")
@@ -1631,6 +1614,8 @@ class Deconvolve(AFNICommand):
     Calculate the deconvolution of a 4D measurement dataset with a specified input stimulus
     time series
 
+    Nota bene: If stimFileCount != stimSeriesCount, the last file is assumed to be multi-block!
+
     For complete details, see the `3dDeconvolve Documentation
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDeconvolve.html>`_
 
@@ -1638,34 +1623,51 @@ class Deconvolve(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni
-    >>> from nipype.testing import example_data
     >>> Deconv = afni.Deconvolve()
+    Traceback (most recent call last):
+    ...
+    AssertionError: Deconvolve() requires two inputs
+
+    >>> from nipype.interfaces import afni
+    >>> Deconv = afni.Deconvolve(2, 1)
+    Traceback (most recent call last):
+    ...
+    AssertionError: The number of stimulus files MUST be <= the number of stimulus series
+
+    >>> from nipype.interfaces import afni
+    >>> Deconv = afni.Deconvolve('2', 3.124)
+    Traceback (most recent call last):
+    ...
+    AssertionError: Initial inputs must be integers
+
+    >>> from nipype.interfaces import afni
+    >>> from nipype.testing import example_data
+    >>> Deconv = afni.Deconvolve(3, 8)
     >>> Deconv.inputs.in_file = example_data('functional.nii')
     >>> Deconv.inputs.mask = example_data('seed_mask.nii')
     >>> Deconv.inputs.ignoreWarnings = 4
     >>> Deconv.inputs.nullHypothesisPolynomialDegree = 1
-    >>> Deconv.inputs.numberOfStimulusFiles = 3
-    >>> # doctest: +SKIP If numberOfStimulusFiles != numberOfStimulusTimeSeries, last file is assumed to be multi-block
-    >>> Deconv.inputs.numberOfStimulusTimeSeries = 8
-    >>> Deconv.inputs.stim_file1 = example_data('stim_file1.1D')
-    >>> Deconv.inputs.stim_label1 = 'median_csf'
-    >>> Deconv.inputs.isStimBase1 = False
-    >>> Deconv.inputs.stim_file1 = example_data('stim_file2.1D')
-    >>> Deconv.inputs.stim_label2 = 'median_wm'
-    >>> Deconv.inputs.isStimBase2 = False
-    >>> Deconv.inputs.stim_file3 = example_data('stim_file3.1D')
-    >>> Deconv.inputs.stim_label3 = 'roll'
-    >>> Deconv.inputs.isStimBase3 = True
-    >>> Deconv.inputs.stim_label4 = 'pitch'
-    >>> Deconv.inputs.isStimBase4 = True
-    >>> Deconv.inputs.stim_label5 = 'yaw'
-    >>> Deconv.inputs.isStimBase5 = True
-    >>> Deconv.inputs.stim_label6 = 'dS'
-    >>> Deconv.inputs.isStimBase6 = True
-    >>> Deconv.inputs.stim_label7 = 'dL'
-    >>> Deconv.inputs.isStimBase7 = True
-    >>> Deconv.inputs.stim_label8 = 'dP'
-    >>> Deconv.inputs.isStimBase8 = True
+    >>> # Deconv.inputs.numberOfStimulusFiles = 3
+    >>> # Deconv.inputs.numberOfStimulusTimeSeries = 8
+    >>> Deconv.inputs.stim_file_1 = example_data('functional.nii') #'stim_file1.1D')
+    >>> Deconv.inputs.stim_label_1 = 'median_csf'
+    >>> Deconv.inputs.is_stim_base_1 = False
+    >>> Deconv.inputs.stim_file_1 = example_data('functional.nii') #'stim_file2.1D')
+    >>> Deconv.inputs.stim_label_2 = 'median_wm'
+    >>> # Deconv.inputs.is_stim_base_2 = False
+    >>> Deconv.inputs.stim_file_3 = example_data('functional.nii') #'stim_file3.1D')
+    >>> Deconv.inputs.stim_label_3 = 'roll'
+    >>> Deconv.inputs.is_stim_base_3 = True
+    >>> Deconv.inputs.stim_label_4 = 'pitch'
+    >>> Deconv.inputs.is_stim_base_4 = True
+    >>> Deconv.inputs.stim_label_5 = 'yaw'
+    >>> Deconv.inputs.is_stim_base_5 = True
+    >>> Deconv.inputs.stim_label_6 = 'dS'
+    >>> Deconv.inputs.is_stim_base_6 = True
+    >>> Deconv.inputs.stim_label_7 = 'dL'
+    >>> Deconv.inputs.is_stim_base_7 = True
+    >>> Deconv.inputs.stim_label_8 = 'dP'
+    >>> Deconv.inputs.is_stim_base_8 = True
     >>> result = Deconv.run()                                              # doctest: +SKIP
 
     """
@@ -1673,20 +1675,26 @@ class Deconvolve(AFNICommand):
     input_spec = DeconvolveInputSpec
     output_spec = DeconvolveOutputSpec
 
-    def __init__(self, **inputs):
-        # self.inputs.axis = 'vstack'
-        # self.inputs.no_flatten = False
-        # super(Merge, self).__init__(**inputs)
-        super(AFNICommand, self).__init__(**inputs)
-        self.numStimFiles = inputs["numberOfStimulusFiles"]
-        self.numStimLabels = inputs["numberOfStimulusTimeSeries"]
-        add_traits(self.inputs, ['stim_file%d' % (i + 1) for i in range(numStimFiles)])
-        add_traits(self.inputs, ['stim_label%d' % (i + 1) for i in range(numStimLabels)])
-        add_traits(self.inputs, ['is_stim_base%d' % (i + 1) for i in range(numStimLabels)])
+    def __init__(self, fileCount=None, seriesCount=None, **inputs):
+        super(Deconvolve, self).__init__(**inputs)
+        assert ((not fileCount is None) and (not seriesCount is None)), "Deconvolve() requires two inputs"
+        assert (isinstance(fileCount, int) and isinstance(seriesCount, int)), "Initial inputs must be integers"
+        assert (fileCount <= seriesCount), "The number of stimulus files MUST be <= the number of stimulus series"
+        self.stimFileCount = fileCount
+        self.stimSeriesCount = seriesCount
+        self._add_stim_traits()
 
-    def _formatStimulus(self, val):
+    def _add_stim_traits(self):
+        add_traits(self.inputs, ['stim_file_%d' % (i + 1) for i in range(self.stimFileCount)],
+                   trait_type=traits.File(exists=True))
+        add_traits(self.inputs, ['stim_label_%d' % (i + 1) for i in range(self.stimSeriesCount)],
+                   trait_type=traits.Str())
+        add_traits(self.inputs, ['is_stim_base_%d' % (i + 1) for i in range(self.stimSeriesCount)],
+                   trait_type=traits.Bool(default=False, usedefault=True))
+
+    def _formatStimulus(self):
         retval = []
-        retval.append("-num_stimts %d" % val)
+        retval.append("-num_stimts %d" % self.inputs.numberOfStimulusFiles)
         for count in range(val):
             index = count + 1
             fileValue = getattr(self.inputs, 'stim_file%d' % (index + 1))
@@ -1715,7 +1723,10 @@ class Deconvolve(AFNICommand):
             else:
                 return "-polort %d" % val
         elif opt == "numberOfStimulusFiles":
-            return self._formatStimulus(val)
+            self._add_stim_traits()
+            return self._formatStimulus()
+        elif re.search('stim_', opt):
+            pass
         return super(Deconvolve, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
