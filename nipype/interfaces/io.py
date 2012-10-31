@@ -550,6 +550,122 @@ class DataGrabber(IOBase):
                 outputs[key] = outputs[key][0]
         return outputs
 
+class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): 
+    root_paths = traits.Either(traits.List(),
+                               traits.Str(),
+                               mandatory=True,)
+    match_regex = traits.Str('(.+)', 
+                             usedefault=True,
+                             desc=("Regular expression for matching "
+                             "paths."))
+    ignore_rules = traits.List(desc=("List of callables that take two "
+                               "arguments, a path and its os.stat "
+                               "result, and returns True if the path "
+                               "should be ignored."))
+    max_depth = traits.Int(desc="The maximum depth to search beneath "
+                           "the root_paths")
+    min_depth = traits.Int(desc="The minimum depth to search beneath "
+                           "the root paths")
+    unpack_single = traits.Bool(False,
+                                usedefault=True,
+                                desc="Unpack single results from list")
+
+
+class DataFinder(IOBase):
+    """Search for paths that match a given regular expression. Matched 
+    paths are available in the output 'out_paths'. Any named groups of 
+    captured text from the regular expression are also available as 
+    ouputs of the same name.
+    
+    Will recursively search any subdirectories by default. This can be 
+    limited with the min/max depth options. Named groups of text 
+    captured by the regular expression will also be output dynamically.
+    """
+    
+    input_spec = DataFinderInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+    
+    def _match_path(self, target_path):
+        #Check if we should ignore the path
+        if not self.inputs.ignore_rules is Undefined:
+            stat = os.stat(target_path)
+            for ignore_rule in self.inputs.ignore_rules:
+                if ignore_rule(target_path, stat):
+                    return
+                    
+        #Check if we can match the path
+        match = self.match_regex.search(target_path)
+        if not match is None:
+            match_dict = match.groupdict()
+            
+            if self.result is None:
+                self.result = {'out_paths' : []}
+                for key in match_dict.keys():
+                    self.result[key] = []
+                    
+            self.result['out_paths'].append(target_path)
+            for key, val in match_dict.iteritems():
+                self.result[key].append(val)
+    
+    def _run_interface(self, runtime):
+        #Prepare some of the inputs
+        if isinstance(self.inputs.root_paths, str):
+            self.inputs.root_paths = [self.inputs.root_paths]
+        self.match_regex = re.compile(self.inputs.match_regex)
+        if self.inputs.max_depth is Undefined:
+            max_depth = None
+        else:
+            max_depth = self.inputs.max_depth
+        if self.inputs.min_depth is Undefined:
+            min_depth = 0
+        else:
+            min_depth = self.inputs.min_depth
+            
+        self.result = None
+        for root_path in self.inputs.root_paths:
+            #Handle tilda/env variables and remove extra seperators
+            root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
+            
+            #Check if the root_path is a file
+            if os.path.isfile(root_path):
+                if min_depth == 0:
+                    self._match_path(root_path)
+                continue
+                
+            #Walk through directory structure checking paths 
+            for curr_dir, sub_dirs, files in os.walk(root_path):
+                #Determine the current depth from the root_path
+                curr_depth = (curr_dir.count(os.sep) - 
+                              root_path.count(os.sep))
+                
+                #If the max path depth has been reached, clear sub_dirs 
+                #and files
+                if (not max_depth is None and 
+                    curr_depth >= max_depth):
+                    sub_dirs[:] = []
+                    files = []
+                    
+                #Test the path for the curr_dir and all files
+                if curr_depth >= min_depth:
+                    self._match_path(curr_dir)
+                if curr_depth >= (min_depth - 1):
+                    for infile in files:
+                        full_path = os.path.join(curr_dir, infile)
+                        self._match_path(full_path)
+            
+        if (self.inputs.unpack_single and 
+            len(self.result['out_paths']) == 1
+           ):
+            for key, vals in self.result.iteritems():
+                self.result[key] = vals[0]
+            
+        return runtime
+            
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs.update(self.result)
+        return outputs
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
