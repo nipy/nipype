@@ -77,7 +77,7 @@ class DcmStack(NiftiGeneratorBase):
         src_paths = self._get_filelist(self.inputs.dicom_files)
         stack = dcmstack.DicomStack()
         for src_path in src_paths:
-            src_dcm = dicom.read_file(src_path)
+            src_dcm = dicom.read_file(src_path, force=True)
             stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
