@@ -588,8 +588,8 @@ class DataFinder(IOBase):
     
     def _match_path(self, target_path):
         #Check if we should ignore the path
-        for ignore_rule in self.ignore_rules:
-            if ignore_rule.search(target_path)
+        for ignore_re in self.ignore_regexes:
+            if ignore_re.search(target_path):
                 return
                     
         #Check if we can match the path
