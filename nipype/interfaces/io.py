@@ -558,10 +558,10 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                              usedefault=True,
                              desc=("Regular expression for matching "
                              "paths."))
-    ignore_rules = traits.List(desc=("List of callables that take two "
-                               "arguments, a path and its os.stat "
-                               "result, and returns True if the path "
-                               "should be ignored."))
+    ignore_regexes = traits.List(desc=("List of regular expressions, "
+                                 "if any match the path it will be "
+                                 "ignored.")
+                                )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
     min_depth = traits.Int(desc="The minimum depth to search beneath "
@@ -588,11 +588,9 @@ class DataFinder(IOBase):
     
     def _match_path(self, target_path):
         #Check if we should ignore the path
-        if not self.inputs.ignore_rules is Undefined:
-            stat = os.stat(target_path)
-            for ignore_rule in self.inputs.ignore_rules:
-                if ignore_rule(target_path, stat):
-                    return
+        for ignore_rule in self.ignore_rules:
+            if ignore_rule.search(target_path)
+                return
                     
         #Check if we can match the path
         match = self.match_regex.search(target_path)
@@ -621,6 +619,12 @@ class DataFinder(IOBase):
             min_depth = 0
         else:
             min_depth = self.inputs.min_depth
+        if self.inputs.ignore_regexes is Undefined:
+            self.ignore_regexes = []
+        else:
+            self.ignore_regexes = \
+                [re.compile(regex) 
+                 for regex in self.inputs.ignore_regexes]
             
         self.result = None
         for root_path in self.inputs.root_paths:
