@@ -175,6 +175,9 @@ class CopyMetaOutputSpec(TraitedSpec):
     dest_file = traits.File(exists=True)
     
 class CopyMeta(BaseInterface):
+    input_spec = CopyMetaInputSpec
+    output_spec = CopyMetaOutputSpec
+    
     '''Copy meta data from one Nifti file to another.'''
     def _run_interface(self, runtime):
         src = NiftiWrapper.from_filename(self.inputs.src_file)
