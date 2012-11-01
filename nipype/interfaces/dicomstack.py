@@ -55,6 +55,8 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                 traits.Str(), 
                                 mandatory=True)
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
+    exclude_regexes = traits.List(desc="Meta data to exclude, suplementing any default exclude filters")
+    include_regexes = traits.List(desc="Meta data to include, overriding any exclude filters")
     
 class DcmStackOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True)
@@ -75,7 +77,15 @@ class DcmStack(NiftiGeneratorBase):
     
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
-        stack = dcmstack.DicomStack()
+        include_regexes = dcmstack.default_key_incl_res
+        if not self.inputs.include_regexes is Undefined:
+            include_regexes += self.inputs.include_regexes
+        exclude_regexes = dcmstack.default_key_excl_res
+        if not self.inputs.exclude_regexes is Undefined:
+            exclude_regexes += self.inputs.exclude_regexes
+        meta_filter = dcmstack.make_key_regex_filter(exclude_regexes, 
+                                                     include_regexes)   
+        stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             src_dcm = dicom.read_file(src_path, force=True)
             stack.add_dcm(src_dcm)
@@ -214,7 +224,10 @@ class CopyMeta(BaseInterface):
 class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     in_files = traits.List(mandatory=True,
                            desc="List of Nifti files to merge")
-    sort_order = traits.Str(desc="Meta data key to sort files by")
+    sort_order = traits.Either(traits.Str(),
+                               traits.List(),
+                               desc="One or more meta data keys to "
+                               "sort files by.")
     merge_dim = traits.Int(desc="Dimension to merge along. If not "
                            "specified, the last singular or "
                            "non-existant dimension is used.")
@@ -223,11 +236,9 @@ class MergeNiftiOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True,
                            desc="Merged Nifti file")
         
-def make_key_func(meta_key, index=None):
+def make_key_func(meta_keys, index=None):
     def key_func(src_nii):
-        result = src_nii.get_meta(meta_key, index)
-        if result is None:
-            raise ValueError('Key not found: %s' ) % meta_key
+        result = [src_nii.get_meta(key, index) for key in meta_keys]
         return result
     
     return key_func
@@ -246,7 +257,10 @@ class MergeNifti(NiftiGeneratorBase):
                for nii in niis
               ]
         if self.inputs.sort_order:
-            nws.sort(key=make_key_func(self.inputs.sort_order))
+            sort_order = self.inputs.sort_order
+            if isinstance(sort_order, str):
+                sort_order = [sort_order]
+            nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:
             merge_dim = None
         else:
