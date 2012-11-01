@@ -181,8 +181,8 @@ class CopyMeta(BaseInterface):
     '''Copy meta data from one Nifti file to another.'''
     def _run_interface(self, runtime):
         src = NiftiWrapper.from_filename(self.inputs.src_file)
-        dest = NiftiWrapper.from_filename(self.inputs.dest_file, 
-                                          make_empty=True)
+        dest_nii = nb.load(self.inputs.dest_file)
+        dest = NiftiWrapper(dest_nii, make_empty=True)
         classes = src.meta_ext.get_valid_classes()
         if self.inputs.include_classes:
             classes = [cls 
