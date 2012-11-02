@@ -215,9 +215,9 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                 'WelchWindowedSinc',
                                 'HammingWindowedSinc',
                                 'LanczosWindowedSinc',
-                                # 'MultiLabel',
-                                # 'Gaussian',
-                                # 'BSpline',
+                                'MultiLabel',
+                                'Gaussian',
+                                'BSpline',
                                 argstr='%s', usedefault = True)
     # TODO: Implement these options for multilabel, gaussian, and bspline
     # interpolation_sigma = traits.Float(requires=['interpolation'])
