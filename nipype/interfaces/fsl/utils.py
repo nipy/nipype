@@ -1187,3 +1187,4 @@ class Reorient2Std(FSLCommand):
             outputs['out_file'] = self._gen_filename('out_file')
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs

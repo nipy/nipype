@@ -108,21 +108,20 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+from nipype import config, logging
+from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
 from traceback import format_exception
 info = None
 pklfile = '%s'
 batchdir = '%s'
 try:
-    from nipype import config, logging
-    import sys
     if not sys.version_info < (2, 7):
-        from ordereddict import OrderedDict
+        from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
     config.update_matplotlib()
     logging.update_logging(config)
-    from nipype.utils.filemanip import loadpkl, savepkl
     traceback=None
     cwd = os.getcwd()
     info = loadpkl(pklfile)

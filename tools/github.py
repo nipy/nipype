@@ -42,7 +42,12 @@ def create_hash_map():
     """
 
     hashmap = {}
+    from base64 import encodestring as base64
+    import pwd
+    login_name = pwd.getpwuid(os.geteuid())[0]
     conn = httplib.HTTPSConnection("api.github.com")
+    conn.request("GET", "/repos/nipy/nipype",
+                 headers={'Authorization': 'Basic %s' % base64(login_name)})
     try:
         conn.request("GET", "/repos/nipy/nipype/git/trees/master?recursive=1")
     except:
