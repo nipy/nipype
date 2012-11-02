@@ -1736,3 +1736,55 @@ class Deconvolve(AFNICommand):
         outputs['out_fitts'] = os.path.abspath(self.inputs.fitts)
         outputs['out_errts'] = os.path.abspath(self.inputs.errts)
         return outputs
+
+class ZeropadInputSpec(AFNICommandInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-1, desc="Filename of input")
+    out_file = traits.Either(File(genfile=True, hash_files=False), traits.Str(), argstr='-prefix %s',
+                             position=1, desc='output file prefix of 3dZeropad')
+    plane = traits.Enum('I', 'S', 'A', 'P', 'L' , 'R', 'z', 'IS', 'AP', 'LR', argstr='%s',
+                        usedefault=False, position=2, desc="plane(s) to zero pad")
+    numberOfPlanes = traits.Int(requires=['plane'])
+    is_mm = traits.Bool(argstr='-mm', default=False, position=3,
+                        desc='Specify if the plane number is in millimeters or slices')
+    master =  File(exists=True, argstr='-master %s', position=2, xor=['plane', 'is_mm'],
+                   desc="Filename of volume to match")
+
+class ZeropadOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="")
+
+class Zeropad(AFNICommand):
+    """
+    >>> from nipype.interfaces import afni
+    >>> from nipype.testing import example_data
+    >>> Zpad = afni.Zeropad()
+    >>> Zpad.inputs.in_file = example_data('functional.nii')
+    >>> Zpad.inputs.out_file = 'zero_pad'
+    >>> Zpad.inputs.plane = 'IS'
+    >>> Zpad.inputs.numberOfPlanes = 44
+    >>> Zpad.inputs.is_mm = False
+    >>> Zpad.cmdline
+    3dZeropad -prefix zero_pad -IS 44 functional.nii
+    >>> result = Zpad.run()  # doctest: +SKIP
+    >>> Zpad.inputs.plane = 'z'
+    >>> Zpad.inputs.is_mm = True
+    >>> Zpad.cmdline
+    3dZeropad -prefix zero_pad -z 44 functional.nii
+    >>> result = Zpad.run()  # doctest: +SKIP
+    """
+    _cmd = "3dZeropad"
+    input_spec = ZeropadInputSpec
+    output_spec = ZeropadOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'plane':
+            return '-%s %d' % (val, self.inputs.numberOfPlanes)
+        return super(AFNICommand, self)._format_arg(opt, spec, val)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                suffix = 'zeropad_')
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
