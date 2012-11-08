@@ -77,7 +77,7 @@ def _get_affine_matrix(params, source):
     Sh = np.eye(4)
     Sh[(0, 0, 1), (1, 2, 2)] = params[9:12]
     if source == 'AFNI':
-        return np.dot(T, np.dot(Rz, np.dot(Rx, np.dot(Ry, np.dot(S, Sh)))))
+        return np.dot(T, np.dot(Ry, np.dot(Rx, np.dot(Rz, np.dot(S, Sh)))))
     return np.dot(T, np.dot(Rx, np.dot(Ry, np.dot(Rz, np.dot(S, Sh)))))
 
 
