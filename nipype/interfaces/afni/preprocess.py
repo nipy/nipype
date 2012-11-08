@@ -1762,13 +1762,13 @@ class Zeropad(AFNICommand):
     >>> Zpad.inputs.plane = 'IS'
     >>> Zpad.inputs.numberOfPlanes = 44
     >>> Zpad.inputs.is_mm = False
-    >>> Zpad.cmdline
-    3dZeropad -prefix zero_pad -IS 44 functional.nii
+    >>> Zpad.cmdline # doctest: +ELLIPSIS
+    '3dZeropad -prefix zero_pad -IS 44 ...functional.nii'
     >>> result = Zpad.run()  # doctest: +SKIP
     >>> Zpad.inputs.plane = 'z'
     >>> Zpad.inputs.is_mm = True
-    >>> Zpad.cmdline
-    3dZeropad -prefix zero_pad -z 44 functional.nii
+    >>> Zpad.cmdline # doctest: +ELLIPSIS
+    '3dZeropad -prefix zero_pad -z 44 -mm ...functional.nii'
     >>> result = Zpad.run()  # doctest: +SKIP
     """
     _cmd = "3dZeropad"
