@@ -90,7 +90,6 @@ def get_file_url(object):
     if is_git_repo():
         info = nipype.get_info()
         shortfile = os.path.join('nipype', filename.split('nipype/')[-1])
-        print shortfile
         uri = 'http://github.com/nipy/nipype/tree/%s/%s#L%d' % \
                                                            (info['commit_hash'],
                                                             shortfile, lines[1])
