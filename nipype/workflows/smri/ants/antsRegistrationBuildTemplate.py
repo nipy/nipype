@@ -155,7 +155,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     Inputs::
 
            inputspec.images :
-           inputspec.fixed_image : 
+           inputspec.fixed_image :
            inputspec.ListOfPassiveImagesDictionaries :
            inputspec.interpolationMapping :
 
@@ -163,7 +163,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
            outputspec.template :
            outputspec.transforms_list :
-           outputspec.passive_deformed_templates : 
+           outputspec.passive_deformed_templates :
     """
     TemplateBuildSingleIterationWF = pe.Workflow(name = 'antsRegistrationTemplateBuildSingleIterationWF_'+str(iterationPhasePrefix) )
 
