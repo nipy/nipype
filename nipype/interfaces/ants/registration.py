@@ -192,7 +192,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                       requires=['sampling_strategy'], desc='')
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.List(traits.Bool(argstr='%s'), default=True, usedefault=True)
-    # Interpolation flag  
+    # Interpolation flag
     interpolation = traits.Enum('Linear',
                                 'NearestNeighbor',
                                 'CosineWindowedSinc',
@@ -339,9 +339,9 @@ class Registration(ANTSCommand):
             if self.inputs.invert_initial_moving_transform:
                 return '--initial-moving-transform [ %s, 1 ]' % self.inputs.initial_moving_transform
             else:
-                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform    
-        elif opt == 'interpolation':  
-            # TODO: handle multilabel, gaussian, and bspline options  
+                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform
+        elif opt == 'interpolation':
+            # TODO: handle multilabel, gaussian, and bspline options
             return '--interpolation %s' % self.inputs.interpolation
         elif opt == 'output_transform_prefix':
             if isdefined(self.inputs.output_inverse_warped_image) and self.inputs.output_inverse_warped_image:

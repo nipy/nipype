@@ -153,7 +153,7 @@ class BET(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self._gen_outfilename()
-        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or 
+        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or
                 (isdefined(self.inputs.surfaces) and self.inputs.surfaces)):
             outputs['meshfile'] = self._gen_fname(outputs['out_file'],
                                                suffix='_mesh.vtk',
