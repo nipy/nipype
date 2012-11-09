@@ -71,7 +71,7 @@ PROV_RECORD_TYPES = (
     (PROV_REC_ALTERNATE,            u'Alternate'),
     (PROV_REC_SPECIALIZATION,       u'Specialization'),
     (PROV_REC_MENTION,              u'Mention'),
-#    (PROV_REC_COLLECTION,           u'Collection'),
+    (PROV_REC_COLLECTION,           u'Collection'),
     (PROV_REC_MEMBERSHIP,           u'Membership'),
     (PROV_REC_BUNDLE,               u'Bundle'),
 )
@@ -364,9 +364,10 @@ class ProvExceptionContraint(ProvException):
 # PROV records
 class ProvRecord(object):
     """Base class for PROV _records."""
-    def __init__(self, bundle, identifier, attributes=None, other_attributes=None):
+    def __init__(self, bundle, identifier, attributes=None, other_attributes=None, asserted=True):
         self._bundle = bundle
         self._identifier = identifier
+        self._asserted = asserted
         self._attributes = None
         self._extra_attributes = None
         if attributes or other_attributes:
@@ -443,9 +444,13 @@ class ProvRecord(object):
         # check to see if there is an existing record matching the attribute (as the record's identifier)
         existing_record = self._bundle.get_record(attribute)
         if existing_record is None:
+            # try to see if there is a bundle with the id
             existing_record = self._bundle.get_bundle(attribute)
         if existing_record and isinstance(existing_record, attribute_types):
             return existing_record
+        elif issubclass(attribute_types, ProvRecord):
+            # Create an inferred record for the id given:
+            return self._bundle.add_inferred_record(attribute_types, attribute)
         else:
             return None
     
@@ -511,6 +516,8 @@ class ProvRecord(object):
             return False
         if self._identifier and not (self._identifier == other._identifier):
             return False
+        if self._asserted != other._asserted:
+            return False
         if self._attributes and other._attributes:
             if len(self._attributes) <> len(other._attributes):
                 return False
@@ -569,8 +576,11 @@ class ProvRecord(object):
                 extra.append('%s=%s' % (str(attr), provn_represenation))
             if extra:
                 items.append('[%s]' % ', '.join(extra))
-        
-        return '%s(%s)' % (PROV_N_MAP[self.get_type()], ', '.join(items))
+        prov_n = '%s(%s)' % (PROV_N_MAP[self.get_type()], ', '.join(items))
+        return prov_n if self._asserted else '// ' + prov_n
+    
+    def is_asserted(self):
+        return self._asserted
     
     def is_element(self):
         return False
@@ -794,7 +804,7 @@ class ProvAttribution(ProvRelation):
     def add_attributes(self, attributes, extra_attributes):
         # Required attributes
         entity = self.required_attribute(attributes, PROV_ATTR_ENTITY, ProvEntity)
-        agent = self.required_attribute(attributes, PROV_ATTR_AGENT, (ProvAgent, ProvEntity))
+        agent = self.required_attribute(attributes, PROV_ATTR_AGENT, ProvAgent)
         
         attributes = OrderedDict()
         attributes[PROV_ATTR_ENTITY] = entity
@@ -812,7 +822,7 @@ class ProvAssociation(ProvRelation):
         # Required attributes
         activity = self.required_attribute(attributes, PROV_ATTR_ACTIVITY, ProvActivity) 
         # Optional attributes
-        agent = self.optional_attribute(attributes, PROV_ATTR_AGENT, (ProvAgent, ProvEntity))
+        agent = self.optional_attribute(attributes, PROV_ATTR_AGENT, ProvAgent)
         plan = self.optional_attribute(attributes, PROV_ATTR_PLAN, ProvEntity)
         
         attributes = OrderedDict()
@@ -831,8 +841,8 @@ class ProvDelegation(ProvRelation):
     
     def add_attributes(self, attributes, extra_attributes):
         # Required attributes
-        delegate = self.required_attribute(attributes, PROV_ATTR_DELEGATE, (ProvAgent, ProvEntity)) 
-        responsible = self.required_attribute(attributes, PROV_ATTR_RESPONSIBLE, (ProvAgent, ProvEntity))
+        delegate = self.required_attribute(attributes, PROV_ATTR_DELEGATE, ProvAgent) 
+        responsible = self.required_attribute(attributes, PROV_ATTR_RESPONSIBLE, ProvAgent)
         # Optional attributes
         activity = self.optional_attribute(attributes, PROV_ATTR_ACTIVITY, ProvActivity)
         
@@ -851,8 +861,8 @@ class ProvInfluence(ProvRelation):
     
     def add_attributes(self, attributes, extra_attributes):
         # Required attributes
-        influencee = self.required_attribute(attributes, PROV_ATTR_INFLUENCEE, (ProvAgent, ProvEntity)) 
-        influencer = self.required_attribute(attributes, PROV_ATTR_INFLUENCER, (ProvAgent, ProvEntity))
+        influencee = self.required_attribute(attributes, PROV_ATTR_INFLUENCEE, ProvElement) 
+        influencer = self.required_attribute(attributes, PROV_ATTR_INFLUENCER, ProvElement)
         # Optional attributes
         activity = self.optional_attribute(attributes, PROV_ATTR_ACTIVITY, ProvActivity)
         
@@ -1081,7 +1091,7 @@ class NamespaceManager(dict):
         
 
 class ProvBundle(ProvEntity):
-    def __init__(self, bundle=None, identifier=None, attributes=None, other_attributes=None):
+    def __init__(self, bundle=None, identifier=None, attributes=None, other_attributes=None, asserted=True):
         # Initializing bundle-specific attributes
         self._records = list()
         self._id_map = dict()
@@ -1092,7 +1102,7 @@ class ProvBundle(ProvEntity):
             self._namespaces = bundle._namespaces
         
         # Initializing record-specific attributes
-        super(ProvBundle, self).__init__(bundle, identifier, attributes, other_attributes)
+        super(ProvBundle, self).__init__(bundle, identifier, attributes, other_attributes, asserted)
         
     # Bundle configurations
     def set_default_namespace(self, uri):
@@ -1285,7 +1295,7 @@ class ProvBundle(ProvEntity):
                             attr_id = self.valid_identifier(attr)
                             if isinstance(value, list):
                                 # Parsing multi-value attribute
-                                extra_attributes.append((attr_id, self._decode_json_representation(value_single)) for value_single in value)
+                                extra_attributes.extend((attr_id, self._decode_json_representation(value_single)) for value_single in value)
                             else:
                                 # add the single-value attribute
                                 extra_attributes.append((attr_id, self._decode_json_representation(value)))
@@ -1355,17 +1365,25 @@ class ProvBundle(ProvEntity):
         return True
             
     # Provenance statements
-    def add_record(self, record_type, identifier, attributes=None, other_attributes=None):
-        new_record = PROV_REC_CLS[record_type](self, self.valid_identifier(identifier), attributes, other_attributes)
-        self._records.append(new_record)
-        if new_record._identifier:
-            if record_type == PROV_REC_BUNDLE:
+    def _add_record(self, record):
+        self._records.append(record)
+        if record._identifier:
+            if record.get_type() == PROV_REC_BUNDLE:
                 # Don't mix bunle ids with normal record ids.
-                self._bundles[new_record._identifier] = new_record
+                self._bundles[record._identifier] = record
             else:
-                self._id_map[new_record._identifier] = new_record
+                self._id_map[record._identifier] = record
+                
+    def add_record(self, record_type, identifier, attributes=None, other_attributes=None, asserted=True):
+        new_record = PROV_REC_CLS[record_type](self, self.valid_identifier(identifier), attributes, other_attributes, asserted)
+        self._add_record(new_record)
         return new_record
     
+    def add_inferred_record(self, record_cls, identifier):
+        record_id = self.valid_identifier(identifier);
+        record = record_cls(self, record_id, asserted=False)
+        self._add_record(record)
+        return record
         
     def add_bundle(self, identifier, bundle):
         '''Add a sub-bundle to the current bundle
