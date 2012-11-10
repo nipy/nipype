@@ -266,12 +266,14 @@ class InterfaceResult(object):
 
     """
 
-    def __init__(self, interface, runtime, inputs=None, outputs=None):
-        self._version = 1.0
+    def __init__(self, interface, runtime, inputs=None, outputs=None,
+                 provenance=None):
+        self._version = 2.0
         self.interface = interface
         self.runtime = runtime
         self.inputs = inputs
         self.outputs = outputs
+        self.provenance = provenance
 
     @property
     def version(self):
@@ -929,7 +931,8 @@ class BaseInterface(Interface):
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
-            self.write_provenance(results)
+            prov_record = self.write_provenance(results)
+            results.provenance = prov_record
         except Exception, e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             runtime.duration = (parseutc(runtime.endTime) -
@@ -964,7 +967,8 @@ class BaseInterface(Interface):
                 except Exception, e:
                     pass
                 results = InterfaceResult(interface, runtime, inputs=inputs)
-                self.write_provenance(results)
+                prov_record = self.write_provenance(results)
+                results.provenance = prov_record
                 return results
             else:
                 raise
@@ -1039,49 +1043,74 @@ class BaseInterface(Interface):
         a0_attrs = {foaf["host"]: runtime.hostname,
                     prov.PROV["type"]: nipype[classname],
                     prov.PROV["label"]: classname,
+                    nipype['duration']: runtime.duration,
+                    nipype['working_directory']: runtime.cwd,
+                    nipype['return_code']: runtime.returncode,
                     }
+        try:
+            a0_attrs.update({nipype['command']: runtime.cmdline})
+        except AttributeError:
+            pass
         a0 = g.activity(uuid1().hex,runtime.startTime, runtime.endTime,
                         a0_attrs)
+        # environment
+        id = uuid1().hex
+        env_collection = g.collection(id)
+        env_collection.add_extra_attributes({prov.PROV['type']: nipype['environment']})
+        g.used(a0, id)
+        # write environment entities
+        for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
+            in_attr = {prov.PROV["type"]: nipype["environment"],
+                       prov.PROV["label"]: key,
+                       nipype[key]: str(val)}
+            id = uuid1().hex
+            g.entity(id, in_attr)
+            g.hadMember(env_collection, id)
         # write input entities
         if inputs:
             id = uuid1().hex
-            eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
-            eref.add_extra_attributes({prov.PROV['type']: nipype['inputs']})
-            inputbundle = g.bundle(id)
+            input_collection = g.collection(id)
+            input_collection.add_extra_attributes({prov.PROV['type']: nipype['inputs']})
+            g.used(a0, id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {prov.PROV["type"]: nipype["input"],
                            prov.PROV["label"]: key,
                            nipype[key]: str(val)}
-                inputbundle.entity(uuid1().hex, in_attr)
-            g.used(a0, inputbundle)
+                id = uuid1().hex
+                g.entity(id, in_attr)
+                g.hadMember(input_collection, id)
         # write output entities
         if outputs:
-            outputs = outputs.get_traitsfree()
             id = uuid1().hex
-            eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
-            eref.add_extra_attributes({prov.PROV['type']: nipype['outputs']})
-            outputbundle = g.bundle(id)
+            output_collection = g.collection(id)
+            outputs = outputs.get_traitsfree()
+            output_collection.add_extra_attributes({prov.PROV['type']: nipype['outputs']})
+            g.wasGeneratedBy(output_collection, a0)
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {prov.PROV["type"]: nipype["output"],
                             prov.PROV["label"]: key,
                             nipype[key]: str(val)}
-                outputbundle.entity(uuid1().hex, out_attr)
-            g.wasGeneratedBy(outputbundle, a0)
+                id = uuid1().hex
+                g.entity(id, out_attr)
+                g.hadMember(output_collection, id)
         # write runtime entities
         id = uuid1().hex
-        eref = g.entity(id, {prov.PROV['type']: prov.PROV['Bundle']})
-        eref.add_extra_attributes({prov.PROV['type']: nipype['runtime']})
-        runtimebundle = g.bundle(id)
+        runtime_collection = g.collection(id)
+        runtime_collection.add_extra_attributes({prov.PROV['type']: nipype['runtime']})
+        g.wasGeneratedBy(runtime_collection, a0)
         for key, value in sorted(runtime.items()):
             if not value:
+                continue
+            if key not in ['stdout', 'stderr', 'merged']:
                 continue
             attr = {prov.PROV["type"]: nipype["runtime"],
                     prov.PROV["label"]: key,
                     nipype[key]: value}
-            runtimebundle.entity(uuid1().hex, attr)
-        g.wasGeneratedBy(runtimebundle, a0)
+            id = uuid1().hex
+            g.entity(uuid1().hex, attr)
+            g.hadMember(runtime_collection, id)
         # create agents
         user_agent = g.agent(uuid1().hex,
                              {prov.PROV["type"]: prov.PROV["Person"],
@@ -1386,6 +1415,7 @@ class CommandLine(BaseInterface):
         Returns
         -------
         runtime : updated runtime information
+            adds stdout, stderr, merged and cmdline
 
         """
         setattr(runtime, 'stdout', None)
