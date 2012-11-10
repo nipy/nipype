@@ -1055,17 +1055,10 @@ class BaseInterface(Interface):
                         a0_attrs)
         # environment
         id = uuid1().hex
-        env_collection = g.collection(id)
-        env_collection.add_extra_attributes({prov.PROV['type']: nipype['environment']})
+        environ = g.entity(id)
+        environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
+                                      nipype['environ_json']: json.dumps(runtime.environ)})
         g.used(a0, id)
-        # write environment entities
-        for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            in_attr = {prov.PROV["type"]: nipype["environment"],
-                       prov.PROV["label"]: key,
-                       nipype[key]: str(val)}
-            id = uuid1().hex
-            g.entity(id, in_attr)
-            g.hadMember(env_collection, id)
         # write input entities
         if inputs:
             id = uuid1().hex
