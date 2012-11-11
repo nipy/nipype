@@ -16,6 +16,9 @@ from nipype.utils.misc import package_check
 import nipype.external.prov as prov
 
 package_check('networkx', '1.3')
+import json
+from socket import gethostname
+
 import networkx as nx
 
 from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
@@ -782,12 +785,9 @@ def write_prov(graph, filename=None):
         classname = node._interface.__class__.__name__
         _, hashval, _, _ = node.hash_exists()
         if isinstance(result.runtime, list):
-            hostname = []
-            cmdline = []
             startTime = None
             endTime = None
             for runtime in result.runtime:
-                keys = runtime.dictcopy()
                 newStartTime=getattr(runtime, 'startTime')
                 if startTime:
                     if newStartTime < startTime:
@@ -800,32 +800,75 @@ def write_prov(graph, filename=None):
                         endTime = newEndTime
                 else:
                     endTime = newEndTime
-                hostname += [runtime.hostname]
-                if 'cmdline' in keys:
-                    cmdline += [runtime.cmdline]
-            attrs = {foaf["host"]: str(hostname),
+            attrs = {foaf["host"]: gethostname(),
                      prov.PROV["type"]: nipype[classname],
                      prov.PROV["label"]: '_'.join((classname,
                                                    node.name)),
                      nipype['hashval']: hashval}
-            if 'cmdline' in keys:
-                attrs.update({nipype['cmdline']: str(cmdline)})
             process = g.activity(uuid1().hex, startTime,
                                  endTime, attrs)
             process.add_extra_attributes({prov.PROV["type"]: nipype["MapNode"]})
+            # add info about sub processes
+            for runtime in result.runtime:
+                attrs = {foaf["host"]: runtime.hostname,
+                         prov.PROV["type"]: nipype[classname],
+                         prov.PROV["label"]: '_'.join((classname,
+                                                       node.name)),
+                         #nipype['hashval']: hashval,
+                         nipype['duration']: runtime.duration,
+                         nipype['working_directory']: runtime.cwd,
+                         nipype['return_code']: runtime.returncode,
+                         nipype['platform']: runtime.platform,
+                         }
+                try:
+                    attrs.update({nipype['command']: runtime.cmdline})
+                    attrs.update({nipype['command_path']: runtime.command_path})
+                    attrs.update({nipype['dependencies']: runtime.dependencies})
+                except AttributeError:
+                    pass
+                process_sub = g.activity(uuid1().hex, runtime.startTime,
+                                     runtime.endTime, attrs)
+                process_sub.add_extra_attributes({prov.PROV["type"]: nipype["Node"]})
+                g.wasAssociatedWith(process_sub, user_agent, None, None,
+                                    {prov.PROV["Role"]: "LoggedInUser"})
+                g.wasAssociatedWith(process_sub, software_agent, None, None,
+                                    {prov.PROV["Role"]: prov.PROV["SoftwareAgent"]})
+                g.wasInformedBy(process_sub, process)
+                # environment
+                id = uuid1().hex
+                environ = g.entity(id)
+                environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
+                                              prov.PROV['label']: "environment",
+                                              nipype['environ_json']: json.dumps(runtime.environ)})
+                g.used(process_sub, id)
         else:
-            attrs = {foaf["host"]: result.runtime.hostname,
+            runtime = result.runtime
+            attrs = {foaf["host"]: runtime.hostname,
                      prov.PROV["type"]: nipype[classname],
                      prov.PROV["label"]: '_'.join((classname,
                                                    node.name)),
-                     nipype['hashval']: hashval}
-            runtime = result.runtime
-            keys = runtime.dictcopy()
-            if 'cmdline' in keys:
-                attrs.update({nipype['cmdline']: runtime.cmdline})
+                     nipype['hashval']: hashval,
+                     nipype['duration']: runtime.duration,
+                     nipype['working_directory']: runtime.cwd,
+                     nipype['return_code']: runtime.returncode,
+                     nipype['platform']: runtime.platform,
+                     }
+            try:
+                attrs.update({nipype['command']: runtime.cmdline})
+                attrs.update({nipype['command_path']: runtime.command_path})
+                attrs.update({nipype['dependencies']: runtime.dependencies})
+            except AttributeError:
+                pass
             process = g.activity(uuid1().hex, runtime.startTime,
                                  runtime.endTime, attrs)
             process.add_extra_attributes({prov.PROV["type"]: nipype["Node"]})
+            # environment
+            id = uuid1().hex
+            environ = g.entity(id)
+            environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
+                                          prov.PROV['label']: "environment",
+                                          nipype['environ_json']: json.dumps(runtime.environ)})
+            g.used(process, id)
         processes.append(process)
         g.wasAssociatedWith(process, user_agent, None, None,
                 {prov.PROV["Role"]: "LoggedInUser"})

@@ -409,5 +409,4 @@ if __name__ == '__main__':
                              model_id=int(args.model),
                              task_id=int(args.task))
     from nipype.pipeline.utils import write_prov
-    from nipype.external.provgraph import provjson_to_filename
     g = write_prov(eg, format='turtle')
