@@ -15,11 +15,13 @@ import errno
 import json
 import os
 import re
+import platform
 import pwd
 from socket import gethostname
 from string import Template
 import select
 import subprocess
+import sys
 from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
@@ -921,6 +923,7 @@ class BaseInterface(Interface):
                         environ=env,
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
+                        platform=platform.platform(),
                         hostname=gethostname())
         try:
             runtime = self._run_interface(runtime)
@@ -1046,9 +1049,12 @@ class BaseInterface(Interface):
                     nipype['duration']: runtime.duration,
                     nipype['working_directory']: runtime.cwd,
                     nipype['return_code']: runtime.returncode,
+                    nipype['platform']: runtime.platform,
                     }
         try:
             a0_attrs.update({nipype['command']: runtime.cmdline})
+            a0_attrs.update({nipype['command_path']: runtime.command_path})
+            a0_attrs.update({nipype['dependencies']: runtime.dependencies})
         except AttributeError:
             pass
         a0 = g.activity(uuid1().hex,runtime.startTime, runtime.endTime,
@@ -1257,6 +1263,31 @@ def run_command(runtime, output=None, timeout=0.01):
     return runtime
 
 
+def get_dependencies(name, environ):
+    """Return library dependencies of a dynamically linked executable
+
+    Uses otool on darwin, ldd on linux. Currently doesn't support windows.
+
+    """
+    PIPE = subprocess.PIPE
+    if sys.platform == 'darwin':
+        proc = subprocess.Popen('otool -L `which %s`' % name,
+                                stdout=PIPE,
+                                stderr=PIPE,
+                                shell=True,
+                                env=environ)
+    elif 'linux' in sys.platform:
+        proc = subprocess.Popen('ldd `which %s`' % name,
+                                stdout=PIPE,
+                                stderr=PIPE,
+                                shell=True,
+                                env=environ)
+    else:
+        return 'Platform %s not supported' % sys.platform
+    o, e = proc.communicate()
+    return o.rstrip()
+
+
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
@@ -1408,7 +1439,7 @@ class CommandLine(BaseInterface):
         Returns
         -------
         runtime : updated runtime information
-            adds stdout, stderr, merged and cmdline
+            adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
         setattr(runtime, 'stdout', None)
@@ -1416,28 +1447,38 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'cmdline', self.cmdline)
         out_environ = self._get_environ()
         runtime.environ.update(out_environ)
-        if not self._exists_in_path(self.cmd.split()[0]):
+        executable_name = self.cmd.split()[0]
+        exist_val, cmd_path = self._exists_in_path(executable_name,
+                                                   runtime.environ)
+        if not exist_val:
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
+        setattr(runtime, 'command_path', cmd_path)
+        setattr(runtime, 'dependencies', get_dependencies(executable_name,
+                                                          runtime.environ))
         runtime = run_command(runtime, output=self.inputs.terminal_output)
         if runtime.returncode is None or runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
 
-    def _exists_in_path(self, cmd):
+    def _exists_in_path(self, cmd, environ):
         '''
         Based on a code snippet from http://orip.org/2009/08/python-checking-if-executable-exists-in.html
         '''
 
+        if 'PATH' in environ:
+            input_environ = environ.get("PATH")
+        else:
+            input_environ = os.environ.get("PATH", "")
         extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-        for directory in os.environ.get("PATH", "").split(os.pathsep):
+        for directory in input_environ.split(os.pathsep):
             base = os.path.join(directory, cmd)
             options = [base] + [(base + ext) for ext in extensions]
             for filename in options:
                 if os.path.exists(filename):
-                    return True
-        return False
+                    return True, filename
+        return False, None
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
