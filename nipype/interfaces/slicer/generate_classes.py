@@ -8,6 +8,15 @@ import subprocess
 import os
 from shutil import rmtree
 
+import keyword
+python_keywords = keyword.kwlist ## If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
+def force_to_valid_python_variable_name(old_name):
+  new_name=old_name
+  new_name = new_name.lstrip().rstrip()
+  if old_name in python_keywords:
+      new_name="xx"+old_name
+  return new_name
+        
 
 def add_class_to_package(class_codes, class_names, module_name, package_dir):
     module_python_filename = os.path.join(package_dir, "%s.py" % module_name)
@@ -149,10 +158,11 @@ def generate_class(module,launcher):
                 ##     <longflag>test</longflag>
                 longFlagName = longFlagName.lstrip(" -").rstrip(" ")
                 name = longFlagName
+                name=force_to_valid_python_variable_name(name)
                 traitsParams["argstr"] = "--" + longFlagName + " "
             else:
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
-                name = name.lstrip().rstrip()
+                name=force_to_valid_python_variable_name(name)
                 if param.getElementsByTagName('index'):
                     traitsParams["argstr"] = ""
                 else:
