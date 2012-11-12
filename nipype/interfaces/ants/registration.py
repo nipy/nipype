@@ -388,7 +388,7 @@ Test collapse transforms flag
         if self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile:
             return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
         else:
-            return ''
+            return '' # TODO: raise error: upper_quantile should NEVER be lower than lower_quantile!!!
 
     def _formatCollapseLinearTransformsToFixedImageHeader(self):
             if self.inputs.collapse_linear_transforms_to_fixed_image_header:
