@@ -15,7 +15,7 @@ import warnings
 from .base import AFNICommandInputSpec, AFNICommand
 from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec, traits,
                     isdefined, File, InputMultiPath, DynamicTraitedSpec)
-from ..io import add_traits
+from nipype.interfaces.io import add_traits
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 
@@ -380,18 +380,9 @@ class Resample(AFNICommand):
 
 
 class TStatInputSpec(AFNICommandInputSpec):
-    in_file = File(desc='input file to 3dTstat',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
-
-    out_file = File(desc='output file from 3dTstat',
-        argstr='-prefix %s',
-        position=-2,
-        genfile=True,
-        hash_files=False)
-
+    in_file = File(desc='input file to 3dTstat', argstr='%s', position=-1, mandatory=True, exists=True)
+    out_file = File(desc='output file from 3dTstat', argstr='-prefix %s', position=-2, genfile=True, hash_files=False)
+    mask_file = File(desc='use the dataset "mset" as a mask', argstr='-mask %s', exists=True)
     suffix = traits.Str('_tstat', desc="out_file suffix", usedefault=True)
 
 
@@ -1587,12 +1578,14 @@ class Calc(AFNICommand):
         return super(Calc, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'other'))
 
-class DeconvolveInputSpec(AFNICommandInputSpec, DynamicTraitedSpec):
+class DeconvolveInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     in_file = InputMultiPath(File(exists=True), argstr="%s", mandatory=True, desc="Filename(s) of 3D+time input dataset")
     mask = File(argstr="-mask %s", exists=True, desc="Filename of 3D mask dataset")
-    ignoreWarnings = traits.Either(traits.Bool(), traits.Int(), desc="GOFORIT [g]: Proceed even if the matrix has \
+    ignoreWarnings = traits.Either(traits.Bool(),
+                                   traits.Int(), desc="GOFORIT [g]: Proceed even if the matrix has \
     problems, optional value 'g' specifies number of warnings to ignore")
-    nullHypothesisPolynomialDegree = traits.Either(traits.Enum('auto'), traits.Int(), argstr="-polort %d", desc="degree of \
+    nullHypothesisPolynomialDegree = traits.Either(traits.Enum('auto'),
+                                                   traits.Int(), argstr="-polort %d", desc="degree of \
     polynomial corresponding to the null hypothesis")
     full_first = traits.Bool(argstr="-full_first", desc="")
     is_float = traits.Bool(argstr="-float", desc="")
@@ -1647,8 +1640,6 @@ class Deconvolve(AFNICommand):
     >>> Deconv.inputs.mask = example_data('seed_mask.nii')
     >>> Deconv.inputs.ignoreWarnings = 4
     >>> Deconv.inputs.nullHypothesisPolynomialDegree = 1
-    >>> # Deconv.inputs.numberOfStimulusFiles = 3
-    >>> # Deconv.inputs.numberOfStimulusTimeSeries = 8
     >>> Deconv.inputs.stim_file_1 = example_data('functional.nii') #'stim_file1.1D')
     >>> Deconv.inputs.stim_label_1 = 'median_csf'
     >>> Deconv.inputs.is_stim_base_1 = False
@@ -1675,9 +1666,9 @@ class Deconvolve(AFNICommand):
     input_spec = DeconvolveInputSpec
     output_spec = DeconvolveOutputSpec
 
-    def __init__(self, fileCount=None, seriesCount=None, **inputs):
+    def __init__(self, fileCount=0, seriesCount=0, **inputs):
         super(Deconvolve, self).__init__(**inputs)
-        assert ((not fileCount is None) and (not seriesCount is None)), "Deconvolve() requires two inputs"
+        assert ((fileCount > 0) and (seriesCount > 0)), "Deconvolve() requires two inputs"
         assert (isinstance(fileCount, int) and isinstance(seriesCount, int)), "Initial inputs must be integers"
         assert (fileCount <= seriesCount), "The number of stimulus files MUST be <= the number of stimulus series"
         self.stimFileCount = fileCount
@@ -1685,11 +1676,11 @@ class Deconvolve(AFNICommand):
         self._add_stim_traits()
 
     def _add_stim_traits(self):
-        add_traits(self.inputs, ['stim_file_%d' % (i + 1) for i in range(self.stimFileCount)],
+        add_traits(self.inputs, ['stim_file_%d' % (ii + 1) for ii in range(self.stimFileCount)],
                    trait_type=traits.File(exists=True))
-        add_traits(self.inputs, ['stim_label_%d' % (i + 1) for i in range(self.stimSeriesCount)],
+        add_traits(self.inputs, ['stim_label_%d' % (jj + 1) for jj in range(self.stimSeriesCount)],
                    trait_type=traits.Str())
-        add_traits(self.inputs, ['is_stim_base_%d' % (i + 1) for i in range(self.stimSeriesCount)],
+        add_traits(self.inputs, ['is_stim_base_%d' % (kk + 1) for kk in range(self.stimSeriesCount)],
                    trait_type=traits.Bool(default=False, usedefault=True))
 
     def _formatStimulus(self):
