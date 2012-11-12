@@ -81,17 +81,16 @@ def get_repo_url(force_github=False):
     return uri
 
 
-def get_file_url(object, hashmap):
+def get_file_url(object):
     """Returns local or remote url for an object
     """
     filename = inspect.getsourcefile(object)
     lines = inspect.getsourcelines(object)
     uri = 'file://%s#L%d' % (filename, lines[1])
     if is_git_repo():
-        o, _ = Popen('git hash-object %s' % filename, shell=True, stdout=PIPE,
-                     cwd=os.path.dirname(nipype.__file__)).communicate()
-        key = o.strip()
-        if key in hashmap:
-            uri = 'http://github.com/nipy/nipype/blob/master/' + \
-                  hashmap[key] + '#L%d' % lines[1]
+        info = nipype.get_info()
+        shortfile = os.path.join('nipype', filename.split('nipype/')[-1])
+        uri = 'http://github.com/nipy/nipype/tree/%s/%s#L%d' % \
+                                                           (info['commit_hash'],
+                                                            shortfile, lines[1])
     return uri

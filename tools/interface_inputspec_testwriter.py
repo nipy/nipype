@@ -1,6 +1,6 @@
 spm_metadata = ['field', 'mandatory', 'copyfile', 'xor', 'requires', 'usedefault']
 cmd_metadata = ['argstr', 'mandatory', 'copyfile', 'xor', 'requires', 'usedefault',
-                'sep']
+                'sep', 'genfile', 'hash_files']
 py_metadata = ['mandatory', 'copyfile', 'xor', 'requires', 'usedefault']
 
 def create_spmtest_func(pkg, interface, object):
