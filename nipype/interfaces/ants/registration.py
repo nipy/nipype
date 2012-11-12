@@ -15,44 +15,33 @@ from nipype.interfaces.traits_extension import isdefined
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
-                            position=1, desc='image dimension (2 or 3)')
-    fixed_image = InputMultiPath(File(exists=True), mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)'))
-    moving_image = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)'))
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, position=1, desc='image dimension (2 or 3)')
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)') )
+    moving_image = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)') )
 
-    metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
-                         'MSQ', 'PSE'), mandatory=True, desc='')
+    metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD', 'MSQ', 'PSE'), mandatory=True, desc='')
 
     metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
     radius = traits.List(traits.Int(), requires=['metric'], desc='')
 
     output_transform_prefix = traits.Str('out', usedefault=True, argstr='--output-naming %s', mandatory=True, desc='')
     transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN', argstr='%s', mandatory=True, desc='')
-    gradient_step_length = traits.Float(
-        requires=['transformation_model'], desc='')
-    number_of_time_steps = traits.Float(
-        requires=['gradient_step_length'], desc='')
+    gradient_step_length = traits.Float(requires=['transformation_model'], desc='')
+    number_of_time_steps = traits.Float(requires=['gradient_step_length'], desc='')
     delta_time = traits.Float(requires=['number_of_time_steps'], desc='')
     symmetry_type = traits.Float(requires=['delta_time'], desc='')
 
-    use_histogram_matching = traits.Bool(
-        argstr='%s', default=True, usedefault=True)
-    number_of_iterations = traits.List(
-        traits.Int(), argstr='--number-of-iterations %s', sep='x')
-    smoothing_sigmas = traits.List(
-        traits.Int(), argstr='--gaussian-smoothing-sigmas %s', sep='x')
-    subsampling_factors = traits.List(
-        traits.Int(), argstr='--subsampling-factors %s', sep='x')
+    use_histogram_matching = traits.Bool(argstr='%s', default=True, usedefault=True)
+    number_of_iterations = traits.List(traits.Int(), argstr='--number-of-iterations %s', sep='x')
+    smoothing_sigmas = traits.List(traits.Int(), argstr='--gaussian-smoothing-sigmas %s', sep='x')
+    subsampling_factors = traits.List(traits.Int(), argstr='--subsampling-factors %s', sep='x')
     affine_gradient_descent_option = traits.List(traits.Float(), argstr='%s')
 
     mi_option = traits.List(traits.Int(), argstr='--MI-option %s', sep='x')
     regularization = traits.Enum('Gauss', 'DMFFD', argstr='%s', desc='')
-    regularization_gradient_field_sigma = traits.Float(
-        requires=['regularization'], desc='')
-    regularization_deformation_field_sigma = traits.Float(
-        requires=['regularization'], desc='')
-    number_of_affine_iterations = traits.List(
-        traits.Int(), argstr='--number-of-affine-iterations %s', sep='x')
+    regularization_gradient_field_sigma = traits.Float(requires=['regularization'], desc='')
+    regularization_deformation_field_sigma = traits.Float(requires=['regularization'], desc='')
+    number_of_affine_iterations = traits.List(traits.Int(), argstr='--number-of-affine-iterations %s', sep='x')
 
     # fixed_image_mask = File(exists=True, argstr='--mask-image %s', desc="this mask -- defined in the 'fixed' image space defines the region of interest over which the registration is computed ==> above 0.1 means inside mask ==> continuous values in range [0.1,1.0] effect optimization like a probability. ==> values > 1 are treated as = 1.0")
     # moving_image_mask = File(exists=True, argstr='--mask-image %s', desc="this mask -- defined in the 'moving' image space defines the region of interest over which the registration is computed ==> above 0.1 means inside mask ==> continuous values in range [0.1,1.0] effect optimization like a probability. ==> values > 1 are treated as = 1.0")
@@ -61,8 +50,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
 class ANTSOutputSpec(TraitedSpec):
     affine_transform = File(exists=True, desc='Affine transform file')
     warp_transform = File(exists=True, desc='Warping deformation field')
-    inverse_warp_transform = File(
-        exists=True, desc='Inverse warping deformation field')
+    inverse_warp_transform = File(exists=True, desc='Inverse warping deformation field')
     metaheader = File(exists=True, desc='VTK metaheader .mhd file')
     metaheader_raw = File(exists=True, desc='VTK metaheader .raw file')
 
@@ -105,12 +93,11 @@ class ANTS(ANTSCommand):
         pointSetBased = ['PSE', 'JTB']
         for ii in range(len(self.inputs.moving_image)):
             if self.inputs.metric[ii] in intensityBased:
-                retval.append(
-                    '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
-                                                             self.inputs.fixed_image[ii],
-                                                             self.inputs.moving_image[ii],
-                                                             self.inputs.metric_weight[ii],
-                                                             self.inputs.radius[ii]))
+                retval.append('--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
+                                                                  self.inputs.fixed_image[ii],
+                                                                  self.inputs.moving_image[ii],
+                                                                  self.inputs.metric_weight[ii],
+                                                                  self.inputs.radius[ii]))
             elif self.inputs.metric[ii] == pointSetBased:
                 pass
                 # retval.append('--image-metric %s[%s, %s, ...'.format(self.inputs.metric[ii], self.inputs.fixed_image[ii], self.inputs.moving_image[ii], ...))
@@ -172,12 +159,9 @@ class ANTS(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['affine_transform'] = os.path.abspath(
-            self.inputs.output_transform_prefix + 'Affine.txt')
-        outputs['warp_transform'] = os.path.abspath(
-            self.inputs.output_transform_prefix + 'Warp.nii.gz')
-        outputs['inverse_warp_transform'] = os.path.abspath(
-            self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
+        outputs['affine_transform'] = os.path.abspath(self.inputs.output_transform_prefix + 'Affine.txt')
+        outputs['warp_transform'] = os.path.abspath(self.inputs.output_transform_prefix + 'Warp.nii.gz')
+        outputs['inverse_warp_transform'] = os.path.abspath(self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
         #outputs['metaheader'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
         #outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
         return outputs
