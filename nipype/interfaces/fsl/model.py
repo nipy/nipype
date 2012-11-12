@@ -1403,15 +1403,15 @@ class Cluster(FSLCommand):
 class RandomiseInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='-i %s', position=0, mandatory=True)
     base_name = traits.Str('tbss_', desc='the rootname that all generated files will have',
-                          argstr='-o %s', position=1, usedefault=True)
-    design_mat = File(exists=True, desc='design matrix file', argstr='-d %s', position=2, mandatory=True)
-    tcon = File(exists=True, desc='t contrasts file', argstr='-t %s', position=3, mandatory=True)
+                          argstr='-o "%s"', position=1, usedefault=True)
+    design_mat = File(exists=True, desc='design matrix file', argstr='-d %s', position=2)
+    tcon = File(exists=True, desc='t contrasts file', argstr='-t %s', position=3)
     fcon = File(exists=True, desc='f contrasts file', argstr='-f %s')
     mask = File(exists=True, desc='mask image', argstr='-m %s')
     x_block_labels = File(exists=True, desc='exchangeability block labels file', argstr='-e %s')
     demean = traits.Bool(desc='demean data temporally before model fitting', argstr='-D')
     one_sample_group_mean = traits.Bool(desc='perform 1-sample group-mean test instead of generic permutation test',
-                                  argstr='-l')
+                                  argstr='-1')
     show_total_perms = traits.Bool(desc='print out how many unique permutations would be generated and exit',
                                  argstr='-q')
     show_info_parallel_mode = traits.Bool(desc='print out information required for parallel mode and exit',
