@@ -153,7 +153,7 @@ class BET(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self._gen_outfilename()
-        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or 
+        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or
                 (isdefined(self.inputs.surfaces) and self.inputs.surfaces)):
             outputs['meshfile'] = self._gen_fname(outputs['out_file'],
                                                suffix='_mesh.vtk',
@@ -690,7 +690,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                           'to intensity mapping', hash_files=False)
     log_file = File(argstr='--logout=%s',
                              desc='Name of log-file', genfile=True, hash_files=False)
-    config_file = File(exists=True, argstr='--config=%s',
+    config_file = traits.Either(traits.Enum("T1_2_MNI152_2mm", "FA_2_FMRIB58_1mm"), File(exists=True), argstr='--config=%s',
                        desc='Name of config file specifying command line arguments')
     refmask_file = File(exists=True, argstr='--refmask=%s',
                         desc='name of file with mask in reference space')

@@ -562,7 +562,9 @@ class AutomaskInputSpec(AFNITraitedSpec):
         hash_files=False)
 
     apply_mask = File(desc="output file from 3dAutomask",
-        argstr='-apply_prefix %s')
+                      argstr='-apply_prefix %s',
+                      genfile=True,
+                      hash_files=False)
 
     clfrac = traits.Float(desc='sets the clip level fraction' +
         ' (must be 0.1-0.9). ' +
@@ -610,8 +612,10 @@ class Automask(AFNICommand):
     output_spec = AutomaskOutputSpec
 
     def _gen_filename(self, name):
-        if name == 'out_file' or name == 'brain_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
+        if name == 'apply_mask':
+            return self._list_outputs()['brain_file']
         return None
 
     def _list_outputs(self):
@@ -623,8 +627,8 @@ class Automask(AFNICommand):
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if not isdefined(self.inputs.apply_mask):
-            outputs['brain_file'] = self._gen_fname(
-                self.inputs.in_file, suffix=self.inputs.apply_suffix)
+            outputs['brain_file'] = self._gen_fname(self.inputs.in_file,
+                                                suffix=self.inputs.apply_suffix)
         else:
             outputs['brain_file'] = os.path.abspath(self.inputs.apply_mask)
         return outputs

@@ -1194,10 +1194,10 @@ class SigLoss(FSLCommand):
 class Reorient2StdInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s")
     out_file = File(genfile=True, hash_files=False, argstr="%s")
-    
+
 class Reorient2StdOutputSpec(TraitedSpec):
     out_file = File(exists=True)
-    
+
 class Reorient2Std(FSLCommand):
     """fslreorient2std is a tool for reorienting the image to match the
     approximate orientation of the standard template images (MNI152).
@@ -1219,10 +1219,11 @@ class Reorient2Std(FSLCommand):
             return self._gen_fname(self.inputs.in_file,
                                   suffix="_reoriented")
         return None
-    
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_filename('out_file')
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs

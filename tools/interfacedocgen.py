@@ -31,7 +31,7 @@ from nipype.interfaces.base import BaseInterface
 from nipype.pipeline.engine import Workflow
 from nipype.utils.misc import trim
 
-from github import create_hash_map, get_file_url
+from github import get_file_url
 
 # Functions and classes
 class InterfaceHelpWriter(object):
@@ -284,7 +284,6 @@ class InterfaceHelpWriter(object):
 
         #ad += '\n' + 'Classes' + '\n' + \
         #    self.rst_section_levels[2] * 7 + '\n'
-        hashmap = create_hash_map()
         for c in classes:
             __import__(uri)
             print c
@@ -303,7 +302,7 @@ class InterfaceHelpWriter(object):
             ad += '\n.. _%s\n\n' % label
             ad += '\n.. index:: %s\n\n' % c
             ad += c + '\n' + self.rst_section_levels[2] * len(c) + '\n\n'
-            ad += "Code: %s\n\n" % get_file_url(classinst, hashmap)
+            ad += "`Link to code <%s>`_\n\n" % get_file_url(classinst)
             ad += trim(classinst.help(returnhelp=True),
                        self.rst_section_levels[3]) + '\n'
 
@@ -314,7 +313,7 @@ class InterfaceHelpWriter(object):
             label = ':func:`' + name + '`'
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
             ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
-            ad += "\n\nCode: %s\n\n" % get_file_url(finst, hashmap)
+            ad += "\n\n`Link to code <%s>`_\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
             ad += '\n\n' + helpstr + '\n\n'
 
@@ -333,7 +332,7 @@ class InterfaceHelpWriter(object):
             label = ':func:`' + name + '`'
             ad += '\n.. _%s:\n\n' % (uri + '.' + name)
             ad += '\n'.join((label, self.rst_section_levels[2] * len(label)))
-            ad += "\n\nCode: %s\n\n" % get_file_url(finst, hashmap)
+            ad += "\n\n`Link to code <%s>`_\n\n" % get_file_url(finst)
             helpstr = trim(finst.__doc__, self.rst_section_levels[3])
             ad += '\n\n' + helpstr + '\n\n'
 
