@@ -19,7 +19,7 @@ import numpy as np
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
-                                    isdefined)
+                                    isdefined, OutputMultiPath)
 from nipype.utils.filemanip import split_filename
 
 from nibabel import load
