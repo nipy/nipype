@@ -400,6 +400,7 @@ Test collapse transforms flag
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid':'Rigid.mat',
                                            'Affine':'Affine.mat',
+                                           'GenericAffine':'GenericAffine.mat',
                                            'CompositeAffine':'Affine.mat',
                                            'Similarity':'Similarity.mat',
                                            'Translation':'Translation.mat',
@@ -439,13 +440,15 @@ Test collapse transforms flag
                     outputs['reverse_invert_flags'].insert(0, reverseInverseMode)
                     transformCount += 1
         else:
-            for transform in ['Affine', 'SyN']: # Only files returned by collapse_output_transforms
-                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, 0, transform)
-                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, 0, transform, True)
+            transformCount = 0
+            for transform in ['GenericAffine', 'SyN']: # Only files returned by collapse_output_transforms
+                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform)
+                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform, True)
                 outputs['forward_transforms'].append(os.path.abspath(forwardFileName))
                 outputs['forward_invert_flags'].append(forwardInverseMode)
                 outputs['reverse_transforms'].append(os.path.abspath(reverseFileName))
                 outputs['reverse_invert_flags'].append(reverseInverseMode)
+                transformCount += 1
         if self.inputs.write_composite_transform:
             fileName = self.inputs.output_transform_prefix + 'Composite.h5'
             outputs['composite_transform'] = [os.path.abspath(fileName)]
