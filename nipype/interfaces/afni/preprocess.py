@@ -1508,7 +1508,7 @@ class CalcInputSpec(AFNICommandInputSpec):
         argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
         argstr=' -b %s', position=1, exists=True)
-    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
+    expr = traits.Str(desc='expr', argstr="-expr '%s'", position=2,
         mandatory=True)
     out_file = File(desc='output file from 3dFourier', argstr='-prefix %s',
         position=-1, genfile=True)
@@ -1700,7 +1700,7 @@ class Deconvolve(AFNICommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == "in_file":
-            files = ",".join(self.inputs.moving_image)
+            files = ",".join(self.inputs.in_file)
             return "-input %s" % files
         elif opt == "ignoreWarnings":
             if isinstance(val, bool):
@@ -1774,8 +1774,7 @@ class Zeropad(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix = 'zeropad_')
+            outputs['out_file'] = self._gen_fname(basename='zeropad', suffix='')
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
