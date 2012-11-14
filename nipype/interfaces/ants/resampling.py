@@ -224,18 +224,14 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                 'MultiLabel',
                                 'Gaussian',
                                 'BSpline',
-                                argstr='%s', usedefault=True)
-    # TODO: Implement these options for multilabel, gaussian, and bspline
-    # interpolation_sigma = traits.Float(requires=['interpolation'])
-    # interpolation_alpha = traits.Float(requires=['interpolation_sigma'])
-    # bspline_order = traits.Int(3, requires=['interpolation'])
-    transforms = traits.List(
-        File(exists=True), argstr='%s', mandatory=True, desc=(''))
+                                argstr='%s', usedefault = True)
+    sigma = traits.Float(requires=['interpolation'])
+    alpha = traits.Float(requires=['alpha'])
+    order = traits.Int(3, requires=['interpolation'])
+    transforms = traits.List(File(exists=True), argstr='%s', mandatory=True, desc=(''))
     invert_transform_flags = traits.List(traits.Bool())
-    default_value = traits.Float(
-        0.0, argstr='--default-value %d', usedefault=True)
-    print_out_composite_warp_file = traits.Enum(
-        0, 1, requires=["output_image"], desc=(''))  # TODO: Change to boolean
+    default_value = traits.Float(0.0,argstr='--default-value %d', usedefault = True)
+    print_out_composite_warp_file = traits.Bool(requires=["output_image"], desc=(''))
 
 
 class ApplyTransformsOutputSpec(TraitedSpec):
@@ -281,22 +277,32 @@ class ApplyTransforms(ANTSCommand):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transform_flags):
-                if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
-                    invert_code = 1 if self.inputs.invert_transform_flags[
-                        ii] else 0
-                    retval.append("--transform [%s,%d]" %
-                                  (self.inputs.transforms[ii], invert_code))
-                else:
-                    raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
+                assert (len(self.inputs.transforms) == len(self.inputs.invert_transform_flags)), \
+                  "ERROR: invert_transform_flags must have the same number of entries as transforms."
+                invert_code = 1 if self.inputs.invert_transform_flags[ii] else 0
+                retval.append("--transform [%s,%d]" % (self.inputs.transforms[ii], invert_code))
             else:
                 retval.append("--transform %s" % self.inputs.transforms[ii])
         return " ".join(retval)
 
     def _getOutputWarpedFileName(self):
         if isdefined(self.inputs.print_out_composite_warp_file):
-            return "--output [%s,%s]" % (self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
+            return "--output [%s, %d]" % (self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
         else:
             return "--output %s" % (self._gen_filename("output_image"))
+
+    def _formatInterp(self):
+        retval = '--interpolation %s' % self.inputs.interpolation
+        if isdefined(self.inputs.sigma):
+            assert (self.inputs.interpolation in ['MultiLabel', 'Gaussian'])
+            retval = retval + '[%g' % self.inputs.sigma
+            if isdefined(self.inputs.alpha):
+                retval = retval + ', %g' % self.inputs.alpha
+            retval = retval + ']'
+        elif isdefined(self.inputs.order):
+            assert (self.inputs.interpolation == 'BSpline')
+            retval = retval + '[%d]' % self.inputs.order
+        return retval
 
     def _format_arg(self, opt, spec, val):
         if opt == "output_image":
@@ -304,12 +310,10 @@ class ApplyTransforms(ANTSCommand):
         elif opt == "transforms":
             return self._getTransformFileNames()
         elif opt == 'interpolation':
-            # TODO: handle multilabel, gaussian, and bspline options
-            return '--interpolation %s' % self.inputs.interpolation
+            return self._formatInterp()
         return super(ApplyTransforms, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
-            self._gen_filename('output_image'))
+        outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
         return outputs
