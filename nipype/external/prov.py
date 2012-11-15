@@ -95,7 +95,7 @@ PROV_N_MAP = {
     PROV_REC_SPECIALIZATION:       u'specializationOf',
     PROV_REC_MENTION:              u'mentionOf',
     PROV_REC_COLLECTION:           u'collection',
-    PROV_REC_MEMBERSHIP:           u'memberOf',
+    PROV_REC_MEMBERSHIP:           u'hadMember',
     PROV_REC_BUNDLE:               u'bundle',
 }
 
