@@ -8,6 +8,7 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+import string
 import os
 import re
 import warnings
@@ -1495,22 +1496,11 @@ class ROIStats(AFNICommand):
         return outputs
 
 
-"""
-3dcalc -a ${rest}.nii.gz[${TRstart}..${TRend}] -expr 'a' -prefix $
-{rest}_dr.nii.gz
-
-3dcalc -a ${rest}_mc.nii.gz -b ${rest}_mask.nii.gz -expr 'a*b' -prefix
-${rest}_ss.nii.gz
-"""
-
-
-class CalcInputSpec(AFNICommandInputSpec):
-    in_file_a = File(desc='input file to 3dcalc',
-        argstr='-a %s', position=0, mandatory=True, exists=True)
-    in_file_b = File(desc='operand file to 3dcalc',
-        argstr=' -b %s', position=1, exists=True)
-    expr = traits.Str(desc='expr', argstr="-expr '%s'", position=2,
-        mandatory=True)
+class CalcInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
+    in_file_a = File(position=0,argstr='-a %s', mandatory=True, exists=True)
+    in_file_b = File(position=1,argstr='-b %s', mandatory=True, exists=True)
+    in_file_c = File(position=2,argstr='-c %s', mandatory=False, exists=True)
+    expr = traits.Str(desc='expr', argstr="-expr '%s'", mandatory=True)
     out_file = File(desc='output file from 3dFourier', argstr='-prefix %s',
         position=-1, genfile=True)
     start_idx = traits.Int(desc='start index for in_file_a',
@@ -1536,7 +1526,7 @@ class Calc(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> from nipype.testing import example_data
-    >>> calc = afni.Calc()
+    >>> calc = afni.Calc(['a','b'])
     >>> calc.inputs.in_file_a = example_data('functional.nii')
     >>> calc.inputs.in_file_b = example_data('functional2.nii')
     >>> calc.inputs.expr='a*b'
@@ -1548,6 +1538,12 @@ class Calc(AFNICommand):
     _cmd = '3dcalc'
     input_spec = CalcInputSpec
     output_spec = CalcOutputSpec
+
+    # def __init__(self, letters=['a', 'b'], **inputs):
+    #     super(Calc, self).__init__(**inputs)
+    #     unique = self._formatLetters(letters)
+    #     assert (unique is not None), 'Calc cannot be initialized with an empty list'
+    #     self._add_in_files(unique)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1562,7 +1558,28 @@ class Calc(AFNICommand):
         if name == 'out_file':
             return self._list_outputs()[name]
 
+    # def _formatLetters(self, letters):
+    #     """
+    #     Returns a sorted list of unique letters in the expression
+    #     """
+    #     unique = list(set(letters))
+    #     unique.sort()
+    #     for letter in unique:
+    #         assert (letter in string.ascii_lowercase), 'Calc only takes in lowercase ASCII letters: %s' % letter
+    #         assert (len(letter) == 1), 'Calc takes in a list of single letters only: %s' % letter
+    #     return unique
+
+    # def _add_in_files(self, unique):
+    #     for letter in unique:
+    #         argstr = '-{0} %s'.format(letter)
+    #         add_traits(self.inputs, ['in_file_%s' % letter],
+    #                trait_type=File(position=unique.index(letter),
+    #                                argstr=argstr, mandatory=True,
+    #                                exists=True))
+
     def _format_arg(self, name, trait_spec, value):
+        # if name == 'expr':
+        #     self._add_in_file_traits(self_findExprLetters())
         if name == 'in_file_a':
             arg = trait_spec.argstr % value
             if isdefined(self.inputs.start_idx):
