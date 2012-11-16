@@ -1723,9 +1723,9 @@ class Deconvolve(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         # TODO: Add isdefined() tests if not mandatory...
-        outputs['out_file'] = os.path.abspath(self.inputs.bucket)
-        outputs['out_fitts'] = os.path.abspath(self.inputs.fitts)
-        outputs['out_errts'] = os.path.abspath(self.inputs.errts)
+        outputs['out_file'] = self._gen_fname(basename=self.inputs.bucket, suffix='')
+        outputs['out_fitts'] = self._gen_fname(basename=self.inputs.fitts, suffix='')
+        outputs['out_errts'] = self._gen_fname(basename=self.inputs.errts, suffix='')
         return outputs
 
 class ZeropadInputSpec(AFNICommandInputSpec):
