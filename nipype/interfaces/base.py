@@ -1034,6 +1034,19 @@ class BaseInterface(Interface):
         dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
         nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6")
 
+        get_id = lambda : nipype[uuid1().hex]
+        import base64
+        import re
+        def safe_encode(x):
+            if isinstance(x, (str, unicode)):
+                return prov.Literal(json.dumps(x)[1:-1], prov.XSD['string'])
+            if isinstance(x, (int)):
+                return prov.Literal(x, prov.XSD['integer'])
+            if isinstance(x, (float)):
+                return prov.Literal(x, prov.XSD['float'])
+            out = base64.b64encode(json.dumps(x))
+            return prov.Literal(out, prov.XSD['base64Binary'])
+
         # create a provenance container
         g = prov.ProvBundle()
 
@@ -1046,28 +1059,35 @@ class BaseInterface(Interface):
         a0_attrs = {foaf["host"]: runtime.hostname,
                     prov.PROV["type"]: nipype[classname],
                     prov.PROV["label"]: classname,
-                    nipype['duration']: runtime.duration,
-                    nipype['working_directory']: runtime.cwd,
+                    nipype['duration']: safe_encode(runtime.duration),
+                    nipype['working_directory']: safe_encode(runtime.cwd),
                     nipype['return_code']: runtime.returncode,
-                    nipype['platform']: runtime.platform,
+                    nipype['platform']: safe_encode(runtime.platform),
                     }
         try:
-            a0_attrs.update({nipype['command']: runtime.cmdline})
-            a0_attrs.update({nipype['command_path']: runtime.command_path})
-            a0_attrs.update({nipype['dependencies']: runtime.dependencies})
+            a0_attrs.update({nipype['command']: safe_encode(runtime.cmdline)})
+            a0_attrs.update({nipype['command_path']: safe_encode(runtime.command_path)})
+            a0_attrs.update({nipype['dependencies']: safe_encode(runtime.dependencies)})
         except AttributeError:
             pass
-        a0 = g.activity(uuid1().hex,runtime.startTime, runtime.endTime,
+        a0 = g.activity(get_id(), runtime.startTime, runtime.endTime,
                         a0_attrs)
         # environment
-        id = uuid1().hex
-        environ = g.entity(id)
-        environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
-                                      nipype['environ_json']: json.dumps(runtime.environ)})
+        id = get_id()
+        env_collection = g.collection(id)
+        env_collection.add_extra_attributes({prov.PROV['type']: nipype['environment']})
         g.used(a0, id)
+        # write environment entities
+        for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
+            in_attr = {prov.PROV["type"]: nipype["environment"],
+                       prov.PROV["label"]: key,
+                       nipype[key]: safe_encode(val)}
+            id = get_id()
+            g.entity(id, in_attr)
+            g.hadMember(env_collection, id)
         # write input entities
         if inputs:
-            id = uuid1().hex
+            id = get_id()
             input_collection = g.collection(id)
             input_collection.add_extra_attributes({prov.PROV['type']: nipype['inputs']})
             g.used(a0, id)
@@ -1075,13 +1095,13 @@ class BaseInterface(Interface):
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {prov.PROV["type"]: nipype["input"],
                            prov.PROV["label"]: key,
-                           nipype[key]: str(val)}
-                id = uuid1().hex
+                           nipype[key]: safe_encode(val)}
+                id = get_id()
                 g.entity(id, in_attr)
                 g.hadMember(input_collection, id)
         # write output entities
         if outputs:
-            id = uuid1().hex
+            id = get_id()
             output_collection = g.collection(id)
             outputs = outputs.get_traitsfree()
             output_collection.add_extra_attributes({prov.PROV['type']: nipype['outputs']})
@@ -1090,12 +1110,12 @@ class BaseInterface(Interface):
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {prov.PROV["type"]: nipype["output"],
                             prov.PROV["label"]: key,
-                            nipype[key]: str(val)}
-                id = uuid1().hex
+                            nipype[key]: safe_encode(val)}
+                id = get_id()
                 g.entity(id, out_attr)
                 g.hadMember(output_collection, id)
         # write runtime entities
-        id = uuid1().hex
+        id = get_id()
         runtime_collection = g.collection(id)
         runtime_collection.add_extra_attributes({prov.PROV['type']: nipype['runtime']})
         g.wasGeneratedBy(runtime_collection, a0)
@@ -1106,12 +1126,12 @@ class BaseInterface(Interface):
                 continue
             attr = {prov.PROV["type"]: nipype["runtime"],
                     prov.PROV["label"]: key,
-                    nipype[key]: value}
-            id = uuid1().hex
-            g.entity(uuid1().hex, attr)
+                    nipype[key]: safe_encode(value)}
+            id = get_id()
+            g.entity(get_id(), attr)
             g.hadMember(runtime_collection, id)
         # create agents
-        user_agent = g.agent(uuid1().hex,
+        user_agent = g.agent(get_id(),
                              {prov.PROV["type"]: prov.PROV["Person"],
                               prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
                               foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
@@ -1119,8 +1139,8 @@ class BaseInterface(Interface):
                       prov.PROV["label"]: "Nipype",
                       foaf["name"]: "Nipype"}
         for key, value in get_info().items():
-            agent_attr.update({nipype[key]: str(value)})
-        software_agent = g.agent(uuid1().hex, agent_attr)
+            agent_attr.update({nipype[key]: safe_encode(value)})
+        software_agent = g.agent(get_id(), agent_attr)
         g.wasAssociatedWith(a0, user_agent, None, None,
                             {prov.PROV["Role"]: "LoggedInUser"})
         g.wasAssociatedWith(a0, software_agent, None, None,
