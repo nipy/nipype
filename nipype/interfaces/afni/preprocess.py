@@ -1594,8 +1594,8 @@ class DeconvolveInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     fout = traits.Bool(argstr="-fout", desc="")
     # TODO: Should all these outputs be mandatory???
     bucket = traits.File(argstr="-bucket %s", mandatory=True, desc="")
-    fitts = traits.File(argstr="-bucket %s", mandatory=True, desc="")
-    errts = traits.File(argstr="-bucket %s", mandatory=True, desc="")
+    fitts = traits.File(argstr="-fitts %s", mandatory=True, desc="")
+    errts = traits.File(argstr="-errts %s", mandatory=True, desc="")
 
 class DeconvolveOutputSpec(TraitedSpec):
     out_file = traits.File(exists=False, desc="")
