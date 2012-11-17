@@ -801,12 +801,16 @@ class BaseInterface(Interface):
         # check minimum version
         names = self.inputs.trait_names(**dict(min_ver=lambda t: t is not None))
         for name in names:
+            if not isdefined(getattr(self.inputs, name)):
+                continue
             min_ver = str(self.inputs.traits()[name].min_ver)
             if min_ver > version:
                 raise Exception('Input %s (%s) (version %s < required %s)' %
                               (name, self.__class__.__name__, version, min_ver))
         names = self.inputs.trait_names(**dict(max_ver=lambda t: t is not None))
         for name in names:
+            if not isdefined(getattr(self.inputs, name)):
+                continue
             max_ver = str(self.inputs.traits()[name].max_ver)
             if max_ver < version:
                 raise Exception('Input %s (%s) (version %s > required %s)' %
