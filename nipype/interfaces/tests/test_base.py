@@ -254,13 +254,27 @@ def test_version():
         input_spec = InputSpec
         _version = 0.8
     obj = DerivedInterface1()
+    obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_input_version_requirements
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver=0.9)
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+        _version = 0.10
+    obj = DerivedInterface1()
+    not_raised = True
+    try:
+        obj._check_input_version_requirements()
+    except:
+        not_raised = False
+    yield assert_true, not_raised
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver=0.9)
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = 0.9
     obj = DerivedInterface1()
+    obj.inputs.foo = 1
     not_raised = True
     try:
         obj._check_input_version_requirements()
@@ -273,6 +287,7 @@ def test_version():
         input_spec = InputSpec
         _version = 0.8
     obj = DerivedInterface2()
+    obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_input_version_requirements
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver=0.9)
@@ -280,6 +295,7 @@ def test_version():
         input_spec = InputSpec
         _version = 0.9
     obj = DerivedInterface1()
+    obj.inputs.foo = 1
     not_raised = True
     try:
         obj._check_input_version_requirements()

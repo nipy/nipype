@@ -28,7 +28,7 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
 from ..utils.misc import is_container, trim, str2bool
-from .. import config, logging
+from .. import config, logging, LooseVersion
 
 iflogger = logging.getLogger('interface')
 
@@ -795,7 +795,7 @@ class BaseInterface(Interface):
     def _check_input_version_requirements(self):
         """ Raises an exception on version mismatch
         """
-        version = str(self.version)
+        version = LooseVersion(str(self.version))
         if not version:
             return
         # check minimum version
@@ -803,7 +803,7 @@ class BaseInterface(Interface):
         for name in names:
             if not isdefined(getattr(self.inputs, name)):
                 continue
-            min_ver = str(self.inputs.traits()[name].min_ver)
+            min_ver = LooseVersion(str(self.inputs.traits()[name].min_ver))
             if min_ver > version:
                 raise Exception('Input %s (%s) (version %s < required %s)' %
                               (name, self.__class__.__name__, version, min_ver))
@@ -811,7 +811,7 @@ class BaseInterface(Interface):
         for name in names:
             if not isdefined(getattr(self.inputs, name)):
                 continue
-            max_ver = str(self.inputs.traits()[name].max_ver)
+            max_ver = LooseVersion(str(self.inputs.traits()[name].max_ver))
             if max_ver < version:
                 raise Exception('Input %s (%s) (version %s > required %s)' %
                               (name, self.__class__.__name__, version, max_ver))
