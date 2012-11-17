@@ -27,7 +27,7 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
-from ..utils.misc import is_container, trim
+from ..utils.misc import is_container, trim, str2bool
 from .. import config, logging
 
 iflogger = logging.getLogger('interface')
@@ -602,6 +602,10 @@ class Interface(object):
         """
         raise NotImplementedError
 
+    @property
+    def version(self):
+        raise NotImplementedError
+
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
@@ -628,6 +632,7 @@ class BaseInterface(Interface):
 
     """
     input_spec = BaseInterfaceInputSpec
+    _version = None
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -787,6 +792,26 @@ class BaseInterface(Interface):
                                              transient=None).items():
             self._check_requires(spec, name, getattr(self.inputs, name))
 
+    def _check_input_version_requirements(self):
+        """ Raises an exception on version mismatch
+        """
+        version = str(self.version)
+        if not version:
+            return
+        # check minimum version
+        names = self.inputs.trait_names(**dict(min_ver=lambda t: t is not None))
+        for name in names:
+            min_ver = str(self.inputs.traits()[name].min_ver)
+            if min_ver > version:
+                raise Exception('Input %s (%s) (version %s < required %s)' %
+                              (name, self.__class__.__name__, version, min_ver))
+        names = self.inputs.trait_names(**dict(max_ver=lambda t: t is not None))
+        for name in names:
+            max_ver = str(self.inputs.traits()[name].max_ver)
+            if max_ver < version:
+                raise Exception('Input %s (%s) (version %s > required %s)' %
+                              (name, self.__class__.__name__, version, max_ver))
+
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -809,6 +834,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
+        self._check_input_version_requirements()
         interface = self.__class__
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
@@ -882,6 +908,14 @@ class BaseInterface(Interface):
                     else:
                         raise error
         return outputs
+
+    @property
+    def version(self):
+        if self._version is None:
+            if str2bool(config.get('execution', 'stop_on_unknown_version')):
+                raise ValueError('Interface %s has no version information' %
+                                 self.__class__.__name__)
+        return self._version
 
 
 class Stream(object):
@@ -1026,6 +1060,7 @@ class CommandLine(BaseInterface):
 
     input_spec = CommandLineInputSpec
     _cmd = None
+    _version = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1069,6 +1104,32 @@ class CommandLine(BaseInterface):
         else:
             print allhelp
 
+    def _get_environ(self):
+        out_environ = {}
+        try:
+            display_var = config.get('execution', 'display_variable')
+            out_environ = {'DISPLAY': display_var}
+        except NoOptionError:
+            pass
+        iflogger.debug(out_environ)
+        if isdefined(self.inputs.environ):
+            out_environ.update(self.inputs.environ)
+        return out_environ
+
+    def version_from_command(self, flag='-v'):
+        cmdname = self.cmd.split()[0]
+        if self._exists_in_path(cmdname):
+            env = deepcopy(os.environ.data)
+            out_environ = self._get_environ()
+            env.update(out_environ)
+            proc = subprocess.Popen(' '.join((cmdname, flag)),
+                                    shell=True,
+                                    env=env,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    )
+            o, e = proc.communicate()
+            return o
 
     def _run_interface(self, runtime):
         """Execute command via subprocess
@@ -1085,15 +1146,7 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        out_environ = {}
-        try:
-            display_var = config.get('execution', 'display_variable')
-            out_environ = {'DISPLAY': display_var}
-        except NoOptionError:
-            pass
-        iflogger.debug(out_environ)
-        if isdefined(self.inputs.environ):
-            out_environ.update(self.inputs.environ)
+        out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],

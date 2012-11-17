@@ -262,7 +262,16 @@ Common
 	can be set to either `True` or `False`. `False` indicates that contents 
 	should be symlinked, while `True` indicates that the contents should be 
 	copied over.
-	
+
+``min_ver`` and ``max_ver``
+    These metadata determine if a particular trait will be available when a
+    given version of the underlying interface runs. Note that this check is
+    performed at runtime.::
+
+	    class RealignInputSpec(BaseInterfaceInputSpec):
+	        jobtype = traits.Enum('estwrite', 'estimate', 'write', min_ver=5,
+	                              usedefault=True)
+
 CommandLine
 ^^^^^^^^^^^
 

@@ -229,6 +229,64 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+def test_version():
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver=0.9)
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+    obj = DerivedInterface1()
+    not_raised = True
+    try:
+        obj._check_input_version_requirements()
+    except:
+        not_raised = False
+    yield assert_true, not_raised
+    config.set('execution', 'stop_on_unknown_version', True)
+    try:
+        obj._check_input_version_requirements()
+    except:
+        not_raised = False
+    yield assert_false, not_raised
+    config.set_default_config()
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver=0.9)
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+        _version = 0.8
+    obj = DerivedInterface1()
+    yield assert_raises, Exception, obj._check_input_version_requirements
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', min_ver=0.9)
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+        _version = 0.9
+    obj = DerivedInterface1()
+    not_raised = True
+    try:
+        obj._check_input_version_requirements()
+    except:
+        not_raised = False
+    yield assert_true, not_raised
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver=0.7)
+    class DerivedInterface2(nib.BaseInterface):
+        input_spec = InputSpec
+        _version = 0.8
+    obj = DerivedInterface2()
+    yield assert_raises, Exception, obj._check_input_version_requirements
+    class InputSpec(nib.TraitedSpec):
+        foo = nib.traits.Int(desc='a random int', max_ver=0.9)
+    class DerivedInterface1(nib.BaseInterface):
+        input_spec = InputSpec
+        _version = 0.9
+    obj = DerivedInterface1()
+    not_raised = True
+    try:
+        obj._check_input_version_requirements()
+    except:
+        not_raised = False
+    yield assert_true, not_raised
+
 def test_Commandline():
     yield assert_raises, Exception, nib.CommandLine
     ci = nib.CommandLine(command='which')
