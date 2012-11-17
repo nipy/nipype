@@ -28,8 +28,10 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
 from ..utils.misc import is_container, trim
-from .. import config, logging
-from .. import __version__ as nipype_version
+from .. import config, logging, LooseVersion
+from .. import __version__
+
+nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
@@ -381,7 +383,7 @@ class BaseTraitedSpec(traits.HasTraits):
             else:
                 msg3 = ''
             msg = ' '.join((msg1, msg2, msg3))
-            if str(trait_spec.deprecated) < nipype_version:
+            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
                 raise TraitError(msg)
             else:
                 warn(msg)
