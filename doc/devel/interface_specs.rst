@@ -274,7 +274,8 @@ Common
 
     In the above example this means that the `jobtype` input is deprecated and
     will be removed in version 0.8. Deprecation should be set to two versions
-    from current release.
+    from current release. Raises `TraitError` after package version crosses the
+    deprecation version.
 
 ``new_name``
     For inputs that are being renamed, one can specify the new name of the field
