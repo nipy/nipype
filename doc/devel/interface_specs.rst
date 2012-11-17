@@ -273,7 +273,8 @@ Common
                                   usedefault=True)
 
     In the above example this means that the `jobtype` input is deprecated and
-    will be removed in version 0.8.
+    will be removed in version 0.8. Deprecation should be set to two versions
+    from current release.
 
 ``new_name``
     For inputs that are being renamed, one can specify the new name of the field
