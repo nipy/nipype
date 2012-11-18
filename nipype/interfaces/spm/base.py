@@ -423,3 +423,11 @@ class SPMCommand(BaseInterface):
         if postscript is not None:
             mscript += postscript
         return mscript
+
+    @property
+    def version(self):
+        version_dict = Info.version()
+        if version_dict:
+            return '.'.join((version_dict['name'].split('SPM')[-1],
+                             version_dict['release']))
+        return version_dict
