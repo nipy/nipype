@@ -11,6 +11,7 @@ from time import sleep
 
 import re
 
+
 class LSFPlugin(SGELikeBatchManagerBase):
     """Execute using LSF Cluster Submission
 
@@ -82,8 +83,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         cmd.inputs.args = '%s -J %s sh %s' % (bsubargs,
-                                           jobname,
-                                           scriptfile)  # -J job_name_spec
+                                              jobname,
+                                              scriptfile)  # -J job_name_spec
         logger.debug('bsub ' + cmd.inputs.args)
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
@@ -94,7 +95,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
             except Exception, e:
                 if tries < self._max_tries:
                     tries += 1
-                    sleep(self._retry_timeout)  # sleep 2 seconds and try again.
+                    sleep(
+                        self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
                     raise RuntimeError('\n'.join((('Could not submit lsf task'
@@ -108,7 +110,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if match:
             taskid = int(match.groups()[0])
         else:
-            raise ScriptError("Can't parse submission job output id: %s" % result.runtime.stdout)
+            raise ScriptError("Can't parse submission job output id: %s" %
+                              result.runtime.stdout)
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted lsf task: %d for node %s' % (taskid, node._id))
         return taskid
