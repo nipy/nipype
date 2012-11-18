@@ -112,7 +112,7 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     l2datasink.inputs.base_directory = output_dir
     l2datasink.inputs.container = group_id
 
-    l2pipeline = pe.Workflow(name="l2output")
+    l2pipeline = pe.Workflow(name="l2output_"+group_id)
     l2pipeline.base_dir = op.join(output_dir, 'l2output')
     l2pipeline.connect([(group_infosource, l2infosource,[('group_id','group_id')])])
 
@@ -181,7 +181,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2datasink.inputs.base_directory = output_dir
     l2datasink.inputs.container = group_id
 
-    l2pipeline = pe.Workflow(name="l2output")
+    l2pipeline = pe.Workflow(name="l2output_"+group_id)
     l2pipeline.base_dir = op.join(output_dir, 'l2output')
     l2pipeline.connect([(group_infosource, l2infosource,[('group_id','group_id')])])
 
