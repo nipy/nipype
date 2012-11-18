@@ -132,6 +132,32 @@ def test_TraitedSpec_logic():
     myif.inputs.kung = 2
     yield assert_equal, myif.inputs.kung, 2.0
 
+def test_deprecation():
+    class DeprecationSpec1(nib.TraitedSpec):
+        foo = nib.traits.Int(deprecated='0.1')
+    spec_instance = DeprecationSpec1()
+    set_foo = lambda : setattr(spec_instance, 'foo', 1)
+    yield assert_raises, nib.TraitError, set_foo
+    class DeprecationSpec1numeric(nib.TraitedSpec):
+        foo = nib.traits.Int(deprecated=0.1)
+    spec_instance = DeprecationSpec1numeric()
+    set_foo = lambda : setattr(spec_instance, 'foo', 1)
+    yield assert_raises, nib.TraitError, set_foo
+    class DeprecationSpec2(nib.TraitedSpec):
+        foo = nib.traits.Int(deprecated='100', new_name='bar')
+    spec_instance = DeprecationSpec2()
+    set_foo = lambda : setattr(spec_instance, 'foo', 1)
+    yield assert_raises, nib.TraitError, set_foo
+    class DeprecationSpec3(nib.TraitedSpec):
+        foo = nib.traits.Int(deprecated='1000', new_name='bar')
+        bar = nib.traits.Int()
+    spec_instance = DeprecationSpec3()
+    not_raised = True
+    try:
+        spec_instance.foo = 1
+    except nib.TraitError:
+        not_raised = False
+    yield assert_true, not_raised
 
 def checknose():
     """check version of nose for known incompatability"""

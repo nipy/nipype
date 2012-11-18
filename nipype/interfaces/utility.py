@@ -356,7 +356,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                         'function objects defined interactively in a python session')
             elif isinstance(function, str):
-                self.inputs.function_str = function
+                self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
         self.inputs.on_trait_change(self._set_function_string, 'function_str')

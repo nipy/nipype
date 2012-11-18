@@ -29,6 +29,9 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
 from ..utils.misc import is_container, trim, str2bool
 from .. import config, logging, LooseVersion
+from .. import __version__
+
+nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
@@ -326,6 +329,10 @@ class BaseTraitedSpec(traits.HasTraits):
         requires = self.trait_names(**has_requires)
         for elem in requires:
             self.on_trait_change(self._requires_warn, elem)
+        has_deprecation = dict(deprecated=lambda t: t is not None)
+        deprecated = self.trait_names(**has_deprecation)
+        for elem in deprecated:
+            self.on_trait_change(self._deprecated_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
         """ Generates warnings for xor traits
@@ -347,7 +354,7 @@ class BaseTraitedSpec(traits.HasTraits):
     def _requires_warn(self, obj, name, old, new):
         """Part of the xor behavior
         """
-        if new:
+        if isdefined(new):
             trait_spec = self.traits()[name]
             msg = None
             for trait_name in trait_spec.requires:
@@ -357,6 +364,30 @@ class BaseTraitedSpec(traits.HasTraits):
                             % (name, ', '.join(trait_spec.requires))
             if msg:
                 warn(msg)
+
+    def _deprecated_warn(self, obj, name, old, new):
+        """Checks if a user assigns a value to a deprecated trait
+        """
+        if isdefined(new):
+            trait_spec = self.traits()[name]
+            msg1 = ('Input %s in interface %s is deprecated.') % (name,
+                                  self.__class__.__name__.split('InputSpec')[0])
+            msg2 = ('Will be removed or raise an error as of release %s') % \
+                                                           trait_spec.deprecated
+            self.trait_set(trait_change_notify=False, **{'%s' % name: Undefined})
+            if trait_spec.new_name:
+                if trait_spec.new_name not in self.copyable_trait_names():
+                    raise TraitError(msg1 + ' Replacement trait %s not found' %
+                                     trait_spec.new_name)
+                msg3 = 'It has been replaced by %s.' % trait_spec.new_name
+            else:
+                msg3 = ''
+            msg = ' '.join((msg1, msg2, msg3))
+            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+                raise TraitError(msg)
+            else:
+                warn(msg)
+
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
