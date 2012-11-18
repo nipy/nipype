@@ -103,6 +103,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                               ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                               ("outputnode.nxmatlab", "@l1output.nxmatlab"),
                                               ("outputnode.nxcsv", "@l1output.nxcsv"),
+                                              ("outputnode.fiber_csv", "@l1output.fiber_csv"),
                                               ("outputnode.cmatrices_csv", "@l1output.cmatrices_csv"),
                                               ("outputnode.fa", "@l1output.fa"),
                                               ("outputnode.filtered_tracts", "@l1output.filtered_tracts"),
