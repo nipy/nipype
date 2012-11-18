@@ -780,7 +780,7 @@ class MS_LDAInputSpec(FSTraitedSpec):
                              desc='pair of class labels to optimize')
     weight_file = traits.File(argstr='-weight %s', mandatory=True,
                         desc='filename for the LDA weights (input or output)')
-    output_synth = traits.File(exists=False, argstr='-synth %s',
+    vol_synth_file = traits.File(exists=False, argstr='-synth %s',
                                mandatory=True,
                              desc='filename for the synthesized output volume')
     label_file = traits.File(exists=True, argstr='-label %s',
@@ -816,11 +816,11 @@ class MS_LDA(FSCommand):
     >>> zero_value = 1
     >>> optimalWeights = MS_LDA(lda_labels=[grey_label, white_label], \
                                 label_file='label.mgz', weight_file='weights.txt', \
-                                shift=zero_value, output_synth='synth_out.mgz', \
+                                shift=zero_value, vol_synth_file='synth_out.mgz', \
                                 conform=True, use_weights=True, \
                                 images=['FLASH1.mgz', 'FLASH2.mgz', 'FLASH3.mgz'])
     >>> optimalWeights.cmdline
-    'mri_ms_LDA -conform -label label.mgz -lda 2 3 -synth synth_out.mgz -shift 1 -W -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
+    'mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz'
     """
 
     _cmd = 'mri_ms_LDA'
@@ -829,7 +829,7 @@ class MS_LDA(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['vol_synth_file'] = os.path.abspath(self.inputs.output_synth)
+        outputs['vol_synth_file'] = os.path.abspath(self.inputs.vol_synth_file)
         if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
             outputs['weight_file'] = os.path.abspath(self.inputs.weight_file)
         return outputs
