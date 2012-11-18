@@ -109,7 +109,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 
 class ProbeVolumeWithModelInputSpec(CommandLineInputSpec):
-    OutputModel = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output "painted" model", argstr="%s")
+    OutputModel = traits.Either(traits.Bool, File(), position=-1, hash_files=False, desc="Output \"painted\" model", argstr="%s")
 
 
 class ProbeVolumeWithModelOutputSpec(TraitedSpec):

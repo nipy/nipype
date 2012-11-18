@@ -9,6 +9,7 @@ import os
 from shutil import rmtree
 
 import keyword
+import re
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
 
 
@@ -314,7 +315,7 @@ def parse_params(params):
     list = []
     for key, value in params.iteritems():
         if isinstance(value, str) or isinstance(value, unicode):
-            list.append('%s="%s"' % (key, value))
+            list.append('%s="%s"' % (key, re.escape(value)))
         else:
             list.append('%s=%s' % (key, value))
 
