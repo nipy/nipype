@@ -8,6 +8,7 @@ Next release
 	  how to set SGE specific options (smri_ants_build_template_new)
 * ENH: added no_flatten option to Merge
 * ENH: added deprecation metadata to traits
+* ENH: Slicer interfaces were updated to version 4.1
 
 Release 0.6.0 (Jun 30, 2012)
 ============================
