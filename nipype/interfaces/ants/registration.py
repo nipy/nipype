@@ -329,7 +329,7 @@ Test collapse transforms flag
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_InverseComposite.h5'], 'forward_invert_flags': [False, False], 'reverse_transforms': ['/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_0GenericAffine.mat', '/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_0GenericAffine.mat', '/Volumes/scratch/src/NIPYPE/nipype/testing/data/output_1Warp.nii.gz']}
+    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
     >>> reg4.aggregate_outputs() #doctest: +SKIP
 
     """
