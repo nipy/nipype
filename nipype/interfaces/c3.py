@@ -1,6 +1,5 @@
 from nipype.interfaces.base import (CommandLineInputSpec, traits, TraitedSpec,
-				    File)
-from nipype.interfaces.slicer.base import SlicerCommandLine
+				    File, SEMLikeCommandLine)
 
 
 class C3dAffineToolInputSpec(CommandLineInputSpec):
@@ -17,7 +16,7 @@ class C3dAffineToolOutputSpec(TraitedSpec):
     itk_transform = File(exists=True)
 
 
-class C3dAffineTool(SlicerCommandLine):
+class C3dAffineTool(SEMLikeCommandLine):
     """Converts fsl-style Affine registration into ANTS compatible itk format
     """
     input_spec = C3dAffineToolInputSpec
