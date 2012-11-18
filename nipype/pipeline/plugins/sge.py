@@ -14,9 +14,9 @@ def qsubSanitizeJobName(testjobname):
 
     Numbers and punctuation are  not allowed.
 
-    >>> qsubSantizeJobName('01')
+    >>> qsubSanitizeJobName('01')
     'J01'
-    >>> qsubSantizeJobName('a01')
+    >>> qsubSanitizeJobName('a01')
     'a01'
     """
     if testjobname[0].isalpha():
