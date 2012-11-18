@@ -780,9 +780,16 @@ class MS_LDAInputSpec(FSTraitedSpec):
                              desc='pair of class labels to optimize')
     weight_file = traits.File(argstr='-weight %s', mandatory=True,
                         desc='filename for the LDA weights (input or output)')
+    output_synth = traits.File(exists=False, argstr='-synth %s',
+                               mandatory=True,
+                               desc='filename for the synthesized output volume',
+                               deprecated='0.8',
+                               new_name='vol_synth_file',
+                               xor=['vol_synth_file', 'output_synth'])
     vol_synth_file = traits.File(exists=False, argstr='-synth %s',
                                mandatory=True,
-                             desc='filename for the synthesized output volume')
+                               desc='filename for the synthesized output volume',
+                               xor=['vol_synth_file', 'output_synth'])
     label_file = traits.File(exists=True, argstr='-label %s',
                              desc='filename of the label volume')
     mask_file = traits.File(exists=True, argstr='-mask %s',
@@ -829,7 +836,10 @@ class MS_LDA(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['vol_synth_file'] = os.path.abspath(self.inputs.vol_synth_file)
+        if isdefined(self.inputs.output_synth):
+            outputs['vol_synth_file'] = os.path.abspath(self.inputs.output_synth)
+        else:
+            outputs['vol_synth_file'] = os.path.abspath(self.inputs.vol_synth_file)
         if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
             outputs['weight_file'] = os.path.abspath(self.inputs.weight_file)
         return outputs
