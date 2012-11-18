@@ -1,3 +1,11 @@
+"""The ants module provides basic functions for interfacing with ants functions.
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
+"""
 from nipype.interfaces.base import (CommandLineInputSpec, traits, TraitedSpec,
 				    File, SEMLikeCommandLine)
 
@@ -22,9 +30,9 @@ class C3dAffineTool(SEMLikeCommandLine):
     Example
     >>> from nipype.interfaces.c3 import C3dAffineTool
     >>> c3 = C3dAffineTool()
-    >>> c3.inputs.source_file = cmatrix.mat
+    >>> c3.inputs.source_file = 'cmatrix.mat'
     >>> c3.inputs.itk_transform = True
-    >>> c3.inouts.fsl2ras = True
+    >>> c3.inputs.fsl2ras = True
     >>> c3.run() #doctest: +SKIP
     """
     input_spec = C3dAffineToolInputSpec
