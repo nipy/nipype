@@ -18,6 +18,14 @@ class C3dAffineToolOutputSpec(TraitedSpec):
 
 class C3dAffineTool(SEMLikeCommandLine):
     """Converts fsl-style Affine registration into ANTS compatible itk format
+
+    Example
+    >>> from nipype.interfaces.c3 import C3dAffineTool
+    >>> c3 = C3dAffineTool()
+    >>> c3.inputs.source_file = cmatrix.mat
+    >>> c3.inputs.itk_transform = True
+    >>> c3.inouts.fsl2ras = True
+    >>> c3.run() #doctest: +SKIP
     """
     input_spec = C3dAffineToolInputSpec
     output_spec = C3dAffineToolOutputSpec
