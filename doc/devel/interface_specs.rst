@@ -278,7 +278,7 @@ Common
     deprecation version.
 
 ``new_name``
-    For inputs that are being renamed, one can specify the new name of the field
+    For inputs that are being renamed, one can specify the new name of the field.::
 
         class RealignInputSpec(BaseInterfaceInputSpec):
             jobtype = traits.Enum('estwrite', 'estimate', 'write',
