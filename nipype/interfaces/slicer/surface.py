@@ -113,7 +113,7 @@ class ProbeVolumeWithModelInputSpec(CommandLineInputSpec):
 
 
 class ProbeVolumeWithModelOutputSpec(TraitedSpec):
-    OutputModel = File(position=-1, desc="Output "painted" model", exists=True)
+    OutputModel = File(position=-1, desc="Output \"painted\" model", exists=True)
 
 
 class ProbeVolumeWithModel(SlicerCommandLine):
