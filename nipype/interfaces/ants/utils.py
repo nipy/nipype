@@ -138,11 +138,11 @@ class JacobianDeterminant(ANTSCommand):
     >>> from nipype.interfaces.ants import JacobianDeterminant
     >>> jacobian = JacobianDeterminant()
     >>> jacobian.inputs.dimension = 3
-    >>> jacobian.inputs.warp_file = 'Sub001_2Warp.nii'
+    >>> jacobian.inputs.warp_file = 'ants_Warp.nii.gz'
     >>> jacobian.inputs.output_prefix = 'Sub001_'
     >>> jacobian.inputs.use_log = 1
     >>> jacobian.cmdline
-    'ANTSJacobian 3 Sub001_2Warp.nii.gz Sub001_ 1'
+    'ANTSJacobian 3 ants_Warp.nii.gz Sub001_ 1'
     """
 
     _cmd = 'ANTSJacobian'
