@@ -117,3 +117,51 @@ class MultiplyImages(ANTSCommand):
         outputs = self._outputs().get()
         outputs['output_product_image'] = os.path.abspath(self.inputs.output_product_image)
         return outputs
+
+
+class JacobianDeterminantInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0, desc='image dimension (2 or 3)')
+    warp_file = File(argstr='%s', exists=True, mandatory=True, position=1, desc='input warp file')
+    output_prefix = File(argstr='%s', genfile=True, hash_files=False, position=2, desc='prefix of the output image filename: PREFIX(log)jacobian.nii.gz')
+    use_log = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3, desc='log transform the jacobian determinant')
+    template_mask = File(argstr='%s', exists=True, mandatory=False, position=4, desc='template mask to adjust for head size')
+    norm_by_total = traits.Enum(0, 1, argstr='%d', mandatory=False, position=5, desc='normalize jacobian by total in mask to adjust for head size')
+    projection_vector = traits.List(traits.Float(), argstr='%s', sep='x', mandatory=False, position=6, desc='vector to project warp against')
+
+class JacobianDeterminantOutputSpec(TraitedSpec):
+    jacobian_image = File(exists=True, desc='(log transformed) jacobian image')
+
+class JacobianDeterminant(ANTSCommand):
+    """
+    Examples
+    --------
+    >>> from nipype.interfaces.ants import JacobianDeterminant
+    >>> jacobian = JacobianDeterminant()
+    >>> jacobian.inputs.dimension = 3
+    >>> jacobian.inputs.warp_file = 'Sub001_2Warp.nii'
+    >>> jacobian.inputs.output_prefix = 'Sub001_'
+    >>> jacobian.inputs.use_log = 1
+    >>> jacobian.cmdline
+    'ANTSJacobian 3 Sub001_2Warp.nii.gz Sub001_ 1'
+    """
+
+    _cmd = 'ANTSJacobian'
+    input_spec = JacobianDeterminantInputSpec
+    output_spec = JacobianDeterminantOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'output_prefix':
+            output = self.inputs.output_prefix
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.warp_file)
+                output = name + '_'
+            return output
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if self.inputs.use_log == 1:
+            outputs['jacobian_image'] = os.path.abspath(self._gen_filename('output_prefix') + 'logjacobian.nii.gz')
+        else:
+            outputs['jacobian_image'] = os.path.abspath(self._gen_filename('output_prefix') + 'jacobian.nii.gz')
+        return outputs
