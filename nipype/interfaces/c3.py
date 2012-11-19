@@ -31,9 +31,10 @@ class C3dAffineTool(SEMLikeCommandLine):
     >>> from nipype.interfaces.c3 import C3dAffineTool
     >>> c3 = C3dAffineTool()
     >>> c3.inputs.source_file = 'cmatrix.mat'
-    >>> c3.inputs.itk_transform = True
+    >>> c3.inputs.itk_transform = 'affine.txt'
     >>> c3.inputs.fsl2ras = True
-    >>> c3.run() #doctest: +SKIP
+    >>> c3.cmdline
+    'c3d_affine_tool -src cmatrix.mat -fsl2ras -oitk affine.txt'
     """
     input_spec = C3dAffineToolInputSpec
     output_spec = C3dAffineToolOutputSpec
