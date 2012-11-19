@@ -142,7 +142,7 @@ class JacobianDeterminant(ANTSCommand):
     >>> jacobian.inputs.output_prefix = 'Sub001_'
     >>> jacobian.inputs.use_log = 1
     >>> jacobian.cmdline
-    'ANTSJacobian 3 xyz_2Warp.nii.gz xyz_ 1'
+    'ANTSJacobian 3 Sub001_2Warp.nii.gz Sub001_ 1'
     """
 
     _cmd = 'ANTSJacobian'
