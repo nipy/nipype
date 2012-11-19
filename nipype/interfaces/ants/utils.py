@@ -149,9 +149,6 @@ class JacobianDeterminant(ANTSCommand):
     input_spec = JacobianDeterminantInputSpec
     output_spec = JacobianDeterminantOutputSpec
 
-    # def _format_arg(self, opt, spec, val):
-    #     return super(JacobianDeterminant, self)._format_arg(opt, spec, val)
-
     def _gen_filename(self, name):
         if name == 'output_prefix':
             output = self.inputs.output_prefix
