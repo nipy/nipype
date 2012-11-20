@@ -1256,6 +1256,29 @@ class StdOutCommandLine(CommandLine):
     def _gen_outfilename(self):
         raise NotImplementedError
 
+class MpiCommandLineInputSpec(CommandLineInputSpec):
+    use_mpi = traits.Bool(False, 
+                          desc="Whether or not to run the command with mpiexec",
+                          usedefault=True)
+    n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
+                         "specify if this is managed externally (e.g. through "
+                         "SGE)")
+    
+
+class MpiCommandLine(CommandLine):
+    input_spec = MpiCommandLineInputSpec
+    
+    @property
+    def cmdline(self):
+        """Adds 'mpiexec' to begining of command"""
+        result = []
+        if self.inputs.use_mpi:
+            result.append('mpiexec')
+            if self.inputs.n_procs: 
+                result.append('-n %d' % self.inputs.n_procs)
+        result.append(super(MpiCommandLine, self).cmdline)
+        return ' '.join(result)
+
 class SEMLikeCommandLine(CommandLine):
     """By default in SEM derived interface all outputs have corresponding inputs.
     However, some SEM commands create outputs that are not defined in the XML.
