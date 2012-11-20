@@ -56,8 +56,10 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                 traits.Str(), 
                                 mandatory=True)
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
-    exclude_regexes = traits.List(desc="Meta data to exclude, suplementing any default exclude filters")
-    include_regexes = traits.List(desc="Meta data to include, overriding any exclude filters")
+    exclude_regexes = traits.List(desc="Meta data to exclude, suplementing "
+                                  "any default exclude filters")
+    include_regexes = traits.List(desc="Meta data to include, overriding any "
+                                  "exclude filters")
     
 class DcmStackOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True)
@@ -92,7 +94,8 @@ class DcmStack(NiftiGeneratorBase):
             stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
-        self.out_path = self._get_out_path(nw.meta_ext.get_class_dict(('global', 'const')))
+        self.out_path = \
+            self._get_out_path(nw.meta_ext.get_class_dict(('global', 'const')))
         if not self.inputs.embed_meta:
             nw.remove_extension()
         nb.save(nii, self.out_path)
@@ -122,7 +125,8 @@ class GroupAndStack(NiftiGeneratorBase):
         self.out_list = []
         for key, stack in stacks.iteritems():
             nw = NiftiWrapper(stack.to_nifti(embed_meta=self.inputs.embed_meta))
-            out_path = self._get_out_path(nw.meta_ext.get_class_dict(('global', 'const')))
+            const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
+            out_path =  self._get_out_path(const_meta)
             nb.save(nw.nii_img, out_path)
             self.out_list.append(out_path)
             
@@ -267,7 +271,8 @@ class MergeNifti(NiftiGeneratorBase):
         else:
             merge_dim = self.inputs.merge_dim
         merged = NiftiWrapper.from_sequence(nws, merge_dim)
-        self.out_path = self._get_out_path(merged.meta_ext.get_class_dict(('global', 'const')))
+        const_meta = merged.meta_ext.get_class_dict(('global', 'const'))
+        self.out_path = self._get_out_path(const_meta)
         nb.save(merged.nii_img, self.out_path)
         return runtime
         
@@ -303,7 +308,8 @@ class SplitNifti(NiftiGeneratorBase):
         else:
             split_dim = self.inputs.split_dim
         for split_nw in nw.split(split_dim):
-            out_path = self._get_out_path(split_nw.meta_ext.get_class_dict(('global', 'const')))
+            const_meta = split_nw.meta_ext.get_class_dict(('global', 'const'))
+            out_path = self._get_out_path(const_meta)
             nb.save(split_nw.nii_img, out_path)
             self.out_list.append(out_path)
             
