@@ -10,10 +10,15 @@ from nipype.interfaces.base import (TraitedSpec,
                                     traits, 
                                     BaseInterface,
                                    )
-import dicom
-import dcmstack
-from dcmstack.dcmmeta import NiftiWrapper
 import nibabel as nb
+
+have_dcmstack = True
+try:
+    import dicom
+    import dcmstack
+    from dcmstack.dcmmeta import NiftiWrapper
+except ImportError:
+    have_dcmstack = False
 
 def sanitize_path_comp(path_comp):
     result = []
