@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os, string
 from os import path
 from glob import glob
