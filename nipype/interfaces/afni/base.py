@@ -6,8 +6,8 @@
 import os
 import warnings
 
-from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename
+from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -98,6 +98,9 @@ class Info(object):
 class AFNITraitedSpec(CommandLineInputSpec):
     outputtype =  traits.Enum('AFNI', Info.ftypes.keys(),
                               desc = 'AFNI output filetype')
+    
+
+    
 
 
 class AFNICommand(CommandLine):
@@ -143,7 +146,7 @@ class AFNICommand(CommandLine):
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
 
-    def _gen_fname(self, basename, cwd=None, suffix='_afni', change_ext=True):
+    def _gen_fname(self, basename, cwd=None, suffix='_afni', change_ext=True, prefix=''):
         """Generate a filename based on the given parameters.
 
         The filename will take the form: cwd/basename<suffix><ext>.
@@ -182,8 +185,42 @@ class AFNICommand(CommandLine):
             else:
                 suffix = ext
         fname = fname_presuffix(basename, suffix = suffix,
-                                use_ext = False, newpath = cwd)
+                                use_ext = False, newpath = cwd, prefix=prefix)
         return fname
 
-
-
+class AFNIPrefixInputSpec(AFNITraitedSpec):
+    out_file = File(desc='output image file name',
+        argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], genfile=True, hash_files=True)
+    prefix = traits.Str(desc='output image prefix', xor=['out_file', 'prefix'])
+    suffix = traits.Str(desc='output image suffix', xor=['out_file', 'suffix'])
+    
+class AFNIPrefixCommand(AFNICommand):
+    input_spec = AFNIPrefixInputSpec
+    _suffix = '_afni'
+    
+    def _gen_out_file(self, source_filename):
+        suffix = self._suffix
+        prefix = ''
+        if isdefined(self.inputs.prefix):
+            prefix = self.inputs.prefix
+        if isdefined(self.inputs.suffix):
+            suffix = self.inputs.suffix
+        
+        _, base, _ = split_filename(source_filename)
+        return self._gen_fname(basename=base, prefix=prefix, suffix=suffix)
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_out_file(self.inputs.in_file)
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = self._gen_filename('out_file')
+        return outputs
+        
+class AFNIPrefixOutputSpec(TraitedSpec):
+    out_file = File(desc='output file',
+        exists=True)
