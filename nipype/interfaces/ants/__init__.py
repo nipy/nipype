@@ -14,4 +14,4 @@ from resampling import ApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesI
 from .segmentation import Atropos, N4BiasFieldCorrection
 
 # Utility Programs
-from .utils import AverageAffineTransform, AverageImages, MultiplyImages
+from .utils import AverageAffineTransform, AverageImages, MultiplyImages, JacobianDeterminant
