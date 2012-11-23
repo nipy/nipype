@@ -13,6 +13,7 @@ before_install:
     - sudo apt-get install -qq python-networkx python-traits python-setuptools
     - sudo apt-get install -qq python-nibabel
     - sudo apt-get install -qq --no-install-recommends fsl afni
+    - sudo apt-get install -qq fsl-atlases
     - source /etc/fsl/fsl.sh
     - virtualenv --system-site-packages ~/virtualenv/this
     - source ~/virtualenv/this/bin/activate
