@@ -12,8 +12,7 @@ before_install:
     - sudo apt-get install -qq python-scipy python-nose
     - sudo apt-get install -qq python-networkx python-traits python-setuptools
     - sudo apt-get install -qq python-nibabel
-    - sudo apt-get install -qq fsl afni
-    - source /etc/fsl/fsl.sh
+    - sudo apt-get install -qq afni
     - virtualenv --system-site-packages ~/virtualenv/this
     - source ~/virtualenv/this/bin/activate
 install: python setup.py build_ext --inplace
