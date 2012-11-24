@@ -4,9 +4,17 @@ python:
 before_install:
     - deactivate
     - sudo apt-get update -qq
+    - sudo apt-get install lsb-release
+    - source /etc/lsb-release
+    - wget -O- http://neuro.debian.net/lists/${DISTRIB_CODENAME}.us-nh | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+    - sudo apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
+    - sudo apt-get update -qq
     - sudo apt-get install -qq python-scipy python-nose
     - sudo apt-get install -qq python-networkx python-traits python-setuptools
-    - sudo easy_install nibabel
+    - sudo apt-get install -qq python-nibabel
+    - sudo apt-get install -qq --no-install-recommends fsl afni
+    - sudo apt-get install -qq fsl-atlases
+    - source /etc/fsl/fsl.sh
     - virtualenv --system-site-packages ~/virtualenv/this
     - source ~/virtualenv/this/bin/activate
 install: python setup.py build_ext --inplace
