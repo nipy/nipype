@@ -191,8 +191,8 @@ class AFNICommand(CommandLine):
 class AFNIPrefixInputSpec(AFNITraitedSpec):
     out_file = File("%s_afni", desc='output image file name',
         argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
-    prefix = traits.Str(desc='output image prefix')
-    suffix = traits.Str(desc='output image suffix')
+    prefix = traits.Str(desc='output image prefix', deprecated=0.8, new_name="out_file")
+    suffix = traits.Str(desc='output image suffix', deprecated=0.8, new_name="out_file")
     
 class AFNIPrefixCommand(AFNICommand):
     input_spec = AFNIPrefixInputSpec
