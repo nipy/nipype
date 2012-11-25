@@ -7,7 +7,8 @@ import os
 import warnings
 
 from ...utils.filemanip import fname_presuffix, split_filename
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
+from ..base import (
+    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -17,6 +18,7 @@ warnings.filterwarnings('always', category=UserWarning)
 # NEW_AFNI base class
 #
 ###################################
+
 
 class Info(object):
     """Handle afni output type and version information.
@@ -80,7 +82,6 @@ class Info(object):
         #      'Nipype uses NIFTI_GZ as default'))
         return 'AFNI'
 
-
     @staticmethod
     def standard_image(img_name):
         '''Grab an image from the standard location.
@@ -96,11 +97,8 @@ class Info(object):
 
 
 class AFNITraitedSpec(CommandLineInputSpec):
-    outputtype =  traits.Enum('AFNI', Info.ftypes.keys(),
-                              desc = 'AFNI output filetype')
-    
-
-    
+    outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
+                             desc='AFNI output filetype')
 
 
 class AFNICommand(CommandLine):
@@ -129,7 +127,6 @@ class AFNICommand(CommandLine):
          as it uses no environment variables
         """
         self._outputtype = self.inputs.outputtype
-
 
     @classmethod
     def set_default_outputtype(cls, outputtype):
@@ -184,22 +181,25 @@ class AFNICommand(CommandLine):
                 suffix = ''.join((suffix, ext))
             else:
                 suffix = ext
-        fname = fname_presuffix(basename, suffix = suffix,
-                                use_ext = False, newpath = cwd, prefix=prefix)
+        fname = fname_presuffix(basename, suffix=suffix,
+                                use_ext=False, newpath=cwd, prefix=prefix)
         return fname
+
 
 class AFNIPrefixInputSpec(AFNITraitedSpec):
     out_file = File("%s_afni", desc='output image file name',
-        argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
-    prefix = traits.Str(desc='output image prefix', deprecated=0.8, new_name="out_file")
-    suffix = traits.Str(desc='output image suffix', deprecated=0.8, new_name="out_file")
-    
+                    argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
+    prefix = traits.Str(
+        desc='output image prefix', deprecated=0.8, new_name="out_file")
+    suffix = traits.Str(
+        desc='output image suffix', deprecated=0.8, new_name="out_file")
+
+
 class AFNIPrefixCommand(AFNICommand):
     input_spec = AFNIPrefixInputSpec
-    
+
     def _gen_filename(self, name):
         trait_spec = self.inputs.trait(name)
-        value = getattr(self.inputs, name)
         if name == "out_file" and (isdefined(self.inputs.prefix) or isdefined(self.inputs.suffix)):
             suffix = ''
             prefix = ''
@@ -207,16 +207,18 @@ class AFNIPrefixCommand(AFNICommand):
                 prefix = self.inputs.prefix
             if isdefined(self.inputs.suffix):
                 suffix = self.inputs.suffix
-            
-            _, base, _ = split_filename(getattr(self.inputs,trait_spec.name_source))
+
+            _, base, _ = split_filename(
+                getattr(self.inputs, trait_spec.name_source))
             return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
         else:
             return super(AFNIPrefixCommand, self)._gen_filename(name)
-        
+
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
-        
+
+
 class AFNIPrefixOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
-        exists=True)
+                    exists=True)
