@@ -496,7 +496,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 trait = self.trait(name)
                 if has_metadata(trait.trait_type, "nohash", True):
                     continue
-                hash_files = not has_metadata(trait.trait_type, "hash_files", False)
+                hash_files = not has_metadata(trait.trait_type, "hash_files", False) and not has_metadata(trait.trait_type, "name_source")
                 dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
                 dict_withhash[name] = self._get_sorteddict(val, True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())

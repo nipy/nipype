@@ -230,12 +230,12 @@ Undefined = _Undefined()
 def isdefined(object):
     return not isinstance(object, _Undefined)
 
-def has_metadata(trait, metadata, value, recursive=True):
+def has_metadata(trait, metadata, value=None, recursive=True):
     '''
-    Checks if a given trait has a metadata set to particular value
+    Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
     count = 0
-    if hasattr(trait, metadata) and getattr(trait, metadata) == value:
+    if hasattr(trait, metadata) and (getattr(trait, metadata) == value or value==None):
         count += 1
     if recursive:
         if hasattr(trait, 'inner_traits'):
