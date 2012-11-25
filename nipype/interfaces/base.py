@@ -30,6 +30,7 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
 from ..utils.misc import is_container, trim
 from .. import config, logging, LooseVersion
 from .. import __version__
+from nipype.utils.filemanip import split_filename
 
 nipype_version = LooseVersion(__version__)
 
@@ -1154,13 +1155,6 @@ class CommandLine(BaseInterface):
                     return True
         return False
 
-    def _gen_filename(self, name):
-        """ Generate filename attributes before running.
-
-        Called when trait.genfile = True and trait is Undefined
-        """
-        raise NotImplementedError
-
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
 
@@ -1200,9 +1194,41 @@ class CommandLine(BaseInterface):
                 return sep.join([argstr % elt for elt in value])
             else:
                 return argstr % sep.join(str(elt) for elt in value)
+        elif trait_spec.name_source:
+            return self._gen_filename(name)
         else:
             # Append options using format string.
             return argstr % value
+    
+    def _gen_filename(self, name):
+            trait_spec = self.inputs.trait(name)
+            argstr = trait_spec.argstr
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if "%s" in value:
+                    _, base, _ = split_filename(getattr(self.inputs, trait_spec.name_source))
+                    retval = value%base
+                else:
+                    retval = value
+            else:
+                raise NotImplementedError
+            
+            if trait_spec.keep_extension:
+                return argstr % retval
+            else:
+                return argstr % self._overload_extension(retval)
+            
+    def _overload_extension(self, value):
+        return value
+    
+    def _list_outputs(self):
+        metadata = dict(name_source=lambda t: t is not None)
+        out_names = self.inputs.traits(**metadata).keys()
+        if out_names:
+            outputs = self.output_spec().get()
+            for name in out_names:
+                outputs[name] = os.path.abspath(self._gen_out_fname(name))
+            return outputs
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
@@ -1225,7 +1251,7 @@ class CommandLine(BaseInterface):
                 continue
             value = getattr(self.inputs, name)
             if not isdefined(value):
-                if spec.genfile:
+                if spec.genfile or spec.source_name:
                     value = self._gen_filename(name)
                 else:
                     continue
