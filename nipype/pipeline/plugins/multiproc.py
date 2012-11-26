@@ -44,6 +44,7 @@ class MultiProcPlugin(DistributedPluginBase):
     execution. Currently supported options are:
 
     - n_procs : number of processes to use
+    - non_daemon : boolean flag to execute as non-daemon processes
 
     """
 
@@ -52,10 +53,17 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskresult = {}
         self._taskid = 0
         n_procs = 1
+        non_daemon = False
         if plugin_args:
             if 'n_procs' in plugin_args:
                 n_procs = plugin_args['n_procs']
-        self.pool = Pool(processes=n_procs)
+            if 'non_daemon' in plugin_args:
+                non_daemon = plugin_args['non_daemon']
+        if non_daemon:
+            # run the execution using the non-daemon pool subclass
+            self.pool = NonDaemonPool(processes=n_procs)
+        else:
+            self.pool = Pool(processes=n_procs)
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
