@@ -1195,7 +1195,7 @@ class CommandLine(BaseInterface):
             else:
                 return argstr % sep.join(str(elt) for elt in value)
         elif trait_spec.name_source:
-            return self._gen_filename(name)
+            return  argstr % self._gen_filename(name)
         else:
             # Append options using format string.
             return argstr % value
@@ -1214,9 +1214,9 @@ class CommandLine(BaseInterface):
                 raise NotImplementedError
             
             if trait_spec.keep_extension:
-                return argstr % retval
+                return retval
             else:
-                return argstr % self._overload_extension(retval)
+                return self._overload_extension(retval)
             
     def _overload_extension(self, value):
         return value
@@ -1227,7 +1227,7 @@ class CommandLine(BaseInterface):
         if out_names:
             outputs = self.output_spec().get()
             for name in out_names:
-                outputs[name] = os.path.abspath(self._gen_out_fname(name))
+                outputs[name] = os.path.abspath(self._gen_filename(name))
             return outputs
 
     def _parse_inputs(self, skip=None):

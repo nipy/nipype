@@ -316,7 +316,16 @@ class AutoTcorrelateInputSpec(AFNIPrefixInputSpec):
         mandatory=True,
         exists=True)
 
-    out_file = File("%s_similarity_matrix", desc='output image file name',
+    polort = traits.Int(desc='Remove polynomical trend of order m or -1 for no detrending',
+        argstr="-polort %d")
+    eta2 = traits.Bool(desc='eta^2 similarity',
+        argstr="-eta2")
+    mask = File(exists=True, desc="mask of voxels", 
+        argstr="-mask %s")
+    mask_only_targets = traits.Bool(desc="use mask only on targets voxels", 
+        argstr="-mask_only_targets")
+
+    out_file = File("%s_similarity_matrix.1D", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
     
 class AutoTcorrelateOutputSpec(TraitedSpec):
@@ -331,14 +340,23 @@ class AutoTcorrelate(AFNIPrefixCommand):
     >>> from nipype.interfaces import afni as afni
     >>> corr = afni.AutoTcorrelate()
     >>> corr.inputs.in_file = 'functional.nii'
-    >>> corr.inputs.outputtype = "NIFTI"
+    >>> corr.inputs.polort = -1
+    >>> corr.inputs.eta2 = True
+    >>> corr.inputs.mask = 'mask.nii'
+    >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline
-    '3dAutoTcorrelation -prefix functional_similarity_matrix.nii functional.nii'
+    '3dAutoTcorrelation -prefix functional_similarity_matrix.1D functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
     output_spec = AutoTcorrelateOutputSpec
-    _cmd = '3dAutoTcorrelation'
+    _cmd = '3dAutoTcorrelate'
+
+    def _overload_extension(self, value):
+        path, base, ext = split_filename(value)
+        if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
+            ext = ext + ".1D"
+        return os.path.join(path, base + ext)
     
 
 class TStatInputSpec(AFNIPrefixInputSpec):
