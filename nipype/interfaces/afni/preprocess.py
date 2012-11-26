@@ -308,7 +308,38 @@ class Resample(AFNICommand):
     _cmd = '3dresample'
     input_spec = ResampleInputSpec
     output_spec = ResampleOutputSpec
+    
+class AutoTcorrelateInputSpec(AFNIPrefixInputSpec):
+    in_file = File(desc='timeseries x space (volume or surface) file',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
 
+    out_file = File("%s_similarity_matrix", desc='output image file name',
+        argstr='-prefix %s', name_source="in_file", usedefault=True)
+    
+class AutoTcorrelateOutputSpec(TraitedSpec):
+    out_file = File(desc='similarity, eta2 or correlation matrix',
+        exists=True)
+    
+class AutoTcorrelate(AFNIPrefixCommand):
+    """
+        Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> corr = afni.AutoTcorrelate()
+    >>> corr.inputs.in_file = 'functional.nii'
+    >>> corr.inputs.outputtype = "NIFTI"
+    >>> corr.cmdline
+    '3dAutoTcorrelation -prefix functional_similarity_matrix.nii functional.nii'
+    >>> res = corr.run() # doctest: +SKIP
+    """
+    input_spec = AutoTcorrelateInputSpec
+    output_spec = AutoTcorrelateOutputSpec
+    _cmd = '3dAutoTcorrelation'
+    
 
 class TStatInputSpec(AFNIPrefixInputSpec):
     in_file = File(desc='input file to 3dTstat',
