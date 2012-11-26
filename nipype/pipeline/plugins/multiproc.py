@@ -1,9 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
+
+Support for child processes running as non-daemons based on
+http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Pool
+from multiprocessing import Process
+from multiprocessing.pool import Pool
 from traceback import format_exception
 import sys
 
@@ -18,6 +22,20 @@ def run_node(node, updatehash):
         result['traceback'] = format_exception(etype,eval,etr)
         result['result'] = node.result
     return result
+
+class NonDaemonProcess(Process):
+    """A non-daemon process to support internal multiprocessing.
+    """
+    def _get_daemon(self):
+        return False
+    def _set_daemon(self, value):
+        pass
+    daemon = property(_get_daemon, _set_daemon)
+
+class NonDaemonPool(Pool):
+    """A process pool with non-daemon processes.
+    """
+    Process = NonDaemonProcess
 
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing
