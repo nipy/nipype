@@ -1,9 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via multiprocessing
+
+Support for child processes running as non-daemons based on
+http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Pool
+from multiprocessing import Process
+from multiprocessing.pool import Pool
 from traceback import format_exception
 import sys
 
@@ -19,6 +23,20 @@ def run_node(node, updatehash):
         result['result'] = node.result
     return result
 
+class NonDaemonProcess(Process):
+    """A non-daemon process to support internal multiprocessing.
+    """
+    def _get_daemon(self):
+        return False
+    def _set_daemon(self, value):
+        pass
+    daemon = property(_get_daemon, _set_daemon)
+
+class NonDaemonPool(Pool):
+    """A process pool with non-daemon processes.
+    """
+    Process = NonDaemonProcess
+
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing
 
@@ -26,6 +44,7 @@ class MultiProcPlugin(DistributedPluginBase):
     execution. Currently supported options are:
 
     - n_procs : number of processes to use
+    - non_daemon : boolean flag to execute as non-daemon processes
 
     """
 
@@ -34,10 +53,17 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskresult = {}
         self._taskid = 0
         n_procs = 1
+        non_daemon = False
         if plugin_args:
             if 'n_procs' in plugin_args:
                 n_procs = plugin_args['n_procs']
-        self.pool = Pool(processes=n_procs)
+            if 'non_daemon' in plugin_args:
+                non_daemon = plugin_args['non_daemon']
+        if non_daemon:
+            # run the execution using the non-daemon pool subclass
+            self.pool = NonDaemonPool(processes=n_procs)
+        else:
+            self.pool = Pool(processes=n_procs)
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
