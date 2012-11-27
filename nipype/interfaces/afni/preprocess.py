@@ -474,10 +474,11 @@ class Detrend(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(basename=self.inputs.in_file,
-                suffix = self.inputs.suffix)
+            basename = self.inputs.in_file
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            basename = self.inputs.out_file
+        outputs['out_file'] = self._gen_fname(basename=basename,
+                suffix=self.inputs.suffix)
         return outputs
 
 
