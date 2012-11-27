@@ -474,7 +474,7 @@ class Detrend(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            outputs['out_file'] = self._gen_fname(basename=self.inputs.in_file,
                 suffix = self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
@@ -843,7 +843,7 @@ class Copy(AFNICommand):
 class FourierInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dFourier',
         argstr='%s',
-        position=3, #-1,
+        position=-1,
         mandatory=True,
         exists=True)
     out_file = File(desc='output file from 3dFourier',
@@ -1580,6 +1580,7 @@ class Calc(AFNICommand):
 
 class DeconvolveInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     in_file = InputMultiPath(File(exists=True), argstr="%s", mandatory=True, desc="Filename(s) of 3D+time input dataset")
+    stim_file_1 = File(exists=True, argstr="%s", mandatory=True, desc="HACK")
     mask = File(argstr="-mask %s", exists=True, desc="Filename of 3D mask dataset")
     ignoreWarnings = traits.Either(traits.Bool(),
                                    traits.Int(), desc="GOFORIT [g]: Proceed even if the matrix has \
@@ -1596,6 +1597,7 @@ class DeconvolveInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     bucket = traits.File(argstr="-bucket %s", mandatory=True, desc="")
     fitts = traits.File(argstr="-fitts %s", mandatory=True, desc="")
     errts = traits.File(argstr="-errts %s", mandatory=True, desc="")
+
 
 class DeconvolveOutputSpec(TraitedSpec):
     out_file = traits.File(exists=False, desc="")
@@ -1643,7 +1645,7 @@ class Deconvolve(AFNICommand):
     >>> Deconv.inputs.stim_file_1 = example_data('functional.nii') #'stim_file1.1D')
     >>> Deconv.inputs.stim_label_1 = 'median_csf'
     >>> Deconv.inputs.is_stim_base_1 = False
-    >>> Deconv.inputs.stim_file_1 = example_data('functional.nii') #'stim_file2.1D')
+    >>> Deconv.inputs.stim_file_2 = example_data('functional.nii') #'stim_file2.1D')
     >>> Deconv.inputs.stim_label_2 = 'median_wm'
     >>> # Deconv.inputs.is_stim_base_2 = False
     >>> Deconv.inputs.stim_file_3 = example_data('functional.nii') #'stim_file3.1D')
@@ -1665,6 +1667,7 @@ class Deconvolve(AFNICommand):
     _cmd = "3dDeconvolve"
     input_spec = DeconvolveInputSpec
     output_spec = DeconvolveOutputSpec
+    _outputtype = 'AFNI'
 
     def __init__(self, fileCount=0, seriesCount=0, **inputs):
         super(Deconvolve, self).__init__(**inputs)
@@ -1685,18 +1688,21 @@ class Deconvolve(AFNICommand):
 
     def _formatStimulus(self):
         retval = []
-        retval.append("-num_stimts %d" % self.inputs.numberOfStimulusFiles)
-        for count in range(val):
-            index = count + 1
-            fileValue = getattr(self.inputs, 'stim_file%d' % (index + 1))
-            labelValue = getattr(self.inputs, 'stim_label%d' % (index + 1))
-            baseValue = getattr(self.inputs, 'stim_base%d' % (index + 1))
-            kthInput = "-stim_file %d %s -stim_label %d %s" % (count, fileValue, count, labelValue)
+        retval.append("-num_stimts %d" % self.stimSeriesCount)
+        for count in range(1, self.stimSeriesCount + 1):
+            if (count < self.stimFileCount):
+                fileValue = getattr(self.inputs, 'stim_file_%d' % count)
+                retval.append("-stim_file %d %s" % (count, fileValue))
+            elif (count >= self.stimFileCount):
+                fileValue = getattr(self.inputs, 'stim_file_%d' % self.stimFileCount)
+                retval.append("-stim_file %d %s[%d]" % (count, fileValue,
+                                                        count - self.stimFileCount)) # + 1
+            labelValue = getattr(self.inputs, 'stim_label_%d' % count)
+            retval.append("-stim_label %d %s" % (count, labelValue))
+            baseValue = getattr(self.inputs, 'is_stim_base_%d' % count)
             if baseValue:
-                kthInput = kthInput + " -stim_base %d" % count
-            retval.append(kthInput)
-        " ".join(retval)
-        return retval
+                retval.append("-stim_base %d" % count)
+        return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
         if opt == "in_file":
@@ -1713,19 +1719,19 @@ class Deconvolve(AFNICommand):
                 return "-polort A"
             else:
                 return "-polort %d" % val
-        elif opt == "numberOfStimulusFiles":
-            self._add_stim_traits()
+        elif opt == 'stim_file_1':
             return self._formatStimulus()
-        elif re.search('stim_', opt):
-            pass
+        elif opt == 'outputtype':
+            pass # TODO: Add user warning here
         return super(Deconvolve, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        # self.inputs.outputtype = 'AFNI'
         # TODO: Add isdefined() tests if not mandatory...
         outputs['out_file'] = self._gen_fname(basename=self.inputs.bucket, suffix='')
         outputs['out_fitts'] = self._gen_fname(basename=self.inputs.fitts, suffix='')
-        outputs['out_errts'] = self._gen_fname(basename=self.inputs.errts, suffix='')
+        outputs['out_errts'] = self._gen_fname(basename=self.inputs.errts, change_ext=False)
         return outputs
 
 class ZeropadInputSpec(AFNICommandInputSpec):

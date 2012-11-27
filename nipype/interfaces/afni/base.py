@@ -17,9 +17,10 @@ class Info(object):
     """Handle afni output type and version information.
     """
     __outputtype = 'AFNI'
-    ftypes = {'NIFTI': '.nii',
-              'AFNI': '+orig.BRIK',
-              'NIFTI_GZ': '.nii.gz'}
+    ftypes = {'NIFTI':'.nii',
+              'AFNI':'+orig.BRIK',
+              'NIFTI_GZ':'.nii.gz',
+              'AFNI_1D':'.1D'}
 
     @staticmethod
     def version():
@@ -183,10 +184,13 @@ class AFNICommand(CommandLine):
             cwd = os.getcwd()
         ext = Info.outputtype_to_ext(self.inputs.outputtype)
         if change_ext:
-            if suffix:
+            if not suffix is None:
                 suffix = ''.join((suffix, ext))
             else:
                 suffix = ext
+        else:
+            suffix = ext
+            # raise IOError("change_ext flag MUST be true; False not yet implemented!")
         fname = fname_presuffix(basename, suffix = suffix, prefix=prefix,
                                 use_ext = False, newpath = cwd)
         return fname
