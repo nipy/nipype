@@ -572,14 +572,45 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class DataFinder(IOBase):
-    """Search for paths that match a given regular expression. Matched 
-    paths are available in the output 'out_paths'. Any named groups of 
-    captured text from the regular expression are also available as 
-    ouputs of the same name.
+    """Search for paths that match a given regular expression. Allows a less 
+    proscriptive approach to gathering input files compared to DataGrabber.
+    Will recursively search any subdirectories by default. This can be limited 
+    with the min/max depth options.     
     
-    Will recursively search any subdirectories by default. This can be 
-    limited with the min/max depth options. Named groups of text 
-    captured by the regular expression will also be output dynamically.
+    Matched paths are available in the output 'out_paths'. Any named groups of 
+    captured text from the regular expression are also available as ouputs of 
+    the same name.
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.io import DataFinder
+    
+    Look for Nifti files in directories with "ep2d_fid" or "qT1" in the name, 
+    starting in the current directory.
+    
+    >>> df = DataFinder()
+    >>> df.inputs.root_paths = '.'
+    >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
+    >>> result = df.run()
+    >>> print result.outputs.out_paths
+    ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
+     './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
+     './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
+     './013-ep2d_fid_T1_pre/acquisition.nii.gz']
+    
+    >>> print result.outputs.series_dir
+    ['027-ep2d_fid_T1_Gd4',
+     '018-ep2d_fid_T1_Gd2',
+     '016-ep2d_fid_T1_Gd1',
+     '013-ep2d_fid_T1_pre']
+     
+    >>> print result.outputs.basename
+    ['acquisition',
+     'acquisition',
+     'acquisition',
+     'acquisition']
+
     """
     
     input_spec = DataFinderInputSpec
