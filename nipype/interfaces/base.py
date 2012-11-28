@@ -1266,6 +1266,23 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
     
 
 class MpiCommandLine(CommandLine):
+    '''Implements functionality to interact with command line programs 
+    that can be run with MPI (i.e. using 'mpiexec'). 
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import MpiCommandLine
+    >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
+    >>> mpi_cli.inputs.args = '-v'
+    >>> mpi_cli.cmdline
+    'my_mpi_prog -v'
+    
+    >>> mpi_cli.inputs.use_mpi = True
+    >>> mpi_cli.inputs.n_procs = 8
+    >>> mpi_cli.cmdline
+    
+    'mpiexec -n 8 my_mpi_prog -v'
+    '''
     input_spec = MpiCommandLineInputSpec
     
     @property
