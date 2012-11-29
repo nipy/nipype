@@ -340,12 +340,13 @@ class AutoTcorrelate(AFNIPrefixCommand):
     >>> from nipype.interfaces import afni as afni
     >>> corr = afni.AutoTcorrelate()
     >>> corr.inputs.in_file = 'functional.nii'
+    >>> corr.inputs.out_file = 'my_similarity_matrix.1D'
     >>> corr.inputs.polort = -1
     >>> corr.inputs.eta2 = True
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
-    >>> corr.cmdline
-    '3dAutoTcorrelation -prefix functional_similarity_matrix.1D functional.nii'
+    >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii' 
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -358,6 +359,8 @@ class AutoTcorrelate(AFNIPrefixCommand):
             ext = ext + ".1D"
         return os.path.join(path, base + ext)
     
+    def _gen_filename(self, name):
+        return os.path.abspath(super(AutoTcorrelate, self)._gen_filename(name))
 
 class TStatInputSpec(AFNIPrefixInputSpec):
     in_file = File(desc='input file to 3dTstat',
@@ -861,8 +864,8 @@ class MaskaveInputSpec(AFNIPrefixInputSpec):
         position=-2,
         mandatory=True,
         exists=True)
-    out_file = File("%s_maskave", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File("%s_maskave.1D", desc='output image file name',
+        argstr="> %s", name_source="in_file", usedefault=True, position=-1)
     mask = File(desc='matrix to align input file',
         argstr='-mask %s',
         position=1,
@@ -892,7 +895,8 @@ class Maskave(AFNIPrefixCommand):
     >>> maskave.inputs.in_file = 'functional.nii'
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
-    >>> maskave.inputs.out_file= 'maskave.1D'
+    >>> maskave.cmdline
+    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
 
     """
@@ -987,7 +991,7 @@ class FimInputSpec(AFNIPrefixInputSpec):
         mandatory=True,
         exists=True)
     out_file = File("%s_fim", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+        argstr='-bucket %s', name_source="in_file", usedefault=True)
     ideal_file = File(desc='ideal time series file name',
         argstr='-ideal_file %s',
         position=2,
@@ -1283,7 +1287,7 @@ class Calc(AFNIPrefixCommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
     """
 

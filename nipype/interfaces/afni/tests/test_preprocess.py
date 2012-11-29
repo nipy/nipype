@@ -117,7 +117,7 @@ def test_fim():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr=' -input %s',mandatory=True,),
                      out = dict(argstr='-out %s',),
-                     out_file = dict(argstr='-prefix %s'),
+                     out_file = dict(argstr='-bucket %s'),
                      outputtype = dict(),
                      )
     instance = afni.Fim()
@@ -346,7 +346,7 @@ def test_maskave():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      mask = dict(argstr='-mask %s',),
-                     out_file = dict(argstr='-prefix %s',),
+                     out_file = dict(argstr='> %s',),
                      outputtype = dict(),
                      quiet = dict(argstr='-quiet',),
                      )

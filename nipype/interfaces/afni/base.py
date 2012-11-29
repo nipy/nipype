@@ -225,11 +225,7 @@ class AFNIPrefixCommand(AFNICommand):
             outputs = self.output_spec().get()
             for name in out_names:
                 out = self._gen_filename(name)
-                if out.startswith("/"):
-                    outputs[name]
-                else:
-                    path,_,_  = split_filename(getattr(self.inputs,self.inputs.trait(name).name_source))
-                    outputs[name] = os.path.join(path, self._gen_filename(name))
+                outputs[name] = os.path.abspath(out)
             return outputs
 
 

@@ -1202,7 +1202,6 @@ class CommandLine(BaseInterface):
     
     def _gen_filename(self, name):
             trait_spec = self.inputs.trait(name)
-            argstr = trait_spec.argstr
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if "%s" in value:
@@ -1212,11 +1211,11 @@ class CommandLine(BaseInterface):
                     retval = value
             else:
                 raise NotImplementedError
-            
-            if trait_spec.keep_extension:
-                return retval
-            else:
+            _,_,ext = split_filename(retval)
+            if trait_spec.overload_extension or not ext:
                 return self._overload_extension(retval)
+            else:
+                return retval
             
     def _overload_extension(self, value):
         return value
