@@ -107,7 +107,7 @@ class To3D(AFNICommand):
                 raise ValueError("Invalid orient flag for AFNI's To3D() node: %s" % val.upper())
         elif opt == 'infolder':
             return os.path.join(self.inputs.infolder, '*.dcm')
-        return super(AFNICommand, self)._format_arg(opt, spec, val)
+        return super(To3D, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -489,8 +489,11 @@ class DespikeInputSpec(AFNICommandInputSpec):
     out_file = File(desc='output file from 3dDespike', argstr='-prefix %s',
          position=-2, genfile=True, hash_files=False)
     suffix = traits.Str('_despike', desc="out_file suffix", usedefault=True)
-    ignore = traits.Int(desc='Number of volumes to skip from the scan session',
+    ignore = traits.Int(desc='Number of volumes to skip in the analysis',
                         argstr='-ignore %d')
+    include_volumes = traits.Str(mandatory=False,
+                                 desc='The range of timepoint volumes to include in the output, \
+    Ex. "[4..]" would include the fifth to the last timepoint')
 
 
 class DespikeOutputSpec(TraitedSpec):
@@ -521,6 +524,13 @@ class Despike(AFNICommand):
         if name == 'out_file':
             return self._list_outputs()[name]
         return None
+
+    def _format_args(self, opt, spec, val):
+        if opt == 'in_file':
+            if isdefined(self.inputs.ignore_volumes):
+                return '%s%s' % (self.inputs.in_file, self.inputs.ignore_volumes)
+            return '%s' % self.inputs.in_file
+        return super(Despike, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -706,7 +716,7 @@ class Volreg(AFNICommand):
     def _format_arg(self, opt, spec, val):
         if opt == 'coarse':
             return '-coarse %d %d' % (self.inputs.coarse[0], self.inputs.coarse[1])
-        return super(AFNICommand, self)._format_arg(opt, spec, val)
+        return super(Volreg, self)._format_arg(opt, spec, val)
 
     def _gen_filename(self, name):
         if name == 'out_file' or name == 'oned_file':
@@ -1025,7 +1035,7 @@ class Allineate(AFNICommand):
                 return ''
         elif opt == 'suffix':
             return ''
-        return super(AFNICommand, self)._format_arg(opt, spec, val)
+        return super(Allineate, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1793,7 +1803,7 @@ class Zeropad(AFNICommand):
     def _format_arg(self, opt, spec, val):
         if opt == 'plane':
             return '-%s %d' % (val, self.inputs.numberOfPlanes)
-        return super(AFNICommand, self)._format_arg(opt, spec, val)
+        return super(Zeropad, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
