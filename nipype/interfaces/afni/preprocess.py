@@ -1471,40 +1471,16 @@ class ROIStats(AFNICommand):
     input_spec = ROIStatsInputSpec
     output_spec = ROIStatsOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+    def _format_arg(self, opt, spec, val):
+        if opt == 'in_file':
+            outputs = self._list_outputs()
+            return '%s>%s' % (self.inputs.in_file, outputs['stats'])
+        return super(ROIStats, self)._format_arg(opt, spec, val)
 
-        outputs = self._outputs()
-
-        outfile = os.path.join(os.getcwd(), 'stat_result.json')
-
-        if runtime is None:
-            try:
-                stats = load_json(outfile)['stat']
-            except IOError:
-                return self.run().outputs
-        else:
-            stats = []
-            for line in runtime.stdout.split('\n'):
-                if line:
-                    values = line.split()
-                    if len(values) > 1:
-                        stats.append([float(val) for val in values])
-                    else:
-                        stats.extend([float(val) for val in values])
-
-            if len(stats) == 1:
-                stats = stats[0]
-            of = os.path.join(os.getcwd(), 'TS.1D')
-            f = open(of, 'w')
-
-            for st in stats:
-                f.write(str(st) + '\n')
-            f.close()
-            save_json(outfile, dict(stat=of))
-        outputs.stats = of
-
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['stats'] = self._gen_fname(basename=self.inputs.in_file, suffix='roiStat')
         return outputs
-
 
 class CalcInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     in_file_a = File(position=0,argstr='-a %s', mandatory=True, exists=True)

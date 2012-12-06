@@ -191,8 +191,8 @@ class AFNICommand(CommandLine):
         else:
             suffix = ext
             # raise IOError("change_ext flag MUST be true; False not yet implemented!")
-        fname = fname_presuffix(basename, suffix = suffix, prefix=prefix,
-                                use_ext = False, newpath = cwd)
+        fname = fname_presuffix(basename, suffix=suffix, prefix=prefix,
+                                use_ext=False, newpath=cwd)
         return fname
 
 
