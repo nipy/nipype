@@ -823,29 +823,35 @@ class BaseInterface(Interface):
                                              transient=None).items():
             self._check_requires(spec, name, getattr(self.inputs, name))
 
-    def _check_input_version_requirements(self):
+    def _check_version_requirements(self, trait_object, raise_exception=True):
         """ Raises an exception on version mismatch
         """
+        unavailable_traits = []
         version = LooseVersion(str(self.version))
         if not version:
             return
         # check minimum version
-        names = self.inputs.trait_names(**dict(min_ver=lambda t: t is not None))
+        names = trait_object.trait_names(**dict(min_ver=lambda t: t is not None))
         for name in names:
-            if not isdefined(getattr(self.inputs, name)):
-                continue
-            min_ver = LooseVersion(str(self.inputs.traits()[name].min_ver))
+            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
             if min_ver > version:
-                raise Exception('Input %s (%s) (version %s < required %s)' %
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s < required %s)' %
                               (name, self.__class__.__name__, version, min_ver))
-        names = self.inputs.trait_names(**dict(max_ver=lambda t: t is not None))
+        names = trait_object.trait_names(**dict(max_ver=lambda t: t is not None))
         for name in names:
-            if not isdefined(getattr(self.inputs, name)):
-                continue
-            max_ver = LooseVersion(str(self.inputs.traits()[name].max_ver))
+            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
             if max_ver < version:
-                raise Exception('Input %s (%s) (version %s > required %s)' %
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s > required %s)' %
                               (name, self.__class__.__name__, version, max_ver))
+        return unavailable_traits
 
     def _run_interface(self, runtime):
         """ Core function that executes interface
@@ -869,7 +875,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
-        self._check_input_version_requirements()
+        self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
@@ -929,9 +935,18 @@ class BaseInterface(Interface):
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
+            _unavailable_outputs = []
+            if outputs:
+                _unavailable_outputs = \
+                               self._check_version_requirements(self._outputs())
             for key, val in predicted_outputs.items():
                 if needed_outputs and key not in needed_outputs:
                     continue
+                if key in _unavailable_outputs:
+                    raise KeyError(('Output trait %s not available in version '
+                                    '%s of interface %s. Please inform '
+                                    'developers.') % (key, self.version,
+                                                      self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
