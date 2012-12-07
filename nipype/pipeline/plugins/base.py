@@ -570,11 +570,15 @@ class GraphPluginBase(PluginBase):
         values = ()
         for keyword in keywords:
             value = getattr(self, "_" + keyword)
+            if keyword == "template" and os.path.isfile(value):
+                value = open(value).read()
             if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict) and keyword in node.plugin_args:
+                    if keyword == "template" and os.path.isfile(node.plugin_args[keyword]):
+                        tmp_value = open(node.plugin_args[keyword]).read()
                     if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
-                        value = node.plugin_args[keyword]
+                        value = tmp_value
                     else:
-                        value += node.plugin_args[keyword]
+                        value += tmp_value
             else:
                 values += (value, )
         return values
