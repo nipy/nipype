@@ -29,6 +29,17 @@ class FileProxyNode(pe.Node):
         if execute and copyfiles:
             self._proxy_outputs = self.interface._list_outputs()
             self._proxy_originputs = deepcopy(self._interface.inputs)
+            for name, spec in self.outputs.traits(transient=None).items():
+                value = self.interface._list_outputs()[name]
+                if isdefined(value):
+                    if spec.is_trait_type(File):
+                        print value
+                        self._add_output_file2proxy(value)
+                    elif spec.is_trait_type(OutputMultiPath):
+                        print value
+                        rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._add_output_file2proxy(x)
+                        map(rec_add,value)
+
             for name, spec in self.inputs.traits(transient=None).items():
                 value = getattr(self.inputs, name)
                 if isdefined(value):
