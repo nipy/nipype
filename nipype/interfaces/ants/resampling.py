@@ -21,32 +21,32 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(4, 3, argstr='%d', usedefault=True,
                             desc='image dimension (3 or 4)', position=1)
     input_image = File(argstr='%s', mandatory=True, copyfile=True,
-                        desc=('image to apply transformation to (generally a '
+                       desc=('image to apply transformation to (generally a '
                               'coregistered functional)'))
     out_postfix = traits.Str('_wtsimt', argstr='%s', usedefault=True,
                              desc=('Postfix that is prepended to all output '
                                    'files (default = _wtsimt)'))
     reference_image = File(argstr='-R %s', xor=['tightest_box'],
-                       desc='reference image space that you wish to warp INTO')
+                           desc='reference image space that you wish to warp INTO')
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
-                          desc=('computes tightest bounding box (overrided by '  \
-                                'reference_image if given)'),
-                          xor=['reference_image'])
+                               desc=('computes tightest bounding box (overrided by '
+                                     'reference_image if given)'),
+                               xor=['reference_image'])
     reslice_by_header = traits.Bool(argstr='--reslice-by-header',
-                     desc=('Uses orientation matrix and origin encoded in '
-                           'reference image file header. Not typically used '
-                           'with additional transforms'))
+                                    desc=('Uses orientation matrix and origin encoded in '
+                                          'reference image file header. Not typically used '
+                                          'with additional transforms'))
     use_nearest = traits.Bool(argstr='--use-NN',
                               desc='Use nearest neighbor interpolation')
     use_bspline = traits.Bool(argstr='--use-Bspline',
                               desc='Use 3rd order B-Spline interpolation')
     transformation_series = InputMultiPath(File(exists=True), argstr='%s',
-                             desc='transformation file(s) to be applied',
-                             mandatory=True, copyfile=False)
+                                           desc='transformation file(s) to be applied',
+                                           mandatory=True, copyfile=False)
     invert_affine = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
-                          'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
+                                desc=('List of Affine transformations to invert. '
+                                      'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
+                                      'found in transformation_series'))
 
 
 class WarpTimeSeriesImageMultiTransformOutputSpec(TraitedSpec):
@@ -75,14 +75,15 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == 'out_postfix':
-            _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
+            _, name, ext = split_filename(
+                os.path.abspath(self.inputs.input_image))
             return name + val + ext
         if opt == 'transformation_series':
             series = []
             affine_counter = 0
             for transformation in val:
                 if 'Affine' in transformation and \
-                    isdefined(self.inputs.invert_affine):
+                        isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
                         series += ['-i'],
@@ -94,45 +95,52 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
         outputs = self._outputs().get()
         _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
         outputs['output_image'] = os.path.join(os.getcwd(),
-                                             ''.join((name,
-                                                      self.inputs.out_postfix,
-                                                      ext)))
+                                               ''.join((name,
+                                                        self.inputs.out_postfix,
+                                                        ext)))
         return outputs
 
 
 class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=True,
                             desc='image dimension (2 or 3)', position=1)
-    input_image = File(argstr='%s', mandatory=True, copyfile=True,
-                        desc=('image to apply transformation to (generally a '
-                              'coregistered functional)') )
-    out_postfix = traits.Str('_wimt', argstr='%s', usedefault=True,
-                             desc=('Postfix that is prepended to all output '
-                                   'files (default = _wimt)'))
+    input_image = File(argstr='%s', mandatory=True,
+                       desc=('image to apply transformation to (generally a '
+                              'coregistered functional)'), position=2)
+    output_image = File(genfile=True, hash_files=False, argstr='%s',
+                        desc=('name of the output warped image'), position = 3, xor=['out_postfix'])
+    out_postfix = File("_wimt", usedefault=True, hash_files=False,
+                       desc=('Postfix that is prepended to all output '
+                             'files (default = _wimt)'), xor=['output_image'])
     reference_image = File(argstr='-R %s', xor=['tightest_box'],
-                       desc='reference image space that you wish to warp INTO')
+                           desc='reference image space that you wish to warp INTO')
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
-                          desc=('computes tightest bounding box (overrided by '  \
-                                'reference_image if given)'),
-                          xor=['reference_image'])
+                               desc=('computes tightest bounding box (overrided by '
+                                     'reference_image if given)'),
+                               xor=['reference_image'])
     reslice_by_header = traits.Bool(argstr='--reslice-by-header',
-                     desc=('Uses orientation matrix and origin encoded in '
-                           'reference image file header. Not typically used '
-                           'with additional transforms'))
+                                    desc=('Uses orientation matrix and origin encoded in '
+                                          'reference image file header. Not typically used '
+                                          'with additional transforms'))
     use_nearest = traits.Bool(argstr='--use-NN',
                               desc='Use nearest neighbor interpolation')
     use_bspline = traits.Bool(argstr='--use-Bspline',
                               desc='Use 3rd order B-Spline interpolation')
-    transformation_series = InputMultiPath(File(exists=True, copyfile=False), argstr='%s',
-                             desc='transformation file(s) to be applied',
-                             mandatory=True, copyfile=False)
+    transformation_series = InputMultiPath(File(exists=True), argstr='%s',
+                                           desc='transformation file(s) to be applied',
+                                           mandatory=True)
     invert_affine = traits.List(traits.Int,
-                    desc=('List of Affine transformations to invert. '
-                          'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
-                          'found in transformation_series'))
+                                desc=('List of Affine transformations to invert.'
+                                      'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
+                                      'found in transformation_series. Note that indexing '
+                                      'starts with 1 and does not include warp fields. Affine '
+                                      'transformations are distinguished '
+                                      'from warp fields by the word "affine" included in their filenames.'))
+
 
 class WarpImageMultiTransformOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
+
 
 class WarpImageMultiTransform(ANTSCommand):
     """Warps an image from one space to another
@@ -162,16 +170,20 @@ class WarpImageMultiTransform(ANTSCommand):
     input_spec = WarpImageMultiTransformInputSpec
     output_spec = WarpImageMultiTransformOutputSpec
 
+    def _gen_filename(self, name):
+        if name == 'output_image':
+            _, name, ext = split_filename(
+                os.path.abspath(self.inputs.input_image))
+            return ''.join((name, self.inputs.out_postfix, ext))
+        return None
+
     def _format_arg(self, opt, spec, val):
-        if opt == 'out_postfix':
-            _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-            return name + val + ext
         if opt == 'transformation_series':
             series = []
             affine_counter = 0
             for transformation in val:
-                if 'Affine' in transformation and \
-                    isdefined(self.inputs.invert_affine):
+                if "affine" in transformation.lower() and \
+                        isdefined(self.inputs.invert_affine):
                     affine_counter += 1
                     if affine_counter in self.inputs.invert_affine:
                         series += '-i',
@@ -181,48 +193,54 @@ class WarpImageMultiTransform(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-        outputs['output_image'] = os.path.join(os.getcwd(),
-                                             ''.join((name,
-                                                      self.inputs.out_postfix,
-                                                      ext)))
+        if isdefined(self.inputs.output_image):
+            outputs['output_image'] = os.path.abspath(self.inputs.output_image)
+        else:
+            outputs['output_image'] = os.path.abspath(
+                self._gen_filename('output_image'))
         return outputs
 
 
 class ApplyTransformsInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--dimensionality %d', usedefault=True,
-                            desc='image dimension (2 or 3)')
+    dimension = traits.Enum(
+        3, 2, argstr='--dimensionality %d', usedefault=True,
+        desc='image dimension (2 or 3)')
     input_image = File(argstr='--input %s', mandatory=True,
-                        desc=('image to apply transformation to (generally a '
+                       desc=('image to apply transformation to (generally a '
                               'coregistered functional)'),
-        exists=True)
-    output_image = traits.Str(argstr='--output %s',
-                             desc=('output file name'), genfile=True,
-                             hash_file=False)
-    reference_image = File(argstr='--reference-image %s', mandatory=True,
-                       desc='reference image space that you wish to warp INTO',
                        exists=True)
+    output_image = traits.Str(argstr='--output %s',
+                              desc=('output file name'), genfile=True,
+                              hash_file=False)
+    reference_image = File(argstr='--reference-image %s', mandatory=True,
+                           desc='reference image space that you wish to warp INTO',
+                           exists=True)
     interpolation = traits.Enum('Linear',
                                 'NearestNeighbor',
                                 'CosineWindowedSinc',
                                 'WelchWindowedSinc',
                                 'HammingWindowedSinc',
                                 'LanczosWindowedSinc',
-                                # 'MultiLabel',
-                                # 'Gaussian',
-                                # 'BSpline',
-                                argstr='%s', usedefault = True)
+                                'MultiLabel',
+                                'Gaussian',
+                                'BSpline',
+                                argstr='%s', usedefault=True)
     # TODO: Implement these options for multilabel, gaussian, and bspline
     # interpolation_sigma = traits.Float(requires=['interpolation'])
     # interpolation_alpha = traits.Float(requires=['interpolation_sigma'])
     # bspline_order = traits.Int(3, requires=['interpolation'])
-    transforms = traits.List(File(exists=True), argstr='%s', mandatory=True, desc=(''))
+    transforms = traits.List(
+        File(exists=True), argstr='%s', mandatory=True, desc=(''))
     invert_transform_flags = traits.List(traits.Bool())
-    default_value = traits.Float(0.0,argstr='--default-value %d', usedefault = True)
-    print_out_composite_warp_file = traits.Enum(0, 1, requires=["output_image"], desc=('')) # TODO: Change to boolean
+    default_value = traits.Float(
+        0.0, argstr='--default-value %d', usedefault=True)
+    print_out_composite_warp_file = traits.Enum(
+        0, 1, requires=["output_image"], desc=(''))  # TODO: Change to boolean
+
 
 class ApplyTransformsOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
+
 
 class ApplyTransforms(ANTSCommand):
     """ApplyTransforms, applied to an input image, transforms it according to a
@@ -264,8 +282,10 @@ class ApplyTransforms(ANTSCommand):
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transform_flags):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
-                    invert_code=1 if self.inputs.invert_transform_flags[ii] else 0
-                    retval.append("--transform [%s,%d]"%(self.inputs.transforms[ii], invert_code))
+                    invert_code = 1 if self.inputs.invert_transform_flags[
+                        ii] else 0
+                    retval.append("--transform [%s,%d]" %
+                                  (self.inputs.transforms[ii], invert_code))
                 else:
                     raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
             else:
@@ -274,9 +294,9 @@ class ApplyTransforms(ANTSCommand):
 
     def _getOutputWarpedFileName(self):
         if isdefined(self.inputs.print_out_composite_warp_file):
-            return "--output [%s,%s]"%(self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
+            return "--output [%s,%s]" % (self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
         else:
-            return "--output %s"%(self._gen_filename("output_image"))
+            return "--output %s" % (self._gen_filename("output_image"))
 
     def _format_arg(self, opt, spec, val):
         if opt == "output_image":
@@ -290,5 +310,6 @@ class ApplyTransforms(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
+        outputs['output_image'] = os.path.abspath(
+            self._gen_filename('output_image'))
         return outputs

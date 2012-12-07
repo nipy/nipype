@@ -354,15 +354,13 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
     parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250', 'scale500'], usedefault=True)
-    freesurfer_dir = Directory(desc='Freesurfer main directory')
-    subjects_dir = Directory(desc='Freesurfer main directory')
-    out_roi_file = File(genfile=True, desc='Region of Interest file for connectivity mapping')
-
+    freesurfer_dir = Directory(exists=True, desc='Freesurfer main directory')
+    subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
+    out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
 
 class ParcellateOutputSpec(TraitedSpec):
-    roi_file = File(desc='Region of Interest file for connectivity mapping',
-                    exists=True)
-    white_matter_mask_file = File(desc='White matter mask file')
+    roi_file = File(exists=True, desc='Region of Interest file for connectivity mapping')
+    white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
                     exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',
@@ -396,15 +394,18 @@ class Parcellate(BaseInterface):
     output_spec = ParcellateOutputSpec
 
     def _run_interface(self, runtime):
-        if self.inputs.subjects_dir:
-           os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
-        iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
-        iflogger.info("=============================================")
-        create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
-        return runtime
+		if self.inputs.subjects_dir:
+		   os.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
+		   
+		if not os.path.exists(op.join(self.inputs.subjects_dir, self.inputs.subject_id)):
+			raise Exception
+		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
+		iflogger.info("=============================================")
+		create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
+		return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()

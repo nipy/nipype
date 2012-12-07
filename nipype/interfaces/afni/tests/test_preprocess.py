@@ -77,7 +77,7 @@ def test_volreg():
 def test_calc():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
-                     expr = dict(argstr='-expr %s',mandatory=True,),
+                     expr = dict(argstr='-expr "%s"',mandatory=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file_a = dict(argstr='-a %s',mandatory=True,),
                      in_file_b = dict(argstr=' -b %s',),
@@ -356,7 +356,9 @@ def test_maskave():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 def test_automask():
-    input_map = dict(apply_mask = dict(argstr='-apply_prefix %s',),
+    input_map = dict(apply_mask = dict(argstr='-apply_prefix %s',
+                                       hash_files=False,genfile=True,),
+                     apply_suffix = dict(usedefault=True,),
                      args = dict(argstr='%s',),
                      clfrac = dict(argstr='-dilate %s',),
                      dilate = dict(argstr='-dilate %s',),
@@ -364,9 +366,10 @@ def test_automask():
                      erode = dict(argstr='-erode %s',),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='-prefix %s',),
+                     mask_suffix = dict(usedefault=True,),
+                     out_file = dict(hash_files=False,genfile=True,
+                                     argstr='-prefix %s',),
                      outputtype = dict(),
-                     suffix = dict(),
                      )
     instance = afni.Automask()
     for key, metadata in input_map.items():

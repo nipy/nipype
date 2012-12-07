@@ -89,13 +89,28 @@ class BETInputSpec(FSLCommandInputSpec):
 
 
 class BETOutputSpec(TraitedSpec):
-    out_file = File(desc="path/name of skullstripped file")
+    out_file = File(
+        desc="path/name of skullstripped file (if generated)")
     mask_file = File(
         desc="path/name of binary brain mask (if generated)")
     outline_file = File(
         desc="path/name of outline file (if generated)")
     meshfile = File(
         desc="path/name of vtk mesh file (if generated)")
+    inskull_mask_file = File(
+        desc="path/name of inskull mask (if generated)")
+    inskull_mesh_file = File(
+        desc="path/name of inskull mesh outline (if generated)")
+    outskull_mask_file = File(
+        desc="path/name of outskull mask (if generated)")
+    outskull_mesh_file = File(
+        desc="path/name of outskull mesh outline (if generated)")
+    outskin_mask_file = File(
+        desc="path/name of outskin mask (if generated)")
+    outskin_mesh_file = File(
+        desc="path/name of outskin mesh outline (if generated)")
+    skull_mask_file = File(
+        desc="path/name of skull mask (if generated)")
 
 
 class BET(FSLCommand):
@@ -138,7 +153,8 @@ class BET(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self._gen_outfilename()
-        if isdefined(self.inputs.mesh) and self.inputs.mesh:
+        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or
+                (isdefined(self.inputs.surfaces) and self.inputs.surfaces)):
             outputs['meshfile'] = self._gen_fname(outputs['out_file'],
                                                suffix='_mesh.vtk',
                                                change_ext=False)
@@ -150,6 +166,21 @@ class BET(FSLCommand):
         if isdefined(self.inputs.outline) and self.inputs.outline:
             outputs['outline_file'] = self._gen_fname(outputs['out_file'],
                                                suffix='_overlay')
+        if isdefined(self.inputs.surfaces) and self.inputs.surfaces:
+            outputs['inskull_mask_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_inskull_mask')
+            outputs['inskull_mesh_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_inskull_mesh')
+            outputs['outskull_mask_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_outskull_mask')
+            outputs['outskull_mesh_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_outskull_mesh')
+            outputs['outskin_mask_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_outskin_mask')
+            outputs['outskin_mesh_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_outskin_mesh')
+            outputs['skull_mask_file'] = self._gen_fname(outputs['out_file'],
+                                               suffix='_skull_mask')
         if isdefined(self.inputs.no_output) and self.inputs.no_output:
             outputs['out_file'] = Undefined
         return outputs
@@ -659,7 +690,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                           'to intensity mapping', hash_files=False)
     log_file = File(argstr='--logout=%s',
                              desc='Name of log-file', genfile=True, hash_files=False)
-    config_file = File(exists=True, argstr='--config=%s',
+    config_file = traits.Either(traits.Enum("T1_2_MNI152_2mm", "FA_2_FMRIB58_1mm"), File(exists=True), argstr='--config=%s',
                        desc='Name of config file specifying command line arguments')
     refmask_file = File(exists=True, argstr='--refmask=%s',
                         desc='name of file with mask in reference space')

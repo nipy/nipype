@@ -5,7 +5,7 @@
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
 import warnings
@@ -148,9 +148,8 @@ class TShift(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> tshift = afni.TShift()
-    >>> tshift.inputs.in_file = example_data('functional.nii')
+    >>> tshift.inputs.in_file = 'functional.nii'
     >>> tshift.inputs.out_file = 'functional_tshift.nii'
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
@@ -201,7 +200,7 @@ class RefitInputSpec(AFNITraitedSpec):
 
 
 class RefitOutputSpec(TraitedSpec):
-    out_file = File(desc='Same file as original infile with modified matrix',
+    out_file = File(desc='Same file as original in_file with modified matrix',
         exists=True)
 
 
@@ -215,9 +214,8 @@ class Refit(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> refit = afni.Refit()
-    >>> refit.inputs.in_file = example_data('structural.nii')
+    >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique=True
     >>> res = refit.run() # doctest: +SKIP
 
@@ -294,9 +292,8 @@ class Warp(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> warp = afni.Warp()
-    >>> warp.inputs.in_file = example_data('structural.nii')
+    >>> warp.inputs.in_file = 'structural.nii'
     >>> warp.inputs.deoblique = True
     >>> res = warp.run() # doctest: +SKIP
 
@@ -356,9 +353,8 @@ class Resample(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> resample = afni.Resample()
-    >>> resample.inputs.in_file = example_data('functional.nii')
+    >>> resample.inputs.in_file = 'functional.nii'
     >>> resample.inputs.orientation= 'RPI'
     >>> res = resample.run() # doctest: +SKIP
 
@@ -414,9 +410,8 @@ class TStat(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> tstat = afni.TStat()
-    >>> tstat.inputs.in_file = example_data('functional.nii')
+    >>> tstat.inputs.in_file = 'functional.nii'
     >>> tstat.inputs.args= '-mean'
     >>> res = tstat.run() # doctest: +SKIP
 
@@ -471,9 +466,8 @@ class Detrend(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> detrend = afni.Detrend()
-    >>> detrend.inputs.in_file = example_data('functional.nii')
+    >>> detrend.inputs.in_file = 'functional.nii'
     >>> detrend.inputs.args = '-polort 2'
     >>> res = detrend.run() # doctest: +SKIP
 
@@ -529,9 +523,8 @@ class Despike(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> despike = afni.Despike()
-    >>> despike.inputs.in_file = example_data('functional.nii')
+    >>> despike.inputs.in_file = 'functional.nii'
     >>> res = despike.run() # doctest: +SKIP
 
     """
@@ -569,7 +562,9 @@ class AutomaskInputSpec(AFNITraitedSpec):
         hash_files=False)
 
     apply_mask = File(desc="output file from 3dAutomask",
-        argstr='-apply_prefix %s')
+                      argstr='-apply_prefix %s',
+                      genfile=True,
+                      hash_files=False)
 
     clfrac = traits.Float(desc='sets the clip level fraction' +
         ' (must be 0.1-0.9). ' +
@@ -605,9 +600,8 @@ class Automask(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> automask = afni.Automask()
-    >>> automask.inputs.in_file = example_data('functional.nii')
+    >>> automask.inputs.in_file = 'functional.nii'
     >>> automask.inputs.dilate = 1
     >>> res = automask.run() # doctest: +SKIP
 
@@ -618,8 +612,10 @@ class Automask(AFNICommand):
     output_spec = AutomaskOutputSpec
 
     def _gen_filename(self, name):
-        if name == 'out_file' or name == 'brain_file':
+        if name == 'out_file':
             return self._list_outputs()[name]
+        if name == 'apply_mask':
+            return self._list_outputs()['brain_file']
         return None
 
     def _list_outputs(self):
@@ -631,8 +627,8 @@ class Automask(AFNICommand):
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
         if not isdefined(self.inputs.apply_mask):
-            outputs['brain_file'] = self._gen_fname(
-                self.inputs.in_file, suffix=self.inputs.apply_suffix)
+            outputs['brain_file'] = self._gen_fname(self.inputs.in_file,
+                                                suffix=self.inputs.apply_suffix)
         else:
             outputs['brain_file'] = os.path.abspath(self.inputs.apply_mask)
         return outputs
@@ -691,11 +687,10 @@ class Volreg(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> volreg = afni.Volreg()
-    >>> volreg.inputs.in_file = example_data('functional.nii')
-    >>> volreg.inputs.other = '-Fourier -twopass'
-    >>> volreg.inputs.zpad = '4'
+    >>> volreg.inputs.in_file = 'functional.nii'
+    >>> volreg.inputs.args = '-Fourier -twopass'
+    >>> volreg.inputs.zpad = 4
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -759,12 +754,11 @@ class Merge(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> merge = afni.Merge()
-    >>> merge.inputs.infile = example_data('functional.nii')
-    >>> merge.inputs.blurfwhm = 4.0
+    >>> merge.inputs.in_files = ['functional.nii', 'functional2.nii']
+    >>> merge.inputs.blurfwhm = 4
     >>> merge.inputs.doall = True
-    >>> merge.inputs.outfile = 'e7.nii'
+    >>> merge.inputs.out_file = 'e7.nii'
     >>> res = merge.run() # doctest: +SKIP
 
     """
@@ -816,9 +810,8 @@ class Copy(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> copy = afni.Copy()
-    >>> copy.inputs.in_file = example_data('functional.nii')
+    >>> copy.inputs.in_file = 'functional.nii'
     >>> copy.inputs.out_file = 'new_func.nii'
     >>> res = copy.run() # doctest: +SKIP
 
@@ -879,9 +872,8 @@ class Fourier(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> fourier = afni.Fourier()
-    >>> fourier.inputs.in_file = example_data('functional.nii')
+    >>> fourier.inputs.in_file = 'functional.nii'
     >>> fourier.inputs.args = '-retrend'
     >>> fourier.inputs.highpass = 0.005
     >>> fourier.inputs.lowpass = 0.1
@@ -937,10 +929,9 @@ class ZCutUp(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
-    >>> zcutup = afni.Zcutup()
-    >>> zcutup.inputs.infile = example_data('functional.nii')
-    >>> zcutup.inputs.outfile= 'functional_zcutup.nii'
+    >>> zcutup = afni.ZCutUp()
+    >>> zcutup.inputs.in_file = 'functional.nii'
+    >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
     >>> res = zcutup.run() # doctest: +SKIP
 
@@ -996,11 +987,10 @@ class Allineate(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> allineate = afni.Allineate()
-    >>> allineate.inputs.infile = example_data('functional.nii')
-    >>> allineate.inputs.outfile= 'functional_allineate.nii'
-    >>> allineate.inputs.matrix= example_data('cmatrix.mat')
+    >>> allineate.inputs.in_file = 'functional.nii'
+    >>> allineate.inputs.out_file= 'functional_allineate.nii'
+    >>> allineate.inputs.matrix= 'cmatrix.mat'
     >>> res = allineate.run() # doctest: +SKIP
 
     """
@@ -1061,10 +1051,9 @@ class Maskave(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> maskave = afni.Maskave()
-    >>> maskave.inputs.in_file = example_data('functional.nii')
-    >>> maskave.inputs.mask= example_data('seed_mask.nii')
+    >>> maskave.inputs.in_file = 'functional.nii'
+    >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
     >>> maskave.inputs.out_file= 'maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
@@ -1119,9 +1108,8 @@ class SkullStrip(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
-    >>> skullstrip = afni.Skullstrip()
-    >>> skullstrip.inputs.in_file = example_data('functional.nii')
+    >>> skullstrip = afni.SkullStrip()
+    >>> skullstrip.inputs.in_file = 'functional.nii'
     >>> skullstrip.inputs.args = '-o_ply'
     >>> res = skullstrip.run() # doctest: +SKIP
 
@@ -1177,9 +1165,8 @@ class TCat(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> tcat = afni.TCat()
-    >>> tcat.inputs.in_file = example_data('functional.nii')
+    >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> tcat.inputs.out_file= 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
     >>> res = tcat.run() # doctest: +SKIP
@@ -1243,10 +1230,9 @@ class Fim(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> fim = afni.Fim()
-    >>> fim.inputs.in_file = example_data('functional.nii')
-    >>> fim.inputs.ideal_file= example_data('seed.1D')
+    >>> fim.inputs.in_file = 'functional.nii'
+    >>> fim.inputs.ideal_file= 'seed.1D'
     >>> fim.inputs.out_file = 'functional_corr.nii'
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
@@ -1313,11 +1299,9 @@ class TCorrelate(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> tcorrelate = afni.TCorrelate()
-    >>> tcorrelate.inputs.in_file = example_data('functional.nii')
-    >>> tcorrelate.inputs.xset= example_data('u_rc1s1_Template.nii')
-    >>> tcorrelate.inputs.yset = example_data('u_rc1s2_Template.nii')
+    >>> tcorrelate.inputs.xset= 'u_rc1s1_Template.nii'
+    >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
     >>> tcorrelate.inputs.out_file = 'functional_tcorrelate.nii.gz'
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
@@ -1375,10 +1359,9 @@ class BrickStat(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> brickstat = afni.BrickStat()
-    >>> brickstat.inputs.in_file = example_data('functional.nii')
-    >>> brickstat.inputs.mask = example_data('skeleton_mask.nii.gz')
+    >>> brickstat.inputs.in_file = 'functional.nii'
+    >>> brickstat.inputs.mask = 'skeleton_mask.nii.gz'
     >>> brickstat.inputs.min = True
     >>> res = brickstat.run() # doctest: +SKIP
 
@@ -1453,10 +1436,9 @@ class ROIStats(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> roistats = afni.ROIStats()
-    >>> roistats.inputs.in_file = example_data('functional.nii')
-    >>> roistats.inputs.mask = example_data('skeleton_mask.nii.gz')
+    >>> roistats.inputs.in_file = 'functional.nii'
+    >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
     >>> roistats.inputs.quiet=True
     >>> res = roistats.run() # doctest: +SKIP
 
@@ -1514,15 +1496,15 @@ class CalcInputSpec(AFNITraitedSpec):
         argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
         argstr=' -b %s', position=1, exists=True)
-    expr = traits.Str(desc='expr', argstr='-expr %s', position=2,
+    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
         mandatory=True)
     out_file = File(desc='output file from 3dFourier', argstr='-prefix %s',
         position=-1, genfile=True)
-    start_idx = traits.Int(desc='start index for infile_a',
+    start_idx = traits.Int(desc='start index for in_file_a',
         requires=['stop_idx'])
-    stop_idx = traits.Int(desc='stop index for infile_a',
+    stop_idx = traits.Int(desc='stop index for in_file_a',
         requires=['start_idx'])
-    single_idx = traits.Int(desc='volume index for infile_a')
+    single_idx = traits.Int(desc='volume index for in_file_a')
     suffix = traits.Str('_calc', desc="out_file suffix", usedefault=True)
 
 
@@ -1540,13 +1522,13 @@ class Calc(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> from nipype.testing import  example_data
     >>> calc = afni.Calc()
-    >>> calc.inputs.infile_a = example_data('functional.nii')
-    >>> calc.inputs.Infile_b = example_data('functional2.nii.gz')
+    >>> calc.inputs.in_file_a = 'functional.nii'
+    >>> calc.inputs.in_file_b = 'functional2.nii'
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
-    >>> res = calc.run() # doctest: +SKIP
+    >>> calc.cmdline
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
     """
 
@@ -1568,7 +1550,7 @@ class Calc(AFNICommand):
             return self._list_outputs()[name]
 
     def _format_arg(self, name, trait_spec, value):
-        if name == 'infile_a':
+        if name == 'in_file_a':
             arg = trait_spec.argstr % value
             if isdefined(self.inputs.start_idx):
                 arg += '[%d..%d]' % (self.inputs.start_idx,

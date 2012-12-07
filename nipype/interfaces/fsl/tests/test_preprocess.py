@@ -78,6 +78,7 @@ def test_bet():
         'center':             ('-c 54 75 80', [54, 75, 80]),
         'threshold':          ('-t', True),
         'mesh':               ('-e', True),
+        'surfaces':           ('-A', True)
         #'verbose':            ('-v', True),
         #'flags':              ('--i-made-this-up', '--i-made-this-up'),
             }

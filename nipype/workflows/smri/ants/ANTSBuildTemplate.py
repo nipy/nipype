@@ -98,14 +98,14 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     Inputs::
 
            inputspec.images :
-           inputspec.fixed_image : 
+           inputspec.fixed_image :
            inputspec.ListOfPassiveImagesDictionaries :
 
     Outputs::
 
            outputspec.template :
            outputspec.transforms_list :
-           outputspec.passive_deformed_templates : 
+           outputspec.passive_deformed_templates :
     """
 
 
