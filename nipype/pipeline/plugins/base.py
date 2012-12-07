@@ -562,9 +562,9 @@ class GraphPluginBase(PluginBase):
                                            store_exception=False))
             dependencies[idx] = [nodes.index(prevnode) for prevnode in
                                  graph.predecessors(node)]
-        self._submit_graph(pyfiles, dependencies)
+        self._submit_graph(pyfiles, dependencies, nodes)
 
-    def _submit_graph(self, pyfiles, dependencies):
+    def _submit_graph(self, pyfiles, dependencies, nodes):
         """
         pyfiles: list of files corresponding to a topological sort
         dependencies: dictionary of dependencies based on the toplogical sort

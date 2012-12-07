@@ -38,15 +38,30 @@ class SGEGraphPlugin(GraphPluginBase):
                 self._qsub_args = plugin_args['qsub_args']
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
-    def _submit_graph(self, pyfiles, dependencies):
+    def _submit_graph(self, pyfiles, dependencies, nodes):
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
         with open(submitjobsfile, 'wt') as fp:
             fp.writelines('#!/usr/bin/env bash\n')
             for idx, pyscript in enumerate(pyfiles):
+                node = nodes[idx]
+                template = self._template
+                qsub_args = self._qsub_args
+                if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict):
+                    if "template" in node.plugin_args:
+                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                            template = node.plugin_args["template"]
+                        else:
+                            template += node.plugin_args["template"]
+                    if "qsub_args" in node.plugin_args:
+                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                            qsub_args = node.plugin_args["qsub_args"]
+                        else:
+                            qsub_args += (" " + node.plugin_args['qsub_args'])
+                        
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
-                batchscript = '\n'.join((self._template,
+                batchscript = '\n'.join((template,
                                          '%s %s' % (sys.executable, pyscript)))
                 batchscriptfile = os.path.join(batch_dir,
                                                'batchscript_%s.sh' % name)
@@ -77,7 +92,7 @@ class SGEGraphPlugin(GraphPluginBase):
                              jobNm=jobname,
                              outFileOption=stdoutFile,
                              errFileOption=stderrFile,
-                             extraQSubArgs=self._qsub_args,
+                             extraQSubArgs=qsub_args,
                              dependantIndex=deps,
                              batchscript=batchscriptfile)
                 fp.writelines( full_line )
