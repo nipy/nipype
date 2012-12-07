@@ -563,6 +563,19 @@ class GraphPluginBase(PluginBase):
             dependencies[idx] = [nodes.index(prevnode) for prevnode in
                                  graph.predecessors(node)]
         self._submit_graph(pyfiles, dependencies, nodes)
+        
+    def _get_args(self, node, keywords):
+        values = ()
+        for keyword in keywords:
+            value = getattr(self, "_" + keyword)
+            if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict) and keyword in node.plugin_args:
+                    if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                        value = node.plugin_args[keyword] 
+                    else:
+                        value += node.plugin_args[keyword]
+            else:
+                values += (value, )
+        return values
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         """

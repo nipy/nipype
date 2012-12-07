@@ -59,19 +59,7 @@ class CondorDAGManPlugin(GraphPluginBase):
             # as jobs in the DAG
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template = self._template
-                submit_specs = self._submit_specs
-                if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict):
-                    if "template" in node.plugin_args:
-                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
-                            template = node.plugin_args["template"]
-                        else:
-                            template += node.plugin_args["template"]
-                    if "submit_specs" in node.plugin_args:
-                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
-                            submit_specs = node.plugin_args["submit_specs"]
-                        else:
-                            submit_specs += node.plugin_args['submit_specs']
+                template, submit_specs = self._get_args(node, ["template", "submit_specs"])
                 # XXX redundant with previous value? or could it change between
                 # scripts?                            
                 batch_dir, name = os.path.split(pyscript)

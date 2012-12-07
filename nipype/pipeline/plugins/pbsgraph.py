@@ -32,7 +32,7 @@ class PBSGraphPlugin(SGEGraphPlugin):
             fp.writelines('#!/usr/bin/env sh\n')
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template, qsub_args = self._get_args(node)
+                template, qsub_args = self._get_args(node, ["template", "qsub_args"])
                 
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
