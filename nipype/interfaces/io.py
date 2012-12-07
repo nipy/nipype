@@ -592,20 +592,20 @@ class DataFinder(IOBase):
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
-    >>> result = df.run()
-    >>> print result.outputs.out_paths
+    >>> result = df.run() # doctest: +SKIP
+    >>> print result.outputs.out_paths # doctest: +SKIP
     ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
      './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
      './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
      './013-ep2d_fid_T1_pre/acquisition.nii.gz']
     
-    >>> print result.outputs.series_dir
+    >>> print result.outputs.series_dir # doctest: +SKIP
     ['027-ep2d_fid_T1_Gd4',
      '018-ep2d_fid_T1_Gd2',
      '016-ep2d_fid_T1_Gd1',
      '013-ep2d_fid_T1_pre']
      
-    >>> print result.outputs.basename
+    >>> print result.outputs.basename # doctest: +SKIP
     ['acquisition',
      'acquisition',
      'acquisition',
@@ -695,6 +695,8 @@ class DataFinder(IOBase):
             for key, vals in self.result.iteritems():
                 self.result[key] = vals[0]
             
+        if not self.result:
+            raise RuntimeError("Regular expression did not match any files!")
         return runtime
             
     def _list_outputs(self):
