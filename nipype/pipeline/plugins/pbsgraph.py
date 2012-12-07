@@ -32,8 +32,9 @@ class PBSGraphPlugin(SGEGraphPlugin):
             fp.writelines('#!/usr/bin/env sh\n')
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template, qsub_args = self._get_args(node, ["template", "qsub_args"])
-                
+                template, qsub_args = self._get_args(
+                    node, ["template", "qsub_args"])
+
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 batchscript = '\n'.join((template,
@@ -45,7 +46,8 @@ class PBSGraphPlugin(SGEGraphPlugin):
                     batchfp.close()
                 deps = ''
                 if idx in dependencies:
-                    values = ['$job%05d' % jobid for jobid in dependencies[idx]]
+                    values = ['$job%05d' %
+                              jobid for jobid in dependencies[idx]]
                     if len(values):
                         deps = '-W depend=afterok:%s' % ':'.join(values)
                 fp.writelines('job%05d=`qsub %s %s %s`\n' % (idx, deps,
@@ -55,4 +57,3 @@ class PBSGraphPlugin(SGEGraphPlugin):
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
         logger.info('submitted all jobs to queue')
-

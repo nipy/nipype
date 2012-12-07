@@ -59,28 +59,29 @@ class CondorDAGManPlugin(GraphPluginBase):
             # as jobs in the DAG
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template, submit_specs = self._get_args(node, ["template", "submit_specs"])
+                template, submit_specs = self._get_args(
+                    node, ["template", "submit_specs"])
                 # XXX redundant with previous value? or could it change between
-                # scripts?                            
+                # scripts?
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 submitspec = '\n'.join(
-                                (template,
-                                 'executable = %s' % sys.executable,
-                                 'arguments = %s' % pyscript,
-                                 'output = %s' % os.path.join(batch_dir,
-                                                             '%s.out' % name),
-                                 'error = %s' % os.path.join(batch_dir,
-                                                             '%s.err' % name),
-                                 'log = %s' % os.path.join(batch_dir,
-                                                           '%s.log' % name),
-                                 'getenv = True',
-                                 submit_specs,
-                                 'queue'
-                                 ))
+                    (template,
+                     'executable = %s' % sys.executable,
+                     'arguments = %s' % pyscript,
+                     'output = %s' % os.path.join(batch_dir,
+                                                  '%s.out' % name),
+                     'error = %s' % os.path.join(batch_dir,
+                                                 '%s.err' % name),
+                     'log = %s' % os.path.join(batch_dir,
+                                               '%s.log' % name),
+                     'getenv = True',
+                     submit_specs,
+                     'queue'
+                     ))
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
-                                               '%s.submit' % name)
+                                          '%s.submit' % name)
                 with open(submitfile, 'wt') as submitfileprt:
                     submitfileprt.writelines(submitspec)
                     submitfileprt.close()
@@ -100,4 +101,3 @@ class CondorDAGManPlugin(GraphPluginBase):
                                                     self._dagman_args)
         cmd.run()
         logger.info('submitted all jobs to Condor DAGMan')
-
