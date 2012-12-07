@@ -20,13 +20,12 @@ class SGEGraphPlugin(GraphPluginBase):
                   qsub call
 
     """
-
-    def __init__(self, **kwargs):
-        self._template = """
+    _template = """
 #!/bin/bash
 #$ -V
 #$ -S /bin/bash
-        """
+"""
+    def __init__(self, **kwargs):
         self._qsub_args = ''
         if 'plugin_args' in kwargs:
             plugin_args = kwargs['plugin_args']
@@ -38,6 +37,23 @@ class SGEGraphPlugin(GraphPluginBase):
                 self._qsub_args = plugin_args['qsub_args']
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
+
+    def _get_args(self, node):
+        template = self._template
+        qsub_args = self._qsub_args
+        if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict):
+            if "template" in node.plugin_args:
+                if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                    template = node.plugin_args["template"]
+                else:
+                    template += node.plugin_args["template"]
+            if "qsub_args" in node.plugin_args:
+                if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                    qsub_args = node.plugin_args["qsub_args"]
+                else:
+                    qsub_args += " " + node.plugin_args['qsub_args']
+        return template, qsub_args
+
     def _submit_graph(self, pyfiles, dependencies, nodes):
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
@@ -45,19 +61,7 @@ class SGEGraphPlugin(GraphPluginBase):
             fp.writelines('#!/usr/bin/env bash\n')
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template = self._template
-                qsub_args = self._qsub_args
-                if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict):
-                    if "template" in node.plugin_args:
-                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
-                            template = node.plugin_args["template"]
-                        else:
-                            template += node.plugin_args["template"]
-                    if "qsub_args" in node.plugin_args:
-                        if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
-                            qsub_args = node.plugin_args["qsub_args"]
-                        else:
-                            qsub_args += (" " + node.plugin_args['qsub_args'])
+                template, qsub_args = self._get_args(node)
                         
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
