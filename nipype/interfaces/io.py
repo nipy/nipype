@@ -74,7 +74,8 @@ def copytree(src, dst):
         except Exception, err:
             errors.extend(err.args[0])
     if errors:
-        raise Exception, errors
+        raise Exception(errors)
+
 
 def add_traits(base, names, trait_type=None):
     """ Add traits to a traited class.
@@ -93,9 +94,10 @@ def add_traits(base, names, trait_type=None):
         _ = getattr(base, key)
     return base
 
+
 class IOBase(BaseInterface):
 
-    def _run_interface(self,runtime):
+    def _run_interface(self, runtime):
         return runtime
 
     def _list_outputs(self):
@@ -107,22 +109,24 @@ class IOBase(BaseInterface):
     def _add_output_traits(self, base):
         return base
 
+
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
-    container = traits.Str(desc = 'Folder within base directory in which to store output')
+    container = traits.Str(
+        desc='Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
                                    desc='store output in parametrized structure')
     strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
+    substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str,traits.Str),
-                                   desc=('List of 2-tuples reflecting a pair '
-                                         'of a Python regexp pattern and a '
-                                         'replacement string. Invoked after '
-                                         'string `substitutions`'))
+    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+                                          desc=('List of 2-tuples reflecting a pair '
+                                                'of a Python regexp pattern and a '
+                                                'replacement string. Invoked after '
+                                                'string `substitutions`'))
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
@@ -137,6 +141,12 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             if key in self._outputs:
                 self._outputs[key] = value
             super(DataSinkInputSpec, self).__setattr__(key, value)
+
+
+class DataSinkOutputSpec(TraitedSpec):
+
+    out_file = traits.Any(desc='datasink output')
+
 
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
@@ -200,6 +210,7 @@ class DataSink(IOBase):
 
     """
     input_spec = DataSinkInputSpec
+    output_spec = DataSinkOutputSpec
 
     def __init__(self, infields=None, **kwargs):
         """
@@ -266,6 +277,8 @@ class DataSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
+        outputs = self.output_spec().get()
+        out_files = []
         outdir = self.inputs.base_directory
         if not isdefined(outdir):
             outdir = '.'
@@ -283,13 +296,13 @@ class DataSink(IOBase):
         for key, files in self.inputs._outputs.items():
             if not isdefined(files):
                 continue
-            iflogger.debug("key: %s files: %s"%(key, str(files)))
+            iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
             for d in key.split('.'):
                 if d[0] == '@':
                     continue
-                tempoutdir = os.path.join(tempoutdir,d)
+                tempoutdir = os.path.join(tempoutdir, d)
 
             # flattening list
             if isinstance(files, list):
@@ -302,7 +315,7 @@ class DataSink(IOBase):
                     dst = self._get_dst(src)
                     dst = os.path.join(tempoutdir, dst)
                     dst = self._substitute(dst)
-                    path,_ = os.path.split(dst)
+                    path, _ = os.path.split(dst)
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
@@ -311,13 +324,14 @@ class DataSink(IOBase):
                                 pass
                             else:
                                 raise(inst)
-                    iflogger.debug("copyfile: %s %s"%(src, dst))
+                    iflogger.debug("copyfile: %s %s" % (src, dst))
                     copyfile(src, dst, copy=True, hashmethod='content')
+                    out_files.append(dst)
                 elif os.path.isdir(src):
-                    dst = self._get_dst(os.path.join(src,''))
+                    dst = self._get_dst(os.path.join(src, ''))
                     dst = os.path.join(tempoutdir, dst)
                     dst = self._substitute(dst)
-                    path,_ = os.path.split(dst)
+                    path, _ = os.path.split(dst)
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
@@ -327,25 +341,29 @@ class DataSink(IOBase):
                             else:
                                 raise(inst)
                     if os.path.exists(dst) and self.inputs.remove_dest_dir:
-                        iflogger.debug("removing: %s"%dst)
+                        iflogger.debug("removing: %s" % dst)
                         shutil.rmtree(dst)
-                    iflogger.debug("copydir: %s %s"%(src, dst))
+                    iflogger.debug("copydir: %s %s" % (src, dst))
                     copytree(src, dst)
-        return None
+                    out_files.append(dst)
+        outputs['out_file'] = out_files
+
+        return outputs
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): #InterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):  # InterfaceInputSpec):
     base_directory = Directory(exists=True,
-            desc='Path to the base directory consisting of subject data.')
+                               desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
-                          desc='Generate exception if list is empty for a given field')
+                                 desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(False, usedefault=True,
-                        desc='Sort the filelist that matches the template')
+                                desc='Sort the filelist that matches the template')
     template = traits.Str(mandatory=True,
-             desc='Layout used to get files. relative to base directory if defined')
+                          desc='Layout used to get files. relative to base directory if defined')
     template_args = traits.Dict(key_trait=traits.Str,
-                                value_trait= traits.List(traits.List),
+                                value_trait=traits.List(traits.List),
                                 desc='Information to plug into template')
+
 
 class DataGrabber(IOBase):
     """ Generic datagrabber module that wraps around glob in an
@@ -428,7 +446,7 @@ class DataGrabber(IOBase):
         # add ability to insert field specific templates
         self.inputs.add_trait('field_template',
                               traits.Dict(traits.Enum(outfields),
-                                desc="arguments that fit into template"))
+                                          desc="arguments that fit into template"))
         undefined_traits['field_template'] = Undefined
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
@@ -454,10 +472,10 @@ class DataGrabber(IOBase):
         # hence manual check
         if self._infields:
             for key in self._infields:
-                value = getattr(self.inputs,key)
+                value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'infields'" % \
-                    (self.__class__.__name__, key)
+                        (self.__class__.__name__, key)
                     raise ValueError(msg)
 
         outputs = {}
@@ -466,16 +484,18 @@ class DataGrabber(IOBase):
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
-                    self.inputs.field_template.has_key(key):
+                    key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
             if isdefined(self.inputs.base_directory):
-                template = os.path.join(os.path.abspath(self.inputs.base_directory), template)
+                template = os.path.join(
+                    os.path.abspath(self.inputs.base_directory), template)
             else:
                 template = os.path.abspath(template)
             if not args:
                 filelist = glob.glob(template)
                 if len(filelist) == 0:
-                    msg = 'Output key: %s Template: %s returned no files'%(key, template)
+                    msg = 'Output key: %s Template: %s returned no files' % (
+                        key, template)
                     if self.inputs.raise_on_empty:
                         raise IOError(msg)
                     else:
@@ -492,7 +512,7 @@ class DataGrabber(IOBase):
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
                             raise ValueError('incompatible number of arguments for %s' % key)
-                        if len(arg)>maxlen:
+                        if len(arg) > maxlen:
                             maxlen = len(arg)
                 outfiles = []
                 for i in range(maxlen):
@@ -506,10 +526,13 @@ class DataGrabber(IOBase):
                             argtuple.append(arg)
                     filledtemplate = template
                     if argtuple:
-                        filledtemplate = template%tuple(argtuple)
+                        try:
+                            filledtemplate = template%tuple(argtuple)
+                        except TypeError as e:
+                            raise TypeError(e.message + ": Template %s failed to convert with args %s"%(template, str(tuple(argtuple))))
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
-                        msg = 'Output key: %s Template: %s returned no files'%(key, filledtemplate)
+                        msg = 'Output key: %s Template: %s returned no files' % (key, filledtemplate)
                         if self.inputs.raise_on_empty:
                             raise IOError(msg)
                         else:
@@ -518,8 +541,8 @@ class DataGrabber(IOBase):
                     else:
                         if self.inputs.sort_filelist:
                             outfiles.sort()
-                        outputs[key].insert(i,list_to_filename(outfiles))
-            if any([val==None for val in outputs[key]]):
+                        outputs[key].insert(i, list_to_filename(outfiles))
+            if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
@@ -527,6 +550,159 @@ class DataGrabber(IOBase):
                 outputs[key] = outputs[key][0]
         return outputs
 
+class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): 
+    root_paths = traits.Either(traits.List(),
+                               traits.Str(),
+                               mandatory=True,)
+    match_regex = traits.Str('(.+)', 
+                             usedefault=True,
+                             desc=("Regular expression for matching "
+                             "paths."))
+    ignore_regexes = traits.List(desc=("List of regular expressions, "
+                                 "if any match the path it will be "
+                                 "ignored.")
+                                )
+    max_depth = traits.Int(desc="The maximum depth to search beneath "
+                           "the root_paths")
+    min_depth = traits.Int(desc="The minimum depth to search beneath "
+                           "the root paths")
+    unpack_single = traits.Bool(False,
+                                usedefault=True,
+                                desc="Unpack single results from list")
+
+
+class DataFinder(IOBase):
+    """Search for paths that match a given regular expression. Allows a less 
+    proscriptive approach to gathering input files compared to DataGrabber.
+    Will recursively search any subdirectories by default. This can be limited 
+    with the min/max depth options.     
+    
+    Matched paths are available in the output 'out_paths'. Any named groups of 
+    captured text from the regular expression are also available as ouputs of 
+    the same name.
+    
+    Examples
+    --------
+
+    >>> from nipype.interfaces.io import DataFinder
+    
+    Look for Nifti files in directories with "ep2d_fid" or "qT1" in the name, 
+    starting in the current directory.
+    
+    >>> df = DataFinder()
+    >>> df.inputs.root_paths = '.'
+    >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
+    >>> result = df.run() # doctest: +SKIP
+    >>> print result.outputs.out_paths # doctest: +SKIP
+    ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
+     './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
+     './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
+     './013-ep2d_fid_T1_pre/acquisition.nii.gz']
+    
+    >>> print result.outputs.series_dir # doctest: +SKIP
+    ['027-ep2d_fid_T1_Gd4',
+     '018-ep2d_fid_T1_Gd2',
+     '016-ep2d_fid_T1_Gd1',
+     '013-ep2d_fid_T1_pre']
+     
+    >>> print result.outputs.basename # doctest: +SKIP
+    ['acquisition',
+     'acquisition',
+     'acquisition',
+     'acquisition']
+
+    """
+    
+    input_spec = DataFinderInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+    
+    def _match_path(self, target_path):
+        #Check if we should ignore the path
+        for ignore_re in self.ignore_regexes:
+            if ignore_re.search(target_path):
+                return
+                    
+        #Check if we can match the path
+        match = self.match_regex.search(target_path)
+        if not match is None:
+            match_dict = match.groupdict()
+            
+            if self.result is None:
+                self.result = {'out_paths' : []}
+                for key in match_dict.keys():
+                    self.result[key] = []
+                    
+            self.result['out_paths'].append(target_path)
+            for key, val in match_dict.iteritems():
+                self.result[key].append(val)
+    
+    def _run_interface(self, runtime):
+        #Prepare some of the inputs
+        if isinstance(self.inputs.root_paths, str):
+            self.inputs.root_paths = [self.inputs.root_paths]
+        self.match_regex = re.compile(self.inputs.match_regex)
+        if self.inputs.max_depth is Undefined:
+            max_depth = None
+        else:
+            max_depth = self.inputs.max_depth
+        if self.inputs.min_depth is Undefined:
+            min_depth = 0
+        else:
+            min_depth = self.inputs.min_depth
+        if self.inputs.ignore_regexes is Undefined:
+            self.ignore_regexes = []
+        else:
+            self.ignore_regexes = \
+                [re.compile(regex) 
+                 for regex in self.inputs.ignore_regexes]
+            
+        self.result = None
+        for root_path in self.inputs.root_paths:
+            #Handle tilda/env variables and remove extra seperators
+            root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
+            
+            #Check if the root_path is a file
+            if os.path.isfile(root_path):
+                if min_depth == 0:
+                    self._match_path(root_path)
+                continue
+                
+            #Walk through directory structure checking paths 
+            for curr_dir, sub_dirs, files in os.walk(root_path):
+                #Determine the current depth from the root_path
+                curr_depth = (curr_dir.count(os.sep) - 
+                              root_path.count(os.sep))
+                
+                #If the max path depth has been reached, clear sub_dirs 
+                #and files
+                if (not max_depth is None and 
+                    curr_depth >= max_depth):
+                    sub_dirs[:] = []
+                    files = []
+                    
+                #Test the path for the curr_dir and all files
+                if curr_depth >= min_depth:
+                    self._match_path(curr_dir)
+                if curr_depth >= (min_depth - 1):
+                    for infile in files:
+                        full_path = os.path.join(curr_dir, infile)
+                        self._match_path(full_path)
+            
+        if (self.inputs.unpack_single and 
+            len(self.result['out_paths']) == 1
+           ):
+            for key, vals in self.result.iteritems():
+                self.result[key] = vals[0]
+            
+        if not self.result:
+            raise RuntimeError("Regular expression did not match any files!")
+        return runtime
+            
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs.update(self.result)
+        return outputs
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
@@ -536,62 +712,85 @@ class FSSourceInputSpec(BaseInterfaceInputSpec):
     hemi = traits.Enum('both', 'lh', 'rh', usedefault=True,
                        desc='Selects hemisphere specific outputs')
 
+
 class FSSourceOutputSpec(TraitedSpec):
-    T1 = File(exists=True, desc='Intensity normalized whole-head volume', loc='mri')
-    aseg = File(exists=True, desc='Volumetric map of regions from automatic segmentation',
-                loc='mri')
-    brain = File(exists=True, desc='Intensity normalized brain-only volume', loc='mri')
-    brainmask = File(exists=True, desc='Skull-stripped (brain-only) volume', loc='mri')
+    T1 = File(
+        exists=True, desc='Intensity normalized whole-head volume', loc='mri')
+    aseg = File(
+        exists=True, desc='Volumetric map of regions from automatic segmentation',
+        loc='mri')
+    brain = File(
+        exists=True, desc='Intensity normalized brain-only volume', loc='mri')
+    brainmask = File(
+        exists=True, desc='Skull-stripped (brain-only) volume', loc='mri')
     filled = File(exists=True, desc='Subcortical mass volume', loc='mri')
-    norm = File(exists=True, desc='Normalized skull-stripped volume', loc='mri')
-    nu = File(exists=True, desc='Non-uniformity corrected whole-head volume', loc='mri')
+    norm = File(
+        exists=True, desc='Normalized skull-stripped volume', loc='mri')
+    nu = File(exists=True,
+              desc='Non-uniformity corrected whole-head volume', loc='mri')
     orig = File(exists=True, desc='Base image conformed to Freesurfer space',
                 loc='mri')
     rawavg = File(exists=True, desc='Volume formed by averaging input images',
                   loc='mri')
-    ribbon = OutputMultiPath(File(exists=True), desc='Volumetric maps of cortical ribbons',
-                             loc='mri', altkey='*ribbon')
+    ribbon = OutputMultiPath(
+        File(exists=True), desc='Volumetric maps of cortical ribbons',
+        loc='mri', altkey='*ribbon')
     wm = File(exists=True, desc='Segmented white-matter volume', loc='mri')
-    wmparc = File(exists=True, desc='Aparc parcellation projected into subcortical white matter',
-                  loc='mri')
+    wmparc = File(
+        exists=True, desc='Aparc parcellation projected into subcortical white matter',
+        loc='mri')
     curv = OutputMultiPath(File(exists=True), desc='Maps of surface curvature',
-                     loc='surf')
-    inflated = OutputMultiPath(File(exists=True), desc='Inflated surface meshes',
-                         loc='surf')
-    pial = OutputMultiPath(File(exists=True), desc='Gray matter/pia mater surface meshes',
                            loc='surf')
+    inflated = OutputMultiPath(
+        File(exists=True), desc='Inflated surface meshes',
+        loc='surf')
+    pial = OutputMultiPath(
+        File(exists=True), desc='Gray matter/pia mater surface meshes',
+        loc='surf')
     smoothwm = OutputMultiPath(File(exists=True), loc='surf',
-                         desc='Smoothed original surface meshes')
-    sphere = OutputMultiPath(File(exists=True), desc='Spherical surface meshes',
-                       loc='surf')
-    sulc = OutputMultiPath(File(exists=True), desc='Surface maps of sulcal depth', loc='surf')
+                               desc='Smoothed original surface meshes')
+    sphere = OutputMultiPath(
+        File(exists=True), desc='Spherical surface meshes',
+        loc='surf')
+    sulc = OutputMultiPath(
+        File(exists=True), desc='Surface maps of sulcal depth', loc='surf')
     thickness = OutputMultiPath(File(exists=True), loc='surf',
-                          desc='Surface maps of cortical thickness')
-    volume = OutputMultiPath(File(exists=True), desc='Surface maps of cortical volume', loc='surf')
-    white = OutputMultiPath(File(exists=True), desc='White/gray matter surface meshes',
-                      loc='surf')
-    label = OutputMultiPath(File(exists=True), desc='Volume and surface label files',
-                      loc='label', altkey='*label')
+                                desc='Surface maps of cortical thickness')
+    volume = OutputMultiPath(
+        File(exists=True), desc='Surface maps of cortical volume', loc='surf')
+    white = OutputMultiPath(
+        File(exists=True), desc='White/gray matter surface meshes',
+        loc='surf')
+    label = OutputMultiPath(
+        File(exists=True), desc='Volume and surface label files',
+        loc='label', altkey='*label')
     annot = OutputMultiPath(File(exists=True), desc='Surface annotation files',
-                      loc='label', altkey='*annot')
-    aparc_aseg = OutputMultiPath(File(exists=True), loc='mri', altkey='aparc*aseg',
-                           desc='Aparc parcellation projected into aseg volume')
-    sphere_reg = OutputMultiPath(File(exists=True), loc='surf', altkey='sphere.reg',
-                           desc='Spherical registration file')
+                            loc='label', altkey='*annot')
+    aparc_aseg = OutputMultiPath(
+        File(exists=True), loc='mri', altkey='aparc*aseg',
+        desc='Aparc parcellation projected into aseg volume')
+    sphere_reg = OutputMultiPath(
+        File(exists=True), loc='surf', altkey='sphere.reg',
+        desc='Spherical registration file')
     aseg_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aseg',
-                           desc='Automated segmentation statistics file')
-    wmparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='wmparc',
-                           desc='White matter parcellation statistics file')
-    aparc_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc',
-                           desc='Aparc parcellation statistics files')
+                                 desc='Automated segmentation statistics file')
+    wmparc_stats = OutputMultiPath(
+        File(exists=True), loc='stats', altkey='wmparc',
+        desc='White matter parcellation statistics file')
+    aparc_stats = OutputMultiPath(
+        File(exists=True), loc='stats', altkey='aparc',
+        desc='Aparc parcellation statistics files')
     BA_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='BA',
-                           desc='Brodmann Area statistics files')
-    aparc_a2009s_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='aparc.a2009s',
-                           desc='Aparc a2009s parcellation statistics files')
+                               desc='Brodmann Area statistics files')
+    aparc_a2009s_stats = OutputMultiPath(
+        File(exists=True), loc='stats', altkey='aparc.a2009s',
+        desc='Aparc a2009s parcellation statistics files')
     curv_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='curv',
-                           desc='Curvature statistics files')
-    entorhinal_exvivo_stats = OutputMultiPath(File(exists=True), loc='stats', altkey='entorhinal_exvivo',
-                           desc='Entorhinal exvivo statistics files')
+                                 desc='Curvature statistics files')
+    entorhinal_exvivo_stats = OutputMultiPath(
+        File(exists=True), loc='stats', altkey='entorhinal_exvivo',
+        desc='Entorhinal exvivo statistics files')
+
 
 class FreeSurferSource(IOBase):
     """Generates freesurfer subject info from their directories
@@ -622,15 +821,16 @@ class FreeSurferSource(IOBase):
         globprefix = ''
         if key == 'ribbon' or dirval in ['surf', 'label', 'stats']:
             if self.inputs.hemi != 'both':
-                globprefix = self.inputs.hemi+'.'
+                globprefix = self.inputs.hemi + '.'
             else:
                 globprefix = '*'
         if key == 'aseg_stats' or key == 'wmparc_stats':
-			globprefix = ''
-        keydir = os.path.join(path,dirval)
+            globprefix = ''
+        keydir = os.path.join(path, dirval)
         if altkey:
             key = altkey
-        globpattern = os.path.join(keydir,''.join((globprefix,key,globsuffix)))
+        globpattern = os.path.join(
+            keydir, ''.join((globprefix, key, globsuffix)))
         return glob.glob(globpattern)
 
     def _list_outputs(self):
@@ -647,28 +847,26 @@ class FreeSurferSource(IOBase):
         return outputs
 
 
-
-
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     query_template = traits.Str(
         mandatory=True,
         desc=('Layout used to get files. Relative to base '
               'directory if defined')
-        )
+    )
 
     query_template_args = traits.Dict(
         traits.Str,
         traits.List(traits.List),
         value=dict(outfiles=[]), usedefault=True,
         desc='Information to plug into template'
-        )
+    )
 
     server = traits.Str(
         mandatory=True,
         requires=['user', 'pwd'],
         xor=['config']
-        )
+    )
 
     user = traits.Str()
     pwd = traits.Password()
@@ -741,13 +939,13 @@ class XNATSource(IOBase):
                 'field_template',
                 traits.Dict(traits.Enum(outfields),
                             desc="arguments that fit into query_template")
-                )
+            )
             undefined_traits['field_template'] = Undefined
             #self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
-            self.inputs.query_template_args =  outdict
+            self.inputs.query_template_args = outdict
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
     def _add_output_traits(self, base):
@@ -775,11 +973,11 @@ class XNATSource(IOBase):
 
         if self._infields:
             for key in self._infields:
-                value = getattr(self.inputs,key)
+                value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = ("%s requires a value for input '%s' "
-                           "because it was listed in 'infields'" % \
-                               (self.__class__.__name__, key)
+                           "because it was listed in 'infields'" %
+                          (self.__class__.__name__, key)
                            )
                     raise ValueError(msg)
 
@@ -789,19 +987,19 @@ class XNATSource(IOBase):
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
-                    self.inputs.field_template.has_key(key):
+                    key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
             if not args:
                 file_objects = xnat.select(template).get('obj')
                 if file_objects == []:
-                    raise IOError('Template %s returned no files' \
-                                      % template
+                    raise IOError('Template %s returned no files'
+                                  % template
                                   )
                 outputs[key] = list_to_filename(
-                                        [str(file_object.get())
-                                         for file_object in file_objects
-                                         if file_object.exists()
-                                        ])
+                    [str(file_object.get())
+                     for file_object in file_objects
+                     if file_object.exists()
+                     ])
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -812,7 +1010,7 @@ class XNATSource(IOBase):
                             raise ValueError('incompatible number '
                                              'of arguments for %s' % key
                                              )
-                        if len(arg)>maxlen:
+                        if len(arg) > maxlen:
                             maxlen = len(arg)
                 outfiles = []
                 for i in range(maxlen):
@@ -839,7 +1037,7 @@ class XNATSource(IOBase):
                              for file_object in file_objects
                              if file_object.exists()
                              ]
-                            )
+                        )
                     else:
                         file_objects = xnat.select(template).get('obj')
 
@@ -853,9 +1051,9 @@ class XNATSource(IOBase):
                              for file_object in file_objects
                              if file_object.exists()
                              ]
-                            )
+                        )
 
-                    outputs[key].insert(i,outfiles)
+                    outputs[key].insert(i, outfiles)
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
@@ -891,14 +1089,14 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
               'assessor level will be used with specified id'),
         mandatory=False,
         xor=['reconstruction_id']
-        )
+    )
 
     reconstruction_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
         mandatory=False,
         xor=['assessor_id']
-        )
+    )
 
     share = traits.Bool(
         desc=('Option to share the subjects from the original project'
@@ -908,7 +1106,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         value=False,
         usedefault=True,
         mandatory=False,
-        )
+    )
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -946,9 +1144,9 @@ class XNATSink(IOBase):
                 'xnat:subjectData',
                 ['xnat:subjectData/PROJECT',
                  'xnat:subjectData/SUBJECT_ID']
-                ).where('xnat:subjectData/SUBJECT_ID = %s AND' %
-                        self.inputs.subject_id
-                        )
+            ).where('xnat:subjectData/SUBJECT_ID = %s AND' %
+                                self.inputs.subject_id
+                    )
 
             subject_id = self.inputs.subject_id
 
@@ -962,12 +1160,12 @@ class XNATSink(IOBase):
                                       )
                                      )
 
-                if not shared.exists(): # subject not in share project
+                if not shared.exists():  # subject not in share project
 
                     share_project = xnat.select(
                         '/project/%s' % self.inputs.project_id)
 
-                    if not share_project.exists(): # check project exists
+                    if not share_project.exists():  # check project exists
                         share_project.insert()
 
                     subject = xnat.select('/project/%(project)s'
@@ -981,18 +1179,18 @@ class XNATSink(IOBase):
             subject_id = '%s_%s' % (
                 quote_id(self.inputs.project_id),
                 quote_id(self.inputs.subject_id)
-                )
+            )
 
         # setup XNAT resource
         uri_template_args = {
-            'project_id':quote_id(self.inputs.project_id),
-            'subject_id':subject_id,
+            'project_id': quote_id(self.inputs.project_id),
+            'subject_id': subject_id,
             'experiment_id': '%s_%s_%s' % (
                 quote_id(self.inputs.project_id),
                 quote_id(self.inputs.subject_id),
                 quote_id(self.inputs.experiment_id)
-                )
-            }
+            )
+        }
 
         if self.inputs.share:
             uri_template_args['original_project'] = result['project']
@@ -1002,16 +1200,16 @@ class XNATSink(IOBase):
                 '%s_%s' % (
                     uri_template_args['experiment_id'],
                     quote_id(self.inputs.assessor_id)
-                    )
                 )
+            )
 
         elif self.inputs.reconstruction_id:
             uri_template_args['reconstruction_id'] = (
                 '%s_%s' % (
                     uri_template_args['experiment_id'],
                     quote_id(self.inputs.reconstruction_id)
-                    )
                 )
+            )
 
         # gather outputs and upload them
         for key, files in self.inputs._outputs.items():
@@ -1031,8 +1229,10 @@ class XNATSink(IOBase):
 def quote_id(string):
     return str(string).replace('_', '---')
 
+
 def unquote_id(string):
     return str(string).replace('---', '_')
+
 
 def push_file(self, xnat, file_name, out_key, uri_template_args):
 
@@ -1043,7 +1243,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                 if part.startswith('_') and len(part.split('_')) % 2
                 ]
 
-    keymap = dict(zip(val_list[1::2],val_list[2::2]))
+    keymap = dict(zip(val_list[1::2], val_list[2::2]))
 
     _label = []
     for key, val in sorted(keymap.items()):
@@ -1063,12 +1263,12 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
 
         uri_template_args['container_id'] = unquote_id(
             uri_template_args['experiment_id']
-            )
+        )
 
         if _label:
             uri_template_args['container_id'] += (
                 '_results_%s' % '_'.join(_label)
-                )
+            )
         else:
             uri_template_args['container_id'] += '_results'
 
@@ -1077,7 +1277,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
         '%s_%s' % (uri_template_args['container_id'],
                    out_key.split('.')[0]
                    )
-        )
+    )
 
     # define file level
     uri_template_args['file_name'] = os.path.split(
@@ -1087,7 +1287,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
         '/project/%(project_id)s/subject/%(subject_id)s'
         '/experiment/%(experiment_id)s/%(container_type)s/%(container_id)s'
         '/out/resource/%(resource_label)s/file/%(file_name)s'
-        )
+    )
 
     # unquote values before uploading
     for key in uri_template_args.keys():
@@ -1101,26 +1301,29 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                        )
 
     # shares the experiment back to the original project if relevant
-    if uri_template_args.has_key('original_project'):
+    if 'original_project' in uri_template_args:
 
         experiment_template = (
             '/project/%(original_project)s'
             '/subject/%(subject_id)s/experiment/%(experiment_id)s'
-            )
+        )
 
         xnat.select(experiment_template % uri_template_args
                     ).share(uri_template_args['original_project'])
 
+
 def capture_provenance():
     pass
+
 
 def push_provenance():
     pass
 
 
 class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    database_file = File(exists=True, mandatory = True)
+    database_file = File(exists=True, mandatory=True)
     table_name = traits.Str(mandatory=True)
+
 
 class SQLiteSink(IOBase):
     """ Very simple frontend for storing values into SQLite database.
@@ -1154,12 +1357,12 @@ class SQLiteSink(IOBase):
         """Execute this module.
         """
         conn = sqlite3.connect(self.inputs.database_file,
-                               check_same_thread = False)
+                               check_same_thread=False)
         c = conn.cursor()
         c.execute("INSERT OR REPLACE INTO %s (" % self.inputs.table_name +
                   ",".join(self._input_names) + ") VALUES (" +
-                  ",".join(["?"]*len(self._input_names)) + ")",
-                  [getattr(self.inputs,name) for name in self._input_names])
+                  ",".join(["?"] * len(self._input_names)) + ")",
+                  [getattr(self.inputs, name) for name in self._input_names])
         conn.commit()
         c.close()
         return None
@@ -1169,8 +1372,10 @@ class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     host = traits.Str('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
-    config = File(mandatory=True, xor=['host'], desc="MySQL Options File (same format as my.cnf)")
-    database_name = traits.Str(mandatory=True, desc='Otherwise known as the schema name')
+    config = File(mandatory=True, xor=['host'],
+                  desc="MySQL Options File (same format as my.cnf)")
+    database_name = traits.Str(
+        mandatory=True, desc='Otherwise known as the schema name')
     table_name = traits.Str(mandatory=True)
     username = traits.Str()
     password = traits.Str()
