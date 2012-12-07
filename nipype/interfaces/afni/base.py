@@ -96,21 +96,21 @@ class Info(object):
         return os.path.join(basedir, img_name)
 
 
-class AFNITraitedSpec(CommandLineInputSpec):
+class AFNIBaseCommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
                              desc='AFNI output filetype')
 
 
-class AFNICommand(CommandLine):
+class AFNIBaseCommand(CommandLine):
     """General support for AFNI commands. Every AFNI command accepts 'outputtype' input. For example:
     afni.Threedsetup(outputtype='NIFTI_GZ')
     """
 
-    input_spec = AFNITraitedSpec
+    input_spec = AFNIBaseCommandInputSpec
     _outputtype = None
 
     def __init__(self, **inputs):
-        super(AFNICommand, self).__init__(**inputs)
+        super(AFNIBaseCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
 
         if self._outputtype is None:
@@ -186,7 +186,7 @@ class AFNICommand(CommandLine):
         return fname
 
 
-class AFNIPrefixInputSpec(AFNITraitedSpec):
+class AFNICommandInputSpec(AFNIBaseCommandInputSpec):
     out_file = File("%s_afni", desc='output image file name',
                     argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
     prefix = traits.Str(
@@ -195,8 +195,8 @@ class AFNIPrefixInputSpec(AFNITraitedSpec):
         desc='output image suffix', deprecated=0.8, new_name="out_file")
 
 
-class AFNIPrefixCommand(AFNICommand):
-    input_spec = AFNIPrefixInputSpec
+class AFNICommand(AFNIBaseCommand):
+    input_spec = AFNICommandInputSpec
 
     def _gen_filename(self, name):
         trait_spec = self.inputs.trait(name)
@@ -212,7 +212,7 @@ class AFNIPrefixCommand(AFNICommand):
                 getattr(self.inputs, trait_spec.name_source))
             return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
         else:
-            return super(AFNIPrefixCommand, self)._gen_filename(name)
+            return super(AFNICommand, self)._gen_filename(name)
 
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
@@ -229,6 +229,6 @@ class AFNIPrefixCommand(AFNICommand):
             return outputs
 
 
-class AFNIPrefixOutputSpec(TraitedSpec):
+class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
