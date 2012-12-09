@@ -121,10 +121,6 @@ class TShiftInputSpec(AFNICommandInputSpec):
                           argstr="-rlt+")
 
 
-class TShiftOutputSpec(TraitedSpec):
-    out_file = File(desc='post slice time shifted 4D image', exists=True)
-
-
 class TShift(AFNICommand):
     """Shifts voxel time series from input
     so that seperate slices are aligned to the same
@@ -149,7 +145,7 @@ class TShift(AFNICommand):
 
     _cmd = '3dTshift'
     input_spec = TShiftInputSpec
-    output_spec = TShiftOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class RefitInputSpec(AFNICommandInputSpec):
@@ -176,11 +172,6 @@ class RefitInputSpec(AFNICommandInputSpec):
                          argstr='-zorigin %s')
 
 
-class RefitOutputSpec(TraitedSpec):
-    out_file = File(desc='Same file as original in_file with modified matrix',
-                    exists=True)
-
-
 class Refit(AFNICommand):
     """Changes some of the information inside a 3D dataset's header
 
@@ -200,7 +191,7 @@ class Refit(AFNICommand):
 
     _cmd = '3drefit'
     input_spec = RefitInputSpec
-    output_spec = RefitOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class WarpInputSpec(AFNICommandInputSpec):
@@ -242,10 +233,6 @@ class WarpInputSpec(AFNICommandInputSpec):
     suffix = traits.Str('_warp', desc="out_file suffix", usedefault=True)
 
 
-class WarpOutputSpec(TraitedSpec):
-    out_file = File(desc='spatially transformed input image', exists=True)
-
-
 class Warp(AFNICommand):
     """Use 3dWarp for spatially transforming a dataset
 
@@ -265,7 +252,7 @@ class Warp(AFNICommand):
 
     _cmd = '3dWarp'
     input_spec = WarpInputSpec
-    output_spec = WarpOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class ResampleInputSpec(AFNICommandInputSpec):
@@ -281,11 +268,6 @@ class ResampleInputSpec(AFNICommandInputSpec):
 
     orientation = traits.Str(desc='new orientation code',
         argstr='-orient %s')
-
-
-class ResampleOutputSpec(TraitedSpec):
-    out_file = File(desc='reoriented or resampled file',
-        exists=True)
 
 
 class Resample(AFNIBaseCommand):
@@ -307,7 +289,7 @@ class Resample(AFNIBaseCommand):
 
     _cmd = '3dresample'
     input_spec = ResampleInputSpec
-    output_spec = ResampleOutputSpec
+    output_spec = AFNICommandOutputSpec
     
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     in_file = File(desc='timeseries x space (volume or surface) file',
@@ -328,10 +310,6 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     out_file = File("%s_similarity_matrix.1D", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
     
-class AutoTcorrelateOutputSpec(TraitedSpec):
-    out_file = File(desc='similarity, eta2 or correlation matrix',
-        exists=True)
-    
 class AutoTcorrelate(AFNICommand):
     """
         Examples
@@ -350,7 +328,7 @@ class AutoTcorrelate(AFNICommand):
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
-    output_spec = AutoTcorrelateOutputSpec
+    output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
     def _overload_extension(self, value):
@@ -373,11 +351,6 @@ class TStatInputSpec(AFNICommandInputSpec):
         argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
-class TStatOutputSpec(TraitedSpec):
-    out_file = File(desc='statistical file',
-        exists=True)
-
-
 class TStat(AFNICommand):
     """Compute voxel-wise statistics using AFNI 3dTstat command
 
@@ -397,7 +370,7 @@ class TStat(AFNICommand):
 
     _cmd = '3dTstat'
     input_spec = TStatInputSpec
-    output_spec = TStatOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class DetrendInputSpec(AFNICommandInputSpec):
@@ -409,11 +382,6 @@ class DetrendInputSpec(AFNICommandInputSpec):
 
     out_file = File("%s_detrend", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
-
-
-class DetrendOutputSpec(TraitedSpec):
-    out_file = File(desc='statistical file',
-        exists=True)
 
 
 class Detrend(AFNICommand):
@@ -436,7 +404,7 @@ class Detrend(AFNICommand):
 
     _cmd = '3dDetrend'
     input_spec = DetrendInputSpec
-    output_spec = DetrendOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class DespikeInputSpec(AFNICommandInputSpec):
@@ -448,11 +416,6 @@ class DespikeInputSpec(AFNICommandInputSpec):
 
     out_file = File("%s_despike", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
-
-
-class DespikeOutputSpec(TraitedSpec):
-    out_file = File(desc='despiked img',
-               exists=True)
 
 
 class Despike(AFNICommand):
@@ -473,7 +436,7 @@ class Despike(AFNICommand):
 
     _cmd = '3dDespike'
     input_spec = DespikeInputSpec
-    output_spec = DespikeOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class AutomaskInputSpec(AFNICommandInputSpec):
@@ -665,11 +628,6 @@ class MergeInputSpec(AFNICommandInputSpec):
           units='mm')
 
 
-class MergeOutputSpec(TraitedSpec):
-    out_file = File(desc='smoothed file',
-        exists=True)
-
-
 class Merge(AFNICommand):
     """Merge or edit volumes using AFNI 3dmerge command
 
@@ -691,7 +649,7 @@ class Merge(AFNICommand):
 
     _cmd = '3dmerge'
     input_spec = MergeInputSpec
-    output_spec = MergeOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class CopyInputSpec(AFNICommandInputSpec):
@@ -702,10 +660,6 @@ class CopyInputSpec(AFNICommandInputSpec):
         exists=True)
     out_file = File("%s_copy", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
-
-
-class CopyOutputSpec(TraitedSpec):
-    out_file = File(desc='copied file', exists=True)
 
 
 class Copy(AFNICommand):
@@ -728,7 +682,7 @@ class Copy(AFNICommand):
 
     _cmd = '3dcopy'
     input_spec = CopyInputSpec
-    output_spec = CopyOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class FourierInputSpec(AFNICommandInputSpec):
@@ -747,10 +701,6 @@ class FourierInputSpec(AFNICommandInputSpec):
         argstr='-highpass %f',
         position=1,
         mandatory=True)
-
-
-class FourierOutputSpec(TraitedSpec):
-    out_file = File(desc='band-pass filtered file', exists=True)
 
 
 class Fourier(AFNICommand):
@@ -775,7 +725,7 @@ class Fourier(AFNICommand):
 
     _cmd = '3dFourier'
     input_spec = FourierInputSpec
-    output_spec = FourierOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class ZCutUpInputSpec(AFNICommandInputSpec):
@@ -788,10 +738,6 @@ class ZCutUpInputSpec(AFNICommandInputSpec):
         argstr='-prefix %s', name_source="in_file", usedefault=True)
     keep = traits.Str(desc='slice range to keep in output',
             argstr='-keep %s')
-
-
-class ZCutUpOutputSpec(TraitedSpec):
-    out_file = File(desc='cut file', exists=True)
 
 
 class ZCutUp(AFNICommand):
@@ -814,7 +760,7 @@ class ZCutUp(AFNICommand):
 
     _cmd = '3dZcutup'
     input_spec = ZCutUpInputSpec
-    output_spec = ZCutUpOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class AllineateInputSpec(AFNICommandInputSpec):
@@ -829,10 +775,6 @@ class AllineateInputSpec(AFNICommandInputSpec):
         argstr='-1dmatrix_apply %s',
         position=-3,
         exists=True)
-
-
-class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='cut file', exists=True)
 
 
 class Allineate(AFNICommand):
@@ -855,7 +797,7 @@ class Allineate(AFNICommand):
 
     _cmd = '3dAllineate'
     input_spec = AllineateInputSpec
-    output_spec = AllineateOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class MaskaveInputSpec(AFNICommandInputSpec):
@@ -873,11 +815,6 @@ class MaskaveInputSpec(AFNICommandInputSpec):
     quiet = traits.Bool(desc='matrix to align input file',
         argstr='-quiet',
         position=2)
-
-
-class MaskaveOutputSpec(TraitedSpec):
-    out_file = File(desc='outfile',
-          exists=True)
 
 
 class Maskave(AFNICommand):
@@ -903,7 +840,7 @@ class Maskave(AFNICommand):
 
     _cmd = '3dmaskave'
     input_spec = MaskaveInputSpec
-    output_spec = MaskaveOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class SkullStripInputSpec(AFNICommandInputSpec):
@@ -914,11 +851,6 @@ class SkullStripInputSpec(AFNICommandInputSpec):
         exists=True)
     out_file = File("%s_skullstrip", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
-
-
-class SkullStripOutputSpec(TraitedSpec):
-    out_file = File(desc='outfile',
-        exists=True)
 
 
 class SkullStrip(AFNICommand):
@@ -940,7 +872,7 @@ class SkullStrip(AFNICommand):
     """
     _cmd = '3dSkullStrip'
     input_spec = SkullStripInputSpec
-    output_spec = SkullStripOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class TCatInputSpec(AFNICommandInputSpec):
@@ -953,11 +885,6 @@ class TCatInputSpec(AFNICommandInputSpec):
     out_file = File("%s_tcat", desc='output image file name',
         argstr='-prefix %s', name_source="in_file", usedefault=True)
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
-
-
-class TCatOutputSpec(TraitedSpec):
-    out_file = File(desc='outfile',
-        exists=True)
 
 
 class TCat(AFNICommand):
@@ -981,7 +908,7 @@ class TCat(AFNICommand):
 
     _cmd = '3dTcat'
     input_spec = TCatInputSpec
-    output_spec = TCatOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class FimInputSpec(AFNICommandInputSpec):
@@ -1001,11 +928,6 @@ class FimInputSpec(AFNICommandInputSpec):
         argstr='-fim_thr %f', position=3)
     out = traits.Str(desc='Flag to output the specified parameter',
         argstr='-out %s', position=4)
-
-
-class FimOutputSpec(TraitedSpec):
-    out_file = File(desc='outfile',
-        exists=True)
 
 
 class Fim(AFNICommand):
@@ -1032,7 +954,7 @@ class Fim(AFNICommand):
 
     _cmd = '3dfim+'
     input_spec = FimInputSpec
-    output_spec = FimOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class TCorrelateInputSpec(AFNIBaseCommandInputSpec):
@@ -1054,11 +976,6 @@ class TCorrelateInputSpec(AFNIBaseCommandInputSpec):
         position=1)
     polort = traits.Int(desc='Remove polynomical trend of order m',
         argstr='-polort %d', position=2)
-
-
-class TCorrelateOutputSpec(TraitedSpec):
-    out_file = File(desc='outfile',
-        exists=True)
 
 
 class TCorrelate(AFNIBaseCommand):
@@ -1084,7 +1001,7 @@ class TCorrelate(AFNIBaseCommand):
 
     _cmd = '3dTcorrelate'
     input_spec = TCorrelateInputSpec
-    output_spec = TCorrelateOutputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class BrickStatInputSpec(AFNIBaseCommandInputSpec):
@@ -1266,10 +1183,6 @@ class CalcInputSpec(AFNICommandInputSpec):
     single_idx = traits.Int(desc='volume index for in_file_a')
 
 
-class CalcOutputSpec(TraitedSpec):
-    out_file = File(desc=' output file', exists=True)
-
-
 class Calc(AFNICommand):
     """This program does voxel-by-voxel arithmetic on 3D datasets
 
@@ -1293,7 +1206,7 @@ class Calc(AFNICommand):
 
     _cmd = '3dcalc'
     input_spec = CalcInputSpec
-    output_spec = CalcOutputSpec
+    output_spec = AFNICommandOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'in_file_a':
