@@ -268,6 +268,7 @@ class InterfaceResult(object):
     def version(self):
         return self._version
 
+
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -374,7 +375,6 @@ class BaseTraitedSpec(traits.HasTraits):
                                   self.__class__.__name__.split('InputSpec')[0])
             msg2 = ('Will be removed or raise an error as of release %s') % \
                                                            trait_spec.deprecated
-            self.trait_set(trait_change_notify=False, **{'%s' % name: Undefined})
             if trait_spec.new_name:
                 if trait_spec.new_name not in self.copyable_trait_names():
                     raise TraitError(msg1 + ' Replacement trait %s not found' %
@@ -387,7 +387,12 @@ class BaseTraitedSpec(traits.HasTraits):
                 raise TraitError(msg)
             else:
                 warn(msg)
-
+                if trait_spec.new_name:
+                    warn('Unsetting %s and setting %s.' % (name,
+                                                           trait_spec.new_name))
+                    self.trait_set(trait_change_notify=False,
+                                   **{'%s' % name: Undefined,
+                                      '%s' % trait_spec.new_name: new})
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
@@ -1327,6 +1332,46 @@ class StdOutCommandLine(CommandLine):
 
     def _gen_outfilename(self):
         raise NotImplementedError
+
+class MpiCommandLineInputSpec(CommandLineInputSpec):
+    use_mpi = traits.Bool(False, 
+                          desc="Whether or not to run the command with mpiexec",
+                          usedefault=True)
+    n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
+                         "specify if this is managed externally (e.g. through "
+                         "SGE)")
+    
+
+class MpiCommandLine(CommandLine):
+    '''Implements functionality to interact with command line programs 
+    that can be run with MPI (i.e. using 'mpiexec'). 
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import MpiCommandLine
+    >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
+    >>> mpi_cli.inputs.args = '-v'
+    >>> mpi_cli.cmdline
+    'my_mpi_prog -v'
+    
+    >>> mpi_cli.inputs.use_mpi = True
+    >>> mpi_cli.inputs.n_procs = 8
+    >>> mpi_cli.cmdline
+    
+    'mpiexec -n 8 my_mpi_prog -v'
+    '''
+    input_spec = MpiCommandLineInputSpec
+    
+    @property
+    def cmdline(self):
+        """Adds 'mpiexec' to begining of command"""
+        result = []
+        if self.inputs.use_mpi:
+            result.append('mpiexec')
+            if self.inputs.n_procs: 
+                result.append('-n %d' % self.inputs.n_procs)
+        result.append(super(MpiCommandLine, self).cmdline)
+        return ' '.join(result)
 
 class SEMLikeCommandLine(CommandLine):
     """By default in SEM derived interface all outputs have corresponding inputs.
