@@ -27,12 +27,12 @@ class To3DInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source=["in_folder", "infolder"], usedefault=True)
     in_xor = ["infolder", "in_folder"]
     in_folder = Directory(desc='folder with DICOM images to convert',
-                         argstr='%s/*.dcm',
-                         position=-1,
-                         mandatory=True,
-                         exists=True,
-                         xor=in_xor)
-    
+                          argstr='%s/*.dcm',
+                          position=-1,
+                          mandatory=True,
+                          exists=True,
+                          xor=in_xor)
+
     infolder = Directory(desc='folder with DICOM images to convert',
                          argstr='%s/*.dcm',
                          position=-1,
@@ -209,36 +209,36 @@ class WarpInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dWarp',
                    argstr='%s',
                    position=-1,
-                  mandatory=True,
-        exists=True)
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_warp", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
     tta2mni = traits.Bool(desc='transform dataset from Talairach to MNI152',
-        argstr='-tta2mni')
+                          argstr='-tta2mni')
 
     mni2tta = traits.Bool(desc='transform dataset from MNI152 to Talaraich',
-        argstr='-mni2tta')
+                          argstr='-mni2tta')
 
     matparent = File(desc="apply transformation from 3dWarpDrive",
-        argstr="-matparent %s",
-        exists=True)
+                     argstr="-matparent %s",
+                     exists=True)
 
     deoblique = traits.Bool(desc='transform dataset from oblique to cardinal',
-        argstr='-deoblique')
+                            argstr='-deoblique')
 
     interp = traits.Enum(('linear', 'cubic', 'NN', 'quintic'),
-        desc='spatial interpolation methods [default = linear]',
-        argstr='-%s')
+                         desc='spatial interpolation methods [default = linear]',
+                         argstr='-%s')
 
     gridset = File(desc="copy grid of specified dataset",
-        argstr="-gridset %s",
-        exists=True)
+                   argstr="-gridset %s",
+                   exists=True)
 
     zpad = traits.Int(desc="pad input dataset with N planes" +
-        " of zero on all sides.",
-        argstr="-zpad %d")
+                      " of zero on all sides.",
+                      argstr="-zpad %d")
 
     suffix = traits.Str('_warp', desc="out_file suffix", usedefault=True)
 
@@ -268,16 +268,16 @@ class Warp(AFNICommand):
 class ResampleInputSpec(AFNICommandInputSpec):
 
     in_file = File(desc='input file to 3dresample',
-        argstr='-inset %s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='-inset %s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_resample", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
     orientation = traits.Str(desc='new orientation code',
-        argstr='-orient %s')
+                             argstr='-orient %s')
 
 
 class Resample(AFNIBaseCommand):
@@ -300,26 +300,29 @@ class Resample(AFNIBaseCommand):
     _cmd = '3dresample'
     input_spec = ResampleInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
+
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     in_file = File(desc='timeseries x space (volume or surface) file',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
-    polort = traits.Int(desc='Remove polynomical trend of order m or -1 for no detrending',
+    polort = traits.Int(
+        desc='Remove polynomical trend of order m or -1 for no detrending',
         argstr="-polort %d")
     eta2 = traits.Bool(desc='eta^2 similarity',
-        argstr="-eta2")
-    mask = File(exists=True, desc="mask of voxels", 
-        argstr="-mask %s")
-    mask_only_targets = traits.Bool(desc="use mask only on targets voxels", 
-        argstr="-mask_only_targets")
+                       argstr="-eta2")
+    mask = File(exists=True, desc="mask of voxels",
+                argstr="-mask %s")
+    mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
+                                    argstr="-mask_only_targets")
 
     out_file = File("%s_similarity_matrix.1D", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
-    
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+
+
 class AutoTcorrelate(AFNICommand):
     """
         Examples
@@ -334,7 +337,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii' 
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -346,19 +349,20 @@ class AutoTcorrelate(AFNICommand):
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
         return os.path.join(path, base + ext)
-    
+
     def _gen_filename(self, name):
         return os.path.abspath(super(AutoTcorrelate, self)._gen_filename(name))
 
+
 class TStatInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dTstat',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_tstat", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
 class TStat(AFNICommand):
@@ -385,13 +389,13 @@ class TStat(AFNICommand):
 
 class DetrendInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dDetrend',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_detrend", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
 class Detrend(AFNICommand):
@@ -419,13 +423,13 @@ class Detrend(AFNICommand):
 
 class DespikeInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dDespike',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_despike", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
 class Despike(AFNICommand):
@@ -451,13 +455,13 @@ class Despike(AFNICommand):
 
 class AutomaskInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dAutomask',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     out_file = File("%s_mask", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
     brain_file = File("%s_masked",
                       desc="output file from 3dAutomask",
