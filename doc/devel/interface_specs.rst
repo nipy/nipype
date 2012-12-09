@@ -269,9 +269,9 @@ Common
     performed at runtime.::
 
 	    class RealignInputSpec(BaseInterfaceInputSpec):
-	        jobtype = traits.Enum('estwrite', 'estimate', 'write', min_ver=5,
+	        jobtype = traits.Enum('estwrite', 'estimate', 'write', min_ver='5',
 	                              usedefault=True)
-``deprecated``
+``deprecated`` and ``new_name``
     This is metadata for removing or renaming an input field from a spec.::
 
         class RealignInputSpec(BaseInterfaceInputSpec):
@@ -285,7 +285,6 @@ Common
     from current release. Raises `TraitError` after package version crosses the
     deprecation version.
 
-``new_name``
     For inputs that are being renamed, one can specify the new name of the
     field.::
 
@@ -301,6 +300,11 @@ Common
     In the above example, the `jobtype` field is being renamed to `job_type`.
     When `new_name` is provided it must exist as a trait, otherwise an exception
     will be raised.
+
+.. note::
+
+   The version information for `min_ver`, `max_ver` and `deprecated` has to be
+   provided as a string. For example, `min_ver='0.1'`.
 
 CommandLine
 ^^^^^^^^^^^

@@ -109,6 +109,11 @@ Execution
 	data through (without copying) (possible values: ``true`` and
 	``false``; default value: ``false``)
 
+*stop_on_unknown_version*
+    If this is set to True, an underlying interface will raise an error, when no
+    version information is available. Please notify developers or submit a
+    patch.
+
 Example
 ~~~~~~~
 
