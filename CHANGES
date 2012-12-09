@@ -1,11 +1,14 @@
 Next release
 ============
 
-* ENH: New interfaces: ICC, Meshfix, ants.Register
+* ENH: Add basic support for LSF plugin.
+* ENH: New interfaces: ICC, Meshfix, ants.Register, C3dAffineTool, ants.JacobianDeterminant
 * ENH: New workflows: ants template building (both using 'ANTS' and the new 'antsRegistration')
 * ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate), 
 	  how to set SGE specific options (smri_ants_build_template_new)
 * ENH: added no_flatten option to Merge
+* ENH: added deprecation metadata to traits
+* ENH: Slicer interfaces were updated to version 4.1
 
 Release 0.6.0 (Jun 30, 2012)
 ============================

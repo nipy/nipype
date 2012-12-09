@@ -1,22 +1,21 @@
-# vim ft=yaml
-# travis-ci.org definition for nipy build
-#
-# We pretend to be erlang because we need can't use the python support in
-# travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
-# and it is impractical to build them
-language: erlang
-env:
-    - PYTHON=python PYSUF=''
-    # - PYTHON=python3 PYSUF=3 : python3-numpy not currently available
-install:
-    - sudo apt-get install $PYTHON-dev
-    - sudo apt-get install $PYTHON-numpy
-    - sudo apt-get install $PYTHON-scipy
-    - sudo apt-get install $PYTHON-networkx
-    - sudo apt-get install $PYTHON-traits
-    - sudo apt-get install $PYTHON-setuptools
-    - sudo easy_install$PYSUF nibabel # Latest pypi
-    - sudo apt-get install $PYTHON-nose
-script:
-    # Change into an innocuous directory and find tests from installation
-    - make test
+language: python
+python:
+    - "2.7"
+before_install:
+    - deactivate
+    - sudo apt-get update -qq
+    - sudo apt-get install lsb-release
+    - source /etc/lsb-release
+    - wget -O- http://neuro.debian.net/lists/${DISTRIB_CODENAME}.us-nh | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+    - sudo apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq python-scipy python-nose
+    - sudo apt-get install -qq python-networkx python-traits python-setuptools
+    - sudo apt-get install -qq python-nibabel
+    - sudo apt-get install -qq --no-install-recommends fsl afni
+    - sudo apt-get install -qq fsl-atlases
+    - source /etc/fsl/fsl.sh
+    - virtualenv --system-site-packages ~/virtualenv/this
+    - source ~/virtualenv/this/bin/activate
+install: python setup.py build_ext --inplace
+script: make test

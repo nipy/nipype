@@ -278,7 +278,7 @@ class SpecifyModel(BaseInterface):
             sessinfo.insert(i, dict(cond=[]))
             if isdefined(self.inputs.high_pass_filter_cutoff):
                 sessinfo[i]['hpf'] = np.float(self.inputs.high_pass_filter_cutoff)
-            if hasattr(info, 'conditions') and info.conditions:
+            if hasattr(info, 'conditions') and info.conditions is not None:
                 for cid, cond in enumerate(info.conditions):
                     sessinfo[i]['cond'].insert(cid, dict())
                     sessinfo[i]['cond'][cid]['name']  = info.conditions[cid]

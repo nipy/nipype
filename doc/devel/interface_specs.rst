@@ -262,7 +262,37 @@ Common
 	can be set to either `True` or `False`. `False` indicates that contents 
 	should be symlinked, while `True` indicates that the contents should be 
 	copied over.
-	
+
+``deprecated``
+    This is metadata for removing or renaming an input field from a spec.::
+
+        class RealignInputSpec(BaseInterfaceInputSpec):
+            jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                                  deprecated='0.8',
+                                  desc='one of: estimate, write, estwrite',
+                                  usedefault=True)
+
+    In the above example this means that the `jobtype` input is deprecated and
+    will be removed in version 0.8. Deprecation should be set to two versions
+    from current release. Raises `TraitError` after package version crosses the
+    deprecation version.
+
+``new_name``
+    For inputs that are being renamed, one can specify the new name of the field.::
+
+        class RealignInputSpec(BaseInterfaceInputSpec):
+            jobtype = traits.Enum('estwrite', 'estimate', 'write',
+                                  deprecated='0.8', new_name='job_type',
+                                  desc='one of: estimate, write, estwrite',
+                                  usedefault=True)
+            job_type = traits.Enum('estwrite', 'estimate', 'write',
+                                  desc='one of: estimate, write, estwrite',
+                                  usedefault=True)
+
+    In the above example, the `jobtype` field is being renamed to `job_type`.
+    When `new_name` is provided it must exist as a trait, otherwise an exception
+    will be raised.
+
 CommandLine
 ^^^^^^^^^^^
 

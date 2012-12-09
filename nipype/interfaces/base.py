@@ -28,7 +28,10 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
 from ..utils.misc import is_container, trim
-from .. import config, logging
+from .. import config, logging, LooseVersion
+from .. import __version__
+
+nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
@@ -265,6 +268,7 @@ class InterfaceResult(object):
     def version(self):
         return self._version
 
+
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -326,6 +330,10 @@ class BaseTraitedSpec(traits.HasTraits):
         requires = self.trait_names(**has_requires)
         for elem in requires:
             self.on_trait_change(self._requires_warn, elem)
+        has_deprecation = dict(deprecated=lambda t: t is not None)
+        deprecated = self.trait_names(**has_deprecation)
+        for elem in deprecated:
+            self.on_trait_change(self._deprecated_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
         """ Generates warnings for xor traits
@@ -347,7 +355,7 @@ class BaseTraitedSpec(traits.HasTraits):
     def _requires_warn(self, obj, name, old, new):
         """Part of the xor behavior
         """
-        if new:
+        if isdefined(new):
             trait_spec = self.traits()[name]
             msg = None
             for trait_name in trait_spec.requires:
@@ -357,6 +365,34 @@ class BaseTraitedSpec(traits.HasTraits):
                             % (name, ', '.join(trait_spec.requires))
             if msg:
                 warn(msg)
+
+    def _deprecated_warn(self, obj, name, old, new):
+        """Checks if a user assigns a value to a deprecated trait
+        """
+        if isdefined(new):
+            trait_spec = self.traits()[name]
+            msg1 = ('Input %s in interface %s is deprecated.') % (name,
+                                  self.__class__.__name__.split('InputSpec')[0])
+            msg2 = ('Will be removed or raise an error as of release %s') % \
+                                                           trait_spec.deprecated
+            if trait_spec.new_name:
+                if trait_spec.new_name not in self.copyable_trait_names():
+                    raise TraitError(msg1 + ' Replacement trait %s not found' %
+                                     trait_spec.new_name)
+                msg3 = 'It has been replaced by %s.' % trait_spec.new_name
+            else:
+                msg3 = ''
+            msg = ' '.join((msg1, msg2, msg3))
+            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+                raise TraitError(msg)
+            else:
+                warn(msg)
+                if trait_spec.new_name:
+                    warn('Unsetting %s and setting %s.' % (name,
+                                                           trait_spec.new_name))
+                    self.trait_set(trait_change_notify=False,
+                                   **{'%s' % name: Undefined,
+                                      '%s' % trait_spec.new_name: new})
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
@@ -1225,6 +1261,78 @@ class StdOutCommandLine(CommandLine):
     def _gen_outfilename(self):
         raise NotImplementedError
 
+class MpiCommandLineInputSpec(CommandLineInputSpec):
+    use_mpi = traits.Bool(False, 
+                          desc="Whether or not to run the command with mpiexec",
+                          usedefault=True)
+    n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
+                         "specify if this is managed externally (e.g. through "
+                         "SGE)")
+    
+
+class MpiCommandLine(CommandLine):
+    '''Implements functionality to interact with command line programs 
+    that can be run with MPI (i.e. using 'mpiexec'). 
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import MpiCommandLine
+    >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
+    >>> mpi_cli.inputs.args = '-v'
+    >>> mpi_cli.cmdline
+    'my_mpi_prog -v'
+    
+    >>> mpi_cli.inputs.use_mpi = True
+    >>> mpi_cli.inputs.n_procs = 8
+    >>> mpi_cli.cmdline    
+    'mpiexec -n 8 my_mpi_prog -v'
+    '''
+    input_spec = MpiCommandLineInputSpec
+    
+    @property
+    def cmdline(self):
+        """Adds 'mpiexec' to begining of command"""
+        result = []
+        if self.inputs.use_mpi:
+            result.append('mpiexec')
+            if self.inputs.n_procs: 
+                result.append('-n %d' % self.inputs.n_procs)
+        result.append(super(MpiCommandLine, self).cmdline)
+        return ' '.join(result)
+
+class SEMLikeCommandLine(CommandLine):
+    """By default in SEM derived interface all outputs have corresponding inputs.
+    However, some SEM commands create outputs that are not defined in the XML.
+    In those cases one has to create a subclass of the autogenerated one and
+    overload the _list_outputs method. _outputs_from_inputs should still be
+    used but only for the reduced (by excluding those that do not have
+    corresponding inputs list of outputs.
+    """
+    def _list_outputs(self):
+	outputs = self.output_spec().get()
+	return self._outputs_from_inputs(outputs)
+
+    def _outputs_from_inputs(self, outputs):
+	for name in outputs.keys():
+	    coresponding_input = getattr(self.inputs, name)
+	    if isdefined(coresponding_input):
+		if isinstance(coresponding_input, bool) and coresponding_input == True:
+		    outputs[name] = os.path.abspath(self._outputs_filenames[name])
+		else:
+		    if isinstance(coresponding_input, list):
+			outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+		    else:
+			outputs[name] = os.path.abspath(coresponding_input)
+	return outputs
+
+    def _format_arg(self, name, spec, value):
+	if name in self._outputs_filenames.keys():
+	    if isinstance(value, bool):
+		if value == True:
+		    value = os.path.abspath(self._outputs_filenames[name])
+		else:
+		    return ""
+	return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
