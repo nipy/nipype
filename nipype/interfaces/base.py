@@ -1356,8 +1356,7 @@ class MpiCommandLine(CommandLine):
     
     >>> mpi_cli.inputs.use_mpi = True
     >>> mpi_cli.inputs.n_procs = 8
-    >>> mpi_cli.cmdline
-    
+    >>> mpi_cli.cmdline    
     'mpiexec -n 8 my_mpi_prog -v'
     '''
     input_spec = MpiCommandLineInputSpec
