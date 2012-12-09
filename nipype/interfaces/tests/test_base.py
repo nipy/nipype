@@ -139,7 +139,7 @@ def test_deprecation():
     set_foo = lambda : setattr(spec_instance, 'foo', 1)
     yield assert_raises, nib.TraitError, set_foo
     class DeprecationSpec1numeric(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated=0.1)
+        foo = nib.traits.Int(deprecated='0.1')
     spec_instance = DeprecationSpec1numeric()
     set_foo = lambda : setattr(spec_instance, 'foo', 1)
     yield assert_raises, nib.TraitError, set_foo
@@ -158,6 +158,18 @@ def test_deprecation():
     except nib.TraitError:
         not_raised = False
     yield assert_true, not_raised
+    class DeprecationSpec3(nib.TraitedSpec):
+        foo = nib.traits.Int(deprecated='1000', new_name='bar')
+        bar = nib.traits.Int()
+    spec_instance = DeprecationSpec3()
+    not_raised = True
+    try:
+        spec_instance.foo = 1
+    except nib.TraitError:
+        not_raised = False
+    yield assert_true, not_raised
+    yield assert_equal, spec_instance.foo, Undefined
+    yield assert_equal, spec_instance.bar, 1
 
 def checknose():
     """check version of nose for known incompatability"""
