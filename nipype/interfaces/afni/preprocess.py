@@ -324,8 +324,11 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
 
 
 class AutoTcorrelate(AFNICommand):
-    """
-        Examples
+    """Computes the correlation coefficient between the time series of each
+    pair of voxels in the input dataset, and stores the output into a
+    new anatomical bucket dataset [scaled to shorts to save memory space].
+    
+    Examples
     ========
 
     >>> from nipype.interfaces import afni as afni
