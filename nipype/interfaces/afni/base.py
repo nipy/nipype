@@ -99,6 +99,9 @@ class Info(object):
 class AFNIBaseCommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
                              desc='AFNI output filetype')
+    
+class AFNITraitedSpec(AFNIBaseCommandInputSpec):
+    pass
 
 
 class AFNIBaseCommand(CommandLine):
@@ -108,11 +111,12 @@ class AFNIBaseCommand(CommandLine):
 
     input_spec = AFNIBaseCommandInputSpec
     _outputtype = None
+    
 
     def __init__(self, **inputs):
         super(AFNIBaseCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
-
+        
         if self._outputtype is None:
             self._outputtype = Info.outputtype()
 
@@ -190,9 +194,9 @@ class AFNICommandInputSpec(AFNIBaseCommandInputSpec):
     out_file = File("%s_afni", desc='output image file name',
                     argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
     prefix = traits.Str(
-        desc='output image prefix', deprecated=0.8, new_name="out_file")
+        desc='output image prefix', deprecated='0.8', new_name="out_file")
     suffix = traits.Str(
-        desc='output image suffix', deprecated=0.8, new_name="out_file")
+        desc='output image suffix', deprecated='0.8', new_name="out_file")
 
 
 class AFNICommand(AFNIBaseCommand):

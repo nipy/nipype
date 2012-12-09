@@ -38,7 +38,7 @@ class To3DInputSpec(AFNICommandInputSpec):
                          position=-1,
                          mandatory=True,
                          exists=True,
-                         deprecated=0.8,
+                         deprecated='0.8',
                          new_name="in_folder",
                          xor=in_xor)
 
