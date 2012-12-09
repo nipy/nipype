@@ -1205,7 +1205,17 @@ class CommandLine(BaseInterface):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if "%s" in value:
-                    _, base, _ = split_filename(getattr(self.inputs, trait_spec.name_source))
+                    if isinstance(trait_spec.name_source, list):
+                        for ns in trait_spec.name_source:
+                            if isdefined(getattr(self.inputs, ns)):
+                                name_source = ns
+                                break
+                    else:
+                        name_source = trait_spec.name_source
+                    if name_source.endswith(os.path.sep):
+                        name_source = name_source[:-len(os.path.sep)]
+                    _, base, _ = split_filename(getattr(self.inputs, name_source))
+                    
                     retval = value%base
                 else:
                     retval = value
