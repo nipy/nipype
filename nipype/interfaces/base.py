@@ -268,6 +268,7 @@ class InterfaceResult(object):
     def version(self):
         return self._version
 
+
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -374,7 +375,6 @@ class BaseTraitedSpec(traits.HasTraits):
                                   self.__class__.__name__.split('InputSpec')[0])
             msg2 = ('Will be removed or raise an error as of release %s') % \
                                                            trait_spec.deprecated
-            self.trait_set(trait_change_notify=False, **{'%s' % name: Undefined})
             if trait_spec.new_name:
                 if trait_spec.new_name not in self.copyable_trait_names():
                     raise TraitError(msg1 + ' Replacement trait %s not found' %
@@ -387,7 +387,12 @@ class BaseTraitedSpec(traits.HasTraits):
                 raise TraitError(msg)
             else:
                 warn(msg)
-
+                if trait_spec.new_name:
+                    warn('Unsetting %s and setting %s.' % (name,
+                                                           trait_spec.new_name))
+                    self.trait_set(trait_change_notify=False,
+                                   **{'%s' % name: Undefined,
+                                      '%s' % trait_spec.new_name: new})
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
