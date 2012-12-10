@@ -374,8 +374,11 @@ class ArtifactDetect(BaseInterface):
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     # Use an SPM like approach
+                    mask_tmp = vol > \
+                               (_nanmean(vol) / self.inputs.global_threshold)
+                    g_vol = np.nansum(vol * mask_tmp)/np.nansum(mask_tmp)
                     mask = mask * \
-                        (vol > (_nanmean(vol) / self.inputs.global_threshold))
+                        (vol > g_vol)
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     g[t0] = _nanmean(vol[mask])
@@ -384,10 +387,13 @@ class ArtifactDetect(BaseInterface):
                     g = np.zeros((timepoints, 1))
             if not intersect_mask:
                 iflogger.info('not intersect_mask is True')
+                mask = np.zeros((x, y, z, timepoints))
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
-                    mask = vol > (_nanmean(vol) / 8)
-                    g[t0] = _nanmean(vol[mask])
+                    mask_tmp = vol > \
+                                 (_nanmean(vol) / self.inputs.global_threshold)
+                    mask[:, :, :, t0] = mask_tmp
+                    g[t0] = np.nansum(vol * mask_tmp)/np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
             maskimg = load(self.inputs.mask_file)
             mask = maskimg.get_data()
