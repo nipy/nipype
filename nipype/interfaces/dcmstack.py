@@ -11,6 +11,7 @@ from nipype.interfaces.base import (TraitedSpec,
                                     BaseInterface,
                                    )
 import nibabel as nb
+from nipype.interfaces.traits_extension import isdefined, Undefined
 
 have_dcmstack = True
 try:
@@ -86,10 +87,10 @@ class DcmStack(NiftiGeneratorBase):
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
         include_regexes = dcmstack.default_key_incl_res
-        if not self.inputs.include_regexes is Undefined:
+        if isdefined(self.inputs.include_regexes):
             include_regexes += self.inputs.include_regexes
         exclude_regexes = dcmstack.default_key_excl_res
-        if not self.inputs.exclude_regexes is Undefined:
+        if isdefined(self.inputs.exclude_regexes):
             exclude_regexes += self.inputs.exclude_regexes
         meta_filter = dcmstack.make_key_regex_filter(exclude_regexes, 
                                                      include_regexes)   
@@ -155,14 +156,14 @@ class LookupMeta(BaseInterface):
     output_spec = DynamicTraitedSpec
 
     def _outputs(self):
-        outputs = LookupMeta(Fastfit, self)._outputs()
+        outputs = super(LookupMeta, self)._outputs()
         undefined_traits = {}
         for meta_key in self.inputs.meta_keys:
             outputs.add_trait(meta_key, traits.Any)
             undefined_traits[meta_key] = Undefined
         outputs.trait_set(trait_change_notify=False, **undefined_traits)
         #Not sure why this is needed
-        for meta_key in meta_keys:
+        for meta_key in self.inputs.meta_keys:
             _ = getattr(outputs, meta_key)
         return outputs
         
