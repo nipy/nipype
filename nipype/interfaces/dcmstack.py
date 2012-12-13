@@ -87,7 +87,7 @@ class DcmStack(NiftiGeneratorBase):
     >>> stacker.inputs.dicom_files = 'path/to/series/'
     >>> stacker.run()
     >>> result.outputs.out_file
-    'sequence.nii.gz'
+    '/path/to/cwd/sequence.nii.gz'
     '''
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec
@@ -132,23 +132,23 @@ class DcmStack(NiftiGeneratorBase):
 class GroupAndStackOutputSpec(TraitedSpec):
     out_list = traits.List(desc="List of output nifti files")
 
-class GroupAndStack(NiftiGeneratorBase):
-    '''Create (potentially) multiple Nifti files for a set of DICOM files.'''
+class GroupAndStack(DcmStack):
+    '''Create (potentially) multiple Nifti files for a set of DICOM files.
+    '''
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec
     
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
-        stacks = \
-            dcmstack.parse_and_stack(src_paths, 
-                                     key_format=self.inputs.out_format
-                                    )
+        stacks = dcmstack.parse_and_stack(src_paths)
         
         self.out_list = []
         for key, stack in stacks.iteritems():
-            nw = NiftiWrapper(stack.to_nifti(embed_meta=self.inputs.embed_meta))
+            nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
             out_path =  self._get_out_path(const_meta)
+            if not self.inputs.embed_meta:
+                nw.remove_extension()
             nb.save(nw.nii_img, out_path)
             self.out_list.append(out_path)
             
