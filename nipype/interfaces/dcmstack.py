@@ -156,7 +156,19 @@ class LookupMetaInputSpec(TraitedSpec):
                              )
 
 class LookupMeta(BaseInterface):
-    '''Lookup meta data values from a Nifti with embeded meta data.'''
+    '''Lookup meta data values from a Nifti with embeded meta data.
+    
+    Example
+    -------
+    
+    >>> from nipype.interfaces import dcmstack
+    >>> lm = dcmstack.LookupMeta()
+    >>> lm.inputs.in_file = 'input.nii.gz'
+    >>> lm.inputs.meta_keys = {'RepetitionTime' : 'TR'}
+    >>> result = lm.run()
+    >>> result.outputs.TR
+    9500.0
+    '''
     input_spec = LookupMetaInputSpec
     output_spec = DynamicTraitedSpec
 
