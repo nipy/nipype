@@ -38,10 +38,15 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
                          desc="Determines output file type")
 
 class NiftiGeneratorBase(BaseInterface):
+    '''Base class for interfaces that produce Nifti files, potentially with 
+    embeded meta data.'''
     def _get_out_path(self, meta):
+        '''Return the output path for the gernerated Nifti.'''
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
+            #If no out_format is specified, use a sane default that will work 
+            #with the provided meta data.
             out_fmt = []
             if 'SeriesNumber' in meta:
                 out_fmt.append('%(SeriesNumber)03d')
@@ -71,7 +76,19 @@ class DcmStackOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True)
 
 class DcmStack(NiftiGeneratorBase):
-    '''Create one Nifti file from a set of DICOM files'''
+    '''Create one Nifti file from a set of DICOM files. Can optionally embed 
+    meta data.
+
+    Example
+    -------
+    
+    >>> from nipype.interfaces.dcmstack import DcmStack
+    >>> stacker = DcmStack()
+    >>> stacker.inputs.dicom_files = 'path/to/series/'
+    >>> stacker.run()
+    >>> result.outputs.out_file
+    'sequence.nii.gz'
+    '''
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec
     
@@ -116,8 +133,7 @@ class GroupAndStackOutputSpec(TraitedSpec):
     out_list = traits.List(desc="List of output nifti files")
 
 class GroupAndStack(NiftiGeneratorBase):
-    '''Create (potentially) multiple Nifti files for a set of DICOM 
-    files.'''
+    '''Create (potentially) multiple Nifti files for a set of DICOM files.'''
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec
     
@@ -162,12 +178,16 @@ class LookupMeta(BaseInterface):
     -------
     
     >>> from nipype.interfaces import dcmstack
-    >>> lm = dcmstack.LookupMeta()
-    >>> lm.inputs.in_file = 'input.nii.gz'
-    >>> lm.inputs.meta_keys = {'RepetitionTime' : 'TR'}
-    >>> result = lm.run()
+    >>> lookup = dcmstack.LookupMeta()
+    >>> lookup.inputs.in_file = 'input.nii.gz'
+    >>> lookup.inputs.meta_keys = {'RepetitionTime' : 'TR', 
+                                   'EchoTime' : 'TE'
+                                  }
+    >>> result = lookup.run()
     >>> result.outputs.TR
     9500.0
+    >>> result.outputs.TE
+    95.0
     '''
     input_spec = LookupMetaInputSpec
     output_spec = DynamicTraitedSpec
@@ -224,10 +244,11 @@ class CopyMetaOutputSpec(TraitedSpec):
     dest_file = traits.File(exists=True)
     
 class CopyMeta(BaseInterface):
+    '''Copy meta data from one Nifti file to another. Useful for preserving 
+    meta data after some processing steps.'''
     input_spec = CopyMetaInputSpec
     output_spec = CopyMetaOutputSpec
     
-    '''Copy meta data from one Nifti file to another.'''
     def _run_interface(self, runtime):
         src = NiftiWrapper.from_filename(self.inputs.src_file)
         dest_nii = nb.load(self.inputs.dest_file)
@@ -327,8 +348,8 @@ class SplitNiftiOutputSpec(TraitedSpec):
                            desc="Split Nifti files")
                            
 class SplitNifti(NiftiGeneratorBase):
-    '''Merge multiple Nifti files into one. Merges together meta data 
-    extensions as well.'''
+    '''Split one Nifti file into many along the specified dimension. Each 
+    result has an updated meta data extension as well.'''
     input_spec = SplitNiftiInputSpec
     output_spec = SplitNiftiOutputSpec
         
