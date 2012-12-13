@@ -147,31 +147,47 @@ class LookupMetaInputSpec(TraitedSpec):
     in_file = File(mandatory=True, 
                    exists=True, 
                    desc='The input Nifti file')
-    meta_keys = traits.List(mandatory=True,
-                            desc='List of meta data keys to lookup')
+    meta_keys = traits.Either(traits.List(),
+                              traits.Dict(),
+                              mandatory=True,
+                              desc=("List of meta data keys to lookup, or a " 
+                              "dict where keys specify the meta data keys to "
+                              "lookup and the values specify the output names")
+                             )
 
 class LookupMeta(BaseInterface):
     '''Lookup meta data values from a Nifti with embeded meta data.'''
     input_spec = LookupMetaInputSpec
     output_spec = DynamicTraitedSpec
 
+    def _make_name_map(self):
+        if isinstance(self.inputs.meta_keys, list):
+            self._meta_keys = {}
+            for key in self.inputs.meta_keys:
+                self._meta_keys[key] = key
+        else:
+            self._meta_keys = self.inputs.meta_keys
+
     def _outputs(self):
+        self._make_name_map()
         outputs = super(LookupMeta, self)._outputs()
         undefined_traits = {}
-        for meta_key in self.inputs.meta_keys:
-            outputs.add_trait(meta_key, traits.Any)
-            undefined_traits[meta_key] = Undefined
+        for out_name in self._meta_keys.values():
+            outputs.add_trait(out_name, traits.Any)
+            undefined_traits[out_name] = Undefined
         outputs.trait_set(trait_change_notify=False, **undefined_traits)
         #Not sure why this is needed
-        for meta_key in self.inputs.meta_keys:
-            _ = getattr(outputs, meta_key)
+        for out_name in self._meta_keys.values():
+            _ = getattr(outputs, out_name)
         return outputs
         
     def _run_interface(self, runtime):
+        #If the 'meta_keys' input is a list, covert it to a dict
+        self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
-        for meta_key in self.inputs.meta_keys:
-            self.result[meta_key] = nw.meta_ext.get_values(meta_key)
+        for meta_key, out_name in self._meta_keys.iteritems():
+            self.result[out_name] = nw.meta_ext.get_values(meta_key)
             
         return runtime
             
