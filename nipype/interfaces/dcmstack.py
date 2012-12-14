@@ -1,3 +1,13 @@
+"""Provides interfaces to various commands provided by freeusrfer
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
+
+"""
+
 from __future__ import absolute_import
 import os, string
 from os import path
@@ -85,9 +95,9 @@ class DcmStack(NiftiGeneratorBase):
     >>> from nipype.interfaces.dcmstack import DcmStack
     >>> stacker = DcmStack()
     >>> stacker.inputs.dicom_files = 'path/to/series/'
-    >>> stacker.run()
-    >>> result.outputs.out_file
-    '/path/to/cwd/sequence.nii.gz'
+    >>> stacker.run() # doctest: +SKIP
+    >>> result.outputs.out_file # doctest: +SKIP
+    '/path/to/cwd/sequence.nii.gz' 
     '''
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec
@@ -179,14 +189,13 @@ class LookupMeta(BaseInterface):
     
     >>> from nipype.interfaces import dcmstack
     >>> lookup = dcmstack.LookupMeta()
-    >>> lookup.inputs.in_file = 'input.nii.gz'
-    >>> lookup.inputs.meta_keys = {'RepetitionTime' : 'TR', 
-                                   'EchoTime' : 'TE'
-                                  }
-    >>> result = lookup.run()
-    >>> result.outputs.TR
+    >>> lookup.inputs.in_file = 'functional.nii'
+    >>> lookup.inputs.meta_keys = {'RepetitionTime' : 'TR', \
+                                   'EchoTime' : 'TE'}
+    >>> result = lookup.run() # doctest: +SKIP
+    >>> result.outputs.TR # doctest: +SKIP
     9500.0
-    >>> result.outputs.TE
+    >>> result.outputs.TE # doctest: +SKIP
     95.0
     '''
     input_spec = LookupMetaInputSpec
