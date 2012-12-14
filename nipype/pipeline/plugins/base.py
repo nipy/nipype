@@ -575,12 +575,14 @@ class GraphPluginBase(PluginBase):
             if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict) and keyword in node.plugin_args:
                     if keyword == "template" and os.path.isfile(node.plugin_args[keyword]):
                         tmp_value = open(node.plugin_args[keyword]).read()
+                    else:
+                        tmp_value = node.plugin_args[keyword]
+                        
                     if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
                         value = tmp_value
                     else:
                         value += tmp_value
-            else:
-                values += (value, )
+            values += (value, )
         return values
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
