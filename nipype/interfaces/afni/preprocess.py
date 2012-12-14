@@ -491,9 +491,12 @@ class DespikeInputSpec(AFNICommandInputSpec):
     suffix = traits.Str('_despike', desc="out_file suffix", usedefault=True)
     ignore = traits.Int(desc='Number of volumes to skip in the analysis',
                         argstr='-ignore %d')
-    include_volumes = traits.Str(mandatory=False,
-                                 desc='The range of timepoint volumes to include in the output, \
-    Ex. "[4..]" would include the fifth to the last timepoint')
+    start = traits.Int(mandatory=False, requires=['end'],
+                       desc='The first of timepoint volumes to include in the output, \
+    Ex. "4" would include the fifth timepoint volume')
+    end = traits.Int(mandatory=False, requires=['start'],
+                     desc='The last of timepoint volumes to include in the output, \
+    Ex. "99" would include the 100th timepoint volume')
 
 
 class DespikeOutputSpec(TraitedSpec):
@@ -525,11 +528,11 @@ class Despike(AFNICommand):
             return self._list_outputs()[name]
         return None
 
-    def _format_args(self, opt, spec, val):
+    def _format_arg(self, opt, spec, val):
         if opt == 'in_file':
-            if isdefined(self.inputs.ignore_volumes):
-                return '%s%s' % (self.inputs.in_file, self.inputs.ignore_volumes)
-            return '%s' % self.inputs.in_file
+            if isdefined(self.inputs.start):
+                return "%s'[%d..%d]'" % (self.inputs.in_file, self.inputs.start, self.inputs.end)
+            return '%s' % (self.inputs.in_file)
         return super(Despike, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
