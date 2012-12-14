@@ -174,10 +174,15 @@ def generate_class(module, launcher):
                 max_index = int(index.firstChild.nodeValue)
 
         for parameterChild in parametersElement.childNodes:
-            if parameterChild.nodeName in ['label', 'description', '#text', '#comment']:
-                continue  ## Skip these nodes
             traitsParams = {}
-            # Argstr section
+            parameterName = parameterChild.nodeName
+            if parameterName in ['label', 'description', '#text', '#comment']:
+                continue  ## Skip these nodes
+            ### Position section
+            index = parameterChild.getElementsByTagName('index')
+            if index:
+                traitsParams["position"] = int(index[0].firstChild.nodeValue) - (max_index + 1)
+            ### Argstr section
             argNode = parameterChild.getElementsByTagName('longflag')
             if len(argNode) > 0:
                 ## Prefer to use longFlag as name if it is given, rather than the parameter name
@@ -190,66 +195,72 @@ def generate_class(module, launcher):
                 traitsParams["argstr"] = ""
             else:
                 traitsParams["argstr"] = "--" + name + " "
-            # Description section
-            descriptionElement = parameterChild.getElementsByTagName('description')
-            if descriptionElement and descriptionElement[0].firstChild:
-                descString = descriptionElement[0].firstChild.nodeValue
-                traitsParams["desc"] = descString.replace('"', "\\\"").replace("\n", ", ")
-
-            argsDict = {'directory': '%s', 'file': '%s', 'integer': "%d",
-                        'double': "%f", 'float': "%f", 'image': "%s",
-                        'transform': "%s", 'boolean': '',
-                        'string-enumeration': '%s', 'string': "%s",
+            argsDict = {'directory': '%s',
+                        'file': '%s',
+                        'integer': "%d",
+                        'double': "%f",
+                        'float': "%f",
+                        'image': "%s",
+                        'transform': "%s",
+                        'boolean': '',
+                        'string-enumeration': '%s',
+                        'string': "%s",
                         'integer-enumeration': '%s',
-                        'table': '%s', 'point': '%s', 'region': '%s', 'geometry': '%s'}
-
-            if parameterChild.nodeName.endswith('-vector'):
+                        'table': '%s',
+                        'point': '%s',
+                        'region': '%s',
+                        'geometry': '%s'}
+            if parameterName.endswith('-vector'):
                 traitsParams["argstr"] += "%s"
             else:
-                traitsParams["argstr"] += argsDict[parameterChild.nodeName]
-
-            index = parameterChild.getElementsByTagName('index')
+                traitsParams["argstr"] += argsDict[parameterName]
+            ### Description section
+            descriptionElement = parameterChild.getElementsByTagName('description')
             if index:
-                traitsParams["position"] = int(
-                    index[0].firstChild.nodeValue) - (max_index + 1)
-
-            desc = parameterChild.getElementsByTagName('description')
-            if index:
-                traitsParams["desc"] = desc[0].firstChild.nodeValue
-
-            typesDict = {'integer': "traits.Int", 'double': "traits.Float",
-                         'float': "traits.Float", 'image': "File",
-                         'transform': "File", 'boolean': "traits.Bool",
-                         'string': "traits.Str", 'file': "File", 'geometry': "File",
-                         'directory': "Directory", 'table': "File",
-                         'point': "traits.List", 'region': "traits.List"}
-
-            if parameterChild.nodeName.endswith('-enumeration'):
+                descString = desc[0].firstChild.nodeValue
+            elif len(descriptionElement) > 0 and descriptionElement[0].firstChild:
+                descString = descriptionElement[0].firstChild.nodeValue
+            descString = descString.replace('"', '\\\"')  ## Convert " to \"
+            traitsParams["desc"] = descString.replace("\n", ", ")  ## WHY???
+            ### TraitsType
+            typesDict = {'integer': "traits.Int",
+                         'double': "traits.Float",
+                         'float': "traits.Float",
+                         'image': "File",
+                         'transform': "File",
+                         'boolean': "traits.Bool",
+                         'string': "traits.Str",
+                         'file': "File",
+                         'geometry': "File",
+                         'directory': "Directory",
+                         'table': "File",
+                         'point': "traits.List",
+                         'region': "traits.List"}
+            if parameterName.endswith('-enumeration'):
                 type = "traits.Enum"
-                values = ['"%s"' % el.firstChild.nodeValue for el in parameterChild.getElementsByTagName('element')]
-            elif parameterChild.nodeName.endswith('-vector'):
+                values = ['"%s"' % element.firstChild.nodeValue for element in parameterChild.getElementsByTagName('element')]
+            elif parameterName.endswith('-vector'):
                 type = "InputMultiPath"
-                if parameterChild.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
-                    values = ["%s(exists=True)" % typesDict[
-                              parameterChild.nodeName.replace('-vector', '')]]
+                if parameterName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
+                    values = ["%s(exists=True)" % typesDict[parameterName.replace('-vector', '')]]
                 else:
-                    values = [typesDict[parameterChild.nodeName.replace('-vector', '')]]
+                    values = [typesDict[parameterName.replace('-vector', '')]]
                 traitsParams["sep"] = ','
             elif parameterChild.getAttribute('multiple') == "true":
                 type = "InputMultiPath"
-                if parameterChild.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
-                    values = ["%s(exists=True)" % typesDict[parameterChild.nodeName]]
-                elif parameterChild.nodeName in ['point', 'region']:
+                if parameterName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
+                    values = ["%s(exists=True)" % typesDict[parameterName]]
+                elif parameterName in ['point', 'region']:
                     values = ["%s(traits.Float(), minlen=3, maxlen=3)" %
-                              typesDict[parameterChild.nodeName]]
+                              typesDict[parameterName]]
                 else:
-                    values = [typesDict[parameterChild.nodeName]]
+                    values = [typesDict[parameterName]]
                 traitsParams["argstr"] += "..."
             else:
                 values = []
-                type = typesDict[parameterChild.nodeName]
+                type = typesDict[parameterName]
 
-            if parameterChild.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
+            if parameterName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
                 if not parameterChild.getElementsByTagName('channel'):
                     raise RuntimeError("Insufficient XML specification: each element of type 'file', 'directory', 'image', 'geometry', 'transform',  or 'table' requires 'channel' field.\n{0}".format(traitsParams))
                 elif parameterChild.getElementsByTagName('channel')[0].firstChild.nodeValue == 'output':
@@ -268,7 +279,7 @@ def generate_class(module, launcher):
                     outputs_filenames[
                         name] = gen_filename_from_param(parameterChild, name)
                 elif parameterChild.getElementsByTagName('channel')[0].firstChild.nodeValue == 'input':
-                    if parameterChild.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and type not in ["InputMultiPath", "traits.List"]:
+                    if parameterName in ['file', 'directory', 'image', 'geometry', 'transform', 'table'] and type not in ["InputMultiPath", "traits.List"]:
                         traitsParams["exists"] = True
                     inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(values), parse_params(traitsParams)))
                 else:
