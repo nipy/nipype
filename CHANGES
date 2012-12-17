@@ -8,6 +8,7 @@ Next release
 * ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate), 
 	  how to set SGE specific options (smri_ants_build_template_new)
 * ENH: added no_flatten option to Merge
+* ENH: added versioning option and checking to traits
 * ENH: added deprecation metadata to traits
 * ENH: Slicer interfaces were updated to version 4.1
 
