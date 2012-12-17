@@ -27,7 +27,7 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
-from ..utils.misc import is_container, trim
+from ..utils.misc import is_container, trim, str2bool
 from .. import config, logging, LooseVersion
 from .. import __version__
 from nipype.utils.filemanip import split_filename
@@ -639,6 +639,10 @@ class Interface(object):
         """
         raise NotImplementedError
 
+    @property
+    def version(self):
+        raise NotImplementedError
+
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
@@ -665,6 +669,7 @@ class BaseInterface(Interface):
 
     """
     input_spec = BaseInterfaceInputSpec
+    _version = None
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -824,6 +829,36 @@ class BaseInterface(Interface):
                                              transient=None).items():
             self._check_requires(spec, name, getattr(self.inputs, name))
 
+    def _check_version_requirements(self, trait_object, raise_exception=True):
+        """ Raises an exception on version mismatch
+        """
+        unavailable_traits = []
+        version = LooseVersion(str(self.version))
+        if not version:
+            return
+        # check minimum version
+        names = trait_object.trait_names(**dict(min_ver=lambda t: t is not None))
+        for name in names:
+            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+            if min_ver > version:
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s < required %s)' %
+                              (name, self.__class__.__name__, version, min_ver))
+        names = trait_object.trait_names(**dict(max_ver=lambda t: t is not None))
+        for name in names:
+            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+            if max_ver < version:
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s > required %s)' %
+                              (name, self.__class__.__name__, version, max_ver))
+        return unavailable_traits
+
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -846,6 +881,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
+        self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
@@ -905,9 +941,18 @@ class BaseInterface(Interface):
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
+            _unavailable_outputs = []
+            if outputs:
+                _unavailable_outputs = \
+                               self._check_version_requirements(self._outputs())
             for key, val in predicted_outputs.items():
                 if needed_outputs and key not in needed_outputs:
                     continue
+                if key in _unavailable_outputs:
+                    raise KeyError(('Output trait %s not available in version '
+                                    '%s of interface %s. Please inform '
+                                    'developers.') % (key, self.version,
+                                                      self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
@@ -919,6 +964,14 @@ class BaseInterface(Interface):
                     else:
                         raise error
         return outputs
+
+    @property
+    def version(self):
+        if self._version is None:
+            if str2bool(config.get('execution', 'stop_on_unknown_version')):
+                raise ValueError('Interface %s has no version information' %
+                                 self.__class__.__name__)
+        return self._version
 
 
 class Stream(object):
@@ -1063,6 +1116,7 @@ class CommandLine(BaseInterface):
 
     input_spec = CommandLineInputSpec
     _cmd = None
+    _version = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1106,6 +1160,32 @@ class CommandLine(BaseInterface):
         else:
             print allhelp
 
+    def _get_environ(self):
+        out_environ = {}
+        try:
+            display_var = config.get('execution', 'display_variable')
+            out_environ = {'DISPLAY': display_var}
+        except NoOptionError:
+            pass
+        iflogger.debug(out_environ)
+        if isdefined(self.inputs.environ):
+            out_environ.update(self.inputs.environ)
+        return out_environ
+
+    def version_from_command(self, flag='-v'):
+        cmdname = self.cmd.split()[0]
+        if self._exists_in_path(cmdname):
+            env = deepcopy(os.environ.data)
+            out_environ = self._get_environ()
+            env.update(out_environ)
+            proc = subprocess.Popen(' '.join((cmdname, flag)),
+                                    shell=True,
+                                    env=env,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    )
+            o, e = proc.communicate()
+            return o
 
     def _run_interface(self, runtime):
         """Execute command via subprocess
@@ -1122,15 +1202,7 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        out_environ = {}
-        try:
-            display_var = config.get('execution', 'display_variable')
-            out_environ = {'DISPLAY': display_var}
-        except NoOptionError:
-            pass
-        iflogger.debug(out_environ)
-        if isdefined(self.inputs.environ):
-            out_environ.update(self.inputs.environ)
+        out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
