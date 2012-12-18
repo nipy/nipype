@@ -1590,7 +1590,7 @@ class DeconvolveInputSpec(DynamicTraitedSpec, AFNICommandInputSpec):
     stim_file_1 = File(exists=True, argstr="%s", mandatory=True, desc="HACK")
     mask = File(argstr="-mask %s", exists=True, desc="Filename of 3D mask dataset")
     ignoreWarnings = traits.Either(traits.Bool(),
-                                   traits.Int(), desc="GOFORIT [g]: Proceed even if the matrix has \
+                                   traits.Int(), argstr='%s', desc="GOFORIT [g]: Proceed even if the matrix has \
     problems, optional value 'g' specifies number of warnings to ignore")
     nullHypothesisPolynomialDegree = traits.Either(traits.Enum('auto'),
                                                    traits.Int(), argstr="-polort %d", desc="degree of \
@@ -1716,11 +1716,12 @@ class Deconvolve(AFNICommand):
             files = ",".join(self.inputs.in_file)
             return "-input %s" % files
         elif opt == "ignoreWarnings":
-            if isinstance(val, bool):
-                if val:
-                    return "-GOFORIT"
-            else:
+            if isinstance(val, int):
                 return "-GOFORIT %d" % val
+            elif isinstance(val, bool) and val:
+                return "-GOFORIT"
+            else:
+                pass
         elif opt == "nullHypothesisPolynomialDegree":
             if val == 'auto':
                 return "-polort A"
