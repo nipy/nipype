@@ -1,5 +1,5 @@
-Next release
-============
+Release 0.7.0 (Dec 18, 2012)
+============================
 
 * ENH: Add basic support for LSF plugin.
 * ENH: New interfaces: ICC, Meshfix, ants.Register, C3dAffineTool, ants.JacobianDeterminant,
