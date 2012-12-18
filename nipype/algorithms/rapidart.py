@@ -206,7 +206,9 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
                             usedefault=True)
     bound_by_brainmask = traits.Bool(False, desc=("use the brain mask to "
                                                  "determine bounding box"
-                                                 "for composite norm"),
+                                                 "for composite norm (works"
+                                                 "for SPM and Nipy - currently"
+                                                 "inaccurate for FSL, AFNI"),
                                      usedefault=True)
     global_threshold = traits.Float(8.0, desc=("use this threshold when mask "
                                                "type equal's spm_global"),
