@@ -287,7 +287,7 @@ class ArtifactDetect(BaseInterface):
             infile = motionfile[0]
         else:
             raise Exception("Unknown type of file")
-        filepath, filename, ext = split_filename(infile)
+        _, filename, ext = split_filename(infile)
         artifactfile = os.path.join(output_dir, ''.join(('art.', filename,
                                                          '_outliers.txt')))
         intensityfile = os.path.join(output_dir, ''.join(('global_intensity.',
@@ -594,8 +594,8 @@ class StimulusCorrelation(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        (filepath, filename) = os.path.split(motionfile)
-        (filename, ext) = os.path.splitext(filename)
+        (_, filename) = os.path.split(motionfile)
+        (filename, _) = os.path.splitext(filename)
         corrfile = os.path.join(output_dir, ''.join(('qa.', filename,
                                                      '_stimcorr.txt')))
         return corrfile
@@ -655,7 +655,7 @@ class StimulusCorrelation(BaseInterface):
         intensityfiles = self.inputs.intensity_values
         spmmat = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         nrows = []
-        for i, imgf in enumerate(motparamlist):
+        for i in range(len(motparamlist)):
             sessidx = i
             rows = None
             if self.inputs.concatenated_design:

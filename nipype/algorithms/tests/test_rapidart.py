@@ -62,7 +62,6 @@ def test_ad_output_filenames():
 
 
 def test_ad_get_affine_matrix():
-    ad = ra.ArtifactDetect()
     matrix = ra._get_affine_matrix(np.array([0]), 'SPM')
     yield assert_equal, matrix, np.eye(4)
     # test translation
@@ -89,7 +88,6 @@ def test_ad_get_affine_matrix():
 
 
 def test_ad_get_norm():
-    ad = ra.ArtifactDetect()
     params = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, np.pi / 4, np.pi / 4,
                        np.pi / 4, 0, 0, 0, -np.pi / 4,
                        -np.pi / 4, -np.pi / 4]).reshape((3, 6))
