@@ -1,1 +1,1 @@
-from denoising import dwiUNLM
+from denoising import DWIUnbiasedNonLocalMeansFilter

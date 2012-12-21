@@ -3,6 +3,17 @@ import nipype.interfaces.utility as util
 import nipype.interfaces.cmtk as cmtk
 import nipype.algorithms.misc as misc
 from .group_connectivity import pullnodeIDs
+from nipype.algorithms.misc import remove_identical_paths
+
+def add_global_to_filename(in_file):
+    from nipype.utils.filemanip import split_filename
+    path, name, ext = split_filename(in_file)
+    return name + '_global' + ext
+
+def add_nodal_to_filename(in_file):
+    from nipype.utils.filemanip import split_filename
+    path, name, ext = split_filename(in_file)
+    return name + '_nodal' + ext
 
 def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     """Creates a workflow to calculate various graph measures (via NetworkX) on
@@ -40,8 +51,11 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     Matlab2CSV_node = pe.Node(interface=misc.Matlab2CSV(), name="Matlab2CSV_node")
     MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
     MergeCSVFiles_node.inputs.extra_column_heading = extra_column_heading
-
+   
     Matlab2CSV_global = Matlab2CSV_node.clone(name="Matlab2CSV_global")
+    MergeCSVFiles_global = MergeCSVFiles_node.clone(name="MergeCSVFiles_global")
+    MergeCSVFiles_global.inputs.extra_column_heading = extra_column_heading
+
 
     mergeNetworks = pe.Node(interface=util.Merge(2), name="mergeNetworks")
     mergeCSVs = mergeNetworks.clone("mergeCSVs")
@@ -51,9 +65,17 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(ntwkMetrics, Matlab2CSV_global,[("global_measures_matlab","in_file")])])
 
     pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
-    pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","out_file")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_node, [(("extra_field", add_nodal_to_filename), "out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","extra_field")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node, [(("network_file", pullnodeIDs), "row_headings")])])
+
+    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global,[("csv_files","in_files")])])
+    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [(("csv_files", remove_identical_paths), "column_headings")])])
+    #MergeCSVFiles_global.inputs.row_heading_title = 'metric'
+    #MergeCSVFiles_global.inputs.column_headings = ['average']
+
+    pipeline.connect([(inputnode, MergeCSVFiles_global, [(("extra_field", add_global_to_filename), "out_file")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_global,[("extra_field","extra_field")])])
 
     pipeline.connect([(inputnode, mergeNetworks,[("network_file","in1")])])
     pipeline.connect([(ntwkMetrics, mergeNetworks,[("gpickled_network_files","in2")])])
@@ -63,10 +85,10 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
                         name="outputnode")
 
     pipeline.connect([(MergeCSVFiles_node, outputnode, [("csv_file", "node_csv")])])
-    pipeline.connect([(Matlab2CSV_global, outputnode, [("csv_files", "global_csv")])])
+    pipeline.connect([(MergeCSVFiles_global, outputnode, [("csv_file", "global_csv")])])
 
     pipeline.connect([(MergeCSVFiles_node, mergeCSVs, [("csv_file", "in1")])])
-    pipeline.connect([(Matlab2CSV_global, mergeCSVs, [("csv_files", "in2")])])
+    pipeline.connect([(MergeCSVFiles_global, mergeCSVs, [("csv_file", "in2")])])
     pipeline.connect([(mergeNetworks, outputnode, [("out", "network_files")])])
     pipeline.connect([(mergeCSVs, outputnode, [("out", "csv_files")])])
     pipeline.connect([(ntwkMetrics, outputnode,[("matlab_matrix_files", "matlab_files")])])
