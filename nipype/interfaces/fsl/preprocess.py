@@ -522,6 +522,10 @@ class FLIRT(FSLCommand):
         else:
             return None
 
+class ApplyXfmInputSpec(FLIRTInputSpec):
+    apply_xfm = traits.Bool(True, argstr='-applyxfm', requires=['in_matrix_file'],
+                     desc='apply transformation supplied by in_matrix_file', usedefault=True)
+
 
 class ApplyXfm(FLIRT):
     """Currently just a light wrapper around FLIRT,
@@ -544,7 +548,7 @@ class ApplyXfm(FLIRT):
     >>> result = applyxfm.run() # doctest: +SKIP
 
     """
-    pass
+    input_spec = ApplyXfmInputSpec
 
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):

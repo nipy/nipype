@@ -113,7 +113,8 @@ class Info(object):
         try:
             return os.environ['FSLOUTPUTTYPE']
         except KeyError:
-            warnings.warn('FSL environment variables not set. setting output type to NIFTI')
+            warnings.warn(('FSL environment variables not set. setting output '
+                           'type to NIFTI'))
             return 'NIFTI'
 
     @staticmethod
@@ -234,6 +235,10 @@ class FSLCommand(CommandLine):
                                 use_ext=False, newpath=cwd)
         return fname
 
+    @property
+    def version(self):
+        return Info.version()
+
 
 def check_fsl():
     ver = Info.version()
@@ -248,7 +253,7 @@ def no_fsl():
     used with skipif to skip tests that will
     fail if FSL is not installed"""
 
-    if Info.version() == None:
+    if Info.version() is None:
         return True
     else:
         return False

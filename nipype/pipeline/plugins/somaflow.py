@@ -23,7 +23,7 @@ class SomaFlowPlugin(GraphPluginBase):
             raise ImportError('SomaFlow could not be imported')
         super(SomaFlowPlugin, self).__init__(plugin_args=plugin_args)
 
-    def _submit_graph(self, pyfiles, dependencies):
+    def _submit_graph(self, pyfiles, dependencies, nodes):
         jobs = []
         soma_deps = []
         for idx, fname in enumerate(pyfiles):

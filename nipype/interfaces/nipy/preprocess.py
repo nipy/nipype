@@ -159,17 +159,19 @@ class FmriRealign4d(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-            (split_filename(self.inputs.in_file[j])[1])))
+                                (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
             (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
-            #output a .par file that looks like fsl.mcflirt's .par file
+            # nipy does not encode euler angles. return in original form of
+            # translation followed by rotation vector see:
+            # http://en.wikipedia.org/wiki/Rodrigues'_rotation_formula
             for i, mo in enumerate(motion):
-                params = ['%.10f' % item for item in np.hstack((mo.rotation,
-                                                             mo.translation))]
+                params = ['%.10f' % item for item in np.hstack((mo.translation,
+                                                                mo.rotation))]
                 string = ' '.join(params) + '\n'
                 mfile.write(string)
             mfile.close()
