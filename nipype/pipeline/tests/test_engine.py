@@ -405,3 +405,37 @@ def test_node_hash():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_old_config():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype.interfaces.utility import Function
+    def func1():
+        return 1
+    def func2(a):
+        return a+1
+    n1 = pe.Node(Function(input_names=[],
+                          output_names=['a'],
+                          function=func1),
+                 name='n1')
+    n2 = pe.Node(Function(input_names=['a'],
+                          output_names=['b'],
+                          function=func2),
+                 name='n2')
+    w1 = pe.Workflow(name='test')
+    modify = lambda x: x+1
+    n1.inputs.a = 1
+    w1.connect(n1, ('a', modify), n2,'a')
+    w1.base_dir = wd
+
+    w1.config = {'crashdump_dir': wd}
+    # generate outputs
+    error_raised = False
+    try:
+        w1.run(plugin='Linear')
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)

@@ -27,8 +27,12 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp)
-from ..utils.misc import is_container, trim
-from .. import config, logging
+from ..utils.misc import is_container, trim, str2bool
+from .. import config, logging, LooseVersion
+from .. import __version__
+from nipype.utils.filemanip import split_filename
+
+nipype_version = LooseVersion(__version__)
 
 iflogger = logging.getLogger('interface')
 
@@ -265,6 +269,7 @@ class InterfaceResult(object):
     def version(self):
         return self._version
 
+
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -326,6 +331,10 @@ class BaseTraitedSpec(traits.HasTraits):
         requires = self.trait_names(**has_requires)
         for elem in requires:
             self.on_trait_change(self._requires_warn, elem)
+        has_deprecation = dict(deprecated=lambda t: t is not None)
+        deprecated = self.trait_names(**has_deprecation)
+        for elem in deprecated:
+            self.on_trait_change(self._deprecated_warn, elem)
 
     def _xor_warn(self, obj, name, old, new):
         """ Generates warnings for xor traits
@@ -347,7 +356,7 @@ class BaseTraitedSpec(traits.HasTraits):
     def _requires_warn(self, obj, name, old, new):
         """Part of the xor behavior
         """
-        if new:
+        if isdefined(new):
             trait_spec = self.traits()[name]
             msg = None
             for trait_name in trait_spec.requires:
@@ -357,6 +366,34 @@ class BaseTraitedSpec(traits.HasTraits):
                             % (name, ', '.join(trait_spec.requires))
             if msg:
                 warn(msg)
+
+    def _deprecated_warn(self, obj, name, old, new):
+        """Checks if a user assigns a value to a deprecated trait
+        """
+        if isdefined(new):
+            trait_spec = self.traits()[name]
+            msg1 = ('Input %s in interface %s is deprecated.') % (name,
+                                  self.__class__.__name__.split('InputSpec')[0])
+            msg2 = ('Will be removed or raise an error as of release %s') % \
+                                                           trait_spec.deprecated
+            if trait_spec.new_name:
+                if trait_spec.new_name not in self.copyable_trait_names():
+                    raise TraitError(msg1 + ' Replacement trait %s not found' %
+                                     trait_spec.new_name)
+                msg3 = 'It has been replaced by %s.' % trait_spec.new_name
+            else:
+                msg3 = ''
+            msg = ' '.join((msg1, msg2, msg3))
+            if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
+                raise TraitError(msg)
+            else:
+                warn(msg)
+                if trait_spec.new_name:
+                    warn('Unsetting %s and setting %s.' % (name,
+                                                           trait_spec.new_name))
+                    self.trait_set(trait_change_notify=False,
+                                   **{'%s' % name: Undefined,
+                                      '%s' % trait_spec.new_name: new})
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
@@ -459,7 +496,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 trait = self.trait(name)
                 if has_metadata(trait.trait_type, "nohash", True):
                     continue
-                hash_files = not has_metadata(trait.trait_type, "hash_files", False)
+                hash_files = not has_metadata(trait.trait_type, "hash_files", False) and not has_metadata(trait.trait_type, "name_source")
                 dict_nofilename[name] = self._get_sorteddict(val, hash_method=hash_method, hash_files=hash_files)
                 dict_withhash[name] = self._get_sorteddict(val, True, hash_method=hash_method, hash_files=hash_files)
         return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
@@ -602,6 +639,10 @@ class Interface(object):
         """
         raise NotImplementedError
 
+    @property
+    def version(self):
+        raise NotImplementedError
+
 
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
@@ -628,6 +669,7 @@ class BaseInterface(Interface):
 
     """
     input_spec = BaseInterfaceInputSpec
+    _version = None
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -787,6 +829,36 @@ class BaseInterface(Interface):
                                              transient=None).items():
             self._check_requires(spec, name, getattr(self.inputs, name))
 
+    def _check_version_requirements(self, trait_object, raise_exception=True):
+        """ Raises an exception on version mismatch
+        """
+        unavailable_traits = []
+        version = LooseVersion(str(self.version))
+        if not version:
+            return
+        # check minimum version
+        names = trait_object.trait_names(**dict(min_ver=lambda t: t is not None))
+        for name in names:
+            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+            if min_ver > version:
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s < required %s)' %
+                              (name, self.__class__.__name__, version, min_ver))
+        names = trait_object.trait_names(**dict(max_ver=lambda t: t is not None))
+        for name in names:
+            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+            if max_ver < version:
+                unavailable_traits.append(name)
+                if not isdefined(getattr(trait_object, name)):
+                    continue
+                if raise_exception:
+                    raise Exception('Trait %s (%s) (version %s > required %s)' %
+                              (name, self.__class__.__name__, version, max_ver))
+        return unavailable_traits
+
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -809,6 +881,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
+        self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
         env = deepcopy(os.environ.data)
@@ -868,9 +941,18 @@ class BaseInterface(Interface):
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
         if predicted_outputs:
+            _unavailable_outputs = []
+            if outputs:
+                _unavailable_outputs = \
+                               self._check_version_requirements(self._outputs())
             for key, val in predicted_outputs.items():
                 if needed_outputs and key not in needed_outputs:
                     continue
+                if key in _unavailable_outputs:
+                    raise KeyError(('Output trait %s not available in version '
+                                    '%s of interface %s. Please inform '
+                                    'developers.') % (key, self.version,
+                                                      self.__class__.__name__))
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
@@ -882,6 +964,14 @@ class BaseInterface(Interface):
                     else:
                         raise error
         return outputs
+
+    @property
+    def version(self):
+        if self._version is None:
+            if str2bool(config.get('execution', 'stop_on_unknown_version')):
+                raise ValueError('Interface %s has no version information' %
+                                 self.__class__.__name__)
+        return self._version
 
 
 class Stream(object):
@@ -1026,6 +1116,7 @@ class CommandLine(BaseInterface):
 
     input_spec = CommandLineInputSpec
     _cmd = None
+    _version = None
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1069,6 +1160,32 @@ class CommandLine(BaseInterface):
         else:
             print allhelp
 
+    def _get_environ(self):
+        out_environ = {}
+        try:
+            display_var = config.get('execution', 'display_variable')
+            out_environ = {'DISPLAY': display_var}
+        except NoOptionError:
+            pass
+        iflogger.debug(out_environ)
+        if isdefined(self.inputs.environ):
+            out_environ.update(self.inputs.environ)
+        return out_environ
+
+    def version_from_command(self, flag='-v'):
+        cmdname = self.cmd.split()[0]
+        if self._exists_in_path(cmdname):
+            env = deepcopy(os.environ.data)
+            out_environ = self._get_environ()
+            env.update(out_environ)
+            proc = subprocess.Popen(' '.join((cmdname, flag)),
+                                    shell=True,
+                                    env=env,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    )
+            o, e = proc.communicate()
+            return o
 
     def _run_interface(self, runtime):
         """Execute command via subprocess
@@ -1085,15 +1202,7 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
-        out_environ = {}
-        try:
-            display_var = config.get('execution', 'display_variable')
-            out_environ = {'DISPLAY': display_var}
-        except NoOptionError:
-            pass
-        iflogger.debug(out_environ)
-        if isdefined(self.inputs.environ):
-            out_environ.update(self.inputs.environ)
+        out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
@@ -1117,13 +1226,6 @@ class CommandLine(BaseInterface):
                 if os.path.exists(filename):
                     return True
         return False
-
-    def _gen_filename(self, name):
-        """ Generate filename attributes before running.
-
-        Called when trait.genfile = True and trait is Undefined
-        """
-        raise NotImplementedError
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
@@ -1164,9 +1266,50 @@ class CommandLine(BaseInterface):
                 return sep.join([argstr % elt for elt in value])
             else:
                 return argstr % sep.join(str(elt) for elt in value)
+        elif trait_spec.name_source:
+            return  argstr % self._gen_filename(name)
         else:
             # Append options using format string.
             return argstr % value
+    
+    def _gen_filename(self, name):
+            trait_spec = self.inputs.trait(name)
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if "%s" in value:
+                    if isinstance(trait_spec.name_source, list):
+                        for ns in trait_spec.name_source:
+                            if isdefined(getattr(self.inputs, ns)):
+                                name_source = ns
+                                break
+                    else:
+                        name_source = trait_spec.name_source
+                    if name_source.endswith(os.path.sep):
+                        name_source = name_source[:-len(os.path.sep)]
+                    _, base, _ = split_filename(getattr(self.inputs, name_source))
+                    
+                    retval = value%base
+                else:
+                    retval = value
+            else:
+                raise NotImplementedError
+            _,_,ext = split_filename(retval)
+            if trait_spec.overload_extension or not ext:
+                return self._overload_extension(retval)
+            else:
+                return retval
+            
+    def _overload_extension(self, value):
+        return value
+    
+    def _list_outputs(self):
+        metadata = dict(name_source=lambda t: t is not None)
+        out_names = self.inputs.traits(**metadata).keys()
+        if out_names:
+            outputs = self.output_spec().get()
+            for name in out_names:
+                outputs[name] = os.path.abspath(self._gen_filename(name))
+            return outputs
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
@@ -1189,7 +1332,7 @@ class CommandLine(BaseInterface):
                 continue
             value = getattr(self.inputs, name)
             if not isdefined(value):
-                if spec.genfile:
+                if spec.genfile or spec.source_name:
                     value = self._gen_filename(name)
                 else:
                     continue
@@ -1225,6 +1368,78 @@ class StdOutCommandLine(CommandLine):
     def _gen_outfilename(self):
         raise NotImplementedError
 
+class MpiCommandLineInputSpec(CommandLineInputSpec):
+    use_mpi = traits.Bool(False, 
+                          desc="Whether or not to run the command with mpiexec",
+                          usedefault=True)
+    n_procs = traits.Int(desc="Num processors to specify to mpiexec. Do not "
+                         "specify if this is managed externally (e.g. through "
+                         "SGE)")
+    
+
+class MpiCommandLine(CommandLine):
+    '''Implements functionality to interact with command line programs 
+    that can be run with MPI (i.e. using 'mpiexec'). 
+
+    Examples
+    --------
+    >>> from nipype.interfaces.base import MpiCommandLine
+    >>> mpi_cli = MpiCommandLine(command='my_mpi_prog')
+    >>> mpi_cli.inputs.args = '-v'
+    >>> mpi_cli.cmdline
+    'my_mpi_prog -v'
+    
+    >>> mpi_cli.inputs.use_mpi = True
+    >>> mpi_cli.inputs.n_procs = 8
+    >>> mpi_cli.cmdline    
+    'mpiexec -n 8 my_mpi_prog -v'
+    '''
+    input_spec = MpiCommandLineInputSpec
+    
+    @property
+    def cmdline(self):
+        """Adds 'mpiexec' to begining of command"""
+        result = []
+        if self.inputs.use_mpi:
+            result.append('mpiexec')
+            if self.inputs.n_procs: 
+                result.append('-n %d' % self.inputs.n_procs)
+        result.append(super(MpiCommandLine, self).cmdline)
+        return ' '.join(result)
+
+class SEMLikeCommandLine(CommandLine):
+    """By default in SEM derived interface all outputs have corresponding inputs.
+    However, some SEM commands create outputs that are not defined in the XML.
+    In those cases one has to create a subclass of the autogenerated one and
+    overload the _list_outputs method. _outputs_from_inputs should still be
+    used but only for the reduced (by excluding those that do not have
+    corresponding inputs list of outputs.
+    """
+    def _list_outputs(self):
+	outputs = self.output_spec().get()
+	return self._outputs_from_inputs(outputs)
+
+    def _outputs_from_inputs(self, outputs):
+	for name in outputs.keys():
+	    coresponding_input = getattr(self.inputs, name)
+	    if isdefined(coresponding_input):
+		if isinstance(coresponding_input, bool) and coresponding_input == True:
+		    outputs[name] = os.path.abspath(self._outputs_filenames[name])
+		else:
+		    if isinstance(coresponding_input, list):
+			outputs[name] = [os.path.abspath(inp) for inp in coresponding_input]
+		    else:
+			outputs[name] = os.path.abspath(coresponding_input)
+	return outputs
+
+    def _format_arg(self, name, spec, value):
+	if name in self._outputs_filenames.keys():
+	    if isinstance(value, bool):
+		if value == True:
+		    value = os.path.abspath(self._outputs_filenames[name])
+		else:
+		    return ""
+	return super(SEMLikeCommandLine, self)._format_arg(name, spec, value)
 
 class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath

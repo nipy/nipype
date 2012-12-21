@@ -923,9 +923,9 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     normalize_area = traits.Bool(argstr='-area', desc='Normalizes the area after smoothing')
     use_momentum = traits.Bool(argstr='-m', desc='Uses momentum')
 
-    out_file = File(argstr='./%s', position=2, genfile=True, desc='output filename or True to generate one')
-    out_curvature_file = File(argstr='-c ./%s', desc='Write curvature to ?h.curvname (default "curv")')
-    out_area_file = File(argstr='-b ./%s', desc='Write area to ?h.areaname (default "area")')
+    out_file = File(argstr='%s', position=2, genfile=True, desc='output filename or True to generate one')
+    out_curvature_file = File(argstr='-c %s', desc='Write curvature to ?h.curvname (default "curv")')
+    out_area_file = File(argstr='-b %s', desc='Write area to ?h.areaname (default "area")')
 
 class SmoothTessellationOutputSpec(TraitedSpec):
     """
@@ -972,6 +972,15 @@ class SmoothTessellation(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
+    
+    def _run_interface(self, runtime):
+        # The returncode is meaningless in BET.  So check the output
+        # in stderr and if it's set, then update the returncode
+        # accordingly.
+        runtime = super(SmoothTessellation, self)._run_interface(runtime)
+        if "failed" in runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
 
 
 class MakeAverageSubjectInputSpec(FSTraitedSpec):
