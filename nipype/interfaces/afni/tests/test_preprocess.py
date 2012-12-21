@@ -19,7 +19,7 @@ def test_allineate():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-source %s',mandatory=True,),
                      matrix = dict(argstr='-1dmatrix_apply %s',),
-                     out_file = dict(argstr='-prefix %s',genfile=True,),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      )
     instance = afni.Allineate()
@@ -46,7 +46,7 @@ def test_skullstrip():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-input %s',mandatory=True,),
-                     out_file = dict(argstr='%s',),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      )
     instance = afni.SkullStrip()
@@ -77,7 +77,7 @@ def test_volreg():
 def test_calc():
     input_map = dict(args = dict(argstr='%s',),
                      environ = dict(usedefault=True,),
-                     expr = dict(argstr='-expr %s',mandatory=True,),
+                     expr = dict(argstr='-expr "%s"',mandatory=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file_a = dict(argstr='-a %s',mandatory=True,),
                      in_file_b = dict(argstr=' -b %s',),
@@ -100,7 +100,7 @@ def test_to3d():
                      funcparams = dict(argstr='-time:zt %s alt+z2',),
                      ignore_exception = dict(usedefault=True,),
                      infolder = dict(argstr='%s/*.dcm',mandatory=True,),
-                     out_file = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      skipoutliers = dict(argstr='-skip_outliers',),
                      )
@@ -117,7 +117,7 @@ def test_fim():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr=' -input %s',mandatory=True,),
                      out = dict(argstr='-out %s',),
-                     out_file = dict(argstr='-bucket %s',),
+                     out_file = dict(argstr='-bucket %s'),
                      outputtype = dict(),
                      )
     instance = afni.Fim()
@@ -222,7 +222,7 @@ def test_copy():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='%s',),
+                     out_file = dict(argstr='-prefix %s',),
                      outputtype = dict(),
                      )
     instance = afni.Copy()
@@ -267,7 +267,7 @@ def test_zcutup():
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
                      keep = dict(argstr='-keep %s',),
-                     out_file = dict(argstr='-prefix %s',mandatory=True,),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      )
     instance = afni.ZCutUp()
@@ -282,7 +282,7 @@ def test_merge():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_files = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='-prefix %s',genfile=True,),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      )
     instance = afni.Merge()
@@ -356,7 +356,8 @@ def test_maskave():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 def test_automask():
-    input_map = dict(apply_mask = dict(argstr='-apply_prefix %s',),
+    input_map = dict(apply_mask = dict(argstr='-apply_prefix %s'),
+                     apply_suffix = dict(),
                      args = dict(argstr='%s',),
                      clfrac = dict(argstr='-dilate %s',),
                      dilate = dict(argstr='-dilate %s',),
@@ -364,9 +365,9 @@ def test_automask():
                      erode = dict(argstr='-erode %s',),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='-prefix %s',),
+                     mask_suffix = dict(),
+                     out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
-                     suffix = dict(),
                      )
     instance = afni.Automask()
     for key, metadata in input_map.items():

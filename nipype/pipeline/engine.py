@@ -498,12 +498,12 @@ connected.
                 plugin_mod = getattr(sys.modules[name], '%sPlugin' % plugin)
                 runner = plugin_mod(plugin_args=plugin_args)
         flatgraph = self._create_flat_graph()
+        self.config = merge_dict(deepcopy(config._sections), self.config)
         if 'crashdump_dir' in self.config:
             warn(("Deprecated: workflow.config['crashdump_dir']\n"
                   "Please use config['execution']['crashdump_dir']"))
             self.config['execution']['crashdump_dir'] = self.config['crashdump_dir']
             del self.config['crashdump_dir']
-        self.config = merge_dict(deepcopy(config._sections), self.config)
         logger.info(str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
@@ -1596,6 +1596,7 @@ class MapNode(Node):
             node = Node(deepcopy(self._interface), name=nodename)
             node.overwrite = self.overwrite
             node.run_without_submitting = self.run_without_submitting
+            node.plugin_args = self.plugin_args
             node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))

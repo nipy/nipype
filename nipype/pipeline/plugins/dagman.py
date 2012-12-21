@@ -35,7 +35,7 @@ class CondorDAGManPlugin(GraphPluginBase):
         self._template = "universe = vanilla\nnotification = Never"
         self._submit_specs = ""
         self._dagman_args = ""
-        if 'plugin_args' in kwargs:
+        if 'plugin_args' in kwargs and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
@@ -49,7 +49,7 @@ class CondorDAGManPlugin(GraphPluginBase):
                 self._dagman_args = plugin_args['dagman_args']
         super(CondorDAGManPlugin, self).__init__(**kwargs)
 
-    def _submit_graph(self, pyfiles, dependencies):
+    def _submit_graph(self, pyfiles, dependencies, nodes):
         # location of all scripts, place dagman output in here too
         batch_dir, _ = os.path.split(pyfiles[0])
         # DAG description filename
@@ -58,27 +58,30 @@ class CondorDAGManPlugin(GraphPluginBase):
             # loop over all scripts, create submit files, and define them
             # as jobs in the DAG
             for idx, pyscript in enumerate(pyfiles):
+                node = nodes[idx]
+                template, submit_specs = self._get_args(
+                    node, ["template", "submit_specs"])
                 # XXX redundant with previous value? or could it change between
                 # scripts?
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 submitspec = '\n'.join(
-                                (self._template,
-                                 'executable = %s' % sys.executable,
-                                 'arguments = %s' % pyscript,
-                                 'output = %s' % os.path.join(batch_dir,
-                                                             '%s.out' % name),
-                                 'error = %s' % os.path.join(batch_dir,
-                                                             '%s.err' % name),
-                                 'log = %s' % os.path.join(batch_dir,
-                                                           '%s.log' % name),
-                                 'getenv = True',
-                                 self._submit_specs,
-                                 'queue'
-                                 ))
+                    (template,
+                     'executable = %s' % sys.executable,
+                     'arguments = %s' % pyscript,
+                     'output = %s' % os.path.join(batch_dir,
+                                                  '%s.out' % name),
+                     'error = %s' % os.path.join(batch_dir,
+                                                 '%s.err' % name),
+                     'log = %s' % os.path.join(batch_dir,
+                                               '%s.log' % name),
+                     'getenv = True',
+                     submit_specs,
+                     'queue'
+                     ))
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
-                                               '%s.submit' % name)
+                                          '%s.submit' % name)
                 with open(submitfile, 'wt') as submitfileprt:
                     submitfileprt.writelines(submitspec)
                     submitfileprt.close()
@@ -98,4 +101,3 @@ class CondorDAGManPlugin(GraphPluginBase):
                                                     self._dagman_args)
         cmd.run()
         logger.info('submitted all jobs to Condor DAGMan')
-

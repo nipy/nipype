@@ -3,7 +3,7 @@
 """Parallel workflow execution via multiprocessing
 """
 
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from traceback import format_exception
 import sys
 
@@ -33,7 +33,7 @@ class MultiProcPlugin(DistributedPluginBase):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
-        n_procs = 1
+        n_procs = cpu_count()
         if plugin_args:
             if 'n_procs' in plugin_args:
                 n_procs = plugin_args['n_procs']

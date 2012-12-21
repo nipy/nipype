@@ -15,7 +15,7 @@ def test_fslversion():
     if ver:
         # If ver is None, fsl is not installed
         ver = ver.split('.')
-        yield assert_equal, ver[0], '4'
+        yield assert_true, ver[0] in ['4', '5']
 
 @skipif(no_fsl)#skip if fsl not installed)
 def test_fsloutputtype():

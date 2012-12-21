@@ -126,7 +126,7 @@ def test_generate_job():
 def test_bool():
     class TestClassInputSpec(SPMCommandInputSpec):
         test_in = include_intercept = traits.Bool(field='testfield')
-        
+
     class TestClass(spm.SPMCommand):
         input_spec = TestClassInputSpec
         _jobtype = 'jobtype'
@@ -135,7 +135,7 @@ def test_bool():
     dc.inputs.test_in = True
     out = dc._make_matlab_command(dc._parse_inputs())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
-    
+
 def test_make_matlab_command():
     class TestClass(spm.SPMCommand):
         _jobtype = 'jobtype'

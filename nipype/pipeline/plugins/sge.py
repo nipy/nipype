@@ -9,6 +9,20 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
+def qsubSanitizeJobName(testjobname):
+    """ Ensure that qsub job names must begin with a letter.
+
+    Numbers and punctuation are  not allowed.
+
+    >>> qsubSanitizeJobName('01')
+    'J01'
+    >>> qsubSanitizeJobName('a01')
+    'a01'
+    """
+    if testjobname[0].isalpha():
+        return testjobname
+    else:
+        return 'J'+testjobname
 
 class SGEPlugin(SGELikeBatchManagerBase):
     """Execute using SGE (OGE not tested)
@@ -70,6 +84,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
+        jobname = qsubSanitizeJobName(jobname)
         cmd.inputs.args = '%s -N %s %s' % (qsubargs,
                                            jobname,
                                            scriptfile)
