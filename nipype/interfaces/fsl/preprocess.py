@@ -199,7 +199,7 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr='%s', position=-1, mandatory=True)
     out_basename = File(desc='base name of output files',
                         argstr='-o %s')  # uses in_file name as basename if none given
-    number_classes = traits.Range(low=1, high=10, argstr='-n %d',
+
                                   desc='number of tissue-type classes')
     output_biasfield = traits.Bool(desc='output estimated bias field',
                                    argstr='-b')
@@ -1119,7 +1119,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     despike_2dfilter = traits.Bool(argstr='--despike',
                                    desc='apply a 2D de-spiking filter')
     no_gap_fill = traits.Bool(argstr='--nofill',
-                              desc='do not apply gap-filling measure to the fievldmap')
+                              desc='do not apply gap-filling measure to the fieldmap')
     no_extend = traits.Bool(argstr='--noextend',
                             desc='do not apply rigid-body extrapolation to the fieldmap')
     smooth2d = traits.Float(argstr='--smooth2=%.2f',
