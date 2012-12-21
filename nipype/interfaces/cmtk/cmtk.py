@@ -165,6 +165,7 @@ def create_endpoints_array(fib, voxelSize):
 def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name, endpoint_name, intersections=False):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
 
+    stats = {}
     iflogger.info('Running cmat function')
     # Identify the endpoints of each fiber
     en_fname = op.abspath(endpoint_name + '_endpoints.npy')
@@ -172,7 +173,8 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     iflogger.info('Reading Trackvis file {trk}'.format(trk=track_file))
     fib, hdr = nb.trackvis.read(track_file, False)
-
+    stats['orig_n_fib'] = len(fib)
+    
     roi = nb.load(roi_file)
     roiData = roi.get_data()
     roiVoxelSize = roi.get_header().get_zooms()
@@ -216,9 +218,8 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     if intersections:
         iflogger.info("Filtering tractography from intersections")
         intersection_matrix, final_fiber_ids = create_allpoints_cmat(fib, roiData, roiVoxelSize, nROIs)
-        path, name, ext = split_filename(matrix_name)
-        finalfibers_fname = op.join(path, name + '_intersections_streamline_final.trk')
-        save_fibers(hdr, fib, finalfibers_fname, final_fiber_ids)
+        finalfibers_fname = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
+        stats['intersections_n_fib'] = save_fibers(hdr, fib, finalfibers_fname, final_fiber_ids)
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
         H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
@@ -329,9 +330,9 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     if intersections:
         path, name, ext = split_filename(matrix_name)
-        intersection_matrix_name = op.join(path, name + '_intersections') + ext
+        intersection_matrix_name = op.abspath(name + '_intersections') + ext
         iflogger.info('Writing intersection network as {ntwk}'.format(ntwk=intersection_matrix_name))
-        nx.write_gpickle(I, op.abspath(intersection_matrix_name))
+        nx.write_gpickle(I, intersection_matrix_name)
 
     path, name, ext = split_filename(matrix_mat_name)
     if not ext == '.mat':
@@ -343,19 +344,19 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     if intersections:
         intersect_dict = {'intersections': intersection_matrix}
-        intersection_matrix_mat_name = op.join(path, name + '_intersections') + ext
+        intersection_matrix_mat_name = op.abspath(name + '_intersections') + ext
         iflogger.info('Writing intersection matrix as {mat}'.format(mat=intersection_matrix_mat_name))
         sio.savemat(intersection_matrix_mat_name, intersect_dict)
 
-    mean_fiber_length_matrix_name = op.join(path, name + '_mean_fiber_length') + ext
+    mean_fiber_length_matrix_name = op.abspath(name + '_mean_fiber_length') + ext
     iflogger.info('Writing matlab mean fiber length matrix as {mat}'.format(mat=mean_fiber_length_matrix_name))
     sio.savemat(mean_fiber_length_matrix_name, fibmean_dict)
 
-    median_fiber_length_matrix_name = op.join(path, name + '_median_fiber_length') + ext
+    median_fiber_length_matrix_name = op.abspath(name + '_median_fiber_length') + ext
     iflogger.info('Writing matlab median fiber length matrix as {mat}'.format(mat=median_fiber_length_matrix_name))
     sio.savemat(median_fiber_length_matrix_name, fibmedian_dict)
 
-    fiber_length_std_matrix_name = op.join(path, name + '_fiber_length_std') + ext
+    fiber_length_std_matrix_name = op.abspath(name + '_fiber_length_std') + ext
     iflogger.info('Writing matlab fiber length deviation matrix as {mat}'.format(mat=fiber_length_std_matrix_name))
     sio.savemat(fiber_length_std_matrix_name, fibdev_dict)
 
@@ -373,7 +374,13 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     iflogger.info("Filtering tractography - keeping only no orphan fibers")
     finalfibers_fname = op.abspath(endpoint_name + '_streamline_final.trk')
-    save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
+    stats['endpoint_n_fib'] = save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
+    stats['endpoints_percent'] = float(stats['endpoint_n_fib'])/float(stats['orig_n_fib'])*100
+    stats['intersections_percent'] = float(stats['intersections_n_fib'])/float(stats['orig_n_fib'])*100
+    
+    out_stats_file = op.abspath(endpoint_name + '_statistics.mat')
+    iflogger.info("Saving matrix creation statistics as %s" % out_stats_file)
+    sio.savemat(out_stats_file, stats)
 
 def save_fibers(oldhdr, oldfib, fname, indices):
     """ Stores a new trackvis file fname using only given indices """
@@ -385,6 +392,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     hdrnew['n_count'] = n_fib_out
     iflogger.info("Writing final non-orphan fibers as %s" % fname)
     nb.trackvis.write(fname, outstreams, hdrnew)
+    return n_fib_out
 
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
@@ -396,6 +404,7 @@ class CreateMatrixInputSpec(TraitedSpec):
     out_mean_fiber_length_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the mean fiber lengths between each node.')
     out_median_fiber_length_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the mean fiber lengths between each node.')
     out_fiber_length_std_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
+    out_intersection_matrix_mat_file = File(genfile=True, desc='Matlab connectivity matrix if all region/fiber intersections are counted.')
     out_endpoint_array_name = File(genfile=True, desc='Name for the generated endpoint arrays')
 
 class CreateMatrixOutputSpec(TraitedSpec):
@@ -416,61 +425,62 @@ class CreateMatrixOutputSpec(TraitedSpec):
     filtered_tractography = File(desc='TrackVis file containing only those fibers originate in one and terminate in another region', exists=True)
     filtered_tractography_by_intersections = File(desc='TrackVis file containing all fibers which connect two regions', exists=True)
     filtered_tractographies = OutputMultiPath(File(desc='TrackVis file containing only those fibers originate in one and terminate in another region', exists=True))
+    stats_file = File(desc='Saved Matlab .mat file with the number of fibers saved at each stage', exists=True)
 
 class CreateMatrix(BaseInterface):
     """
-	Performs connectivity mapping and outputs the result as a NetworkX graph and a Matlab matrix
+    Performs connectivity mapping and outputs the result as a NetworkX graph and a Matlab matrix
 
-	Example
-	-------
+    Example
+    -------
 
-	>>> import nipype.interfaces.cmtk as cmtk
-	>>> conmap = cmtk.CreateMatrix()
-	>>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
-	>>> conmap.tract_file = 'fibers.trk'
-	>>> conmap.run()                 # doctest: +SKIP
-	"""
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> conmap = cmtk.CreateMatrix()
+    >>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
+    >>> conmap.tract_file = 'fibers.trk'
+    >>> conmap.run()                 # doctest: +SKIP
+    """
 
     input_spec = CreateMatrixInputSpec
     output_spec = CreateMatrixOutputSpec
 
     def _run_interface(self, runtime):
-    	if isdefined(self.inputs.out_matrix_file):
-    		path, name, _ = split_filename(self.inputs.out_matrix_file)
-    		matrix_file = op.abspath(name + '.pck')
-    	else:
-    		matrix_file = self._gen_outfilename('.pck')
+        if isdefined(self.inputs.out_matrix_file):
+            path, name, _ = split_filename(self.inputs.out_matrix_file)
+            matrix_file = op.abspath(name + '.pck')
+        else:
+            matrix_file = self._gen_outfilename('.pck')
 
-    	matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
-    	path, name, ext = split_filename(matrix_mat_file)
-    	if not ext == '.mat':
-    		ext = '.mat'
-    		matrix_mat_file = matrix_mat_file + ext
+        matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
+        path, name, ext = split_filename(matrix_mat_file)
+        if not ext == '.mat':
+            ext = '.mat'
+            matrix_mat_file = matrix_mat_file + ext
 
-    	if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
-    		mean_fiber_length_matrix_mat_file = op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
-    	else:
-    		mean_fiber_length_matrix_name = op.abspath(self._gen_outfilename('_mean_fiber_length.mat'))
+        if isdefined(self.inputs.out_mean_fiber_length_matrix_mat_file):
+            mean_fiber_length_matrix_mat_file = op.abspath(self.inputs.out_mean_fiber_length_matrix_mat_file)
+        else:
+            mean_fiber_length_matrix_name = op.abspath(self._gen_outfilename('_mean_fiber_length.mat'))
 
-    	if isdefined(self.inputs.out_median_fiber_length_matrix_mat_file):
-    		median_fiber_length_matrix_mat_file = op.abspath(self.inputs.out_median_fiber_length_matrix_mat_file)
-    	else:
-    		median_fiber_length_matrix_name = op.abspath(self._gen_outfilename('_median_fiber_length.mat'))
+        if isdefined(self.inputs.out_median_fiber_length_matrix_mat_file):
+            median_fiber_length_matrix_mat_file = op.abspath(self.inputs.out_median_fiber_length_matrix_mat_file)
+        else:
+            median_fiber_length_matrix_name = op.abspath(self._gen_outfilename('_median_fiber_length.mat'))
 
-    	if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
-    		fiber_length_std_matrix_mat_file = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
-    	else:
-    		fiber_length_std_matrix_name = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
+        if isdefined(self.inputs.out_fiber_length_std_matrix_mat_file):
+            fiber_length_std_matrix_mat_file = op.abspath(self.inputs.out_fiber_length_std_matrix_mat_file)
+        else:
+            fiber_length_std_matrix_name = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
-    	if not isdefined(self.inputs.out_endpoint_array_name):
-    		_, endpoint_name , _ = split_filename(self.inputs.tract_file)
-    		endpoint_name = op.abspath(endpoint_name)
-    	else:
-    		endpoint_name = op.abspath(self.inputs.out_endpoint_array_name)
+        if not isdefined(self.inputs.out_endpoint_array_name):
+            _, endpoint_name , _ = split_filename(self.inputs.tract_file)
+            endpoint_name = op.abspath(endpoint_name)
+        else:
+            endpoint_name = op.abspath(self.inputs.out_endpoint_array_name)
 
-    	cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
-    	matrix_file, matrix_mat_file, endpoint_name, self.inputs.count_region_intersections)
-    	return runtime
+        cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
+        matrix_file, matrix_mat_file, endpoint_name, self.inputs.count_region_intersections)
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -481,8 +491,10 @@ class CreateMatrix(BaseInterface):
         else:
             out_matrix_file = op.abspath(self._gen_outfilename('.pck'))
             out_intersection_matrix_file = op.abspath(self._gen_outfilename('_intersections.pck'))
-        outputs['matrix_file'] = out_matrix_file
 
+        outputs['matrix_file'] = out_matrix_file
+        outputs['intersection_matrix_file'] = out_intersection_matrix_file
+        
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
         if not ext == '.mat':
@@ -505,7 +517,13 @@ class CreateMatrix(BaseInterface):
         else:
             outputs['fiber_length_std_matrix_mat_file'] = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
+        if isdefined(self.inputs.out_intersection_matrix_mat_file):
+            outputs['intersection_matrix_mat_file'] = op.abspath(self.inputs.out_intersection_matrix_mat_file)
+        else:
+            outputs['intersection_matrix_mat_file'] = op.abspath(self._gen_outfilename('_intersections.mat'))
+
         if isdefined(self.inputs.out_endpoint_array_name):
+            endpoint_name = self.inputs.out_endpoint_array_name
             outputs['endpoint_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpoints.npy')
             outputs['endpoint_file_mm'] = op.abspath(self.inputs.out_endpoint_array_name + '_endpointsmm.npy')
             outputs['fiber_length_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslength.npy')
@@ -519,10 +537,6 @@ class CreateMatrix(BaseInterface):
             outputs['fiber_label_file'] = op.abspath(endpoint_name + '_filtered_fiberslabel.npy')
             outputs['fiber_labels_noorphans'] = op.abspath(endpoint_name + '_final_fiberslabels.npy')
 
-        outputs['filtered_tractography_by_intersections'] = op.join(path, name + '_intersections_streamline_final.trk')
-        outputs['intersection_matrix_mat_file'] = op.join(path, name + '_intersections') + ext
-        outputs['intersection_matrix_file'] = out_intersection_matrix_file
-
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
@@ -534,19 +548,20 @@ class CreateMatrix(BaseInterface):
             outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
             outputs['fiber_length_std_matrix_mat_file']]
 
-        _, name , _ = split_filename(self.inputs.tract_file)
-        outputs['filtered_tractography'] = op.abspath(name + '_streamline_final.trk')
+        outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')
+        outputs['filtered_tractography_by_intersections'] = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
         outputs['filtered_tractographies'] = [outputs['filtered_tractography'], outputs['filtered_tractography_by_intersections']]
+        outputs['stats_file'] = op.abspath(endpoint_name + '_statistics.mat')
         return outputs
 
     def _gen_outfilename(self, ext):
         if ext.endswith("mat") and isdefined(self.inputs.out_matrix_mat_file):
             _, name , _ = split_filename(self.inputs.out_matrix_mat_file)
-    	elif isdefined(self.inputs.out_matrix_file):
-    		_, name , _ = split_filename(self.inputs.out_matrix_file)
-    	else:
-    		_, name , _ = split_filename(self.inputs.tract_file)
-    	return name + ext
+        elif isdefined(self.inputs.out_matrix_file):
+            _, name , _ = split_filename(self.inputs.out_matrix_file)
+        else:
+            _, name , _ = split_filename(self.inputs.tract_file)
+        return name + ext
 
 class ROIGenInputSpec(BaseInterfaceInputSpec):
     aparc_aseg_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')

@@ -108,19 +108,21 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+from nipype import config, logging
+from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
 from traceback import format_exception
 info = None
 pklfile = '%s'
 batchdir = '%s'
+from nipype.utils.filemanip import loadpkl, savepkl
 try:
-    from nipype import config, logging
-    from ordereddict import OrderedDict
+    if not sys.version_info < (2, 7):
+        from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
     config.update_matplotlib()
     logging.update_logging(config)
-    from nipype.utils.filemanip import loadpkl, savepkl
     traceback=None
     cwd = os.getcwd()
     info = loadpkl(pklfile)
@@ -216,7 +218,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-              np.any(self.proc_pending == True):
+                    np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -295,11 +297,12 @@ class DistributedPluginBase(PluginBase):
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
                                   ssp.lil_matrix(np.zeros((numnodes,
-                                                    self.depidx.shape[1])))),
+                                                           self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
-                                  ssp.lil_matrix(np.zeros((self.depidx.shape[0],
-                                                           numnodes)))),
+                                  ssp.lil_matrix(
+                                      np.zeros((self.depidx.shape[0],
+                                                numnodes)))),
                                  'lil')
         self.depidx[-numnodes:, jobid] = 1
         self.proc_done = np.concatenate((self.proc_done,
@@ -313,7 +316,7 @@ class DistributedPluginBase(PluginBase):
         """
         while np.any(self.proc_done == False):
             # Check to see if a job is available
-            jobids = np.flatnonzero((self.proc_done == False) & \
+            jobids = np.flatnonzero((self.proc_done == False) &
                                     (self.depidx.sum(axis=0) == 0).__array__())
             if len(jobids) > 0:
                 # send all available jobs
@@ -334,20 +337,21 @@ class DistributedPluginBase(PluginBase):
                     self.proc_done[jobid] = True
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
-                    logger.info('Executing: %s ID: %d' % \
-                                    (self.procs[jobid]._id, jobid))
+                    logger.info('Executing: %s ID: %d' %
+                               (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
                         logger.debug('checking hash locally')
                         try:
-                            hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+                            hash_exists, _, _, _ = self.procs[
+                                jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
                             if (hash_exists and
-                            (self.procs[jobid].overwrite == False or
-                             (self.procs[jobid].overwrite == None and
-                              not self.procs[jobid]._interface.always_run))):
+                               (self.procs[jobid].overwrite == False or
+                               (self.procs[jobid].overwrite == None and
+                                    not self.procs[jobid]._interface.always_run))):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -383,7 +387,7 @@ class DistributedPluginBase(PluginBase):
 
         This is called when a job is completed.
         """
-        logger.info('[Job finished] jobname: %s jobid: %d' % \
+        logger.info('[Job finished] jobname: %s jobid: %d' %
                     (self.procs[jobid]._id, jobid))
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'end')
@@ -429,7 +433,7 @@ class DistributedPluginBase(PluginBase):
                     self.refidx[idx, idx] = -1
                     outdir = self.procs[idx]._output_directory()
                     logger.info(('[node dependencies finished] '
-                                 'removing node: %s from directory %s') % \
+                                 'removing node: %s from directory %s') %
                                 (self.procs[idx]._id, outdir))
                     shutil.rmtree(outdir)
 
@@ -560,9 +564,28 @@ class GraphPluginBase(PluginBase):
                                            store_exception=False))
             dependencies[idx] = [nodes.index(prevnode) for prevnode in
                                  graph.predecessors(node)]
-        self._submit_graph(pyfiles, dependencies)
+        self._submit_graph(pyfiles, dependencies, nodes)
 
-    def _submit_graph(self, pyfiles, dependencies):
+    def _get_args(self, node, keywords):
+        values = ()
+        for keyword in keywords:
+            value = getattr(self, "_" + keyword)
+            if keyword == "template" and os.path.isfile(value):
+                value = open(value).read()
+            if hasattr(node, "plugin_args") and isinstance(node.plugin_args, dict) and keyword in node.plugin_args:
+                    if keyword == "template" and os.path.isfile(node.plugin_args[keyword]):
+                        tmp_value = open(node.plugin_args[keyword]).read()
+                    else:
+                        tmp_value = node.plugin_args[keyword]
+                        
+                    if 'overwrite' in node.plugin_args and node.plugin_args['overwrite']:
+                        value = tmp_value
+                    else:
+                        value += tmp_value
+            values += (value, )
+        return values
+
+    def _submit_graph(self, pyfiles, dependencies, nodes):
         """
         pyfiles: list of files corresponding to a topological sort
         dependencies: dictionary of dependencies based on the toplogical sort

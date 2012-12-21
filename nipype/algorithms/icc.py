@@ -51,12 +51,12 @@ class ICC(BaseInterface):
         new_data[maskdata] = icc.reshape(-1,)
         new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
         nb.save(new_img, 'icc_map.nii')
-        
+
         new_data = np.zeros(nim.get_shape())
         new_data[maskdata] = session_var.reshape(-1,)
         new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
         nb.save(new_img, 'session_var_map.nii')
-        
+
         new_data = np.zeros(nim.get_shape())
         new_data[maskdata] = subject_var.reshape(-1,)
         new_img = nb.Nifti1Image(new_data, nim.get_affine(), nim.get_header())
@@ -122,7 +122,7 @@ def ICC_rep_anova(Y):
 
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
     ICC = (MSR - MSE) / (MSR + dfc * MSE)
-    
+
     e_var = MSE #variance of error
     r_var = (MSR - MSE)/nb_conditions #variance between subjects
 
