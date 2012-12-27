@@ -46,6 +46,7 @@ stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
 stop_on_unknown_version = false
+commandline_output = stream
 
 [check]
 interval = 1209600

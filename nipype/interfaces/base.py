@@ -1038,42 +1038,76 @@ def run_command(runtime, timeout=0.01):
                              shell=True,
                              cwd=runtime.cwd,
                              env=runtime.environ)
-    streams = [
-        Stream('stdout', proc.stdout),
-        Stream('stderr', proc.stderr)
-        ]
-
-    def _process(drain=0):
-        try:
-            res = select.select(streams, [], [], timeout)
-        except select.error, e:
-            iflogger.info(str(e))
-            if e[0] == errno.EINTR:
-                return
-            else:
-                raise
-        else:
-            for stream in res[0]:
-                stream.read(drain)
-
-    while proc.returncode is None:
-        proc.poll()
-        _process()
-    runtime.returncode = proc.returncode
-    _process(drain=1)
-
-    # collect results, merge and return
     result = {}
-    temp = []
-    for stream in streams:
-        rows = stream._rows
-        temp += rows
-        result[stream._name] = [r[2] for r in rows]
-    temp.sort()
-    result['merged'] = [r[1] for r in temp]
+    if config.get('execution', 'commandline_output').lower() == 'stream':
+        streams = [
+            Stream('stdout', proc.stdout),
+            Stream('stderr', proc.stderr)
+            ]
+
+        def _process(drain=0):
+            try:
+                res = select.select(streams, [], [], timeout)
+            except select.error, e:
+                iflogger.info(str(e))
+                if e[0] == errno.EINTR:
+                    return
+                else:
+                    raise
+            else:
+                for stream in res[0]:
+                    stream.read(drain)
+
+        while proc.returncode is None:
+            proc.poll()
+            _process()
+        runtime.returncode = proc.returncode
+        _process(drain=1)
+
+        # collect results, merge and return
+        temp = []
+        for stream in streams:
+            rows = stream._rows
+            temp += rows
+            result[stream._name] = [r[2] for r in rows]
+        temp.sort()
+        result['merged'] = [r[1] for r in temp]
+    elif config.get('execution', 'commandline_output').lower() == 'allatonce':
+        stdout, stderr = proc.communicate()
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
+        result['merged'] = ''
+    elif config.get('execution', 'commandline_output').lower() == 'file':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stderr =  open(errfile, 'wt')
+        stdout =  open(outfile, 'wt')
+        proc = subprocess.Popen(runtime.cmdline,
+                            stdout=stdout,
+                            stderr=stderr,
+                            shell=True,
+                            cwd=runtime.cwd,
+                            env=runtime.environ)
+        ret_code = proc.wait()
+        stderr.flush()
+        stdout.flush()
+        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
+        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['merged'] = ''
+    elif config.get('execution', 'commandline_output').lower() == 'none':
+        proc.communicate()
+        result['stdout'] = []
+        result['stderr'] = []
+        result['merged'] = ''
+    else:
+        raise ValueError(("Unknown input for config['execution']"
+                          "['commandline_output']. Should be one of 'stream', "
+                          "'allatonce', 'file', or 'none'"))
+
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
+    runtime.returncode = proc.returncode
     return runtime
 
 

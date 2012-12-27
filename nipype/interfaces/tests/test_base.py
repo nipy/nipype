@@ -461,3 +461,36 @@ def test_Commandline_environ():
     ci3.inputs.environ = {'DISPLAY' : ':2'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
+
+
+def test_CommandLine_output():
+    from nipype import config
+    config.set_default_config()
+    config.set('execution', 'commandline_output', 'foo')
+    ci = nib.CommandLine(command='ls -l')
+    yield assert_raises, ValueError, ci.run
+
+    tmp_infile = setup_file()
+    tmpd, name = os.path.split(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+    yield assert_true, os.path.exists(tmp_infile)
+    config.set('execution', 'commandline_output', 'allatonce')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_equal, res.runtime.merged, ''
+    yield assert_true, name in res.runtime.stdout
+    config.set('execution', 'commandline_output', 'file')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    config.set('execution', 'commandline_output', 'none')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_equal, res.runtime.stdout, ''
+    config.set('execution', 'commandline_output', 'stream')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    os.chdir(pwd)
+    teardown_file(tmpd)

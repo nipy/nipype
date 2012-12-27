@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Allows controlling how commandline interface terminal output is handled.
 
 Release 0.7.0 (Dec 18, 2012)
 ============================
