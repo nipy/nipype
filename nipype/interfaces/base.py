@@ -1138,7 +1138,7 @@ class CommandLine(BaseInterface):
     'ls -al'
 
     >>> cli.inputs.trait_get()
-    {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
+    {'ignore_exception': False, 'terminal_output': 'stream', 'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
     >>> cli.inputs.get_hashval()
     ({'args': '-al'}, 'a2f45e04a34630c5f33a75ea2a533cdd')
