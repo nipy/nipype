@@ -480,5 +480,17 @@ def test_CommandLine_output():
     res = ci.run()
     yield assert_equal, res.runtime.merged, ''
     yield assert_true, name in res.runtime.stdout
+    config.set('execution', 'commandline_output', 'file')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    config.set('execution', 'commandline_output', 'none')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_equal, res.runtime.stdout, ''
+    config.set('execution', 'commandline_output', 'stream')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
     os.chdir(pwd)
     teardown_file(tmpd)
