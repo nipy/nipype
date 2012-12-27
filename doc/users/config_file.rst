@@ -114,6 +114,14 @@ Execution
     version information is available. Please notify developers or submit a
     patch.
 
+*commandline_output (CommandLine interfaces only)*
+    Controls how terminal output from a command line is handled. There are 4
+    possible options. (default: 'stream' for current compatibility)
+    `stream`: line by line streaming to terminal
+    `allatonce`: streams after command has terminated
+    `file`: writes output to stdout.nipype and stderr.nipype
+    `none`: suppresses all output
+
 Example
 ~~~~~~~
 
