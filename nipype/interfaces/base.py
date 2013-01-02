@@ -1164,7 +1164,7 @@ class CommandLine(BaseInterface):
         if not isdefined(self.inputs.terminal_output):
             self.inputs.terminal_output = self._terminal_output
         else:
-            self._output_update()
+            self._terminal_output_update()
 
     def _terminal_output_update(self):
         self._terminal_output = self.inputs.terminal_output
