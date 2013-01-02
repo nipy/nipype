@@ -1174,6 +1174,15 @@ class SigLossOuputSpec(TraitedSpec):
                     desc='signal loss estimate file')
 
 class SigLoss(FSLCommand):
+    """Estimates signal loss from a field map (in rad/s)
+
+    Examples
+    --------
+    >>> sigloss = Sigloss()
+    >>> sigloss.inputs.in_file = "phase.nii"
+    >>> sigloss.inputs.echo_time = 0.03
+    >>> res = sigloss.run() # doctest: +SKIP
+    """
     input_spec = SigLossInputSpec
     output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
