@@ -16,9 +16,11 @@ class CondorDAGManPlugin(GraphPluginBase):
     The plugin_args input to run can be used to control the DAGMan execution.
     Currently supported options are:
 
-    - template : submit spec template to use for job submission. The template
-                 all generated submit specs are appended to this template. This
-                 can be a str or a filename.
+    - template : submit spec template for individual jobs in a DAG. All
+                 generated submit spec components (e.g. executable name and
+                 arguments) are appended to this template. This can be a str or
+                 a filename. In the latter case the file content is used as a
+                 template.
     - submit_specs : additional submit specs that are appended to the generated
                  submit specs to allow for overriding or extending the defaults.
                  This can be a str or a filename.
