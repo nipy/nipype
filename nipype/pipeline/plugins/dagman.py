@@ -3,6 +3,7 @@
 
 import os
 import sys
+import uuid
 
 from .base import (GraphPluginBase, logger)
 
@@ -53,7 +54,7 @@ class CondorDAGManPlugin(GraphPluginBase):
         # location of all scripts, place dagman output in here too
         batch_dir, _ = os.path.split(pyfiles[0])
         # DAG description filename
-        dagfilename = os.path.join(batch_dir, 'workflow.dag')
+        dagfilename = os.path.join(batch_dir, 'workflow-%s.dag' % uuid.uuid4())
         with open(dagfilename, 'wt') as dagfileptr:
             # loop over all scripts, create submit files, and define them
             # as jobs in the DAG
