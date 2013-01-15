@@ -204,6 +204,18 @@ class TrimOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 class Trim(BaseInterface):
+    """ Simple interface to trim a few volumes from a 4d fmri nifti file
+
+    Examples
+    --------
+    >>> from nipype.interfaces.nipy.preprocess import Trim
+    >>> trim = Trim()
+    >>> trim.inputs.in_file = ['functional.nii']
+    >>> trim.inputs.begin_index = 3 # remove 3 first volumes
+    >>> res = trim.run() # doctest: +SKIP
+
+    """
+
     input_spec = TrimInputSpec
     output_spec = TrimOutputSpec
 
