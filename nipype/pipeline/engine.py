@@ -139,8 +139,8 @@ class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes
     """
 
-    def __init__(self, **kwargs):
-        super(Workflow, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(Workflow, self).__init__(* args, **kwargs)
         self._graph = nx.DiGraph()
 
     # PUBLIC API
@@ -469,6 +469,31 @@ connected.
             fp.close()
         else:
             logger.info(dotstr)
+
+    def export(self, prefix="output", format="python"):
+        """Export object into a different format
+
+        Parameters
+        ----------
+
+        prefix: string
+           prefix to use for output file
+
+        format: string
+           one of "python"
+        """
+        formats = ["python"]
+        if format not in formats:
+            raise ValueError('format must be one of: %s' % '|'.join(formats))
+        flatgraph = self._create_flat_graph()
+
+        if format == "python":
+            with open('%s.py', 'wt') as fp:
+                # write nodes
+                for node in nx.topological_sort(flatgraph):
+                    nodestr = node.format(format=python)
+                    fp.writelines(nodestr)
+                # write connections
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
@@ -1031,6 +1056,12 @@ class Node(WorkflowBase):
     def help(self):
         """ Print interface help"""
         self._interface.help()
+
+    def format(format=python):
+        """Format a node in a given output syntax
+        """
+
+
 
     def hash_exists(self, updatehash=False):
         # Get a dictionary with hashed filenames and a hashvalue
