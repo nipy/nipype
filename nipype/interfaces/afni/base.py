@@ -42,7 +42,8 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        clout = CommandLine(command='afni_vcheck').run()
+        clout = CommandLine(command='afni_vcheck',
+                            terminal_output='allatonce').run()
         out = clout.runtime.stdout
         return out.split('\n')[1]
 
@@ -87,7 +88,8 @@ class Info(object):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine('which afni').run()
+        clout = CommandLine('which afni',
+                            terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None
 

@@ -3,6 +3,7 @@
 
 import os
 import sys
+import uuid
 
 from .base import (GraphPluginBase, logger)
 
@@ -15,9 +16,11 @@ class CondorDAGManPlugin(GraphPluginBase):
     The plugin_args input to run can be used to control the DAGMan execution.
     Currently supported options are:
 
-    - template : submit spec template to use for job submission. The template
-                 all generated submit specs are appended to this template. This
-                 can be a str or a filename.
+    - template : submit spec template for individual jobs in a DAG. All
+                 generated submit spec components (e.g. executable name and
+                 arguments) are appended to this template. This can be a str or
+                 a filename. In the latter case the file content is used as a
+                 template.
     - submit_specs : additional submit specs that are appended to the generated
                  submit specs to allow for overriding or extending the defaults.
                  This can be a str or a filename.
@@ -53,7 +56,7 @@ class CondorDAGManPlugin(GraphPluginBase):
         # location of all scripts, place dagman output in here too
         batch_dir, _ = os.path.split(pyfiles[0])
         # DAG description filename
-        dagfilename = os.path.join(batch_dir, 'workflow.dag')
+        dagfilename = os.path.join(batch_dir, 'workflow-%s.dag' % uuid.uuid4())
         with open(dagfilename, 'wt') as dagfileptr:
             # loop over all scripts, create submit files, and define them
             # as jobs in the DAG
@@ -95,7 +98,8 @@ class CondorDAGManPlugin(GraphPluginBase):
                                      % (' '.join([str(i) for i in parents]),
                                         child))
         # hand over DAG to condor_dagman
-        cmd = CommandLine('condor_submit_dag', environ=os.environ.data)
+        cmd = CommandLine('condor_submit_dag', environ=os.environ.data,
+                          terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '-update_submit %s %s' % (dagfilename,
                                                     self._dagman_args)
