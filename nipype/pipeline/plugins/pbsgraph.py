@@ -53,7 +53,8 @@ class PBSGraphPlugin(SGEGraphPlugin):
                 fp.writelines('job%05d=`qsub %s %s %s`\n' % (idx, deps,
                                                              qsub_args,
                                                              batchscriptfile))
-        cmd = CommandLine('sh', environ=os.environ.data)
+        cmd = CommandLine('sh', environ=os.environ.data,
+                          terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
         logger.info('submitted all jobs to queue')
