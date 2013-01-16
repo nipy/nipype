@@ -1,3 +1,11 @@
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 import os
 import warnings
 
@@ -211,7 +219,7 @@ class Trim(BaseInterface):
     --------
     >>> from nipype.interfaces.nipy.preprocess import Trim
     >>> trim = Trim()
-    >>> trim.inputs.in_file = ['functional.nii']
+    >>> trim.inputs.in_file = 'functional.nii'
     >>> trim.inputs.begin_index = 3 # remove 3 first volumes
     >>> res = trim.run() # doctest: +SKIP
 
