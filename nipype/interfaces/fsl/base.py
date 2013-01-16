@@ -73,7 +73,8 @@ class Info(object):
         except KeyError:
             return None
         clout = CommandLine(command='cat',
-                            args='%s/etc/fslversion' % (basedir)).run()
+                            args='%s/etc/fslversion' % (basedir),
+                            terminal_output='allatonce').run()
         out = clout.runtime.stdout
         return out.strip('\n')
 
