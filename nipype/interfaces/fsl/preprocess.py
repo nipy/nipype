@@ -199,7 +199,7 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr='%s', position=-1, mandatory=True)
     out_basename = File(desc='base name of output files',
                         argstr='-o %s')  # uses in_file name as basename if none given
-
+    number_classes = traits.Range(low=1, high=10, argstr='-n %d',
                                   desc='number of tissue-type classes')
     output_biasfield = traits.Bool(desc='output estimated bias field',
                                    argstr='-b')
