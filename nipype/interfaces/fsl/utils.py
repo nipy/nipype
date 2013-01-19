@@ -1301,9 +1301,10 @@ class Complex(FSLCommand):
     """fslcomplex is a tool for converting complex data
     Examples
     --------
-    >>> complex = Complex()
-    >>> complex.inputs.complex_in_file = "complex.nii"
-    >>> res = complex.run() # doctest: +SKIP
+    >>> cplx = Complex()
+    >>> cplx.inputs.complex_in_file = "complex.nii"
+    >>> cplx.real_polar = True
+    >>> res = cplx.run() # doctest: +SKIP
 
     """
     _cmd = 'fslcomplex'
