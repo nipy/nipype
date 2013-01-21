@@ -17,7 +17,8 @@ def get_matlab_command():
         matlab_cmd = 'matlab'
 
     try:
-        res = CommandLine(command='which', args=matlab_cmd).run()
+        res = CommandLine(command='which', args=matlab_cmd,
+                          terminal_output='allatonce').run()
         matlab_path = res.runtime.stdout.strip()
     except Exception, e:
         return None
@@ -95,6 +96,9 @@ class MatlabCommand(CommandLine):
                 not isdefined(self.inputs.uses_mcr):
             if config.getboolean('execution','single_thread_matlab'):
                 self.inputs.single_comp_thread = True
+        # For matlab commands force all output to be returned since matlab
+        # does not have a clean way of notifying an error
+        self.inputs.terminal_output = 'allatonce'
 
     @classmethod
     def set_default_matlab_cmd(cls, matlab_cmd):
@@ -130,6 +134,7 @@ class MatlabCommand(CommandLine):
         cls._default_paths = paths
 
     def _run_interface(self,runtime):
+        self.inputs.terminal_output = 'allatonce'
         runtime = super(MatlabCommand, self)._run_interface(runtime)
         try:
             # Matlab can leave the terminal in a barbbled state

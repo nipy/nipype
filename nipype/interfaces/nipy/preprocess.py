@@ -1,3 +1,11 @@
+"""
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 import os
 import warnings
 
@@ -5,7 +13,7 @@ import nibabel as nb
 import numpy as np
 
 from ...utils.misc import package_check
-from ...utils.filemanip import split_filename
+from ...utils.filemanip import split_filename, fname_presuffix
 
 
 try:
@@ -24,10 +32,10 @@ from ..base import (TraitedSpec, BaseInterface, traits,
 
 class ComputeMaskInputSpec(BaseInterfaceInputSpec):
     mean_volume = File(exists=True, mandatory=True,
-    desc="mean EPI image, used to compute the threshold for the mask")
+                       desc="mean EPI image, used to compute the threshold for the mask")
     reference_volume = File(exists=True,
-                       desc=("reference volume used to compute the mask. "
-                             "If none is give, the mean volume is used."))
+                            desc=("reference volume used to compute the mask. "
+                                  "If none is give, the mean volume is used."))
     m = traits.Float(desc="lower fraction of the histogram to be discarded")
     M = traits.Float(desc="upper fraction of the histogram to be discarded")
     cc = traits.Bool(desc="Keep only the largest connected component")
@@ -68,7 +76,6 @@ class ComputeMask(BaseInterface):
 
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
-
 
     in_file = InputMultiPath(exists=True,
                              mandatory=True,
@@ -144,10 +151,10 @@ class FmriRealign4d(BaseInterface):
             TR_slices = self.inputs.tr_slices
 
         R = FR4d(all_ims, tr=self.inputs.tr,
-            slice_order=self.inputs.slice_order,
-            tr_slices=TR_slices,
-            time_interp=self.inputs.time_interp,
-            start=self.inputs.start)
+                 slice_order=self.inputs.slice_order,
+                 tr_slices=TR_slices,
+                 time_interp=self.inputs.time_interp,
+                 start=self.inputs.start)
 
         R.estimate(loops=self.inputs.loops,
                    between_loops=self.inputs.between_loops,
@@ -159,11 +166,11 @@ class FmriRealign4d(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-                                (split_filename(self.inputs.in_file[j])[1])))
+                                      (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
-            (os.path.split(self.inputs.in_file[j])[1])))
+                                      (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             # nipy does not encode euler angles. return in original form of
@@ -182,4 +189,66 @@ class FmriRealign4d(BaseInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = self._out_file_path
         outputs['par_file'] = self._par_file_path
+        return outputs
+
+
+class TrimInputSpec(BaseInterfaceInputSpec):
+    in_file = File(
+        exists=True, mandatory=True,
+        desc="EPI image to trim")
+    begin_index = traits.Int(
+        0, usedefault=True,
+        desc='first volume')
+    end_index = traits.Int(
+        0, usedefault=True,
+        desc='last volume indexed as in python (and 0 for last)')
+    out_file = File(desc='output filename')
+    suffix = traits.Str(
+        '_trim', usedefault=True,
+        desc='suffix for out_file to use if no out_file provided')
+
+
+class TrimOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class Trim(BaseInterface):
+    """ Simple interface to trim a few volumes from a 4d fmri nifti file
+
+    Examples
+    --------
+    >>> from nipype.interfaces.nipy.preprocess import Trim
+    >>> trim = Trim()
+    >>> trim.inputs.in_file = 'functional.nii'
+    >>> trim.inputs.begin_index = 3 # remove 3 first volumes
+    >>> res = trim.run() # doctest: +SKIP
+
+    """
+
+    input_spec = TrimInputSpec
+    output_spec = TrimOutputSpec
+
+    def _run_interface(self, runtime):
+        out_file = self._list_outputs()['out_file']
+        nii = nb.load(self.inputs.in_file)
+        if self.inputs.end_index == 0:
+            s = slice(self.inputs.begin_index, nii.shape[3])
+        else:
+            s = slice(self.inputs.begin_index, self.inputs.end_index)
+        nii2 = nb.Nifti1Image(
+            nii.get_data()[..., s],
+            nii.get_affine(),
+            nii.get_header())
+        nb.save(nii2, out_file)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = fname_presuffix(
+                self.inputs.in_file,
+                newpath=os.getcwd(),
+                suffix=self.inputs.suffix)
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
