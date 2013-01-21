@@ -280,7 +280,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                              argstr='-orient %s')
 
 
-class Resample(AFNIBaseCommand):
+class Resample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command
 
     For complete details, see the `3dresample Documentation.
