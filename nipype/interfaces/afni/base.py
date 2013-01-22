@@ -232,7 +232,8 @@ class AFNICommand(AFNIBaseCommand):
             outputs = self.output_spec().get()
             for name in out_names:
                 out = self._gen_filename(name)
-                outputs[name] = os.path.abspath(out)
+                if isdefined(out):
+                    outputs[name] = os.path.abspath(out)
             return outputs
 
 
