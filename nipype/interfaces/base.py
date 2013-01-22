@@ -28,7 +28,7 @@ from dateutil.parser import parse as parseutc
 from warnings import warn
 from uuid import uuid1
 
-import nipype.external.prov as prov
+import prov.model as pm
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
                                isdefined, File, Directory,
@@ -924,7 +924,8 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=gethostname())
+                        hostname=gethostname(),
+                        version=self.version)
         try:
             runtime = self._run_interface(runtime)
             outputs = self.aggregate_outputs(runtime)
@@ -1030,25 +1031,30 @@ class BaseInterface(Interface):
         outputs = results.outputs
         classname = self.__class__.__name__
 
-        foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
-        dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
-        nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6")
+        foaf = pm.Namespace("foaf","http://xmlns.com/foaf/0.1/")
+        dcterms = pm.Namespace("dcterms","http://purl.org/dc/terms/")
+        nipype = pm.Namespace("nipype","http://nipy.org/nipype/terms/")
 
         get_id = lambda : nipype[uuid1().hex]
         import base64
         import re
+
         def safe_encode(x):
+            if x is None:
+                return pm.Literal(json.dumps("Unknown")[1:-1], pm.XSD['string'])
             if isinstance(x, (str, unicode)):
-                return prov.Literal(json.dumps(x)[1:-1], prov.XSD['string'])
+                return pm.Literal(json.dumps(x)[1:-1], pm.XSD['string'])
             if isinstance(x, (int)):
-                return prov.Literal(x, prov.XSD['integer'])
+                return pm.Literal(int(x), pm.XSD['integer'])
             if isinstance(x, (float)):
-                return prov.Literal(x, prov.XSD['float'])
-            out = base64.b64encode(json.dumps(x))
-            return prov.Literal(out, prov.XSD['base64Binary'])
+                return pm.Literal(x, pm.XSD['float'])
+            #out = base64.b64encode(json.dumps(x))
+            #return pm.Literal(out, pm.XSD['base64Binary'])
+            return pm.Literal(json.dumps("Could not encode")[1:-1],
+                              pm.XSD['string'])
 
         # create a provenance container
-        g = prov.ProvBundle()
+        g = pm.ProvBundle()
 
         # Set the default _namespace name
         g.set_default_namespace(nipype.get_uri())
@@ -1056,13 +1062,14 @@ class BaseInterface(Interface):
         g.add_namespace(dcterms)
         g.add_namespace(nipype)
 
-        a0_attrs = {foaf["host"]: runtime.hostname,
-                    prov.PROV["type"]: nipype[classname],
-                    prov.PROV["label"]: classname,
+        a0_attrs = {foaf["host"]: safe_encode(runtime.hostname),
+                    pm.PROV["type"]: nipype[classname],
+                    pm.PROV["label"]: classname,
                     nipype['duration']: safe_encode(runtime.duration),
                     nipype['working_directory']: safe_encode(runtime.cwd),
                     nipype['return_code']: runtime.returncode,
                     nipype['platform']: safe_encode(runtime.platform),
+                    nipype['version']: safe_encode(runtime.version),
                     }
         try:
             a0_attrs.update({nipype['command']: safe_encode(runtime.cmdline)})
@@ -1075,12 +1082,13 @@ class BaseInterface(Interface):
         # environment
         id = get_id()
         env_collection = g.collection(id)
-        env_collection.add_extra_attributes({prov.PROV['type']: nipype['environment']})
+        env_collection.add_extra_attributes({pm.PROV['type']: nipype['environment'],
+                                             pm.PROV['label']: "Environment"})
         g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            in_attr = {prov.PROV["type"]: nipype["environment"],
-                       prov.PROV["label"]: key,
+            in_attr = {pm.PROV["type"]: nipype["environment"],
+                       pm.PROV["label"]: key,
                        nipype[key]: safe_encode(val)}
             id = get_id()
             g.entity(id, in_attr)
@@ -1089,12 +1097,13 @@ class BaseInterface(Interface):
         if inputs:
             id = get_id()
             input_collection = g.collection(id)
-            input_collection.add_extra_attributes({prov.PROV['type']: nipype['inputs']})
+            input_collection.add_extra_attributes({pm.PROV['type']: nipype['inputs'],
+                                                   pm.PROV['label']: "Inputs"})
             g.used(a0, id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_attr = {prov.PROV["type"]: nipype["input"],
-                           prov.PROV["label"]: key,
+                in_attr = {pm.PROV["type"]: nipype["input"],
+                           pm.PROV["label"]: key,
                            nipype[key]: safe_encode(val)}
                 id = get_id()
                 g.entity(id, in_attr)
@@ -1104,12 +1113,13 @@ class BaseInterface(Interface):
             id = get_id()
             output_collection = g.collection(id)
             outputs = outputs.get_traitsfree()
-            output_collection.add_extra_attributes({prov.PROV['type']: nipype['outputs']})
+            output_collection.add_extra_attributes({pm.PROV['type']: nipype['outputs'],
+                                                    pm.PROV['label']: "Outputs"})
             g.wasGeneratedBy(output_collection, a0)
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_attr = {prov.PROV["type"]: nipype["output"],
-                            prov.PROV["label"]: key,
+                out_attr = {pm.PROV["type"]: nipype["output"],
+                            pm.PROV["label"]: key,
                             nipype[key]: safe_encode(val)}
                 id = get_id()
                 g.entity(id, out_attr)
@@ -1117,37 +1127,38 @@ class BaseInterface(Interface):
         # write runtime entities
         id = get_id()
         runtime_collection = g.collection(id)
-        runtime_collection.add_extra_attributes({prov.PROV['type']: nipype['runtime']})
+        runtime_collection.add_extra_attributes({pm.PROV['type']: nipype['runtime'],
+                                                 pm.PROV['label']: "RuntimeInfo"})
         g.wasGeneratedBy(runtime_collection, a0)
         for key, value in sorted(runtime.items()):
             if not value:
                 continue
             if key not in ['stdout', 'stderr', 'merged']:
                 continue
-            attr = {prov.PROV["type"]: nipype["runtime"],
-                    prov.PROV["label"]: key,
+            attr = {pm.PROV["type"]: nipype["runtime"],
+                    pm.PROV["label"]: key,
                     nipype[key]: safe_encode(value)}
             id = get_id()
             g.entity(get_id(), attr)
             g.hadMember(runtime_collection, id)
         # create agents
         user_agent = g.agent(get_id(),
-                             {prov.PROV["type"]: prov.PROV["Person"],
-                              prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
-                              foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
-        agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
-                      prov.PROV["label"]: "Nipype",
-                      foaf["name"]: "Nipype"}
+                             {pm.PROV["type"]: pm.PROV["Person"],
+                              pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
+                              foaf["name"]: safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
+        agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
+                      pm.PROV["label"]: "Nipype",
+                      foaf["name"]: safe_encode("Nipype")}
         for key, value in get_info().items():
             agent_attr.update({nipype[key]: safe_encode(value)})
         software_agent = g.agent(get_id(), agent_attr)
         g.wasAssociatedWith(a0, user_agent, None, None,
-                            {prov.PROV["Role"]: "LoggedInUser"})
+                            {pm.PROV["Role"]: safe_encode("LoggedInUser")})
         g.wasAssociatedWith(a0, software_agent, None, None,
-                            {prov.PROV["Role"]: "Software"})
+                            {pm.PROV["Role"]: safe_encode("Software")})
         # write provenance
         with open(filename, 'wt') as fp:
-            json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+            json.dump(g, fp, cls= pm.ProvBundle.JSONEncoder)
         return g
 
 
