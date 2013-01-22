@@ -486,14 +486,19 @@ connected.
         if format not in formats:
             raise ValueError('format must be one of: %s' % '|'.join(formats))
         flatgraph = self._create_flat_graph()
+        nodes = nx.topological_sort(flatgraph)
 
         if format == "python":
             with open('%s.py', 'wt') as fp:
-                # write nodes
-                for node in nx.topological_sort(flatgraph):
-                    nodestr = node.format(format=python)
+                nodenames = []
+                for idx, node in enumerate(nodes):
+                    # write nodes
+                    nodestr, nodename = node.format(format=python)
                     fp.writelines(nodestr)
-                # write connections
+                    # write connections
+                    for prevnode in flatgraph.predecessors(node):
+                        # write connection
+                        pass
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
