@@ -1043,7 +1043,10 @@ class BaseInterface(Interface):
             if x is None:
                 return pm.Literal(json.dumps("Unknown")[1:-1], pm.XSD['string'])
             if isinstance(x, (str, unicode)):
-                return pm.Literal(json.dumps(x)[1:-1], pm.XSD['string'])
+                if os.path.exists(x):
+                    return 'file://%s%s' % (gethostname(), x)
+                else:
+                    return pm.Literal(json.dumps(x)[1:-1], pm.XSD['string'])
             if isinstance(x, (int)):
                 return pm.Literal(int(x), pm.XSD['integer'])
             if isinstance(x, (float)):
