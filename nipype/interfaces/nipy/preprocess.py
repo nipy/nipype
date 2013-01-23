@@ -156,9 +156,9 @@ class FmriRealign4d(BaseInterface):
                  time_interp=self.inputs.time_interp,
                  start=self.inputs.start)
 
-        R.estimate(loops=self.inputs.loops,
-                   between_loops=self.inputs.between_loops,
-                   speedup=self.inputs.speedup)
+        R.estimate(loops=list(self.inputs.loops),
+                   between_loops=list(self.inputs.between_loops),
+                   speedup=list(self.inputs.speedup))
 
         corr_run = R.resample()
         self._out_file_path = []
