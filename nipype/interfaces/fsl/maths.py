@@ -117,6 +117,19 @@ class MeanImage(MathsCommand):
     input_spec = MeanImageInput
     _suffix = "_mean"
 
+class MaxImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%smax", position=4,
+        desc="dimension to max across")
+
+
+class MaxImage(MathsCommand):
+    """Use fslmaths to generate a max image across a given dimension.
+
+    """
+    input_spec = MaxImageInput
+    _suffix = "_max"
+
 
 class IsotropicSmoothInput(MathsInput):
 
