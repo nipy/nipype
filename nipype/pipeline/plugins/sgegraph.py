@@ -88,7 +88,8 @@ class SGEGraphPlugin(GraphPluginBase):
                     batchscript=batchscriptfile)
                 fp.writelines(full_line)
 
-        cmd = CommandLine('bash', environ=os.environ.data)
+        cmd = CommandLine('bash', environ=os.environ.data,
+                          terminal_output='allatonce')
         cmd.inputs.args = '%s' % submitjobsfile
         cmd.run()
         logger.info('submitted all jobs to queue')

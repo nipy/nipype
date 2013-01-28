@@ -684,7 +684,7 @@ class NewSegment(SPMCommand):
                 new_tissues.append(new_tissue)
             return new_tissues
         elif opt == 'write_deformation_fields':
-            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[0])])
+            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[1])])
         else:
             return super(NewSegment, self)._format_arg(opt, spec, val)
 
