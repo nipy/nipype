@@ -1542,6 +1542,15 @@ class GLMOutputSpec(TraitedSpec):
         desc = 'file or image output')
 
 class GLM(FSLCommand):
+    """
+    FSL GLM: 
+
+    Example
+    -------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> glm = fsl.GLM(in_file='functional.nii', design = 'maps.nii')
+    >>> glm.cmdline
+    """
     _cmd = 'fsl_glm'
     input_spec = GLMInputSpec
     output_spec = GLMOutputSpec
