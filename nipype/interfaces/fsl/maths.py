@@ -117,6 +117,28 @@ class MeanImage(MathsCommand):
     input_spec = MeanImageInput
     _suffix = "_mean"
 
+class MaxImageInput(MathsInput):
+
+    dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%smax", position=4,
+        desc="dimension to max across")
+
+
+class MaxImage(MathsCommand):
+    """Use fslmaths to generate a max image across a given dimension.
+
+    Examples
+    --------
+    from nipype.interfaces.fsl.maths import MaxImage
+    maxer = MaxImage() 
+    maxer.inputs.in_file = "functional.nii"
+    maxer.dimension = "T"
+    maths.cmdline
+    fslmaths functional.nii -Tmax functional_max.nii
+    
+    """
+    input_spec = MaxImageInput
+    _suffix = "_max"
+
 
 class IsotropicSmoothInput(MathsInput):
 
