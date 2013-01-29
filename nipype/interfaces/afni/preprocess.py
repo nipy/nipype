@@ -534,7 +534,7 @@ class Automask(AFNICommand):
 
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
+            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
         elif name == "brain_file" and isdefined(self.inputs.apply_suffix):
             suffix = ''
             prefix = ''
@@ -543,7 +543,7 @@ class Automask(AFNICommand):
 
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
+            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
         elif name == "apply_mask" and isdefined(self.inputs.apply_suffix):
             suffix = ''
             prefix = ''
@@ -552,7 +552,7 @@ class Automask(AFNICommand):
 
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
+            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
         elif hasattr(self.inputs,name) and isdefined(getattr(self.inputs,name)):
             return super(Automask, self)._gen_filename(name)
         return Undefined
