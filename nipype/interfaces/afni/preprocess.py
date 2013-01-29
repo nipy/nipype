@@ -12,7 +12,7 @@ import warnings
 import os
 from .base import AFNIBaseCommandInputSpec, AFNIBaseCommand
 from ..base import (Directory, CommandLineInputSpec, CommandLine, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath)
+                    traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.afni.base import AFNICommand, AFNICommandInputSpec,\
@@ -553,8 +553,9 @@ class Automask(AFNICommand):
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
             return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
-        else:
-            return super(AFNICommand, self)._gen_filename(name)
+        elif hasattr(self.inputs,name) and isdefined(getattr(self.inputs,name)):
+            return super(Automask, self)._gen_filename(name)
+        return Undefined
 
     def _list_outputs(self):
         outputs = super(Automask, self)._list_outputs()
