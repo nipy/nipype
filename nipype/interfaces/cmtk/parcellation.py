@@ -184,6 +184,31 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
         nb.save(img, out_roi)
 
     iflogger.info("[ DONE ]")
+        # dilate cortical regions
+        iflogger.info("Dilating cortical regions...")
+        dilatestart = time()
+        # loop throughout all the voxels belonging to the aseg GM volume
+        for j in range(xx.size):
+            if newrois[xx[j],yy[j],zz[j]] == 0:
+                local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+                mask = local.copy()
+                mask[np.nonzero(local>0)] = 1
+                thisdist = np.multiply(dist,mask)
+                thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                if value.size > 1:
+                    counts = np.bincount(value)
+                    value = np.argmax(counts)
+                newrois[xx[j],yy[j],zz[j]] = value
+        iflogger.info("Cortical ROIs dilation took %s seconds to process." % (time()-dilatestart))
+
+        # store volume eg in ROIv_scale33.nii.gz
+        out_roi = op.join(fs_dir, 'label', 'ROIv_%s.nii.gz' % parkey)
+        iflogger.info("Save output image to %s" % out_roi)
+        img = ni.Nifti1Image(newrois, aseg.get_affine(), hdr2)
+        ni.save(img, out_roi)
+
+     iflogger.info("[ DONE ]") 
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
