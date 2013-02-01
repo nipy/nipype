@@ -459,6 +459,7 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(exists=True, desc='Region of Interest file for connectivity mapping')
+    roiv_file = File(exists=True, desc='Region of Interest file for fMRI connectivity mapping')
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
                     exists=True)
@@ -468,7 +469,8 @@ class ParcellateOutputSpec(TraitedSpec):
                     exists=True)
     roi_file_in_structural_space = File(desc='ROI image resliced to the dimensions of the original structural image',
                     exists=True)
-
+    dilated_roi_file_in_structural_space = File(desc='dilated ROI image resliced to the dimensions of the original structural image',
+                    exists=True)
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -500,9 +502,9 @@ class Parcellate(BaseInterface):
 			raise Exception
 		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
 		iflogger.info("=============================================")
-		#create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
 		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-		#create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
 		crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
 		return runtime
 
@@ -512,11 +514,13 @@ class Parcellate(BaseInterface):
             outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
             outputs['roi_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROI'))
+        outputs['roiv_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
+        outputs['dilated_roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):
