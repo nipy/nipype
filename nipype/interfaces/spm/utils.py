@@ -222,7 +222,13 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
     deformation = File(
         exists=True,
         field='comp{1}.inv.comp{1}.sn2def.matname',
-        desc='SN SPM deformation file')
+        desc='SN SPM deformation file',
+        xor=['deformation_field'])
+    deformation_field = File(
+        exists=True,
+        field='comp{1}.inv.comp{1}.def',
+        desc='SN SPM deformation file',
+        xor=['deformation'])
     interpolation = traits.Range(
         low=0, hign=7, field='interp',
         desc='degree of b-spline used for interpolation')
@@ -260,6 +266,8 @@ class ApplyInverseDeformation(SPMCommand):
         if opt == 'target':
             return scans_for_fname(filename_to_list(val))
         if opt == 'deformation':
+            return np.array([list_to_filename(val)], dtype=object)
+        if opt == 'deformation_field':
             return np.array([list_to_filename(val)], dtype=object)
         return val
 
