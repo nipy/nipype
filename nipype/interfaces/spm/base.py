@@ -9,18 +9,15 @@ import os
 from copy import deepcopy
 
 # Third-party imports
+from nibabel import load
 import numpy as np
 from scipy.io import savemat
 
 # Local imports
-from nipype.interfaces.base import (BaseInterface, traits, isdefined,
-                                    InputMultiPath, BaseInterfaceInputSpec,
-                                    Directory)
-
-from nibabel import load
-from nipype.interfaces.matlab import MatlabCommand
-
-import nipype.utils.spm_docs as sd
+from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
+                    BaseInterfaceInputSpec, Directory, Undefined)
+from ..matlab import MatlabCommand
+from ...utils import spm_docs as sd
 
 from ... import logging
 logger = logging.getLogger('interface')
@@ -222,6 +219,9 @@ class SPMCommand(BaseInterface):
                                   uses_mcr=self.inputs.use_mcr)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
+        if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:
+            self.mlab.inputs.nodesktop = Undefined
+            self.mlab.inputs.nosplash = Undefined
 
     @property
     def jobtype(self):
