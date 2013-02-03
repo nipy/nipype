@@ -16,6 +16,7 @@ from glob import glob
 import gzip
 from copy import deepcopy
 import cPickle
+import inspect
 import os
 import shutil
 from shutil import rmtree
@@ -37,7 +38,7 @@ from ..interfaces.base import (traits, InputMultiPath, CommandLine,
                                Undefined, TraitedSpec, DynamicTraitedSpec,
                                Bunch, InterfaceResult, md5, Interface,
                                TraitDictObject, TraitListObject, isdefined)
-from ..utils.misc import getsource
+from ..utils.misc import getsource, create_function_from_source
 from ..utils.filemanip import (save_json, FileNotFoundError,
                                filename_to_list, list_to_filename,
                                copyfiles, fnames_presuffix, loadpkl,
@@ -48,8 +49,61 @@ from ..utils.filemanip import (save_json, FileNotFoundError,
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir,
                     clean_working_directory, format_dot,
-                    get_print_name, merge_dict,
-                    evaluate_connect_function)
+                    get_print_name, merge_dict, evaluate_connect_function)
+
+
+def _write_inputs(node):
+    lines = []
+    for key, _ in node.inputs.items():
+        val = getattr(node.inputs, key)
+        if isdefined(val):
+            if type(val) == str:
+                lines.append('%s.inputs.%s = "%s"' % (node.name, key, val))
+            else:
+                lines.append('%s.inputs.%s = %s' % (node.name, key, val))
+    return lines
+
+
+def format_node(node, format='python'):
+    """Format a node in a given output syntax
+    """
+    lines = []
+    name = node.name
+    if format == 'python':
+        klass = node._interface
+        importline = 'from %s import %s' % (klass.__module__,
+                                            klass.__class__.__name__)
+        comment = '# Node: %s' % node.fullname
+        spec = inspect.getargspec(node._interface.__init__)
+        if spec.defaults:
+            args = spec.args[1:-len(spec.defaults)]
+        else:
+            args = spec.args[1:]
+        if args:
+            filled_args = []
+            for arg in args:
+                filled_args.append('%s=%s' % (arg, getattr(node._interface,
+                                                           '_%s' % arg)))
+            args = ', '.join(filled_args)
+        else:
+            args = ''
+        if isinstance(node, MapNode):
+            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' % (name,
+                                                                       klass.__class__.__name__,
+                                                                       args,
+                                                                       node.iterfield,
+                                                                       name)
+        else:
+            nodedef = '%s = Node(%s(%s), name="%s")' % (name,
+                                                      klass.__class__.__name__,
+                                                      args,
+                                                      name)
+        lines = [importline, comment, nodedef]
+        if node.iterables is not None:
+            lines.append('%s.iterables = %s' % (name, node.iterables))
+        lines.extend(_write_inputs(node))
+    return lines
+
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
@@ -488,17 +542,52 @@ connected.
         flatgraph = self._create_flat_graph()
         nodes = nx.topological_sort(flatgraph)
 
+        lines = ['# Workflow']
+        importlines = ['from nipype.pipeline.engine import Workflow, Node, MapNode']
+        functions = {}
         if format == "python":
-            with open('%s.py', 'wt') as fp:
-                nodenames = []
-                for idx, node in enumerate(nodes):
-                    # write nodes
-                    nodestr, nodename = node.format(format=python)
-                    fp.writelines(nodestr)
-                    # write connections
-                    for prevnode in flatgraph.predecessors(node):
-                        # write connection
-                        pass
+            connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
+            connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' % self.name
+            wfdef = '%s = Workflow("%s")' % (self.name, self.name)
+            lines.append(wfdef)
+            for idx, node in enumerate(nodes):
+                nodename = node.name
+                # write nodes
+                nodelines = format_node(node, format='python')
+                for line in nodelines:
+                    if line.startswith('from'):
+                        if line not in importlines:
+                            importlines.append(line)
+                    else:
+                        lines.append(line)
+                # write connections
+                for u, _, d in flatgraph.in_edges_iter(nbunch=node,
+                                                       data=True):
+                    for cd in d['connect']:
+                        if isinstance(cd[0], tuple):
+                            args = list(cd[0])
+                            if args[1] in functions:
+                                funcname = functions[args[1]]
+                            else:
+                                func = create_function_from_source(args[1])
+                                funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                                functions[args[1]] = funcname
+                            args[1] = funcname
+                            args = tuple([arg for arg in args if arg])
+                            line = connect_template % (u.name, args,
+                                                       nodename, cd[1])
+                            line = line.replace("'%s'" % funcname, funcname)
+                            lines.append(line)
+                        else:
+                            lines.append(connect_template2 % (u.name, cd[0],
+                                                              nodename, cd[1]))
+            functionlines = ['# Functions']
+            for function in functions:
+                functionlines.append(cPickle.loads(function).rstrip())
+            all_lines = importlines + functionlines + lines
+            with open('%s%s.py' % (prefix, self.name), 'wt') as fp:
+                fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
+        return all_lines
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
@@ -1061,11 +1150,6 @@ class Node(WorkflowBase):
     def help(self):
         """ Print interface help"""
         self._interface.help()
-
-    def format(format=python):
-        """Format a node in a given output syntax
-        """
-
 
 
     def hash_exists(self, updatehash=False):
