@@ -58,7 +58,21 @@ def _write_inputs(node):
         val = getattr(node.inputs, key)
         if isdefined(val):
             if type(val) == str:
-                lines.append('%s.inputs.%s = "%s"' % (node.name, key, val))
+                try:
+                    func = create_function_from_source(val)
+                except RuntimeError, e:
+                    lines.append("%s.inputs.%s = '%s'" % (node.name, key, val))
+                else:
+                    funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                    lines.append(cPickle.loads(val))
+                    if funcname == node.name:
+                        lines[-1] = lines[-1].replace(' %s(' % funcname,
+                                                      ' %s_1(' % funcname)
+                        funcname = '%s_1' % funcname
+                    lines.append('from nipype.utils.misc import getsource')
+                    lines.append("%s.inputs.%s = getsource(%s)" % (node.name,
+                                                                   key,
+                                                                   funcname))
             else:
                 lines.append('%s.inputs.%s = %s' % (node.name, key, val))
     return lines
@@ -586,7 +600,8 @@ connected.
                 functionlines.append(cPickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
             with open('%s%s.py' % (prefix, self.name), 'wt') as fp:
-                fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
+                #fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
+                fp.writelines('\n'.join(all_lines))
         return all_lines
 
     def run(self, plugin=None, plugin_args=None, updatehash=False):
