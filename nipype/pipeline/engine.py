@@ -62,11 +62,11 @@ def _write_inputs(node):
                 try:
                     func = create_function_from_source(val)
                 except RuntimeError, e:
-                    lines.append("%s.inputs.%s = '%s'" % (node.name, key, val))
+                    lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
                     funcname = [name for name in func.func_globals if name != '__builtins__'][0]
                     lines.append(cPickle.loads(val))
-                    if funcname == node.name:
+                    if funcname == nodename:
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
                         funcname = '%s_1' % funcname
