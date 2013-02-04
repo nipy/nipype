@@ -564,7 +564,7 @@ connected.
             wfdef = '%s = Workflow("%s")' % (self.name, self.name)
             lines.append(wfdef)
             for idx, node in enumerate(nodes):
-                nodename = node.fullname('.', '_')
+                nodename = node.fullname.replace('.', '_')
                 # write nodes
                 nodelines = format_node(node, format='python')
                 for line in nodelines:
@@ -587,12 +587,12 @@ connected.
                                 functions[args[1]] = funcname
                             args[1] = funcname
                             args = tuple([arg for arg in args if arg])
-                            line = connect_template % (u.name, args,
+                            line = connect_template % (u.fullname.replace('.','_'), args,
                                                        nodename, cd[1])
                             line = line.replace("'%s'" % funcname, funcname)
                             lines.append(line)
                         else:
-                            lines.append(connect_template2 % (u.name, cd[0],
+                            lines.append(connect_template2 % (u.fullname.replace('.','_'), cd[0],
                                                               nodename, cd[1]))
             functionlines = ['# Functions']
             for function in functions:
