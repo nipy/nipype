@@ -89,15 +89,13 @@ def format_node(node, format='python'):
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
         spec = inspect.getargspec(node._interface.__init__)
-        if spec.defaults:
-            args = spec.args[1:-len(spec.defaults)]
-        else:
-            args = spec.args[1:]
+        args = spec.args[1:]
         if args:
             filled_args = []
             for arg in args:
-                filled_args.append('%s=%s' % (arg, getattr(node._interface,
-                                                           '_%s' % arg)))
+                if  hasattr(node._interface, '_%s' % arg):
+                    filled_args.append('%s=%s' % (arg, getattr(node._interface,
+                                                               '_%s' % arg)))
             args = ', '.join(filled_args)
         else:
             args = ''
