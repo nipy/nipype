@@ -439,6 +439,7 @@ class DataGrabber(IOBase):
         undefined_traits = {}
         # used for mandatory inputs check
         self._infields = infields
+        self._outfields = outfields
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
