@@ -210,10 +210,7 @@ class Reslice(SPMCommand):
 
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
-    in_files = InputMultiPath(
-        traits.Either(traits.List(File(exists=True)),File(exists=True)),
-        field='fnames',
-        mandatory=True,
+    in_files=InputMultiPath(File(exists=True), mandatory=True, field='fnames',
         desc='Files on which deformation is applied')
     target = File(
         exists=True,
@@ -274,10 +271,8 @@ class ApplyInverseDeformation(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_files'] = []
-        for imgf in filename_to_list(self.inputs.in_files):
-            
-            outputs['out_files'].append(
-                fname_presuffix(imgf,prefix='w',newpath=os.getcwd()))
-
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s'%fname))
         return outputs
 
