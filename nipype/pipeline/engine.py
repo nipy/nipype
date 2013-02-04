@@ -75,7 +75,7 @@ def _write_inputs(node):
                                                                    key,
                                                                    funcname))
             else:
-                lines.append('%s.inputs.%s = %s' % (node.name, key, val))
+                lines.append('%s.inputs.%s = %s' % (nodename, key, val))
     return lines
 
 
