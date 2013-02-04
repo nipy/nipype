@@ -54,6 +54,7 @@ from .utils import (generate_expanded_graph, modify_paths,
 
 def _write_inputs(node):
     lines = []
+    nodename = node.fullname.replace('.', '_')
     for key, _ in node.inputs.items():
         val = getattr(node.inputs, key)
         if isdefined(val):
@@ -70,7 +71,7 @@ def _write_inputs(node):
                                                       ' %s_1(' % funcname)
                         funcname = '%s_1' % funcname
                     lines.append('from nipype.utils.misc import getsource')
-                    lines.append("%s.inputs.%s = getsource(%s)" % (node.name,
+                    lines.append("%s.inputs.%s = getsource(%s)" % (nodename,
                                                                    key,
                                                                    funcname))
             else:
@@ -82,7 +83,7 @@ def format_node(node, format='python'):
     """Format a node in a given output syntax
     """
     lines = []
-    name = node.name
+    name = node.fullname.replace('.', '_')
     if format == 'python':
         klass = node._interface
         importline = 'from %s import %s' % (klass.__module__,
