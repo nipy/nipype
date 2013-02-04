@@ -564,7 +564,7 @@ connected.
             wfdef = '%s = Workflow("%s")' % (self.name, self.name)
             lines.append(wfdef)
             for idx, node in enumerate(nodes):
-                nodename = node.name
+                nodename = node.fullname('.', '_')
                 # write nodes
                 nodelines = format_node(node, format='python')
                 for line in nodelines:
