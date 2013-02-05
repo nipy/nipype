@@ -17,7 +17,7 @@ import os
 import re
 import platform
 import pwd
-from socket import gethostname
+from socket import gethostname, getfqdn
 from string import Template
 import select
 import subprocess
@@ -924,7 +924,7 @@ class BaseInterface(Interface):
                         startTime=dt.isoformat(dt.utcnow()),
                         endTime=None,
                         platform=platform.platform(),
-                        hostname=gethostname(),
+                        hostname=getfqdn(),
                         version=self.version)
         try:
             runtime = self._run_interface(runtime)
@@ -1036,23 +1036,19 @@ class BaseInterface(Interface):
         nipype = pm.Namespace("nipype","http://nipy.org/nipype/terms/")
 
         get_id = lambda : nipype[uuid1().hex]
-        import base64
-        import re
 
         def safe_encode(x):
             if x is None:
                 return pm.Literal(json.dumps("Unknown")[1:-1], pm.XSD['string'])
             if isinstance(x, (str, unicode)):
                 if os.path.exists(x):
-                    return 'file://%s%s' % (gethostname(), x)
+                    return 'file://%s%s' % (getfqdn(), x)
                 else:
                     return pm.Literal(json.dumps(x)[1:-1], pm.XSD['string'])
             if isinstance(x, (int)):
                 return pm.Literal(int(x), pm.XSD['integer'])
             if isinstance(x, (float)):
                 return pm.Literal(x, pm.XSD['float'])
-            #out = base64.b64encode(json.dumps(x))
-            #return pm.Literal(out, pm.XSD['base64Binary'])
             return pm.Literal(json.dumps("Could not encode")[1:-1],
                               pm.XSD['string'])
 
