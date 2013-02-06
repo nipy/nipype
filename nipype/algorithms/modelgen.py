@@ -325,7 +325,7 @@ class SpecifyModel(BaseInterface):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
 		    shape = load(f).get_shape()
-                    numscans += shape[3] if len(shape) = 4 else 1
+                    numscans += shape[3] if len(shape) == 4 else 1
                 for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
