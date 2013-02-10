@@ -47,5 +47,5 @@ acknowledgements: The development of this tool was supported by funding from gra
 
     input_spec = BRAINSResampleInputSpec
     output_spec = BRAINSResampleOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch BRAINSResample "
+    _cmd = "BRAINSResample "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

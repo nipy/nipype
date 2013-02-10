@@ -42,5 +42,5 @@ acknowledgements: This work is funded by the Harvard Catalyst, and the National 
 
     input_spec = PETStandardUptakeValueComputationInputSpec
     output_spec = PETStandardUptakeValueComputationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch PETStandardUptakeValueComputation "
+    _cmd = "PETStandardUptakeValueComputation "
     _outputs_filenames = {'csvFile':'csvFile.csv'}

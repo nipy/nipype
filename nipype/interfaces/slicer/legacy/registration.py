@@ -47,7 +47,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = BSplineDeformableRegistrationInputSpec
     output_spec = BSplineDeformableRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch BSplineDeformableRegistration "
+    _cmd = "BSplineDeformableRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt','outputwarp':'outputwarp.nrrd'}
 
 
@@ -95,7 +95,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
     input_spec = AffineRegistrationInputSpec
     output_spec = AffineRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch AffineRegistration "
+    _cmd = "AffineRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
 
 
@@ -137,7 +137,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = MultiResolutionAffineRegistrationInputSpec
     output_spec = MultiResolutionAffineRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch MultiResolutionAffineRegistration "
+    _cmd = "MultiResolutionAffineRegistration "
     _outputs_filenames = {'resampledImage':'resampledImage.nii','saveTransform':'saveTransform.txt'}
 
 
@@ -191,7 +191,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
     input_spec = RigidRegistrationInputSpec
     output_spec = RigidRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch RigidRegistration "
+    _cmd = "RigidRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
 
 
@@ -234,7 +234,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = LinearRegistrationInputSpec
     output_spec = LinearRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch LinearRegistration "
+    _cmd = "LinearRegistration "
     _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
 
 
@@ -293,5 +293,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ExpertAutomatedRegistrationInputSpec
     output_spec = ExpertAutomatedRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ExpertAutomatedRegistration "
+    _cmd = "ExpertAutomatedRegistration "
     _outputs_filenames = {'resampledImage':'resampledImage.nii','saveTransform':'saveTransform.txt'}

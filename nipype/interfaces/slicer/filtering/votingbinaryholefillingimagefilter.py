@@ -38,5 +38,5 @@ acknowledgements: This command module was derived from Insight/Examples/Filterin
 
     input_spec = VotingBinaryHoleFillingImageFilterInputSpec
     output_spec = VotingBinaryHoleFillingImageFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch VotingBinaryHoleFillingImageFilter "
+    _cmd = "VotingBinaryHoleFillingImageFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

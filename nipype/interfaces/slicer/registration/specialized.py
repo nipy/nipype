@@ -38,7 +38,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ACPCTransformInputSpec
     output_spec = ACPCTransformOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ACPCTransform "
+    _cmd = "ACPCTransform "
     _outputs_filenames = {'outputTransform':'outputTransform.mat'}
 
 
@@ -74,7 +74,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = FiducialRegistrationInputSpec
     output_spec = FiducialRegistrationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch FiducialRegistration "
+    _cmd = "FiducialRegistration "
     _outputs_filenames = {'saveTransform':'saveTransform.txt'}
 
 
@@ -152,7 +152,7 @@ acknowledgements: The development of this tool was supported by funding from gra
 
     input_spec = VBRAINSDemonWarpInputSpec
     output_spec = VBRAINSDemonWarpOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch VBRAINSDemonWarp "
+    _cmd = "VBRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDisplacementFieldVolume':'outputDisplacementFieldVolume.nrrd'}
 
 
@@ -229,5 +229,5 @@ acknowledgements: The development of this tool was supported by funding from gra
 
     input_spec = BRAINSDemonWarpInputSpec
     output_spec = BRAINSDemonWarpOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch BRAINSDemonWarp "
+    _cmd = "BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','outputCheckerboardVolume':'outputCheckerboardVolume.nii','outputDisplacementFieldVolume':'outputDisplacementFieldVolume.nrrd'}

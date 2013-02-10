@@ -41,5 +41,5 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
     input_spec = SimpleRegionGrowingSegmentationInputSpec
     output_spec = SimpleRegionGrowingSegmentationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch SimpleRegionGrowingSegmentation "
+    _cmd = "SimpleRegionGrowingSegmentation "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

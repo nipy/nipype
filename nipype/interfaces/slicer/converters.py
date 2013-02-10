@@ -41,7 +41,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = DicomToNrrdConverterInputSpec
     output_spec = DicomToNrrdConverterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DicomToNrrdConverter "
+    _cmd = "DicomToNrrdConverter "
     _outputs_filenames = {'outputDirectory':'outputDirectory'}
 
 
@@ -74,5 +74,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = OrientScalarVolumeInputSpec
     output_spec = OrientScalarVolumeOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch OrientScalarVolume "
+    _cmd = "OrientScalarVolume "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

@@ -58,7 +58,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ResampleDTIVolumeInputSpec
     output_spec = ResampleDTIVolumeOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ResampleDTIVolume "
+    _cmd = "ResampleDTIVolume "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -103,7 +103,7 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
 
     input_spec = DWIRicianLMMSEFilterInputSpec
     output_spec = DWIRicianLMMSEFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DWIRicianLMMSEFilter "
+    _cmd = "DWIRicianLMMSEFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -153,7 +153,7 @@ acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the
 
     input_spec = TractographyLabelMapSeedingInputSpec
     output_spec = TractographyLabelMapSeedingOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch TractographyLabelMapSeeding "
+    _cmd = "TractographyLabelMapSeeding "
     _outputs_filenames = {'OutputFibers':'OutputFibers.vtk','outputdirectory':'outputdirectory'}
 
 
@@ -192,7 +192,7 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
 
     input_spec = DWIJointRicianLMMSEFilterInputSpec
     output_spec = DWIJointRicianLMMSEFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DWIJointRicianLMMSEFilter "
+    _cmd = "DWIJointRicianLMMSEFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -228,7 +228,7 @@ contributor: Demian Wassermann (SPL, BWH)
 
     input_spec = DiffusionWeightedVolumeMaskingInputSpec
     output_spec = DiffusionWeightedVolumeMaskingOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DiffusionWeightedVolumeMasking "
+    _cmd = "DiffusionWeightedVolumeMasking "
     _outputs_filenames = {'outputBaseline':'outputBaseline.nii','thresholdMask':'thresholdMask.nii'}
 
 
@@ -261,7 +261,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = DTIimportInputSpec
     output_spec = DTIimportOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DTIimport "
+    _cmd = "DTIimport "
     _outputs_filenames = {'outputTensor':'outputTensor.nii'}
 
 
@@ -302,7 +302,7 @@ acknowledgements: This command module is based on the estimation functionality p
 
     input_spec = DWIToDTIEstimationInputSpec
     output_spec = DWIToDTIEstimationOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DWIToDTIEstimation "
+    _cmd = "DWIToDTIEstimation "
     _outputs_filenames = {'outputTensor':'outputTensor.nii','outputBaseline':'outputBaseline.nii'}
 
 
@@ -335,7 +335,7 @@ acknowledgements: LMI
 
     input_spec = DiffusionTensorScalarMeasurementsInputSpec
     output_spec = DiffusionTensorScalarMeasurementsOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DiffusionTensorScalarMeasurements "
+    _cmd = "DiffusionTensorScalarMeasurements "
     _outputs_filenames = {'outputScalar':'outputScalar.nii'}
 
 
@@ -367,5 +367,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = DTIexportInputSpec
     output_spec = DTIexportOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DTIexport "
+    _cmd = "DTIexport "
     _outputs_filenames = {'outputFile':'outputFile'}

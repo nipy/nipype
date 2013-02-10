@@ -44,5 +44,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = HistogramMatchingInputSpec
     output_spec = HistogramMatchingOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch HistogramMatching "
+    _cmd = "HistogramMatching "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

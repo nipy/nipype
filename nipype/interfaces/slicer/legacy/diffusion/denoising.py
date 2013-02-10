@@ -43,5 +43,5 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
 
     input_spec = DWIUnbiasedNonLocalMeansFilterInputSpec
     output_spec = DWIUnbiasedNonLocalMeansFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch DWIUnbiasedNonLocalMeansFilter "
+    _cmd = "DWIUnbiasedNonLocalMeansFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
