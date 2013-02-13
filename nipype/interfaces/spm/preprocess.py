@@ -1136,7 +1136,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False,usedefault=True,field='estwrite.output.GM.native',)
     gm_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.GM.warped',)
-    gm_modulated_normalize = traits.Int(
+    gm_modulated_normalized = traits.Int(
         2,usedefault=True,field='estwrite.output.GM.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
     gm_dartel = traits.Int(
@@ -1147,7 +1147,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False,usedefault=True,field='estwrite.output.WM.native',)
     wm_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.WM.warped',)
-    wm_modulated_normalize = traits.Int(
+    wm_modulated_normalized = traits.Int(
         2,usedefault=True,field='estwrite.output.WM.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
     wm_dartel = traits.Int(
@@ -1158,7 +1158,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False,usedefault=True,field='estwrite.output.CSF.native',)
     csf_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.CSF.warped',)
-    csf_modulated_normalize = traits.Int(
+    csf_modulated_normalized = traits.Int(
         2,usedefault=True,field='estwrite.output.CSF.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
     csf_dartel = traits.Int(
@@ -1190,11 +1190,16 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
 
 class VBMSegmentOuputSpec(TraitedSpec):
     
-    native_class_images = traits.List(traits.List(File(exists=True)), desc='native space probability maps')
-    dartel_input_images = traits.List(traits.List(File(exists=True)), desc='dartel imported class images')
-    normalized_class_images = traits.List(traits.List(File(exists=True)), desc='normalized class images')
-    modulated_class_images = traits.List(traits.List(File(exists=True)), desc='modulated+normalized class images')
-    transformation_mat = OutputMultiPath(File(exists=True), desc='Normalization transformation')
+    native_class_images = traits.List(traits.List(File(exists=True)), 
+                                      desc='native space probability maps')
+    dartel_input_images = traits.List(traits.List(File(exists=True)), 
+                                      desc='dartel imported class images')
+    normalized_class_images = traits.List(traits.List(File(exists=True)),
+                                          desc='normalized class images')
+    modulated_class_images = traits.List(traits.List(File(exists=True)), 
+                                         desc='modulated+normalized class images')
+    transformation_mat = OutputMultiPath(File(exists=True),
+                                         desc='Normalization transformation')
 
     bias_corrected_images = OutputMultiPath(
         File(exists=True), 
@@ -1221,6 +1226,12 @@ class VBMSegment(SPMCommand):
     
     def _list_outputs(self):
         outputs = self._outputs().get()
+        
+        do_dartel = self.inputs.spatial_normalization
+        dartel_px = ''
+        if do_dartel:
+            dartel_px = 'r'
+        
         outputs['native_class_images'] = [[],[],[]]
         outputs['dartel_input_images'] = [[],[],[]]
         outputs['normalized_class_images'] = [[],[],[]]
@@ -1231,72 +1242,61 @@ class VBMSegment(SPMCommand):
         outputs['bias_corrected_images'] = []
         outputs['normalized_bias_corrected_images'] = []
 
-        outputs['native_bias_field_images'] = []
-        outputs['normalized_bias_field_images'] = []
-
         outputs['inverse_deformation_field'] = []
         outputs['forward_deformation_field'] = []        
         outputs['jacobian_determinant_images'] = []
         
         outputs['pve_label_native_images'] = []
         outputs['pve_label_normalized_images'] = []
-        outputs['pve_label_normalized_images'] = []
-
+        outputs['pve_label_registered_images'] = []
 
         for filename in self.inputs.in_files:
             pth, base, ext = split_filename(filename)
 
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
-            
-            if self.inputs.gm_native:
-                outputs['native_class_images'][0].append(os.path.join(pth,"p%d%s.nii"%(1, base)))
-            if self.inputs.wm_native:
-                outputs['native_class_images'][1].append(os.path.join(pth,"p%d%s.nii"%(2, base)))
-            if self.inputs.csf_native:
-                outputs['native_class_images'][2].append(os.path.join(pth,"p%d%s.nii"%(3, base)))
 
-            if self.inputs.gm_normalized:
-                outputs['normalized_class_images'][0].append(os.path.join(pth,"wp%d%s.nii"%(1, base)))
-            if self.inputs.wm_normalized:
-                outputs['normalized_class_images'][1].append(os.path.join(pth,"wp%d%s.nii"%(2, base)))
-            if self.inputs.csf_normalized:
-                outputs['normalized_class_images'][2].append(os.path.join(pth,"wp%d%s.nii"%(3, base)))
+            for i,tis in enumerate(['gm','wm','csf']):
+            # native space
 
-            if self.inputs.gm_modulated_normalize:
-                outputs['modulated_class_images'][0].append(os.path.join(pth,"mm0wp%d%s.nii"%(1, base)))
-            if self.inputs.wm_modulated_normalize:
-                outputs['modulated_class_images'][1].append(os.path.join(pth,"mm0wp%d%s.nii"%(2, base)))
-            if self.inputs.csf_modulated_normalize:
-                outputs['modulated_class_images'][2].append(os.path.join(pth,"mmwp%d%s.nii"%(3, base)))
+                if getattr(self.inputs,'%s_native'%tis):
+                    outputs['native_class_images'][i].append(os.path.join(pth,"p%d%s.nii"%(i+1, base)))
+                if getattr(self.inputs,'%s_dartel'%tis) == 1:
+                    outputs['dartel_input_images'][i].append(os.path.join(pth,"rp%d%s.nii"%(i+1, base)))
+                elif getattr(self.inputs,'%s_dartel'%tis) == 2:
+                    outputs['dartel_input_images'][i].append(os.path.join(pth,"rp%d%s_affine.nii"%(i+1, base)))
 
-            if self.inputs.gm_dartel == 1:
-                outputs['dartel_input_images'][0].append(os.path.join(pth,"rp%d%s.nii"%(1, base)))
-            elif self.inputs.gm_dartel == 2:
-                outputs['dartel_input_images'][0].append(os.path.join(pth,"rp%d%s_affine.nii"%(1, base)))                
-            if self.inputs.wm_dartel == 1:
-                outputs['dartel_input_images'][1].append(os.path.join(pth,"rp%d%s.nii"%(2, base)))
-            elif self.inputs.wm_dartel == 2:
-                outputs['dartel_input_images'][1].append(os.path.join(pth,"rp%d%s_affine.nii"%(2, base)))
-            if self.inputs.csf_dartel == 1:
-                outputs['dartel_input_images'][2].append(os.path.join(pth,"rp%d%s.nii"%(3, base)))
-            elif self.inputs.csf_dartel == 2:
-                outputs['dartel_input_images'][2].append(os.path.join(pth,"rp%d%s_affine.nii"%(3, base)))
+            #normalized space
+                if getattr(self.inputs,'%s_normalized'%tis):
+                    outputs['normalized_class_images'][i].append(os.path.join(pth,"w%sp%d%s.nii"%(dartel_px,i+1, base)))
+
+                if getattr(self.inputs,'%s_modulated_normalized'%tis)==1:
+                    outputs['modulated_class_images'][i].append(os.path.join(pth,"mw%sp%d%s.nii"%(dartel_px, i+1, base)))
+                elif getattr(self.inputs,'%s_modulated_normalized'%tis)==2:
+                    outputs['normalized_class_images'][i].append(os.path.join(pth,"m0w%sp%d%s.nii"%(dartel_px,i+1, base)))
+
+                    
+                    
+            if self.inputs.pve_label_native:
+                outputs['pve_label_native_images'].append(os.path.join(pth,"p0%s_affine.nii"%(base)))
+            if self.inputs.pve_label_normalized:
+                outputs['pve_label_normalized_images'].append(os.path.join(pth,"w%sp0%s_affine.nii"%(dartel_px,base)))
+            if self.inputs.pve_label_dartel==1:
+                outputs['pve_label_registered_images'].append(os.path.join(pth,"rp0%s.nii"%( base)))
+            elif self.inputs.pve_label_dartel==2:
+                outputs['pve_label_registered_images'].append(os.path.join(pth,"rp0%s_affine.nii"%( base)))
 
 
             if self.inputs.bias_corrected_native:
                 outputs['bias_corrected_images'].append(os.path.join(pth,"m%s.nii"%(base)))
             if self.inputs.bias_corrected_normalized:
-                if self.inputs.bias_corrected_affine:
-                    outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s_affine.nii"%(base)))
-                else:
-                    outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s.nii"%(base)))
+                outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s%s_affine.nii"%(dartel_px, base)))
 
             if self.inputs.deformation_field[0]:
-                outputs['forward_deformation_field'].append(os.path.join(pth,"y_r%s.nii"%(base)))
+                outputs['forward_deformation_field'].append(os.path.join(pth,"y_%s%s.nii"%(dartel_px,base)))
             if self.inputs.deformation_field[1]:
-                outputs['inverse_deformation_field'].append(os.path.join(pth,"iy_r%s.nii"%(base)))
+                outputs['inverse_deformation_field'].append(os.path.join(pth,"iy_%s%s.nii"%(dartel_px,base)))
 
-            if self.inputs.jacobian_determinant:
+            if self.inputs.jacobian_determinant and do_dartel:
                 outputs['jacobian_determinant_images'].append(os.path.join(pth,"jac_wrp1%s.nii"%(base)))
         return outputs
 
