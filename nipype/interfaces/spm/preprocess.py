@@ -1116,8 +1116,8 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         4, usedefault=True, field='estwrite.opts.warpreg',
         desc='Controls balance between parameters and data')
     
-    spatial_normalization = traits.Enum(
-        'low','high',usedefault=True,)
+    spatial_normalization = traits.Enum('high',
+        'low',usedefault=True,)
     dartel_template = File(
         exists=True,
         field='estwrite.extopts.dartelwarp.normhigh.darteltpm')
@@ -1210,7 +1210,7 @@ class VBMSegmentOuputSpec(TraitedSpec):
 
     pve_label_native_images = OutputMultiPath(File(exists=True))
     pve_label_normalized_images = OutputMultiPath(File(exists=True))
-    pve_label_normalized_images = OutputMultiPath(File(exists=True))
+    pve_label_registered_images = OutputMultiPath(File(exists=True))
     
     forward_deformation_field = OutputMultiPath(File(exists=True))
     inverse_deformation_field = OutputMultiPath(File(exists=True))
@@ -1277,9 +1277,9 @@ class VBMSegment(SPMCommand):
                     
                     
             if self.inputs.pve_label_native:
-                outputs['pve_label_native_images'].append(os.path.join(pth,"p0%s_affine.nii"%(base)))
+                outputs['pve_label_native_images'].append(os.path.join(pth,"p0%s.nii"%(base)))
             if self.inputs.pve_label_normalized:
-                outputs['pve_label_normalized_images'].append(os.path.join(pth,"w%sp0%s_affine.nii"%(dartel_px,base)))
+                outputs['pve_label_normalized_images'].append(os.path.join(pth,"w%sp0%s.nii"%(dartel_px,base)))
             if self.inputs.pve_label_dartel==1:
                 outputs['pve_label_registered_images'].append(os.path.join(pth,"rp0%s.nii"%( base)))
             elif self.inputs.pve_label_dartel==2:
@@ -1289,7 +1289,7 @@ class VBMSegment(SPMCommand):
             if self.inputs.bias_corrected_native:
                 outputs['bias_corrected_images'].append(os.path.join(pth,"m%s.nii"%(base)))
             if self.inputs.bias_corrected_normalized:
-                outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s%s_affine.nii"%(dartel_px, base)))
+                outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s.nii"%(base)))
 
             if self.inputs.deformation_field[0]:
                 outputs['forward_deformation_field'].append(os.path.join(pth,"y_%s%s.nii"%(dartel_px,base)))
@@ -1316,7 +1316,9 @@ class VBMSegment(SPMCommand):
         
     def _parse_inputs(self):
         if self.inputs.spatial_normalization == 'low':
-            return super(VBMSegment, self)._parse_inputs(skip=('spatial_normalization', 'dartel_template'))
+            einputs = super(VBMSegment, self)._parse_inputs(skip=('spatial_normalization', 'dartel_template'))
+            einputs[0]['estwrite']['extopts']['dartelwarp']={'normlow':1}
+            return einputs
         else:
             return super(VBMSegment, self)._parse_inputs(skip=('spatial_normalization'))
             
