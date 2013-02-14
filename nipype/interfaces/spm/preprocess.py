@@ -1161,7 +1161,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
     csf_modulated_normalized = traits.Range(
         0,2,2,usedefault=True,field='estwrite.output.CSF.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
-    csf_dartel = traits.range(
+    csf_dartel = traits.Range(
         0,2,0,usedefault=True,field='estwrite.output.CSF.dartel',
         desc="0=None,1=rigid(SPM8 default),2=affine")
 
