@@ -1122,7 +1122,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         exists=True,
         field='estwrite.extopts.dartelwarp.normhigh.darteltpm')
     use_sanlm_denoising_filter = traits.Range(
-        2,0,2,usedefault=True,field='estwrite.extopts.sanlm',
+        0,2,2,usedefault=True,field='estwrite.extopts.sanlm',
         desc="0=No denoising, 1=denoising,2=denoising multi-threaded")
     mrf_weighting = traits.Float(
         0.15,usedefault=True,field='estwrite.extopts.mrf')
@@ -1136,33 +1136,33 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False,usedefault=True,field='estwrite.output.GM.native',)
     gm_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.GM.warped',)
-    gm_modulated_normalized = traits.Int(
-        2,usedefault=True,field='estwrite.output.GM.modulated',
+    gm_modulated_normalized = traits.Range(
+        0,2,2,usedefault=True,field='estwrite.output.GM.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
-    gm_dartel = traits.Int(
-        0,usedefault=True,field='estwrite.output.GM.dartel',
+    gm_dartel = traits.Range(
+        0,2,0,usedefault=True,field='estwrite.output.GM.dartel',
         desc="0=None,1=rigid(SPM8 default),2=affine")
 
     wm_native = traits.Bool(
         False,usedefault=True,field='estwrite.output.WM.native',)
     wm_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.WM.warped',)
-    wm_modulated_normalized = traits.Int(
-        2,usedefault=True,field='estwrite.output.WM.modulated',
+    wm_modulated_normalized = traits.Range(
+        0,2,2,usedefault=True,field='estwrite.output.WM.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
-    wm_dartel = traits.Int(
-        0,usedefault=True,field='estwrite.output.WM.dartel',
+    wm_dartel = traits.Range(
+        0,2,0,usedefault=True,field='estwrite.output.WM.dartel',
         desc="0=None,1=rigid(SPM8 default),2=affine")
 
     csf_native = traits.Bool(
         False,usedefault=True,field='estwrite.output.CSF.native',)
     csf_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.CSF.warped',)
-    csf_modulated_normalized = traits.Int(
-        2,usedefault=True,field='estwrite.output.CSF.modulated',
+    csf_modulated_normalized = traits.Range(
+        0,2,2,usedefault=True,field='estwrite.output.CSF.modulated',
         desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
-    csf_dartel = traits.Int(
-        0,usedefault=True,field='estwrite.output.CSF.dartel',
+    csf_dartel = traits.range(
+        0,2,0,usedefault=True,field='estwrite.output.CSF.dartel',
         desc="0=None,1=rigid(SPM8 default),2=affine")
 
     bias_corrected_native = traits.Bool(
@@ -1176,8 +1176,8 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         False,usedefault=True,field='estwrite.output.label.native')
     pve_label_normalized = traits.Bool(
         False,usedefault=True,field='estwrite.output.label.warped')
-    pve_label_dartel =  traits.Int(
-        0,usedefault=True,field='estwrite.output.label.dartel',
+    pve_label_dartel =  traits.Range(
+        0,2,0,usedefault=True,field='estwrite.output.label.dartel',
         desc="0=None,1=rigid(SPM8 default),2=affine")
 
     jacobian_determinant = traits.Bool(
