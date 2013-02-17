@@ -261,7 +261,8 @@ class CopyMeta(BaseInterface):
     output_spec = CopyMetaOutputSpec
     
     def _run_interface(self, runtime):
-        src = NiftiWrapper.from_filename(self.inputs.src_file)
+        src_nii = nb.load(self.inputs.src_file)
+        src = NiftiWrapper(src_nii, make_empty=True)
         dest_nii = nb.load(self.inputs.dest_file)
         dest = NiftiWrapper(dest_nii, make_empty=True)
         classes = src.meta_ext.get_valid_classes()
