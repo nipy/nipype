@@ -1094,6 +1094,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
         argstr='--unwarp=%s', genfile=True,
         desc='apply unwarping and save as filename', hash_files=False)
     forward_warping = traits.Bool(
+        False, usedefault=True,
         desc='apply forward warping instead of unwarping')
     warped_file = File(argstr='--warp=%s', genfile=True,
                        desc='apply forward warping and save as filename',
