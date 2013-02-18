@@ -1105,7 +1105,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
     
     bias_fwhm = traits.Enum(
         60,
-        (30, 40, 50, 70 , 80, 90, 100, 110, 120, 130, 'Inf'),
+        (30, 40, 50, 60, 70 , 80, 90, 100, 110, 120, 130, 'Inf'),
         field='estwrite.opts.biasfwhm',
         usedefault=True,                    
         desc='FWHM of Gaussian smoothness of bias')
@@ -1289,7 +1289,7 @@ class VBMSegment(SPMCommand):
             if self.inputs.bias_corrected_native:
                 outputs['bias_corrected_images'].append(os.path.join(pth,"m%s.nii"%(base)))
             if self.inputs.bias_corrected_normalized:
-                outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s.nii"%(base)))
+                outputs['normalized_bias_corrected_images'].append(os.path.join(pth,"wm%s%s.nii"%(dartel_px,base)))
 
             if self.inputs.deformation_field[0]:
                 outputs['forward_deformation_field'].append(os.path.join(pth,"y_%s%s.nii"%(dartel_px,base)))
