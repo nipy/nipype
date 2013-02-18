@@ -404,7 +404,7 @@ class FEATModel(FSLCommand):
         return fname.split('.')[0]
 
     def _list_outputs(self):
-        #TODO: figure out file names and get rid off the globs
+        # TODO: figure out file names and get rid off the globs
         outputs = self._outputs().get()
         root = self._get_design_root(list_to_filename(self.inputs.fsf_file))
         design_file = glob(os.path.join(os.getcwd(), '%s*.mat' % root))
@@ -430,14 +430,14 @@ class FEATModel(FSLCommand):
 # ohinds: 2009-12-28
 
 class FILMGLSInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-3,
+    in_file = File(exists=True, mandatory=True, position= -3,
                   argstr='%s',
                   desc='input data file')
-    design_file = File(exists=True, position=-2,
+    design_file = File(exists=True, position= -2,
                        argstr='%s',
                        desc='design matrix file')
     threshold = traits.Float(1000, min=0, argstr='%f',
-                             position=-1,
+                             position= -1,
                              desc='threshold')
     smooth_autocorr = traits.Bool(argstr='-sa',
                                   desc='Smooth auto corr estimates')
@@ -548,6 +548,181 @@ threshold=10, results_dir='stats')
                                              change_ext=False,
                                              cwd=results_dir)
         return outputs
+
+class FSLGLMInputSpec(FSLCommandInputSpec):
+    """
+    Use FSL GLM
+    @author: sebastian urchs
+    @contact: sebastian.urchs@gmail.com
+
+    """
+
+    in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
+                   desc='input file name (text matrix or 3D/4D image file)')
+
+    output_file = File(argstr='-o %s', mandatory=True, position=3,
+                       desc=('filename for GLM parameter estimates'
+                             + ' (GLM betas)'))
+
+    design_file = File(exists=True, argstr='-d %s', mandatory=True, position=2,
+                       desc=('file name of the GLM design matrix (text time'
+                             + ' courses for temporal regression or an image'
+                             + ' file for spatial regression)'))
+
+    contrasts = File(exists=True, argstr='-c %s', desc=('matrix of t-statics'
+                                                        + ' contrasts'))
+
+    mask = File(exists=True, argstr='-m %s', desc=('mask image file name if'
+                                                   + ' input is image'))
+
+    dof = traits.Int(argstr='--dof %d', desc=('set degrees of freedom'
+                                              + ' explicitly'))
+
+    des_norm = traits.Bool(argstr='--des_norm', desc=('switch on normalization'
+                                                     + ' of the design matrix'
+                                                     + ' columns to unit std'
+                                                     + ' deviation'))
+
+    dat_norm = traits.Bool(argstr='--dat_norm', desc=('switch on normalization'
+                                                      + ' of the data time'
+                                                      + ' series to unit std'
+                                                      + ' deviation'))
+
+    var_norm = traits.Bool(argstr='--vn', desc=('perform MELODIC variance-'
+                                                + 'normalisation on data'))
+
+    demean = traits.Bool(argstr='--demean', desc=('switch on demeaining of '
+                                                  + ' design and data'))
+
+    out_cope = File(argstr='--out_cope=%s',
+                    desc='output file name for COPE (either as txt or image')
+
+    out_z_name = File(argstr='--out_z=%s',
+                 desc='output file name for Z-stats (either as txt or image')
+
+    out_t_name = File(argstr='--out_t=%s',
+                 desc='output file name for t-stats (either as txt or image')
+
+    out_p_name = File(argstr='--out_p=%s',
+                 desc=('output file name for p-values of Z-stats (either as'
+                       + ' text file or image)'))
+
+    out_f_name = File(argstr='--out_f=%s',
+                 desc='output file name for F-value of full model fit')
+
+    out_pf_name = File(argstr='--out_pf=%s',
+                 desc='output file name for p-value for full model fit')
+
+    out_res_name = File(argstr='--out_res=%s',
+                 desc='output file name for residuals')
+
+    out_varcb_name = File(argstr='--out_varcb=%s',
+                 desc='output file name for variance of COPEs')
+
+    out_sigsq_name = File(argstr='--out_sigsq=%s',
+                 desc=('output file name for residual noise variance'
+                       + ' sigma-square'))
+
+    out_data_name = File(argstr='--out_data=%s',
+                 desc='output file name for pre-processed data')
+
+    out_vnscales_name = File(argstr='--out_vnscales=%s',
+                 desc=('output file name for scaling factors for variance'
+                       + ' normalisation'))
+
+
+class FSLGLMOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc=('file name of GLM parameters'
+                                       + ' (if generated)'))
+
+    out_cope = OutputMultiPath(exists=True, desc='output file name for COPEs' +
+                               ' (either as text file or image)')
+
+    out_z = OutputMultiPath(exists=True, desc='output file name for COPEs' +
+                            ' (either as text file or image)')
+
+    out_t = OutputMultiPath(exists=True, desc='output file name for t-stats' +
+                            ' (either as text file or image)')
+
+    out_p = OutputMultiPath(exists=True, desc='output file name for p-values' +
+                            '  of Z-stats (either as text file or image)')
+
+    out_f = OutputMultiPath(exists=True, desc='output file name for F-value' +
+                            ' of full model fit')
+
+    out_pf = OutputMultiPath(exists=True, desc='output file name for p-value' +
+                             ' for full model fit')
+
+    out_res = OutputMultiPath(exists=True, desc='output file name for' +
+                              ' residuals')
+
+    out_varcb = OutputMultiPath(exists=True, desc='output file name for' +
+                                ' variance of COPEs')
+
+    out_sigsq = OutputMultiPath(exists=True, desc='output file name for' +
+                                ' residual noise variance sigma-square')
+
+    out_data = OutputMultiPath(exists=True, desc='output file name for' +
+                               ' residual noise variance sigma-square')
+
+    out_vnscales = OutputMultiPath(exists=True, desc='output file name' +
+                                   ' for scaling factors for variance' +
+                                   ' normalisation')
+
+
+class FSLGLM(FSLCommand):
+    """
+    Use FSL GLM.
+    @author: sebastian urchs
+    @contact: sebastian.urchs@gmail.com
+    @status: testing
+
+    """
+    _cmd = 'fsl_glm'
+    input_spec = FSLGLMInputSpec
+    output_spec = FSLGLMOutputSpec
+
+    def _list_outputs(self):
+        import os
+        outputs = self.output_spec().get()
+
+        outputs['out_file'] = os.path.join(os.getcwd(), self.inputs.output_file)
+
+        if isdefined(self.inputs.out_cope):
+            outputs['out_cope'] = os.path.join(os.getcwd(), self.inputs.out_cope)
+
+        if isdefined(self.inputs.out_z_name):
+            outputs['out_z'] = os.path.join(os.getcwd(), self.inputs.out_z_name)
+
+        if isdefined(self.inputs.out_t_name):
+            outputs['out_t'] = os.path.join(os.getcwd(), self.inputs.out_t_name)
+
+        if isdefined(self.inputs.out_p_name):
+            outputs['out_p'] = os.path.join(os.getcwd(), self.inputs.out_p_name)
+
+        if isdefined(self.inputs.out_f_name):
+            outputs['out_f'] = os.path.join(os.getcwd(), self.inputs.out_f_name)
+
+        if isdefined(self.inputs.out_pf_name):
+            outputs['out_pf'] = os.path.join(os.getcwd(), self.inputs.out_pf_name)
+
+        if isdefined(self.inputs.out_res_name):
+            outputs['out_res'] = os.path.join(os.getcwd(), self.inputs.out_res_name)
+
+        if isdefined(self.inputs.out_varcb_name):
+            outputs['out_varcb'] = os.path.join(os.getcwd(), self.inputs.out_varcb_name)
+
+        if isdefined(self.inputs.out_sigsq_name):
+            outputs['out_sigsq'] = os.path.join(os.getcwd(), self.inputs.out_sigsq_name)
+
+        if isdefined(self.inputs.out_data_name):
+            outputs['out_data'] = os.path.join(os.getcwd(), self.inputs.out_data_name)
+
+        if isdefined(self.inputs.out_vnscales_name):
+            outputs['out_vnscales'] = os.path.join(os.getcwd(), self.inputs.out_vnscales_name)
+
+        return outputs
+
 
 
 class FEATRegisterInputSpec(BaseInterfaceInputSpec):
@@ -732,7 +907,7 @@ class FLAMEO(FSLCommand):
 
 class ContrastMgrInputSpec(FSLCommandInputSpec):
     tcon_file = File(exists=True, mandatory=True,
-                     argstr='%s', position=-1,
+                     argstr='%s', position= -1,
                      desc='contrast file containing T-contrasts')
     fcon_file = File(exists=True, argstr='-f %s',
                      desc='contrast file containing F-contrasts')
@@ -744,7 +919,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                        desc='statistical corrections used within FILM modelling')
     dof_file = File(exists=True, argstr='', copyfile=False, mandatory=True,
                     desc='degrees of freedom')
-    sigmasquareds = File(exists=True, argstr='', position=-2,
+    sigmasquareds = File(exists=True, argstr='', position= -2,
                          copyfile=False, mandatory=True,
                          desc='summary of residuals, See Woolrich, et. al., 2001')
     contrast_num = traits.Int(min=1, argstr='-cope',
@@ -905,7 +1080,7 @@ class L2Model(BaseInterface):
                    '/NumContrasts   1',
                    '/PPheights          %e' % 1,
                    '/RequiredEffect     100.0',  # XX where does this
-                   #number come from
+                   # number come from
                    '',
                    '/Matrix',
                    '%e' % 1]
@@ -1121,7 +1296,7 @@ class SMM(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        #TODO get the true logdir from the stdout
+        # TODO get the true logdir from the stdout
         outputs['null_p_map'] = self._gen_fname(basename="w1_mean", cwd="logdir")
         outputs['activation_p_map'] = self._gen_fname(basename="w2_mean", cwd="logdir")
         if not isdefined(self.inputs.no_deactivation_class) or not self.inputs.no_deactivation_class:
@@ -1382,7 +1557,7 @@ class Cluster(FSLCommand):
                     if inval:
                         change_ext = True
                         if suffix.endswith('.txt'):
-                            change_ext=False
+                            change_ext = False
                         outputs[outkey] = self._gen_fname(self.inputs.in_file,
                                                           suffix='_' + suffix,
                                                           change_ext=change_ext)
