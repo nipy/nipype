@@ -407,7 +407,7 @@ def savepkl(filename, record):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    cPickle.dump(record, pkl_file)
+    cPickle.dump(record, pkl_file, -1)
     pkl_file.close()
 
 rst_levels = ['=', '-', '~', '+']
