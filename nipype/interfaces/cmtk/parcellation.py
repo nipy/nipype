@@ -129,7 +129,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     iflogger.info("[ DONE ]")
 
-def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
+def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name,dilation):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
     iflogger.info("Create the ROIs:")
@@ -231,28 +231,29 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     iflogger.info("[ DONE ]")
     # dilate cortical regions
-    iflogger.info("Dilating cortical regions...")
-    # loop throughout all the voxels belonging to the aseg GM volume
-    for j in range(xx.size):
-        if rois[xx[j],yy[j],zz[j]] == 0:
-            local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
-            mask = local.copy()
-            mask[np.nonzero(local>0)] = 1
-            thisdist = np.multiply(dist,mask)
-            thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
-            value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
-            if value.size > 1:
-                counts = np.bincount(value)
-                value = np.argmax(counts)
-            rois[xx[j],yy[j],zz[j]] = value
-
-    # store volume eg in ROIv_scale33.nii.gz
-    out_roi = op.join(output_dir, 'ROIv_%s.nii.gz' % parcellation_name)
-    iflogger.info("Save output image to %s" % out_roi)
-    img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
-    nb.save(img, out_roi)
-
-    iflogger.info("[ DONE ]") 
+    if (dilation==True) :
+        iflogger.info("Dilating cortical regions...")
+        # loop throughout all the voxels belonging to the aseg GM volume
+        for j in range(xx.size):
+            if rois[xx[j],yy[j],zz[j]] == 0:
+                local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+                mask = local.copy()
+                mask[np.nonzero(local>0)] = 1
+                thisdist = np.multiply(dist,mask)
+                thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                if value.size > 1:
+                    counts = np.bincount(value)
+                    value = np.argmax(counts)
+                rois[xx[j],yy[j],zz[j]] = value
+    
+        # store volume eg in ROIv_scale33.nii.gz
+        out_roi = op.join(output_dir, 'ROIv_%s.nii.gz' % parcellation_name)
+        iflogger.info("Save output image to %s" % out_roi)
+        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        nb.save(img, out_roi)
+    
+        iflogger.info("[ DONE ]") 
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
@@ -456,6 +457,7 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
     freesurfer_dir = Directory(exists=True, desc='Freesurfer main directory')
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
     out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
+    dilation = traits.Bool(False, usedefault=True)
 
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(exists=True, desc='Region of Interest file for connectivity mapping')
@@ -487,6 +489,7 @@ class Parcellate(BaseInterface):
     >>> parcellate.inputs.freesurfer_dir = '.'
     >>> parcellate.inputs.subjects_dir = '.'
     >>> parcellate.inputs.subject_id = 'subj1'
+    >>> parcellate.inputs.dilation = True
     >>> parcellate.inputs.parcellation_name = 'scale500'
     >>> parcellate.run()                 # doctest: +SKIP
     """
@@ -503,7 +506,7 @@ class Parcellate(BaseInterface):
 		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
 		iflogger.info("=============================================")
 		create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name,self.inputs.dilation)
 		create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
 		crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
 		return runtime
