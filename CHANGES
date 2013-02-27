@@ -3,6 +3,9 @@ Next release
 * ENH: New interfaces: nipy.Trim
 
 * ENH: Allow control over terminal output for commandline interfaces
+* ENH: New workflows: susceptibility correction for EPI imaging based on epidewarp.fsl
+       updated to support both dMRI and fMRI, and new parameters.
+* ENH: Minor improvements to FSL's FUGUE interface
 
 Release 0.7.0 (Dec 18, 2012)
 ============================
