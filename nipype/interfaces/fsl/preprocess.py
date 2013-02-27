@@ -1110,10 +1110,9 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                      desc='filename for saving fieldmap (rad/s)', hash_files=False)
     fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
                         desc='filename for loading fieldmap (rad/s)')
-#    shift_out_file = File(argstr='--saveshift=%s', genfile=True,
-#                          desc='filename for saving pixel shift volume', hash_files=False)
 
     save_shift = traits.Bool( desc='output pixel shift volume' )
+
     shift_out_file = traits.File( argstr='--saveshift=%s', genfile=True,
                            desc='filename for saving pixel shift volume', hash_files=False)
 
