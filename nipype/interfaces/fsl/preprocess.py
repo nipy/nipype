@@ -1092,6 +1092,12 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                    desc='filename of input volume')
     unwarped_file = File(argstr='--unwarp=%s', genfile=True,
                          desc='apply unwarping and save as filename', hash_files=False)
+
+    save_warped = traits.Bool( desc='apply forward warp and save' )
+
+    warped_file = File(argstr='--warp=%s', genfile=True,
+                         desc='apply forward warp and save as filename', hash_files=False)
+
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
                          desc='filename for input phase image')
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1104,8 +1110,13 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                      desc='filename for saving fieldmap (rad/s)', hash_files=False)
     fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
                         desc='filename for loading fieldmap (rad/s)')
-    shift_out_file = File(argstr='--saveshift=%s',
-                          desc='filename for saving pixel shift volume', hash_files=False)
+#    shift_out_file = File(argstr='--saveshift=%s', genfile=True,
+#                          desc='filename for saving pixel shift volume', hash_files=False)
+
+    save_shift = traits.Bool( desc='output pixel shift volume' )
+    shift_out_file = traits.File( argstr='--saveshift=%s', genfile=True,
+                           desc='filename for saving pixel shift volume', hash_files=False)
+
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
                          desc='filename for reading pixel shift volume')
     median_2dfilter = traits.Bool(argstr='--median',
@@ -1154,6 +1165,8 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
 class FUGUEOutputSpec(TraitedSpec):
     unwarped_file = File(exists=True, desc='unwarped file')
+    shift_out_file = File( desc='voxel shift map file' )
+    warped_file = File( desc='warped file' )
 
 
 class FUGUE(FSLCommand):
@@ -1174,6 +1187,17 @@ class FUGUE(FSLCommand):
         super(FUGUE, self).__init__(**kwargs)
         warn('This interface has not been fully tested. Please report any failures.')
 
+    def _parse_inputs(self, skip=None):
+        skip = []
+        if not isdefined( self.inputs.save_shift ) or not self.inputs.save_shift:
+            skip.append('shift_out_file')
+        if not isdefined( self.inputs.save_warped ) or not self.inputs.save_warped:
+            skip.append('warped_file')
+        else:
+            skip.append('unwarped_file')
+
+        return super(FUGUE,self)._parse_inputs(skip=skip)
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_file = self.inputs.unwarped_file
@@ -1181,11 +1205,34 @@ class FUGUE(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                       suffix='_unwarped')
         outputs['unwarped_file'] = os.path.abspath(out_file)
+
+        if isdefined( self.inputs.save_shift ) and self.inputs.save_shift:
+            shift_out = self.inputs.shift_out_file
+            if not isdefined(shift_out):
+                shift_out = self._gen_fname( self.inputs.in_file, suffix='_shift' )
+
+            outputs['shift_out_file'] = os.path.abspath( shift_out )
+
+        if isdefined( self.inputs.save_warped ) and self.inputs.save_warped:
+            warped_out = self.inputs.warped_file
+            if not isdefined(warped_out):
+                warped_out = self._gen_fname( self.inputs.in_file, suffix='_fwdwarp' )
+
+            outputs['warped_file'] = os.path.abspath( warped_out )
+            del outputs['unwarped_file']
+
         return outputs
 
     def _gen_filename(self, name):
         if name == 'unwarped_file':
             return self._list_outputs()['unwarped_file']
+
+        if name == 'warped_file':
+            return self._list_outputs()['warped_file']
+
+        if name == 'shift_out_file':
+            return self._list_outputs()['shift_out_file']
+
         return None
 
 
