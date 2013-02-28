@@ -319,7 +319,7 @@ def create_epi_correct_pipeline(name="epi_correct", register_to_ref=False ):
                     ,(mask_mag_dil,    prelude, [('out_file', 'mask_file' ) ])
                     ,(prelude,      fill_phase, [('unwrapped_phase_file','in_file')] )
                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
-                    ,(fill_phase,          vsm, [('out_file','phasemap_file')]) #, (('out_file',_genvsmpath),'shift_out_file') ] )
+                    ,(fill_phase,          vsm, [('out_file','phasemap_file')]) 
                     ,(inputnode,           vsm, [(('te_diff',_ms2sec),'asym_se_time'),('vsm_sigma','smooth2d')])
                     ,(dwell_time,          vsm, [(('dwell_time',_ms2sec),'dwell_time') ])
                     ,(mask_mag_dil,        vsm, [('out_file','mask_file')] )
@@ -444,26 +444,8 @@ def _vsm_remove_mean( in_file, mask_file, in_unwarped ):
     nib.save( img, out_file )
     return out_file
 
-#def _generate_fwdmap( in_file, mask_file, shift_in_file, in_unwarped):
-#    import os
-#    out_file = os.path.abspath( './fwdmap.nii.gz' )
-#    cmd = 'fugue -i %s -w %s --loadshift=%s --mask=%s' % ( in_file, out_file, shift_in_file, mask_file )
-#    print "	 Running:",cmd
-#    os.system(cmd)
-#    return out_file
-
-def _genvsmpath( in_file ):
-    import os
-    name,fext = os.path.splitext( os.path.basename(in_file) )
-    if fext == '.gz': name,_ = os.path.splitext(name)
-    out_file = os.path.abspath( os.path.join( os.path.dirname(in_file), '%s_vsm.nii.gz' % name ))
-    return out_file
-
 def _ms2sec( val ):
     return val*1e-3;
-
-def _yield( in_file, in_block ):
-    return in_file
 
 def _split_dwi( in_file ):
     import nibabel as nib
