@@ -213,7 +213,7 @@ class buildtemplateparallel(ANTSCommand):
                 start = '-z '
             else:
                 start = ''
-            return start + ' '.join([os.path.split(name)[1] for name in val])
+            return start + ' '.join(name for name in val)
         return super(buildtemplateparallel, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
