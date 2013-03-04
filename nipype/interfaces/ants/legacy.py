@@ -205,7 +205,7 @@ class buildtemplateparallel(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == 'num_cores':
             if self.inputs.parallelization == 2:
-                return '-j ' + val
+                return '-j ' + str(val)
             else:
                 return ''
         if opt == 'in_files':
