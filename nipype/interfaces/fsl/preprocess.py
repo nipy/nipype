@@ -391,6 +391,9 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     out_matrix_file = File(argstr='-omat %s',
                      desc='output affine matrix in 4x4 asciii format',
                      genfile=True, position=3, hash_files=False)
+
+    out_log = File( desc='output log' )
+
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(argstr='-applyxfm', requires=['in_matrix_file'],
                      desc='apply transformation supplied by in_matrix_file')
@@ -461,6 +464,8 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                                desc='do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr='-2D',
                           desc='use 2D rigid body mode - ignores dof')
+
+    save_log = traits.Bool(desc='save to log file')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
 
@@ -471,6 +476,7 @@ class FLIRTOutputSpec(TraitedSpec):
     out_matrix_file = File(exists=True,
                            desc='path/name of calculated affine transform ' \
                          '(if generated)')
+    out_log = File(desc='path/name of output log (if generated)' )
 
 
 class FLIRT(FSLCommand):
@@ -508,13 +514,42 @@ class FLIRT(FSLCommand):
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
 
         outputs['out_matrix_file'] = self.inputs.out_matrix_file
+
         # Generate an out_matrix file if one is not provided
         if not isdefined(outputs['out_matrix_file']):
             outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
                                                    suffix='_flirt.mat',
                                                    change_ext=False)
         outputs['out_matrix_file'] = os.path.abspath(outputs['out_matrix_file'])
+
+        if isdefined( self.inputs.save_log ) and self.inputs.save_log:
+            outputs['out_log'] = self.inputs.out_log
+            # Generate an out_log file if one is not provided
+            if not isdefined( outputs['out_log']):
+                outputs['out_log'] = self._gen_fname( self.inputs.in_file,
+                                                       suffix='_flirt.log',
+                                                       change_ext=False)
+            outputs['out_log'] = os.path.abspath( outputs['out_log'] )
         return outputs
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = super(FLIRT,self).aggregate_outputs(runtime=runtime, needed_outputs=needed_outputs)
+        if isdefined( self.inputs.save_log ) and self.inputs.save_log:
+            with open(outputs.out_log, "a") as text_file:
+                text_file.write(runtime.stdout + '\n' )
+        return outputs
+
+    def _parse_inputs(self, skip=None):
+        skip = []
+
+        if isdefined( self.inputs.save_log ) and self.inputs.save_log:
+            if not isdefined( self.inputs.verbose ) or self.inputs.verbose==0:
+                self.inputs.verbose=1
+
+        skip.append( 'save_log' )            
+
+        return super(FLIRT,self)._parse_inputs(skip=skip)
+
 
     def _gen_filename(self, name):
         if name in ('out_file', 'out_matrix_file'):
