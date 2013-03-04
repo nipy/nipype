@@ -7,8 +7,8 @@ def get_nii_image_info(nifti_input_file):
 	import nibabel as nib
 	img = nib.load(nifti_input_file)
 	
-	img_shape =  img.get_shape()
-	img_header = img.get_header()['pixdim'][1:4]
+	img_shape =  img.shape
+	img_header = img.get_header().get_zooms()
 	dim_x = img_shape[0]
 	dim_y = img_shape[1]
 	dim_z = img_shape[2]
@@ -21,12 +21,13 @@ def get_nii_image_info(nifti_input_file):
 	Also, there is no absolute requirement that the inplane is a square matrix, so it may be potentially?
 	safer to simply determine whch axis is the smallest and assume that is the in plane resolution
 	May consider adding an UNKNOWN and/or more checks for this
-	"""
 	image_orientation = 'UNK'
 	if(    dim_x  == dim_y ): image_orientation = 'axial'
 	elif(  dim_y  == dim_z ): image_orientation = 'sagittal'
 	elif(  dim_x  == dim_z ): image_orientation = 'coronal'
- 	return dim_x, dim_y, dim_z, vox_size_x, vox_size_y, vox_size_z, image_orientation
-
+	return dim_x, dim_y, dim_z, vox_size_x, vox_size_y, vox_size_z, image_orientation
+	REMOVING FROM production version as image_orientation is likely not going to be always correct using this metric
+	"""
+ 	return dim_x, dim_y, dim_z, vox_size_x, vox_size_y, vox_size_z
 
 
