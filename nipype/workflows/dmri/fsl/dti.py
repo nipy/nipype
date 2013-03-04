@@ -339,7 +339,6 @@ def create_epi_correct_pipeline(name="epi_correct", register_to_ref=False ):
         # Select reference volume from EPI (B0 in dMRI and a middle frame in fMRI)
         select_epi = pe.Node( interface=fsl.utils.ExtractROI(t_size=1), name="select_epi" )
 
-
         # fugue -i %s -w %s --loadshift=%s --mask=%s % ( mag_name, magfw_name, vsmmag_name, mask_name ), log ) # Forward Map
         vsm_fwd = pe.Node( interface=fsl.FUGUE(save_warped=True), name="vsm_fwd")
         vsm_reg = pe.Node( interface=fsl.FLIRT( bins=256, cost='corratio', dof=6, interp='trilinear',  searchr_x=[-10,10], searchr_y=[-10,10], searchr_z=[-10,10] ), name="vsm_registration" )
