@@ -12,6 +12,41 @@ def transpose(samples_over_fibres):
         a = a.reshape(-1,1)
     return a.T.tolist()
 
+def create_dmri_preprocessing(name="dMRI_preprocessing"):
+    """Creates a workflow that chains the necessary pipelines to
+       correct for motion, eddy currents, and susceptibility
+       artifacts in EPI dMRI sequences.
+
+    Example
+    -------
+
+    >>> nipype_dmri_preprocess = create_dmri_preprocessing("nipype_dmri_prep")
+    >>> nipype_dmri_preprocess.inputs.inputnode. =     
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.run() # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.
+
+    Outputs::
+
+        outputnode.dmri_corrected
+
+    """
+
+    pipeline = pe.Workflow(name=name)
+
+    return pipeline
+
+  
+
 def create_bedpostx_pipeline(name="bedpostx"):
     """Creates a pipeline that does the same as bedpostx script from FSL -
     calculates diffusion model parameters (distributions not MLE) voxelwise for
@@ -168,6 +203,61 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       ])
     return bedpostx
 
+def create_motion_correct_pipeline(name="motion_correct"):
+    """Creates a pipeline that corrects for motion artifact in dMRI sequences.
+    It takes a series of diffusion weighted images and rigidly corregisters 
+    them to one reference image. Finally, the b-matrix is rotated accordingly,
+    making use of the rotation matrix obtained by FLIRT.
+
+    Example
+    -------
+
+    >>> nipype_motioncorrect = create_motion_correct_pipeline("nipype_motioncorrect")
+    >>> nipype_motioncorrect.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> nipype_motioncorrect.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> nipype_motioncorrect.inputs.inputnode.ref_num = 0
+    >>> nipype_motioncorrect.run() # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.in_file
+        inputnode.ref_num
+        inputnode.in_bvec
+
+    Outputs::
+
+        outputnode.motion_corrected
+    """
+
+    inputnode = pe.Node(interface = util.IdentityInterface(fields=["in_file", "ref_num","in_bvec"]),
+                        name="inputnode")
+
+    pipeline = pe.Workflow(name=name)
+
+    split = pe.Node(fsl.Split(dimension='t'), name="split")
+    pick_ref = pe.Node(util.Select(), name="pick_ref")
+    coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1, dof=6), name = "coregistration", iterfield=["in_file"])
+    rotate_bvecs = pe.Node( util.Function( input_names=["in_bvec", "in_matrix"], output_names=["out_file"], function=_rotate_bvecs ), name="rotate_b_matrix" )
+    merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
+    outputnode = pe.Node(interface = util.IdentityInterface(fields=["motion_corrected","out_bvec"]),
+                        name="outputnode")
+
+    pipeline.connect([
+                         (inputnode, split, [("in_file", "in_file")])
+                        ,(split, pick_ref, [("out_files", "inlist")])
+                        ,(inputnode, pick_ref, [("ref_num", "index")])
+                        ,(split, coregistration, [("out_files", "in_file")])
+                        ,(inputnode, rotate_bvecs, [("in_bvec","in_bvec")])
+                        ,(coregistration, rotate_bvecs, [("out_matrix_file","in_matrix")])
+                        ,(pick_ref, coregistration, [("out", "reference")])
+                        ,(coregistration, merge, [("out_file", "in_files")])
+                        ,(merge, outputnode, [("merged_file", "motion_corrected")])
+                        ,(rotate_bvecs, outputnode, [("out_file","out_bvec")])
+                    ])
+
+    return pipeline
+
+
 def create_eddy_correct_pipeline(name="eddy_correct"):
     """Creates a pipeline that replaces eddy_correct script in FSL. It takes a
     series of diffusion weighted images and linearly corregisters them to one
@@ -197,30 +287,26 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     pipeline = pe.Workflow(name=name)
 
     split = pe.Node(fsl.Split(dimension='t'), name="split")
-    pipeline.connect([(inputnode, split, [("in_file", "in_file")])])
-
     pick_ref = pe.Node(util.Select(), name="pick_ref")
-    pipeline.connect([(split, pick_ref, [("out_files", "inlist")]),
-                      (inputnode, pick_ref, [("ref_num", "index")])])
-
-    coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1), name = "coregistration", iterfield=["in_file"])
-    pipeline.connect([(split, coregistration, [("out_files", "in_file")]),
-                      (pick_ref, coregistration, [("out", "reference")])])
-
+    coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1 ), name = "coregistration", iterfield=["in_file"])
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
-    pipeline.connect([(coregistration, merge, [("out_file", "in_files")])
-                      ])
-
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["eddy_corrected"]),
                         name="outputnode")
 
-    pipeline.connect([(merge, outputnode, [("merged_file", "eddy_corrected")])])
-
+    pipeline.connect([
+                         (inputnode, split, [("in_file", "in_file")])
+                        ,(split, pick_ref, [("out_files", "inlist")])
+                        ,(inputnode, pick_ref, [("ref_num", "index")])
+                        ,(split, coregistration, [("out_files", "in_file")])
+                        ,(pick_ref, coregistration, [("out", "reference")])
+                        ,(coregistration, merge, [("out_file", "in_files")])
+                        ,(merge, outputnode, [("merged_file", "eddy_corrected")])
+                    ])
     return pipeline
 
-def create_epi_correct_pipeline(name="epi_correct", register_to_ref=False ):
+def create_susceptibility_correct_pipeline(name="susceptibility_correct", register_to_ref=False ):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
-        for EPI distortion correction with the fieldmap information in
+        for susceptibility distortion correction in EPI sequences with the fieldmap information in
         dMRI and fMRI (Jezzard et al., MRM 1995 ) using FSL's FUGUE.
 
     Example
@@ -270,9 +356,6 @@ def create_epi_correct_pipeline(name="epi_correct", register_to_ref=False ):
                                                                    ]), name="inputnode")
 
     pipeline = pe.Workflow(name=name)
-
-
-    matrix_file = os.path.abspath( './flirt.txt' )
 
     # Keep first frame from magnitude
     select_mag = pe.Node( interface=fsl.utils.ExtractROI(t_size=1,t_min=0), name="select_magnitude" )
@@ -371,6 +454,39 @@ def create_epi_correct_pipeline(name="epi_correct", register_to_ref=False ):
     
 
     return pipeline
+
+def _rotate_bvecs( in_bvec, in_matrix ):
+    import os
+    import numpy as np
+
+    name,fext = os.path.splitext( os.path.basename(in_bvec) )
+    if fext == '.gz': name,_ = os.path.splitext(name)
+    out_file = os.path.abspath( './%s_rotated.bvec' % name )
+    bvecs = np.loadtxt( in_bvec )
+    new_bvecs = [ bvecs[:,0] ]
+
+    for i,vol_matrix in enumerate(in_matrix[1::]):
+        bvec = np.matrix( bvecs[:,i] )
+        rot = np.matrix(np.loadtxt( vol_matrix )[0:3,0:3])
+        new_bvecs.append( (np.array( rot * bvec.T).T)[0] )
+    np.savetxt( out_file, np.array(new_bvecs).T, fmt='%0.15f' )
+    return out_file
+
+def _cat_logs( in_files ):
+    import shutil
+    import os
+
+    name,fext = os.path.splitext( os.path.basename(in_files[0]) )
+    if fext == '.gz': name,_ = os.path.splitext(name)
+    out_file = os.path.abspath( './%s_ecclog.log' % name )
+    out_str = ""
+    with open( out_file, 'wb' ) as totallog:
+        for i,fname in enumerate(in_files):
+            totallog.write( "\n\npreprocessing %d\n" % i )
+            with open(fname) as inlog:
+                for line in inlog:
+                    totallog.write(line)
+    return out_file
 
 def _compute_dwelltime( dwell_time=0.68, is_parallel=False, is_reverse_encoding=False ):
     if is_parallel:
