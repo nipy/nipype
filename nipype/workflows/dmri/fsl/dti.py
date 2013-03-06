@@ -12,36 +12,86 @@ def transpose(samples_over_fibres):
         a = a.reshape(-1,1)
     return a.T.tolist()
 
-def create_dmri_preprocessing(name="dMRI_preprocessing"):
+def create_dmri_preprocessing(name="dMRI_preprocessing", fieldmap_registration=False):
     """Creates a workflow that chains the necessary pipelines to
-       correct for motion, eddy currents, and susceptibility
-       artifacts in EPI dMRI sequences.
+    correct for motion, eddy currents, and susceptibility
+    artifacts in EPI dMRI sequences.
 
     Example
     -------
 
     >>> nipype_dmri_preprocess = create_dmri_preprocessing("nipype_dmri_prep")
-    >>> nipype_dmri_preprocess.inputs.inputnode. =     
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
-    >>> nipype_dmri_preprocess.inputs.inputnode. =
+    >>> nipype_dmri_preprocess.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> nipype_dmri_preprocess.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> nipype_dmri_preprocess.inputs.inputnode.ref_num = 0
+    >>> nipype_dmri_preprocess.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
+    >>> nipype_dmri_preprocess.inputs.inputnode.fieldmap_pha = 'phase.nii'
+    >>> nipype_dmri_preprocess.inputs.inputnode.te_diff = 2.46
+    >>> nipype_dmri_preprocess.inputs.inputnode.epi_echospacing = 0.77
+    >>> nipype_dmri_preprocess.inputs.inputnode.epi_rev_encoding = False
+    >>> nipype_dmri_preprocess.inputs.inputnode.pi_accel_factor = True
     >>> nipype_dmri_preprocess.run() # doctest: +SKIP
+
 
     Inputs::
 
-        inputnode.
+        inputnode.in_file 
+        inputnode.in_bvec 
+        inputnode.ref_num 
+        inputnode.fieldmap_mag
+        inputnode.fieldmap_pha
+        inputnode.te_diff
+        inputnode.epi_echospacing
+        inputnode.epi_rev_encoding
+        inputnode.pi_accel_factor
+        inputnode.vsm_sigma
+
 
     Outputs::
 
         outputnode.dmri_corrected
+        outputnode.bvec_rotated
+
+
+    Optional arguments::
+
+        fieldmap_registration - True if registration to fieldmap should be done (default False)
+
 
     """
 
     pipeline = pe.Workflow(name=name)
+    
+    inputnode = pe.Node(interface = util.IdentityInterface(
+                    fields=['in_file', 'in_bvec','ref_num','fieldmap_mag',
+                            'fieldmap_pha','te_diff','epi_echospacing',
+                            'epi_rev_encoding','pi_accel_factor','vsm_sigma']),
+                    name='inputnode')
+
+    outputnode= pe.Node(interface = util.IdentityInterface(
+                    fields=['dmri_corrected','bvec_rotated']),
+                    name='outputnode')
+
+    motion = create_motion_correct_pipeline()
+    eddy = create_eddy_correct_pipeline()
+    susceptibility = create_susceptibility_correct_pipeline(fieldmap_registration=fieldmap_registration)
+
+    pipeline.connect([
+                     (inputnode,          motion, [('in_file','inputnode.in_file'),('in_bvec','inputnode.in_bvec'),('ref_num','inputnode.ref_num')])
+                    ,(inputnode,            eddy, [('ref_num','inputnode.ref_num')])
+                    ,(motion,               eddy, [('outputnode.motion_corrected','inputnode.in_file')])
+                    ,(eddy,       susceptibility, [('outputnode.eddy_corrected','inputnode.in_file')])
+                    ,(inputnode,  susceptibility, [('ref_num','inputnode.ref_num')
+                                                  ,('fieldmap_mag','inputnode.fieldmap_mag')
+                                                  ,('fieldmap_pha','inputnode.fieldmap_pha')
+                                                  ,('te_diff','inputnode.te_diff')
+                                                  ,('epi_echospacing','inputnode.epi_echospacing')
+                                                  ,('epi_rev_encoding','inputnode.epi_rev_encoding')
+                                                  ,('pi_accel_factor','inputnode.pi_accel_factor')
+                                                  ,('vsm_sigma','inputnode.vsm_sigma') ])
+                    ,(motion,         outputnode, [('outputnode.out_bvec', 'bvec_rotated')])
+                    ,(susceptibility, outputnode, [('outputnode.epi_corrected','dmri_corrected')])
+                    ])
 
     return pipeline
 
@@ -206,7 +256,8 @@ def create_bedpostx_pipeline(name="bedpostx"):
 def create_motion_correct_pipeline(name="motion_correct"):
     """Creates a pipeline that corrects for motion artifact in dMRI sequences.
     It takes a series of diffusion weighted images and rigidly corregisters 
-    them to one reference image. Finally, the b-matrix is rotated accordingly,
+    them to one reference image. Finally, the b-matrix is rotated accordingly
+    (Leemans et al. 2009 - http://www.ncbi.nlm.nih.gov/pubmed/19319973),
     making use of the rotation matrix obtained by FLIRT.
 
     Example
@@ -227,6 +278,8 @@ def create_motion_correct_pipeline(name="motion_correct"):
     Outputs::
 
         outputnode.motion_corrected
+        outputnode.out_bvec
+
     """
 
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["in_file", "ref_num","in_bvec"]),
@@ -260,8 +313,9 @@ def create_motion_correct_pipeline(name="motion_correct"):
 
 def create_eddy_correct_pipeline(name="eddy_correct"):
     """Creates a pipeline that replaces eddy_correct script in FSL. It takes a
-    series of diffusion weighted images and linearly corregisters them to one
-    reference image.
+    series of diffusion weighted images and linearly co-registers them to one
+    reference image. No rotation of the B-matrix is performed, so this pipeline
+    should be executed after the motion correction pipeline.
 
     Example
     -------
@@ -288,7 +342,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
 
     split = pe.Node(fsl.Split(dimension='t'), name="split")
     pick_ref = pe.Node(util.Select(), name="pick_ref")
-    coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1 ), name = "coregistration", iterfield=["in_file"])
+    coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1, dof=12 ), name = "coregistration", iterfield=["in_file"])
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["eddy_corrected"]),
                         name="outputnode")
@@ -304,23 +358,24 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
                     ])
     return pipeline
 
-def create_susceptibility_correct_pipeline(name="susceptibility_correct", register_to_ref=False ):
+def create_susceptibility_correct_pipeline(name="susceptibility_correct", fieldmap_registration=False ):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
-        for susceptibility distortion correction in EPI sequences with the fieldmap information in
-        dMRI and fMRI (Jezzard et al., MRM 1995 ) using FSL's FUGUE.
+    for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
+    information (Jezzard et al., 1995) using FSL's FUGUE. The registration to the (warped) fieldmap
+    (strictly following the original script) is available using fieldmap_registration=True.
 
     Example
     -------
 
-    >>> nipype_epicorrect = create_epi_correct_pipeline("nipype_epicorrect")
-    >>> nipype_epicorrect.inputs.inputnode.in_file = 'epi_data.nii'
+    >>> nipype_epicorrect = create_susceptibility_correct_pipeline("nipype_epicorrect", fieldmap_registration=False)
+    >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
     >>> nipype_epicorrect.inputs.inputnode.te_diff = 2.46
-    >>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.51
+    >>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
     >>> nipype_epicorrect.inputs.inputnode.epi_rev_encoding = False
-    >>> nipype_epicorrect.inputs.inputnode.ref_volume = 0
-    >>> nipype_epicorrect.inputs.inputnode.epi_parallel = True
+    >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
+    >>> nipype_epicorrect.inputs.inputnode.pi_accel_factor = 1.0
     >>> nipype_epicorrect.run() # doctest: +SKIP
 
     Inputs::
@@ -332,14 +387,20 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
         inputnode.epi_echospacing - The echo spacing (aka dwell time) in the EPI sequence
         inputnode.epi_ph_encoding_dir - The phase encoding direction in EPI acquisition (default y)
         inputnode.epi_rev_encoding - True if it is acquired with reverse encoding
-        inputnode.epi_parallel - True if EPI was acquired in a parallel imaging scheme
+        inputnode.pi_accel_factor - Acceleration factor used for EPI parallel imaging (GRAPPA)
         inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
-        inputnode.ref_volume - The reference volume (B=0 in dMRI or a central frame in fMRI)
+        inputnode.ref_num - The reference volume (B=0 in dMRI or a central frame in fMRI)
 
 
     Outputs::
 
         outputnode.epi_corrected
+
+
+    Optional arguments::
+
+        fieldmap_registration - True if registration to fieldmap should be done (default False)
+    
     """
 
     inputnode = pe.Node(interface = util.IdentityInterface(fields=["in_file", 
@@ -349,9 +410,9 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
                                                                    "epi_echospacing",
                                                                    "epi_ph_encoding_dir", 
                                                                    "epi_rev_encoding", 
-                                                                   "epi_parallel",
+                                                                   "pi_accel_factor",
                                                                    "vsm_sigma",
-                                                                   "ref_volume",
+                                                                   "ref_num",
                                                                    "unwarp_direction"
                                                                    ]), name="inputnode")
 
@@ -365,7 +426,7 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
     mask_mag_dil = pe.Node( interface=util.Function( input_names=["in_file"], output_names=["out_file"], function=_dilate_mask), name='mask_dilate' )
 
     # Compute dwell time
-    dwell_time = pe.Node( interface=util.Function( input_names=["dwell_time","is_parallel","is_reverse_encoding"], output_names=["dwell_time"], function=_compute_dwelltime), name='dwell_time')
+    dwell_time = pe.Node( interface=util.Function( input_names=["dwell_time","pi_factor","is_reverse_encoding"], output_names=["dwell_time"], function=_compute_dwelltime), name='dwell_time')
 
     # Normalize phase diff to be [-pi, pi)
     norm_pha = pe.Node( interface=util.Function( input_names=["in_file"], output_names=["out_file"], function=_prepare_phasediff ), name='normalize_phasediff')
@@ -392,7 +453,7 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
 
 
     pipeline.connect([ 
-                     (inputnode,    dwell_time, [('epi_echospacing','dwell_time'), ('epi_parallel','is_parallel'),('epi_rev_encoding','is_reverse_encoding') ])
+                     (inputnode,    dwell_time, [('epi_echospacing','dwell_time'), ('pi_accel_factor','pi_factor'),('epi_rev_encoding','is_reverse_encoding') ])
                     ,(inputnode,    select_mag, [('fieldmap_mag','in_file')] )
                     ,(inputnode,      norm_pha, [('fieldmap_pha','in_file')] )
                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')] )
@@ -414,8 +475,7 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
                     ,(dwi_merge,    outputnode, [('merged_file','epi_corrected')])
                     ])
 
-    if register_to_ref:
-        # register to ref volume
+    if fieldmap_registration:
         """ Register magfw to example epi. There are some parameters here that may need to be tweaked. Should probably strip the mag
             Pre-condition: forward warp the mag in order to reg with func. What does mask do here?
         """
@@ -431,7 +491,7 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", regist
         msk_applyxfm = pe.Node( interface=fsl.ApplyXfm(), name='msk_apply_xfm')
 
         pipeline.connect([
-                     (inputnode,    select_epi, [('in_file','in_file'), ('ref_volume','t_min')] )
+                     (inputnode,      select_epi, [('in_file','in_file'), ('ref_num','t_min')] )
                     ,(select_epi,        vsm_reg, [('roi_file','reference')])
                     ,(vsm,               vsm_fwd, [('shift_out_file','shift_in_file')])
                     ,(mask_mag_dil,      vsm_fwd, [('out_file','mask_file')] )
@@ -488,9 +548,8 @@ def _cat_logs( in_files ):
                     totallog.write(line)
     return out_file
 
-def _compute_dwelltime( dwell_time=0.68, is_parallel=False, is_reverse_encoding=False ):
-    if is_parallel:
-        dwell_time*=0.5
+def _compute_dwelltime( dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False ):
+    dwell_time*=(1.0/pi_factor)
 
     if is_reverse_encoding:
         dwell_time*=-1.0
