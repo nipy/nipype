@@ -9,11 +9,12 @@ Next release
        with rotation of the B-matrix, and susceptibility correction for EPI imaging using
        fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.
 * ENH: Minor improvements to FSL's FUGUE and FLIRT interfaces
-* ENH: Added optional dilation of parcels in cmtk.Parcellate 
+* ENH: Added optional dilation of parcels in cmtk.Parcellate
 * ENH: Interpolation mode added to afni.Resample
 * ENH: Function interface can accept a list of strings containing import statements
        that allow external functions to run without their imports defined in the
        function body
+* ENH: Allow node configurations to override master configuration
 
 * FIX: SpecifyModel works with 3D files correctly now.
 
