@@ -657,7 +657,7 @@ connected.
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = self.config
+            node.config = merge_dict(deepcopy(self.config), node.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):

@@ -223,6 +223,8 @@ first level contrasts specified in a few steps above.
 
 contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 contrastestimate.inputs.contrasts = contrasts
+contrastestimate.overwrite = True
+contrastestimate.config = {'execution': {'remove_unnecessary_outputs': False}}
 
 """
 Setup the pipeline
