@@ -27,6 +27,7 @@ from string import Template
 import sys
 from tempfile import mkdtemp
 from warnings import warn
+from hashlib import sha1
 
 import numpy as np
 
@@ -1177,7 +1178,8 @@ class Node(WorkflowBase):
         if self._hierarchy:
             outputdir = os.path.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
-            outputdir = os.path.join(outputdir, *self.parameterization)
+            param_dirs = [self._parameterization_dir(p) for p in self.parameterization]
+            outputdir = os.path.join(outputdir, *param_dirs)
         return os.path.abspath(os.path.join(outputdir,
                                             self.name))
 
@@ -1339,6 +1341,18 @@ class Node(WorkflowBase):
         return self._result
 
     # Private functions
+    def _parameterization_dir(self, param):
+        """
+        Returns the directory name for the given parameterization string as follows:
+            - If the parameterization is longer than 32 characters, then
+              return the SHA-1 hex digest.
+            - Otherwise, return the parameterization unchanged.
+        """
+        if len(param) > 32:
+            return sha1(param).hexdigest()
+        else:
+            return param
+    
     def _get_hashval(self):
         """Return a hash of the input state"""
         if not self._got_inputs:
