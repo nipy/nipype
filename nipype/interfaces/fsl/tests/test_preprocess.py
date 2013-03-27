@@ -219,7 +219,8 @@ def test_flirt():
         # Skip mandatory inputs and the trait methods
         if key in ('trait_added', 'trait_modified', 'in_file', 'reference',
                    'environ', 'output_type', 'out_file', 'out_matrix_file',
-                   'in_matrix_file', 'apply_xfm', 'ignore_exception'):
+                   'in_matrix_file', 'apply_xfm', 'ignore_exception',
+                   'terminal_output', 'out_log', 'save_log'):
             continue
         param = None
         value = None

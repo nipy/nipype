@@ -9,7 +9,7 @@ available plugins allow local and distributed execution of workflows and
 debugging. Each available plugin is described below.
 
 Current plugins are available for Linear, Multiprocessing, IPython_ distributed
-processing platforms and for direct processing on SGE_, PBS_, Condor_, and LSF_. We
+processing platforms and for direct processing on SGE_, PBS_, HTCondor_, and LSF_. We
 anticipate future plugins for the Soma_ workflow.
 
 .. note::
@@ -34,7 +34,7 @@ Optional arguments::
 .. note::
 
    Except for the status_callback, the remaining arguments only apply to the
-   distributed plugins: MultiProc/IPython(X)/SGE/PBS/Condor/LSF
+   distributed plugins: MultiProc/IPython(X)/SGE/PBS/HTCondor/HTCondorDAGMan/LSF
 
 For example:
 
@@ -148,27 +148,71 @@ Optional arguments::
   template: custom template file to use
   bsub_args: any other command line args to be passed to bsub.
 
-Condor
-------
+HTCondor
+--------
 
-Despite the differences between Condor and SGE-like batch systems the plugin
-usage (incl. supported arguments) is almost identical. The Condor plugin relies
-on a ``qsub`` emulation script for Condor, called ``condor_qsub`` that can be
+DAGMan
+~~~~~~
+
+With its DAGMan_ component HTCondor_ (previously Condor) allows for submitting
+entire graphs of dependent jobs at once. With the ``CondorDAGMan`` plug-in
+Nipype can utilize this functionality to submit complete workflows directly and
+in a single step.  Consequently, and in contrast to other plug-ins, workflow
+execution returns almost instantaneously -- Nipype is only used to generate the
+workflow graph, while job scheduling and dependency resolution are entirely
+managed by HTCondor_.
+
+Please note that although DAGMan_ supports specification of data dependencies
+as well as data provisioning on compute nodes this functionality is currently
+not supported by this plug-in. As with all other batch systems supported by
+Nipype, only HTCondor pools with a shared file system can be used to process
+Nipype workflows.
+
+Workflow execution with HTCondor DAGMan is done by calling::
+
+       workflow.run(plugin='CondorDAGMan')
+
+Job execution behavior can be tweaked with the following optional plug-in
+arguments::
+
+  template : submit spec template to use for job submission. The template
+             all generated submit specs are appended to this template. This
+             can be a str or a filename.
+  submit_specs : additional submit specs that are appended to the generated
+                 submit specs to allow for overriding or extending the defaults.
+                 This can be a str or a filename.
+  dagman_args : arguments to be prepended to the job execution script in the
+                dagman call
+
+Please see the `HTCondor documentation`_ for details on possible configuration
+options and command line arguments.
+
+``qsub`` emulation
+~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+  This plug-in is deprecated and users should migrate to the more robust and
+  more versatile ``CondorDAGMan`` plug-in.
+
+Despite the differences between HTCondor and SGE-like batch systems the plugin
+usage (incl. supported arguments) is almost identical. The HTCondor plugin relies
+on a ``qsub`` emulation script for HTCondor, called ``condor_qsub`` that can be
 obtained from a `Git repository on git.debian.org`_. This script is currently
-not shipped with a standard Condor distribution, but is included in the Condor
+not shipped with a standard HTCondor distribution, but is included in the HTCondor
 package from http://neuro.debian.net. It is sufficient to download this script
 and install it in any location on a system that is included in the ``PATH``
 configuration.
 
 .. _Git repository on git.debian.org: http://anonscm.debian.org/gitweb/?p=pkg-exppsy/condor.git;a=blob_plain;f=debian/condor_qsub;hb=HEAD
 
-Running a workflow in a Condor pool is done by calling::
+Running a workflow in a HTCondor pool is done by calling::
 
        workflow.run(plugin='Condor')
 
 The plugin supports a limited set of qsub arguments (``qsub_args``) that cover
 the most common use cases. The ``condor_qsub`` emulation script translates qsub
-arguments into the corresponding Condor terminology and handles the actual job
+arguments into the corresponding HTCondor terminology and handles the actual job
 submission. For details on supported options see the manpage of ``condor_qsub``.
 
 Optional arguments::
@@ -182,4 +226,6 @@ Optional arguments::
 .. _Soma: http://brainvisa.info/soma/soma-workflow/
 .. _PBS: http://www.clusterresources.com/products/torque-resource-manager.php
 .. _LSF: http://www.platform.com/Products/platform-lsf
-.. _Condor: http://www.cs.wisc.edu/condor/
+.. _HTCondor: http://www.cs.wisc.edu/htcondor/
+.. _DAGMan: http://research.cs.wisc.edu/htcondor/dagman/dagman.html
+.. _HTCondor documentation: http://research.cs.wisc.edu/htcondor/manual

@@ -50,7 +50,7 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
 class NiftiGeneratorBase(BaseInterface):
     '''Base class for interfaces that produce Nifti files, potentially with 
     embeded meta data.'''
-    def _get_out_path(self, meta):
+    def _get_out_path(self, meta, idx=None):
         '''Return the output path for the gernerated Nifti.'''
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
@@ -58,6 +58,8 @@ class NiftiGeneratorBase(BaseInterface):
             #If no out_format is specified, use a sane default that will work 
             #with the provided meta data.
             out_fmt = []
+            if not idx is None:
+                out_fmt.append('%03d' % idx)
             if 'SeriesNumber' in meta:
                 out_fmt.append('%(SeriesNumber)03d')
             if 'ProtocolName' in meta:
@@ -259,7 +261,8 @@ class CopyMeta(BaseInterface):
     output_spec = CopyMetaOutputSpec
     
     def _run_interface(self, runtime):
-        src = NiftiWrapper.from_filename(self.inputs.src_file)
+        src_nii = nb.load(self.inputs.src_file)
+        src = NiftiWrapper(src_nii, make_empty=True)
         dest_nii = nb.load(self.inputs.dest_file)
         dest = NiftiWrapper(dest_nii, make_empty=True)
         classes = src.meta_ext.get_valid_classes()
@@ -371,9 +374,9 @@ class SplitNifti(NiftiGeneratorBase):
             split_dim = None
         else:
             split_dim = self.inputs.split_dim
-        for split_nw in nw.split(split_dim):
+        for split_idx, split_nw in enumerate(nw.split(split_dim)):
             const_meta = split_nw.meta_ext.get_class_dict(('global', 'const'))
-            out_path = self._get_out_path(const_meta)
+            out_path = self._get_out_path(const_meta, idx=split_idx)
             nb.save(split_nw.nii_img, out_path)
             self.out_list.append(out_path)
             

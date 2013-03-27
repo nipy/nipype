@@ -205,7 +205,7 @@ class buildtemplateparallel(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == 'num_cores':
             if self.inputs.parallelization == 2:
-                return '-j ' + val
+                return '-j ' + str(val)
             else:
                 return ''
         if opt == 'in_files':
@@ -213,7 +213,7 @@ class buildtemplateparallel(ANTSCommand):
                 start = '-z '
             else:
                 start = ''
-            return start + ' '.join([os.path.split(name)[1] for name in val])
+            return start + ' '.join(name for name in val)
         return super(buildtemplateparallel, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):

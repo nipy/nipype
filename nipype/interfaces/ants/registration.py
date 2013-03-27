@@ -264,16 +264,16 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
-        File(), desc='List of output transforms for forward registration')
+        File(exists=True), desc='List of output transforms for forward registration')
     reverse_transforms = traits.List(
-        File(), desc='List of output transforms for reverse registration')
+        File(exists=True), desc='List of output transforms for reverse registration')
     forward_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the forward transforms')
     reverse_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the reverse transforms')
-    composite_transform = traits.List(File(), desc='Composite transform file')
+    composite_transform = traits.List(File(exists=True), desc='Composite transform file')
     inverse_composite_transform = traits.List(
-        File(), desc='Inverse composite transform file')
+        File(exists=True), desc='Inverse composite transform file')
 
 
 class Registration(ANTSCommand):
@@ -336,7 +336,6 @@ Test collapse transforms flag
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
-    _numberOfOutputTransforms = 0
     _quantilesDone = False
 
     def _optionalMetricParameters(self, index):
@@ -419,10 +418,6 @@ Test collapse transforms flag
         if opt == 'moving_image_mask':
             return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
         elif opt == 'transforms':
-            if self.inputs.collapse_output_transforms:
-                self._numberOfOutputTransforms = 2  # Affine and displacement
-            else:
-                self._numberOfOutputTransforms = len(self.inputs.transforms)
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
             if self.inputs.invert_initial_moving_transform:
@@ -449,7 +444,8 @@ Test collapse transforms flag
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid': 'Rigid.mat',
-                                           'Affine': 'Affine.mat',
+                                           #seems counterontuitive, but his is how ANTS is calling it
+                                           'Affine': 'GenericAffine.mat',
                                            'GenericAffine': 'GenericAffine.mat',
                                            'CompositeAffine': 'Affine.mat',
                                            'Similarity': 'Similarity.mat',
@@ -473,6 +469,7 @@ Test collapse transforms flag
         outputs['reverse_transforms'] = []
         outputs['reverse_invert_flags'] = []
         if not self.inputs.collapse_output_transforms:
+            transformCount = 0
             if isdefined(self.inputs.initial_moving_transform):
                 outputs['forward_transforms'].append(
                     self.inputs.initial_moving_transform)
@@ -481,20 +478,21 @@ Test collapse transforms flag
                 outputs['reverse_transforms'].insert(
                     0, self.inputs.initial_moving_transform)
                 outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
-                transformCount = 1
-                for count in range(self._numberOfOutputTransforms):
-                    forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
-                                                                                self.inputs.transforms[count])
-                    reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
-                                                                                self.inputs.transforms[count], True)
-                    outputs['forward_transforms'].append(
-                        os.path.abspath(forwardFileName))
-                    outputs['forward_invert_flags'].append(forwardInverseMode)
-                    outputs['reverse_transforms'].insert(
-                        0, os.path.abspath(reverseFileName))
-                    outputs[
-                        'reverse_invert_flags'].insert(0, reverseInverseMode)
-                    transformCount += 1
+                transformCount += 1
+                
+            for count in range(len(self.inputs.transforms)):
+                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
+                                                                            self.inputs.transforms[count])
+                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
+                                                                            self.inputs.transforms[count], True)
+                outputs['forward_transforms'].append(
+                    os.path.abspath(forwardFileName))
+                outputs['forward_invert_flags'].append(forwardInverseMode)
+                outputs['reverse_transforms'].insert(
+                    0, os.path.abspath(reverseFileName))
+                outputs[
+                    'reverse_invert_flags'].insert(0, reverseInverseMode)
+                transformCount += 1
         else:
             transformCount = 0
             for transform in ['GenericAffine', 'SyN']:  # Only files returned by collapse_output_transforms

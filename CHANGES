@@ -1,6 +1,12 @@
 Next release
 ============
+* ENH: New interfaces: nipy.Trim
 
+* ENH: Allow control over terminal output for commandline interfaces
+* ENH: New workflows for dMRI and fMRI pre-processing: added motion artifact correction
+       with rotation of the B-matrix, and susceptibility correction for EPI imaging using
+       fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.
+* ENH: Minor improvements to FSL's FUGUE and FLIRT interfaces
 
 Release 0.7.0 (Dec 18, 2012)
 ============================

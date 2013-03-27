@@ -59,7 +59,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
         return o.startswith('=')
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=os.environ.data)
+        cmd = CommandLine('qsub', environ=os.environ.data,
+                          terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
         if self._qsub_args:
