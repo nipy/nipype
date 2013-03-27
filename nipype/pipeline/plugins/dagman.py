@@ -98,7 +98,8 @@ class CondorDAGManPlugin(GraphPluginBase):
                                      % (' '.join([str(i) for i in parents]),
                                         child))
         # hand over DAG to condor_dagman
-        cmd = CommandLine('condor_submit_dag', environ=os.environ.data)
+        cmd = CommandLine('condor_submit_dag', environ=os.environ.data,
+                          terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
         cmd.inputs.args = '-update_submit %s %s' % (dagfilename,
                                                     self._dagman_args)

@@ -461,3 +461,53 @@ def test_Commandline_environ():
     ci3.inputs.environ = {'DISPLAY' : ':2'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
+
+def test_CommandLine_output():
+    tmp_infile = setup_file()
+    tmpd, name = os.path.split(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+    yield assert_true, os.path.exists(tmp_infile)
+    ci = nib.CommandLine(command='ls -l')
+    ci.inputs.terminal_output = 'allatonce'
+    res = ci.run()
+    yield assert_equal, res.runtime.merged, ''
+    yield assert_true, name in res.runtime.stdout
+    ci = nib.CommandLine(command='ls -l')
+    ci.inputs.terminal_output = 'file'
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    ci = nib.CommandLine(command='ls -l')
+    ci.inputs.terminal_output = 'none'
+    res = ci.run()
+    yield assert_equal, res.runtime.stdout, ''
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
+def test_global_CommandLine_output():
+    tmp_infile = setup_file()
+    tmpd, name = os.path.split(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, name in res.runtime.stdout
+    yield assert_true, os.path.exists(tmp_infile)
+    nib.CommandLine.set_default_terminal_output('allatonce')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_equal, res.runtime.merged, ''
+    yield assert_true, name in res.runtime.stdout
+    nib.CommandLine.set_default_terminal_output('file')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    nib.CommandLine.set_default_terminal_output('none')
+    ci = nib.CommandLine(command='ls -l')
+    res = ci.run()
+    yield assert_equal, res.runtime.stdout, ''
+    os.chdir(pwd)
+    teardown_file(tmpd)
