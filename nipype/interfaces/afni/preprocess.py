@@ -284,12 +284,11 @@ class ResampleInputSpec(AFNICommandInputSpec):
                                 desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
 
     voxel_size = traits.Tuple(*[traits.Float()]*3,
-                               argstr='-dxyz %f %f %f',
-                               desc="resample to new dx, dy and dz")
+                              argstr='-dxyz %f %f %f',
+                              desc="resample to new dx, dy and dz")
 
     master = traits.File(argstr='-master %s',
                          desc='align dataset grid to a reference file')
-                               
 
 
 class Resample(AFNICommand):
@@ -339,7 +338,7 @@ class AutoTcorrelate(AFNICommand):
     """Computes the correlation coefficient between the time series of each
     pair of voxels in the input dataset, and stores the output into a
     new anatomical bucket dataset [scaled to shorts to save memory space].
-    
+
     Examples
     ========
 
@@ -485,15 +484,15 @@ class AutomaskInputSpec(AFNICommandInputSpec):
                       usedefault=True)
 
     clfrac = traits.Float(desc='sets the clip level fraction' +
-        ' (must be 0.1-0.9). ' +
-        'A small value will tend to make the mask larger [default = 0.5].',
-        argstr="-dilate %s")
+                          ' (must be 0.1-0.9). ' +
+                          'A small value will tend to make the mask larger [default = 0.5].',
+                          argstr="-dilate %s")
 
     dilate = traits.Int(desc='dilate the mask outwards',
-        argstr="-dilate %s")
+                        argstr="-dilate %s")
 
     erode = traits.Int(desc='erode the mask inwards',
-        argstr="-erode %s")
+                       argstr="-erode %s")
 
     mask_suffix = traits.Str(
         desc="out_file suffix", depracated=0.8, new_name="out_file")
@@ -506,10 +505,10 @@ class AutomaskInputSpec(AFNICommandInputSpec):
 
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
-        exists=True)
+                    exists=True)
 
     brain_file = File(desc='brain file (skull stripped)',
-        exists=True)
+                      exists=True)
 
 
 class Automask(AFNICommand):
@@ -565,7 +564,7 @@ class Automask(AFNICommand):
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
             return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif hasattr(self.inputs,name) and isdefined(getattr(self.inputs,name)):
+        elif hasattr(self.inputs, name) and isdefined(getattr(self.inputs, name)):
             return super(Automask, self)._gen_filename(name)
         return Undefined
 
@@ -580,35 +579,35 @@ class Automask(AFNICommand):
 class VolregInputSpec(AFNICommandInputSpec):
 
     in_file = File(desc='input file to 3dvolreg',
-       argstr='%s',
-       position=-1,
-       mandatory=True,
-       exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_volreg", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
     basefile = File(desc='base file for registration',
-        argstr='-base %s',
-        position=-6,
-        exists=True)
+                    argstr='-base %s',
+                    position=-6,
+                    exists=True)
     zpad = traits.Int(desc='Zeropad around the edges' +
-        ' by \'n\' voxels during rotations',
-        argstr='-zpad %d',
-        position=-5)
+                      ' by \'n\' voxels during rotations',
+                      argstr='-zpad %d',
+                      position=-5)
     md1dfile = File(desc='max displacement output file',
-        argstr='-maxdisp1D %s',
-        position=-4)
+                    argstr='-maxdisp1D %s',
+                    position=-4)
     oned_file = File('%s.1D', desc='1D movement parameters output file',
-        argstr='-1Dfile %s',
-        name_source="in_file",
-        keep_extension=True,
-        usedefault=True)
+                     argstr='-1Dfile %s',
+                     name_source="in_file",
+                     keep_extension=True,
+                     usedefault=True)
     verbose = traits.Bool(desc='more detailed description of the process',
-        argstr='-verbose')
+                          argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
-        argstr='-tshift 0')
+                            argstr='-tshift 0')
     copyorigin = traits.Bool(desc='copy base file origin coords to output',
-        argstr='-twodup')
+                             argstr='-twodup')
 
 
 class VolregOutputSpec(TraitedSpec):
@@ -650,12 +649,12 @@ class MergeInputSpec(AFNICommandInputSpec):
         position=-1,
         mandatory=True)
     out_file = File("%s_merge", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
     doall = traits.Bool(desc='apply options to all sub-bricks in dataset',
-        argstr='-doall')
+                        argstr='-doall')
     blurfwhm = traits.Int(desc='FWHM blur value (mm)',
-          argstr='-1blur_fwhm %d',
-          units='mm')
+                          argstr='-1blur_fwhm %d',
+                          units='mm')
 
 
 class Merge(AFNICommand):
@@ -684,12 +683,12 @@ class Merge(AFNICommand):
 
 class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dcopy',
-        argstr='%s',
-        position=-2,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-2,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_copy", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
 class Copy(AFNICommand):
@@ -717,20 +716,20 @@ class Copy(AFNICommand):
 
 class FourierInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dFourier',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_fourier", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
     lowpass = traits.Float(desc='lowpass',
-        argstr='-lowpass %f',
-        position=0,
-        mandatory=True)
+                           argstr='-lowpass %f',
+                           position=0,
+                           mandatory=True)
     highpass = traits.Float(desc='highpass',
-        argstr='-highpass %f',
-        position=1,
-        mandatory=True)
+                            argstr='-highpass %f',
+                            position=1,
+                            mandatory=True)
 
 
 class Fourier(AFNICommand):
@@ -760,7 +759,7 @@ class Fourier(AFNICommand):
 
 class ZCutUpInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dZcutup',
-        argstr='%s',
+                  argstr='%s',
         position=-1,
         mandatory=True,
         exists=True)
