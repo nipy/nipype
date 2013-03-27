@@ -42,7 +42,8 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        clout = CommandLine(command='afni_vcheck').run()
+        clout = CommandLine(command='afni_vcheck',
+                            terminal_output='allatonce').run()
         out = clout.runtime.stdout
         return out.split('\n')[1]
 
@@ -87,7 +88,8 @@ class Info(object):
         '''Grab an image from the standard location.
 
         Could be made more fancy to allow for more relocatability'''
-        clout = CommandLine('which afni').run()
+        clout = CommandLine('which afni',
+                            terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:
             return None
 
@@ -214,9 +216,10 @@ class AFNICommand(AFNIBaseCommand):
 
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd='')
+            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
         else:
-            return super(AFNICommand, self)._gen_filename(name)
+            return os.path.join(os.getcwd(),
+                                super(AFNICommand, self)._gen_filename(name))
 
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
@@ -229,7 +232,8 @@ class AFNICommand(AFNIBaseCommand):
             outputs = self.output_spec().get()
             for name in out_names:
                 out = self._gen_filename(name)
-                outputs[name] = os.path.abspath(out)
+                if isdefined(out):
+                    outputs[name] = os.path.abspath(out)
             return outputs
 
 
