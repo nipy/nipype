@@ -1188,3 +1188,59 @@ class Reorient2Std(FSLCommand):
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+class InvWarpInputSpec(FSLCommandInputSpec):
+    warp = File(exists=True,
+                desc='Name of file containing warp-coefficients/fields. This would typically be the output from the --cout switch of fnirt (but can also use fields, like the output from --fout).',
+                argstr='--warp=%s',
+                mandatory=True)
+    reference = File(exists=True,
+                     desc='Name of a file in target space. Note that the target space is now different from the target space that was used to create the --warp file. It would typically be the file that was specified with the --in argument when running fnirt.',
+                     argstr='--ref=%s',
+                     mandatory=True)
+
+    inverse_warp = File(exists=True,
+                     desc='Name of output file, containing warps that are the "reverse" of those in --warp. This will be a field-file (rather than a file of spline coefficients), and it will have any affine component included as part of the displacements.',
+                     argstr='--out=%s',
+                     gen_file=True)
+
+    absolute = traits.Bool(argstr='--abs',
+                           desc='If set it indicates that the warps in --warp should be interpreted as absolute, provided that it is not created by fnirt (which always uses relative warps). If set it also indicates that the output --out should be absolute.',
+                           xor='relative')
+    relative = traits.Bool(argstr='--rel',
+                           desc='If set it indicates that the warps in --warp should be interpreted as relative. I.e. the values in --warp are displacements from the coordinates in the --ref space. If set it also indicates that the output --out should be relative.',
+                           xor='absolute')
+    niter = traits.Int(argstr='--niter=%d',
+                       desc='Determines how many iterations of the gradient-descent search that should be run.')
+    regularise = traits.Float(argstr='--regularise=%f',
+                              desc='Regularisation strength (deafult=1.0).')
+    noconstraint = traits.Bool(argstr='--noconstraint',
+                               desc='Do not apply Jacobian constraint')
+    jacobian_min = traits.Float(argstr='--jmin=%f',
+                                desc='Minimum acceptable Jacobian value for constraint (default 0.01)')
+    jacobian_max = traits.Float(argstr='--jmax=%f',
+                                desc='Maximum acceptable Jacobian value for constraint (default 100.0)')
+
+class InvWarpOutputSpec(TraitedSpec):
+    inverse_warp = File(exists=True, desc='Name of output file, containing warps that are the "reverse" of those in --warp.')
+
+class InvWarp(FSLCommand):
+    """Use FSL Invwarp to inverse a FNIRT warp
+
+Examples
+
+>>> TODO
+"""
+
+    input_spec = InvWarpInputSpec
+    output_spec = InvWarpOutputSpec
+
+
+    _cmd = 'invwarp'
+
+    def _gen_filename(self, name):
+        if name == 'inverse_warp':
+            in_file1 = self.inputs.in_file1
+            return '%s_inv%s' % os.path.splitext(in_file1)
+        else:
+            raise NotImplementedError
