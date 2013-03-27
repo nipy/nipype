@@ -1024,7 +1024,7 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01):
     """
     Run a command, read stdout and stderr, prefix with timestamp. The returned
     runtime contains a merged stdout+stderr log with timestamps
@@ -1038,42 +1038,71 @@ def run_command(runtime, timeout=0.01):
                              shell=True,
                              cwd=runtime.cwd,
                              env=runtime.environ)
-    streams = [
-        Stream('stdout', proc.stdout),
-        Stream('stderr', proc.stderr)
-        ]
-
-    def _process(drain=0):
-        try:
-            res = select.select(streams, [], [], timeout)
-        except select.error, e:
-            iflogger.info(str(e))
-            if e[0] == errno.EINTR:
-                return
-            else:
-                raise
-        else:
-            for stream in res[0]:
-                stream.read(drain)
-
-    while proc.returncode is None:
-        proc.poll()
-        _process()
-    runtime.returncode = proc.returncode
-    _process(drain=1)
-
-    # collect results, merge and return
     result = {}
-    temp = []
-    for stream in streams:
-        rows = stream._rows
-        temp += rows
-        result[stream._name] = [r[2] for r in rows]
-    temp.sort()
-    result['merged'] = [r[1] for r in temp]
+    if output == 'stream':
+        streams = [
+            Stream('stdout', proc.stdout),
+            Stream('stderr', proc.stderr)
+            ]
+
+        def _process(drain=0):
+            try:
+                res = select.select(streams, [], [], timeout)
+            except select.error, e:
+                iflogger.info(str(e))
+                if e[0] == errno.EINTR:
+                    return
+                else:
+                    raise
+            else:
+                for stream in res[0]:
+                    stream.read(drain)
+
+        while proc.returncode is None:
+            proc.poll()
+            _process()
+        _process(drain=1)
+
+        # collect results, merge and return
+        result = {}
+        temp = []
+        for stream in streams:
+            rows = stream._rows
+            temp += rows
+            result[stream._name] = [r[2] for r in rows]
+        temp.sort()
+        result['merged'] = [r[1] for r in temp]
+    if output == 'allatonce':
+        stdout, stderr = proc.communicate()
+        result['stdout'] = stdout.split('\n')
+        result['stderr'] = stderr.split('\n')
+        result['merged'] = ''
+    if output == 'file':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stderr =  open(errfile, 'wt')
+        stdout =  open(outfile, 'wt')
+        proc = subprocess.Popen(runtime.cmdline,
+                                stdout=stdout,
+                                stderr=stderr,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
+        ret_code = proc.wait()
+        stderr.flush()
+        stdout.flush()
+        result['stdout'] = [line.strip() for line in open(outfile).readlines()]
+        result['stderr'] = [line.strip() for line in open(errfile).readlines()]
+        result['merged'] = ''
+    if output == 'none':
+        proc.communicate()
+        result['stdout'] = []
+        result['stderr'] = []
+        result['merged'] = ''
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']
+    runtime.returncode = proc.returncode
     return runtime
 
 
@@ -1081,7 +1110,9 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
-
+    terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
+                                  desc='Control terminal output', nohash=True,
+                                  mandatory=True)
 
 class CommandLine(BaseInterface):
     """Implements functionality to interact with command line programs
@@ -1107,7 +1138,7 @@ class CommandLine(BaseInterface):
     'ls -al'
 
     >>> cli.inputs.trait_get()
-    {'ignore_exception': False, 'args': '-al', 'environ': {'DISPLAY': ':1'}}
+    {'ignore_exception': False, 'terminal_output': 'stream', 'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
     >>> cli.inputs.get_hashval()
     ({'args': '-al'}, 'a2f45e04a34630c5f33a75ea2a533cdd')
@@ -1117,6 +1148,7 @@ class CommandLine(BaseInterface):
     input_spec = CommandLineInputSpec
     _cmd = None
     _version = None
+    _terminal_output = 'stream'
 
     def __init__(self, command=None, **inputs):
         super(CommandLine, self).__init__(**inputs)
@@ -1127,6 +1159,31 @@ class CommandLine(BaseInterface):
             raise Exception("Missing command")
         if command:
             self._cmd = command
+        self.inputs.on_trait_change(self._terminal_output_update,
+                                    'terminal_output')
+        if not isdefined(self.inputs.terminal_output):
+            self.inputs.terminal_output = self._terminal_output
+        else:
+            self._terminal_output_update()
+
+    def _terminal_output_update(self):
+        self._terminal_output = self.inputs.terminal_output
+
+    @classmethod
+    def set_default_terminal_output(cls, output_type):
+        """Set the default output type for FSL classes.
+
+        This method is used to set the default output type for all fSL
+        subclasses.  However, setting this will not update the output
+        type for any existing instances.  For these, assign the
+        <instance>.inputs.output_type.
+        """
+
+        if output_type in ['stream', 'allatonce', 'file', 'none']:
+            cls._terminal_output = output_type
+        else:
+            raise AttributeError('Invalid terminal output_type: %s' %
+                                 output_type)
 
     @property
     def cmd(self):
@@ -1207,7 +1264,7 @@ class CommandLine(BaseInterface):
         if not self._exists_in_path(self.cmd.split()[0]):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
-        runtime = run_command(runtime)
+        runtime = run_command(runtime, output=self.inputs.terminal_output)
         if runtime.returncode is None or runtime.returncode != 0:
             self.raise_exception(runtime)
 

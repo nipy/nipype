@@ -570,7 +570,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     logger.info('Creating detailed dot file: %s' % outfname)
     _write_detailed_dot(graph, outfname)
     cmd = 'dot -T%s -O %s' % (format, outfname)
-    res = CommandLine(cmd).run()
+    res = CommandLine(cmd, terminal_output='allatonce').run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
     pklgraph = _create_dot_graph(graph, show_connectinfo, simple_form)
@@ -581,7 +581,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
     nx.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
     cmd = 'dot -T%s -O %s' % (format, outfname)
-    res = CommandLine(cmd).run()
+    res = CommandLine(cmd, terminal_output='allatonce').run()
     if res.runtime.returncode:
         logger.warn('dot2png: %s', res.runtime.stderr)
     if show:

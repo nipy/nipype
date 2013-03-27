@@ -247,7 +247,8 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
         The formated docstring
 
     """
-    res = CommandLine('which %s' % cmd.split(' ')[0]).run()
+    res = CommandLine('which %s' % cmd.split(' ')[0],
+                      terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found'%cmd.split(' ')[0])
@@ -320,7 +321,8 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
         Contains a mapping from input to command line variables
 
     """
-    res = CommandLine('which %s' % cmd.split(' ')[0]).run()
+    res = CommandLine('which %s' % cmd.split(' ')[0],
+                      terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
         raise Exception('Command %s not found'%cmd.split(' ')[0])
