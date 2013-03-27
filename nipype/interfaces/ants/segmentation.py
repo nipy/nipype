@@ -162,6 +162,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     input_image = File(argstr='--input-image %s', mandatory=True,
                         desc=('image to apply transformation to (generally a '
                               'coregistered functional)'))
+    mask_image = File(argstr='--mask-image %s')
     output_image = traits.Str(argstr='--output %s',
                              desc=('output file name'), genfile=True,
                              hash_file=False)
