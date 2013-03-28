@@ -477,32 +477,32 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 
     # BBR options
     wm_seg = File(
-        argstr='-wmseg %s',
+        argstr='-wmseg %s', min_ver='5.0.0',
         desc='white matter segmentation volume needed by BBR cost function')
     wmcoords = File(
-        argstr='-wmcoords %s',
+        argstr='-wmcoords %s', min_ver='5.0.0',
         desc='white matter boundary coordinates for BBR cost function')
     wmnorms = File(
-        argstr='-wmnorms %s',
+        argstr='-wmnorms %s', min_ver='5.0.0',
         desc='white matter boundary normals for BBR cost function')
     fieldmap = File(
-        argstr='-fieldmap %s',
+        argstr='-fieldmap %s', min_ver='5.0.0',
         desc='fieldmap image in rads/s - must be already registered to the reference image')
     fieldmapmask = File(
-        argstr='-fieldmapmask %s',
+        argstr='-fieldmapmask %s', min_ver='5.0.0',
         desc='mask for fieldmap image')
     pedir = traits.Int(
-        argstr='-pedir %d',
+        argstr='-pedir %d', min_ver='5.0.0',
         desc='phase encode direction of EPI - 1/2/3=x/y/z & -1/-2/-3=-x/-y/-z')
     echospacing = traits.Float(
-        argstr='-echospacing %f',
+        argstr='-echospacing %f', min_ver='5.0.0',
         desc='value of EPI echo spacing - units of seconds')
     bbrtype = traits.Enum(
         'signed', 'global_abs', 'local_abs',
-        argstr='-bbrtype %s',
+        argstr='-bbrtype %s', min_ver='5.0.0',
         desc='type of bbr cost function: signed [default], global_abs, local_abs')
     bbrslope = traits.Float(
-        argstr='-bbrslope %f',
+        argstr='-bbrslope %f', min_ver='5.0.0',
         desc='value of bbr slope')
     
 
