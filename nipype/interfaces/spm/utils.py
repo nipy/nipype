@@ -247,6 +247,19 @@ class ApplyInverseDeformationOutput(TraitedSpec):
                                 desc='Transformed files')
 
 class ApplyInverseDeformation(SPMCommand):
+    """ Uses spm to apply inverse deformation stored in a .mat file or a
+    deformation field to a given file
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> inv = spmu.ApplyInverseDeformation()
+    >>> inv.inputs.in_files = 'functional.nii'
+    >>> inv.inputs.deformation = 'struct_to_func.mat'
+    >>> inv.inputs.target = 'structural.nii'
+    >>> inv.run() # doctest: +SKIP
+    """
 
     input_spec  = ApplyInverseDeformationInput
     output_spec = ApplyInverseDeformationOutput
