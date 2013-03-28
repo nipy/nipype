@@ -724,9 +724,9 @@ class FourierInputSpec(AFNICommandInputSpec):
                            position=0,
                            mandatory=True)
     highpass = traits.Float(desc='highpass',
-                           argstr='-highpass %f',
-        position=1,
-        mandatory=True)
+                            argstr='-highpass %f',
+                            position=1,
+                            mandatory=True)
 
 
 class Fourier(AFNICommand):
@@ -815,8 +815,8 @@ class BandpassInputSpec(AFNICommandInputSpec):
         argstr='-nfft %d',
         desc="set the FFT length [must be a legal value]")
     normalize = traits.Bool(
-         argstr='-norm',
-         desc="""Make all output time series have L2 norm = 1
+        argstr='-norm',
+        desc="""Make all output time series have L2 norm = 1
                    ++ i.e., sum of squares = 1""")
     automask = traits.Bool(
         argstr='-automask',
@@ -866,14 +866,14 @@ class Bandpass(AFNICommand):
 
 class ZCutUpInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dZcutup',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_zcupup", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
     keep = traits.Str(desc='slice range to keep in output',
-            argstr='-keep %s')
+                      argstr='-keep %s')
 
 
 class ZCutUp(AFNICommand):
@@ -901,10 +901,10 @@ class ZCutUp(AFNICommand):
 
 class AllineateInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dAllineate',
-        argstr='-source %s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='-source %s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
     reference = File(
         exists=True,
         argstr='-base %s',
@@ -930,8 +930,8 @@ if not given the reference will be the first volume of in_file.""")
         argstr='-1Dmatrix_save %s',
         desc='Save the transformation matrix for each volume.')
     in_matrix = File(desc='matrix to align input file',
-        argstr='-1Dmatrix_apply %s',
-        position=-3)
+                     argstr='-1Dmatrix_apply %s',
+                     position=-3)
 
     _cost_funcs = [
         'leastsq', 'ls',
@@ -1075,11 +1075,11 @@ if not given the reference will be the first volume of in_file.""")
 
     # Non-linear experimental
     _nwarp_types = ['bilinear',
-                  'cubic', 'quintic', 'heptic', 'nonic',
-                  'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
+                    'cubic', 'quintic', 'heptic', 'nonic',
+                    'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
     nwarp = traits.Enum(
         *_nwarp_types, argstr='-nwarp %s',
-         desc='Experimental nonlinear warping: bilinear or legendre poly.')
+        desc='Experimental nonlinear warping: bilinear or legendre poly.')
     _dirs = ['X', 'Y', 'Z', 'I', 'J', 'K']
     nwarp_fixmot = traits.List(
         traits.Enum(*_dirs),
@@ -1128,7 +1128,7 @@ class Allineate(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix=self.inputs.suffix)
+                                                  suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1140,19 +1140,19 @@ class Allineate(AFNICommand):
 
 class MaskaveInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dmaskave',
-        argstr='%s',
-        position=-2,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-2,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_maskave.1D", desc='output image file name',
-        argstr="> %s", name_source="in_file", usedefault=True, position=-1)
+                    argstr="> %s", name_source="in_file", usedefault=True, position=-1)
     mask = File(desc='matrix to align input file',
-        argstr='-mask %s',
-        position=1,
-        exists=True)
+                argstr='-mask %s',
+                position=1,
+                exists=True)
     quiet = traits.Bool(desc='matrix to align input file',
-        argstr='-quiet',
-        position=2)
+                        argstr='-quiet',
+                        position=2)
 
 
 class Maskave(AFNICommand):
@@ -1183,12 +1183,12 @@ class Maskave(AFNICommand):
 
 class SkullStripInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dSkullStrip',
-        argstr='-input %s',
-        position=1,
-        mandatory=True,
-        exists=True)
+                   argstr='-input %s',
+                   position=1,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_skullstrip", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
 
 
 class SkullStrip(AFNICommand):
@@ -1221,7 +1221,7 @@ class TCatInputSpec(AFNICommandInputSpec):
         position=-1,
         mandatory=True)
     out_file = File("%s_tcat", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
 
 
@@ -1251,21 +1251,21 @@ class TCat(AFNICommand):
 
 class FimInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dfim+',
-        argstr=' -input %s',
-        position=1,
-        mandatory=True,
-        exists=True)
+                   argstr=' -input %s',
+                   position=1,
+                   mandatory=True,
+                   exists=True)
     out_file = File("%s_fim", desc='output image file name',
-        argstr='-bucket %s', name_source="in_file", usedefault=True)
+                    argstr='-bucket %s', name_source="in_file", usedefault=True)
     ideal_file = File(desc='ideal time series file name',
-        argstr='-ideal_file %s',
-        position=2,
-        mandatory=True,
-        exists=True)
+                      argstr='-ideal_file %s',
+                      position=2,
+                      mandatory=True,
+                      exists=True)
     fim_thr = traits.Float(desc='fim internal mask threshold value',
-        argstr='-fim_thr %f', position=3)
+                           argstr='-fim_thr %f', position=3)
     out = traits.Str(desc='Flag to output the specified parameter',
-        argstr='-out %s', position=4)
+                     argstr='-out %s', position=4)
 
 
 class Fim(AFNICommand):
@@ -1297,12 +1297,12 @@ class Fim(AFNICommand):
 
 class TCorrelateInputSpec(AFNIBaseCommandInputSpec):
     xset = File(desc='input xset',
-        argstr=' %s',
-        position=-2,
-        mandatory=True,
-        exists=True)
+                argstr=' %s',
+                position=-2,
+                mandatory=True,
+                exists=True)
     yset = File(desc='input yset',
-        argstr=' %s',
+               argstr=' %s',
         position=-1,
         mandatory=True,
         exists=True)
