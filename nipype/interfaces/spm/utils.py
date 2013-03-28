@@ -208,9 +208,9 @@ class Reslice(SPMCommand):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
-
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
-    in_files=InputMultiPath(File(exists=True), mandatory=True, field='fnames',
+    in_files = InputMultiPath(
+        File(exists=True), mandatory=True, field='fnames',
         desc='Files on which deformation is applied')
     target = File(
         exists=True,
@@ -241,10 +241,11 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         minlen=3, maxlen=3,
         desc='3-element list (opt)')
 
-    
+
 class ApplyInverseDeformationOutput(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc='Transformed files')
+
 
 class ApplyInverseDeformation(SPMCommand):
     """ Uses spm to apply inverse deformation stored in a .mat file or a
@@ -261,12 +262,11 @@ class ApplyInverseDeformation(SPMCommand):
     >>> inv.run() # doctest: +SKIP
     """
 
-    input_spec  = ApplyInverseDeformationInput
+    input_spec = ApplyInverseDeformationInput
     output_spec = ApplyInverseDeformationOutput
-    
+
     _jobtype = 'util'
     _jobname = 'defs'
-
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -286,6 +286,5 @@ class ApplyInverseDeformation(SPMCommand):
         outputs['out_files'] = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
-            outputs['out_files'].append(os.path.realpath('w%s'%fname))
+            outputs['out_files'].append(os.path.realpath('w%s' % fname))
         return outputs
-
