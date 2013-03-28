@@ -1302,18 +1302,18 @@ class TCorrelateInputSpec(AFNIBaseCommandInputSpec):
                 mandatory=True,
                 exists=True)
     yset = File(desc='input yset',
-               argstr=' %s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                argstr=' %s',
+                position=-1,
+                mandatory=True,
+                exists=True)
     out_file = File("%s_tcorr", desc='output image file name',
-        argstr='-prefix %s', name_source="xset", usedefault=True)
+                    argstr='-prefix %s', name_source="xset", usedefault=True)
     pearson = traits.Bool(desc='Correlation is the normal' +
-        ' Pearson correlation coefficient',
-        argstr='-pearson',
-        position=1)
+                          ' Pearson correlation coefficient',
+                          argstr='-pearson',
+                          position=1)
     polort = traits.Int(desc='Remove polynomical trend of order m',
-        argstr='-polort %d', position=2)
+                        argstr='-polort %d', position=2)
 
 
 class TCorrelate(AFNIBaseCommand):
@@ -1344,19 +1344,19 @@ class TCorrelate(AFNIBaseCommand):
 
 class BrickStatInputSpec(AFNIBaseCommandInputSpec):
     in_file = File(desc='input file to 3dmaskave',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     mask = File(desc='-mask dset = use dset as mask to include/exclude voxels',
-        argstr='-mask %s',
-        position=2,
-        exists=True)
+                argstr='-mask %s',
+                position=2,
+                exists=True)
 
     min = traits.Bool(desc='print the minimum value in dataset',
-        argstr='-min',
-        position=1)
+                      argstr='-min',
+                      position=1)
 
 
 class BrickStatOutputSpec(TraitedSpec):
@@ -1415,25 +1415,25 @@ class BrickStat(AFNIBaseCommand):
 
 class ROIStatsInputSpec(AFNIBaseCommandInputSpec):
     in_file = File(desc='input file to 3dROIstats',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
 
     mask = File(desc='input mask',
-        argstr='-mask %s',
-        position=3,
-        exists=True)
+                argstr='-mask %s',
+                position=3,
+                exists=True)
 
     mask_f2short = traits.Bool(
         desc='Tells the program to convert a float mask ' +
-            'to short integers, by simple rounding.',
+        'to short integers, by simple rounding.',
         argstr='-mask_f2short',
         position=2)
 
     quiet = traits.Bool(desc='execute quietly',
-        argstr='-quiet',
-        position=1)
+                        argstr='-quiet',
+                        position=1)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
@@ -1507,17 +1507,17 @@ ${rest}_ss.nii.gz
 
 class CalcInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 3dcalc',
-        argstr='-a %s', position=0, mandatory=True, exists=True)
+                     argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
-        argstr=' -b %s', position=1, exists=True)
+                     argstr=' -b %s', position=1, exists=True)
     out_file = File("%s_calc", desc='output image file name',
-        argstr='-prefix %s', name_source="in_file_a", usedefault=True)
+                    argstr='-prefix %s', name_source="in_file_a", usedefault=True)
     expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
-        mandatory=True)
+                      mandatory=True)
     start_idx = traits.Int(desc='start index for in_file_a',
-        requires=['stop_idx'])
+                           requires=['stop_idx'])
     stop_idx = traits.Int(desc='stop index for in_file_a',
-        requires=['start_idx'])
+                          requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for in_file_a')
     other = File(desc='other options', argstr='')
     suffix = traits.Str('_calc', desc="out_file suffix", usedefault=True)
@@ -1553,7 +1553,7 @@ class Calc(AFNICommand):
             arg = trait_spec.argstr % value
             if isdefined(self.inputs.start_idx):
                 arg += '[%d..%d]' % (self.inputs.start_idx,
-                    self.inputs.stop_idx)
+                                     self.inputs.stop_idx)
             if isdefined(self.inputs.single_idx):
                 arg += '[%d]' % (self.inputs.single_idx)
             return arg
@@ -1603,20 +1603,33 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
     suffix = traits.Str('_blurmask', desc="out_file suffix", usedefault=True)
 
 
-class BlurInMaskOutputSpec(TraitedSpec):
-    out_file = File(exists=True)
-
-
 class BlurInMask(AFNICommand):
+    """ Blurs a dataset spatially inside a mask.  That's all.  Experimental.
+
+    For complete details, see the `3dBlurInMask Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> bim = afni.BlurInMask()
+    >>> bim.inputs.in_file = 'functional.nii'
+    >>> bim.inputs.mask = 'mask.nii'
+    >>> bim.inputs.fwhm = 5.0
+    >>> res = bim.run()   # doctest: +SKIP
+
+    """
+
     _cmd = '3dBlurInMask'
     input_spec = BlurInMaskInputSpec
-    output_spec = BlurInMaskOutputSpec
+    output_spec = AFNICommandOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                suffix=self.inputs.suffix)
+                                                  suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1626,68 +1639,62 @@ class BlurInMask(AFNICommand):
             return self._list_outputs()[name]
 
 
-class TCorrMapInputSpec(AFNICommandInputSpec):
+class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     in_file = File(exists=True, argstr='-input %s', mandatory=True)
     seeds = File(exists=True, argstr='-seed %s', xor=('seeds_width'))
     mask = File(exists=True, argstr='-mask %s')
     automask = traits.Bool(argstr='-automask')
     polort = traits.Int(argstr='-polort %d')
     bandpass = traits.Tuple((traits.Float(), traits.Float()),
-                             argstr='-bpass %f %f')
+                            argstr='-bpass %f %f')
     regress_out_timeseries = traits.File(exists=True, argstr='-ort %s')
     blur_fwhm = traits.Float(argstr='-Gblur %f')
     seeds_width = traits.Float(argstr='-Mseed %f', xor=('seeds'))
 
     # outputs
-    mean_file = File(genfile=True, argstr='-Mean %s', suffix='_mean')
-    zmean = File(genfile=True, argstr='-Zmean %s', suffix='_zmean')
-    qmean = File(genfile=True, argstr='-Qmean %s', suffix='_qmean')
-    pmean = File(genfile=True, argstr='-Pmean %s', suffix='_pmean')
+    mean_file = File(argstr='-Mean %s', suffix='_mean', name_source="in_file")
+    zmean = File(argstr='-Zmean %s', suffix='_zmean', name_source="in_file")
+    qmean = File(argstr='-Qmean %s', suffix='_qmean', name_source="in_file")
+    pmean = File(argstr='-Pmean %s', suffix='_pmean', name_source="in_file")
 
     _thresh_opts = ('absolute_threshold',
-                    'var_absolute_threshold', 'var_absolute_threshold_normalize')
+                    'var_absolute_threshold',
+                    'var_absolute_threshold_normalize')
     thresholds = traits.List(traits.Int())
     absolute_threshold = File(
-        genfile=True,
         argstr='-Thresh %f %s', suffix='_thresh',
-        xor=_thresh_opts)
+        name_source="in_file", xor=_thresh_opts)
     var_absolute_threshold = File(
-        genfile=True,
         argstr='-VarThresh %f %f %f %s', suffix='_varthresh',
-        xor=_thresh_opts)
+        name_source="in_file", xor=_thresh_opts)
     var_absolute_threshold_normalize = File(
-        genfile=True,
         argstr='-VarThreshN %f %f %f %s', suffix='_varthreshn',
-        xor=_thresh_opts)
+        name_source="in_file", xor=_thresh_opts)
 
     correlation_maps = File(
-        genfile=True, argstr='-CorrMap %s', suffix='_corrmap')
+        argstr='-CorrMap %s', name_source="in_file")
     correlation_maps_masked = File(
-        genfile=True, argstr='-CorrMask %s', suffix='_corrmask')
+        argstr='-CorrMask %s', name_source="in_file")
 
     _expr_opts = ('average_expr', 'average_expr_nonzero', 'sum_expr')
     expr = traits.Str()
     average_expr = File(
-        genfile=True,
         argstr='-Aexpr %s %s', suffix='_aexpr',
         xor=_expr_opts)
     average_expr_nonzero = File(
-        genfile=True,
         argstr='-Cexpr %s %s', suffix='_cexpr',
         xor=_expr_opts)
     sum_expr = File(
-        genfile=True,
         argstr='-Sexpr %s %s', suffix='_sexpr',
         xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        genfile=True,
         argstr='-Hist %d %s', suffix='_hist')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
 
-    mean_file = File(genfile=True)
+    mean_file = File()
     zmean = File()
     qmean = File()
     pmean = File()
@@ -1703,6 +1710,25 @@ class TCorrMapOutputSpec(TraitedSpec):
 
 
 class TCorrMap(AFNICommand):
+    """ For each voxel time series, computes the correlation between it
+    and all other voxels, and combines this set of values into the
+    output dataset(s) in some way.
+
+    For complete details, see the `3dTcorrMap Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> tcm = afni.TcorrMap()
+    >>> tcm.inputs.in_file = 'functional.nii'
+    >>> tcm.inputs.mask = 'mask.nii'
+    >>> tcm.mean_file = '%s_meancorr.nii'
+    >>> res = tcm.run()   # doctest: +SKIP
+
+    """
+
     _cmd = '3dTcorrMap'
     input_spec = TCorrMapInputSpec
     output_spec = TCorrMapOutputSpec
@@ -1735,15 +1761,25 @@ class TCorrMap(AFNICommand):
         return super(TCorrMap, self)._parse_inputs(skip=skip)
 
     def _gen_filename(self, name):
-        if name in self._outputs().get().keys():
-            return self._list_outputs()[name]
+        if hasattr(self.inputs, name) and \
+                not isdefined(getattr(self.inputs, name)):
+            return Undefined
+        return super(TCorrMap, self)._gen_filename(name)
 
 
 class AutoboxInputSpec(AFNICommandInputSpec):
-    in_file = File(exists=True, mandatory=True, argstr='-input %s')
-    padding = traits.Int(argstr='-npad %d')
+    in_file = File(exists=True, mandatory=True, argstr='-input %s',
+                   desc='input file')
+    padding = traits.Int(
+        argstr='-npad %d',
+        desc='Number of extra voxels to pad on each side of box')
     out_file = File(argstr="-prefix %s", name_source="in_file")
-    no_clustering = traits.Bool(argstr='-noclust')
+    no_clustering = traits.Bool(
+        argstr='-noclust',
+        desc="""Don't do any clustering to find box. Any non-zero
+                voxel will be preserved in the cropped volume.
+                The default method uses some clustering to find the
+                cropping box, and will clip off small isolated blobs.""")
 
 
 class AutoboxOuputSpec(TraitedSpec):  # out_file not mandatory
@@ -1758,6 +1794,23 @@ class AutoboxOuputSpec(TraitedSpec):  # out_file not mandatory
 
 
 class Autobox(AFNICommand):
+    """ Computes size of a box that fits around the volume.
+    Also can be used to crop the volume to that box.
+
+    For complete details, see the `3dAutobox Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> abox = afni.Autobox()
+    >>> abox.inputs.in_file = 'structural.nii'
+    >>> abox.inputs.padding = 5
+    >>> res = abox.run()   # doctest: +SKIP
+
+    """
+
     _cmd = '3dAutobox'
     input_spec = AutoboxInputSpec
     output_spec = AutoboxOuputSpec
