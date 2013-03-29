@@ -444,8 +444,7 @@ Test collapse transforms flag
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid': 'Rigid.mat',
-                                           #seems counterontuitive, but his is how ANTS is calling it
-                                           'Affine': 'GenericAffine.mat',
+                                           'Affine': 'Affine.mat',
                                            'GenericAffine': 'GenericAffine.mat',
                                            'CompositeAffine': 'Affine.mat',
                                            'Similarity': 'Similarity.mat',
