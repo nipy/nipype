@@ -74,7 +74,6 @@ reg.inputs.use_estimate_learning_rate_once = [True, True]
 reg.inputs.use_histogram_matching = [True, True] # This is the default
 reg.inputs.output_transform_prefix = 'thisTransform'
 reg.inputs.output_warped_image = 'INTERNAL_WARPED.nii.gz'
-reg.cmdline
 
 
 """
