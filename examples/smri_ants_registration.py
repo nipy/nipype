@@ -83,7 +83,6 @@ reg.inputs.initial_moving_transform_com = True
 
 print reg.cmdline
 
-
 """
 3. Run the registration
 """
