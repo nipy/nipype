@@ -1116,8 +1116,8 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         4, usedefault=True, field='estwrite.opts.warpreg',
         desc='Controls balance between parameters and data')
 
-   spatial_normalization = traits.Enum('high',
-        'low', usedefault=True,)
+    spatial_normalization = traits.Enum(
+        'high', 'low', usedefault=True,)
     dartel_template = File(
         exists=True,
         field='estwrite.extopts.dartelwarp.normhigh.darteltpm')
