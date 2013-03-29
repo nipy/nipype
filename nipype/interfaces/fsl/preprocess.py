@@ -1163,7 +1163,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     forward_warping = traits.Bool(
         False, usedefault=True,
         desc='apply forward warping instead of unwarping')
-    warped_file = File(argstr='--warp=%s', genfile=True,
+    warped_file = File(argstr='--warp=%s', 
                        desc='apply forward warping and save as filename',
                        hash_files=False)
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
@@ -1181,7 +1181,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
     save_shift = traits.Bool(desc='output pixel shift volume')
 
-    shift_out_file = traits.File(argstr='--saveshift=%s', genfile=True,
+    shift_out_file = traits.File(argstr='--saveshift=%s', 
                            desc='filename for saving pixel shift volume', hash_files=False)
 
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
