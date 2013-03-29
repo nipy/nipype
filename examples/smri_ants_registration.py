@@ -79,6 +79,7 @@ reg.inputs.use_histogram_matching = [False]*3 + [True] # This is the default
 reg.inputs.initial_moving_transform_com = True
 reg.inputs.output_warped_image = True
 
+
 """
 3. Run the registration
 """
