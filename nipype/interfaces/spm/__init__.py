@@ -10,5 +10,5 @@ from .preprocess import (SliceTiming, Realign, Coregister, Normalize, Segment,
 from .model import (Level1Design, EstimateModel, EstimateContrast, Threshold,
                     OneSampleTTestDesign, TwoSampleTTestDesign,
                     PairedTTestDesign, MultipleRegressionDesign)
+from .utils import Analyze2nii, CalcCoregAffine, ApplyTransform, Reslice, ApplyInverseDeformation
 
-from .utils import Analyze2nii, CalcCoregAffine, ApplyTransform, Reslice
