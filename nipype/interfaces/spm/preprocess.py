@@ -1218,6 +1218,26 @@ class VBMSegmentOuputSpec(TraitedSpec):
     jacobian_determinant_images = OutputMultiPath(File(exists=True))
 
 class VBMSegment(SPMCommand):
+
+    """Use VBM8 toolbox to separate structural images into different
+    tissue classes.
+
+    Examples
+    --------
+    >>> import nipype.interfaces.spm as spm
+    >>> seg = spm.VBMSegment()
+    >>> seg.inputs.tissues = os.path.join(spm.Info.version()['path'],'toolbox','Seg','TPM.nii')
+    >>> seg.inputs.dartel_template = os.path.join(spm.Info.version()['path'],'toolbox','vbm8','Template_1_IXI550_MNI152.nii')
+    >>> seg.inputs.bias_corrected_native = True,
+    >>> seg.inputs.gm_native = True
+    >>> seg.inputs.wm_native = True
+    >>> seg.inputs.csf_native = True
+    >>> seg.inputs.pve_label_native = True,
+    >>> seg.inputs.deformation_field = (True, False)
+    >>> seg.run() # doctest: +SKIP
+
+    """
+
     input_spec = VBMSegmentInputSpec
     output_spec = VBMSegmentOuputSpec
 
