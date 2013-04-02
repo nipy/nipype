@@ -1222,8 +1222,8 @@ class VBMSegment(SPMCommand):
     """Use VBM8 toolbox to separate structural images into different
     tissue classes.
 
-    Examples
-    --------
+    Example
+    -------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.VBMSegment()
     >>> seg.inputs.tissues = os.path.join(spm.Info.version()['path'],'toolbox','Seg','TPM.nii')
@@ -1235,7 +1235,6 @@ class VBMSegment(SPMCommand):
     >>> seg.inputs.pve_label_native = True,
     >>> seg.inputs.deformation_field = (True, False)
     >>> seg.run() # doctest: +SKIP
-
     """
 
     input_spec = VBMSegmentInputSpec
