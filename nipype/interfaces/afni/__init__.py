@@ -11,4 +11,5 @@ from .base import Info
 from .preprocess import (To3D, Refit, Resample, TStat, Automask, Volreg, Merge,
                          ZCutUp, Calc, TShift, Warp, Detrend, Despike, Copy,
                          Fourier, Allineate, Maskave, SkullStrip, TCat, Fim,
-                         TCorrelate, BrickStat, ROIStats, AutoTcorrelate)
+                         TCorrelate, BrickStat, ROIStats, AutoTcorrelate,
+                         BlurInMask, Autobox, TCorrMap, Bandpass)

@@ -1,12 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info
+from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import (TraitedSpec, BaseInterface,
-                                    BaseInterfaceInputSpec, isdefined)
+from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
+                                    BaseInterfaceInputSpec, isdefined, 
+                                    OutputMultiPath, InputMultiPath)
 from nipype.interfaces.base import File, traits
-from nipype.utils.filemanip import split_filename, fname_presuffix
+from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_list,list_to_filename
 import os
+import numpy as np
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):
     analyze_file = File(exists=True, mandatory=True)
@@ -206,3 +208,83 @@ class Reslice(SPMCommand):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
+class ApplyInverseDeformationInput(SPMCommandInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True), mandatory=True, field='fnames',
+        desc='Files on which deformation is applied')
+    target = File(
+        exists=True,
+        field='comp{1}.inv.space',
+        desc='File defining target space')
+    deformation = File(
+        exists=True,
+        field='comp{1}.inv.comp{1}.sn2def.matname',
+        desc='SN SPM deformation file',
+        xor=['deformation_field'])
+    deformation_field = File(
+        exists=True,
+        field='comp{1}.inv.comp{1}.def',
+        desc='SN SPM deformation file',
+        xor=['deformation'])
+    interpolation = traits.Range(
+        low=0, hign=7, field='interp',
+        desc='degree of b-spline used for interpolation')
+
+    bounding_box = traits.List(
+        traits.Float(),
+        field='comp{1}.inv.comp{1}.sn2def.bb',
+        minlen=6, maxlen=6,
+        desc='6-element list (opt)')
+    voxel_sizes = traits.List(
+        traits.Float(),
+        field='comp{1}.inv.comp{1}.sn2def.vox',
+        minlen=3, maxlen=3,
+        desc='3-element list (opt)')
+
+
+class ApplyInverseDeformationOutput(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc='Transformed files')
+
+
+class ApplyInverseDeformation(SPMCommand):
+    """ Uses spm to apply inverse deformation stored in a .mat file or a
+    deformation field to a given file
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> inv = spmu.ApplyInverseDeformation()
+    >>> inv.inputs.in_files = 'functional.nii'
+    >>> inv.inputs.deformation = 'struct_to_func.mat'
+    >>> inv.inputs.target = 'structural.nii'
+    >>> inv.run() # doctest: +SKIP
+    """
+
+    input_spec = ApplyInverseDeformationInput
+    output_spec = ApplyInverseDeformationOutput
+
+    _jobtype = 'util'
+    _jobname = 'defs'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt == 'target':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'deformation':
+            return np.array([list_to_filename(val)], dtype=object)
+        if opt == 'deformation_field':
+            return np.array([list_to_filename(val)], dtype=object)
+        return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = []
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s' % fname))
+        return outputs
