@@ -282,6 +282,17 @@ class ResampleInputSpec(AFNICommandInputSpec):
     orientation = traits.Str(desc='new orientation code',
                              argstr='-orient %s')
 
+    resample_mode = traits.Enum('NN', 'Li', 'Cu', 'Bk',
+                                argstr='-rmode %s',
+                                desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
+
+    voxel_size = traits.Tuple(*[traits.Float()]*3,
+                              argstr='-dxyz %f %f %f',
+                              desc="resample to new dx, dy and dz")
+
+    master = traits.File(argstr='-master %s',
+                         desc='align dataset grid to a reference file')
+
 
 class Resample(AFNICommand):
     """Resample or reorient an image using AFNI 3dresample command
