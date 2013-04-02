@@ -554,12 +554,12 @@ def _rotate_bvecs(in_bvec, in_matrix):
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_rotated.bvec' % name)
     bvecs = np.loadtxt(in_bvec)
-    new_bvecs = [bvecs[:, 0]]
+    new_bvecs = np.zeros(shape=bvecs.T.shape) #pre-initialise array, 3 col format
 
-    for i, vol_matrix in enumerate(in_matrix[1::]):
+    for i, vol_matrix in enumerate(in_matrix[0::]): #start index at 0
         bvec = np.matrix(bvecs[:, i])
         rot = np.matrix(np.loadtxt(vol_matrix)[0:3, 0:3])
-        new_bvecs.append((np.array(rot * bvec.T).T)[0])
+        new_bvecs[i] = (np.array(rot * bvec.T).T)[0] #fill each volume with x,y,z as we go along
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
 
