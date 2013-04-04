@@ -322,6 +322,8 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
                                     argstr="-mask_only_targets")
     mask_source = File(exists=True, 
+        desc="mask to restrict target voxels. not to be used with mask_only_targets", 
+        argstr="-mask_source %s")
 
     out_file = File("%s_similarity_matrix.1D", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file", usedefault=True)
