@@ -28,8 +28,8 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
 
     volume1 = File(exists=True, desc="3D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D volume", mandatory=True)
-    mask1 = File(exists=True, desc="3D volume", mandatory=True)
-    mask2 = File(exists=True, desc="3D volume", mandatory=True)
+    mask1 = File(exists=True, desc="3D volume")
+    mask2 = File(exists=True, desc="3D volume")
     metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
                           traits.Callable(),
                          desc="""str or callable
