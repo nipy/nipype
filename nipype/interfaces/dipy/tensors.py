@@ -14,6 +14,7 @@ iflogger = logging.getLogger('interface')
 try:
     package_check('dipy')
     import dipy.reconst.dti as dti
+    from dipy.core.gradients import GradientTable
 except Exception, e:
     warnings.warn('dipy not installed')
 
@@ -53,9 +54,14 @@ class TensorMode(BaseInterface):
 		bvals=np.loadtxt(self.inputs.bvals)
 		gradients=np.loadtxt(self.inputs.bvecs).T
 
-		tensor = dti.Tensor(data,bvals,gradients,thresh=50)
-		
-		mode_data = tensor.mode
+		gtab = GradientTable(gradients)
+		gtab.bvals = bvals
+
+		mask = data[..., 0] > 50
+		tenmodel = dti.TensorModel(gtab)
+		tenfit = tenmodel.fit(data, mask)
+
+		mode_data = tenfit.mode
 		img = nb.Nifti1Image(mode_data,affine)
 		out_file = op.abspath(self.inputs.out_filename)
 		nb.save(img, out_file)
