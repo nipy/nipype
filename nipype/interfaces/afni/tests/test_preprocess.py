@@ -18,7 +18,7 @@ def test_allineate():
                      environ = dict(usedefault=True,),
                      ignore_exception = dict(usedefault=True,),
                      in_file = dict(argstr='-source %s',mandatory=True,),
-                     matrix = dict(argstr='-1dmatrix_apply %s',),
+                     in_matrix = dict(argstr='-1Dmatrix_apply %s',),
                      out_file = dict(argstr='-prefix %s'),
                      outputtype = dict(),
                      )
