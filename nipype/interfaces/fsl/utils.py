@@ -1178,7 +1178,7 @@ class SigLoss(FSLCommand):
 
     Examples
     --------
-    >>> sigloss = Sigloss()
+    >>> sigloss = SigLoss()
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
     >>> res = sigloss.run() # doctest: +SKIP
