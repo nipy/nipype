@@ -11,7 +11,7 @@ from .preprocess import (FAST, FLIRT, ApplyXfm, BET, MCFLIRT, FNIRT, ApplyWarp,
                          SliceTimer, SUSAN, PRELUDE, FUGUE, FIRST)
 from .model import (Level1Design, FEAT, FEATModel, FILMGLS, FEATRegister,
                     FLAMEO, ContrastMgr, MultipleRegressDesign, L2Model, SMM,
-                    MELODIC, SmoothEstimate, Cluster, Randomise)
+                    MELODIC, SmoothEstimate, Cluster, Randomise, GLM)
 from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     ImageStats, FilterRegressor, Overlay, Slicer,
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
