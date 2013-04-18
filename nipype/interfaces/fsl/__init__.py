@@ -15,7 +15,8 @@ from .model import (Level1Design, FEAT, FEATModel, FILMGLS, FEATRegister,
 from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     ImageStats, FilterRegressor, Overlay, Slicer,
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
-                    SwapDimensions, PowerSpectrum, Reorient2Std)
+                    SwapDimensions, PowerSpectrum, SigLoss, Reorient2Std,
+                    Complex)
 from .dti import (EddyCorrect, BEDPOSTX, DTIFit, ProbTrackX, VecReg, ProjThresh,
                   FindTheBiggest, DistanceMap, TractSkeleton, XFibres,
                   MakeDyadicVectors)
