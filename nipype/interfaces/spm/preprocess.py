@@ -1341,7 +1341,7 @@ class VBMSegment(SPMCommand):
             if val == 'low':
                 return {'normlow': []}
         elif opt in ['dartel_template']:
-            return scans_for_fnames(val, keep4d=True)
+            return np.array([val], dtype=object)
         elif opt in ['deformation_field']:
             return super(VBMSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[1])])
         else:
