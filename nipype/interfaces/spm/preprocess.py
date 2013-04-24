@@ -129,7 +129,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                         field='eoptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z]')
-    write_which = traits.Tuple(traits.Int, traits.Int, field='roptions.which',
+    write_which = traits.List(traits.Int, traits.Int, field='roptions.which',
                               desc='determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
