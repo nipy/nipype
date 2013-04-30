@@ -212,12 +212,15 @@ class Realign(SPMCommand):
             if resliced_mean:
                 outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
             
+            index_start = 0
+            if self.inputs.which[0]<2:
+                index_start = 1
             if resliced_all:
                 outputs['realigned_files'] = []
                 for imgf in filename_to_list(self.inputs.in_files):
                     realigned_run = []
                     if isinstance(imgf,list):
-                        for inner_imgf in filename_to_list(imgf):
+                        for inner_imgf[index_start:] in filename_to_list(imgf):
                             realigned_run.append(fname_presuffix(inner_imgf, prefix=self.inputs.out_prefix))
                     else:
                         realigned_run = fname_presuffix(imgf, prefix=self.inputs.out_prefix)
