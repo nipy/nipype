@@ -13,7 +13,7 @@ class FileProxyNode(pe.Node):
     execution."""
     
     def __init__(self,*args,**kwargs):
-        self.proxy_out = kwargs.pop('proxy_out',False)
+        self.proxy_out = kwargs.pop('proxy_out',True)
         super(self,FileProxyNode).__init__(*args,**kwargs)
     
     def _transform_input_file(self, fname, incwd=True):
