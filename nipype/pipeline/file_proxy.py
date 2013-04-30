@@ -12,6 +12,10 @@ class FileProxyNode(pe.Node):
     """ Generic file proxy for transforming files before and after interface
     execution."""
     
+    def __init__(self,*args,**kwargs):
+        self.proxy_out = kwargs.pop('proxy_out',False)
+        super(self,FileProxyNode).__init__(*args,**kwargs)
+    
     def _transform_input_file(self, fname, incwd=True):
         raise NotImplementedError
 
@@ -47,14 +51,14 @@ class FileProxyNode(pe.Node):
                         if os.path.isfile(value):
                             value = self._transform_input_file(value,copyfiles)
                             self.inputs.trait(name).copyfile = None
-                        else:
+                        elif self.proxy_out:
                             value = self._add_output_file2proxy(value)
                     elif spec.is_trait_type(InputMultiPath):
                         rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._transform_input_file(x,copyfiles)
                         if value:
                             value = map(rec_add, value)
                         self.inputs.trait(name).copyfile = None
-                    elif spec.is_trait_type(OutputMultiPath):
+                    elif spec.is_trait_type(OutputMultiPath) and self.proxy_out:
                         rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._add_output_file2proxy(x)
                         if value:
                             value = map(rec_add, value)
