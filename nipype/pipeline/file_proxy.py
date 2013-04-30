@@ -14,7 +14,7 @@ class FileProxyNode(pe.Node):
     
     def __init__(self,*args,**kwargs):
         self.proxy_out = kwargs.pop('proxy_out',True)
-        super(self,FileProxyNode).__init__(*args,**kwargs)
+        super(FileProxyNode,self).__init__(*args,**kwargs)
     
     def _transform_input_file(self, fname, incwd=True):
         raise NotImplementedError
@@ -31,16 +31,15 @@ class FileProxyNode(pe.Node):
     def _run_command(self,execute,copyfiles=True):
         self._file2 = []
         if execute and copyfiles:
+            self._copyfiles_to_wd(os.getcwd(),execute)
             self._proxy_outputs = self.interface._list_outputs()
             self._proxy_originputs = deepcopy(self._interface.inputs)
             for name, spec in self.outputs.traits(transient=None).items():
                 value = self.interface._list_outputs()[name]
                 if isdefined(value):
                     if spec.is_trait_type(File):
-                        print value
                         self._add_output_file2proxy(value)
-                    elif spec.is_trait_type(OutputMultiPath):
-                        print value
+                    elif spec.is_trait_type(OutputMultiPath) and self.proxy_out:
                         rec_add = lambda x: map(rec_add,x) if isinstance(x,list) else self._add_output_file2proxy(x)
                         map(rec_add,value)
 
@@ -69,8 +68,7 @@ class FileProxyNode(pe.Node):
     def _save_results(self, result, cwd):
         self._process_output_files()
         self._clean_proxy_files()
-        if hasattr(self,'_proxy_outputs'):
-            print self._proxy_outputs
+        if hasattr(self,'_proxy_outputs') and self.proxy_out:
             for t,v in self._proxy_outputs.items():
                 setattr(result.outputs,t,v)
         return super(FileProxyNode,self)._save_results(result,cwd)
@@ -121,6 +119,7 @@ class GunzipNode(FileProxyNode):
         if not hasattr(self,'_file2gzip'):
             self._file2gzip = []
         if ext[-3:]=='.gz':
+            fname = fname_presuffix(fname,newpath=os.getcwd())
             uncomp = fname_presuffix(fname,suffix=ext[:-3],use_ext=False,
                                      newpath=os.getcwd())
             self._file2gzip.append((uncomp,fname))
