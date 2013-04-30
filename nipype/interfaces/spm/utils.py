@@ -288,3 +288,74 @@ class ApplyInverseDeformation(SPMCommand):
             _, fname = os.path.split(filename)
             outputs['out_files'].append(os.path.realpath('w%s' % fname))
         return outputs
+
+
+class ResliceToReferenceInput(SPMCommandInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True), mandatory=True, field='fnames',
+        desc='Files on which deformation is applied')
+    target = File(
+        exists=True,
+        field='comp{1}.id.space',
+        desc='File defining target space')
+    interpolation = traits.Range(
+        low=0, hign=7, field='interp',
+        desc='degree of b-spline used for interpolation')
+
+    bounding_box = traits.List(
+        traits.Float(),
+        field='comp{2}.idbbvox.bb',
+        minlen=6, maxlen=6,
+        desc='6-element list (opt)')
+    voxel_sizes = traits.List(
+        traits.Float(),
+        field='comp{2}.idbbvox.vox',
+        minlen=3, maxlen=3,
+        desc='3-element list (opt)')
+
+
+class ResliceToReferenceOutput(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc='Transformed files')
+
+
+class ResliceToReference(SPMCommand):
+    """ Uses spm to apply inverse deformation stored in a .mat file or a
+    deformation field to a given file
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> r2ref = spmu.ResliceToReference()
+    >>> r2ref.inputs.in_files = 'functional.nii'
+    >>> inv.inputs.target = 'structural.nii'
+    >>> inv.run() # doctest: +SKIP
+    """
+
+    input_spec = ResliceToReferenceInput
+    output_spec = ResliceToReferenceOutput
+
+    _jobtype = 'util'
+    _jobname = 'defs'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt == 'target':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'deformation':
+            return np.array([list_to_filename(val)], dtype=object)
+        if opt == 'deformation_field':
+            return np.array([list_to_filename(val)], dtype=object)
+        return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = []
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s' % fname))
+        return outputs
