@@ -407,13 +407,13 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                            argstr='-datatype %s',
                            desc='force output data type')
     cost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                       'leastsq', 'labeldiff',
+                       'leastsq', 'labeldiff','bbr',
                        argstr='-cost %s',
                        desc='cost function')
     # XXX What is the difference between 'cost' and 'searchcost'?  Are
     # these both necessary or do they map to the same variable.
     cost_func = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                            'leastsq', 'labeldiff',
+                            'leastsq', 'labeldiff','bbr',
                             argstr='-searchcost %s',
                             desc='cost function')
     uses_qform = traits.Bool(argstr='-usesqform',
@@ -474,6 +474,37 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     save_log = traits.Bool(desc='save to log file')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
+
+    # BBR options
+    wm_seg = File(
+        argstr='-wmseg %s', min_ver='5.0.0',
+        desc='white matter segmentation volume needed by BBR cost function')
+    wmcoords = File(
+        argstr='-wmcoords %s', min_ver='5.0.0',
+        desc='white matter boundary coordinates for BBR cost function')
+    wmnorms = File(
+        argstr='-wmnorms %s', min_ver='5.0.0',
+        desc='white matter boundary normals for BBR cost function')
+    fieldmap = File(
+        argstr='-fieldmap %s', min_ver='5.0.0',
+        desc='fieldmap image in rads/s - must be already registered to the reference image')
+    fieldmapmask = File(
+        argstr='-fieldmapmask %s', min_ver='5.0.0',
+        desc='mask for fieldmap image')
+    pedir = traits.Int(
+        argstr='-pedir %d', min_ver='5.0.0',
+        desc='phase encode direction of EPI - 1/2/3=x/y/z & -1/-2/-3=-x/-y/-z')
+    echospacing = traits.Float(
+        argstr='-echospacing %f', min_ver='5.0.0',
+        desc='value of EPI echo spacing - units of seconds')
+    bbrtype = traits.Enum(
+        'signed', 'global_abs', 'local_abs',
+        argstr='-bbrtype %s', min_ver='5.0.0',
+        desc='type of bbr cost function: signed [default], global_abs, local_abs')
+    bbrslope = traits.Float(
+        argstr='-bbrslope %f', min_ver='5.0.0',
+        desc='value of bbr slope')
+    
 
 
 class FLIRTOutputSpec(TraitedSpec):
@@ -1157,14 +1188,15 @@ class SUSAN(FSLCommand):
 class FUGUEInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
                    desc='filename of input volume')
-    unwarped_file = File(argstr='--unwarp=%s', genfile=True,
-                         desc='apply unwarping and save as filename', hash_files=False)
-
-    save_warped = traits.Bool(desc='apply forward warp and save')
-
-    warped_file = File(argstr='--warp=%s', genfile=True,
-                         desc='apply forward warp and save as filename', hash_files=False)
-
+    unwarped_file = File(
+        argstr='--unwarp=%s', genfile=True,
+        desc='apply unwarping and save as filename', hash_files=False)
+    forward_warping = traits.Bool(
+        False, usedefault=True,
+        desc='apply forward warping instead of unwarping')
+    warped_file = File(argstr='--warp=%s', 
+                       desc='apply forward warping and save as filename',
+                       hash_files=False)
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
                          desc='filename for input phase image')
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1180,7 +1212,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
     save_shift = traits.Bool(desc='output pixel shift volume')
 
-    shift_out_file = traits.File(argstr='--saveshift=%s', genfile=True,
+    shift_out_file = traits.File(argstr='--saveshift=%s', 
                            desc='filename for saving pixel shift volume', hash_files=False)
 
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
@@ -1216,25 +1248,20 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                              desc='apply intensity correction only')
     mask_file = File(exists=True, argstr='--mask=%s',
                      desc='filename for loading valid mask')
-    save_unmasked_fmap = traits.Either(traits.Bool,
-                                       traits.File,
-                                       argstr='--unmaskfmap=%s',
-                                       requires=['fmap_out_file'],
-                                       desc='saves the unmasked fieldmap when using --savefmap', hash_files=False)
-    save_unmasked_shift = traits.Either(traits.Bool,
-                                       traits.File,
-                                       argstr='--unmaskshift=%s',
-                                       requires=['shift_out_file'],
-                                       desc='saves the unmasked shiftmap when using --saveshift', hash_files=False)
-    nokspace = traits.Bool(
-        argstr='--nokspace', desc='do not use k-space forward warping')
+    save_unmasked_fmap = traits.Bool(argstr='--unmaskfmap',
+                                     requires=['fmap_out_file'],
+                                     desc='saves the unmasked fieldmap when using --savefmap')
+    save_unmasked_shift = traits.Bool(argstr='--unmaskshift',
+                                      requires=['shift_out_file'],
+                                      desc='saves the unmasked shiftmap when using --saveshift')
+    nokspace = traits.Bool(argstr='--nokspace', desc='do not use k-space forward warping')
 
 
 class FUGUEOutputSpec(TraitedSpec):
-    unwarped_file = File(exists=True, desc='unwarped file')
+    unwarped_file = File(desc='unwarped file')
+    warped_file = File(desc='forward warped file')
     shift_out_file = File(desc='voxel shift map file')
-    warped_file = File(desc='warped file')
-
+    fmap_out_file = File(desc='fieldmap file')
 
 class FUGUE(FSLCommand):
     """Use FSL FUGUE to unwarp epi's with fieldmaps
@@ -1268,43 +1295,40 @@ class FUGUE(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        out_file = self.inputs.unwarped_file
+        if self.inputs.forward_warping:
+            out_field = 'warped_file'
+        else: 
+            out_field = 'unwarped_file'
+
+        out_file = getattr(self.inputs,out_field)
         if not isdefined(out_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_unwarped')
-        outputs['unwarped_file'] = os.path.abspath(out_file)
-
-        if isdefined(self.inputs.save_shift) and self.inputs.save_shift:
-            shift_out = self.inputs.shift_out_file
-            if not isdefined(shift_out):
-                shift_out = self._gen_fname(
-                    self.inputs.in_file, suffix='_shift')
-
-            outputs['shift_out_file'] = os.path.abspath(shift_out)
-
-        if isdefined(self.inputs.save_warped) and self.inputs.save_warped:
-            warped_out = self.inputs.warped_file
-            if not isdefined(warped_out):
-                warped_out = self._gen_fname(
-                    self.inputs.in_file, suffix='_fwdwarp')
-
-            outputs['warped_file'] = os.path.abspath(warped_out)
-            del outputs['unwarped_file']
+            if isdefined(self.inputs.in_file):
+                out_file = self._gen_fname(self.inputs.in_file,
+                                           suffix='_'+out_field[:-5])
+        if isdefined(out_file):
+            outputs[out_field] = os.path.abspath(out_file)
+        if isdefined(self.inputs.fmap_out_file):
+            outputs['fmap_out_file'] = os.path.abspath(self.inputs.fmap_out_file)
+        if isdefined(self.inputs.shift_out_file):
+            outputs['shift_out_file'] = os.path.abspath(self.inputs.shift_out_file)
 
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwarped_file':
+        if name == 'unwarped_file' and not self.inputs.forward_warping:
             return self._list_outputs()['unwarped_file']
-
-        if name == 'warped_file':
+        if name == 'warped_file' and self.inputs.forward_warping:
             return self._list_outputs()['warped_file']
-
-        if name == 'shift_out_file':
-            return self._list_outputs()['shift_out_file']
-
         return None
 
+    def _parse_inputs(self,skip=None):
+        if skip==None:
+            skip=[]
+        if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
+            skip+=['unwarped_file']
+        if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
+            skip+=['warped_file']
+        return super(FUGUE,self)._parse_inputs(skip=skip)
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',
