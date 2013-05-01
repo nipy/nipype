@@ -6,18 +6,6 @@ from nipype.testing import assert_equal, assert_true
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import Function
 
-def dummyFunction(filename):
-    '''
-    This function writes the value 45 to the given filename.
-    '''
-    j = 0
-    for i in range(0, 10):
-      j += i
-
-    # j is now 45 (0+1+2+3+4+5+6+7+8+9)
-
-    with open(filename, 'w') as f:
-      f.write(str(j))
 
 def mytestFunction(insum=0):
     '''
@@ -40,6 +28,19 @@ def mytestFunction(insum=0):
 
     # list of tempFiles
     f = [None] * numberOfThreads
+
+    def dummyFunction(filename):
+        '''
+        This function writes the value 45 to the given filename.
+        '''
+        j = 0
+        for i in range(0, 10):
+          j += i
+
+        # j is now 45 (0+1+2+3+4+5+6+7+8+9)
+
+        with open(filename, 'w') as f:
+          f.write(str(j))
 
     for n in xrange(numberOfThreads):
 
@@ -72,7 +73,7 @@ def mytestFunction(insum=0):
     # here, all processes are done
 
     # read in all temp files and sum them up
-    total = 0
+    total = insum
     for file in f:
       with open(file) as fd:
         total += int(fd.read())
@@ -105,7 +106,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     pipe.base_dir = os.getcwd()
     f1.inputs.insum = 0
 
-    pipe.config = {'execution': {'stop_on_first_error': True}}
+    pipe.config = {'execution': {'stop_on_first_crash': True}}
     # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs
     execgraph = pipe.run(plugin="MultiProc",
@@ -117,8 +118,7 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     result = node.get_output('sum_out')
     os.chdir(cur_dir)
     rmtree(temp_dir)
-    if nondaemon_flag:
-        yield assert_equal, result, 180 # n_procs (2) * numberOfThreads (2) * 45 == 180
+    return result
 
     
 def test_run_multiproc_nondaemon_false():
@@ -130,15 +130,15 @@ def test_run_multiproc_nondaemon_false():
     non_daemon flag is on.
     '''
     shouldHaveFailed = False
-    
     try:
-      # with nondaemon_flag = False, the execution should fail
-      run_multiproc_nondaemon_with_flag(False)
+        # with nondaemon_flag = False, the execution should fail
+        run_multiproc_nondaemon_with_flag(False)
     except:
-      shouldHaveFailed = True
+        shouldHaveFailed = True
     yield assert_true, shouldHaveFailed
 
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
-    run_multiproc_nondaemon_with_flag(True)
-  
+    result = run_multiproc_nondaemon_with_flag(True)
+    yield assert_equal, result, 180 # n_procs (2) * numberOfThreads (2) * 45 == 180
+
