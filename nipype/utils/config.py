@@ -45,6 +45,7 @@ single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
+stop_on_unknown_version = false
 
 [check]
 interval = 1209600

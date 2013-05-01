@@ -170,6 +170,32 @@ def test_meanimage():
     clean_directory(testdir, origdir, ftype)
 
 @skipif(no_fsl)
+def test_maximage():
+    files, testdir, origdir, ftype = create_files_in_directory()
+
+    # Get the command
+    maxer = fsl.MaxImage(in_file="a.nii",out_file="b.nii")
+
+    # Test the underlying command
+    yield assert_equal, maxer.cmd, "fslmaths"
+
+    # Test the defualt opstring
+    yield assert_equal, maxer.cmdline, "fslmaths a.nii -Tmax b.nii"
+
+    # Test the other dimensions
+    cmdline = "fslmaths a.nii -%smax b.nii"
+    for dim in ["X","Y","Z","T"]:
+        maxer.inputs.dimension=dim
+        yield assert_equal, maxer.cmdline, cmdline%dim
+
+    # Test the auto naming
+    maxer = fsl.MaxImage(in_file="a.nii")
+    yield assert_equal, maxer.cmdline, "fslmaths a.nii -Tmax %s"%os.path.join(testdir, "a_max.nii")
+
+    # Clean up our mess
+    clean_directory(testdir, origdir, ftype)
+
+@skipif(no_fsl)
 def test_smooth():
     files, testdir, origdir, ftype = create_files_in_directory()
 

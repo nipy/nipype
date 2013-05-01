@@ -129,7 +129,8 @@ class RealignInputSpec(SPMCommandInputSpec):
     wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                         field='eoptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z]')
-    write_which = traits.Tuple(traits.Int, traits.Int, field='roptions.which',
+    write_which = traits.ListInt([1, 1], field='roptions.which',
+                              minlen=2, maxlen=2, usedefault=True,
                               desc='determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                          desc='degree of b-spline used for interpolation')
@@ -187,6 +188,8 @@ class Realign(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        resliced_all  = self.inputs.write_which[0] > 0
+        resliced_mean = self.inputs.write_which[1] > 0
         if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
         for imgf in self.inputs.in_files:
@@ -206,16 +209,19 @@ class Realign(SPMCommand):
             else:
                 first_image = self.inputs.in_files[0]
 
-            outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
-            outputs['realigned_files'] = []
-            for imgf in filename_to_list(self.inputs.in_files):
-                realigned_run = []
-                if isinstance(imgf,list):
-                    for inner_imgf in filename_to_list(imgf):
-                        realigned_run.append(fname_presuffix(inner_imgf, prefix=self.inputs.out_prefix))
-                else:
-                    realigned_run = fname_presuffix(imgf, prefix=self.inputs.out_prefix)
-                outputs['realigned_files'].append(realigned_run)
+            if resliced_mean:
+                outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
+            
+            if resliced_all:
+                outputs['realigned_files'] = []
+                for imgf in filename_to_list(self.inputs.in_files):
+                    realigned_run = []
+                    if isinstance(imgf,list):
+                        for inner_imgf in filename_to_list(imgf):
+                            realigned_run.append(fname_presuffix(inner_imgf, prefix=self.inputs.out_prefix))
+                    else:
+                        realigned_run = fname_presuffix(imgf, prefix=self.inputs.out_prefix)
+                    outputs['realigned_files'].append(realigned_run)
         return outputs
 
 
@@ -684,7 +690,7 @@ class NewSegment(SPMCommand):
                 new_tissues.append(new_tissue)
             return new_tissues
         elif opt == 'write_deformation_fields':
-            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[0])])
+            return super(NewSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[1])])
         else:
             return super(NewSegment, self)._format_arg(opt, spec, val)
 
@@ -1082,3 +1088,276 @@ class ApplyDeformations(SPMCommand):
             _, fname = os.path.split(filename)
             outputs['out_files'].append(os.path.realpath('w%s'%fname))
         return outputs
+
+class VBMSegmentInputSpec(SPMCommandInputSpec):
+
+    in_files = InputMultiPath(
+        File(exists=True),
+        desc="A list of files to be segmented",
+        field='estwrite.data', copyfile=False, mandatory=True)
+
+    tissues = File(
+        exists=True, field='estwrite.tpm',
+        desc='tissue probability map')
+    gaussians_per_class = traits.Tuple(
+        (2, 2, 2, 3, 4, 2), *([traits.Int()]*6),
+        usedefault=True,
+        desc='number of gaussians for each tissue class')
+    bias_regularization = traits.Enum(
+        0.0001,
+        (0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10),
+        field='estwrite.opts.biasreg', usedefault=True,
+        desc='no(0) - extremely heavy (10)')
+
+    bias_fwhm = traits.Enum(
+        60,
+        (30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 'Inf'),
+        field='estwrite.opts.biasfwhm',
+        usedefault=True,
+        desc='FWHM of Gaussian smoothness of bias')
+    sampling_distance = traits.Float(
+        3, usedefault=True, field='estwrite.opts.samp',
+        desc='Sampling distance on data for parameter estimation')
+    warping_regularization = traits.Float(
+        4, usedefault=True, field='estwrite.opts.warpreg',
+        desc='Controls balance between parameters and data')
+
+    spatial_normalization = traits.Enum(
+        'high', 'low', usedefault=True,)
+    dartel_template = File(
+        exists=True,
+        field='estwrite.extopts.dartelwarp.normhigh.darteltpm')
+    use_sanlm_denoising_filter = traits.Range(
+        0, 2, 2, usedefault=True, field='estwrite.extopts.sanlm',
+        desc="0=No denoising, 1=denoising,2=denoising multi-threaded")
+    mrf_weighting = traits.Float(
+        0.15, usedefault=True, field='estwrite.extopts.mrf')
+    cleanup_partitions = traits.Int(
+        1, usedefault=True, field='estwrite.extopts.cleanup',
+        desc="0=None,1=light,2=thorough")
+    display_results = traits.Bool(
+        True, usedefault=True, field='estwrite.extopts.print')
+
+    gm_native = traits.Bool(
+        False, usedefault=True, field='estwrite.output.GM.native',)
+    gm_normalized = traits.Bool(
+        False, usedefault=True, field='estwrite.output.GM.warped',)
+    gm_modulated_normalized = traits.Range(
+        0, 2, 2, usedefault=True, field='estwrite.output.GM.modulated',
+        desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
+    gm_dartel = traits.Range(
+        0, 2, 0, usedefault=True, field='estwrite.output.GM.dartel',
+        desc="0=None,1=rigid(SPM8 default),2=affine")
+
+    wm_native = traits.Bool(
+        False, usedefault=True, field='estwrite.output.WM.native',)
+    wm_normalized = traits.Bool(
+        False, usedefault=True, field='estwrite.output.WM.warped',)
+    wm_modulated_normalized = traits.Range(
+        0, 2, 2, usedefault=True, field='estwrite.output.WM.modulated',
+        desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
+    wm_dartel = traits.Range(
+        0, 2, 0, usedefault=True, field='estwrite.output.WM.dartel',
+        desc="0=None,1=rigid(SPM8 default),2=affine")
+
+    csf_native = traits.Bool(
+        False, usedefault=True, field='estwrite.output.CSF.native',)
+    csf_normalized = traits.Bool(
+        False, usedefault=True, field='estwrite.output.CSF.warped',)
+    csf_modulated_normalized = traits.Range(
+        0, 2, 2, usedefault=True, field='estwrite.output.CSF.modulated',
+        desc='0=none,1=affine+non-linear(SPM8 default),2=non-linear only')
+    csf_dartel = traits.Range(
+        0, 2, 0, usedefault=True, field='estwrite.output.CSF.dartel',
+        desc="0=None,1=rigid(SPM8 default),2=affine")
+
+    bias_corrected_native = traits.Bool(
+        False, usedefault=True, field='estwrite.output.bias.native',)
+    bias_corrected_normalized = traits.Bool(
+        True, usedefault=True, field='estwrite.output.bias.warped',)
+    bias_corrected_affine = traits.Bool(
+        False, usedefault=True, field='estwrite.output.bias.affine',)
+
+    pve_label_native = traits.Bool(
+        False, usedefault=True, field='estwrite.output.label.native')
+    pve_label_normalized = traits.Bool(
+        False, usedefault=True, field='estwrite.output.label.warped')
+    pve_label_dartel = traits.Range(
+        0, 2, 0, usedefault=True, field='estwrite.output.label.dartel',
+        desc="0=None,1=rigid(SPM8 default),2=affine")
+
+    jacobian_determinant = traits.Bool(
+        False, usedefault=True, field='estwrite.jacobian.warped')
+
+    deformation_field = traits.Tuple(
+        (0, 0), traits.Bool, traits.Bool, usedefault=True,
+        field='estwrite.output.warps',
+        desc='forward and inverse field')
+
+class VBMSegmentOuputSpec(TraitedSpec):
+
+    native_class_images = traits.List(traits.List(File(exists=True)),
+                                      desc='native space probability maps')
+    dartel_input_images = traits.List(traits.List(File(exists=True)),
+                                      desc='dartel imported class images')
+    normalized_class_images = traits.List(traits.List(File(exists=True)),
+                                          desc='normalized class images')
+    modulated_class_images = traits.List(traits.List(File(exists=True)),
+                                         desc='modulated+normalized class images')
+    transformation_mat = OutputMultiPath(File(exists=True),
+                                         desc='Normalization transformation')
+
+    bias_corrected_images = OutputMultiPath(
+        File(exists=True),
+        desc='bias corrected images')
+    normalized_bias_corrected_images = OutputMultiPath(
+        File(exists=True),
+        desc='bias corrected images')
+
+    pve_label_native_images = OutputMultiPath(File(exists=True))
+    pve_label_normalized_images = OutputMultiPath(File(exists=True))
+    pve_label_registered_images = OutputMultiPath(File(exists=True))
+
+    forward_deformation_field = OutputMultiPath(File(exists=True))
+    inverse_deformation_field = OutputMultiPath(File(exists=True))
+
+    jacobian_determinant_images = OutputMultiPath(File(exists=True))
+
+class VBMSegment(SPMCommand):
+
+    """Use VBM8 toolbox to separate structural images into different
+    tissue classes.
+
+    Example
+    -------
+    >>> import nipype.interfaces.spm as spm
+    >>> seg = spm.VBMSegment()
+    >>> seg.inputs.tissues = 'TPM.nii'
+    >>> seg.inputs.dartel_template = 'Template_1_IXI550_MNI152.nii'
+    >>> seg.inputs.bias_corrected_native = True
+    >>> seg.inputs.gm_native = True
+    >>> seg.inputs.wm_native = True
+    >>> seg.inputs.csf_native = True
+    >>> seg.inputs.pve_label_native = True
+    >>> seg.inputs.deformation_field = (True, False)
+    >>> seg.run() # doctest: +SKIP
+    """
+
+    input_spec = VBMSegmentInputSpec
+    output_spec = VBMSegmentOuputSpec
+
+    _jobtype = 'tools'
+    _jobname = 'vbm8'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+
+        do_dartel = self.inputs.spatial_normalization
+        dartel_px = ''
+        if do_dartel:
+            dartel_px = 'r'
+
+        outputs['native_class_images'] = [[], [], []]
+        outputs['dartel_input_images'] = [[], [], []]
+        outputs['normalized_class_images'] = [[], [], []]
+        outputs['modulated_class_images'] = [[], [], []]
+
+        outputs['transformation_mat'] = []
+
+        outputs['bias_corrected_images'] = []
+        outputs['normalized_bias_corrected_images'] = []
+
+        outputs['inverse_deformation_field'] = []
+        outputs['forward_deformation_field'] = []
+        outputs['jacobian_determinant_images'] = []
+
+        outputs['pve_label_native_images'] = []
+        outputs['pve_label_normalized_images'] = []
+        outputs['pve_label_registered_images'] = []
+
+        for filename in self.inputs.in_files:
+            pth, base, ext = split_filename(filename)
+
+            outputs['transformation_mat'].append(
+                os.path.join(pth, "%s_seg8.mat" % base))
+
+            for i, tis in enumerate(['gm', 'wm', 'csf']):
+            # native space
+
+                if getattr(self.inputs, '%s_native' % tis):
+                    outputs['native_class_images'][i].append(
+                        os.path.join(pth, "p%d%s.nii" % (i+1, base)))
+                if getattr(self.inputs, '%s_dartel' % tis) == 1:
+                    outputs['dartel_input_images'][i].append(
+                        os.path.join(pth, "rp%d%s.nii" % (i+1, base)))
+                elif getattr(self.inputs, '%s_dartel' % tis) == 2:
+                    outputs['dartel_input_images'][i].append(
+                        os.path.join(pth, "rp%d%s_affine.nii" % (i+1, base)))
+
+            # normalized space
+                if getattr(self.inputs, '%s_normalized' % tis):
+                    outputs['normalized_class_images'][i].append(
+                        os.path.join(pth, "w%sp%d%s.nii" % (dartel_px, i+1, base)))
+
+                if getattr(self.inputs, '%s_modulated_normalized' % tis) == 1:
+                    outputs['modulated_class_images'][i].append(os.path.join(
+                        pth, "mw%sp%d%s.nii" % (dartel_px, i+1, base)))
+                elif getattr(self.inputs, '%s_modulated_normalized' % tis) == 2:
+                    outputs['normalized_class_images'][i].append(os.path.join(
+                        pth, "m0w%sp%d%s.nii" % (dartel_px, i+1, base)))
+
+            if self.inputs.pve_label_native:
+                outputs['pve_label_native_images'].append(
+                    os.path.join(pth, "p0%s.nii" % (base)))
+            if self.inputs.pve_label_normalized:
+                outputs['pve_label_normalized_images'].append(
+                    os.path.join(pth, "w%sp0%s.nii" % (dartel_px, base)))
+            if self.inputs.pve_label_dartel == 1:
+                outputs['pve_label_registered_images'].append(
+                    os.path.join(pth, "rp0%s.nii" % (base)))
+            elif self.inputs.pve_label_dartel == 2:
+                outputs['pve_label_registered_images'].append(
+                    os.path.join(pth, "rp0%s_affine.nii" % (base)))
+
+            if self.inputs.bias_corrected_native:
+                outputs['bias_corrected_images'].append(
+                    os.path.join(pth, "m%s.nii" % (base)))
+            if self.inputs.bias_corrected_normalized:
+                outputs['normalized_bias_corrected_images'].append(
+                    os.path.join(pth, "wm%s%s.nii" % (dartel_px, base)))
+
+            if self.inputs.deformation_field[0]:
+                outputs['forward_deformation_field'].append(
+                    os.path.join(pth, "y_%s%s.nii" % (dartel_px, base)))
+            if self.inputs.deformation_field[1]:
+                outputs['inverse_deformation_field'].append(
+                    os.path.join(pth, "iy_%s%s.nii" % (dartel_px, base)))
+
+            if self.inputs.jacobian_determinant and do_dartel:
+                outputs['jacobian_determinant_images'].append(
+                    os.path.join(pth, "jac_wrp1%s.nii" % (base)))
+        return outputs
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt in ['in_files']:
+            return scans_for_fnames(val, keep4d=True)
+        elif opt in ['spatial_normalization']:
+            if val == 'low':
+                return {'normlow': []}
+        elif opt in ['dartel_template']:
+            return np.array([val], dtype=object)
+        elif opt in ['deformation_field']:
+            return super(VBMSegment, self)._format_arg(opt, spec, [int(val[0]), int(val[1])])
+        else:
+            return super(VBMSegment, self)._format_arg(opt, spec, val)
+
+    def _parse_inputs(self):
+        if self.inputs.spatial_normalization == 'low':
+            einputs = super(VBMSegment, self)._parse_inputs(
+                skip=('spatial_normalization', 'dartel_template'))
+            einputs[0]['estwrite']['extopts']['dartelwarp'] = {'normlow': 1}
+            return einputs
+        else:
+            return super(VBMSegment, self)._parse_inputs(skip=('spatial_normalization'))

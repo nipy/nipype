@@ -6,6 +6,7 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('smri', parent_package, top_path)
 
     config.add_subpackage('freesurfer')
+    config.add_subpackage('ants')
 
     return config
 

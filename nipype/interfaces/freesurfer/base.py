@@ -146,3 +146,12 @@ class FSCommand(CommandLine):
         fname = fname_presuffix(basename, suffix=suffix,
                                 use_ext=use_ext, newpath=cwd)
         return fname
+
+    @property
+    def version(self):
+        ver = Info.version()
+        if ver:
+            if 'dev' in ver:
+                return ver.rstrip().split('-')[-1] + '.dev'
+            else:
+                return ver.rstrip().split('-v')[-1]

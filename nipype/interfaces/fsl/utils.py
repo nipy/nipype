@@ -1152,6 +1152,54 @@ class EPIDeWarp(FSLCommand):
                                                   basename='maskexf')
         return outputs
 
+class SigLossInputSpec(FSLCommandInputSpec):
+    in_file = File(mandatory=True,
+                   exists=True,
+                   argstr='-i %s',
+                   desc='b0 fieldmap file')
+    out_file = File(argstr='-s %s',
+                    desc='output signal loss estimate file',
+                    genfile=True)
+    
+    mask_file = File(exists=True,
+                     argstr='-m %s',
+                     desc='brain mask file')
+    echo_time = traits.Float(argstr='--te=%f',
+                             desc='echo time in seconds')
+    slice_direction = traits.Enum('x','y','z',
+                                  argstr='-d %s',
+                                  desc='slicing direction')
+class SigLossOuputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc='signal loss estimate file')
+
+class SigLoss(FSLCommand):
+    """Estimates signal loss from a field map (in rad/s)
+
+    Examples
+    --------
+    >>> sigloss = SigLoss()
+    >>> sigloss.inputs.in_file = "phase.nii"
+    >>> sigloss.inputs.echo_time = 0.03
+    >>> res = sigloss.run() # doctest: +SKIP
+    """
+    input_spec = SigLossInputSpec
+    output_spec = SigLossOuputSpec
+    _cmd = 'sigloss'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file']=self._gen_fname(self.inputs.in_file,
+                                                suffix='_sigloss')
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name=='out_file':
+            return self._list_outputs()['out_file']
+        return None
+    
 class Reorient2StdInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s")
     out_file = File(genfile=True, hash_files=False, argstr="%s")
@@ -1188,3 +1236,130 @@ class Reorient2Std(FSLCommand):
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class ComplexInputSpec(FSLCommandInputSpec):
+    complex_in_file = File(exists=True, argstr="%s", position=2)
+    complex_in_file2 = File(exists=True, argstr="%s", position=3)
+
+    real_in_file = File(exists=True, argstr="%s", position=2)
+    imaginary_in_file = File(exists=True, argstr="%s", position=3)
+    magnitude_in_file = File(exists=True, argstr="%s", position=2)
+    phase_in_file = File(exists=True, argstr='%s', position=3)
+
+    _ofs = ['complex_out_file',
+            'magnitude_out_file','phase_out_file',
+            'real_out_file','imaginary_out_file']
+    _conversion = ['real_polar','real_cartesian',
+                   'complex_cartesian','complex_polar',
+                   'complex_split','complex_merge',]
+
+    complex_out_file = File(genfile=True, argstr="%s", position=-3, 
+                            xor=_ofs+_conversion[:2])
+    magnitude_out_file = File(genfile=True, argstr="%s", position=-4,
+                              xor=_ofs[:1]+_ofs[3:]+_conversion[1:])
+    phase_out_file = File(genfile=True, argstr="%s", position=-3,
+                          xor=_ofs[:1]+_ofs[3:]+_conversion[1:])
+    real_out_file = File(genfile=True, argstr="%s", position=-4,
+                         xor=_ofs[:3]+_conversion[:1]+_conversion[2:])
+    imaginary_out_file = File(genfile=True, argstr="%s", position=-3,
+                              xor=_ofs[:3]+_conversion[:1]+_conversion[2:])
+
+    start_vol = traits.Int(position=-2, argstr='%d')
+    end_vol = traits.Int(position=-1, argstr='%d')
+
+    real_polar = traits.Bool(
+        argstr = '-realpolar', xor = _conversion, position=1,)
+#        requires=['complex_in_file','magnitude_out_file','phase_out_file'])
+    real_cartesian = traits.Bool(
+        argstr = '-realcartesian', xor = _conversion, position=1,)
+#        requires=['complex_in_file','real_out_file','imaginary_out_file'])
+    complex_cartesian = traits.Bool(
+        argstr = '-complex', xor = _conversion, position=1,)
+#        requires=['real_in_file','imaginary_in_file','complex_out_file'])
+    complex_polar = traits.Bool(
+        argstr = '-complexpolar', xor = _conversion, position=1,)
+#        requires=['magnitude_in_file','phase_in_file',
+#                  'magnitude_out_file','phase_out_file'])
+    complex_split = traits.Bool(
+        argstr = '-complexsplit', xor = _conversion, position=1,)
+#        requires=['complex_in_file','complex_out_file'])
+    complex_merge = traits.Bool(
+        argstr = '-complexmerge', xor = _conversion + ['start_vol','end_vol'],
+        position=1,)
+#        requires=['complex_in_file','complex_in_file2','complex_out_file'])
+
+class ComplexOuputSpec(TraitedSpec):
+    magnitude_out_file = File()
+    phase_out_file = File()
+    real_out_file = File()
+    imaginary_out_file = File()
+    complex_out_file = File()
+    
+    
+class Complex(FSLCommand):
+    """fslcomplex is a tool for converting complex data
+    Examples
+    --------
+    >>> cplx = Complex()
+    >>> cplx.inputs.complex_in_file = "complex.nii"
+    >>> cplx.real_polar = True
+    >>> res = cplx.run() # doctest: +SKIP
+
+    """
+    _cmd = 'fslcomplex'
+    input_spec = ComplexInputSpec
+    output_spec = ComplexOuputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip == None:
+            skip = []
+        if self.inputs.real_cartesian:
+            skip += self.inputs._ofs[:3]
+        elif self.inputs.real_polar:
+            skip += self.inputs._ofs[:1]+self.inputs._ofs[3:]
+        else:
+            skip += self.inputs._ofs[1:]
+        return super(Complex,self)._parse_inputs(skip)
+
+    def _gen_filename(self, name):
+        if name == 'complex_out_file':
+            if self.inputs.complex_cartesian:
+                in_file = self.inputs.real_in_file
+            elif self.inputs.complex_polar:
+                in_file = self.inputs.magnitude_in_file
+            elif self.inputs.complex_split or self.inputs.complex_merge:
+                in_file = self.inputs.complex_in_file
+            else:
+                return None
+            return self._gen_fname(in_file, suffix="_cplx")
+        elif name =='magnitude_out_file':
+            return self._gen_fname(self.inputs.complex_in_file, suffix="_mag")
+        elif name =='phase_out_file':
+            return self._gen_fname(self.inputs.complex_in_file,suffix="_phase")
+        elif name =='real_out_file':
+            return self._gen_fname(self.inputs.complex_in_file, suffix="_real")
+        elif name =='imaginary_out_file':
+            return self._gen_fname(self.inputs.complex_in_file, suffix="_imag")
+        return None
+
+    def _get_output(self,name):
+        output = getattr(self.inputs,name)
+        if not isdefined(output):
+            output = self._gen_filename(name)
+        return os.path.abspath(output)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if self.inputs.complex_cartesian or self.inputs.complex_polar or \
+                self.inputs.complex_split or self.inputs.complex_merge:
+            outputs['complex_out_file'] = self._get_output('complex_out_file')
+        elif self.inputs.real_cartesian:
+            outputs['real_out_file'] = self._get_output('real_out_file')
+            outputs['imaginary_out_file'] = self._get_output('imaginary_out_file')
+        elif self.inputs.real_polar:
+            outputs['magnitude_out_file'] = self._get_output('magnitude_out_file')
+            outputs['phase_out_file'] = self._get_output('phase_out_file')
+        return outputs
+
+

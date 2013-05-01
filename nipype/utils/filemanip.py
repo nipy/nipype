@@ -71,7 +71,7 @@ def split_filename(fname):
 
     """
 
-    special_extensions = [".nii.gz"]
+    special_extensions = [".nii.gz", ".tar.gz"]
 
     pth, fname = os.path.split(fname)
 

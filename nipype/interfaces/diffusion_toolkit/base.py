@@ -42,7 +42,8 @@ class Info(object):
            Version number as string or None if FSL not found
 
         """
-        clout = CommandLine(command='dti_recon').run()
+        clout = CommandLine(command='dti_recon',
+                            terminal_output='allatonce').run()
 
         if clout.runtime.returncode is not 0:
             return None
