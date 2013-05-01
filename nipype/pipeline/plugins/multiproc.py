@@ -53,7 +53,7 @@ class MultiProcPlugin(DistributedPluginBase):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
-        non_daemon = False
+        non_daemon = True
         n_procs = cpu_count()
         if plugin_args:
             if 'n_procs' in plugin_args:
