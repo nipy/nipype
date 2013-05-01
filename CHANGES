@@ -7,6 +7,7 @@ Next release
        fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.
 * ENH: Minor improvements to FSL's FUGUE and FLIRT interfaces
 * ENH: Added optional dilation of parcels in cmtk.Parcellate 
+* ENH: Interpolation mode added to afni.Resample
 
 Release 0.7.0 (Dec 18, 2012)
 ============================
