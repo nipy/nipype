@@ -1226,13 +1226,13 @@ class VBMSegment(SPMCommand):
     -------
     >>> import nipype.interfaces.spm as spm
     >>> seg = spm.VBMSegment()
-    >>> seg.inputs.tissues = os.path.join(spm.Info.version()['path'],'toolbox','Seg','TPM.nii')
-    >>> seg.inputs.dartel_template = os.path.join(spm.Info.version()['path'],'toolbox','vbm8','Template_1_IXI550_MNI152.nii')
-    >>> seg.inputs.bias_corrected_native = True,
+    >>> seg.inputs.tissues = 'TPM.nii'
+    >>> seg.inputs.dartel_template = 'Template_1_IXI550_MNI152.nii'
+    >>> seg.inputs.bias_corrected_native = True
     >>> seg.inputs.gm_native = True
     >>> seg.inputs.wm_native = True
     >>> seg.inputs.csf_native = True
-    >>> seg.inputs.pve_label_native = True,
+    >>> seg.inputs.pve_label_native = True
     >>> seg.inputs.deformation_field = (True, False)
     >>> seg.run() # doctest: +SKIP
     """
