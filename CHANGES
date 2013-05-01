@@ -1,6 +1,7 @@
 Next release
 ============
-* ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss
+
+* ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment
 * ENH: Allow control over terminal output for commandline interfaces
 * ENH: New workflows for dMRI and fMRI pre-processing: added motion artifact correction
        with rotation of the B-matrix, and susceptibility correction for EPI imaging using
