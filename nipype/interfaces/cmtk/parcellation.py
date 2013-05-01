@@ -524,7 +524,8 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
     out_roi_file = File(
         genfile=True, desc='Region of Interest file for connectivity mapping')
-    dilation = traits.Bool(False, usedefault=True)
+    dilation = traits.Bool(False, usedefault=True, 
+                           desc='Dilate cortical parcels? Useful for fMRI connectivity')
 
 
 class ParcellateOutputSpec(TraitedSpec):
