@@ -6,12 +6,11 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Process
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
 
-from .base import (DistributedPluginBase, logger, report_crash)
+from .base import (DistributedPluginBase, report_crash)
 
 def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
@@ -28,11 +27,13 @@ class NonDaemonProcess(Process):
     """
     def _get_daemon(self):
         return False
+
     def _set_daemon(self, value):
         pass
+
     daemon = property(_get_daemon, _set_daemon)
 
-class NonDaemonPool(Pool):
+class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
     Process = NonDaemonProcess
