@@ -48,23 +48,50 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
             os.makedirs(op.join('.', p))
         except:
             pass
+    if '33' in parcellation_name :
+        comp = [
+        ('rh', 'myatlas_36_rh.gcs', 'rh.myaparc_36.annot', 'regenerated_rh_36','myaparc_36'),
+        ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
+        ('lh', 'myatlas_36_lh.gcs', 'lh.myaparc_36.annot', 'regenerated_lh_36','myaparc_36'),
+        ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
+        ]
+    elif '60' in parcellation_name :
+        comp = [
+        ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
+        ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
+        ]
+    elif '125' in parcellation_name :
+        comp = [
+        ('rh','myatlas_125_rh.gcs','rh.myaparc_125.annot','regenerated_rh_125','myaparc_125'),
+        ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
+        ('lh','myatlas_125_lh.gcs','lh.myaparc_125.annot','regenerated_lh_125','myaparc_125'),
+        ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
+        ]
+    elif '250' in parcellation_name :
+        comp = [
+        ('rh','myatlas_250_rh.gcs','rh.myaparc_250.annot','regenerated_rh_250','myaparc_250'),
+        ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
+        ('lh','myatlas_250_lh.gcs','lh.myaparc_250.annot','regenerated_lh_250','myaparc_250'),
+        ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
+        ]
+    else :
+        comp = [
+        ('rh', 'myatlas_36_rh.gcs', 'rh.myaparc_36.annot', 'regenerated_rh_36','myaparc_36'),
+        ('rh', 'myatlasP1_16_rh.gcs','rh.myaparcP1_16.annot','regenerated_rh_500','myaparcP1_16'),
+        ('rh', 'myatlasP17_28_rh.gcs','rh.myaparcP17_28.annot','regenerated_rh_500','myaparcP17_28'),
+        ('rh', 'myatlasP29_36_rh.gcs','rh.myaparcP29_36.annot','regenerated_rh_500','myaparcP29_36'),
+        ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
+        ('rh','myatlas_125_rh.gcs','rh.myaparc_125.annot','regenerated_rh_125','myaparc_125'),
+        ('rh','myatlas_250_rh.gcs','rh.myaparc_250.annot','regenerated_rh_250','myaparc_250'),
+        ('lh', 'myatlas_36_lh.gcs', 'lh.myaparc_36.annot', 'regenerated_lh_36','myaparc_36'),
+        ('lh', 'myatlasP1_16_lh.gcs','lh.myaparcP1_16.annot','regenerated_lh_500','myaparcP1_16'),
+        ('lh', 'myatlasP17_28_lh.gcs','lh.myaparcP17_28.annot','regenerated_lh_500','myaparcP17_28'),
+        ('lh', 'myatlasP29_36_lh.gcs','lh.myaparcP29_36.annot','regenerated_lh_500','myaparcP29_36'),
+        ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
+        ('lh','myatlas_125_lh.gcs','lh.myaparc_125.annot','regenerated_lh_125','myaparc_125'),
+        ('lh','myatlas_250_lh.gcs','lh.myaparc_250.annot','regenerated_lh_250','myaparc_250'),
+        ]
 
-    comp = [
-    ('rh', 'myatlas_36_rh.gcs', 'rh.myaparc_36.annot', 'regenerated_rh_36','myaparc_36'),
-    ('rh', 'myatlasP1_16_rh.gcs','rh.myaparcP1_16.annot','regenerated_rh_500','myaparcP1_16'),
-    ('rh', 'myatlasP17_28_rh.gcs','rh.myaparcP17_28.annot','regenerated_rh_500','myaparcP17_28'),
-    ('rh', 'myatlasP29_36_rh.gcs','rh.myaparcP29_36.annot','regenerated_rh_500','myaparcP29_36'),
-    ('rh','myatlas_60_rh.gcs','rh.myaparc_60.annot','regenerated_rh_60','myaparc_60'),
-    ('rh','myatlas_125_rh.gcs','rh.myaparc_125.annot','regenerated_rh_125','myaparc_125'),
-    ('rh','myatlas_250_rh.gcs','rh.myaparc_250.annot','regenerated_rh_250','myaparc_250'),
-    ('lh', 'myatlas_36_lh.gcs', 'lh.myaparc_36.annot', 'regenerated_lh_36','myaparc_36'),
-    ('lh', 'myatlasP1_16_lh.gcs','lh.myaparcP1_16.annot','regenerated_lh_500','myaparcP1_16'),
-    ('lh', 'myatlasP17_28_lh.gcs','lh.myaparcP17_28.annot','regenerated_lh_500','myaparcP17_28'),
-    ('lh', 'myatlasP29_36_lh.gcs','lh.myaparcP29_36.annot','regenerated_lh_500','myaparcP29_36'),
-    ('lh','myatlas_60_lh.gcs','lh.myaparc_60.annot','regenerated_lh_60', 'myaparc_60'),
-    ('lh','myatlas_125_lh.gcs','lh.myaparc_125.annot','regenerated_lh_125','myaparc_125'),
-    ('lh','myatlas_250_lh.gcs','lh.myaparc_250.annot','regenerated_lh_250','myaparc_250'),
-    ]
     log = cmp_config.get_logger()
 
     for out in comp:
@@ -102,7 +129,7 @@ def create_annot_label(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     iflogger.info("[ DONE ]")
 
-def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
+def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name,dilation):
     """ Creates the ROI_%s.nii.gz files using the given parcellation information
     from networks. Iteratively create volume. """
     iflogger.info("Create the ROIs:")
@@ -115,6 +142,25 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
     pgpath = parval['node_information_graphml']
     aseg = nb.load(op.join(fs_dir, 'mri', 'aseg.nii.gz'))
     asegd = aseg.get_data()
+
+    # identify cortical voxels, right (3) and left (42) hemispheres
+    idxr = np.where(asegd == 3)
+    idxl = np.where(asegd == 42)
+    xx = np.concatenate((idxr[0],idxl[0]))
+    yy = np.concatenate((idxr[1],idxl[1]))
+    zz = np.concatenate((idxr[2],idxl[2]))
+
+    # initialize variables necessary for cortical ROIs dilation
+    # dimensions of the neighbourhood for rois labels assignment (choose odd dimensions!)
+    shape = (25,25,25)
+    center = np.array(shape) // 2
+    # dist: distances from the center of the neighbourhood
+    dist = np.zeros(shape, dtype='float32')
+    for x in range(shape[0]):
+        for y in range(shape[1]):
+            for z in range(shape[2]):
+                distxyz = center - [x,y,z]
+                dist[x,y,z] = np.sqrt(np.sum(np.multiply(distxyz,distxyz)))
 
     iflogger.info("Working on parcellation: ")
     iflogger.info(cmp_config._get_lausanne_parcellation('Lausanne2008')[parcellation_name])
@@ -184,6 +230,30 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name):
         nb.save(img, out_roi)
 
     iflogger.info("[ DONE ]")
+    # dilate cortical regions
+    if (dilation==True) :
+        iflogger.info("Dilating cortical regions...")
+        # loop throughout all the voxels belonging to the aseg GM volume
+        for j in range(xx.size):
+            if rois[xx[j],yy[j],zz[j]] == 0:
+                local = extract(rois, shape, position=(xx[j],yy[j],zz[j]), fill=0)
+                mask = local.copy()
+                mask[np.nonzero(local>0)] = 1
+                thisdist = np.multiply(dist,mask)
+                thisdist[np.nonzero(thisdist==0)] = np.amax(thisdist)
+                value = np.int_(local[np.nonzero(thisdist==np.amin(thisdist))])
+                if value.size > 1:
+                    counts = np.bincount(value)
+                    value = np.argmax(counts)
+                rois[xx[j],yy[j],zz[j]] = value
+    
+        # store volume eg in ROIv_scale33.nii.gz
+        out_roi = op.join(output_dir, 'ROIv_%s.nii.gz' % parcellation_name)
+        iflogger.info("Save output image to %s" % out_roi)
+        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        nb.save(img, out_roi)
+    
+        iflogger.info("[ DONE ]") 
 
 
 def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
@@ -340,6 +410,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
           ]
 
     ds.append( (op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name), op.join(op.curdir, 'ROI_HR_th.nii.gz')) )
+    ds.append( (op.join(op.curdir, 'ROIv_%s.nii.gz' % parcellation_name), op.join(op.curdir, 'ROIv_HR_th.nii.gz')) )
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
         iflogger.info("Processing %s:" % d[0])
@@ -350,6 +421,35 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
         mri_cmd = 'mri_convert -rl "%s" -rt nearest "%s" -nc "%s"' % (orig, d[0], d[1])
         runCmd( mri_cmd,log )
 
+def extract(Z, shape, position, fill):
+    """ Extract voxel neighbourhood
+Parameters
+----------
+Z: the original data
+shape: tuple containing neighbourhood dimensions
+position: tuple containing central point indexes
+fill: value for the padding of Z
+Returns
+-------
+R: the neighbourhood of the specified point in Z
+"""	
+    R = np.ones(shape, dtype=Z.dtype) * fill # initialize output block to the fill value
+    P = np.array(list(position)).astype(int) # position coordinates(numpy array)
+    Rs = np.array(list(R.shape)).astype(int) # output block dimensions (numpy array)
+    Zs = np.array(list(Z.shape)).astype(int) # original volume dimensions (numpy array)
+
+    R_start = np.zeros(len(shape)).astype(int)
+    R_stop = np.array(list(shape)).astype(int)
+    Z_start = (P - Rs // 2)
+    Z_start_cor = (np.maximum(Z_start,0)).tolist() # handle borders
+    R_start = R_start + (Z_start_cor - Z_start)
+    Z_stop = (P + Rs // 2) + Rs % 2
+    Z_stop_cor = (np.minimum(Z_stop,Zs)).tolist() # handle borders
+    R_stop = R_stop - (Z_stop - Z_stop_cor)
+
+    R[R_start[0]:R_stop[0], R_start[1]:R_stop[1], R_start[2]:R_stop[2]] = Z[Z_start_cor[0]:Z_stop_cor[0], Z_start_cor[1]:Z_stop_cor[1], Z_start_cor[2]:Z_stop_cor[2]]
+
+    return R
 
 class ParcellateInputSpec(BaseInterfaceInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
@@ -357,9 +457,11 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
     freesurfer_dir = Directory(exists=True, desc='Freesurfer main directory')
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
     out_roi_file = File(genfile = True, desc='Region of Interest file for connectivity mapping')
+    dilation = traits.Bool(False, usedefault=True)
 
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(exists=True, desc='Region of Interest file for connectivity mapping')
+    roiv_file = File(exists=True, desc='Region of Interest file for fMRI connectivity mapping')
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(desc='Image file with regions labelled as unknown cortical structures',
                     exists=True)
@@ -369,7 +471,8 @@ class ParcellateOutputSpec(TraitedSpec):
                     exists=True)
     roi_file_in_structural_space = File(desc='ROI image resliced to the dimensions of the original structural image',
                     exists=True)
-
+    dilated_roi_file_in_structural_space = File(desc='dilated ROI image resliced to the dimensions of the original structural image',
+                    exists=True)
 
 class Parcellate(BaseInterface):
     """Subdivides segmented ROI file into smaller subregions
@@ -386,6 +489,7 @@ class Parcellate(BaseInterface):
     >>> parcellate.inputs.freesurfer_dir = '.'
     >>> parcellate.inputs.subjects_dir = '.'
     >>> parcellate.inputs.subject_id = 'subj1'
+    >>> parcellate.inputs.dilation = True
     >>> parcellate.inputs.parcellation_name = 'scale500'
     >>> parcellate.run()                 # doctest: +SKIP
     """
@@ -402,7 +506,7 @@ class Parcellate(BaseInterface):
 		iflogger.info("ROI_HR_th.nii.gz / fsmask_1mm.nii.gz CREATION")
 		iflogger.info("=============================================")
 		create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
+		create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name,self.inputs.dilation)
 		create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
 		crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
 		return runtime
@@ -413,11 +517,13 @@ class Parcellate(BaseInterface):
             outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
         else:
             outputs['roi_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROI'))
+        outputs['roiv_file'] = op.abspath(self._gen_outfilename('nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
+        outputs['dilated_roi_file_in_structural_space'] = op.abspath('ROI_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):
