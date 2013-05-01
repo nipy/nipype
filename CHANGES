@@ -7,6 +7,7 @@ Next release
        with rotation of the B-matrix, and susceptibility correction for EPI imaging using
        fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.
 * ENH: Minor improvements to FSL's FUGUE and FLIRT interfaces
+* ENH: interpolation mode added to afni.Resample
 
 Release 0.7.0 (Dec 18, 2012)
 ============================
