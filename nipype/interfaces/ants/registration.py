@@ -17,8 +17,13 @@ from nipype.interfaces.traits_extension import isdefined
 class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
-    fixed_image = InputMultiPath(File(exists=True), mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)'))
-    moving_image = InputMultiPath(File(exists=True), argstr='%s', mandatory=True, desc=('image to apply transformation to (generally a coregistered functional)'))
+    fixed_image = InputMultiPath(File(exists=True), mandatory=True,
+           desc=('image to apply transformation to (generally a coregistered '
+                 'functional)'))
+    moving_image = InputMultiPath(File(exists=True), argstr='%s',
+                                  mandatory=True,
+           desc=('image to apply transformation to (generally a coregistered '
+                 'functional)'))
 
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
                          'MSQ', 'PSE'), mandatory=True, desc='')
@@ -26,8 +31,12 @@ class ANTSInputSpec(ANTSCommandInputSpec):
     metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
     radius = traits.List(traits.Int(), requires=['metric'], desc='')
 
-    output_transform_prefix = traits.Str('out', usedefault=True, argstr='--output-naming %s', mandatory=True, desc='')
-    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp', 'SyN', argstr='%s', mandatory=True, desc='')
+    output_transform_prefix = traits.Str('out', usedefault=True,
+                                         argstr='--output-naming %s',
+                                         mandatory=True, desc='')
+    transformation_model = traits.Enum('Diff', 'Elast', 'Exp', 'Greedy Exp',
+                                       'SyN', argstr='%s', mandatory=True,
+                                       desc='')
     gradient_step_length = traits.Float(
         requires=['transformation_model'], desc='')
     number_of_time_steps = traits.Float(
@@ -53,9 +62,6 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         requires=['regularization'], desc='')
     number_of_affine_iterations = traits.List(
         traits.Int(), argstr='--number-of-affine-iterations %s', sep='x')
-
-    # fixed_image_mask = File(exists=True, argstr='--mask-image %s', desc="this mask -- defined in the 'fixed' image space defines the region of interest over which the registration is computed ==> above 0.1 means inside mask ==> continuous values in range [0.1,1.0] effect optimization like a probability. ==> values > 1 are treated as = 1.0")
-    # moving_image_mask = File(exists=True, argstr='--mask-image %s', desc="this mask -- defined in the 'moving' image space defines the region of interest over which the registration is computed ==> above 0.1 means inside mask ==> continuous values in range [0.1,1.0] effect optimization like a probability. ==> values > 1 are treated as = 1.0")
 
 
 class ANTSOutputSpec(TraitedSpec):
@@ -188,17 +194,19 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(
-        mandatory=False, requires=['moving_image_mask'], exists=True, desc='')
+    fixed_image_mask = File(requires=['moving_image_mask'],
+                            exists=True, desc='')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(argstr='%s', mandatory=False, requires=[
-                             'fixed_image_mask'], exists=True, desc='')
-    initial_moving_transform = File(
-        argstr='%s', mandatory=False, exists=True, desc='')
+    moving_image_mask = File(argstr='%s', requires=['fixed_image_mask'],
+                             exists=True, desc='')
+    initial_moving_transform = File(argstr='%s', exists=True, desc='',
+                                    xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(
-        default=False, usedefault=True, mandatory=False,
-        requires=["initial_moving_transform"], desc='')
+        default=False, usedefault=True, requires=["initial_moving_transform"],
+        desc='', xor=['initial_moving_transform_com'])
+    initial_moving_transform_com = traits.Bool(xor=['initial_moving_transform'],
+                    desc="Use center of mass for moving transform")
     metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons",
                          "GC", "MI", "Mattes"), mandatory=True, desc='')
     metric_weight = traits.List(
@@ -224,11 +232,18 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         # 'Gaussian',
         # 'BSpline',
         argstr='%s', usedefault=True)
-    write_composite_transform = traits.Bool(argstr='--write-composite-transform %d', default=False, usedefault=True, desc='')
+        #MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
+        #Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
+        #BSpline[<order=3>]
+    write_composite_transform = traits.Bool(argstr='--write-composite-transform %d',
+                                            default=False, usedefault=True, desc='')
     collapse_output_transforms = traits.Bool(
-        argstr='--collapse-output-transforms %d', default=False,
-        usedefault=False,  # This should be true for explicit completeness
-        desc='Collapse output transforms. Specifically, enabling this option combines all adjacent linear transforms and composes all adjacent displacement field transforms before writing the results to disk.')
+        argstr='--collapse-output-transforms %d', default=True,
+        usedefault=True,  # This should be true for explicit completeness
+        desc=('Collapse output transforms. Specifically, enabling this option '
+              'combines all adjacent linear transforms and composes all '
+              'adjacent displacement field transforms before writing the '
+              'results to disk.'))
 
     transforms = traits.List(traits.Enum('Rigid', 'Affine', 'CompositeAffine',
                                          'Similarity', 'Translation', 'BSpline',
@@ -420,10 +435,12 @@ Test collapse transforms flag
         elif opt == 'transforms':
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
-            if self.inputs.invert_initial_moving_transform:
-                return '--initial-moving-transform [ %s, 1 ]' % self.inputs.initial_moving_transform
-            else:
-                return '--initial-moving-transform [ %s, 0 ]' % self.inputs.initial_moving_transform
+            return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
+                                                              int(self.inputs.invert_initial_moving_transform))
+        elif opt == 'initial_moving_transform_com':
+            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
+                                                                  self.inputs.moving_image[0],
+                                                                  int(self.inputs.initial_moving_transform_com))
         elif opt == 'interpolation':
             # TODO: handle multilabel, gaussian, and bspline options
             return '--interpolation %s' % self.inputs.interpolation
@@ -445,7 +462,7 @@ Test collapse transforms flag
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid': 'Rigid.mat',
                                            #seems counterontuitive, but his is how ANTS is calling it
-                                           'Affine': 'GenericAffine.mat',
+                                           'Affine': 'Affine.mat',
                                            'GenericAffine': 'GenericAffine.mat',
                                            'CompositeAffine': 'Affine.mat',
                                            'Similarity': 'Similarity.mat',
@@ -479,7 +496,7 @@ Test collapse transforms flag
                     0, self.inputs.initial_moving_transform)
                 outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
                 transformCount += 1
-                
+
             for count in range(len(self.inputs.transforms)):
                 forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
                                                                             self.inputs.transforms[count])
