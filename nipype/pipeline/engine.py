@@ -79,7 +79,7 @@ def _write_inputs(node):
     return lines
 
 
-def format_node(node, format='python'):
+def format_node(node, format='python', include_config=False):
     """Format a node in a given output syntax
     """
     lines = []
@@ -112,9 +112,15 @@ def format_node(node, format='python'):
                                                       args,
                                                       name)
         lines = [importline, comment, nodedef]
+        
+        if include_config:
+            lines = [importline, "from collections import OrderedDict", comment, nodedef]
+            lines.append('%s.config = %s' % (name, node.config))
+        
         if node.iterables is not None:
             lines.append('%s.iterables = %s' % (name, node.iterables))
         lines.extend(_write_inputs(node))
+        
     return lines
 
 
@@ -537,7 +543,7 @@ connected.
         else:
             logger.info(dotstr)
 
-    def export(self, prefix="output", format="python"):
+    def export(self, prefix="output", format="python", include_config=False):
         """Export object into a different format
 
         Parameters
@@ -563,10 +569,12 @@ connected.
             connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' % self.name
             wfdef = '%s = Workflow("%s")' % (self.name, self.name)
             lines.append(wfdef)
+            if include_config:
+                lines.append('%s.config = %s' % (self.name, self.config))
             for idx, node in enumerate(nodes):
                 nodename = node.fullname.replace('.', '_')
                 # write nodes
-                nodelines = format_node(node, format='python')
+                nodelines = format_node(node, format='python', include_config=include_config)
                 for line in nodelines:
                     if line.startswith('from'):
                         if line not in importlines:
