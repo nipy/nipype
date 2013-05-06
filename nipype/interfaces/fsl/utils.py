@@ -1220,9 +1220,7 @@ class EPIDeWarp(FSLCommand):
                                                   basename='maskexf')
         return outputs
 
-<<<<<<< HEAD
 
-=======
 class SigLossInputSpec(FSLCommandInputSpec):
     in_file = File(mandatory=True,
                    exists=True,
@@ -1271,7 +1269,7 @@ class SigLoss(FSLCommand):
             return self._list_outputs()['out_file']
         return None
     
->>>>>>> master
+
 class Reorient2StdInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s")
     out_file = File(genfile=True, hash_files=False, argstr="%s")
@@ -1355,7 +1353,8 @@ class InvWarp(FSLCommand):
     """Use FSL Invwarp to inverse a FNIRT warp
 
     Examples
-    >>> invwarp = Invwarp()
+    >>> from nipype.interfaces.fsl import InvWarp
+    >>> invwarp = InvWarp()
     >>> invwarp.inputs.warp = "struct2mni.nii"
     >>> invwarp.inputs.reference = "anatomical.nii"
     >>> invwarp.inputs.inverse_warp = "mni2t1.nii"

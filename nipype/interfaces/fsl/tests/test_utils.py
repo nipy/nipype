@@ -414,10 +414,8 @@ def test_swapdims():
 def test_invwarp():
     input_map = dict(environ=dict(),
                      args=dict(argstr='%s',),
-                     environ=dict(),
                      warp=dict(mandatory=True,),
-                     reference=dict(mandatory=True,),
-                     inverse_warp=dict(mandatory=True,))
+                     reference=dict(mandatory=True,))
     instance = fsl.InvWarp()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
