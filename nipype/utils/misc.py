@@ -76,9 +76,8 @@ def create_function_from_source(function_source, imports=None):
                            ])
         raise RuntimeError(msg)
     ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
-    assert len(ns_funcs) == 1, ns_funcs
+    assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
     funcname = ns_funcs[0]
-    print "*****", funcname
     func = ns[funcname]
     return func
 
