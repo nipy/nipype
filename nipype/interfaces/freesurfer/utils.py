@@ -417,6 +417,8 @@ class ApplyMask(FSCommand):
                                                   suffix="_masked",
                                                   newpath=os.getcwd(),
                                                   use_ext=True)
+        else:
+            outputs["out_file"] = os.path.abspath(outputs["out_file"])
         return outputs
 
     def _gen_filename(self, name):
