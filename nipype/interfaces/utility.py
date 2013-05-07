@@ -108,14 +108,14 @@ class Merge(IOBase):
 
     def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
-        self.numinputs = numinputs
+        self._numinputs = numinputs
         add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         out = []
         if self.inputs.axis == 'vstack':
-            for idx in range(self.numinputs):
+            for idx in range(self._numinputs):
                 value = getattr(self.inputs, 'in%d' % (idx + 1))
                 if isdefined(value):
                     if isinstance(value, list) and not self.inputs.no_flatten:
@@ -125,7 +125,7 @@ class Merge(IOBase):
         else:
             for i in range(len(filename_to_list(self.inputs.in1))):
                 out.insert(i, [])
-                for j in range(self.numinputs):
+                for j in range(self._numinputs):
                     out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
         if out:
             outputs['out'] = out
