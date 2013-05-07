@@ -261,6 +261,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Int()))
+    sigma_units = traits.Enum('mm', 'vox', requires=['smoothing_sigmas'],
+                              usedefault=True,
+                              desc="units for smoothing sigmas")
     shrink_factors = traits.List(traits.List(traits.Int()))
     convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
     convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
@@ -389,8 +392,9 @@ Test collapse transforms flag
             retval.append('--transform %s' % (self._formatTransform(ii)))
             retval.append('--metric %s' % self._formatMetric(ii))
             retval.append('--convergence %s' % self._formatConvergence(ii))
-            retval.append('--smoothing-sigmas %s' % self._antsJoinList(
-                self.inputs.smoothing_sigmas[ii]))
+            retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
+                self.inputs.smoothing_sigmas[ii])),
+                          self.inputs.sigma_units)
             retval.append('--shrink-factors %s' %
                           self._antsJoinList(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
