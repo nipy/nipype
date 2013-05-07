@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import re
+from cPickle import dumps, loads
 import numpy as np
 import nibabel as nb
 
@@ -11,7 +12,7 @@ from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, Fil
     InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
 from nipype.interfaces.io import IOBase, add_traits
 from nipype.testing import assert_equal
-from nipype.utils.misc import getsource, create_function_from_source, dumps
+from nipype.utils.misc import getsource, create_function_from_source
 
 
 class IdentityInterface(IOBase):
@@ -335,7 +336,8 @@ class Function(IOBase):
     input_spec = FunctionInputSpec
     output_spec = DynamicTraitedSpec
 
-    def __init__(self, input_names, output_names, function=None, **inputs):
+    def __init__(self, input_names, output_names, function=None, imports=None,
+                 **inputs):
         """
 
         Parameters
@@ -344,7 +346,15 @@ class Function(IOBase):
         input_names: single str or list
             names corresponding to function inputs
         output_names: single str or list
-            names corresponding to function outputs. has to match the number of outputs
+            names corresponding to function outputs.
+            has to match the number of outputs
+        function : callable
+            callable python object. must be able to execute in an
+            isolated namespace (possibly in concert with the ``imports``
+            parameter)
+        imports : list of strings
+            list of import statements that allow the function to execute
+            in an otherwise empty namespace
         """
 
         super(Function, self).__init__(**inputs)
@@ -354,15 +364,18 @@ class Function(IOBase):
                     self.inputs.function_str = getsource(function)
                 except IOError:
                     raise Exception('Interface Function does not accept ' \
-                                        'function objects defined interactively in a python session')
+                                    'function objects defined interactively ' \
+                                    'in a python session')
             elif isinstance(function, str):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
-        self.inputs.on_trait_change(self._set_function_string, 'function_str')
+        self.inputs.on_trait_change(self._set_function_string,
+                                    'function_str')
         self._input_names = filename_to_list(input_names)
         self._output_names = filename_to_list(output_names)
         add_traits(self.inputs, [name for name in self._input_names])
+        self.imports = imports
         self._out = {}
         for name in self._output_names:
             self._out[name] = None
@@ -373,7 +386,8 @@ class Function(IOBase):
                 function_source = getsource(new)
             elif isinstance(new, str):
                 function_source = dumps(new)
-            self.inputs.trait_set(trait_change_notify=False, **{'%s' % name: function_source})
+            self.inputs.trait_set(trait_change_notify=False,
+                                  **{'%s' % name: function_source})
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -384,7 +398,8 @@ class Function(IOBase):
         return base
 
     def _run_interface(self, runtime):
-        function_handle = create_function_from_source(self.inputs.function_str)
+        function_handle = create_function_from_source(self.inputs.function_str,
+                                                      self.imports)
 
         args = {}
         for name in self._input_names:
