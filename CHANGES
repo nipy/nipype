@@ -1,7 +1,8 @@
 Next release
 ============
 
-* ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment, fsl.InvWarp
+* ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment, fsl.InvWarp,
+       dipy.TensorMode
 * ENH: Allow control over terminal output for commandline interfaces
 * ENH: Added preliminary support for generating Python code from Workflows.
 * ENH: New workflows for dMRI and fMRI pre-processing: added motion artifact correction
