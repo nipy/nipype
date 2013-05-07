@@ -393,8 +393,8 @@ Test collapse transforms flag
             retval.append('--metric %s' % self._formatMetric(ii))
             retval.append('--convergence %s' % self._formatConvergence(ii))
             retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
-                self.inputs.smoothing_sigmas[ii])),
-                          self.inputs.sigma_units)
+                self.inputs.smoothing_sigmas[ii]),
+                          self.inputs.sigma_units))
             retval.append('--shrink-factors %s' %
                           self._antsJoinList(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
