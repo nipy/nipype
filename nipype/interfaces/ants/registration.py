@@ -205,7 +205,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     invert_initial_moving_transform = traits.Bool(
         default=False, requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
-    initial_moving_transform_com = traits.Bool(xor=['initial_moving_transform'],
+    initial_moving_transform_com = traits.Bool(argstr='%s',
+                                               xor=['initial_moving_transform'],
                     desc="Use center of mass for moving transform")
     metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons",
                          "GC", "MI", "Mattes"), mandatory=True, desc='')
