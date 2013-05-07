@@ -543,17 +543,22 @@ connected.
         else:
             logger.info(dotstr)
 
-    def export(self, prefix="output", format="python", include_config=False):
+    def export(self, filename=None, prefix="output", format="python", include_config=False):
         """Export object into a different format
 
         Parameters
         ----------
+        filename: string
+           file to save the code to; overrides prefix
 
         prefix: string
            prefix to use for output file
 
         format: string
            one of "python"
+           
+        include_config: boolean
+           whether to include node and workflow config values
         """
         formats = ["python"]
         if format not in formats:
@@ -606,7 +611,10 @@ connected.
             for function in functions:
                 functionlines.append(cPickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
-            with open('%s%s.py' % (prefix, self.name), 'wt') as fp:
+            
+            if not filename:
+                filename = '%s%s.py' % (prefix, self.name)
+            with open(filename, 'wt') as fp:
                 #fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
                 fp.writelines('\n'.join(all_lines))
         return all_lines
