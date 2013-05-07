@@ -203,7 +203,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(
-        default=False, usedefault=True, requires=["initial_moving_transform"],
+        default=False, requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
     initial_moving_transform_com = traits.Bool(xor=['initial_moving_transform'],
                     desc="Use center of mass for moving transform")
