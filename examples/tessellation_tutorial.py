@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-=============================================
+=================================================
 sMRI: Regional Tessellation and Surface Smoothing
-=============================================
+=================================================
 
 Introduction
 ============
@@ -26,8 +26,7 @@ This example requires that the user has Freesurfer installed, and that the Frees
 
 .. warning::
 
-	This workflow will take several hours to finish entirely, since smoothing
-    the larger cortical surfaces is very time consuming.
+	This workflow will take several hours to finish entirely, since smoothing the larger cortical surfaces is very time consuming.
 
 Packages and Data Setup
 =======================
