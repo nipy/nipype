@@ -554,6 +554,9 @@ connected.
 
         format: string
            one of "python"
+           
+        include_config: boolean
+           whether to include node and workflow config values
         """
         formats = ["python"]
         if format not in formats:
