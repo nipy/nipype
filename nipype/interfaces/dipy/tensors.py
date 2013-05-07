@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+   >>> os.chdir(datadir)
+"""
+
 from nipype.interfaces.base import (
     TraitedSpec, BaseInterface, File)
 from nipype.utils.filemanip import split_filename
@@ -51,7 +58,7 @@ class TensorMode(BaseInterface):
 
     >>> import nipype.interfaces.dipy as dipy
     >>> mode = dipy.TensorMode()
-    >>> mode.inputs.in_file = 'dwi.nii'
+    >>> mode.inputs.in_file = 'diffusion.nii'
     >>> mode.inputs.bvecs = 'bvecs'
     >>> mode.inputs.bvals = 'bvals'
     >>> mode.run()                                   # doctest: +SKIP
