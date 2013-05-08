@@ -261,11 +261,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   traits.Float())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
-    smoothing_sigmas = traits.List(traits.List(traits.Int()))
+    smoothing_sigmas = traits.List(traits.List(traits.Int()), mandatory=True)
     sigma_units = traits.List(traits.Enum('mm', 'vox'),
                               requires=['smoothing_sigmas'],
-                              desc="units for smoothing sigmas")
-    shrink_factors = traits.List(traits.List(traits.Int()))
+                              desc="units for smoothing sigmas", mandatory=True)
+    shrink_factors = traits.List(traits.List(traits.Int()), mandatory=True)
     convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
     convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
     # Output flags
