@@ -68,12 +68,14 @@ input_passive_images=[
 """
 3. Define the workflow and its working directory
 """
+
 tbuilder=pe.Workflow(name="ANTSTemplateBuilder")
 tbuilder.base_dir=requestedPath
 
 """
 4. Define data sources. In real life these would be replace by DataGrabbers
 """
+
 datasource = pe.Node(interface=util.IdentityInterface(fields=
                     ['imageList', 'passiveImagesDictionariesList']),
                     run_without_submitting=True,
@@ -84,6 +86,7 @@ datasource.inputs.passiveImagesDictionariesList=input_passive_images
 """
 5. Template is initialized by a simple average
 """
+
 initAvg = pe.Node(interface=ants.AverageImages(), name ='initAvg')
 initAvg.inputs.dimension = 3
 initAvg.inputs.normalize = True
