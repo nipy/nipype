@@ -1,8 +1,12 @@
-.. _citation:
+.. _about:
 
-========
-Citation
-========
+=====
+About
+=====
+
+
+Citatation
+----------
 
 .. admonition:: Reference
 
@@ -29,3 +33,6 @@ Citation
 	issn             = "1662-5196"}
 
 .. include:: links_names.txt
+
+
+.. include:: ../THANKS.rst
