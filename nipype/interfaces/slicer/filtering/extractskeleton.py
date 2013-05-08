@@ -38,5 +38,5 @@ acknowledgements: The original implementation of this method was provided by ETH
 
     input_spec = ExtractSkeletonInputSpec
     output_spec = ExtractSkeletonOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ExtractSkeleton "
+    _cmd = "ExtractSkeleton "
     _outputs_filenames = {'OutputImageFileName':'OutputImageFileName.nii'}

@@ -44,7 +44,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = GrayscaleGrindPeakImageFilterInputSpec
     output_spec = GrayscaleGrindPeakImageFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch GrayscaleGrindPeakImageFilter "
+    _cmd = "GrayscaleGrindPeakImageFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -84,5 +84,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = GrayscaleFillHoleImageFilterInputSpec
     output_spec = GrayscaleFillHoleImageFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch GrayscaleFillHoleImageFilter "
+    _cmd = "GrayscaleFillHoleImageFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
