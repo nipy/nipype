@@ -142,6 +142,6 @@ Iterables are commonly used to execute the same workflow for many subjects.
 Usually one parametrises DataGrabber node with subject ID. This is achieved by
 connecting an IdentityInterface in front of DataGrabber. When you set iterables of the
 IdentityInterface to the list of subjects IDs, the same workflow will be executed
-for every subject. See :doc:`examples/spm_tutorial` to see this pattern in action.
+for every subject. See :doc:`examples/fmri_spm` to see this pattern in action.
 
 .. include:: ../links_names.txt
