@@ -24,7 +24,6 @@ Contributors to Nipype include but are not limited to:
   * Cindee Madison
   * Claire Tarbert
   * Colin Buchanan
-  * daniel-ge
   * Daniel Ginsburg
   * Daniel Haehn
   * Daniel Margulies
@@ -64,6 +63,8 @@ For full most up to date list see `Ohloh <https://www.ohloh.net/p/nipype/contrib
 
 Other contributors
 ------------------
+
+.. hlist::
 
   * Matthew Brett
   * Michael Castelle
