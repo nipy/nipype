@@ -228,7 +228,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         traits.Bool(argstr='%s'), default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
-        'HammingWindowedSinc', 'LanczosWindowedSinc',
+        'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
         # 'MultiLabel',
         # 'Gaussian',
         # 'BSpline',
@@ -273,8 +273,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         "transform", usedefault=True, argstr="%s", desc="")
     output_warped_image = traits.Either(
         traits.Bool, File(), hash_files=False, desc="")
-    output_inverse_warped_image = traits.Either(traits.Bool, File(
-    ), hash_files=False, requires=['output_warped_image'], desc="")
+    output_inverse_warped_image = traits.Either(traits.Bool, File(),
+                                                hash_files=False,
+                                      requires=['output_warped_image'], desc="")
     winsorize_upper_quantile = traits.Range(low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
     collapse_linear_transforms_to_fixed_image_header = traits.Bool(
@@ -293,6 +294,8 @@ class RegistrationOutputSpec(TraitedSpec):
     composite_transform = traits.List(File(exists=True), desc='Composite transform file')
     inverse_composite_transform = traits.List(
         File(exists=True), desc='Inverse composite transform file')
+    warped_image = File(desc="Outputs warped image")
+    inverse_warped_image = File(desc="Outputs the inverse of the warped image")
 
 
 class Registration(ANTSCommand):
@@ -409,6 +412,27 @@ Test collapse transforms flag
     def _antsJoinList(self, antsList):
         return "x".join([str(i) for i in antsList])
 
+    def _get_outputfilenames(self, inverse=False):
+        output_filename = None
+        if not inverse:
+            if isdefined(self.inputs.output_warped_image) and \
+                self.inputs.output_warped_image:
+                output_filename = self.inputs.output_warped_image
+                if isinstance(output_filename, bool):
+                    output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
+                else:
+                    output_filename = os.path.abspath(output_filename)
+            return output_filename
+        inv_output_filename = None
+        if isdefined(self.inputs.output_inverse_warped_image) and \
+            self.inputs.output_inverse_warped_image:
+            inv_output_filename = self.inputs.output_inverse_warped_image
+            if isinstance(inv_output_filename, bool):
+                inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
+            else:
+                inv_output_filename = os.path.abspath(inv_output_filename)
+        return inv_output_filename
+
     def _formatConvergence(self, ii):
         convergence_iter = self._antsJoinList(
             self.inputs.number_of_iterations[ii])
@@ -450,10 +474,15 @@ Test collapse transforms flag
             # TODO: handle multilabel, gaussian, and bspline options
             return '--interpolation %s' % self.inputs.interpolation
         elif opt == 'output_transform_prefix':
-            if isdefined(self.inputs.output_inverse_warped_image) and self.inputs.output_inverse_warped_image:
-                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image, self.inputs.output_inverse_warped_image)
-            elif isdefined(self.inputs.output_warped_image) and self.inputs.output_warped_image:
-                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix, self.inputs.output_warped_image)
+            out_filename = self._get_outputfilenames(inverse=False)
+            inv_out_filename = self._get_outputfilenames(inverse=True)
+            if out_filename and inv_out_filename:
+                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
+                                                    out_filename,
+                                                    inv_out_filename)
+            elif out_filename:
+                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
+                                                out_filename)
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
         elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
@@ -541,4 +570,10 @@ Test collapse transforms flag
                 'InverseComposite.h5'
             outputs['inverse_composite_transform'] = [
                 os.path.abspath(fileName)]
+        out_filename = self._get_outputfilenames(inverse=False)
+        inv_out_filename = self._get_outputfilenames(inverse=True)
+        if out_filename:
+            outputs['warped_image'] = out_filename
+        if inv_out_filename:
+            outputs['inverse_warped_image'] = inv_out_filename
         return outputs
