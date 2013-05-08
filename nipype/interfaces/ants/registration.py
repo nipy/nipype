@@ -501,6 +501,12 @@ Test collapse transforms flag
                     0, self.inputs.initial_moving_transform)
                 outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
                 transformCount += 1
+            elif isdefined(self.inputs.initial_moving_transform_com):
+                forwardFileName, _ = self._outputFileNames(self.inputs.output_transform_prefix,
+                                                           transformCount,
+                                                           'DerivedInitialMovingTranslation')
+                outputs['forward_transforms'].append(forwardFileName)
+                transformCount += 1
 
             for count in range(len(self.inputs.transforms)):
                 forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
