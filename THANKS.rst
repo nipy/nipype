@@ -91,6 +91,6 @@ We would also like to thank `JetBrains <http://www.jetbrains.com/>`__ for provid
  
 Funding
 -------
-Satrajit Ghosh work on this project was partially founded by NIBIB R03 EB008673 (PI: Ghosh and Whitfield-Gabrieli). 
+Satrajit Ghosh work on this project was partially funded by NIBIB R03 EB008673 (PI: Ghosh and Whitfield-Gabrieli) and by the `INCF <http://www.incf.org <INCF>`__ through a contract with TankThink Labs, LLC.
 Chris Burn was supported by NIMH grant 5R01MH081909-02 (PI: Desposito).
 
