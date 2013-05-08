@@ -309,6 +309,7 @@ class Registration(ANTSCommand):
     >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.output_transform_prefix = "output_"
     >>> reg.inputs.initial_moving_transform = 'trans.mat'
+    >>> reg.inputs.invert_initial_moving_transform = True
     >>> reg.inputs.transforms = ['Affine', 'SyN']
     >>> reg.inputs.transform_parameters = [(2.0,), (0.25, 3.0, 0.0)]
     >>> reg.inputs.number_of_iterations = [[1500, 200], [100, 50, 30]]
@@ -323,6 +324,7 @@ class Registration(ANTSCommand):
     >>> reg.inputs.convergence_threshold = [1.e-8, 1.e-9]
     >>> reg.inputs.convergence_window_size = [20]*2
     >>> reg.inputs.smoothing_sigmas = [[1,0], [2,1,0]]
+    >>> reg.inputs.sigma_units = ['vox'] * 2
     >>> reg.inputs.shrink_factors = [[2,1], [3,2,1]]
     >>> reg.inputs.use_estimate_learning_rate_once = [True, True]
     >>> reg.inputs.use_histogram_matching = [True, True] # This is the default
@@ -332,26 +334,26 @@ class Registration(ANTSCommand):
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.inputs.collapse_linear_transforms_to_fixed_image_header = False
     >>> reg1.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  #doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
     >>> reg2.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
     >>> reg3.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 0 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0 --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0 --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
-Test collapse transforms flag
+    # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
+    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
     >>> reg4.aggregate_outputs() #doctest: +SKIP
 
     """
@@ -421,7 +423,7 @@ Test collapse transforms flag
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
                 else:
-                    output_filename = os.path.abspath(output_filename)
+                    output_filename = output_filename
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
@@ -430,7 +432,7 @@ Test collapse transforms flag
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
             else:
-                inv_output_filename = os.path.abspath(inv_output_filename)
+                inv_output_filename = inv_output_filename
         return inv_output_filename
 
     def _formatConvergence(self, ii):
@@ -573,7 +575,7 @@ Test collapse transforms flag
         out_filename = self._get_outputfilenames(inverse=False)
         inv_out_filename = self._get_outputfilenames(inverse=True)
         if out_filename:
-            outputs['warped_image'] = out_filename
+            outputs['warped_image'] = os.path.abspath(out_filename)
         if inv_out_filename:
-            outputs['inverse_warped_image'] = inv_out_filename
+            outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
         return outputs
