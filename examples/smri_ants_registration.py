@@ -69,6 +69,7 @@ reg.inputs.sampling_percentage = [0.05, None]
 reg.inputs.convergence_threshold = [1.e-8, 1.e-9]
 reg.inputs.convergence_window_size = [20]*2
 reg.inputs.smoothing_sigmas = [[1,0], [2,1,0]]
+reg.inputs.sigma_units = ['vox'] * 2
 reg.inputs.shrink_factors = [[2,1], [3,2,1]]
 reg.inputs.use_estimate_learning_rate_once = [True, True]
 reg.inputs.use_histogram_matching = [True, True] # This is the default
