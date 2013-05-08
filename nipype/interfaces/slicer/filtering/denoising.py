@@ -39,7 +39,7 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
     input_spec = GradientAnisotropicDiffusionInputSpec
     output_spec = GradientAnisotropicDiffusionOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch GradientAnisotropicDiffusion "
+    _cmd = "GradientAnisotropicDiffusion "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -78,7 +78,7 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
     input_spec = CurvatureAnisotropicDiffusionInputSpec
     output_spec = CurvatureAnisotropicDiffusionOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch CurvatureAnisotropicDiffusion "
+    _cmd = "CurvatureAnisotropicDiffusion "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -111,7 +111,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = GaussianBlurImageFilterInputSpec
     output_spec = GaussianBlurImageFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch GaussianBlurImageFilter "
+    _cmd = "GaussianBlurImageFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -144,5 +144,5 @@ acknowledgements: This command module was derived from Insight/Examples/Filterin
 
     input_spec = MedianImageFilterInputSpec
     output_spec = MedianImageFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch MedianImageFilter "
+    _cmd = "MedianImageFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

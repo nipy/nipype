@@ -60,5 +60,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ResampleScalarVectorDWIVolumeInputSpec
     output_spec = ResampleScalarVectorDWIVolumeOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ResampleScalarVectorDWIVolume "
+    _cmd = "ResampleScalarVectorDWIVolume "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
