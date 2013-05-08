@@ -472,7 +472,8 @@ Test collapse transforms flag
                                            'CompositeAffine': 'Affine.mat',
                                            'Similarity': 'Similarity.mat',
                                            'Translation': 'Translation.mat',
-                                           'BSpline': 'BSpline.txt'}
+                                           'BSpline': 'BSpline.txt',
+                                           'Initial': 'DerivedInitialMovingTranslation.mat'}
         if transform in self.lowDimensionalTransformMap.keys():
             suffix = self.lowDimensionalTransformMap[transform]
             inverse_mode = inverse
@@ -504,7 +505,7 @@ Test collapse transforms flag
             elif isdefined(self.inputs.initial_moving_transform_com):
                 forwardFileName, _ = self._outputFileNames(self.inputs.output_transform_prefix,
                                                            transformCount,
-                                                           'DerivedInitialMovingTranslation')
+                                                           'Initial')
                 outputs['forward_transforms'].append(forwardFileName)
                 transformCount += 1
 
