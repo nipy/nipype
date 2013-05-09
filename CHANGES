@@ -1,5 +1,5 @@
-Next release
-============
+Release 0.8.0 (May 8, 2013)
+===========================
 
 * ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment, fsl.InvWarp,
        dipy.TensorMode
