@@ -729,6 +729,8 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     if not isinstance(d1, dict):
         return merge(d1, d2)
     result = dict(d1)
+    if d2 is None:
+        return result
     for k, v in d2.iteritems():
         if k in result:
             result[k] = merge_dict(result[k], v, merge=merge)

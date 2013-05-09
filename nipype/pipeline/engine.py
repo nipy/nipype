@@ -143,7 +143,7 @@ class WorkflowBase(object):
             special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
-        self.config = deepcopy(config._sections)
+        self.config = None #deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" %
                             self.__class__.__name__)
@@ -215,6 +215,7 @@ class Workflow(WorkflowBase):
     def __init__(self, *args, **kwargs):
         super(Workflow, self).__init__(* args, **kwargs)
         self._graph = nx.DiGraph()
+        self.config = deepcopy(config._sections)
 
     # PUBLIC API
     def clone(self, name):
@@ -1205,7 +1206,10 @@ class Node(WorkflowBase):
             Update the hash stored in the output directory
         """
         # check to see if output directory and hash exist
-        self.config = merge_dict(deepcopy(config._sections), self.config)
+        if self.config is None:
+            self.config = deepcopy(config._sections)
+        else:
+            self.config = merge_dict(deepcopy(config._sections), self.config)
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
