@@ -5,8 +5,8 @@ About
 =====
 
 
-Citatation
-----------
+Citation
+--------
 
 .. admonition:: Reference
 
