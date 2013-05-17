@@ -169,8 +169,8 @@ class RefitInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=True)
 
-    out_file = File("%s_refit", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File("%s_refit", desc='output image file name, should be the same as input',
+                    argstr='%s', name_source="in_file", usedefault=True)
 
     deoblique = traits.Bool(desc='replace current transformation' +
                             ' matrix with cardinal matrix',
