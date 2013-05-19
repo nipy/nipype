@@ -1126,7 +1126,7 @@ class Allineate(AFNICommand):
     >>> allineate = afni.Allineate()
     >>> allineate.inputs.in_file = 'functional.nii'
     >>> allineate.inputs.out_file= 'functional_allineate.nii'
-    >>> allineate.inputs.matrix= 'cmatrix.mat'
+    >>> allineate.inputs.in_matrix= 'cmatrix.mat'
     >>> res = allineate.run() # doctest: +SKIP
 
     """
