@@ -13,53 +13,38 @@ logging = Logging(config)
 
 from distutils.version import LooseVersion
 
-try:
-    from numpy.testing import nosetester
+from .fixes.numpy.testing import nosetester
 
-    class _NoseTester(nosetester.NoseTester):
-        """ Subclass numpy's NoseTester to add doctests by default
+class _NoseTester(nosetester.NoseTester):
+    """ Subclass numpy's NoseTester to add doctests by default
+    """
+
+    def _get_custom_doctester(self):
+        return None
+
+    def test(self, label='fast', verbose=1, extra_argv=['--exe'],
+             doctests=True, coverage=False):
+        """Run the full test suite
+
+        Examples
+        --------
+        This will run the test suite and stop at the first failing
+        example
+        >>> from nipype import test
+        >>> test(extra_argv=['--exe', '-sx']) #doctest: +SKIP
         """
+        return super(_NoseTester, self).test(label=label,
+                                             verbose=verbose,
+                                             extra_argv=extra_argv,
+                                             doctests=doctests,
+                                             coverage=coverage)
 
-        def _get_custom_doctester(self):
-            return None
-
-        def prepare_test_args(self, label='fast', verbose=1, extra_argv=None,
-                          doctests=False, coverage=False):
-            argv, plugins = super(_NoseTester, self).prepare_test_args(label=label,
-                                                 verbose=verbose,
-                                                 extra_argv=extra_argv,
-                                                 doctests=doctests,
-                                                 coverage=coverage)
-            if doctests and '--with-numpydoctest' in argv:
-                numpydocindex = argv.index('--with-numpydoctest')
-                argv[numpydocindex] = '--with-doctest'
-            return argv, plugins
-
-        def test(self, label='fast', verbose=1, extra_argv=['--exe'],
-                 doctests=True, coverage=False):
-            """Run the full test suite
-
-            Examples
-            --------
-            This will run the test suite and stop at the first failing
-            example
-            >>> from nipype import test
-            >>> test(extra_argv=['--exe', '-sx']) #doctest: +SKIP
-            """
-            return super(_NoseTester, self).test(label=label,
-                                                 verbose=verbose,
-                                                 extra_argv=extra_argv,
-                                                 doctests=doctests,
-                                                 coverage=coverage)
-
-    try:
-        test = _NoseTester(raise_warnings="release").test
-    except TypeError:
-        # Older versions of numpy do not have a raise_warnings argument
-        test = _NoseTester().test
-    del nosetester
-except:
-    pass
+try:
+    test = _NoseTester(raise_warnings="release").test
+except TypeError:
+    # Older versions of numpy do not have a raise_warnings argument
+    test = _NoseTester().test
+del nosetester
 
 
 def _test_local_install():
