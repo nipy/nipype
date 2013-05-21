@@ -351,11 +351,15 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
                                                supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
-    count = 0
-    for i, params in enumerate(walk(iterables.items())):
-        count += 1
+    iterable_params = list(walk(iterables.items()))
+    # If there are no iterable subgraphs, then return
+    if not iterable_params:
+        return supergraph
+    # Make an iterable subgraph node id template
+    count = len(iterable_params)
     template = '.%s%%0%dd' % (prefix, np.ceil(np.log10(count)))
-    for i, params in enumerate(walk(iterables.items())):
+    # Copy the iterable subgraphs
+    for i, params in enumerate(iterable_params):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy + n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
