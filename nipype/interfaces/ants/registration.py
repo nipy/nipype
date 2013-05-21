@@ -215,8 +215,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         trait=traits.Either(traits.Range(low=0.0, high=1.0), None), value=[None], minlen=1,
         requires=['sampling_strategy'], desc='')
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
-    use_histogram_matching = traits.List(
-        traits.Bool(argstr='%s'), default=True, usedefault=True)
+    use_histogram_matching = traits.Either(traits.Bool, traits.List(traits.Bool(argstr='%s')),
+        default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc',
@@ -382,8 +382,13 @@ Test collapse transforms flag
                 retval.append('--use-estimate-learning-rate-once %d' %
                               self.inputs.use_estimate_learning_rate_once[ii])
             if isdefined(self.inputs.use_histogram_matching):
-                retval.append('--use-histogram-matching %d' %
-                              self.inputs.use_histogram_matching[ii])
+                # use_histogram_matching is either a common flag for all transforms
+                # or a list of transform-specific flags
+                if isinstance(self.inputs.use_histogram_matching, bool):
+                    histval = self.inputs.use_histogram_matching
+                else:
+                    histval = self.inputs.use_histogram_matching[ii]
+                retval.append('--use-histogram-matching %d' % histval)
         return " ".join(retval)
 
     def _antsJoinList(self, antsList):
