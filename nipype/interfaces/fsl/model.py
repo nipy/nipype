@@ -18,12 +18,12 @@ from shutil import rmtree
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec)
+from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from nipype.interfaces.base import (load_template, File, traits, isdefined,
                                     TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
                                     BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (list_to_filename, filename_to_list)
+from nipype.utils.filemanip import (list_to_filename, filename_to_list, split_filename)
 from nibabel import load
 
 warn = warnings.warn
@@ -1472,12 +1472,9 @@ class Randomise(FSLCommand):
     Example
     -------
     >>> import nipype.interfaces.fsl as fsl
-    >>> rand = fsl.Randomise(in_file='allFA.nii', \
-    mask = 'mask.nii', \
-    tcon='design.con', \
-    design_mat='design.mat')
+    >>> rand = fsl.Randomise(in_file='allFA.nii', mask = 'mask.nii', tcon='design.con', design_mat='design.mat')
     >>> rand.cmdline
-    'randomise -i allFA.nii -o tbss_ -d design.mat -t design.con -m mask.nii'
+    'randomise -i allFA.nii -o "tbss_" -d design.mat -t design.con -m mask.nii'
 
     """
 
@@ -1511,3 +1508,66 @@ class Randomise(FSLCommand):
             outputs['f_corrected_p_files'] = glob(self._gen_fname(\
                 '%s_%s_corrp_fstat*.nii' % (self.inputs.base_name, prefix)))
         return outputs
+
+
+class GLMInputSpec(FSLCommandInputSpec):
+    in_file = File(
+        exists=True,mandatory=True,
+        argstr='-i %s',
+        desc='input 3d+t file',)
+    design = File(
+        exists=True, mandatory=True,
+        argstr='-d %s',
+        desc='design file or image file')
+    out_file = File(
+        genfile=True, argstr="-o %s",
+        desc="file or image output")
+    mask = File(
+        exists=True,
+        argstr='-m %s',
+        desc='mask file')
+    contrasts = File(
+        exists=True,
+        argstr='-c %s',
+        desc='t-contrasts file')
+    options = traits.String(
+        argstr='%s',
+        desc = 'fsl_glm options')
+
+
+class GLMOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=True,
+        desc = 'file or image output')
+
+
+class GLM(FSLCommand):
+    """
+    FSL GLM: 
+
+    Example
+    -------
+    >>> import nipype.interfaces.fsl as fsl
+    >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii')
+    >>> glm.cmdline
+    'fsl_glm -d maps.nii -i functional.nii -o functional_glm.txt'
+
+    """
+    _cmd = 'fsl_glm'
+    input_spec = GLMInputSpec
+    output_spec = GLMOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        # Generate an out_file if one is not provided
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file'] = os.path.abspath(self._gen_filename('out_file'))
+        return outputs
+
+    def _gen_filename(self, name):
+        if name in ('out_file'):
+            from nipype.utils.filemanip import fname_presuffix
+            return fname_presuffix(self.inputs.in_file,
+                                   suffix='_glm.txt', use_ext=False)
+        return None

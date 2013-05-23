@@ -13,11 +13,10 @@ def transpose(samples_over_fibres):
         a = a.reshape(-1, 1)
     return a.T.tolist()
 
-
-def create_dmri_preprocessing(name="dMRI_preprocessing", fieldmap_registration=False):
+def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fieldmap_registration=False):
     """Creates a workflow that chains the necessary pipelines to
-    correct for motion, eddy currents, and susceptibility
-    artifacts in EPI dMRI sequences.
+    correct for motion, eddy currents, and, if selected, susceptibility
+    artifacts in EPI dMRI sequences. 
 
     .. warning::
 
@@ -63,9 +62,9 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", fieldmap_registration=F
 
 
     Optional arguments::
-
+        use_fieldmap - True if there are fieldmap files that should be used (default True)
         fieldmap_registration - True if registration to fieldmap should be performed (default False)
-
+        
 
     """
 
@@ -83,16 +82,41 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", fieldmap_registration=F
 
     motion = create_motion_correct_pipeline()
     eddy = create_eddy_correct_pipeline()
-    susceptibility = create_susceptibility_correct_pipeline(
+    
+    if use_fieldmap: # we have a fieldmap, so lets use it (yay!)
+        susceptibility = create_susceptibility_correct_pipeline(
         fieldmap_registration=fieldmap_registration)
-
-    pipeline.connect([
-                     (inputnode,          motion, [('in_file', 'inputnode.in_file'), (
-                         'in_bvec', 'inputnode.in_bvec'), ('ref_num', 'inputnode.ref_num')]), (inputnode,            eddy, [('ref_num', 'inputnode.ref_num')]), (motion,               eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]), (eddy,       susceptibility, [('outputnode.eddy_corrected', 'inputnode.in_file')]), (inputnode,  susceptibility, [('ref_num', 'inputnode.ref_num'), ('fieldmap_mag', 'inputnode.fieldmap_mag'), ('fieldmap_pha', 'inputnode.fieldmap_pha'), ('te_diff', 'inputnode.te_diff'), ('epi_echospacing', 'inputnode.epi_echospacing'), ('epi_rev_encoding', 'inputnode.epi_rev_encoding'), ('pi_accel_factor', 'inputnode.pi_accel_factor'), ('vsm_sigma', 'inputnode.vsm_sigma')]), (motion,         outputnode, [('outputnode.out_bvec', 'bvec_rotated')]), (susceptibility, outputnode, [('outputnode.epi_corrected', 'dmri_corrected')])
-                     ])
+        
+        pipeline.connect([
+                         (inputnode, motion, [('in_file', 'inputnode.in_file'),
+                                              ('in_bvec', 'inputnode.in_bvec'),
+                                              ('ref_num', 'inputnode.ref_num')]),
+                          (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]),
+                          (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
+                          (eddy, susceptibility, [('outputnode.eddy_corrected', 'inputnode.in_file')]),
+                          (inputnode, susceptibility, [('ref_num', 'inputnode.ref_num'),
+                                                        ('fieldmap_mag', 'inputnode.fieldmap_mag'),
+                                                        ('fieldmap_pha', 'inputnode.fieldmap_pha'),
+                                                        ('te_diff', 'inputnode.te_diff'),
+                                                        ('epi_echospacing', 'inputnode.epi_echospacing'),
+                                                        ('epi_rev_encoding', 'inputnode.epi_rev_encoding'),
+                                                        ('pi_accel_factor', 'inputnode.pi_accel_factor'),
+                                                        ('vsm_sigma', 'inputnode.vsm_sigma')]),
+                          (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
+                          (susceptibility, outputnode, [('outputnode.epi_corrected', 'dmri_corrected')])
+                         ])
+    else: # we don't have a fieldmap, so we just carry on without it :(
+        pipeline.connect([
+                         (inputnode, motion, [('in_file', 'inputnode.in_file'),
+                                              ('in_bvec', 'inputnode.in_bvec'),
+                                              ('ref_num', 'inputnode.ref_num')]),
+                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]), 
+                         (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
+                         (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
+                         (eddy, outputnode, [('outputnode.eddy_corrected', 'dmri_corrected')])
+                         ])
 
     return pipeline
-
 
 def create_bedpostx_pipeline(name="bedpostx"):
     """Creates a pipeline that does the same as bedpostx script from FSL -
@@ -530,12 +554,12 @@ def _rotate_bvecs(in_bvec, in_matrix):
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_rotated.bvec' % name)
     bvecs = np.loadtxt(in_bvec)
-    new_bvecs = [bvecs[:, 0]]
+    new_bvecs = np.zeros(shape=bvecs.T.shape) #pre-initialise array, 3 col format
 
-    for i, vol_matrix in enumerate(in_matrix[1::]):
+    for i, vol_matrix in enumerate(in_matrix[0::]): #start index at 0
         bvec = np.matrix(bvecs[:, i])
         rot = np.matrix(np.loadtxt(vol_matrix)[0:3, 0:3])
-        new_bvecs.append((np.array(rot * bvec.T).T)[0])
+        new_bvecs[i] = (np.array(rot * bvec.T).T)[0] #fill each volume with x,y,z as we go along
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
 

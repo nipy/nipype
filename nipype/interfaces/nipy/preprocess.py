@@ -82,8 +82,12 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
-    slice_order = traits.List(traits.Int(),
-                              desc='0 based slice order',
+    slice_order = traits.List(traits.Int(), maxver=0.3,
+            desc=('0 based slice order. This would be equivalent to entering'
+                  'np.argsort(spm_slice_order) for this field. This effects'
+                  'interleaved acquisition. This field will be deprecated in'
+                  'future Nipy releases and be replaced by actual slice'
+                  'acquisition times.'),
                               requires=["time_interp"])
     tr_slices = traits.Float(desc="TR slices", requires=['time_interp'])
     start = traits.Float(0.0, usedefault=True,

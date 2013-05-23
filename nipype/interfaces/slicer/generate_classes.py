@@ -410,8 +410,8 @@ if __name__ == "__main__":
                     'BSplineToDeformationField']
 
     ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
-    #generate_all_classes(modules_list=modules_list,launcher=[])
+    generate_all_classes(modules_list=modules_list,launcher=[])
     ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
-    launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
-    generate_all_classes(modules_list=modules_list, launcher=launcher)
+    #launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
+    #generate_all_classes(modules_list=modules_list, launcher=launcher)
     #generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )

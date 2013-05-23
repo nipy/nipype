@@ -1,12 +1,26 @@
 Next release
 ============
-* ENH: New interfaces: nipy.Trim
 
+
+Release 0.8.0 (May 8, 2013)
+===========================
+
+* ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment, fsl.InvWarp,
+       dipy.TensorMode
 * ENH: Allow control over terminal output for commandline interfaces
+* ENH: Added preliminary support for generating Python code from Workflows.
 * ENH: New workflows for dMRI and fMRI pre-processing: added motion artifact correction
        with rotation of the B-matrix, and susceptibility correction for EPI imaging using
        fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.
 * ENH: Minor improvements to FSL's FUGUE and FLIRT interfaces
+* ENH: Added optional dilation of parcels in cmtk.Parcellate
+* ENH: Interpolation mode added to afni.Resample
+* ENH: Function interface can accept a list of strings containing import statements
+       that allow external functions to run without their imports defined in the
+       function body
+* ENH: Allow node configurations to override master configuration
+
+* FIX: SpecifyModel works with 3D files correctly now.
 
 Release 0.7.0 (Dec 18, 2012)
 ============================

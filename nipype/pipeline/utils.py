@@ -634,7 +634,7 @@ def walk_outputs(object):
             if isdefined(val):
                 out.extend(walk_outputs(val))
     else:
-        if isdefined(object) and isinstance(object, str):
+        if isdefined(object) and isinstance(object, basestring):
             if os.path.islink(object) or os.path.isfile(object):
                 out = [(filename, 'f') for filename in get_all_files(object)]
             elif os.path.isdir(object):
@@ -729,6 +729,8 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     if not isinstance(d1, dict):
         return merge(d1, d2)
     result = dict(d1)
+    if d2 is None:
+        return result
     for k, v in d2.iteritems():
         if k in result:
             result[k] = merge_dict(result[k], v, merge=merge)
