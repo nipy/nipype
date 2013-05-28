@@ -1698,16 +1698,16 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     expr = traits.Str()
     average_expr = File(
         argstr='-Aexpr %s %s', suffix='_aexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     average_expr_nonzero = File(
         argstr='-Cexpr %s %s', suffix='_cexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     sum_expr = File(
         argstr='-Sexpr %s %s', suffix='_sexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        argstr='-Hist %d %s', suffix='_hist')
+        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
@@ -1756,6 +1756,9 @@ class TCorrMap(AFNICommand):
             return trait_spec.argstr % self.inputs.thresholds + [value]
         elif name in self.inputs._expr_opts:
             return trait_spec.argstr % (self.inputs.expr, value)
+        elif name == 'histogram':
+            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
+                                        value)
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
 
