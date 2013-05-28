@@ -217,9 +217,11 @@ class AFNICommand(AFNIBaseCommand):
             _, base, _ = split_filename(
                 getattr(self.inputs, trait_spec.name_source))
             return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
+
         else:
-            return os.path.join(os.getcwd(),
-                                super(AFNICommand, self)._gen_filename(name))
+            if getattr(self.inputs, name):
+                return os.path.join(
+                    os.getcwd(),super(AFNICommand, self)._gen_filename(name))
 
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
@@ -232,7 +234,7 @@ class AFNICommand(AFNIBaseCommand):
             outputs = self.output_spec().get()
             for name in out_names:
                 out = self._gen_filename(name)
-                if isdefined(out):
+                if out and isdefined(out):
                     outputs[name] = os.path.abspath(out)
             return outputs
 
