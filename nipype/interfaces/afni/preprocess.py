@@ -1762,32 +1762,6 @@ class TCorrMap(AFNICommand):
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for o in self._outputs().get().keys():
-            ov = getattr(self.inputs, o)
-            if not isdefined(ov):
-                ov = self._gen_fname(
-                    o, suffix=self.input_spec.class_traits()[o].suffix)
-            outputs[o] = ov
-        return outputs
-
-    def _parse_inputs(self, skip=None):
-        outs = self._list_outputs()
-        # skip under
-        if skip == None:
-            skip = []
-        skip.extend([k for k in self._outputs()
-                    .get().keys() if not isdefined(outs[k])])
-        return super(TCorrMap, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if hasattr(self.inputs, name) and \
-                not isdefined(getattr(self.inputs, name)):
-            return Undefined
-        return super(TCorrMap, self)._gen_filename(name)
-
-
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
                    desc='input file')
