@@ -1391,11 +1391,11 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if not isdefined(value):
-                if spec.genfile or spec.source_name:
+            if spec.genfile or spec.name_source:
+                if isdefined(value):
                     value = self._gen_filename(name)
-                else:
-                    continue
+            if not isdefined(value):
+                continue
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
