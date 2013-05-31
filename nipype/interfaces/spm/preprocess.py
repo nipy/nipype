@@ -120,7 +120,8 @@ class RealignInputSpec(SPMCommandInputSpec):
                         desc='gaussian smoothing kernel width')
     separation = traits.Range(low=0.0, field='eoptions.sep',
                               desc='sampling separation in mm')
-    register_to_mean = traits.Bool(field='eoptions.rtm',
+    register_to_mean = traits.Bool(True, field='eoptions.rtm',
+                                   mandatory=True, usedefault=True,
                 desc='Indicate whether realignment is done to the mean image')
     weight_img = File(exists=True, field='eoptions.weight',
                              desc='filename of weighting image')
@@ -213,14 +214,26 @@ class Realign(SPMCommand):
                 outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
             
             if resliced_all:
+                reg_to_mean = self.inputs.register_to_mean
                 outputs['realigned_files'] = []
-                for imgf in filename_to_list(self.inputs.in_files):
+                for idx, imgf in enumerate(filename_to_list(self.inputs.in_files)):
                     realigned_run = []
-                    if isinstance(imgf,list):
-                        for inner_imgf in filename_to_list(imgf):
-                            realigned_run.append(fname_presuffix(inner_imgf, prefix=self.inputs.out_prefix))
+                    if isinstance(imgf, list):
+                        for i, inner_imgf in enumerate(filename_to_list(imgf)):
+                            newfile = fname_presuffix(inner_imgf,
+                                                      prefix=self.inputs.out_prefix)
+                            if os.path.exists(newfile):
+                                realigned_run.append(newfile)
+                                continue
+                            if idx==0 and i == 0 and not reg_to_mean and \
+                                func_is_3d(inner_imgf):
+                                realigned_run.append(fname_presuffix(inner_imgf,
+                                                                     prefix=''))
                     else:
-                        realigned_run = fname_presuffix(imgf, prefix=self.inputs.out_prefix)
+                        realigned_run = fname_presuffix(imgf,
+                                                        prefix=self.inputs.out_prefix)
+                        if idx==0 and not reg_to_mean and func_is_3d(imgf):
+                            realigned_run = fname_presuffix(imgf, prefix='')
                     outputs['realigned_files'].append(realigned_run)
         return outputs
 
