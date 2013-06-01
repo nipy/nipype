@@ -225,14 +225,13 @@ class Realign(SPMCommand):
                             if os.path.exists(newfile):
                                 realigned_run.append(newfile)
                                 continue
-                            if idx==0 and i == 0 and not reg_to_mean and \
-                                func_is_3d(inner_imgf):
+                            if idx==0 and i == 0  and func_is_3d(inner_imgf):
                                 realigned_run.append(fname_presuffix(inner_imgf,
                                                                      prefix=''))
                     else:
                         realigned_run = fname_presuffix(imgf,
                                                         prefix=self.inputs.out_prefix)
-                        if idx==0 and not reg_to_mean and func_is_3d(imgf):
+                        if idx==0 and func_is_3d(imgf):
                             realigned_run = fname_presuffix(imgf, prefix='')
                     outputs['realigned_files'].append(realigned_run)
         return outputs
