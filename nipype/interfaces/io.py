@@ -832,7 +832,7 @@ class FreeSurferSource(IOBase):
             key = altkey
         globpattern = os.path.join(
             keydir, ''.join((globprefix, key, globsuffix)))
-        return glob.glob(globpattern)
+        return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
