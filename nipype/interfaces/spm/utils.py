@@ -99,10 +99,10 @@ class CalcCoregAffine(SPMCommand):
         moving = '%s';
         targetv = spm_vol(target);
         movingv = spm_vol(moving);
-        x = spm_coreg(targetv,movingv);
+        x = spm_coreg(targetv, movingv);
         M = spm_matrix(x);
         save('%s' , 'M' );
-        M = inv(spm_matrix(x));
+        M = inv(M);
         save('%s','M')
         """%(self.inputs.target,
              self.inputs.moving,
