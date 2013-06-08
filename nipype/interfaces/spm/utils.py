@@ -39,7 +39,7 @@ class Analyze2nii(SPMCommand):
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File( exists = True, mandatory = True,
                    desc = 'target for generating affine transform')
-    moving = File( exists = True, mandatory = True,
+    moving = File( exists = True, mandatory = True, copyfile=False,
                    desc = 'volume transform can be applied to register with target')
     mat = File( desc = 'Filename used to store affine matrix')
     invmat = File( desc = 'Filename used to store inverse affine matrix')
@@ -99,10 +99,10 @@ class CalcCoregAffine(SPMCommand):
         moving = '%s';
         targetv = spm_vol(target);
         movingv = spm_vol(moving);
-        x = spm_coreg(movingv, targetv);
-        M = spm_matrix(x(:)');
+        x = spm_coreg(targetv, movingv);
+        M = spm_matrix(x);
         save('%s' , 'M' );
-        M = inv(spm_matrix(x(:)'));
+        M = inv(M);
         save('%s','M')
         """%(self.inputs.target,
              self.inputs.moving,
@@ -152,15 +152,16 @@ class ApplyTransform(SPMCommand):
         script = """
         infile = '%s';
         transform = load('%s');
+        M  = inv(transform.M);
         img_space = spm_get_space(infile);
-        spm_get_space(infile, transform.M * img_space);
+        spm_get_space(infile, M * img_space);
         """%(self.inputs.in_file,
              self.inputs.mat)
         return script
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.mat)
+        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
         return outputs
 
 class ResliceInputSpec(SPMCommandInputSpec):
