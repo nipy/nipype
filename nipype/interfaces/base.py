@@ -1111,8 +1111,11 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
-                                  desc='Control terminal output', nohash=True,
-                                  mandatory=True)
+                                  desc=('Control terminal output: `stream` - displays'
+                                  'to terminal immediately, `allatonce` - waits till '
+                                  'command is finished to display output, `file` - writes'
+                                  'output to file, `none` - output is ignored'), 
+                                  nohash=True, mandatory=True)
 
 class CommandLine(BaseInterface):
     """Implements functionality to interact with command line programs
@@ -1389,7 +1392,7 @@ class CommandLine(BaseInterface):
                 continue
             value = getattr(self.inputs, name)
             if not isdefined(value):
-                if spec.genfile or spec.source_name:
+                if spec.genfile or spec.name_source:
                     value = self._gen_filename(name)
                 else:
                     continue
