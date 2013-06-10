@@ -208,21 +208,42 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     initial_moving_transform_com = traits.Bool(argstr='%s',
                                                xor=['initial_moving_transform'],
                     desc="Use center of mass for moving transform")
-    metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons",
-                         "GC", "MI", "Mattes"), mandatory=True, desc='')
+    metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
+        "Mattes")
+    metric_stage_trait = traits.Either(
+        metric_item_trait, traits.List(metric_item_trait))
+    metric = traits.List(metric_stage_trait, mandatory=True,
+        desc='the metric(s) to use for each stage. '
+        'Note that multiple metrics per stage are not supported '
+        'in ANTS 1.9.1 and earlier.')
+    metric_weight_item_trait = traits.Float(1.0)
+    metric_weight_stage_trait = traits.Either(
+        metric_weight_item_trait, traits.List(metric_weight_item_trait))
     metric_weight = traits.List(
-        traits.Float(1.0), usedefault=True, requires=['metric'], mandatory=True,
-        desc="Note that the metricWeight is currently not used. Rather, it is a temporary place \
-    holder until multivariate metrics are available for a single stage.")
-    ###  This is interpreted as number_of_bins for MI and Mattes, and as radius for all other metrics
+        metric_weight_stage_trait, value=[1.0], usedefault=True,
+        requires=['metric'], mandatory=True,
+        desc='the metric weight(s) for each stage. '
+        'The weights must sum to 1 per stage.')
+    radius_bins_item_trait = traits.Int(5)
+    radius_bins_stage_trait = traits.Either(
+        radius_bins_item_trait, traits.List(radius_bins_item_trait))
     radius_or_number_of_bins = traits.List(
-        traits.Int(5), usedefault=True, requires=['metric_weight'], desc='')
+        radius_bins_stage_trait, value=[5], usedefault=True,
+        requires=['metric_weight'],
+        desc='the number of bins in each stage for the MI and Mattes metric, '
+        'the radius for other metrics')
+    sampling_strategy_item_trait = traits.Enum("Dense", "Regular", "Random", None)
+    sampling_strategy_stage_trait = traits.Either(
+        sampling_strategy_item_trait, traits.List(sampling_strategy_item_trait))
     sampling_strategy = traits.List(
-        trait=traits.Enum("Dense", "Regular", "Random", None), value=['Dense'], minlen=1,
-        usedefault=True, requires=['metric_weight'], desc='')
+        trait=sampling_strategy_stage_trait, requires=['metric_weight'],
+        desc='the metric sampling strategy (strategies) for each stage')
+    sampling_percentage_item_trait = traits.Either(traits.Range(low=0.0, high=1.0), None)
+    sampling_percentage_stage_trait = traits.Either(
+        sampling_percentage_item_trait, traits.List(sampling_percentage_item_trait))
     sampling_percentage = traits.List(
-        trait=traits.Either(traits.Range(low=0.0, high=1.0), None), value=[None], minlen=1,
-        requires=['sampling_strategy'], desc='')
+        trait=sampling_percentage_stage_trait, requires=['sampling_strategy'],
+        desc="the metric sampling percentage(s) to use for each stage")
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
     use_histogram_matching = traits.List(
         traits.Bool(argstr='%s'), default=True, usedefault=True)
@@ -334,19 +355,19 @@ class Registration(ANTSCommand):
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.inputs.collapse_linear_transforms_to_fixed_image_header = False
     >>> reg1.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  #doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
     >>> reg2.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
     >>> reg3.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ,Random,0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32  ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
     # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
@@ -356,32 +377,95 @@ class Registration(ANTSCommand):
     {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
     >>> reg4.aggregate_outputs() #doctest: +SKIP
 
+    # Test multiple metrics per stage
+    >>> reg5 = copy.deepcopy(reg)
+    >>> reg5.inputs.metric = ['CC', ['CC', 'Mattes']]
+    >>> reg5.inputs.metric_weight = [1, [.5]*2]
+    >>> reg5.inputs.radius_or_number_of_bins = [4, [32]*2]
+    >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
+    >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
+    >>> reg5.cmdline
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, Dense, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, Dense, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
+    DEF_SAMPLING_STRATEGY = 'Dense'
+    """The default sampling stratey argument."""
+    
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
 
-    def _optionalMetricParameters(self, index):
-        if (len(self.inputs.sampling_strategy) > index) and (self.inputs.sampling_strategy[index] is not None):
-            if self.inputs.sampling_strategy[index] == "Dense":
-                return ''  # The default when nothing is specified
-            if isdefined(self.inputs.sampling_percentage) and (self.inputs.sampling_percentage is not None):
-                return ',%s,%g' % (self.inputs.sampling_strategy[index], self.inputs.sampling_percentage[index])
-            else:
-                return ',%s' % self.inputs.sampling_strategy[index]
-        return ''
-
     def _formatMetric(self, index):
-        retval = []
-        retval.append(
-            '%s[ %s, %s, %g, %d' % (self.inputs.metric[index], self.inputs.fixed_image[0],
-                                    self.inputs.moving_image[
-                                    0], self.inputs.metric_weight[index],
-                                    self.inputs.radius_or_number_of_bins[index]))
-        retval.append(' %s' % self._optionalMetricParameters(index))
-        retval.append(' ]')
-        return "".join(retval)
+        """
+        Format the antsRegistration -m metric argument(s).
+        
+        Parameters
+        ----------
+        index: the stage index
+        """
+        # The common fixed image.
+        fixed = self.inputs.fixed_image[0]
+        # The common moving image.
+        moving = self.inputs.moving_image[0]
+        # The metric name input for the current stage.
+        name_input = self.inputs.metric[index]
+        # The stage-specific input dictionary.
+        stage_inputs = dict(
+            metric=name_input,
+            weight=self.inputs.metric_weight[index],
+            radius_or_bins=self.inputs.radius_or_number_of_bins[index],
+            optional=self.inputs.radius_or_number_of_bins[index]
+        )
+        # The optional sampling strategy and percentage.
+        if (isdefined(self.inputs.sampling_strategy) and self.inputs.sampling_strategy):
+            sampling_strategy = self.inputs.sampling_strategy[index]
+            if sampling_strategy:
+                stage_inputs['sampling_strategy'] = sampling_strategy
+            sampling_percentage = self.inputs.sampling_percentage
+        if (isdefined(self.inputs.sampling_percentage) and self.inputs.sampling_percentage):
+            sampling_percentage = self.inputs.sampling_percentage[index]
+            if sampling_percentage:
+                stage_inputs['sampling_percentage'] = sampling_percentage
+        
+        # Make a list of metric specifications, one per -m command line
+        # argument for the current stage.
+        # If there are multiple inputs for this stage, then convert the
+        # dictionary of list inputs into a list of metric specifications.
+        # Otherwise, make a singleton list of the metric specification
+        # from the non-list inputs.
+        if isinstance(name_input, list):
+            items = stage_inputs.items()
+            indexes = range(0, len(name_input))
+            specs = [{k: v[i] for k, v in items} for i in indexes]
+        else:
+            specs = [stage_inputs]
+        
+        # Format the --metric command line metric arguments, one per specification.
+        return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
+    
+    def _formatMetricArgument(self, fixed, moving, **kwargs):
+        retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
+                                         fixed, moving, kwargs['weight'],
+                                         kwargs['radius_or_bins'])
+        
+        # The optional sampling strategy.
+        if kwargs.has_key('sampling_strategy'):
+            sampling_strategy = kwargs['sampling_strategy']
+        elif kwargs.has_key('sampling_percentage'):
+            # The sampling percentage is specified but not the
+            # sampling strategy. Use the default strategy.
+            sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
+        else:
+            sampling_strategy = None
+        # Format the optional sampling arguments.
+        if sampling_strategy:
+            retval += ', %s' % sampling_strategy
+            if kwargs.has_key('sampling_percentage'):
+                retval += ', %g' % kwargs['sampling_percentage']
+        
+        retval += ' ]'
+        
+        return retval
 
     def _formatTransform(self, index):
         retval = []
@@ -396,7 +480,8 @@ class Registration(ANTSCommand):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             retval.append('--transform %s' % (self._formatTransform(ii)))
-            retval.append('--metric %s' % self._formatMetric(ii))
+            for metric in self._formatMetric(ii):
+                retval.append('--metric %s' % metric)
             retval.append('--convergence %s' % self._formatConvergence(ii))
             retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
                 self.inputs.smoothing_sigmas[ii]),
