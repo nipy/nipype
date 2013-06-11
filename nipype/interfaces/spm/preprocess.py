@@ -530,7 +530,6 @@ class SegmentOutputSpec(TraitedSpec):
     native_csf_image = File(exists=True, desc='native space csf probability map')
     normalized_csf_image = File(exists=True, desc='normalized csf probability map')
     modulated_csf_image = File(exists=True, desc='modulated, normalized csf probability map')
-    modulated_input_image = File(exists=True, desc='modulated version of input image')
     transformation_mat = File(exists=True, desc='Normalization transformation')
     inverse_transformation_mat = File(exists=True, desc='Inverse normalization info')
 
@@ -586,7 +585,6 @@ class Segment(SPMCommand):
                     if getattr(self.inputs, outtype)[idx]:
                         outfield = '%s_%s_image'%(image,tissue)
                         outputs[outfield] = fname_presuffix(f, prefix='%sc%d'%(prefix,tidx+1))
-        outputs['modulated_input_image'] = fname_presuffix(f, prefix='m')
         t_mat = fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False)
         outputs['transformation_mat'] = t_mat
         invt_mat = fname_presuffix(f, suffix='_seg_inv_sn.mat', use_ext=False)
