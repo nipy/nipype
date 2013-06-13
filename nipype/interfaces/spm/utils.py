@@ -330,8 +330,8 @@ class ResliceToReference(SPMCommand):
     >>> import nipype.interfaces.spm.utils as spmu
     >>> r2ref = spmu.ResliceToReference()
     >>> r2ref.inputs.in_files = 'functional.nii'
-    >>> inv.inputs.target = 'structural.nii'
-    >>> inv.run() # doctest: +SKIP
+    >>> r2ref.inputs.target = 'structural.nii'
+    >>> r2ref.run() # doctest: +SKIP
     """
 
     input_spec = ResliceToReferenceInput
