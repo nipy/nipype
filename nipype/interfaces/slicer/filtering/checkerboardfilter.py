@@ -36,5 +36,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = CheckerBoardFilterInputSpec
     output_spec = CheckerBoardFilterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch CheckerBoardFilter "
+    _cmd = "CheckerBoardFilter "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}

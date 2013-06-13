@@ -71,6 +71,11 @@ be imported within the function itself::
 Without explicitly importing Nibabel in the body of the function, this
 would fail.
 
+Alternatively, it is possible to provide a list of strings corresponding
+to the imports needed to execute a function as a parameter of the `Function`
+constructor. This allows for the use of external functions that do not
+import all external definitions inside the function body.
+
 Hello World - Function interface in a workflow
 ----------------------------------------------
 

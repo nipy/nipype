@@ -12,15 +12,6 @@ stored in a nipy data packages that you can download separately.
    for running the algorithms in the NIPY library.  This file should
    import without nose being present on the python path.
 
-Examples
---------
-
->>> from nipy.testing import funcfile
->>> from nipy.io.api import load_image
->>> img = load_image(funcfile)
->>> img.shape
-(17, 21, 3, 20)
-
 """
 
 import os
@@ -36,11 +27,6 @@ transfm = funcfile
 
 from nose.tools import *
 from numpy.testing import *
-
-# Overwrites numpy.testing.Tester
-from .nosetester import NipyNoseTester as Tester
-test = Tester().test
-bench = Tester().bench
 
 from . import decorators as dec
 from .utils import skip_if_no_package, package_check
@@ -58,10 +44,3 @@ def example_data(infile='functional.nii'):
         raise IOError('%s empty data file does NOT exist'%(outfile))
 
     return outfile
-
-# Allow failed import of nose if not now running tests
-try:
-    from nose.tools import assert_true, assert_false
-    from lightunit import ParametricTestCase, parametric
-except ImportError:
-    pass

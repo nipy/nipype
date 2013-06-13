@@ -37,7 +37,7 @@ def test_apply_transform():
     scrpt = applymat._make_matlab_command(None)
     expected = 'img_space = spm_get_space(infile);'
     assert_equal( expected in scrpt, True)
-    expected = 'spm_get_space(infile, transform.M * img_space);'
+    expected = 'spm_get_space(infile, M * img_space);'
     assert_equal(expected in scrpt, True)
 
 def test_reslice():

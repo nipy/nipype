@@ -8,7 +8,7 @@ Introduction
 
 This script, dmri_group_connectivity_camino.py, runs group-based connectivity analysis using
 the dmri.camino.connectivity_mapping Nipype workflow. Further detail on the processing can be
-found in :ref:`dmri_connectivity. This tutorial can be run using:
+found in :doc:`dmri_connectivity`. This tutorial can be run using:
 
     python dmri_group_connectivity_camino.py
 
@@ -109,7 +109,7 @@ This line creates the processing workflow given the information input about the 
 
     * nipype/workflows/dmri/mrtrix/group_connectivity.py
     * nipype/workflows/dmri/camino/connectivity_mapping.py
-    * :ref:`dmri_connectivity`
+    * :doc:`dmri_connectivity`
 
 The purpose of the second-level workflow is simple: It is used to merge each
 subject's CFF file into one, so that there is a single file containing all of the

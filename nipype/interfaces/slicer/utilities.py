@@ -33,5 +33,5 @@ description:
 
     input_spec = EMSegmentTransformToNewFormatInputSpec
     output_spec = EMSegmentTransformToNewFormatOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch EMSegmentTransformToNewFormat "
+    _cmd = "EMSegmentTransformToNewFormat "
     _outputs_filenames = {'outputMRMLFileName':'outputMRMLFileName.mrml'}

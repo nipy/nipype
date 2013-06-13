@@ -35,5 +35,5 @@ acknowledgements: This work is funded by NIH grants R01 CA111288 and U01 CA15126
 
     input_spec = BSplineToDeformationFieldInputSpec
     output_spec = BSplineToDeformationFieldOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch BSplineToDeformationField "
+    _cmd = "BSplineToDeformationField "
     _outputs_filenames = {'defImage':'defImage.nii'}

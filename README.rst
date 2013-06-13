@@ -89,16 +89,13 @@ Currently NIPYPE consists of the following files and directories:
 License information
 -------------------
 
-See the file "LICENSE" for information on the history of this
-software, terms & conditions for usage, and a DISCLAIMER OF ALL
-WARRANTIES.
+We use the 3-clause BSD license; the full license is in the file ``LICENSE`` in
+the nipype distribution.
 
-This NIPYPE distribution contains no GNU General Public Licensed
-(GPLed) code so it may be used in proprietary projects.  There
-are interfaces to some GNU code but these are entirely optional.
+There are interfaces to some GNU code but these are entirely optional.
 
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2009-2012, NIPY Developers
+Copyright (c) 2009-2013, NIPY Developers
 All rights reserved.

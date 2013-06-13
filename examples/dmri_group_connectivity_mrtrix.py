@@ -8,7 +8,7 @@ Introduction
 
 This script, dmri_group_connectivity_mrtrix.py, runs group-based connectivity analysis using
 the dmri.mrtrix.connectivity_mapping Nipype workflow. Further detail on the processing can be
-found in :ref:`dmri_connectivity_advanced. This tutorial can be run using:
+found in :doc:`dmri_connectivity_advanced`. This tutorial can be run using:
 
     python dmri_group_connectivity_mrtrix.py
 
@@ -107,7 +107,7 @@ The workflow is created given the information input about the groups and subject
 
     * nipype/workflows/dmri/mrtrix/group_connectivity.py
     * nipype/workflows/dmri/mrtrix/connectivity_mapping.py
-    * :ref:`dmri_connectivity_advanced`
+    * :doc:`dmri_connectivity_advanced`
 
 We set values for absolute threshold used on the fractional anisotropy map. This is done
 in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary

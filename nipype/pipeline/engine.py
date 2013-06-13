@@ -16,6 +16,7 @@ from glob import glob
 import gzip
 from copy import deepcopy
 import cPickle
+import inspect
 import os
 import shutil
 from shutil import rmtree
@@ -37,7 +38,7 @@ from ..interfaces.base import (traits, InputMultiPath, CommandLine,
                                Undefined, TraitedSpec, DynamicTraitedSpec,
                                Bunch, InterfaceResult, md5, Interface,
                                TraitDictObject, TraitListObject, isdefined)
-from ..utils.misc import getsource
+from ..utils.misc import getsource, create_function_from_source
 from ..utils.filemanip import (save_json, FileNotFoundError,
                                filename_to_list, list_to_filename,
                                copyfiles, fnames_presuffix, loadpkl,
@@ -48,8 +49,80 @@ from ..utils.filemanip import (save_json, FileNotFoundError,
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir,
                     clean_working_directory, format_dot,
-                    get_print_name, merge_dict,
-                    evaluate_connect_function)
+                    get_print_name, merge_dict, evaluate_connect_function)
+
+
+def _write_inputs(node):
+    lines = []
+    nodename = node.fullname.replace('.', '_')
+    for key, _ in node.inputs.items():
+        val = getattr(node.inputs, key)
+        if isdefined(val):
+            if type(val) == str:
+                try:
+                    func = create_function_from_source(val)
+                except RuntimeError, e:
+                    lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
+                else:
+                    funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                    lines.append(cPickle.loads(val))
+                    if funcname == nodename:
+                        lines[-1] = lines[-1].replace(' %s(' % funcname,
+                                                      ' %s_1(' % funcname)
+                        funcname = '%s_1' % funcname
+                    lines.append('from nipype.utils.misc import getsource')
+                    lines.append("%s.inputs.%s = getsource(%s)" % (nodename,
+                                                                   key,
+                                                                   funcname))
+            else:
+                lines.append('%s.inputs.%s = %s' % (nodename, key, val))
+    return lines
+
+
+def format_node(node, format='python', include_config=False):
+    """Format a node in a given output syntax
+    """
+    lines = []
+    name = node.fullname.replace('.', '_')
+    if format == 'python':
+        klass = node._interface
+        importline = 'from %s import %s' % (klass.__module__,
+                                            klass.__class__.__name__)
+        comment = '# Node: %s' % node.fullname
+        spec = inspect.getargspec(node._interface.__init__)
+        args = spec.args[1:]
+        if args:
+            filled_args = []
+            for arg in args:
+                if  hasattr(node._interface, '_%s' % arg):
+                    filled_args.append('%s=%s' % (arg, getattr(node._interface,
+                                                               '_%s' % arg)))
+            args = ', '.join(filled_args)
+        else:
+            args = ''
+        if isinstance(node, MapNode):
+            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' % (name,
+                                                                       klass.__class__.__name__,
+                                                                       args,
+                                                                       node.iterfield,
+                                                                       name)
+        else:
+            nodedef = '%s = Node(%s(%s), name="%s")' % (name,
+                                                      klass.__class__.__name__,
+                                                      args,
+                                                      name)
+        lines = [importline, comment, nodedef]
+        
+        if include_config:
+            lines = [importline, "from collections import OrderedDict", comment, nodedef]
+            lines.append('%s.config = %s' % (name, node.config))
+        
+        if node.iterables is not None:
+            lines.append('%s.iterables = %s' % (name, node.iterables))
+        lines.extend(_write_inputs(node))
+        
+    return lines
+
 
 class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
@@ -70,7 +143,7 @@ class WorkflowBase(object):
             special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
-        self.config = deepcopy(config._sections)
+        self.config = None #deepcopy(config._sections)
         if name is None:
             raise Exception("init requires a name for this %s" %
                             self.__class__.__name__)
@@ -139,9 +212,10 @@ class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes
     """
 
-    def __init__(self, **kwargs):
-        super(Workflow, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(Workflow, self).__init__(* args, **kwargs)
         self._graph = nx.DiGraph()
+        self.config = deepcopy(config._sections)
 
     # PUBLIC API
     def clone(self, name):
@@ -470,6 +544,82 @@ connected.
         else:
             logger.info(dotstr)
 
+    def export(self, filename=None, prefix="output", format="python", include_config=False):
+        """Export object into a different format
+
+        Parameters
+        ----------
+        filename: string
+           file to save the code to; overrides prefix
+
+        prefix: string
+           prefix to use for output file
+
+        format: string
+           one of "python"
+           
+        include_config: boolean
+           whether to include node and workflow config values
+        """
+        formats = ["python"]
+        if format not in formats:
+            raise ValueError('format must be one of: %s' % '|'.join(formats))
+        flatgraph = self._create_flat_graph()
+        nodes = nx.topological_sort(flatgraph)
+
+        lines = ['# Workflow']
+        importlines = ['from nipype.pipeline.engine import Workflow, Node, MapNode']
+        functions = {}
+        if format == "python":
+            connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
+            connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' % self.name
+            wfdef = '%s = Workflow("%s")' % (self.name, self.name)
+            lines.append(wfdef)
+            if include_config:
+                lines.append('%s.config = %s' % (self.name, self.config))
+            for idx, node in enumerate(nodes):
+                nodename = node.fullname.replace('.', '_')
+                # write nodes
+                nodelines = format_node(node, format='python', include_config=include_config)
+                for line in nodelines:
+                    if line.startswith('from'):
+                        if line not in importlines:
+                            importlines.append(line)
+                    else:
+                        lines.append(line)
+                # write connections
+                for u, _, d in flatgraph.in_edges_iter(nbunch=node,
+                                                       data=True):
+                    for cd in d['connect']:
+                        if isinstance(cd[0], tuple):
+                            args = list(cd[0])
+                            if args[1] in functions:
+                                funcname = functions[args[1]]
+                            else:
+                                func = create_function_from_source(args[1])
+                                funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                                functions[args[1]] = funcname
+                            args[1] = funcname
+                            args = tuple([arg for arg in args if arg])
+                            line = connect_template % (u.fullname.replace('.','_'), args,
+                                                       nodename, cd[1])
+                            line = line.replace("'%s'" % funcname, funcname)
+                            lines.append(line)
+                        else:
+                            lines.append(connect_template2 % (u.fullname.replace('.','_'), cd[0],
+                                                              nodename, cd[1]))
+            functionlines = ['# Functions']
+            for function in functions:
+                functionlines.append(cPickle.loads(function).rstrip())
+            all_lines = importlines + functionlines + lines
+            
+            if not filename:
+                filename = '%s%s.py' % (prefix, self.name)
+            with open(filename, 'wt') as fp:
+                #fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
+                fp.writelines('\n'.join(all_lines))
+        return all_lines
+
     def run(self, plugin=None, plugin_args=None, updatehash=False):
         """ Execute the workflow
 
@@ -508,7 +658,7 @@ connected.
         self._set_needed_outputs(flatgraph)
         execgraph = generate_expanded_graph(deepcopy(flatgraph))
         for index, node in enumerate(execgraph.nodes()):
-            node.config = self.config
+            node.config = merge_dict(deepcopy(self.config), node.config)
             node.base_dir = self.base_dir
             node.index = index
             if isinstance(node, MapNode):
@@ -1032,6 +1182,7 @@ class Node(WorkflowBase):
         """ Print interface help"""
         self._interface.help()
 
+
     def hash_exists(self, updatehash=False):
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
@@ -1055,7 +1206,10 @@ class Node(WorkflowBase):
             Update the hash stored in the output directory
         """
         # check to see if output directory and hash exist
-        self.config = merge_dict(deepcopy(config._sections), self.config)
+        if self.config is None:
+            self.config = deepcopy(config._sections)
+        else:
+            self.config = merge_dict(deepcopy(config._sections), self.config)
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
