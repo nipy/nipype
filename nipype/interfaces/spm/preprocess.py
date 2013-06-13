@@ -521,16 +521,17 @@ class SegmentInputSpec(SPMCommandInputSpec):
 
 
 class SegmentOutputSpec(TraitedSpec):
-    native_gm_image = File(exists=True, desc='native space grey probability map')
-    normalized_gm_image = File(exists=True, desc='normalized grey probability map',)
-    modulated_gm_image = File(exists=True, desc='modulated, normalized grey probability map')
-    native_wm_image = File(exists=True, desc='native space white probability map')
-    normalized_wm_image = File(exists=True, desc='normalized white probability map')
-    modulated_wm_image = File(exists=True, desc='modulated, normalized white probability map')
-    native_csf_image = File(exists=True, desc='native space csf probability map')
-    normalized_csf_image = File(exists=True, desc='normalized csf probability map')
-    modulated_csf_image = File(exists=True, desc='modulated, normalized csf probability map')
-    modulated_input_image = File(exists=True, desc='modulated version of input image')
+    native_gm_image = File(desc='native space grey probability map')
+    normalized_gm_image = File(desc='normalized grey probability map',)
+    modulated_gm_image = File(desc='modulated, normalized grey probability map')
+    native_wm_image = File(desc='native space white probability map')
+    normalized_wm_image = File(desc='normalized white probability map')
+    modulated_wm_image = File(desc='modulated, normalized white probability map')
+    native_csf_image = File(desc='native space csf probability map')
+    normalized_csf_image = File(desc='normalized csf probability map')
+    modulated_csf_image = File(desc='modulated, normalized csf probability map')
+    modulated_input_image = File(deprecated='0.10', new_name='bias_corrected_image', desc='bias-corrected version of input image') 
+    bias_corrected_image = File(desc='bias-corrected version of input image')   
     transformation_mat = File(exists=True, desc='Normalization transformation')
     inverse_transformation_mat = File(exists=True, desc='Inverse normalization info')
 
@@ -586,7 +587,8 @@ class Segment(SPMCommand):
                     if getattr(self.inputs, outtype)[idx]:
                         outfield = '%s_%s_image'%(image,tissue)
                         outputs[outfield] = fname_presuffix(f, prefix='%sc%d'%(prefix,tidx+1))
-        outputs['modulated_input_image'] = fname_presuffix(f, prefix='m')
+        if isdefined(self.inputs.save_bias_corrected) and self.inputs.save_bias_corrected:
+            outputs['bias_corrected_image'] = fname_presuffix(f, prefix='m')
         t_mat = fname_presuffix(f, suffix='_seg_sn.mat', use_ext=False)
         outputs['transformation_mat'] = t_mat
         invt_mat = fname_presuffix(f, suffix='_seg_inv_sn.mat', use_ext=False)
