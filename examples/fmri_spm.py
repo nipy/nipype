@@ -98,7 +98,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
-
+datasource.inputs.sort_filelist = True
 
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.
@@ -194,7 +194,7 @@ contrasts = [cont1,cont2]
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
-modelspec.inputs.concatenate_runs        = True
+modelspec.inputs.concatenate_runs        = False
 modelspec.inputs.input_units             = 'secs'
 modelspec.inputs.output_units            = 'secs'
 modelspec.inputs.time_repetition         = 3.
@@ -223,6 +223,8 @@ first level contrasts specified in a few steps above.
 
 contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 contrastestimate.inputs.contrasts = contrasts
+contrastestimate.overwrite = True
+contrastestimate.config = {'execution': {'remove_unnecessary_outputs': False}}
 
 """
 Setup the pipeline

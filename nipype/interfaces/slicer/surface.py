@@ -35,7 +35,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = MergeModelsInputSpec
     output_spec = MergeModelsOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch MergeModels "
+    _cmd = "MergeModels "
     _outputs_filenames = {'ModelOutput':'ModelOutput.vtk'}
 
 
@@ -69,7 +69,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ModelToLabelMapInputSpec
     output_spec = ModelToLabelMapOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ModelToLabelMap "
+    _cmd = "ModelToLabelMap "
     _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
 
 
@@ -109,7 +109,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = GrayscaleModelMakerInputSpec
     output_spec = GrayscaleModelMakerOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch GrayscaleModelMaker "
+    _cmd = "GrayscaleModelMaker "
     _outputs_filenames = {'OutputGeometry':'OutputGeometry.vtk'}
 
 
@@ -142,7 +142,7 @@ acknowledgements: BWH, NCIGT/LMI
 
     input_spec = ProbeVolumeWithModelInputSpec
     output_spec = ProbeVolumeWithModelOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ProbeVolumeWithModel "
+    _cmd = "ProbeVolumeWithModel "
     _outputs_filenames = {'OutputModel':'OutputModel.vtk'}
 
 
@@ -178,7 +178,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = LabelMapSmoothingInputSpec
     output_spec = LabelMapSmoothingOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch LabelMapSmoothing "
+    _cmd = "LabelMapSmoothing "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -228,5 +228,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = ModelMakerInputSpec
     output_spec = ModelMakerOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ModelMaker "
+    _cmd = "ModelMaker "
     _outputs_filenames = {'modelSceneFile':'modelSceneFile.mrml'}

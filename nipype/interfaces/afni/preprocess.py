@@ -76,11 +76,12 @@ class To3D(AFNICommand):
     >>> from nipype.interfaces import afni
     >>> To3D = afni.To3D()
     >>> To3D.inputs.datatype = 'float'
-    >>> To3D.inputs.infolder = 'dicomdir'
+    >>> To3D.inputs.in_folder = '.'
+    >>> To3D.inputs.out_file = 'dicomdir'
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.inputs.outputtype = "NIFTI"
-    >>> To3D.cmdline
-    'to3d -datum float -anat -prefix dicomdir.nii dicomdir/*.dcm'
+    >>> To3D.cmdline #doctest: +ELLIPSIS
+    'to3d -datum float -anat -prefix .../dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
@@ -149,8 +150,8 @@ class TShift(AFNICommand):
     >>> tshift.inputs.in_file = 'functional.nii'
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
-    >>> tshift.cmdline
-    '3dTshift -prefix functional_tshift+orig.BRIK -tpattern alt+z -tzero 0.0 functional.nii'
+    >>> tshift.cmdline #doctest: +ELLIPSIS
+    '3dTshift -prefix .../functional_tshift+orig.BRIK -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()   # doctest: +SKIP
 
     """
@@ -168,8 +169,8 @@ class RefitInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=True)
 
-    out_file = File("%s_refit", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File("%s_refit", desc='output image file name, should be the same as input',
+                    argstr='%s', name_source="in_file", usedefault=True)
 
     deoblique = traits.Bool(desc='replace current transformation' +
                             ' matrix with cardinal matrix',
@@ -281,6 +282,17 @@ class ResampleInputSpec(AFNICommandInputSpec):
 
     orientation = traits.Str(desc='new orientation code',
                              argstr='-orient %s')
+
+    resample_mode = traits.Enum('NN', 'Li', 'Cu', 'Bk',
+                                argstr='-rmode %s',
+                                desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
+
+    voxel_size = traits.Tuple(*[traits.Float()]*3,
+                              argstr='-dxyz %f %f %f',
+                              desc="resample to new dx, dy and dz")
+
+    master = traits.File(argstr='-master %s',
+                         desc='align dataset grid to a reference file')
 
 
 class Resample(AFNICommand):
@@ -528,8 +540,8 @@ class Automask(AFNICommand):
     >>> automask.inputs.in_file = 'functional.nii'
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
-    >>> automask.cmdline
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    >>> automask.cmdline #doctest: +ELLIPSIS
+    '3dAutomask -apply_prefix .../functional_masked.nii -dilate 1 -prefix .../functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
@@ -634,8 +646,8 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.args = '-Fourier -twopass'
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
-    >>> volreg.cmdline
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 functional.nii'
+    >>> volreg.cmdline #doctest: +ELLIPSIS
+    '3dvolreg -Fourier -twopass -1Dfile .../functional.1D -prefix .../functional_volreg.nii -zpad 4 functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1115,7 +1127,7 @@ class Allineate(AFNICommand):
     >>> allineate = afni.Allineate()
     >>> allineate.inputs.in_file = 'functional.nii'
     >>> allineate.inputs.out_file= 'functional_allineate.nii'
-    >>> allineate.inputs.matrix= 'cmatrix.mat'
+    >>> allineate.inputs.in_matrix= 'cmatrix.mat'
     >>> res = allineate.run() # doctest: +SKIP
 
     """
@@ -1176,8 +1188,8 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.in_file = 'functional.nii'
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
-    >>> maskave.cmdline
-    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
+    >>> maskave.cmdline #doctest: +ELLIPSIS
+    '3dmaskave -mask seed_mask.nii -quiet functional.nii > .../functional_maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
 
     """
@@ -1545,8 +1557,8 @@ class Calc(AFNICommand):
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
-    >>> calc.cmdline
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
+    >>> calc.cmdline #doctest: +ELLIPSIS
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix .../functional_calc.nii'
 
     """
 
@@ -1686,16 +1698,16 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     expr = traits.Str()
     average_expr = File(
         argstr='-Aexpr %s %s', suffix='_aexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     average_expr_nonzero = File(
         argstr='-Cexpr %s %s', suffix='_cexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     sum_expr = File(
         argstr='-Sexpr %s %s', suffix='_sexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        argstr='-Hist %d %s', suffix='_hist')
+        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
@@ -1727,7 +1739,7 @@ class TCorrMap(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> tcm = afni.TcorrMap()
+    >>> tcm = afni.TCorrMap()
     >>> tcm.inputs.in_file = 'functional.nii'
     >>> tcm.inputs.mask = 'mask.nii'
     >>> tcm.mean_file = '%s_meancorr.nii'
@@ -1744,34 +1756,11 @@ class TCorrMap(AFNICommand):
             return trait_spec.argstr % self.inputs.thresholds + [value]
         elif name in self.inputs._expr_opts:
             return trait_spec.argstr % (self.inputs.expr, value)
+        elif name == 'histogram':
+            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
+                                        value)
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for o in self._outputs().get().keys():
-            ov = getattr(self.inputs, o)
-            if not isdefined(ov):
-                ov = self._gen_fname(
-                    o, suffix=self.input_spec.class_traits()[o].suffix)
-            outputs[o] = ov
-        return outputs
-
-    def _parse_inputs(self, skip=None):
-        outs = self._list_outputs()
-        # skip under
-        if skip == None:
-            skip = []
-        skip.extend([k for k in self._outputs()
-                    .get().keys() if not isdefined(outs[k])])
-        return super(TCorrMap, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if hasattr(self.inputs, name) and \
-                not isdefined(getattr(self.inputs, name)):
-            return Undefined
-        return super(TCorrMap, self)._gen_filename(name)
-
 
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',

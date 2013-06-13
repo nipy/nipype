@@ -4,7 +4,8 @@ import os
 import shutil
 from tempfile import mkdtemp
 
-from nipype.testing import assert_equal, assert_true
+import numpy as np
+from nipype.testing import assert_equal, assert_true, assert_raises
 from nipype.interfaces import utility
 import nipype.pipeline.engine as pe
 
@@ -66,3 +67,49 @@ def test_function():
     # Clean up
     os.chdir(origdir)
     shutil.rmtree(tempdir)
+
+
+def make_random_array(size):
+
+    return np.random.randn(size, size)
+
+
+def should_fail():
+
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    node = pe.Node(utility.Function(input_names=["size"],
+                                    output_names=["random_array"],
+                                    function=make_random_array),
+                   name="should_fail")
+    try:
+        node.inputs.size = 10
+        node.run()
+    finally:
+        os.chdir(origdir)
+        shutil.rmtree(tempdir)
+
+
+assert_raises(NameError, should_fail)
+
+
+def test_function_with_imports():
+
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    node = pe.Node(utility.Function(input_names=["size"],
+                                    output_names=["random_array"],
+                                    function=make_random_array,
+                                    imports=["import numpy as np"]),
+                   name="should_not_fail")
+    print node.inputs.function_str
+    try:
+        node.inputs.size = 10
+        node.run()
+    finally:
+        os.chdir(origdir)
+        shutil.rmtree(tempdir)
