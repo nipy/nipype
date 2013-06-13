@@ -40,7 +40,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = RobustStatisticsSegmenterInputSpec
     output_spec = RobustStatisticsSegmenterOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch RobustStatisticsSegmenter "
+    _cmd = "RobustStatisticsSegmenter "
     _outputs_filenames = {'segmentedImageFileName':'segmentedImageFileName.nii'}
 
 
@@ -98,7 +98,7 @@ acknowledgements: Many people and organizations have contributed to the funding,
 
     input_spec = EMSegmentCommandLineInputSpec
     output_spec = EMSegmentCommandLineOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch EMSegmentCommandLine "
+    _cmd = "EMSegmentCommandLine "
     _outputs_filenames = {'generateEmptyMRMLSceneAndQuit':'generateEmptyMRMLSceneAndQuit','resultMRMLSceneFileName':'resultMRMLSceneFileName','resultVolumeFileName':'resultVolumeFileName.mhd'}
 
 
@@ -139,5 +139,5 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vinc
 
     input_spec = BRAINSROIAutoInputSpec
     output_spec = BRAINSROIAutoOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch BRAINSROIAuto "
+    _cmd = "BRAINSROIAuto "
     _outputs_filenames = {'outputROIMaskVolume':'outputROIMaskVolume.nii','outputClippedVolumeROI':'outputClippedVolumeROI.nii'}

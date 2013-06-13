@@ -36,7 +36,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = MultiplyScalarVolumesInputSpec
     output_spec = MultiplyScalarVolumesOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch MultiplyScalarVolumes "
+    _cmd = "MultiplyScalarVolumes "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -71,7 +71,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = MaskScalarVolumeInputSpec
     output_spec = MaskScalarVolumeOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch MaskScalarVolume "
+    _cmd = "MaskScalarVolume "
     _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}
 
 
@@ -105,7 +105,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = SubtractScalarVolumesInputSpec
     output_spec = SubtractScalarVolumesOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch SubtractScalarVolumes "
+    _cmd = "SubtractScalarVolumes "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -139,7 +139,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = AddScalarVolumesInputSpec
     output_spec = AddScalarVolumesOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch AddScalarVolumes "
+    _cmd = "AddScalarVolumes "
     _outputs_filenames = {'outputVolume':'outputVolume.nii'}
 
 
@@ -174,5 +174,5 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
     input_spec = CastScalarVolumeInputSpec
     output_spec = CastScalarVolumeOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch CastScalarVolume "
+    _cmd = "CastScalarVolume "
     _outputs_filenames = {'OutputVolume':'OutputVolume.nii'}

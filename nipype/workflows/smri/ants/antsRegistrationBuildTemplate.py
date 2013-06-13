@@ -197,6 +197,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     BeginANTS.inputs.use_estimate_learning_rate_once = [False,       False]
     BeginANTS.inputs.shrink_factors =           [[3,2,1],            [3,2,1]]
     BeginANTS.inputs.smoothing_sigmas =         [[3,2,0],            [3,2,0]]
+    BeginANTS.inputs.sigma_units =         ["vox"]*2
 
     GetMovingImagesNode = pe.Node(interface=util.Function(function=GetMovingImages,
                                       input_names=['ListOfImagesDictionaries','registrationImageTypes','interpolationMapping'],

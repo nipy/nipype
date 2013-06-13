@@ -565,8 +565,8 @@ class StimulusCorrelation(BaseInterface):
 
     Currently this class supports an SPM generated design matrix and requires
     intensity parameters. This implies that one must run
-    :ref:`nipype.algorithms.rapidart.ArtifactDetect`
-    and :ref:`nipype.interfaces.spm.model.Level1Design` prior to running this or
+    :ref:`ArtifactDetect <nipype.algorithms.rapidart.ArtifactDetect>`
+    and :ref:`Level1Design <nipype.interfaces.spm.model.Level1Design>` prior to running this or
     provide an SPM.mat file and intensity parameters through some other means.
 
     Examples

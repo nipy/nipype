@@ -45,5 +45,5 @@ acknowledgements:
 
     input_spec = IntensityDifferenceMetricInputSpec
     output_spec = IntensityDifferenceMetricOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch IntensityDifferenceMetric "
+    _cmd = "IntensityDifferenceMetric "
     _outputs_filenames = {'outputVolume':'outputVolume.nii','reportFileName':'reportFileName'}

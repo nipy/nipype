@@ -34,5 +34,5 @@ contributor: Alex Yarmarkovich (SPL, BWH)
 
     input_spec = ImageLabelCombineInputSpec
     output_spec = ImageLabelCombineOutputSpec
-    _cmd = "/home/raid3/gorgolewski/software/slicer/Slicer --launch ImageLabelCombine "
+    _cmd = "ImageLabelCombine "
     _outputs_filenames = {'OutputLabelMap':'OutputLabelMap.nii'}

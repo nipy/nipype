@@ -324,7 +324,12 @@ class SpecifyModel(BaseInterface):
             for i, out in enumerate(outliers):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
-                    numscans += load(f).get_shape()[3]
+                    shape = load(f).get_shape()
+                    if len(shape) == 3 or shape[3] == 1:
+                        iflogger.warning("You are using 3D instead of 4D files. Are you sure this was intended?")
+                        numscans += 1
+                    else:
+                        numscans += shape[3]
                 for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))

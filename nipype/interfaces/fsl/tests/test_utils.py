@@ -18,119 +18,129 @@ def create_files_in_directory():
     outdir = mkdtemp()
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nb.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                os.path.join(outdir, f))
     return filelist, outdir, cwd
+
 
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
 
+
 @skipif(no_fsl)
 def test_extractroi():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_file = dict(mandatory=True,argstr='%s',),
-                     output_type = dict(),
-                     roi_file = dict(argstr='%s',),
-                     t_min = dict(argstr='%d',),
-                     t_size = dict(argstr='%d',),
-                     x_min = dict(argstr='%d',),
-                     x_size = dict(argstr='%d',),
-                     y_min = dict(argstr='%d',),
-                     y_size = dict(argstr='%d',),
-                     z_min = dict(argstr='%d',),
-                     z_size = dict(argstr='%d',),
+    input_map = dict(args=dict(argstr='%s',),
+                     environ=dict(),
+                     in_file=dict(mandatory=True, argstr='%s',),
+                     output_type=dict(),
+                     roi_file=dict(argstr='%s',),
+                     t_min=dict(argstr='%d',),
+                     t_size=dict(argstr='%d',),
+                     x_min=dict(argstr='%d',),
+                     x_size=dict(argstr='%d',),
+                     y_min=dict(argstr='%d',),
+                     y_size=dict(argstr='%d',),
+                     z_min=dict(argstr='%d',),
+                     z_size=dict(argstr='%d',),
                      )
     instance = fsl.ExtractROI()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 @skipif(no_fsl)
 def test_imagemaths():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_file = dict(argstr='%s',mandatory=True,),
-                     in_file2 = dict(argstr='%s',),
-                     op_string = dict(argstr='%s',),
-                     out_data_type = dict(argstr='-odt %s',),
-                     out_file = dict(argstr='%s',),
-                     output_type = dict(),
-                     suffix = dict(),
+    input_map = dict(args=dict(argstr='%s',),
+                     environ=dict(),
+                     in_file=dict(argstr='%s', mandatory=True,),
+                     in_file2=dict(argstr='%s',),
+                     op_string=dict(argstr='%s',),
+                     out_data_type=dict(argstr='-odt %s',),
+                     out_file=dict(argstr='%s',),
+                     output_type=dict(),
+                     suffix=dict(),
                      )
     instance = fsl.ImageMaths()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 @skipif(no_fsl)
 def test_merge():
-    input_map = dict(args = dict(argstr='%s',),
-                     dimension = dict(argstr='-%s',mandatory=True,),
-                     environ = dict(),
-                     in_files = dict(mandatory=True,argstr='%s',),
-                     merged_file = dict(argstr='%s',),
-                     output_type = dict(),
+    input_map = dict(args=dict(argstr='%s',),
+                     dimension=dict(argstr='-%s', mandatory=True,),
+                     environ=dict(),
+                     in_files=dict(mandatory=True, argstr='%s',),
+                     merged_file=dict(argstr='%s',),
+                     output_type=dict(),
                      )
     instance = fsl.Merge()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 @skipif(no_fsl)
 def test_filterregressor():
-    input_map = dict(Out_vnscales = dict(),
-                     args = dict(argstr='%s',),
-                     design_file = dict(mandatory=True,),
-                     environ = dict(),
-                     filter_columns = dict(mandatory=True,),
-                     filter_all = dict(mandatory=True,),
-                     in_file = dict(mandatory=True,),
-                     mask = dict(),
-                     out_file = dict(),
-                     output_type = dict(),
-                     var_norm = dict(),
+    input_map = dict(Out_vnscales=dict(),
+                     args=dict(argstr='%s',),
+                     design_file=dict(mandatory=True,),
+                     environ=dict(),
+                     filter_columns=dict(mandatory=True,),
+                     filter_all=dict(mandatory=True,),
+                     in_file=dict(mandatory=True,),
+                     mask=dict(),
+                     out_file=dict(),
+                     output_type=dict(),
+                     var_norm=dict(),
                      )
     instance = fsl.FilterRegressor()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 @skipif(no_fsl)
 def test_smooth():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     fwhm = dict(argstr='-kernel gauss %f -fmean',mandatory=True,),
-                     in_file = dict(argstr='%s',mandatory=True,),
-                     output_type = dict(),
-                     smoothed_file = dict(argstr='%s',),
+    input_map = dict(args=dict(argstr='%s',),
+                     environ=dict(),
+                     fwhm=dict(
+                         argstr='-kernel gauss %f -fmean', mandatory=True,),
+                     in_file=dict(argstr='%s', mandatory=True,),
+                     output_type=dict(),
+                     smoothed_file=dict(argstr='%s',),
                      )
     instance = fsl.Smooth()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
+
 @skipif(no_fsl)
 def test_split():
-    input_map = dict(args = dict(argstr='%s',),
-                     dimension = dict(argstr='-%s',),
-                     environ = dict(),
-                     in_file = dict(argstr='%s',),
-                     out_base_name = dict(argstr='%s',),
-                     output_type = dict(),
+    input_map = dict(args=dict(argstr='%s',),
+                     dimension=dict(argstr='-%s',),
+                     environ=dict(),
+                     in_file=dict(argstr='%s',),
+                     out_base_name=dict(argstr='%s',),
+                     output_type=dict(),
                      )
     instance = fsl.Split()
     for key, metadata in input_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
+
+
 def no_fsl():
     """Checks if FSL is NOT installed
     used with skipif to skip tests that will
@@ -140,6 +150,7 @@ def no_fsl():
         return True
     else:
         return False
+
 
 @skipif(no_fsl)
 def test_fslroi():
@@ -158,17 +169,17 @@ def test_fslroi():
     roi.inputs.roi_file = 'foo_roi.nii'
     roi.inputs.t_min = 10
     roi.inputs.t_size = 20
-    yield assert_equal, roi.cmdline, 'fslroi %s foo_roi.nii 10 20'%filelist[0]
+    yield assert_equal, roi.cmdline, 'fslroi %s foo_roi.nii 10 20' % filelist[0]
 
     # .run based parameter setting
     roi2 = fsl.ExtractROI(in_file=filelist[0],
-                      roi_file='foo2_roi.nii',
-                      t_min=20, t_size=40,
-                      x_min=3, x_size=30,
-                      y_min=40, y_size=10,
-                      z_min=5, z_size=20)
+                          roi_file='foo2_roi.nii',
+                          t_min=20, t_size=40,
+                          x_min=3, x_size=30,
+                          y_min=40, y_size=10,
+                          z_min=5, z_size=20)
     yield assert_equal, roi2.cmdline, \
-          'fslroi %s foo2_roi.nii 3 30 40 10 5 20 20 40'%filelist[0]
+        'fslroi %s foo2_roi.nii 3 30 40 10 5 20 20 40' % filelist[0]
 
     clean_directory(outdir, cwd)
     # test arguments for opt_map
@@ -192,18 +203,20 @@ def test_fslmaths():
     math.inputs.op_string = '-add 2.5 -mul input_volume2'
     math.inputs.out_file = 'foo_math.nii'
     yield assert_equal, math.cmdline, \
-        'fslmaths %s -add 2.5 -mul input_volume2 foo_math.nii'%filelist[0]
+        'fslmaths %s -add 2.5 -mul input_volume2 foo_math.nii' % filelist[0]
 
     # .run based parameter setting
     math2 = fsl.ImageMaths(in_file=filelist[0], op_string='-add 2.5',
                            out_file='foo2_math.nii')
-    yield assert_equal, math2.cmdline, 'fslmaths %s -add 2.5 foo2_math.nii'%filelist[0]
+    yield assert_equal, math2.cmdline, 'fslmaths %s -add 2.5 foo2_math.nii' % filelist[0]
 
     # test arguments for opt_map
     # Fslmath class doesn't have opt_map{}
     clean_directory(outdir, cwd)
 
 # test overlay
+
+
 @skipif(no_fsl)
 def test_overlay():
     filelist, outdir, cwd = create_files_in_directory()
@@ -223,19 +236,21 @@ def test_overlay():
     overlay.inputs.show_negative_stats = True
     overlay.inputs.out_file = 'foo_overlay.nii'
     yield assert_equal, overlay.cmdline, \
-        'overlay 1 0 %s -a %s 2.50 10.00 %s -2.50 -10.00 foo_overlay.nii'%(
-            filelist[1],filelist[0],filelist[0])
+        'overlay 1 0 %s -a %s 2.50 10.00 %s -2.50 -10.00 foo_overlay.nii' % (
+            filelist[1], filelist[0], filelist[0])
 
     # .run based parameter setting
-    overlay2 = fsl.Overlay(stat_image=filelist[0], stat_thresh=(2.5,10),
+    overlay2 = fsl.Overlay(stat_image=filelist[0], stat_thresh=(2.5, 10),
                            background_image=filelist[1], auto_thresh_bg=True,
                            out_file='foo2_overlay.nii')
-    yield assert_equal, overlay2.cmdline, 'overlay 1 0 %s -a %s 2.50 10.00 foo2_overlay.nii'%(
-                                           filelist[1], filelist[0])
+    yield assert_equal, overlay2.cmdline, 'overlay 1 0 %s -a %s 2.50 10.00 foo2_overlay.nii' % (
+        filelist[1], filelist[0])
 
     clean_directory(outdir, cwd)
 
 # test slicer
+
+
 @skipif(no_fsl)
 def test_slicer():
     filelist, outdir, cwd = create_files_in_directory()
@@ -255,22 +270,27 @@ def test_slicer():
     slicer.inputs.image_width = 750
     slicer.inputs.out_file = 'foo_bar.png'
     yield assert_equal, slicer.cmdline, \
-        'slicer %s %s -L -i 10.000 20.000  -A 750 foo_bar.png'%(filelist[0],filelist[1])
+        'slicer %s %s -L -i 10.000 20.000  -A 750 foo_bar.png' % (
+            filelist[0], filelist[1])
 
     # .run based parameter setting
-    slicer2 = fsl.Slicer(in_file = filelist[0], middle_slices = True, label_slices=False,
-                         out_file='foo_bar2.png')
-    yield assert_equal, slicer2.cmdline, 'slicer %s   -a foo_bar2.png'%(filelist[0])
+    slicer2 = fsl.Slicer(
+        in_file=filelist[0], middle_slices=True, label_slices=False,
+        out_file='foo_bar2.png')
+    yield assert_equal, slicer2.cmdline, 'slicer %s   -a foo_bar2.png' % (filelist[0])
 
     clean_directory(outdir, cwd)
 
+
 def create_parfiles():
 
-    np.savetxt('a.par',np.random.rand(6,3))
-    np.savetxt('b.par',np.random.rand(6,3))
+    np.savetxt('a.par', np.random.rand(6, 3))
+    np.savetxt('b.par', np.random.rand(6, 3))
     return ['a.par', 'b.par']
 
 # test fsl_tsplot
+
+
 @skipif(no_fsl)
 def test_plottimeseries():
     filelist, outdir, cwd = create_files_in_directory()
@@ -285,21 +305,24 @@ def test_plottimeseries():
 
     # .inputs based parameters setting
     plotter.inputs.in_file = parfiles[0]
-    plotter.inputs.labels = ['x','y','z']
-    plotter.inputs.y_range = (0,1)
+    plotter.inputs.labels = ['x', 'y', 'z']
+    plotter.inputs.y_range = (0, 1)
     plotter.inputs.title = 'test plot'
     plotter.inputs.out_file = 'foo.png'
     yield assert_equal, plotter.cmdline, \
         ('fsl_tsplot -i %s -a x,y,z -o foo.png -t \'test plot\' -u 1 --ymin=0 --ymax=1'
-         %parfiles[0])
+         % parfiles[0])
 
     # .run based parameter setting
-    plotter2 = fsl.PlotTimeSeries(in_file=parfiles, title='test2 plot', plot_range=(2,5),
-                                  out_file='bar.png')
+    plotter2 = fsl.PlotTimeSeries(
+        in_file=parfiles, title='test2 plot', plot_range=(2, 5),
+        out_file='bar.png')
     yield assert_equal, plotter2.cmdline, \
-        'fsl_tsplot -i %s,%s -o bar.png --start=2 --finish=5 -t \'test2 plot\' -u 1'%tuple(parfiles)
+        'fsl_tsplot -i %s,%s -o bar.png --start=2 --finish=5 -t \'test2 plot\' -u 1' % tuple(
+            parfiles)
 
     clean_directory(outdir, cwd)
+
 
 @skipif(no_fsl)
 def test_plotmotionparams():
@@ -319,15 +342,16 @@ def test_plotmotionparams():
     plotter.inputs.plot_type = 'rotations'
     plotter.inputs.out_file = 'foo.png'
     yield assert_equal, plotter.cmdline, \
-    ('fsl_tsplot -i %s -o foo.png -t \'MCFLIRT estimated rotations (radians)\' '
-     '--start=1 --finish=3 -a x,y,z'%parfiles[0])
+        ('fsl_tsplot -i %s -o foo.png -t \'MCFLIRT estimated rotations (radians)\' '
+         '--start=1 --finish=3 -a x,y,z' % parfiles[0])
 
     # .run based parameter setting
-    plotter2 = fsl.PlotMotionParams(in_file=parfiles[1],in_source='spm',plot_type='translations',
-                                    out_file='bar.png')
+    plotter2 = fsl.PlotMotionParams(
+        in_file=parfiles[1], in_source='spm', plot_type='translations',
+        out_file='bar.png')
     yield assert_equal, plotter2.cmdline, \
         ('fsl_tsplot -i %s -o bar.png -t \'Realign estimated translations (mm)\' '
-         '--start=1 --finish=3 -a x,y,z'%parfiles[1])
+         '--start=1 --finish=3 -a x,y,z' % parfiles[1])
 
     clean_directory(outdir, cwd)
 
@@ -347,15 +371,17 @@ def test_convertxfm():
     cvt.inputs.in_file = filelist[0]
     cvt.inputs.invert_xfm = True
     cvt.inputs.out_file = "foo.mat"
-    yield assert_equal, cvt.cmdline, 'convert_xfm -omat foo.mat -inverse %s'%filelist[0]
+    yield assert_equal, cvt.cmdline, 'convert_xfm -omat foo.mat -inverse %s' % filelist[0]
 
     # constructor based parameter setting
-    cvt2 = fsl.ConvertXFM(in_file=filelist[0], in_file2=filelist[1], concat_xfm=True,
-                          out_file="bar.mat")
+    cvt2 = fsl.ConvertXFM(
+        in_file=filelist[0], in_file2=filelist[1], concat_xfm=True,
+        out_file="bar.mat")
     yield assert_equal, cvt2.cmdline, \
-        "convert_xfm -omat bar.mat -concat %s %s"%(filelist[1], filelist[0])
+        "convert_xfm -omat bar.mat -concat %s %s" % (filelist[1], filelist[0])
 
     clean_directory(outdir, cwd)
+
 
 @skipif(no_fsl)
 def test_swapdims():
@@ -366,7 +392,7 @@ def test_swapdims():
     yield assert_equal, swap.cmd, "fslswapdim"
 
     # Test mandatory args
-    args = [dict(in_file=files[0]), dict(new_dims=("x","y","z"))]
+    args = [dict(in_file=files[0]), dict(new_dims=("x", "y", "z"))]
     for arg in args:
         wontrun = fsl.SwapDimensions(**arg)
         yield assert_raises, ValueError, wontrun.run
@@ -374,7 +400,7 @@ def test_swapdims():
     # Now test a basic command line
     swap.inputs.in_file = files[0]
     swap.inputs.new_dims = ("x", "y", "z")
-    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s"%os.path.realpath(os.path.join(testdir, "a_newdims.nii"))
+    yield assert_equal, swap.cmdline, "fslswapdim a.nii x y z %s" % os.path.realpath(os.path.join(testdir, "a_newdims.nii"))
 
     # Test that we can set an output name
     swap.inputs.out_file = "b.nii"
@@ -382,3 +408,15 @@ def test_swapdims():
 
     # Clean up
     clean_directory(testdir, origdir)
+
+
+@skipif(no_fsl)
+def test_invwarp():
+    input_map = dict(environ=dict(),
+                     args=dict(argstr='%s',),
+                     warp=dict(mandatory=True,),
+                     reference=dict(mandatory=True,))
+    instance = fsl.InvWarp()
+    for key, metadata in input_map.items():
+        for metakey, value in metadata.items():
+            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value

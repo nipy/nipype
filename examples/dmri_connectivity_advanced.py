@@ -139,16 +139,13 @@ FreeSurferSourceRH.inputs.hemi = 'rh'
 """
 Creating the workflow's nodes
 =============================
-"""
 
-"""
 Conversion nodes
 ----------------
-"""
 
-"""
 A number of conversion operations are required to obtain NIFTI files from the FreesurferSource for each subject.
 Nodes are used to convert the following:
+
     * Original structural image to NIFTI
     * Pial, white, inflated, and spherical surfaces for both the left and right hemispheres are converted to GIFTI for visualization in ConnectomeViewer
     * Parcellated annotation files for the left and right hemispheres are also converted to GIFTI
@@ -200,6 +197,7 @@ eddycorrect.inputs.inputnode.ref_num = 1
 
 """
 Tensors are fitted to each voxel in the diffusion-weighted image and from these three maps are created:
+
     * Major eigenvector in each voxel
     * Apparent diffusion coefficient
     * Fractional anisotropy
@@ -282,9 +280,7 @@ trk2tdi = pe.Node(interface=dipy.TrackDensityMap(),name='trk2tdi')
 """
 Structural segmentation nodes
 -----------------------------
-"""
 
-"""
 The following node identifies the transformation between the diffusion-weighted
 image and the structural image. This transformation is then applied to the tracts
 so that they are in the same space as the regions of interest.
@@ -355,10 +351,7 @@ tessflow.inputs.inputspec.lookup_file = lookup_file
 Connecting the workflow
 =======================
 Here we connect our processing pipeline.
-"""
 
-
-"""
 Connecting the inputs, FreeSurfer nodes, and conversions
 --------------------------------------------------------
 """
@@ -436,7 +429,6 @@ mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
 
 """
-
 This block creates the rough brain mask to be multiplied, mulitplies it with the
 fractional anisotropy image, and thresholds it to get the single-fiber voxels.
 """
