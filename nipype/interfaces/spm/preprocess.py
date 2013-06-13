@@ -213,7 +213,7 @@ class Realign(SPMCommand):
                 outputs['mean_image'] = fname_presuffix(first_image, prefix='mean')
             
             index_start = 0
-            if self.inputs.which[0]<2:
+            if self.inputs.write_which[0]<2:
                 index_start = 1
             if resliced_all:
                 outputs['realigned_files'] = []
