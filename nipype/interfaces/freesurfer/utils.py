@@ -16,7 +16,7 @@ import re
 from nipype.utils.filemanip import fname_presuffix, split_filename
 
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath, isdefined
+from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath, isdefined, CommandLine, CommandLineInputSpec
 
 filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                afni='brik', brik='brik', bshort='bshort',
@@ -1018,3 +1018,32 @@ class MakeAverageSubject(FSCommand):
         outputs = self.output_spec().get()
         outputs['average_subject_name'] = self.inputs.out_name
         return outputs
+
+class ExtractMainComponentInputSpec(CommandLineInputSpec):
+    in_file = File(
+        exists=True, mandatory=True, argstr='%s', position=1,
+        desc='input surface file')
+    out_file = File(
+        '%s_maincmp', usedefault=True,
+        name_source='in_file', argstr='%s', position=2,
+        desc='surface containing main component')
+
+class ExtractMainComponentOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='surface containing main component')
+
+class ExtractMainComponent(CommandLine):
+    """Extract the main component of a tesselated surface
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import ExtractMainComponent
+    >>> mcmp = ExtractMainComponent(in_file='lh.white')
+    >>> mcmp.cmdline
+    'make_average_subject --out average --subjects s1 s2'
+
+    """    
+
+    _cmd='mris_extract_main_component'
+    input_spec=ExtractMainComponentInputSpec
+    output_spec=ExtractMainComponentOutputSpec
