@@ -127,7 +127,7 @@ def format_node(node, format='python', include_config=False):
 class WorkflowBase(object):
     """Defines common attributes and functions for workflows and nodes."""
 
-    def __init__(self, name, base_dir=None, **kwargs):
+    def __init__(self, name=None, base_dir=None):
         """ Initialize base parameters of a workflow or node
 
         Parameters
@@ -210,7 +210,7 @@ class WorkflowBase(object):
 class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes."""
 
-    def __init__(self, name, base_dir=None, *args, **kwargs):
+    def __init__(self, name, base_dir=None):
         """Create a workflow object.
 
         Parameters
@@ -221,7 +221,7 @@ class Workflow(WorkflowBase):
             path to workflow storage
 
         """
-        super(Workflow, self).__init__(name, base_dir, *args, **kwargs)
+        super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
