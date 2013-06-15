@@ -129,7 +129,7 @@ class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
     """
 
-    def __init__(self, name=None, base_dir=None, **kwargs):
+    def __init__(self, name=None, base_dir=None):
         """ Initialize base parameters of a workflow or node
 
         Parameters
@@ -213,8 +213,8 @@ class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes
     """
 
-    def __init__(self, *args, **kwargs):
-        super(Workflow, self).__init__(* args, **kwargs)
+    def __init__(self, *args):
+        super(Workflow, self).__init__(*args)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
