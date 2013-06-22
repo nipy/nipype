@@ -13,7 +13,7 @@ from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
-import nipype.external.prov as prov
+import prov.model as prov
 
 package_check('networkx', '1.3')
 import json
@@ -749,11 +749,11 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     return result
 
 
-def write_prov(graph, filename=None):
+def write_prov(graph, filename=None, format='turtle'):
     """Write W3C PROV Model JSON file
     """
     if not filename:
-        filename = os.path.join(os.getcwd(), 'workflow_provenance.json')
+        filename = os.path.join(os.getcwd(), 'workflow_provenance')
     foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
     dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
     nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6/")
@@ -932,7 +932,10 @@ def write_prov(graph, filename=None):
         g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
                        starter=processes[nodes.index(edgeinfo[0])])
     # write provenance
-    with open(filename, 'wt') as fp:
-        prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+    if format == 'json':
+        with open(filename + 'json', 'wt') as fp:
+            prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+    elif format == 'turtle':
+        g.rdf().serialize(filename + '.ttl', format='turtle')
     return g
 

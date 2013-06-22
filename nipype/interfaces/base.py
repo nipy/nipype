@@ -8,6 +8,7 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 
+from base64 import b64encode
 from ConfigParser import NoOptionError
 from copy import deepcopy
 import datetime
@@ -34,11 +35,11 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                isdefined, File, Directory,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json)
+                               hash_timestamp, save_json,
+                               split_filename)
 from ..utils.misc import is_container, trim, str2bool
 from .. import config, logging, LooseVersion
 from .. import __version__
-from nipype.utils.filemanip import split_filename
 
 nipype_version = LooseVersion(__version__)
 
@@ -1024,7 +1025,7 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
-    def write_provenance(self, results, filename='provenance.json'):
+    def write_provenance(self, results, filename='provenance', format='turtle'):
         runtime = results.runtime
         interface = results.interface
         inputs = results.inputs
@@ -1039,17 +1040,18 @@ class BaseInterface(Interface):
 
         def safe_encode(x):
             if x is None:
-                return pm.Literal(json.dumps("Unknown")[1:-1], pm.XSD['string'])
+                return pm.Literal("Unknown", pm.XSD['string'])
             if isinstance(x, (str, unicode)):
                 if os.path.exists(x):
-                    return 'file://%s%s' % (getfqdn(), x)
+                    return pm.URIRef('file://%s%s' % (getfqdn(), x))
                 else:
-                    return pm.Literal(json.dumps(x)[1:-1], pm.XSD['string'])
-            if isinstance(x, (int)):
+                    return pm.Literal(x, pm.XSD['string'])
+            if isinstance(x, (int,)):
                 return pm.Literal(int(x), pm.XSD['integer'])
-            if isinstance(x, (float)):
+            if isinstance(x, (float,)):
                 return pm.Literal(x, pm.XSD['float'])
-            return pm.Literal(json.dumps("Could not encode")[1:-1],
+            # if isinstance(x, (dict,)):
+            return pm.Literal(b64encode(x),
                               pm.XSD['string'])
 
         # create a provenance container
@@ -1156,8 +1158,11 @@ class BaseInterface(Interface):
         g.wasAssociatedWith(a0, software_agent, None, None,
                             {pm.PROV["Role"]: safe_encode("Software")})
         # write provenance
-        with open(filename, 'wt') as fp:
-            json.dump(g, fp, cls= pm.ProvBundle.JSONEncoder)
+        if format == 'json':
+            with open(filename + '.json', 'wt') as fp:
+                json.dump(g, fp, cls= pm.ProvBundle.JSONEncoder)
+        if format == 'turtle':
+            g.rdf().serialize(filename + '.ttl', format='turtle')
         return g
 
 
