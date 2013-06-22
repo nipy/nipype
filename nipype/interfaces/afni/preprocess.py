@@ -169,8 +169,8 @@ class RefitInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=True)
 
-    out_file = File("%s_refit", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File("%s_refit", desc='output image file name, should be the same as input',
+                    argstr='%s', name_source="in_file", usedefault=True)
 
     deoblique = traits.Bool(desc='replace current transformation' +
                             ' matrix with cardinal matrix',
@@ -1681,16 +1681,16 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     expr = traits.Str()
     average_expr = File(
         argstr='-Aexpr %s %s', suffix='_aexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     average_expr_nonzero = File(
         argstr='-Cexpr %s %s', suffix='_cexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     sum_expr = File(
         argstr='-Sexpr %s %s', suffix='_sexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        argstr='-Hist %d %s', suffix='_hist')
+        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
@@ -1739,34 +1739,11 @@ class TCorrMap(AFNICommand):
             return trait_spec.argstr % self.inputs.thresholds + [value]
         elif name in self.inputs._expr_opts:
             return trait_spec.argstr % (self.inputs.expr, value)
+        elif name == 'histogram':
+            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
+                                        value)
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for o in self._outputs().get().keys():
-            ov = getattr(self.inputs, o)
-            if not isdefined(ov):
-                ov = self._gen_fname(
-                    o, suffix=self.input_spec.class_traits()[o].suffix)
-            outputs[o] = ov
-        return outputs
-
-    def _parse_inputs(self, skip=None):
-        outs = self._list_outputs()
-        # skip under
-        if skip == None:
-            skip = []
-        skip.extend([k for k in self._outputs()
-                    .get().keys() if not isdefined(outs[k])])
-        return super(TCorrMap, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if hasattr(self.inputs, name) and \
-                not isdefined(getattr(self.inputs, name)):
-            return Undefined
-        return super(TCorrMap, self)._gen_filename(name)
-
 
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
