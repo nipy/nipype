@@ -81,7 +81,7 @@ class To3D(AFNICommand):
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.inputs.outputtype = "NIFTI"
     >>> To3D.cmdline #doctest: +ELLIPSIS
-    'to3d -datum float -anat -prefix .../dicomdir.nii ./*.dcm'
+    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
@@ -361,7 +361,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii'
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix my_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -373,9 +373,6 @@ class AutoTcorrelate(AFNICommand):
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
         return os.path.join(path, base + ext)
-
-    def _gen_filename(self, name):
-        return os.path.abspath(super(AutoTcorrelate, self)._gen_filename(name))
 
 
 class TStatInputSpec(AFNICommandInputSpec):
@@ -1163,6 +1160,7 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True)
     out_file = File("%s_maskave.1D", desc='output image file name',
+                    keep_extension=True,
                     argstr="> %s", name_source="in_file", usedefault=True, position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
@@ -1558,7 +1556,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix .../functional_calc.nii'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii'
 
     """
 
@@ -1591,13 +1589,9 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = File(
-        '%s_blur',
-        desc='output to the file',
-        argstr='-prefix %s',
-        name_source='in_file',
-        position=-1,
-        genfile=True)
+    out_file = File('%s_blur', desc='output to the file', argstr='-prefix %s',
+                    name_source='in_file', position=-1, genfile=True,
+                    usedefault=True)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1635,6 +1629,8 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.in_file = 'functional.nii'
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
+    >>> bim.cmdline #doctest: +ELLIPSIS
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix .../functional_blur+orig.BRIK'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
@@ -1642,19 +1638,6 @@ class BlurInMask(AFNICommand):
     _cmd = '3dBlurInMask'
     input_spec = BlurInMaskInputSpec
     output_spec = AFNICommandOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
 
 
 class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
