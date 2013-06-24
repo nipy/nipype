@@ -508,12 +508,12 @@ class AutomaskInputSpec(AFNICommandInputSpec):
                        argstr="-erode %s")
 
     mask_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="out_file")
+        desc="out_file suffix", deprecated=0.8, new_name="out_file")
     apply_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="brain_file")
-    apply_mask = File(desc="output file from 3dAutomask",
-                      argstr='-apply_prefix %s',
-                      name_source="in_file", depracated=0.8, new_name="brain_file")
+        desc="out_file suffix", deprecated=0.8, new_name="brain_file")
+    #apply_mask = File(desc="output file from 3dAutomask",
+                      #argstr='-apply_prefix %s',
+                      #name_source="in_file", deprecated=0.8, new_name="brain_file")
 
 
 class AutomaskOutputSpec(TraitedSpec):
@@ -580,12 +580,12 @@ class Automask(AFNICommand):
             return super(Automask, self)._gen_filename(name)
         return Undefined
 
-    def _list_outputs(self):
-        outputs = super(Automask, self)._list_outputs()
-        if isdefined(self.inputs.apply_mask):
-            outputs['brain_file'] = os.path.abspath(
-                self._gen_filename('apply_mask'))
-        return outputs
+    #def _list_outputs(self):
+        #outputs = super(Automask, self)._list_outputs()
+        #if isdefined(self.inputs.apply_mask):
+            #outputs['brain_file'] = os.path.abspath(
+                #self._gen_filename('apply_mask'))
+        #return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):
