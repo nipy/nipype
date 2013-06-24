@@ -694,7 +694,7 @@ class BaseInterface(Interface):
         if returnhelp:
             return allhelp
         else:
-            print allhelp
+            print(allhelp)
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
@@ -1218,7 +1218,7 @@ class CommandLine(BaseInterface):
         if returnhelp:
             return allhelp
         else:
-            print allhelp
+            print(allhelp)
 
     def _get_environ(self):
         out_environ = {}
@@ -1326,49 +1326,45 @@ class CommandLine(BaseInterface):
                 return sep.join([argstr % elt for elt in value])
             else:
                 return argstr % sep.join(str(elt) for elt in value)
-        elif trait_spec.name_source:
-            return  argstr % self._gen_filename(name)
         else:
             # Append options using format string.
             return argstr % value
-    
-    def _gen_filename(self, name):
-            trait_spec = self.inputs.trait(name)
-            value = getattr(self.inputs, name)
-            if isdefined(value):
-                if "%s" in value:
-                    if isinstance(trait_spec.name_source, list):
-                        for ns in trait_spec.name_source:
-                            if isdefined(getattr(self.inputs, ns)):
-                                name_source = ns
-                                break
-                    else:
-                        name_source = trait_spec.name_source
-                    if name_source.endswith(os.path.sep):
-                        name_source = name_source[:-len(os.path.sep)]
-                    _, base, _ = split_filename(getattr(self.inputs, name_source))
-                    
-                    retval = value%base
+
+    def _filename_from_source(self, name):
+        trait_spec = self.inputs.trait(name)
+        retval = getattr(self.inputs, name)
+        if isdefined(retval):
+            if "%s" in retval:
+                if isinstance(trait_spec.name_source, list):
+                    for ns in trait_spec.name_source:
+                        if isdefined(getattr(self.inputs, ns)):
+                            name_source = ns
+                            break
                 else:
-                    retval = value
-            else:
-                raise NotImplementedError
-            _,_,ext = split_filename(retval)
-            if trait_spec.overload_extension or not ext:
-                return self._overload_extension(retval)
-            else:
+                    name_source = trait_spec.name_source
+                if name_source.endswith(os.path.sep):
+                    name_source = name_source[:-len(os.path.sep)]
+                _, base, _ = split_filename(getattr(self.inputs, name_source))
+                retval = os.path.abspath(retval % base)
+            _, _, ext = split_filename(retval)
+            if trait_spec.keep_extension and ext:
                 return retval
-            
+            return self._overload_extension(retval)
+        return retval
+
+    def _gen_filename(self, name):
+        raise NotImplementedError
+
     def _overload_extension(self, value):
         return value
-    
+
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
         out_names = self.inputs.traits(**metadata).keys()
         if out_names:
             outputs = self.output_spec().get()
             for name in out_names:
-                outputs[name] = os.path.abspath(self._gen_filename(name))
+                outputs[name] = os.path.abspath(self._filename_from_source(name))
             return outputs
 
     def _parse_inputs(self, skip=None):
@@ -1391,11 +1387,12 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if not isdefined(value):
-                if spec.genfile or spec.name_source:
+            if spec.genfile or spec.name_source:
+                value = self._filename_from_source(name)
+                if not isdefined(value):
                     value = self._gen_filename(name)
-                else:
-                    continue
+            if not isdefined(value):
+                continue
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
