@@ -213,8 +213,8 @@ class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes
     """
 
-    def __init__(self, *args):
-        super(Workflow, self).__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super(Workflow, self).__init__(*args, **kwargs)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
