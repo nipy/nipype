@@ -23,6 +23,7 @@ from scipy.ndimage.measurements import center_of_mass, label
 from scipy.special import legendre
 import scipy.io as sio
 import itertools
+import scipy.stats as stats
 
 from .. import logging
 
@@ -901,3 +902,52 @@ class AddCSVColumn(BaseInterface):
         out_file = op.abspath(name + ext)
         outputs['csv_file'] = out_file
         return outputs
+
+
+class CalculateSkewnessInputSpec(TraitedSpec):
+    timeseries_file = File(exists=True, mandatory=True, desc='Text file with timeseries in columns and timepoints in rows, whitespace separated')
+
+class CalculateSkewnessOutputSpec(TraitedSpec):
+    skewness = traits.List(traits.Float(), desc='Skewness')
+
+class CalculateSkewness(BaseInterface):
+    """
+    Calculates skewness of timeseries.
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> skew = misc.CalculateSkewness()
+    >>> skew.inputs.timeseries_file = 'timeseries.txt'
+    >>> skew.run() # doctest: +SKIP
+    """
+    input_spec = CalculateSkewnessInputSpec
+    output_spec = CalculateSkewnessOutputSpec
+
+    def _run_interface(self, runtime):
+        
+        self._skewness = calc_skewness(self.inputs.timeseries_file)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['skewness'] = self._skewness
+        return outputs
+
+def calc_skewness(timeseries_file):
+    """Returns skewness of timeseries (list of values; one per timeseries).
+
+    Keyword arguments:
+    timeseries_file -- text file with white space separated timepoints in rows
+
+    """
+    with open(timeseries_file) as timeseries_file:
+        timeseries = []
+        for line in timeseries_file:
+            if line.strip():
+                row = [ float(i) for i in line.strip().split("  ")]
+                timeseries.append(row)
+    timeseries = np.array(timeseries)
+    
+    return [stats.skew(timeseries[:,i]) for i in range(timeseries.shape[1])]
