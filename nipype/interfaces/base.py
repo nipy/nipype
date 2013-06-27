@@ -1247,7 +1247,7 @@ class CommandLine(BaseInterface):
             o, e = proc.communicate()
             return o
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes = [0]):
         """Execute command via subprocess
 
         Parameters
@@ -1268,7 +1268,7 @@ class CommandLine(BaseInterface):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
         runtime = run_command(runtime, output=self.inputs.terminal_output)
-        if runtime.returncode is None or runtime.returncode != 0:
+        if runtime.returncode is None or runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
