@@ -403,6 +403,8 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(argstr='-applyxfm', requires=['in_matrix_file'],
                             desc='apply transformation supplied by in_matrix_file')
+    apply_isoxfm = traits.Float(argstr='-applyisoxfm %f',
+                                desc='as applyxfm but forces isotropic resampling')
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr='-datatype %s',
                            desc='force output data type')
