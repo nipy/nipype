@@ -321,8 +321,7 @@ class ResliceToReferenceOutput(TraitedSpec):
 
 
 class ResliceToReference(SPMCommand):
-    """ Uses spm to apply inverse deformation stored in a .mat file or a
-    deformation field to a given file
+    """ Uses spm to reslice a volume to a target image space or to a provided voxel size and bounding box
 
     Examples
     --------
