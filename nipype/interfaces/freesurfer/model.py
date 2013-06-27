@@ -100,6 +100,7 @@ class MRISPreproc(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outfile = self.inputs.out_file
+        outputs['out_file'] = outfile
         if not isdefined(outfile):
             outputs['out_file'] = os.path.join(os.getcwd(),
                                    'concat_%s_%s.mgz' % (self.inputs.hemi,
