@@ -944,13 +944,7 @@ def calc_moments(timeseries_file, moment):
     timeseries_file -- text file with white space separated timepoints in rows
 
     """
-    with open(timeseries_file) as timeseries_file:
-        timeseries = []
-        for line in timeseries_file:
-            if line.strip():
-                row = [ float(i) for i in line.strip().split("  ")]
-                timeseries.append(row)
-    timeseries = np.array(timeseries)
+    timeseries = np.genfromtxt(timeseries_file)
     
     moment = 3
     m2 = stats.moment(timeseries, 2, axis=0)
