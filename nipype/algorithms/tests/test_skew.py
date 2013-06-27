@@ -1,7 +1,7 @@
 import numpy as np
 from nipype.testing import assert_equal
 import tempfile
-from nipype.algorithms.misc import calc_skewness
+from nipype.algorithms.misc import calc_moments
 
 
 def test_skew():
@@ -129,7 +129,7 @@ def test_skew():
     with tempfile.NamedTemporaryFile(delete=True) as f:
         f.write(data)
         f.flush()
-        skewness = calc_skewness(f.name)
-        yield assert_equal, skewness, [-0.23418937314622, 0.2946365564954823, -0.05781002053540932, 
+        skewness = calc_moments(f.name, 3)
+        yield assert_equal, skewness, np.array([-0.23418937314622, 0.2946365564954823, -0.05781002053540932, 
                                        -0.3512508282578762, -0.07035664150233077, -0.01935867699166935, 
-                                       0.00483863369427428, 0.21879460029850167]
+                                       0.00483863369427428, 0.21879460029850167])

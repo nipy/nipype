@@ -904,13 +904,14 @@ class AddCSVColumn(BaseInterface):
         return outputs
 
 
-class CalculateSkewnessInputSpec(TraitedSpec):
+class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(exists=True, mandatory=True, desc='Text file with timeseries in columns and timepoints in rows, whitespace separated')
+    moemtn = traits.Int(mandatory=True, desc="Define which moment should be calculated, 3 for skewness, 4 for kurtosis.")
 
-class CalculateSkewnessOutputSpec(TraitedSpec):
-    skewness = traits.List(traits.Float(), desc='Skewness')
+class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
+    moments = traits.List(traits.Float(), desc='Moments')
 
-class CalculateSkewness(BaseInterface):
+class CalculateNormalizedMoments(BaseInterface):
     """
     Calculates skewness of timeseries.
 
@@ -918,25 +919,26 @@ class CalculateSkewness(BaseInterface):
     -------
 
     >>> import nipype.algorithms.misc as misc
-    >>> skew = misc.CalculateSkewness()
+    >>> skew = misc.CalculateNormalizedMoments()
+    >>> skew.inputs.moment = 3
     >>> skew.inputs.timeseries_file = 'timeseries.txt'
     >>> skew.run() # doctest: +SKIP
     """
-    input_spec = CalculateSkewnessInputSpec
-    output_spec = CalculateSkewnessOutputSpec
+    input_spec = CalculateNormalizedMomentsInputSpec
+    output_spec = CalculateNormalizedMomentsOutputSpec
 
     def _run_interface(self, runtime):
         
-        self._skewness = calc_skewness(self.inputs.timeseries_file)
+        self._moments = calc_moments(self.inputs.timeseries_file, self.inputs.moment)
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['skewness'] = self._skewness
+        outputs['skewness'] = self._moments
         return outputs
 
-def calc_skewness(timeseries_file):
-    """Returns skewness of timeseries (list of values; one per timeseries).
+def calc_moments(timeseries_file, moment):
+    """Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries (list of values; one per timeseries).
 
     Keyword arguments:
     timeseries_file -- text file with white space separated timepoints in rows
@@ -950,4 +952,8 @@ def calc_skewness(timeseries_file):
                 timeseries.append(row)
     timeseries = np.array(timeseries)
     
-    return [stats.skew(timeseries[:,i]) for i in range(timeseries.shape[1])]
+    moment = 3
+    m2 = stats.moment(timeseries, 2, axis=0)
+    m3 = stats.moment(timeseries, moment, axis=0)
+    zero = (m2 == 0)
+    return np.where(zero, 0, m3 / m2**(moment/2.0))
