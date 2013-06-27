@@ -991,7 +991,7 @@ class AddCSVColumn(BaseInterface):
 class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(exists=True, mandatory=True,
                            desc='Text file with timeseries in columns and timepoints in rows, whitespace separated')
-    moemtn = traits.Int(
+    moment = traits.Int(
         mandatory=True, desc="Define which moment should be calculated, 3 for skewness, 4 for kurtosis.")
 
 
@@ -1001,7 +1001,7 @@ class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
 
 class CalculateNormalizedMoments(BaseInterface):
     """
-    Calculates skewness of timeseries.
+    Calculates moments of timeseries.
 
     Example
     -------
