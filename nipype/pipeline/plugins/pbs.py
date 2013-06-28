@@ -23,6 +23,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
 
     """
 
+    # Addtional class variables
+    _max_jobname_len = 15
+    
     def __init__(self, **kwargs):
         template = """
 #PBS -V
