@@ -444,7 +444,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     nb.save(img, wm_out)
 
 
-def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file):
+def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file,dilation):
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
@@ -468,7 +468,8 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
 
     ds.append((op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name),
               op.join(op.curdir, 'ROI_HR_th.nii.gz')))
-    ds.append((op.join(op.curdir, 'ROIv_%s.nii.gz' %
+    if(dilation==True):
+    	ds.append((op.join(op.curdir, 'ROIv_%s.nii.gz' %
               parcellation_name), op.join(op.curdir, 'ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
@@ -531,7 +532,7 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(
         exists=True, desc='Region of Interest file for connectivity mapping')
-    roiv_file = File(exists=True, desc='Region of Interest file for fMRI connectivity mapping')
+    roiv_file = File(exists=False, desc='Region of Interest file for fMRI connectivity mapping')
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(
         desc='Image file with regions labelled as unknown cortical structures',
@@ -583,7 +584,7 @@ class Parcellate(BaseInterface):
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.dilation)
         create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
+        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file,self.inputs.dilation)
         return runtime
 
     def _list_outputs(self):
@@ -602,7 +603,7 @@ class Parcellate(BaseInterface):
         outputs['roi_file_in_structural_space'] = op.abspath(
             'ROI_HR_th.nii.gz')
         outputs['dilated_roi_file_in_structural_space'] = op.abspath(
-            'ROI_HR_th.nii.gz')
+            'ROIv_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):
