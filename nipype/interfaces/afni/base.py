@@ -205,16 +205,6 @@ class AFNICommand(AFNIBaseCommand):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
 
-    def _list_outputs(self):
-        metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
-        if out_names:
-            outputs = self.output_spec().get()
-            for name in out_names:
-                out = self._gen_filename(name)
-                if out and isdefined(out):
-                    outputs[name] = os.path.abspath(out)
-            return outputs
 
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
