@@ -4,6 +4,8 @@
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
+import nipype.interfaces.freesurfer as fs    # freesurfer
+import nipype.interfaces.spm as spm
 
 from ...smri.freesurfer.utils import create_getmask_flow
 
@@ -483,7 +485,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
                                                       save_plots = True,
-                                                      interpolation = 'sinc'),
+                                                      interpolation = 'spline'),
                                 name='realign',
                                 iterfield = ['in_file'])
     featpreproc.connect(img2float, 'out_file', motion_correct, 'in_file')
@@ -1066,4 +1068,167 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     featpreproc.connect(maskflow, 'outputspec.reg_cost', outputnode, 'reg_cost')
 
     return featpreproc
+
+def create_reg_workflow(name='registration'):
+    """Create a FEAT preprocessing workflow together with freesurfer
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: 'registration')
+
+    Inputs::
+
+        inputspec.source_files : files (filename or list of filenames to register)
+        inputspec.mean_image : reference image to use
+        inputspec.anatomical_image : anatomical image to coregister to
+        inputspec.target_image : registration target
+
+    Outputs::
+
+        outputspec.func2anat_transform : FLIRT transform
+        outputspec.anat2target_transform : FLIRT+FNIRT transform
+        outputspec.transformed_files : transformed files in target space
+        outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+
+    """
+
+    register = pe.Workflow(name=name)
+
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=['source_files',
+                                                                 'mean_image',
+                                                                 'anatomical_image',
+                                                                 'target_image']),
+                        name='inputspec')
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=['func2anat_transform',
+                                                              'anat2target_transform',
+                                                              'transformed_files',
+                                                              'transformed_mean',
+                                                              ]),
+                     name='outputspec')
+
+    """
+    Estimate the tissue classes from the anatomical image. But use spm's segment
+    as FSL appears to be breaking.
+    """
+
+    #fast = pe.Node(fsl.FAST(), name='fast')
+    #fast.config = {'execution': {'keep_unncessary_outputs': True}}
+    #register.connect(inputnode, 'anatomical_image', fast, 'in_files')
+
+    convert = pe.Node(fs.MRIConvert(out_type='nii'), name='convert')
+    register.connect(inputnode, 'anatomical_image', convert, 'in_file')
+
+    segment = pe.Node(spm.Segment(), name='segment')
+    segment.inputs.wm_output_type = [False, False, True]
+    segment.config = {'execution': {'keep_unnecessary_outputs': 'true'}}
+    register.connect(convert, 'out_file', segment, 'data')
+
+    """
+    Binarize the segmentation
+    """
+
+    binarize = pe.Node(fsl.ImageMaths(op_string='-nan -thr 0.5 -bin'),
+                       name='binarize')
+    #pickindex = lambda x, i: x[i]
+    #register.connect(fast, ('partial_volume_files', pickindex, 1),
+    #                 binarize, 'in_file')
+    register.connect(segment, 'native_wm_image', binarize, 'in_file')
+
+    """
+    Calculate rigid transform from mean image to anatomical image
+    """
+
+    mean2anat = pe.Node(fsl.FLIRT(), name='mean2anat')
+    mean2anat.inputs.dof = 6
+    register.connect(inputnode, 'mean_image', mean2anat, 'in_file')
+    register.connect(inputnode, 'anatomical_image', mean2anat, 'reference')
+
+    """
+    Now use bbr cost function to improve the transform
+    """
+
+    mean2anatbbr = pe.Node(fsl.FLIRT(), name='mean2anatbbr')
+    mean2anatbbr.inputs.dof = 6
+    mean2anatbbr.inputs.cost = 'bbr'
+    mean2anatbbr.inputs.schedule = '/usr/local/fsl/etc/flirtsch/bbr.sch'
+    register.connect(inputnode, 'mean_image', mean2anatbbr, 'in_file')
+    register.connect(binarize, 'out_file', mean2anatbbr, 'wm_seg')
+    register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
+    register.connect(mean2anat, 'out_matrix_file', mean2anatbbr, 'in_matrix_file')
+
+    """
+    Calculate affine transform from anatomical to target
+    """
+
+    anat2target_affine = pe.Node(fsl.FLIRT(), name='anat2target_linear')
+    register.connect(inputnode, 'anatomical_image', anat2target_affine, 'in_file')
+    register.connect(inputnode, 'target_image', anat2target_affine, 'reference')
+
+    """
+    Calculate nonlinear transform from anatomical to target
+    """
+
+    anat2target_nonlinear = pe.Node(fsl.FNIRT(), name='anat2target_nonlinear')
+    register.connect(anat2target_affine, 'out_matrix_file',
+                     anat2target_nonlinear, 'affine_file')
+    #anat2target_nonlinear.inputs.in_fwhm = [8, 4, 2, 2]
+    #anat2target_nonlinear.inputs.subsampling_scheme = [4, 2, 1, 1]
+    anat2target_nonlinear.inputs.warp_resolution = (8, 8, 8)
+    register.connect(inputnode, 'anatomical_image', anat2target_nonlinear, 'in_file')
+    register.connect(inputnode, 'target_image',
+                     anat2target_nonlinear, 'ref_file')
+
+    """
+    Transform the mean image. First to anatomical and then to target
+    """
+
+    warp2anat = pe.Node(fsl.ApplyWarp(interp='spline'), name='warp2anat')
+    register.connect(inputnode, 'mean_image', warp2anat, 'in_file')
+    register.connect(inputnode, 'anatomical_image', warp2anat, 'ref_file')
+    register.connect(mean2anatbbr, 'out_matrix_file', warp2anat, 'premat')
+
+    warpmean = pe.Node(fsl.ApplyWarp(interp='spline'), name='warpmean')
+    register.connect(warp2anat, 'out_file', warpmean, 'in_file')
+    register.connect(inputnode, 'target_image', warpmean, 'ref_file')
+    register.connect(anat2target_affine, 'out_matrix_file', warpmean, 'premat')
+    register.connect(anat2target_nonlinear, 'field_file',
+                     warpmean, 'field_file')
+
+    """
+    Transform the remaining images. First to anatomical and then to target
+    """
+
+    warpall2anat = pe.MapNode(fsl.ApplyWarp(interp='spline'),
+                              iterfield=['in_file'],
+                              name='warpall2anat')
+    register.connect(inputnode, 'source_files', warpall2anat, 'in_file')
+    register.connect(inputnode, 'anatomical_image', warpall2anat, 'ref_file')
+    register.connect(mean2anatbbr, 'out_matrix_file', warpall2anat, 'premat')
+
+    warpall = pe.MapNode(fsl.ApplyWarp(interp='spline'), name='warpall',
+                         iterfield=['in_file'])
+    register.connect(warpall2anat, 'out_file', warpall, 'in_file')
+    register.connect(inputnode, 'target_image', warpall, 'ref_file')
+    register.connect(anat2target_affine, 'out_matrix_file', warpall, 'premat')
+    register.connect(anat2target_nonlinear, 'field_file',
+                     warpall, 'field_file')
+
+    """
+    Assign all the output files
+    """
+
+    register.connect(warpmean, 'out_file', outputnode, 'transformed_mean')
+    register.connect(warpall, 'out_file', outputnode, 'transformed_files')
+    register.connect(mean2anatbbr, 'out_matrix_file',
+                     outputnode, 'func2anat_transform')
+    register.connect(anat2target_nonlinear, 'field_file',
+                     outputnode, 'anat2target_transform')
+
+    return register
 

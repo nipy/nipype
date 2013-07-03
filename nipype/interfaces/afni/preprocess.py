@@ -81,7 +81,7 @@ class To3D(AFNICommand):
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.inputs.outputtype = "NIFTI"
     >>> To3D.cmdline #doctest: +ELLIPSIS
-    'to3d -datum float -anat -prefix .../dicomdir.nii ./*.dcm'
+    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
@@ -169,8 +169,8 @@ class RefitInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=True)
 
-    out_file = File("%s_refit", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File("%s_refit", desc='output image file name, should be the same as input',
+                    argstr='%s', name_source="in_file", usedefault=True)
 
     deoblique = traits.Bool(desc='replace current transformation' +
                             ' matrix with cardinal matrix',
@@ -361,7 +361,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii'
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix my_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -373,9 +373,6 @@ class AutoTcorrelate(AFNICommand):
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
         return os.path.join(path, base + ext)
-
-    def _gen_filename(self, name):
-        return os.path.abspath(super(AutoTcorrelate, self)._gen_filename(name))
 
 
 class TStatInputSpec(AFNICommandInputSpec):
@@ -1163,6 +1160,7 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True)
     out_file = File("%s_maskave.1D", desc='output image file name',
+                    keep_extension=True,
                     argstr="> %s", name_source="in_file", usedefault=True, position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
@@ -1558,7 +1556,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix .../functional_calc.nii'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii'
 
     """
 
@@ -1591,13 +1589,9 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = File(
-        '%s_blur',
-        desc='output to the file',
-        argstr='-prefix %s',
-        name_source='in_file',
-        position=-1,
-        genfile=True)
+    out_file = File('%s_blur', desc='output to the file', argstr='-prefix %s',
+                    name_source='in_file', position=-1, genfile=True,
+                    usedefault=True)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1635,6 +1629,8 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.in_file = 'functional.nii'
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
+    >>> bim.cmdline #doctest: +ELLIPSIS
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix .../functional_blur+orig.BRIK'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
@@ -1642,19 +1638,6 @@ class BlurInMask(AFNICommand):
     _cmd = '3dBlurInMask'
     input_spec = BlurInMaskInputSpec
     output_spec = AFNICommandOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
 
 
 class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
@@ -1698,16 +1681,16 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     expr = traits.Str()
     average_expr = File(
         argstr='-Aexpr %s %s', suffix='_aexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     average_expr_nonzero = File(
         argstr='-Cexpr %s %s', suffix='_cexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     sum_expr = File(
         argstr='-Sexpr %s %s', suffix='_sexpr',
-        xor=_expr_opts)
+        name_source='in_file', xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        argstr='-Hist %d %s', suffix='_hist')
+        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
@@ -1756,34 +1739,11 @@ class TCorrMap(AFNICommand):
             return trait_spec.argstr % self.inputs.thresholds + [value]
         elif name in self.inputs._expr_opts:
             return trait_spec.argstr % (self.inputs.expr, value)
+        elif name == 'histogram':
+            return trait_spec.argstr % (self.inputs.histogram_bin_numbers,
+                                        value)
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for o in self._outputs().get().keys():
-            ov = getattr(self.inputs, o)
-            if not isdefined(ov):
-                ov = self._gen_fname(
-                    o, suffix=self.input_spec.class_traits()[o].suffix)
-            outputs[o] = ov
-        return outputs
-
-    def _parse_inputs(self, skip=None):
-        outs = self._list_outputs()
-        # skip under
-        if skip == None:
-            skip = []
-        skip.extend([k for k in self._outputs()
-                    .get().keys() if not isdefined(outs[k])])
-        return super(TCorrMap, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if hasattr(self.inputs, name) and \
-                not isdefined(getattr(self.inputs, name)):
-            return Undefined
-        return super(TCorrMap, self)._gen_filename(name)
-
 
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
