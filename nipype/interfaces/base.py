@@ -27,6 +27,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
+import urllib
 from uuid import uuid1
 
 import prov.model as pm
@@ -932,7 +933,7 @@ class BaseInterface(Interface):
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             runtime.duration = (parseutc(runtime.endTime) -
-                                parseutc(runtime.endTime)).total_seconds()
+                                parseutc(runtime.startTime)).total_seconds()
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -941,7 +942,7 @@ class BaseInterface(Interface):
         except Exception, e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             runtime.duration = (parseutc(runtime.endTime) -
-                                parseutc(runtime.endTime)).total_seconds()
+                                parseutc(runtime.startTime)).total_seconds()
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -960,21 +961,24 @@ class BaseInterface(Interface):
                     e.args += (inputs_str, )
 
             #exception raising inhibition for special cases
+            import traceback
+            runtime.traceback = traceback.format_exc()
+            runtime.traceback_args = e.args
+            inputs=None
+            try:
+                inputs = self.inputs.get_traitsfree()
+            except Exception, e:
+                pass
+            results = InterfaceResult(interface, runtime, inputs=inputs)
+            try:
+                prov_record = self.write_provenance(results)
+            except Exception, e:
+                prov_record = None
+            results.provenance = prov_record
             if hasattr(self.inputs, 'ignore_exception') and \
             isdefined(self.inputs.ignore_exception) and \
             self.inputs.ignore_exception:
-                import traceback
-                runtime.traceback = traceback.format_exc()
-                runtime.traceback_args = e.args
-                inputs=None
-                try:
-                    inputs = self.inputs.get_traitsfree()
-                except Exception, e:
-                    pass
-                results = InterfaceResult(interface, runtime, inputs=inputs)
-                prov_record = self.write_provenance(results)
-                results.provenance = prov_record
-                return results
+                pass
             else:
                 raise
         return results
@@ -1025,7 +1029,7 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
-    def write_provenance(self, results, filename='provenance', format='turtle'):
+    def write_provenance(self, results, filename='provenance', format='all'):
         runtime = results.runtime
         interface = results.interface
         inputs = results.inputs
@@ -1050,21 +1054,24 @@ class BaseInterface(Interface):
                 return pm.Literal(int(x), pm.XSD['integer'])
             if isinstance(x, (float,)):
                 return pm.Literal(x, pm.XSD['float'])
-            # if isinstance(x, (dict,)):
-            return pm.Literal(b64encode(x),
+            if isinstance(x, (dict, list,)):
+                return pm.Literal(json.dumps(x),
+                                  pm.XSD['string'])
+            return pm.Literal(b64encode(json.dumps(x)),
                               pm.XSD['string'])
 
         # create a provenance container
         g = pm.ProvBundle()
 
         # Set the default _namespace name
-        g.set_default_namespace(nipype.get_uri())
+        # g.set_default_namespace(nipype.get_uri())
         g.add_namespace(foaf)
         g.add_namespace(dcterms)
         g.add_namespace(nipype)
 
-        a0_attrs = {foaf["host"]: safe_encode(runtime.hostname),
-                    pm.PROV["type"]: nipype[classname],
+        a0_attrs = {foaf["host"]: pm.URIRef(runtime.hostname),
+                    nipype['module']: self.__module__,
+                    nipype["interface"]: classname,
                     pm.PROV["label"]: classname,
                     nipype['duration']: safe_encode(runtime.duration),
                     nipype['working_directory']: safe_encode(runtime.cwd),
@@ -1088,9 +1095,9 @@ class BaseInterface(Interface):
         g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            in_attr = {pm.PROV["type"]: nipype["environment"],
-                       pm.PROV["label"]: key,
-                       nipype[key]: safe_encode(val)}
+            in_attr = {pm.PROV["label"]: key,
+                       nipype["environment_variable"]: key,
+                       nipype["value"]: safe_encode(val)}
             id = get_id()
             g.entity(id, in_attr)
             g.hadMember(env_collection, id)
@@ -1103,9 +1110,9 @@ class BaseInterface(Interface):
             g.used(a0, id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_attr = {pm.PROV["type"]: nipype["input"],
-                           pm.PROV["label"]: key,
-                           nipype[key]: safe_encode(val)}
+                in_attr = {pm.PROV["label"]: key,
+                           nipype["in_port"]: key,
+                           nipype["value"]: safe_encode(val)}
                 id = get_id()
                 g.entity(id, in_attr)
                 g.hadMember(input_collection, id)
@@ -1119,9 +1126,9 @@ class BaseInterface(Interface):
             g.wasGeneratedBy(output_collection, a0)
             # write input entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_attr = {pm.PROV["type"]: nipype["output"],
-                            pm.PROV["label"]: key,
-                            nipype[key]: safe_encode(val)}
+                out_attr = {pm.PROV["label"]: key,
+                            nipype["out_port"]: key,
+                            nipype["value"]: safe_encode(val)}
                 id = get_id()
                 g.entity(id, out_attr)
                 g.hadMember(output_collection, id)
@@ -1136,8 +1143,7 @@ class BaseInterface(Interface):
                 continue
             if key not in ['stdout', 'stderr', 'merged']:
                 continue
-            attr = {pm.PROV["type"]: nipype["runtime"],
-                    pm.PROV["label"]: key,
+            attr = {pm.PROV["label"]: key,
                     nipype[key]: safe_encode(value)}
             id = get_id()
             g.entity(get_id(), attr)
@@ -1158,10 +1164,10 @@ class BaseInterface(Interface):
         g.wasAssociatedWith(a0, software_agent, None, None,
                             {pm.PROV["Role"]: safe_encode("Software")})
         # write provenance
-        if format == 'json':
+        if format in ['json', 'all']:
             with open(filename + '.json', 'wt') as fp:
                 json.dump(g, fp, cls= pm.ProvBundle.JSONEncoder)
-        if format == 'turtle':
+        if format in ['turtle', 'all']:
             g.rdf().serialize(filename + '.ttl', format='turtle')
         return g
 

@@ -756,27 +756,47 @@ def write_prov(graph, filename=None, format='turtle'):
         filename = os.path.join(os.getcwd(), 'workflow_provenance')
     foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
     dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
-    nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/0.6/")
+    nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/")
 
     # create a provenance container
     g = prov.ProvBundle()
 
     # Set the default _namespace name
-    g.set_default_namespace(nipype.get_uri())
+    #g.set_default_namespace(nipype.get_uri())
     g.add_namespace(foaf)
     g.add_namespace(dcterms)
     g.add_namespace(nipype)
 
-    user_agent = g.agent(uuid1().hex,
-            {prov.PROV["type"]: prov.PROV["Person"],
-             prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
-             foaf["name"]: pwd.getpwuid(os.geteuid()).pw_name})
-    agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
-                  prov.PROV["label"]: "Nipype",
-                  foaf["name"]: "Nipype"}
+    def safe_encode(x):
+        if x is None:
+            return pm.Literal("Unknown", pm.XSD['string'])
+        if isinstance(x, (str, unicode)):
+            if os.path.exists(x):
+                return pm.URIRef('file://%s%s' % (getfqdn(), x))
+            else:
+                return pm.Literal(x, pm.XSD['string'])
+        if isinstance(x, (int,)):
+            return pm.Literal(int(x), pm.XSD['integer'])
+        if isinstance(x, (float,)):
+            return pm.Literal(x, pm.XSD['float'])
+        if isinstance(x, (dict, list,)):
+            return pm.Literal(json.dumps(x),
+                              pm.XSD['string'])
+        return pm.Literal(b64encode(json.dumps(x)),
+                          pm.XSD['string'])
+
+    get_id = lambda : nipype[uuid1().hex]
+
+    user_agent = g.agent(get_id(),
+                         {pm.PROV["type"]: pm.PROV["Person"],
+                          pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
+                          foaf["name"]: safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
+    agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
+                  pm.PROV["label"]: "Nipype",
+                  foaf["name"]: safe_encode("Nipype")}
     for key, value in get_info().items():
-        agent_attr.update({nipype[key]: value})
-    software_agent = g.agent(uuid1().hex, agent_attr)
+        agent_attr.update({nipype[key]: safe_encode(value)})
+    software_agent = g.agent(get_id(), agent_attr)
 
     processes = []
     nodes = graph.nodes()

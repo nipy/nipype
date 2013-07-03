@@ -1816,13 +1816,16 @@ class MapNode(Node):
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       outputs=self.outputs)
+                                       provenance=[], outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
             self._result.runtime.insert(i, None)
-            if node.result and hasattr(node.result, 'runtime'):
-                self._result.interface.insert(i, node.result.interface)
-                self._result.runtime[i] = node.result.runtime
+            if node.result:
+                if hasattr(node.result, 'runtime'):
+                    self._result.interface.insert(i, node.result.interface)
+                    self._result.runtime[i] = node.result.runtime
+                if hasattr(node.result, 'provenance'):
+                    self._result.provenance[i] = node.result.provenance
             returncode.insert(i, err)
             if self.outputs:
                 for key, _ in self.outputs.items():
