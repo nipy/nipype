@@ -1036,7 +1036,6 @@ def calc_moments(timeseries_file, moment):
     """
     timeseries = np.genfromtxt(timeseries_file)
 
-    moment = 3
     m2 = stats.moment(timeseries, 2, axis=0)
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
