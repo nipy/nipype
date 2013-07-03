@@ -532,7 +532,7 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(
         exists=True, desc='Region of Interest file for connectivity mapping')
-    roiv_file = File(exists=False, desc='Region of Interest file for fMRI connectivity mapping')
+    roiv_file = File(desc='Region of Interest file for fMRI connectivity mapping')
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(
         desc='Image file with regions labelled as unknown cortical structures',
@@ -546,8 +546,7 @@ class ParcellateOutputSpec(TraitedSpec):
         desc='ROI image resliced to the dimensions of the original structural image',
                     exists=True)
     dilated_roi_file_in_structural_space = File(
-        desc='dilated ROI image resliced to the dimensions of the original structural image',
-                    exists=True)
+        desc='dilated ROI image resliced to the dimensions of the original structural image')
 
 
 class Parcellate(BaseInterface):
@@ -594,7 +593,8 @@ class Parcellate(BaseInterface):
         else:
             outputs['roi_file'] = op.abspath(
                 self._gen_outfilename('nii.gz', 'ROI'))
-        outputs['roiv_file'] = op.abspath(self._gen_outfilename(
+        if(self.inputs.dilation==True):
+            outputs['roiv_file'] = op.abspath(self._gen_outfilename(
             'nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
@@ -602,7 +602,8 @@ class Parcellate(BaseInterface):
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath(
             'ROI_HR_th.nii.gz')
-        outputs['dilated_roi_file_in_structural_space'] = op.abspath(
+        if(self.inputs.dilation==True):
+            outputs['dilated_roi_file_in_structural_space'] = op.abspath(
             'ROIv_HR_th.nii.gz')
         return outputs
 
