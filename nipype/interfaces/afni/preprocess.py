@@ -507,14 +507,6 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     erode = traits.Int(desc='erode the mask inwards',
                        argstr="-erode %s")
 
-    mask_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="out_file")
-    apply_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="brain_file")
-    apply_mask = File(desc="output file from 3dAutomask",
-                      argstr='-apply_prefix %s',
-                      name_source="in_file", depracated=0.8, new_name="brain_file")
-
 
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
@@ -546,46 +538,6 @@ class Automask(AFNICommand):
     _cmd = '3dAutomask'
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
-
-    def _gen_filename(self, name):
-        trait_spec = self.inputs.trait(name)
-        if name == "out_file" and isdefined(self.inputs.mask_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.mask_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif name == "brain_file" and isdefined(self.inputs.apply_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.apply_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif name == "apply_mask" and isdefined(self.inputs.apply_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.apply_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif hasattr(self.inputs, name) and isdefined(getattr(self.inputs, name)):
-            return super(Automask, self)._gen_filename(name)
-        return Undefined
-
-    def _list_outputs(self):
-        outputs = super(Automask, self)._list_outputs()
-        if isdefined(self.inputs.apply_mask):
-            outputs['brain_file'] = os.path.abspath(
-                self._gen_filename('apply_mask'))
-        return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):
