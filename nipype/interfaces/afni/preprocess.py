@@ -512,7 +512,7 @@ class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
                     exists=True)
 
-    brain_file = File(desc='brain file (skull stripped)')
+    brain_file = File(desc='brain file (skull stripped)', exists=True)
 
 
 class Automask(AFNICommand):
