@@ -13,6 +13,7 @@ from copy import deepcopy
 import datetime
 import errno
 import os
+import re
 from socket import gethostname
 from string import Template
 import select
@@ -703,27 +704,37 @@ class BaseInterface(Interface):
         requires = spec.requires
 
         manhelpstr = ['\t%s' % name]
+
         try:
             setattr(inputs, name, None)
         except TraitError as excp:
             def_val = ''
             if getattr(spec, 'usedefault'):
-                def_val = ', nipype default value: %s' % str(getattr(spec, 'default_value')()[1])
+                def_arg = getattr(spec, 'default_value')()[1]
+                def_val = ', nipype default value: %s' % def_arg
             line = "(%s%s)" % (excp.info, def_val)
-            manhelpstr = wrap(line, 90, initial_indent=manhelpstr[0]+': ',
+            manhelpstr = wrap(line, 70,
+                              initial_indent=manhelpstr[0]+': ',
                               subsequent_indent='\t\t ')
+
         if desc:
             for line in desc.split('\n'):
-                manhelpstr += wrap(line, 90, initial_indent='\t\t',
+                line = re.sub("\s+", " ", line)
+                manhelpstr += wrap(line, 70,
+                                   initial_indent='\t\t',
                                    subsequent_indent='\t\t')
+
         if xor:
             line = '%s' % ', '.join(xor)
-            manhelpstr += wrap(line, 90, initial_indent='\t\tmutually_exclusive: ',
+            manhelpstr += wrap(line, 70,
+                               initial_indent='\t\tmutually_exclusive: ',
                                subsequent_indent='\t\t ')
-        if requires: # and name not in xor_done:
+
+        if requires:
             others = [field for field in requires if field != name]
             line = '%s' % ', '.join(others)
-            manhelpstr += wrap(line, 90, initial_indent='\t\trequires: ',
+            manhelpstr += wrap(line, 70,
+                               initial_indent='\t\trequires: ',
                                subsequent_indent='\t\t ')
         return manhelpstr
 
@@ -1247,7 +1258,7 @@ class CommandLine(BaseInterface):
             o, e = proc.communicate()
             return o
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes = [0]):
         """Execute command via subprocess
 
         Parameters
@@ -1268,7 +1279,7 @@ class CommandLine(BaseInterface):
             raise IOError("%s could not be found on host %s" % (self.cmd.split()[0],
                                                                 runtime.hostname))
         runtime = run_command(runtime, output=self.inputs.terminal_output)
-        if runtime.returncode is None or runtime.returncode != 0:
+        if runtime.returncode is None or runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
