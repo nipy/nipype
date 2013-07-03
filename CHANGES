@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: New interfaces: spm.ResliceToReference
 
 Release 0.8.0 (May 8, 2013)
 ===========================
