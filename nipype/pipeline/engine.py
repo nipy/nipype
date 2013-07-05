@@ -1666,7 +1666,7 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, name, iterfield=None, **kwargs):
+    def __init__(self, interface, name, iterfield, **kwargs):
         """
 
         Parameters
@@ -1675,7 +1675,7 @@ class MapNode(Node):
             node specific interface (fsl.Bet(), spm.Coregister())
         name : alphanumeric string
             node specific name
-        iterfield : list of strings
+        iterfield : string or list of strings
             name(s) of input fields that will receive a list of whatever kind
             of input they take. the node will be run separately for each
             value in these lists. for more than one input, the values are
@@ -1684,11 +1684,9 @@ class MapNode(Node):
         See Node docstring for additional keyword arguments.
         """
         super(MapNode, self).__init__(interface, name, **kwargs)
+        if isinstance(iterfield, str):
+            iterfield = [iterfield]
         self.iterfield = iterfield
-        if self.iterfield is None:
-            raise Exception("Iterfield must be provided")
-        elif isinstance(self.iterfield, str):
-            self.iterfield = [self.iterfield]
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
