@@ -1666,20 +1666,20 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, name, iterfield, **kwargs):
+    def __init__(self, interface, iterfield, name, **kwargs):
         """
 
         Parameters
         ----------
         interface : interface object
             node specific interface (fsl.Bet(), spm.Coregister())
-        name : alphanumeric string
-            node specific name
         iterfield : string or list of strings
             name(s) of input fields that will receive a list of whatever kind
             of input they take. the node will be run separately for each
             value in these lists. for more than one input, the values are
             paired (i.e. it does not compute a combinatorial product).
+        name : alphanumeric string
+            node specific name
 
         See Node docstring for additional keyword arguments.
         """
