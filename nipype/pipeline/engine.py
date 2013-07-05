@@ -209,8 +209,18 @@ class WorkflowBase(object):
 class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes."""
 
-    def __init__(self, name, *args, **kwargs):
-        super(Workflow, self).__init__(name, *args, **kwargs)
+    def __init__(self, name, base_dir=None, *args, **kwargs):
+        """Create a workflow object.
+
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+
+        """
+        super(Workflow, self).__init__(name, base_dir, *args, **kwargs)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
