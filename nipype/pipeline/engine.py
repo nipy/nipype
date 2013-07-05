@@ -226,8 +226,8 @@ class Workflow(WorkflowBase):
         Parameters
         ----------
 
-        name: string (mandatory )
-            every clone requires a new name
+        name: alphanumeric name
+            unique name for the workflow
 
         """
         clone = super(Workflow, self).clone(name)
@@ -1072,8 +1072,8 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> import nipype.interfaces.spm as spm
-    >>> realign = Node(interface=spm.Realign(), name='realign')
+    >>> from nipype import Node, spm
+    >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
@@ -1656,12 +1656,11 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> import nipype.interfaces.fsl as fsl
-    >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign',
-                          iterfield=['in_file']) # doctest: +SKIP
+    >>> from nipype import MapNode, fsl
+    >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
                                   'functional2.nii',
-                                  'functional3.nii'] # doctest: +SKIP
+                                  'functional3.nii']
     >>> realign.run() # doctest: +SKIP
 
     """
