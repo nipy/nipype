@@ -18,6 +18,7 @@ from copy import deepcopy
 import cPickle
 import inspect
 import os
+import re
 import shutil
 from shutil import rmtree
 from socket import gethostname
@@ -128,28 +129,22 @@ class WorkflowBase(object):
     """ Define common attributes and functions for workflows and nodes
     """
 
-    def __init__(self, name=None, base_dir=None, **kwargs):
+    def __init__(self, name, base_dir=None, **kwargs):
         """ Initialize base parameters of a workflow or node
 
         Parameters
         ----------
-
+        name : string (mandatory)
+            Name of this node. Name must be alphanumeric and not contain any
+            special characters (e.g., '.', '@').
         base_dir : string
             base output directory (will be hashed before creations)
             default=None, which results in the use of mkdtemp
 
-        name : string (mandatory)
-            Name of this node. Name must be alphanumeric and not contain any
-            special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
         self.config = None #deepcopy(config._sections)
-        if name is None:
-            raise Exception("init requires a name for this %s" %
-                            self.__class__.__name__)
-        if '.' in name:
-            raise Exception(('the name keyword-arg must not contain a period'
-                             ' "."'))
+        self._verify_name(name)
         self.name = name
         # for compatibility with node expansion using iterables
         self._id = self.name
@@ -181,6 +176,7 @@ class WorkflowBase(object):
         """
         if (name is None) or (name == self.name):
             raise Exception('Cloning requires a new name')
+        self._verify_name(name)
         clone = deepcopy(self)
         clone.name = name
         clone._id = name
@@ -192,6 +188,11 @@ class WorkflowBase(object):
 
     def _check_inputs(self, parameter):
         return hasattr(self.inputs, parameter)
+
+    def _verify_name(self, name):
+        valid_name = bool(re.match('^[\w-]+$', name))
+        if not valid_name:
+            raise Exception('the name must not contain any special characters')
 
     def __repr__(self):
         if self._hierarchy:
@@ -209,11 +210,10 @@ class WorkflowBase(object):
 
 
 class Workflow(WorkflowBase):
-    """Controls the setup and execution of a pipeline of processes
-    """
+    """Controls the setup and execution of a pipeline of processes."""
 
-    def __init__(self, *args, **kwargs):
-        super(Workflow, self).__init__(* args, **kwargs)
+    def __init__(self, name, *args, **kwargs):
+        super(Workflow, self).__init__(name, *args, **kwargs)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
@@ -1077,14 +1077,17 @@ class Node(WorkflowBase):
 
     """
 
-    def __init__(self, interface, iterables=None, overwrite=None,
+    def __init__(self, interface, name, iterables=None, overwrite=None,
                  needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
         ----------
 
         interface : interface object
-            node specific interface  (fsl.Bet(), spm.Coregister())
+            node specific interface (fsl.Bet(), spm.Coregister())
+
+        name : alphanumeric string
+            node specific name
 
         iterables : generator
             input field and list to iterate using the pipeline engine
@@ -1108,13 +1111,15 @@ class Node(WorkflowBase):
         run_without_submitting : boolean
             Run the node without submitting to a job engine or to a
             multiprocessing pool
+
         """
-        super(Node, self).__init__(**kwargs)
+        super(Node, self).__init__(name, **kwargs)
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
         self._interface = interface
+        self.name = name
         self._result = None
         self.iterables = iterables
         self.overwrite = overwrite
@@ -1642,20 +1647,24 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, iterfield=None, **kwargs):
+    def __init__(self, interface, name, iterfield=None, **kwargs):
         """
 
         Parameters
         ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        name : alphanumeric string
+            node specific name
+        iterfield : list of strings
+            name(s) of input fields that will receive a list of whatever kind
+            of input they take. the node will be run separately for each
+            value in these lists. for more than one input, the values are
+            paired (i.e. it does not compute a combinatorial product).
 
-        iterfield : 1+-element list
-        key(s) over which to repeatedly call the interface.
-        for example, to iterate FSL.Bet over multiple files, one can
-        set node.iterfield = ['infile'].  If this list has more than 1 item
-        then the inputs are selected in order simultaneously from each of these
-        fields and each field will need to have the same number of members.
+        See Node docstring for additional keyword arguments.
         """
-        super(MapNode, self).__init__(interface, **kwargs)
+        super(MapNode, self).__init__(interface, name, **kwargs)
         self.iterfield = iterfield
         if self.iterfield is None:
             raise Exception("Iterfield must be provided")
