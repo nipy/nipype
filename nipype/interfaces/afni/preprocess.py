@@ -507,18 +507,6 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     erode = traits.Int(desc='erode the mask inwards',
                        argstr="-erode %s")
 
-<<<<<<< HEAD
-    mask_suffix = traits.Str(
-        desc="out_file suffix", deprecated=0.8, new_name="out_file")
-    apply_suffix = traits.Str(
-        desc="out_file suffix", deprecated=0.8, new_name="brain_file")
-    #apply_mask = File(desc="output file from 3dAutomask",
-                      #argstr='-apply_prefix %s',
-                      #name_source="in_file", deprecated=0.8, new_name="brain_file")
-
-=======
->>>>>>> upstream/master
-
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
                     exists=True)
@@ -549,6 +537,7 @@ class Automask(AFNICommand):
     _cmd = '3dAutomask'
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
+
 
 class VolregInputSpec(AFNICommandInputSpec):
 
