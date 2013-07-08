@@ -711,7 +711,7 @@ class BaseInterface(Interface):
             def_val = ''
             if getattr(spec, 'usedefault'):
                 def_arg = getattr(spec, 'default_value')()[1]
-                def_val = ', nipype default value: %s' % def_arg
+                def_val = ', nipype default value: %s' % str(def_arg)
             line = "(%s%s)" % (excp.info, def_val)
             manhelpstr = wrap(line, 70,
                               initial_indent=manhelpstr[0]+': ',
