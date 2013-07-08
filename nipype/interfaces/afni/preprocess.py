@@ -507,6 +507,7 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     erode = traits.Int(desc='erode the mask inwards',
                        argstr="-erode %s")
 
+
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
                     exists=True)
