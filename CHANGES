@@ -1,6 +1,10 @@
 Next release
 ============
 
+* ENH: New interfaces: spm.ResliceToReference
+
+* FIX: Deals properly with 3d files in SPM Realign
+
 
 Release 0.8.0 (May 8, 2013)
 ===========================

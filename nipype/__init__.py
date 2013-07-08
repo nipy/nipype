@@ -15,6 +15,12 @@ from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
 
+from pipeline import Node, MapNode, Workflow
+from interfaces import (fsl, spm, freesurfer, afni, ants, slicer, dipy, nipy,
+                        mrtrix, camino, DataGrabber, DataSink,
+                        IdentityInterface, Rename, Function, Select, Merge)
+
+
 class _NoseTester(nosetester.NoseTester):
     """ Subclass numpy's NoseTester to add doctests by default
     """

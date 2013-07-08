@@ -52,10 +52,10 @@ class LSFPlugin(SGELikeBatchManagerBase):
         result = cmd.run(ignore_exception=True)
         iflogger.setLevel(oldlevel)
         # logger.debug(result.runtime.stdout)
-        if 'PEND' in result.runtime.stdout or 'RUN' in result.runtime.stdout:
-            return True
-        else:
+        if 'DONE' in result.runtime.stdout or 'EXIT' in result.runtime.stdout:
             return False
+        else:
+            return True
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('bsub', environ=os.environ.data,
@@ -71,9 +71,9 @@ class LSFPlugin(SGELikeBatchManagerBase):
             else:
                 bsubargs += (" " + node.plugin_args['bsub_args'])
         if '-o' not in bsubargs:  # -o outfile
-            bsubargs = '%s -o %s' % (bsubargs, path)
+            bsubargs = '%s -o %s' % (bsubargs, scriptfile + ".log")
         if '-e' not in bsubargs:
-            bsubargs = '%s -e %s' % (bsubargs, path)  # -e error file
+            bsubargs = '%s -e %s' % (bsubargs, scriptfile + ".log")  # -e error file
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
