@@ -24,7 +24,7 @@ from nipype.interfaces.base import (load_template, File, traits, isdefined,
                                     InputMultiPath, OutputMultiPath,
                                     BaseInterfaceInputSpec)
 from nipype.utils.filemanip import (
-    list_to_filename, filename_to_list, split_filename)
+    list_to_filename, filename_to_list, fname_presuffix)
 from nibabel import load
 
 warn = warnings.warn
@@ -1769,7 +1769,6 @@ class GLM(FSLCommand):
 
     def _gen_filename(self, name):
         if name in ('out_file'):
-            from nipype.utils.filemanip import fname_presuffix
             return fname_presuffix(self.inputs.in_file,
                                    suffix='_glm.txt', use_ext=False)
         return None
