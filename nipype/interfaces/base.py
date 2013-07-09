@@ -1375,7 +1375,9 @@ class CommandLine(BaseInterface):
         if out_names:
             outputs = self.output_spec().get()
             for name in out_names:
-                outputs[name] = os.path.abspath(self._filename_from_source(name))
+                fname = self._filename_from_source(name)
+                if isdefined(fname):
+                    outputs[name] = os.path.abspath(fname)
             return outputs
 
     def _parse_inputs(self, skip=None):
