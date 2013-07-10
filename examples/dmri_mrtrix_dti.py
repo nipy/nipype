@@ -27,6 +27,8 @@ import nipype.interfaces.fsl as fsl
 import nipype.algorithms.misc as misc
 import os, os.path as op                     # system functions
 
+fsl.FSLCommand.set_default_output_type('NIFTI')
+
 """
 This needs to point to the fdt folder you can find after extracting
 

@@ -387,16 +387,13 @@ def test_maskave():
 
 
 def test_automask():
-    input_map = dict(apply_mask=dict(argstr='-apply_prefix %s'),
-                     apply_suffix=dict(),
-                     args=dict(argstr='%s',),
+    input_map = dict(args=dict(argstr='%s',),
                      clfrac=dict(argstr='-dilate %s',),
                      dilate=dict(argstr='-dilate %s',),
                      environ=dict(usedefault=True,),
                      erode=dict(argstr='-erode %s',),
                      ignore_exception=dict(usedefault=True,),
                      in_file=dict(argstr='%s', mandatory=True,),
-                     mask_suffix=dict(),
                      out_file=dict(argstr='-prefix %s'),
                      outputtype=dict(),
                      )
