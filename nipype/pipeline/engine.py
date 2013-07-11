@@ -18,6 +18,8 @@ from copy import deepcopy
 import cPickle
 import inspect
 import os
+import os.path as op
+import re
 import shutil
 from shutil import rmtree
 from socket import gethostname
@@ -64,7 +66,8 @@ def _write_inputs(node):
                 except RuntimeError, e:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
-                    funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                    funcname = [name for name in func.func_globals
+                                if name != '__builtins__'][0]
                     lines.append(cPickle.loads(val))
                     if funcname == nodename:
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
@@ -80,8 +83,7 @@ def _write_inputs(node):
 
 
 def format_node(node, format='python', include_config=False):
-    """Format a node in a given output syntax
-    """
+    """Format a node in a given output syntax."""
     lines = []
     name = node.fullname.replace('.', '_')
     if format == 'python':
@@ -100,56 +102,46 @@ def format_node(node, format='python', include_config=False):
             args = ', '.join(filled_args)
         else:
             args = ''
+        klass_name = klass.__class__.__name__
         if isinstance(node, MapNode):
-            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' % (name,
-                                                                       klass.__class__.__name__,
-                                                                       args,
-                                                                       node.iterfield,
-                                                                       name)
+            nodedef = '%s = MapNode(%s(%s), iterfield=%s, name="%s")' \
+                      % (name, klass_name, args, node.iterfield, name)
         else:
-            nodedef = '%s = Node(%s(%s), name="%s")' % (name,
-                                                      klass.__class__.__name__,
-                                                      args,
-                                                      name)
+            nodedef = '%s = Node(%s(%s), name="%s")' \
+                      % (name, klass_name, args, name)
         lines = [importline, comment, nodedef]
-        
+
         if include_config:
-            lines = [importline, "from collections import OrderedDict", comment, nodedef]
+            lines = [importline, "from collections import OrderedDict",
+                     comment, nodedef]
             lines.append('%s.config = %s' % (name, node.config))
-        
+
         if node.iterables is not None:
             lines.append('%s.iterables = %s' % (name, node.iterables))
         lines.extend(_write_inputs(node))
-        
+
     return lines
 
 
 class WorkflowBase(object):
-    """ Define common attributes and functions for workflows and nodes
-    """
+    """Defines common attributes and functions for workflows and nodes."""
 
-    def __init__(self, name=None, base_dir=None, **kwargs):
+    def __init__(self, name, base_dir=None, **kwargs):
         """ Initialize base parameters of a workflow or node
 
         Parameters
         ----------
-
+        name : string (mandatory)
+            Name of this node. Name must be alphanumeric and not contain any
+            special characters (e.g., '.', '@').
         base_dir : string
             base output directory (will be hashed before creations)
             default=None, which results in the use of mkdtemp
 
-        name : string (mandatory)
-            Name of this node. Name must be alphanumeric and not contain any
-            special characters (e.g., '.', '@').
         """
         self.base_dir = base_dir
-        self.config = None #deepcopy(config._sections)
-        if name is None:
-            raise Exception("init requires a name for this %s" %
-                            self.__class__.__name__)
-        if '.' in name:
-            raise Exception(('the name keyword-arg must not contain a period'
-                             ' "."'))
+        self.config = None
+        self._verify_name(name)
         self.name = name
         # for compatibility with node expansion using iterables
         self._id = self.name
@@ -181,6 +173,7 @@ class WorkflowBase(object):
         """
         if (name is None) or (name == self.name):
             raise Exception('Cloning requires a new name')
+        self._verify_name(name)
         clone = deepcopy(self)
         clone.name = name
         clone._id = name
@@ -192,6 +185,11 @@ class WorkflowBase(object):
 
     def _check_inputs(self, parameter):
         return hasattr(self.inputs, parameter)
+
+    def _verify_name(self, name):
+        valid_name = bool(re.match('^[\w-]+$', name))
+        if not valid_name:
+            raise Exception('the name must not contain any special characters')
 
     def __repr__(self):
         if self._hierarchy:
@@ -209,11 +207,20 @@ class WorkflowBase(object):
 
 
 class Workflow(WorkflowBase):
-    """Controls the setup and execution of a pipeline of processes
-    """
+    """Controls the setup and execution of a pipeline of processes."""
 
-    def __init__(self, *args, **kwargs):
-        super(Workflow, self).__init__(* args, **kwargs)
+    def __init__(self, name, base_dir=None, *args, **kwargs):
+        """Create a workflow object.
+
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+
+        """
+        super(Workflow, self).__init__(name, base_dir, *args, **kwargs)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
@@ -229,8 +236,8 @@ class Workflow(WorkflowBase):
         Parameters
         ----------
 
-        name: string (mandatory )
-            every clone requires a new name
+        name: alphanumeric name
+            unique name for the workflow
 
         """
         clone = super(Workflow, self).clone(name)
@@ -294,10 +301,12 @@ class Workflow(WorkflowBase):
         newnodes = []
         for srcnode, destnode, _ in connection_list:
             if self in [srcnode, destnode]:
-                raise IOError(('Workflow connect cannot contain itself as node:'
-                               ' src[%s] dest[%s] workflow[%s]') % (srcnode,
-                                                                    destnode,
-                                                                    self.name))
+                msg = ('Workflow connect cannot contain itself as node:'
+                       ' src[%s] dest[%s] workflow[%s]') % (srcnode,
+                                                            destnode,
+                                                            self.name)
+
+                raise IOError(msg)
             if (srcnode not in newnodes) and not self._has_node(srcnode):
                 newnodes.append(srcnode)
             if (destnode not in newnodes) and not self._has_node(destnode):
@@ -368,8 +377,8 @@ connected.
         for srcnode, destnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(srcnode, destnode, None)
             if edge_data:
-                logger.debug('(%s, %s): Edge data exists: %s' % \
-                                 (srcnode, destnode, str(edge_data)))
+                logger.debug('(%s, %s): Edge data exists: %s'
+                             % (srcnode, destnode, str(edge_data)))
                 for data in connects:
                     if data not in edge_data['connect']:
                         edge_data['connect'].append(data)
@@ -377,7 +386,9 @@ connected.
                         logger.debug('Removing connection: %s' % str(data))
                         edge_data['connect'].remove(data)
                 if edge_data['connect']:
-                    self._graph.add_edges_from([(srcnode, destnode, edge_data)])
+                    self._graph.add_edges_from([(srcnode,
+                                                 destnode,
+                                                 edge_data)])
                 else:
                     #pass
                     logger.debug('Removing connection: %s->%s' % (srcnode,
@@ -415,8 +426,8 @@ connected.
             if isinstance(node, Workflow):
                 for subnode in node._get_all_nodes():
                     if subnode in all_nodes:
-                        raise IOError(('Subnode %s of node %s already exists in'
-                                       ' the workflow') % (subnode, node))
+                        raise IOError(('Subnode %s of node %s already exists '
+                                       'in the workflow') % (subnode, node))
             newnodes.append(node)
         if not newnodes:
             logger.debug('no new nodes to add')
@@ -465,7 +476,6 @@ connected.
             outnode = None
         return outnode
 
-
     def list_node_names(self):
         """List names of all nodes in a workflow
         """
@@ -477,7 +487,6 @@ connected.
             else:
                 outlist.append(node.name)
         return sorted(outlist)
-
 
     def write_graph(self, dotfilename='graph.dot', graph2use='hierarchical',
                     format="png", simple_form=True):
@@ -544,22 +553,21 @@ connected.
         else:
             logger.info(dotstr)
 
-    def export(self, filename=None, prefix="output", format="python", include_config=False):
+    def export(self, filename=None, prefix="output", format="python",
+               include_config=False):
         """Export object into a different format
 
         Parameters
         ----------
         filename: string
            file to save the code to; overrides prefix
-
         prefix: string
            prefix to use for output file
-
         format: string
            one of "python"
-           
         include_config: boolean
            whether to include node and workflow config values
+
         """
         formats = ["python"]
         if format not in formats:
@@ -568,11 +576,13 @@ connected.
         nodes = nx.topological_sort(flatgraph)
 
         lines = ['# Workflow']
-        importlines = ['from nipype.pipeline.engine import Workflow, Node, MapNode']
+        importlines = ['from nipype.pipeline.engine import Workflow, '
+                       'Node, MapNode']
         functions = {}
         if format == "python":
             connect_template = '%s.connect(%%s, %%s, %%s, "%%s")' % self.name
-            connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' % self.name
+            connect_template2 = '%s.connect(%%s, "%%s", %%s, "%%s")' \
+                                % self.name
             wfdef = '%s = Workflow("%s")' % (self.name, self.name)
             lines.append(wfdef)
             if include_config:
@@ -580,7 +590,8 @@ connected.
             for idx, node in enumerate(nodes):
                 nodename = node.fullname.replace('.', '_')
                 # write nodes
-                nodelines = format_node(node, format='python', include_config=include_config)
+                nodelines = format_node(node, format='python',
+                                        include_config=include_config)
                 for line in nodelines:
                     if line.startswith('from'):
                         if line not in importlines:
@@ -597,26 +608,28 @@ connected.
                                 funcname = functions[args[1]]
                             else:
                                 func = create_function_from_source(args[1])
-                                funcname = [name for name in func.func_globals if name != '__builtins__'][0]
+                                funcname = [name for name in func.func_globals
+                                            if name != '__builtins__'][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
                             args = tuple([arg for arg in args if arg])
-                            line = connect_template % (u.fullname.replace('.','_'), args,
-                                                       nodename, cd[1])
+                            line_args = (u.fullname.replace('.', '_'),
+                                         args, nodename, cd[1])
+                            line = connect_template % line_args
                             line = line.replace("'%s'" % funcname, funcname)
                             lines.append(line)
                         else:
-                            lines.append(connect_template2 % (u.fullname.replace('.','_'), cd[0],
-                                                              nodename, cd[1]))
+                            line_args = (u.fullname.replace('.', '_'),
+                                         cd[0], nodename, cd[1])
+                            lines.append(connect_template2 % line_args)
             functionlines = ['# Functions']
             for function in functions:
                 functionlines.append(cPickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
-            
+
             if not filename:
                 filename = '%s%s.py' % (prefix, self.name)
             with open(filename, 'wt') as fp:
-                #fp.writelines('\n'.join([line.replace('\n', '\\n') for line in all_lines]))
                 fp.writelines('\n'.join(all_lines))
         return all_lines
 
@@ -652,7 +665,8 @@ connected.
         if 'crashdump_dir' in self.config:
             warn(("Deprecated: workflow.config['crashdump_dir']\n"
                   "Please use config['execution']['crashdump_dir']"))
-            self.config['execution']['crashdump_dir'] = self.config['crashdump_dir']
+            crash_dir = self.config['crashdump_dir']
+            self.config['execution']['crashdump_dir'] = crash_dir
             del self.config['crashdump_dir']
         logger.info(str(sorted(self.config)))
         self._set_needed_outputs(flatgraph)
@@ -686,9 +700,9 @@ connected.
         nodes = nx.topological_sort(graph)
         report_files = []
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_%s.pklz";' % (i,
-                                           os.path.realpath(node.output_dir()),
-                                           node.name))
+            report_files.append('result_files[%d] = "%s/result_%s.pklz";'
+                                % (i, os.path.realpath(node.output_dir()),
+                                   node.name))
             report_files.append('report_files[%d] = "%s/_report/report.rst";' %
                                 (i, os.path.realpath(node.output_dir())))
         report_files = '\n'.join(report_files)
@@ -728,9 +742,9 @@ connected.
         fp.close()
 
     def _set_needed_outputs(self, graph):
-        """Initialize node with list of which outputs are needed
-        """
-        if not str2bool(self.config['execution']['remove_unnecessary_outputs']):
+        """Initialize node with list of which outputs are needed."""
+        rm_outputs = self.config['execution']['remove_unnecessary_outputs']
+        if not str2bool(rm_outputs):
             return
         for node in graph.nodes():
             node.needed_outputs = []
@@ -755,9 +769,9 @@ connected.
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = \
-                                        (os.path.join(edge[0].output_dir(),
-                                             'result_%s.pklz' % edge[0].name),
-                                         sourceinfo)
+                        (os.path.join(edge[0].output_dir(),
+                         'result_%s.pklz' % edge[0].name),
+                         sourceinfo)
 
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
@@ -893,8 +907,7 @@ connected.
         return False
 
     def _create_flat_graph(self):
-        """Turn a hierarchical DAG into a simple DAG where no node is a workflow
-        """
+        """Make a simple DAG where no node is a workflow."""
         logger.debug('Creating flat graph for workflow: %s', self.name)
         workflowcopy = deepcopy(self)
         workflowcopy._generate_flatgraph()
@@ -936,8 +949,8 @@ connected.
                         srcnode = u
                         srcout = cd[0]
                         dstin = cd[1].split('.')[-1]
-                        logger.debug('in edges: %s %s %s %s' % (srcnode, srcout,
-                                                                dstnode, dstin))
+                        logger.debug('in edges: %s %s %s %s' %
+                                     (srcnode, srcout, dstnode, dstin))
                         self.disconnect(u, cd[0], node, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # do not use out_edges_iter for reasons stated in in_edges
@@ -1069,22 +1082,25 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> import nipype.interfaces.spm as spm
-    >>> realign = Node(interface=spm.Realign(), name='realign')
+    >>> from nipype import Node, spm
+    >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
     >>> realign.run() # doctest: +SKIP
 
     """
 
-    def __init__(self, interface, iterables=None, overwrite=None,
+    def __init__(self, interface, name, iterables=None, overwrite=None,
                  needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
         ----------
 
         interface : interface object
-            node specific interface  (fsl.Bet(), spm.Coregister())
+            node specific interface (fsl.Bet(), spm.Coregister())
+
+        name : alphanumeric string
+            node specific name
 
         iterables : generator
             input field and list to iterate using the pipeline engine
@@ -1100,21 +1116,23 @@ class Node(WorkflowBase):
             assumes that process has been executed
 
         needed_outputs : list of output_names
-            Force the node to keep only specific outputs. By default all outputs are
-            kept. Setting this attribute will delete any output files and
-            directories from the node's working directory that are not part of the
-            `needed_outputs`.
+            Force the node to keep only specific outputs. By default all
+            outputs are kept. Setting this attribute will delete any output
+            files and directories from the node's working directory that are
+            not part of the `needed_outputs`.
 
         run_without_submitting : boolean
             Run the node without submitting to a job engine or to a
             multiprocessing pool
+
         """
-        super(Node, self).__init__(**kwargs)
+        super(Node, self).__init__(name, **kwargs)
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
         self._interface = interface
+        self.name = name
         self._result = None
         self.iterables = iterables
         self.overwrite = overwrite
@@ -1182,7 +1200,6 @@ class Node(WorkflowBase):
         """ Print interface help"""
         self._interface.help()
 
-
     def hash_exists(self, updatehash=False):
         # Get a dictionary with hashed filenames and a hashvalue
         # of the dictionary itself.
@@ -1215,22 +1232,26 @@ class Node(WorkflowBase):
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
-        hash_exists, hashvalue, hashfile, hashed_inputs = self.hash_exists(updatehash=updatehash)
-
-        if (not updatehash and (((self.overwrite == None
+        hash_info = self.hash_exists(updatehash=updatehash)
+        hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
+        if (not updatehash and (((self.overwrite is None
                                   and self._interface.always_run)
                                  or self.overwrite) or
                                 not hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
-            #by rerunning we mean only nodes that did finish to run previously
-            if os.path.exists(outdir) \
-            and not isinstance(self, MapNode) \
-            and len(glob(os.path.join(outdir, '_0x*.json'))) != 0 \
-            and len(glob(os.path.join(outdir, '_0x*_unfinished.json'))) == 0:
+            # by rerunning we mean only nodes that did finish to run previously
+            json_pat = op.join(outdir, '_0x*.json')
+            json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
+            need_rerun = (os.path.exists(outdir)
+                          and not isinstance(self, MapNode)
+                          and len(glob(json_pat)) != 0
+                          and len(glob(json_unfinished_pat)) == 0)
+            if need_rerun:
                 logger.debug("Rerunning node")
                 logger.debug(("updatehash = %s, "
-                              "self.overwrite = %s, self._interface.always_run = %s, "
+                              "self.overwrite = %s, "
+                              "self._interface.always_run = %s, "
                               "os.path.exists(%s) = %s, "
                               "hash_method = %s") %
                              (str(updatehash),
@@ -1239,33 +1260,38 @@ class Node(WorkflowBase):
                               hashfile,
                               str(os.path.exists(hashfile)),
                               self.config['execution']['hash_method'].lower()))
-                if config.get('logging', 'workflow_level') == 'DEBUG' and \
-                   not os.path.exists(hashfile):
-                        exp_hash_paths = glob(os.path.join(outdir, '_0x*.json'))
-                        if len(exp_hash_paths) == 1:
-                            _, exp_hash_file_base, _ = split_filename(exp_hash_paths[0])
-                            exp_hash = exp_hash_file_base[len('_0x'):]
-                            logger.debug("Previous node hash = %s" % exp_hash)
-                            try:
-                                prev_inputs = load_json(exp_hash_paths[0])
-                            except:
-                                pass
-                            else:
-                                logging.logdebug_dict_differences(prev_inputs,
-                                                                  hashed_inputs)
-                if (str2bool(self.config['execution']['stop_on_first_rerun']) and
-                    not (self.overwrite == None and self._interface.always_run)):
+                log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
+                if log_debug and not op.exists(hashfile):
+                    exp_hash_paths = glob(json_pat)
+                    if len(exp_hash_paths) == 1:
+                        split_out = split_filename(exp_hash_paths[0])
+                        exp_hash_file_base = split_out[1]
+                        exp_hash = exp_hash_file_base[len('_0x'):]
+                        logger.debug("Previous node hash = %s" % exp_hash)
+                        try:
+                            prev_inputs = load_json(exp_hash_paths[0])
+                        except:
+                            pass
+                        else:
+                            logging.logdebug_dict_differences(prev_inputs,
+                                                              hashed_inputs)
+                cannot_rerun = (str2bool(
+                    self.config['execution']['stop_on_first_rerun'])
+                    and (self.overwrite is not None
+                         and self._interface.always_run))
+                if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
             hashfile_unfinished = os.path.join(outdir,
                                                '_0x%s_unfinished.json' %
                                                hashvalue)
-            if os.path.exists(hashfile):
+            if op.exists(hashfile):
                 os.remove(hashfile)
-            if os.path.exists(outdir) and \
-               not (os.path.exists(hashfile_unfinished) and
-                    self._interface.can_resume) and \
-               not isinstance(self, MapNode):
+            rm_outdir = (op.exists(outdir)
+                         and not (op.exists(hashfile_unfinished)
+                                  and self._interface.can_resume)
+                         and not isinstance(self, MapNode))
+            if rm_outdir:
                 logger.debug("Removing old %s and its contents" % outdir)
                 rmtree(outdir)
             else:
@@ -1306,8 +1332,8 @@ class Node(WorkflowBase):
             self._got_inputs = True
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
-        if str2bool(self.config['execution']['remove_unnecessary_outputs']) \
-            and self.needed_outputs:
+        rm_extra = self.config['execution']['remove_unnecessary_outputs']
+        if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
             sorted_outputs = sorted(self.needed_outputs)
@@ -1458,15 +1484,17 @@ class Node(WorkflowBase):
                 self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
-                aggouts = self._interface.aggregate_outputs(needed_outputs=self.needed_outputs)
+                aggouts = self._interface.aggregate_outputs(
+                    needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
                                 environ=deepcopy(os.environ.data),
                                 hostname=gethostname())
-                result = InterfaceResult(interface=self._interface.__class__,
-                                         runtime=runtime,
-                                         inputs=self._interface.inputs.get_traitsfree(),
-                                         outputs=aggouts)
+                result = InterfaceResult(
+                    interface=self._interface.__class__,
+                    runtime=runtime,
+                    inputs=self._interface.inputs.get_traitsfree(),
+                    outputs=aggouts)
                 self._save_results(result, cwd)
             else:
                 logger.debug('aggregating mapnode results')
@@ -1482,9 +1510,10 @@ class Node(WorkflowBase):
             runtime = Bunch(returncode=1,
                             environ=deepcopy(os.environ.data),
                             hostname=gethostname())
-            result = InterfaceResult(interface=self._interface.__class__,
-                                     runtime=runtime,
-                                     inputs=self._interface.inputs.get_traitsfree())
+            result = InterfaceResult(
+                interface=self._interface.__class__,
+                runtime=runtime,
+                inputs=self._interface.inputs.get_traitsfree())
             self._result = result
             logger.debug('Executing node')
             if copyfiles:
@@ -1552,7 +1581,7 @@ class Node(WorkflowBase):
                     infiles = filename_to_list(files)
                     if execute:
                         if linksonly:
-                            if info['copy'] == False:
+                            if not info['copy']:
                                 newfiles = copyfiles(infiles,
                                                      [outdir],
                                                      copy=info['copy'],
@@ -1560,8 +1589,9 @@ class Node(WorkflowBase):
                             else:
                                 newfiles = fnames_presuffix(infiles,
                                                             newpath=outdir)
-                            newfiles = self._strip_temp(newfiles,
-                                os.path.abspath(olddir).split(os.path.sep)[-1])
+                            newfiles = self._strip_temp(
+                                newfiles,
+                                op.abspath(olddir).split(os.path.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles,
                                                  [outdir],
@@ -1599,8 +1629,9 @@ class Node(WorkflowBase):
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
-            if not hasattr(self.result, 'outputs') or \
-               self.result.outputs is None:
+            exit_now = (not hasattr(self.result, 'outputs')
+                        or self.result.outputs is None)
+            if exit_now:
                 return
             fp.writelines(write_rst_header('Execution Outputs', level=1))
             if isinstance(self.result.outputs, Bunch):
@@ -1613,13 +1644,13 @@ class Node(WorkflowBase):
             fp.writelines(write_rst_header('Runtime info', level=1))
             if hasattr(self.result.runtime, 'cmdline'):
                 fp.writelines(write_rst_dict(
-                        {'hostname': self.result.runtime.hostname,
-                         'duration': self.result.runtime.duration,
-                         'command': self.result.runtime.cmdline}))
+                    {'hostname': self.result.runtime.hostname,
+                     'duration': self.result.runtime.duration,
+                     'command': self.result.runtime.cmdline}))
             else:
                 fp.writelines(write_rst_dict(
-                        {'hostname': self.result.runtime.hostname,
-                         'duration': self.result.runtime.duration}))
+                    {'hostname': self.result.runtime.hostname,
+                     'duration': self.result.runtime.duration}))
             if hasattr(self.result.runtime, 'merged'):
                 fp.writelines(write_rst_header('Terminal output', level=2))
                 fp.writelines(write_rst_list(self.result.runtime.merged))
@@ -1635,32 +1666,36 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> import nipype.interfaces.fsl as fsl
-    >>> realign = MapNode(interface=fsl.MCFLIRT(), name='realign', iterfield=['in_file']) # doctest: +SKIP
-    >>> realign.inputs.in_file = ['functional.nii', 'functional2.nii', 'functional3.nii'] # doctest: +SKIP
+    >>> from nipype import MapNode, fsl
+    >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
+    >>> realign.inputs.in_file = ['functional.nii',
+                                  'functional2.nii',
+                                  'functional3.nii']
     >>> realign.run() # doctest: +SKIP
 
     """
 
-    def __init__(self, interface, iterfield=None, **kwargs):
+    def __init__(self, interface, iterfield, name, **kwargs):
         """
 
         Parameters
         ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        iterfield : string or list of strings
+            name(s) of input fields that will receive a list of whatever kind
+            of input they take. the node will be run separately for each
+            value in these lists. for more than one input, the values are
+            paired (i.e. it does not compute a combinatorial product).
+        name : alphanumeric string
+            node specific name
 
-        iterfield : 1+-element list
-        key(s) over which to repeatedly call the interface.
-        for example, to iterate FSL.Bet over multiple files, one can
-        set node.iterfield = ['infile'].  If this list has more than 1 item
-        then the inputs are selected in order simultaneously from each of these
-        fields and each field will need to have the same number of members.
+        See Node docstring for additional keyword arguments.
         """
-        super(MapNode, self).__init__(interface, **kwargs)
+        super(MapNode, self).__init__(interface, name, **kwargs)
+        if isinstance(iterfield, str):
+            iterfield = [iterfield]
         self.iterfield = iterfield
-        if self.iterfield is None:
-            raise Exception("Iterfield must be provided")
-        elif isinstance(self.iterfield, str):
-            self.iterfield = [self.iterfield]
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
@@ -1705,8 +1740,7 @@ class MapNode(Node):
             setattr(self._interface.inputs, name, newvalue)
 
     def _get_hashval(self):
-        """ Compute hash including iterfield lists
-        """
+        """ Compute hash including iterfield lists."""
         if not self._got_inputs:
             self._get_inputs()
             self._got_inputs = True
@@ -1714,14 +1748,17 @@ class MapNode(Node):
         hashinputs = deepcopy(self._interface.inputs)
         for name in self.iterfield:
             hashinputs.remove_trait(name)
-            hashinputs.add_trait(name,
-                                 InputMultiPath(self._interface.inputs.traits()[name].trait_type))
+            hashinputs.add_trait(
+                name,
+                InputMultiPath(
+                    self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s' %
                          (name, getattr(self._inputs, name)))
             setattr(hashinputs, name, getattr(self._inputs, name))
-        hashed_inputs, hashvalue = hashinputs.get_hashval(hash_method=self.config['execution']['hash_method'])
-        if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
-        self.needed_outputs:
+        hashed_inputs, hashvalue = hashinputs.get_hashval(
+            hash_method=self.config['execution']['hash_method'])
+        rm_extra = self.config['execution']['remove_unnecessary_outputs']
+        if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
             hashobject.update(hashvalue)
             sorted_outputs = sorted(self.needed_outputs)
@@ -1751,7 +1788,8 @@ class MapNode(Node):
             node.overwrite = self.overwrite
             node.run_without_submitting = self.run_without_submitting
             node.plugin_args = self.plugin_args
-            node._interface.inputs.set(**deepcopy(self._interface.inputs.get()))
+            node._interface.inputs.set(
+                **deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
                 fieldvals = filename_to_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s' % (i, field,
@@ -1785,8 +1823,9 @@ class MapNode(Node):
             returncode.insert(i, err)
             if self.outputs:
                 for key, _ in self.outputs.items():
-                    if str2bool(self.config['execution']['remove_unnecessary_outputs']) and \
-                    self.needed_outputs:
+                    rm_extra = (self.config['execution']
+                                ['remove_unnecessary_outputs'])
+                    if str2bool(rm_extra) and self.needed_outputs:
                         if key not in self.needed_outputs:
                             continue
                     values = getattr(self._result.outputs, key)
@@ -1796,8 +1835,8 @@ class MapNode(Node):
                         values.insert(i, node.result.outputs.get()[key])
                     else:
                         values.insert(i, None)
-                    if any([isdefined(val) for val in values]) and \
-                       self._result.outputs:
+                    defined_vals = [isdefined(val) for val in values]
+                    if any(defined_vals) and self._result.outputs:
                         setattr(self._result.outputs, key, values)
         if returncode and any([code is not None for code in returncode]):
             msg = []
@@ -1819,7 +1858,8 @@ class MapNode(Node):
             report_file = os.path.join(report_dir, 'report.rst')
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Subnode reports', level=1))
-            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+            nitems = len(filename_to_list(
+                getattr(self.inputs, self.iterfield[0])))
             subnode_report_files = []
             for i in range(nitems):
                 nodename = '_' + self.name + str(i)
