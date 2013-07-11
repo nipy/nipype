@@ -1669,8 +1669,8 @@ class MapNode(Node):
     >>> from nipype import MapNode, fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
-                                  'functional2.nii',
-                                  'functional3.nii']
+    ...                           'functional2.nii',
+    ...                           'functional3.nii']
     >>> realign.run() # doctest: +SKIP
 
     """
