@@ -108,7 +108,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
                 break
         iflogger.setLevel(oldlevel)
         # retrieve sge taskid
-        taskid = int(result.runtime.stdout.split(' ')[2])
+        lines = [line for line in result.runtime.stdout.split('\n') if line]
+        taskid = int(lines[-1].split(' ')[2])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sge task: %d for node %s' % (taskid, node._id))
         return taskid
