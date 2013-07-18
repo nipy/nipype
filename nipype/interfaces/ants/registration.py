@@ -205,8 +205,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     invert_initial_moving_transform = traits.Bool(
         default=False, requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
+
     initial_moving_transform_com = traits.Bool(argstr='%s',
-                                               xor=['initial_moving_transform'],
+                    default=False, xor=['initial_moving_transform'],
                     desc="Use center of mass for moving transform")
     metric = traits.List(traits.Enum("CC", "MeanSquares", "Demons",
                          "GC", "MI", "Mattes"), mandatory=True, desc='')
@@ -466,12 +467,20 @@ class Registration(ANTSCommand):
         elif opt == 'transforms':
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
+            try:
+                doInvertTransform = int(self.inputs.invert_initial_moving_transform)
+            except:
+                doInvertTransform = 0 ## Just do the default behavior
             return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
-                                                              int(self.inputs.invert_initial_moving_transform))
+                                                              doInvertTransform)
         elif opt == 'initial_moving_transform_com':
+            try:
+                doCenterOfMassInit = int(self.inputs.initial_moving_transform_com)
+            except:
+                doCenterOfMassInit = 0 ## Just do the default behavior
             return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
                                                                   self.inputs.moving_image[0],
-                                                                  int(self.inputs.initial_moving_transform_com))
+                                                                  doCenterOfMassInit)
         elif opt == 'interpolation':
             # TODO: handle multilabel, gaussian, and bspline options
             return '--interpolation %s' % self.inputs.interpolation
