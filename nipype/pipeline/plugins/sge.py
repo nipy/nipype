@@ -2,6 +2,7 @@
 """
 
 import os
+import re
 import subprocess
 from time import sleep
 
@@ -109,7 +110,8 @@ class SGEPlugin(SGELikeBatchManagerBase):
         iflogger.setLevel(oldlevel)
         # retrieve sge taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]
-        taskid = int(lines[-1].split(' ')[2])
+        taskid = int(re.match("Your job ([0-9]*) .* has been submitted",
+                              lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sge task: %d for node %s' % (taskid, node._id))
         return taskid
