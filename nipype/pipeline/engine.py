@@ -55,6 +55,7 @@ from .utils import (generate_expanded_graph, modify_paths,
                     clean_working_directory, format_dot,
                     get_print_name, merge_dict, evaluate_connect_function)
 
+from ..interfaces.utility import Join
 
 def _write_inputs(node):
     lines = []
@@ -1092,9 +1093,8 @@ class Node(WorkflowBase):
 
     """
 
-    def __init__(self, interface, name, iterables=None, itersource=None,
-                 synchronize=False, overwrite=None, needed_outputs=None,
-                 run_without_submitting=False, **kwargs):
+    def __init__(self, interface, name, iterables=None, joinsource=None, overwrite=None,
+                 needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
         ----------
@@ -1113,6 +1113,7 @@ class Node(WorkflowBase):
             node.iterables = ('frac',[0.5,0.6,0.7])
             node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
 
+<<<<<<< HEAD
             If this node has an itersource, then the iterables values
             is a dictionary which maps an iterable source field value
             to the target iterables field values, e.g.:
@@ -1143,6 +1144,10 @@ class Node(WorkflowBase):
             iterables values.
             Otherwise, this iterable node is expanded once per
             each permutation of the iterables values.
+=======
+        joinsource: Node
+            The iterable node joined by this Join node
+>>>>>>> Add join feature.
 
         overwrite : Boolean
             Whether to overwrite contents of output directory if it already
@@ -1169,8 +1174,7 @@ class Node(WorkflowBase):
         self.name = name
         self._result = None
         self.iterables = iterables
-        self.synchronize = synchronize
-        self.itersource = itersource
+        self._joinsource = joinsource
         self.overwrite = overwrite
         self.parameterization = None
         self.run_without_submitting = run_without_submitting
@@ -1204,6 +1208,28 @@ class Node(WorkflowBase):
     def outputs(self):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
+
+    @property
+    def joinsource(self):
+        """
+        Return the join source node
+        
+        The join source is the iterable node which initiates an iterated
+        execution path, as described in the Join interface.
+        """
+        return self._joinsource
+    
+    @joinsource.setter
+    def joinsource(self, value):
+        """
+        Set the join source node
+        
+        Raises TypeError if this node's interface is not a Join.
+        """
+        if not isinstance(self._interface, Join):
+            raise TypeError("Cannot set the joinsource of a non-Join interface: %s" % 
+                self._interface.__class__)
+        self._joinsource = value
 
     def output_dir(self):
         """Return the location of the output directory for the node"""
