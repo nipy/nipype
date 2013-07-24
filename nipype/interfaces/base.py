@@ -941,10 +941,40 @@ class BaseInterface(Interface):
     def _list_outputs(self):
         """ List the expected outputs
         """
+        metadata = dict(name_source=lambda t: t is not None)
+        out_names = self.inputs.traits(**metadata).keys()
         if self.output_spec:
-            raise NotImplementedError
+            if out_names:
+                outputs = self.output_spec().get()
+                for name in out_names:
+                    fname = self._filename_from_source(name)
+                    if isdefined(fname):
+                        outputs[name] = os.path.abspath(fname)
+            return outputs
         else:
             return None
+
+    def _filename_from_source(self, name):
+        trait_spec = self.inputs.trait(name)
+        retval = getattr(self.inputs, name)
+        if isdefined(retval):
+            if "%s" in retval:
+                if isinstance(trait_spec.name_source, list):
+                    for ns in trait_spec.name_source:
+                        if isdefined(getattr(self.inputs, ns)):
+                            name_source = ns
+                            break
+                else:
+                    name_source = trait_spec.name_source
+                if name_source.endswith(os.path.sep):
+                    name_source = name_source[:-len(os.path.sep)]
+                _, base, _ = split_filename(getattr(self.inputs, name_source))
+                retval = os.path.abspath(retval % base)
+            _, _, ext = split_filename(retval)
+            if trait_spec.keep_extension and ext:
+                return retval
+            return self._overload_extension(retval)
+        return retval
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
@@ -1341,44 +1371,11 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
-    def _filename_from_source(self, name):
-        trait_spec = self.inputs.trait(name)
-        retval = getattr(self.inputs, name)
-        if isdefined(retval):
-            if "%s" in retval:
-                if isinstance(trait_spec.name_source, list):
-                    for ns in trait_spec.name_source:
-                        if isdefined(getattr(self.inputs, ns)):
-                            name_source = ns
-                            break
-                else:
-                    name_source = trait_spec.name_source
-                if name_source.endswith(os.path.sep):
-                    name_source = name_source[:-len(os.path.sep)]
-                _, base, _ = split_filename(getattr(self.inputs, name_source))
-                retval = os.path.abspath(retval % base)
-            _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
-                return retval
-            return self._overload_extension(retval)
-        return retval
-
     def _gen_filename(self, name):
         raise NotImplementedError
 
     def _overload_extension(self, value):
         return value
-
-    def _list_outputs(self):
-        metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
-        if out_names:
-            outputs = self.output_spec().get()
-            for name in out_names:
-                fname = self._filename_from_source(name)
-                if isdefined(fname):
-                    outputs[name] = os.path.abspath(fname)
-            return outputs
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
