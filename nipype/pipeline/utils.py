@@ -5,6 +5,7 @@
 
 from copy import deepcopy
 from glob import glob
+from collections import defaultdict
 import os
 import pickle
 import pwd
@@ -494,7 +495,6 @@ def generate_expanded_graph(graph_in):
     """
     logger.debug("PE: expanding iterables")
     graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
-    moreiterables = True
     # convert list of tuples to dict fields
     for node in graph_in.nodes():
         if isinstance(node.iterables, tuple):
@@ -505,36 +505,94 @@ def generate_expanded_graph(graph_in):
                                                   lambda: x[1]),
                                       node.iterables))
     allprefixes = list('abcdefghijklmnopqrstuvwxyz')
-    while moreiterables:
-        nodes = nx.topological_sort(graph_in)
-        nodes.reverse()
-        inodes = [node for node in nodes if node.iterables is not None]
-        if inodes:
-            node = inodes[0]
-            iterables = node.iterables.copy()
-            node.iterables = None
-            logger.debug('node: %s iterables: %s' % (node, iterables))
-            subnodes = [s for s in dfs_preorder(graph_in, node)]
-            prior_prefix = []
-            for s in subnodes:
-                prior_prefix.extend(re.findall('\.(.)I', s._id))
-            prior_prefix = sorted(prior_prefix)
-            if not len(prior_prefix):
-                iterable_prefix = 'a'
-            else:
-                if prior_prefix[-1] == 'z':
-                    raise ValueError('Too many iterables in the workflow')
-                iterable_prefix = \
-                           allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
-            node._id += ('.' + iterable_prefix + 'I')
-            logger.debug(('subnodes:', subnodes))
-            subgraph = graph_in.subgraph(subnodes)
-            graph_in = _merge_graphs(graph_in, subnodes,
-                                     subgraph, node._hierarchy + node._id,
-                                     iterables, iterable_prefix)
-            #nx.write_dot(graph_in, '%s_post.dot'%node)
+
+    # the iterable nodes
+    inodes = _iterable_nodes(graph_in)
+    # while there is an iterable node, expand the iterable node's
+    # subgraphs
+    while inodes:
+        inode = inodes[0]
+        iterables = inode.iterables.copy()
+        inode.iterables = None
+        logger.debug('node: %s iterables: %s' % (inode, iterables))
+        
+        # the join successor nodes of the current iterable node
+        jnodes = [node for node in graph_in.nodes()
+            if inode.name == node.joinsource]
+        
+        # excise the join in-edges
+        jedge_dict = {}
+        for jnode in jnodes:
+            for src, dest, data in graph_in.in_edges_iter(jnode, True):
+                jedge_dict[src.name] = (dest.name, data)
+                graph_in.remove_edge(src, dest)
+                logger.debug("Excised the %s -> %s join node in-edge."
+                             % (src, dest))
+
+        # collect the subnodes to expand
+        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        prior_prefix = []
+        for s in subnodes:
+            prior_prefix.extend(re.findall('\.(.)I', s._id))
+        prior_prefix = sorted(prior_prefix)
+        if not len(prior_prefix):
+            iterable_prefix = 'a'
         else:
-            moreiterables = False
+            if prior_prefix[-1] == 'z':
+                raise ValueError('Too many iterables in the workflow')
+            iterable_prefix =\
+            allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+        logger.debug(('subnodes:', subnodes))
+        
+        # append a suffix to the iterable node id
+        inode._id += ('.' + iterable_prefix + 'I')
+        
+        # merge the iterated subgraphs
+        subgraph = graph_in.subgraph(subnodes)
+        graph_in = _merge_graphs(graph_in, subnodes,
+                                 subgraph, inode._hierarchy + inode._id,
+                                 iterables, iterable_prefix)
+        
+        # reconnect the join nodes
+        if jnodes:
+            # the {node name: replicated nodes} dictionary
+            node_name_dict = defaultdict(list)
+            for node in graph_in.nodes():
+                node_name_dict[node.name].append(node)
+            # preserve the node iteration order by sorting on the node id
+            for nodes in node_name_dict.values():
+                nodes.sort(key=str)
+            # for each join in-edge, connect every expanded source node
+            # which matches on the in-edge source name to the destination
+            # join node. Qualify each edge connect join field name by
+            # appending the next join slot index, e.g. the connect
+            # from two expanded nodes from field 'out_file' to join
+            # field 'in' are qualified as ('out_file', 'in1') and
+            # ('out_file', 'in2'), resp. This preserves connection port
+            # integrity.
+            for src_name, tgt in jedge_dict.iteritems():
+                dest_name, edge_data = tgt
+                for src in node_name_dict[src_name]:
+                    for dest in node_name_dict[dest_name]:
+                        newdata = deepcopy(edge_data)
+                        connects = newdata['connect']
+                        for idx, connect in enumerate(connects):
+                            src_field, dest_field = connect
+                            if dest_field != 'in':
+                                raise Exception("Invalid join connect field: %s"
+                                                % dest_field)
+                            qualified = dest._interface.next_slot()
+                            connects[idx] = (src_field, qualified)
+                            logger.debug("Qualified the %s -> %s join field %s as"
+                                         " %s." % (src, dest, 'in', qualified))
+                        graph_in.add_edge(src, dest, newdata)
+                        logger.debug("Connected the join node %s subgraph to the"
+                                     " expanded join point %s" % (dest, src))
+        
+        #nx.write_dot(graph_in, '%s_post.dot' % node)
+        # the remaining iterable nodes
+        inodes = _iterable_nodes(graph_in)
+        
     for node in graph_in.nodes():
         if node.parameterization:
             node.parameterization = [param for _, param in
@@ -542,7 +600,15 @@ def generate_expanded_graph(graph_in):
     logger.debug("PE: expanding iterables ... done")
     return _remove_identity_nodes(graph_in)
 
-
+def _iterable_nodes(graph_in):
+    """ Returns the iterable nodes in the given graph
+    
+    The nodes are sorted in reverse topological order.
+    """
+    nodes = nx.topological_sort(graph_in)
+    nodes.reverse()
+    return [node for node in nodes if node.iterables is not None]
+    
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
                  simple_form=True):

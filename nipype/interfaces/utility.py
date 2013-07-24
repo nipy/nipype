@@ -140,6 +140,68 @@ class Merge(IOBase):
         return outputs
 
 
+class JoinInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    pass
+
+
+class JoinOutputSpec(TraitedSpec):
+    out = traits.List(desc='Joined output')
+
+
+class Join(IOBase):
+    """
+    The Join interface aggregates inputs from an iterated workflow
+    execution path.
+    
+    Examples
+    --------
+    
+    >>> import nipype.pipeline.engine as pe
+    >>> from nipype.interfaces.utility import (IdentityInterface, Join)
+    >>> from nipype.interfaces import (ants, dcm2nii, fsl)
+    >>> wf = pe.Workflow(name='preprocess')
+    >>> inputspec = pe.Node(IdentityInterface(fields=['image']), name='inputspec')
+    >>> inputspec.iterables = [('image', ['img1.nii', 'img2.nii', 'img3.nii'])]
+    >>> img2flt = pe.Node(fsl.ImageMaths(out_data_type='float'), name='img2flt')
+    >>> wf.connect(inputspec, 'image', img2flt, 'in_file')
+    >>> join = pe.Node(Join(), joinsource='inputspec', name='join')
+    >>> wf.connect(img2flt, 'out_file', join, 'in')
+    >>> average = pe.Node(ants.AverageImages(), name='average')
+    >>> wf.connect(join, 'out', average, 'images')
+    >>> realign = pe.Node(fsl.FLIRT(), name='realign')
+    >>> wf.connect(img2flt, 'out_file', realign, 'in_file')
+    >>> wf.connect(average, 'output_average_image', realign, 'reference')
+    >>> strip = pe.Node(fsl.BET(), name='strip')
+    >>> wf.connect(realign, 'out_file', strip, 'in_file')
+    """
+    input_spec = JoinInputSpec
+    output_spec = JoinOutputSpec
+
+    def __init__(self, **inputs):
+        super(Join, self).__init__(**inputs)
+        add_traits(self.inputs, ['in'])
+        print self.inputs.copyable_trait_names()
+        
+        self._next_slot_index = 0
+    
+    def next_slot(self):
+        self._next_slot_index += 1
+        field = "in%d" % self._next_slot_index
+        add_traits(self.inputs, [field])
+        return field
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out = []
+        for idx in range(self._next_slot_index):
+            value = getattr(self.inputs, 'in%d' % (idx + 1))
+            if isdefined(value):
+                out.append(value)
+        if out:
+            outputs['out'] = out
+        return outputs
+
+
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
