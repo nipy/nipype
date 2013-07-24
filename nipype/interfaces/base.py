@@ -976,6 +976,9 @@ class BaseInterface(Interface):
             return self._overload_extension(retval)
         return retval
 
+    def _overload_extension(self, value):
+        return value
+
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
         """
@@ -1373,9 +1376,6 @@ class CommandLine(BaseInterface):
 
     def _gen_filename(self, name):
         raise NotImplementedError
-
-    def _overload_extension(self, value):
-        return value
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
