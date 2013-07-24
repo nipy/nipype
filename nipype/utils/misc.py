@@ -9,6 +9,17 @@ from distutils.version import LooseVersion
 import numpy as np
 from textwrap import dedent
 import sys
+import re
+
+def human_order_sorted(l):
+    """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
+    def atoi(text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(text):
+        return [ atoi(c) for c in re.split('(\d+)', text) ]
+
+    return sorted(l, key=natural_keys)
 
 def trim(docstring, marker=None):
     if not docstring:
