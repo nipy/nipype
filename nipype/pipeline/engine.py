@@ -54,6 +54,7 @@ from .utils import (generate_expanded_graph, modify_paths,
                     clean_working_directory, format_dot,
                     get_print_name, merge_dict, evaluate_connect_function)
 
+
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
@@ -1090,7 +1091,7 @@ class Node(WorkflowBase):
 
     """
 
-    def __init__(self, interface, name, iterables=None, joinsource=None, overwrite=None,
+    def __init__(self, interface, name, iterables=None, overwrite=None,
                  needed_outputs=None, run_without_submitting=False, **kwargs):
         """
         Parameters
@@ -1138,7 +1139,6 @@ class Node(WorkflowBase):
         self.name = name
         self._result = None
         self.iterables = iterables
-        self._joinsource = joinsource
         self.overwrite = overwrite
         self.parameterization = None
         self.run_without_submitting = run_without_submitting
@@ -1341,7 +1341,7 @@ class Node(WorkflowBase):
             return sha1(param).hexdigest()
         else:
             return param
-    
+
     def _get_hashval(self):
         """Return a hash of the input state"""
         if not self._got_inputs:
@@ -1687,13 +1687,16 @@ class JoinNode(Node):
     >>> from nipype.interfaces.utility import IdentityInterface
     >>> from nipype.interfaces import (ants, dcm2nii, fsl)
     >>> wf = pe.Workflow(name='preprocess')
-    >>> inputspec = pe.Node(IdentityInterface(fields=['image']), name='inputspec')
-    >>> inputspec.iterables = [('image', ['img1.nii', 'img2.nii', 'img3.nii'])]
-    >>> img2flt = pe.Node(fsl.ImageMaths(out_data_type='float'), name='img2flt')
+    >>> inputspec = pe.Node(IdentityInterface(fields=['image']),
+    ...                     name='inputspec')
+    >>> inputspec.iterables = [('image',
+    ...                        ['img1.nii', 'img2.nii', 'img3.nii'])]
+    >>> img2flt = pe.Node(fsl.ImageMaths(out_data_type='float'),
+    ...                   name='img2flt')
     >>> wf.connect(inputspec, 'image', img2flt, 'in_file')
     >>> average = pe.JoinNode(ants.AverageImages(), joinsource='inputspec',
-    >>>                       joinfield='images', name='average')
-    >>> wf.connect((img2flt, 'out_file', average, 'images')
+    ...                       joinfield='images', name='average')
+    >>> wf.connect(img2flt, 'out_file', average, 'images')
     >>> realign = pe.Node(fsl.FLIRT(), name='realign')
     >>> wf.connect(img2flt, 'out_file', realign, 'in_file')
     >>> wf.connect(average, 'output_average_image', realign, 'reference')
@@ -1719,19 +1722,22 @@ class JoinNode(Node):
         See Node docstring for additional keyword arguments.
         """
         super(JoinNode, self).__init__(interface, name, **kwargs)
-        
+
         self.joinsource = joinsource
         """the join predecessor iterable node"""
-        
+
+        if not joinfield:
+            raise ValueError("The JoinNode %s is missing a join field."
+                             % name)
         if isinstance(joinfield, str):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
-        
+
         self._inputs = self._override_join_traits(self._interface.inputs,
                                                   self.joinfield)
         """the override inputs"""
-        
+
         self._next_slot_index = 0
         """the joinfield index assigned to an iterated input"""
 
@@ -1743,12 +1749,12 @@ class JoinNode(Node):
     def _add_join_item_fields(self):
         """Add new join item fields assigned to the next iterated
         input
-        
+
         This method is intended solely for workflow graph expansion.
-        
+
         Examples
         --------
-        
+
         >>> from nipype.interfaces.utility import IdentityInterface
         >>> import nipype.pipeline.engine as pe
         >>> inputspec = pe.Node(IdentityInterface(fields=['image']),
@@ -1757,11 +1763,12 @@ class JoinNode(Node):
         ...    joinsource='inputspec', joinfield='images', name='join')
         >>> join._add_join_item_fields()
         {'image': 'image1', 'mask': 'mask1'}
-        
+
         Return the {base field: slot field} dictionary
         """
         # create the new join item fields
-        newfields = {field: self._add_join_item_field(field, self._next_slot_index)
+        idx = self._next_slot_index
+        newfields = {field: self._add_join_item_field(field, idx)
             for field in self.joinfield}
         # increment the join slot index
         self._next_slot_index += 1
@@ -1769,7 +1776,7 @@ class JoinNode(Node):
 
     def _add_join_item_field(self, field, index):
         """Add new join item fields qualified by the given index
-        
+
         Return the new field name
         """
         # the new field name
@@ -1779,33 +1786,41 @@ class JoinNode(Node):
         # add the join item trait to the override traits
         self._inputs.add_trait(name, trait)
         return name
-    
+
     def _join_item_field_name(self, field, index):
         """Return the field suffixed by the index + 1"""
         return "%s%d" % (field, index + 1)
-    
+
     def _override_join_traits(self, basetraits, fields):
         """Convert the given join fields to accept an input that
         is a list item rather than a list. Non-join fields
         delegate to the interface traits.
-        
+
         Return the override DynamicTraitedSpec
         """
-        traits = DynamicTraitedSpec()
+        dyntraits = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()
-        for basetrait in basetraits.items():
-            name, spec = basetrait
-            if name in fields:
-                item_trait = spec.inner_traits[0]
-                traits.add_trait(name, item_trait)
+        else:
+            # validate the fields
+            for field in fields:
+                if not basetraits.trait(field):
+                    raise ValueError("The JoinNode %s does not have a field"
+                                     " named %s" % (self.name, field))
+        for name, trait in basetraits.items():
+            # if a join field is a list, then the item trait is the list
+            # inner trait. Otherwise, the item trait is a new Any trait.
+            if name in fields and isinstance(trait.trait_type, traits.List):
+                item_trait = trait.inner_traits[0]
+                dyntraits.add_trait(name, item_trait)
                 logger.debug("Converted the join node %s field %s"
                              " trait type from %s to %s"
-                             % (self, name, spec.trait_type.info(),
+                             % (self, name, trait.trait_type.info(),
                                 item_trait.info()))
             else:
-                traits.add_trait(basetrait)
-        return traits
+                dyntraits.add_trait(name, traits.Any)
+                setattr(dyntraits, name, Undefined)
+        return dyntraits
 
     def _run_command(self, execute, copyfiles=True):
         """Collates the join inputs prior to delegating to the superclass."""
