@@ -63,6 +63,31 @@ class SumInterface(nib.BaseInterface):
         return outputs
 
 
+_set_len = None
+"""The Set interface execution result."""
+
+class SetInputSpec(nib.TraitedSpec):
+    input1 = nib.traits.Set(nib.traits.Int, mandatory=True, desc='input')
+
+class SetOutputSpec(nib.TraitedSpec):
+    output1 = nib.traits.Int(desc='ouput')
+
+class SetInterface(nib.BaseInterface):
+    input_spec = SetInputSpec
+    output_spec = SetOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        global _set_len
+        outputs = self._outputs().get()
+        _set_len = outputs['output1'] = len(self.inputs.input1)
+        print ">>>>>>>>SET LEN: %d" % _set_len 
+        return outputs
+
+
 _products = []
 """The Products interface execution results."""
 
@@ -132,6 +157,32 @@ def test_join_expansion():
     # there are two iterations of the post-join node in the iterable path
     assert_equal(len(_products), 2,
                  "The number of iterated post-join outputs is incorrect")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_set_join_node():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [1, 2, 1, 3, 2])]
+    # a pre-join node in the iterated path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'input1')
+    # the set join node
+    join = pe.JoinNode(SetInterface(), joinsource='inputspec',
+        joinfield='input1', name='join')
+    wf.connect(pre_join1, 'output1', join, 'input1')
+    
+    wf.run()
+    
+    # the join length is the number of unique inputs
+    assert_equal(_set_len, 3, "The join Set output value is incorrect: %s." % _set_len)
 
     os.chdir(cwd)
     rmtree(wd)
