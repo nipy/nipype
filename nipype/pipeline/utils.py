@@ -518,7 +518,7 @@ def generate_expanded_graph(graph_in):
         
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes()
-            if inode.name == node.joinsource]
+            if hasattr(node, 'joinsource') and inode.name == node.joinsource]
         
         # excise the join in-edges
         jedge_dict = {}
@@ -572,22 +572,32 @@ def generate_expanded_graph(graph_in):
             # integrity.
             for src_name, tgt in jedge_dict.iteritems():
                 dest_name, edge_data = tgt
+                dests = node_name_dict[dest_name]
+                if not dests:
+                    raise Exception("The execution graph does not contain"
+                                    " the join node: %s" % dest_name)
+                elif len(dests) > 1:
+                    raise Exception("The execution graph contains more than one"
+                                    " join node named %s: %s" % (dest_name, dests))
+                else:
+                    dest = dests[0]
                 for src in node_name_dict[src_name]:
-                    for dest in node_name_dict[dest_name]:
-                        newdata = deepcopy(edge_data)
-                        connects = newdata['connect']
-                        for idx, connect in enumerate(connects):
-                            src_field, dest_field = connect
-                            if dest_field != 'in':
-                                raise Exception("Invalid join connect field: %s"
-                                                % dest_field)
-                            qualified = dest._interface.next_slot()
-                            connects[idx] = (src_field, qualified)
-                            logger.debug("Qualified the %s -> %s join field %s as"
-                                         " %s." % (src, dest, 'in', qualified))
-                        graph_in.add_edge(src, dest, newdata)
-                        logger.debug("Connected the join node %s subgraph to the"
-                                     " expanded join point %s" % (dest, src))
+                    newdata = deepcopy(edge_data)
+                    connects = newdata['connect']
+                    join_fields = [field for _, field in connects
+                        if field in dest.joinfield]
+                    slot_dict = dest._add_join_item_fields()
+                    for idx, connect in enumerate(connects):
+                        src_field, dest_field = connect
+                        # qualify a join destination field name
+                        if dest_field in slot_dict:
+                            slot_field = slot_dict[dest_field]
+                            connects[idx] = (src_field, slot_field)
+                            logger.debug("Qualified the %s -> %s join field %s as %s."
+                                         % (src, dest, dest_field, slot_field))
+                    graph_in.add_edge(src, dest, newdata)
+                    logger.debug("Connected the join node %s subgraph to the"
+                                 " expanded join point %s" % (dest, src))
         
         #nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes

@@ -54,8 +54,6 @@ from .utils import (generate_expanded_graph, modify_paths,
                     clean_working_directory, format_dot,
                     get_print_name, merge_dict, evaluate_connect_function)
 
-from ..interfaces.utility import Join
-
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
@@ -1175,28 +1173,6 @@ class Node(WorkflowBase):
         """Return the output fields of the underlying interface"""
         return self._interface._outputs()
 
-    @property
-    def joinsource(self):
-        """
-        Return the join source node
-        
-        The join source is the iterable node which initiates an iterated
-        execution path, as described in the Join interface.
-        """
-        return self._joinsource
-    
-    @joinsource.setter
-    def joinsource(self, value):
-        """
-        Set the join source node
-        
-        Raises TypeError if this node's interface is not a Join.
-        """
-        if not isinstance(self._interface, Join):
-            raise TypeError("Cannot set the joinsource of a non-Join interface: %s" % 
-                self._interface.__class__)
-        self._joinsource = value
-
     def output_dir(self):
         """Return the location of the output directory for the node"""
         if self.base_dir is None:
@@ -1712,6 +1688,155 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_header('Environment', level=2))
                 fp.writelines(write_rst_dict(self.result.runtime.environ))
         fp.close()
+
+
+class JoinNode(Node):
+    """Wraps interface objects that join inputs into a list.
+
+    Examples
+    --------
+
+    >>> import nipype.pipeline.engine as pe
+    >>> from nipype.interfaces.utility import IdentityInterface
+    >>> from nipype.interfaces import (ants, dcm2nii, fsl)
+    >>> wf = pe.Workflow(name='preprocess')
+    >>> inputspec = pe.Node(IdentityInterface(fields=['image']), name='inputspec')
+    >>> inputspec.iterables = [('image', ['img1.nii', 'img2.nii', 'img3.nii'])]
+    >>> img2flt = pe.Node(fsl.ImageMaths(out_data_type='float'), name='img2flt')
+    >>> wf.connect(inputspec, 'image', img2flt, 'in_file')
+    >>> average = pe.JoinNode(ants.AverageImages(), joinsource='inputspec',
+    >>>                       joinfield='images', name='average')
+    >>> wf.connect((img2flt, 'out_file', average, 'images')
+    >>> realign = pe.Node(fsl.FLIRT(), name='realign')
+    >>> wf.connect(img2flt, 'out_file', realign, 'in_file')
+    >>> wf.connect(average, 'output_average_image', realign, 'reference')
+    >>> strip = pe.Node(fsl.BET(), name='strip')
+    >>> wf.connect(realign, 'out_file', strip, 'in_file')
+
+    """
+
+    def __init__(self, interface, name, joinsource, joinfield, **kwargs):
+        """
+
+        Parameters
+        ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        name : alphanumeric string
+            node specific name
+        joinsource : node name
+            name of the join predecessor iterable node
+        joinfield : string or list of strings
+            name(s) of input fields that will collect inputs into a list
+
+        See Node docstring for additional keyword arguments.
+        """
+        super(JoinNode, self).__init__(interface, name, **kwargs)
+        
+        self.joinsource = joinsource
+        """the join predecessor iterable node"""
+        
+        if isinstance(joinfield, str):
+            joinfield = [joinfield]
+        self.joinfield = joinfield
+        """the fields to join"""
+        
+        self._inputs = self._override_join_traits(self._interface.inputs,
+                                                  self.joinfield)
+        """the override inputs"""
+        
+        self._next_slot_index = 0
+        """the joinfield index assigned to an iterated input"""
+
+    @property
+    def inputs(self):
+        """The JoinNode inputs include the join field overrides."""
+        return self._inputs
+
+    def _add_join_item_fields(self):
+        """Add new join item fields assigned to the next iterated
+        input
+        
+        This method is intended solely for workflow graph expansion.
+        
+        Examples
+        --------
+        
+        >>> from nipype.interfaces.utility import IdentityInterface
+        >>> import nipype.pipeline.engine as pe
+        >>> inputspec = pe.Node(IdentityInterface(fields=['image']),
+        ...    name='inputspec'),
+        >>> join = pe.JoinNode(IdentityInterface(fields=['images', 'mask']),
+        ...    joinsource='inputspec', joinfield='images', name='join')
+        >>> join._add_join_item_fields()
+        {'image': 'image1', 'mask': 'mask1'}
+        
+        Return the {base field: slot field} dictionary
+        """
+        # create the new join item fields
+        newfields = {field: self._add_join_item_field(field, self._next_slot_index)
+            for field in self.joinfield}
+        # increment the join slot index
+        self._next_slot_index += 1
+        return newfields
+
+    def _add_join_item_field(self, field, index):
+        """Add new join item fields qualified by the given index
+        
+        Return the new field name
+        """
+        # the new field name
+        name = self._join_item_field_name(field, index)
+        # make a copy of the join trait
+        trait = self._inputs.trait(field, False, True)
+        # add the join item trait to the override traits
+        self._inputs.add_trait(name, trait)
+        return name
+    
+    def _join_item_field_name(self, field, index):
+        """Return the field suffixed by the index + 1"""
+        return "%s%d" % (field, index + 1)
+    
+    def _override_join_traits(self, basetraits, fields):
+        """Convert the given join fields to accept an input that
+        is a list item rather than a list. Non-join fields
+        delegate to the interface traits.
+        
+        Return the override DynamicTraitedSpec
+        """
+        traits = DynamicTraitedSpec()
+        if fields is None:
+            fields = basetraits.copyable_trait_names()
+        for basetrait in basetraits.items():
+            name, spec = basetrait
+            if name in fields:
+                item_trait = spec.inner_traits[0]
+                traits.add_trait(name, item_trait)
+                logger.debug("Converted the join node %s field %s"
+                             " trait type from %s to %s"
+                             % (self, name, spec.trait_type.info(),
+                                item_trait.info()))
+            else:
+                traits.add_trait(basetrait)
+        return traits
+
+    def _run_command(self, execute, copyfiles=True):
+        """Collates the join inputs prior to delegating to the superclass."""
+        self._collate_join_field_inputs()
+        return super(JoinNode, self)._run_command(execute, copyfiles)
+
+    def _collate_join_field_inputs(self):
+        """Collects each override join item field into the interface join
+        field input."""
+        for field in self.joinfield:
+            val = self._collate_input_value(field)
+            setattr(self._interface.inputs, field, val)
+        logger.debug("Collated %d inputs into each %s node join field"
+                     % (self._next_slot_index, self))
+
+    def _collate_input_value(self, field):
+        return [getattr(self._inputs, self._join_item_field_name(field, idx))
+            for idx in range(self._next_slot_index)]
 
 
 class MapNode(Node):
