@@ -1808,9 +1808,10 @@ class JoinNode(Node):
                     raise ValueError("The JoinNode %s does not have a field"
                                      " named %s" % (self.name, field))
         for name, trait in basetraits.items():
-            # if a join field is a list, then the item trait is the list
-            # inner trait. Otherwise, the item trait is a new Any trait.
-            if name in fields and isinstance(trait.trait_type, traits.List):
+            # if a join field has a single inner trait, then the item
+            # trait is that inner trait. Otherwise, the item trait is
+            # a new Any trait.
+            if name in fields and len(trait.inner_traits) == 1:
                 item_trait = trait.inner_traits[0]
                 dyntraits.add_trait(name, item_trait)
                 logger.debug("Converted the join node %s field %s"
@@ -1833,13 +1834,17 @@ class JoinNode(Node):
         for field in self.joinfield:
             val = self._collate_input_value(field)
             setattr(self._interface.inputs, field, val)
-        logger.debug("Collated %d inputs into each %s node join field"
+        logger.debug("Collated %d inputs into the %s node join fields"
                      % (self._next_slot_index, self))
 
     def _collate_input_value(self, field):
-        return [getattr(self._inputs, self._join_item_field_name(field, idx))
+        val = [getattr(self._inputs, self._join_item_field_name(field, idx))
             for idx in range(self._next_slot_index)]
-
+        basetrait = self._interface.inputs.trait(field)
+        if isinstance(basetrait.trait_type, traits.Set):
+            return set(val)
+        else:
+            return val
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
