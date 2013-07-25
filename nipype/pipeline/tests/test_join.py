@@ -88,7 +88,6 @@ class ProductInterface(nib.BaseInterface):
         _products.append(outputs['output1'])
         return outputs
 
-
 def test_join_expansion():
     cwd = os.getcwd()
     wd = mkdtemp()

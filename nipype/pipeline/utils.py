@@ -590,11 +590,11 @@ def generate_expanded_graph(graph_in):
         iterables = inode.iterables.copy()
         inode.iterables = None
         logger.debug('node: %s iterables: %s' % (inode, iterables))
-        
+
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes()
             if hasattr(node, 'joinsource') and inode.name == node.joinsource]
-        
+
         # excise the join in-edges
         jedge_dict = {}
         for jnode in jnodes:
@@ -621,13 +621,13 @@ def generate_expanded_graph(graph_in):
 
         # append a suffix to the iterable node id
         inode._id += ('.' + iterable_prefix + 'I')
-        
+
         # merge the iterated subgraphs
         subgraph = graph_in.subgraph(subnodes)
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
                                  iterables, iterable_prefix)
-        
+
         # reconnect the join nodes
         if jnodes:
             # the {node name: replicated nodes} dictionary
@@ -652,8 +652,9 @@ def generate_expanded_graph(graph_in):
                     raise Exception("The execution graph does not contain"
                                     " the join node: %s" % dest_name)
                 elif len(dests) > 1:
-                    raise Exception("The execution graph contains more than one"
-                                    " join node named %s: %s" % (dest_name, dests))
+                    raise Exception("The execution graph contains more than"
+                                    " one join node named %s: %s"
+                                    % (dest_name, dests))
                 else:
                     dest = dests[0]
                 for src in node_name_dict[src_name]:
@@ -668,16 +669,17 @@ def generate_expanded_graph(graph_in):
                         if dest_field in slot_dict:
                             slot_field = slot_dict[dest_field]
                             connects[idx] = (src_field, slot_field)
-                            logger.debug("Qualified the %s -> %s join field %s as %s."
-                                         % (src, dest, dest_field, slot_field))
+                            logger.debug("Qualified the %s -> %s join field"
+                                         " %s as %s." %
+                                         (src, dest, dest_field, slot_field))
                     graph_in.add_edge(src, dest, newdata)
                     logger.debug("Connected the join node %s subgraph to the"
                                  " expanded join point %s" % (dest, src))
-        
+
         #nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes
         inodes = _iterable_nodes(graph_in)
-        
+
     for node in graph_in.nodes():
         if node.parameterization:
             node.parameterization = [param for _, param in
