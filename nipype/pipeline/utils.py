@@ -571,10 +571,10 @@ def generate_expanded_graph(graph_in):
     logger.debug("PE: expanding iterables")
     graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
     # convert list of tuples to dict fields
-    for node in graph_in.nodes():
+    for node in graph_in.nodes_iter():
         if isinstance(node.iterables, tuple):
             node.iterables = [node.iterables]
-    for node in graph_in.nodes():
+    for node in graph_in.nodes_iter():
         if isinstance(node.iterables, list):
             node.iterables = dict(map(lambda(x): (x[0],
                                                   lambda: x[1]),
@@ -592,7 +592,7 @@ def generate_expanded_graph(graph_in):
         logger.debug('node: %s iterables: %s' % (inode, iterables))
 
         # the join successor nodes of the current iterable node
-        jnodes = [node for node in graph_in.nodes()
+        jnodes = [node for node in graph_in.nodes_iter()
             if hasattr(node, 'joinsource') and inode.name == node.joinsource]
 
         # excise the join in-edges
@@ -632,7 +632,7 @@ def generate_expanded_graph(graph_in):
         if jnodes:
             # the {node name: replicated nodes} dictionary
             node_name_dict = defaultdict(list)
-            for node in graph_in.nodes():
+            for node in graph_in.nodes_iter():
                 node_name_dict[node.name].append(node)
             # preserve the node iteration order by sorting on the node id
             for nodes in node_name_dict.values():
