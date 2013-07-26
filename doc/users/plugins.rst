@@ -114,6 +114,7 @@ Optional arguments::
 
   template: custom template file to use
   qsub_args: any other command line args to be passed to qsub.
+  max_jobname_len: (PBS only) maximum length of the job name.  Default 15.
 
 For example, the following snippet executes the workflow on myqueue with
 a custom template::
