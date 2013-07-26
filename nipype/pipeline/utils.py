@@ -399,82 +399,107 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
     else:
         data['connect'].extend(connection_info)
 
-
-def _remove_identity_nodes(graph, keep_iterables=False):
-    """Remove identity nodes from an execution graph
+def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
+    """Remove non-join identity nodes from the given graph
+    
+    Iterable nodes are retained if and only if the keep_iterables
+    flag is set to True.
     """
-    identity_nodes = []
-    for node in nx.topological_sort(graph):
-        if isinstance(node._interface, IdentityInterface):
-            if keep_iterables and getattr(node, 'iterables') is not None:
-                pass
-            else:
-                identity_nodes.append(node)
-    if identity_nodes:
-        for node in identity_nodes:
-            portinputs = {}
-            portoutputs = {}
-            for u, _, d in graph.in_edges_iter(node, data=True):
-                for src, dest in d['connect']:
-                    portinputs[dest] = (u, src)
-            for  _, v, d in graph.out_edges_iter(node, data=True):
-                for src, dest in d['connect']:
-                    if isinstance(src, tuple):
-                        srcport = src[0]
-                    else:
-                        srcport = src
-                    if srcport not in portoutputs:
-                        portoutputs[srcport] = []
-                    portoutputs[srcport].append((v, dest, src))
-            if not portoutputs:
-                pass
-            elif not portinputs:
-                for key, connections in portoutputs.items():
-                    for destnode, inport, src in connections:
-                        value = getattr(node.inputs, key)
-                        if isinstance(src, tuple):
-                            value = evaluate_connect_function(src[1], src[2],
-                                                              value)
-                        destnode.set_input(inport, value)
-            else:
-                for key, connections in portoutputs.items():
-                    for destnode, inport, src in connections:
-                        if key not in portinputs:
-                            value = getattr(node.inputs, key)
-                            if isinstance(src, tuple):
-                                value = evaluate_connect_function(src[1],
-                                                                  src[2],
-                                                                  value)
-                            destnode.set_input(inport, value)
-                        else:
-                            srcnode, srcport = portinputs[key]
-                            if isinstance(srcport, tuple) and isinstance(src,
-                                                                         tuple):
-                                raise ValueError(("Does not support two inline "
-                                                  "functions in series (\'%s\' "
-                                                  "and \'%s\'). Please use a "
-                                                  "Function node") %
-                                            (srcport[1].split("\\n")[0][6:-1],
-                                             src[1].split("\\n")[0][6:-1]))
-                            connect = graph.get_edge_data(srcnode,
-                                                          destnode,
-                                                       default={'connect': []})
-                            if isinstance(src, tuple):
-                                connect['connect'].append(((srcport,
-                                                            src[1],
-                                                            src[2]),
-                                                           inport))
-                            else:
-                                connect = {'connect': [(srcport, inport)]}
-                            old_connect = graph.get_edge_data(srcnode,
-                                                              destnode,
-                                                        default={'connect': []})
-                            old_connect['connect'] += connect['connect']
-                            graph.add_edges_from([(srcnode, destnode,
-                                                   old_connect)])
-            graph.remove_nodes_from([node])
+    # if keep_iterables is False, then include the iterable
+    # and join nodes in the nodes to delete
+    for node in _identity_nodes(graph, not keep_iterables):
+        if not hasattr(node, 'joinsource'):
+            _remove_identity_node(graph, node)
     return graph
 
+def _identity_nodes(graph, include_iterables):
+    """Return the IdentityInterface nodes in the graph
+    
+    The nodes are in topological sort order. The iterable nodes
+    are included if and only if the include_iterables flag is set
+    to True.
+    """
+    return [node for node in nx.topological_sort(graph)
+        if isinstance(node._interface, IdentityInterface) and
+           (include_iterables or getattr(node, 'iterables') is None)]
+
+def _remove_identity_node(graph, node):
+    """Remove identity nodes from an execution graph
+    """
+    portinputs, portoutputs = _node_ports(graph, node)
+    for field, connections in portoutputs.items():
+        if portinputs:
+            _propagate_internal_output(graph, node, field, connections,
+                                            portinputs)
+        else:
+            _propagate_root_output(graph, node, field, connections)
+    graph.remove_nodes_from([node])
+    logger.debug("Removed the identity node %s from the graph." % node)
+
+def _node_ports(graph, node):
+    """Return the given node's input and output ports
+    
+    The return value is the (inputs, outputs) dictionaries.
+    The inputs is a {destination field: (source node, source field)}
+    dictionary.
+    The outputs is a {source field: destination items} dictionary,
+    where each destination item is a
+    (destination node, destination field, source field) tuple.
+    """
+    portinputs = {}
+    portoutputs = {}
+    for u, _, d in graph.in_edges_iter(node, data=True):
+        for src, dest in d['connect']:
+            portinputs[dest] = (u, src)
+    for  _, v, d in graph.out_edges_iter(node, data=True):
+        for src, dest in d['connect']:
+            if isinstance(src, tuple):
+                srcport = src[0]
+            else:
+                srcport = src
+            if srcport not in portoutputs:
+                portoutputs[srcport] = []
+            portoutputs[srcport].append((v, dest, src))
+    return (portinputs, portoutputs)
+
+def _propagate_root_output(graph, node, field, connections):
+    """Propagates the given graph root node output port
+    field connections to the out-edge destination nodes."""
+    for destnode, inport, src in connections:
+        value = getattr(node.inputs, field)
+        if isinstance(src, tuple):
+            value = evaluate_connect_function(src[1], src[2],
+                                              value)
+        destnode.set_input(inport, value)
+
+def _propagate_internal_output(graph, node, field, connections, portinputs):
+    """Propagates the given graph internal node output port
+    field connections to the out-edge source node and in-edge
+    destination nodes."""
+    for destnode, inport, src in connections:
+        if field in portinputs:
+            srcnode, srcport = portinputs[field]
+            if isinstance(srcport, tuple) and isinstance(src, tuple):
+                raise ValueError(("Does not support two inline functions "
+                                  "in series (\'%s\'  and \'%s\'). "
+                                  "Please use a Function node") %
+                                  (srcport[1].split("\\n")[0][6:-1],
+                                   src[1].split("\\n")[0][6:-1]))
+            connect = graph.get_edge_data(srcnode, destnode,
+                                          default={'connect': []})
+            if isinstance(src, tuple):
+                connect['connect'].append(((srcport, src[1], src[2]), inport))
+            else:
+                connect = {'connect': [(srcport, inport)]}
+            old_connect = graph.get_edge_data(srcnode, destnode,
+                                              default={'connect': []})
+            old_connect['connect'] += connect['connect']
+            graph.add_edges_from([(srcnode, destnode, old_connect)])
+        else:
+            value = getattr(node.inputs, field)
+            if isinstance(src, tuple):
+                value = evaluate_connect_function(src[1], src[2], value)
+            destnode.set_input(inport, value)
 
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
@@ -485,7 +510,7 @@ def generate_expanded_graph(graph_in):
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
-    graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
+    graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
     # convert list of tuples to dict fields
     for node in graph_in.nodes_iter():
         if isinstance(node.iterables, tuple):
@@ -601,7 +626,7 @@ def generate_expanded_graph(graph_in):
             node.parameterization = [param for _, param in
                                      sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
-    return _remove_identity_nodes(graph_in)
+    return _remove_nonjoin_identity_nodes(graph_in)
 
 def _iterable_nodes(graph_in):
     """ Returns the iterable nodes in the given graph
