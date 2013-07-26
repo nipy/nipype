@@ -87,6 +87,7 @@ class GunzipNode(FileProxyNode):
     ========
 
     >>> import nipype.pipeline.file_proxy as fileproxy
+    >>> import nipype.interfaces.spm as spm
     >>> realign = fileproxy.GunzipNode(interface=spm.Realign(),name='realign')
     >>> realign.inputs.in_files = 'functional.nii.gz'
     >>> realign.run()
