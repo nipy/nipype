@@ -944,8 +944,8 @@ class BaseInterface(Interface):
         metadata = dict(name_source=lambda t: t is not None)
         out_names = self.inputs.traits(**metadata).keys()
         if self.output_spec:
+            outputs = self.output_spec().get()
             if out_names:
-                outputs = self.output_spec().get()
                 for name in out_names:
                     fname = self._filename_from_source(name)
                     if isdefined(fname):

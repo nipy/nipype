@@ -276,7 +276,6 @@ def test_BaseInterface():
 
     yield assert_equal, DerivedInterface2.help(), None
     yield assert_equal, DerivedInterface2()._outputs().foo, Undefined
-    yield assert_raises, NotImplementedError, DerivedInterface2(goo=1).run
 
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
