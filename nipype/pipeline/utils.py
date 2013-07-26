@@ -460,7 +460,11 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
 
 def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
     """Remove non-join identity nodes from the given graph
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> Support an identity join node.
     Iterable nodes are retained if and only if the keep_iterables
     flag is set to True.
     """
@@ -473,7 +477,7 @@ def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
 
 def _identity_nodes(graph, include_iterables):
     """Return the IdentityInterface nodes in the graph
-
+    
     The nodes are in topological sort order. The iterable nodes
     are included if and only if the include_iterables flag is set
     to True.
@@ -497,7 +501,11 @@ def _remove_identity_node(graph, node):
 
 def _node_ports(graph, node):
     """Return the given node's input and output ports
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> Support an identity join node.
     The return value is the (inputs, outputs) dictionaries.
     The inputs is a {destination field: (source node, source field)}
     dictionary.
@@ -569,7 +577,7 @@ def generate_expanded_graph(graph_in):
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
-    graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
+    graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
     # convert list of tuples to dict fields
     for node in graph_in.nodes_iter():
         if isinstance(node.iterables, tuple):
@@ -685,7 +693,7 @@ def generate_expanded_graph(graph_in):
             node.parameterization = [param for _, param in
                                      sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
-    return _remove_identity_nodes(graph_in)
+    return _remove_nonjoin_identity_nodes(graph_in)
 
 def _iterable_nodes(graph_in):
     """ Returns the iterable nodes in the given graph
