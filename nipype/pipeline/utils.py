@@ -3,6 +3,7 @@
 """Utility routines for workflow graphs
 """
 
+from base64 import b64encode
 from copy import deepcopy
 from glob import glob
 import os
@@ -17,7 +18,7 @@ import prov.model as prov
 
 package_check('networkx', '1.3')
 import json
-from socket import gethostname
+from socket import gethostname, getfqdn
 
 import networkx as nx
 
@@ -769,30 +770,30 @@ def write_prov(graph, filename=None, format='turtle'):
 
     def safe_encode(x):
         if x is None:
-            return pm.Literal("Unknown", pm.XSD['string'])
+            return prov.Literal("Unknown", prov.XSD['string'])
         if isinstance(x, (str, unicode)):
             if os.path.exists(x):
-                return pm.URIRef('file://%s%s' % (getfqdn(), x))
+                return prov.URIRef('file://%s%s' % (getfqdn(), x))
             else:
-                return pm.Literal(x, pm.XSD['string'])
+                return prov.Literal(x, prov.XSD['string'])
         if isinstance(x, (int,)):
-            return pm.Literal(int(x), pm.XSD['integer'])
+            return prov.Literal(int(x), prov.XSD['integer'])
         if isinstance(x, (float,)):
-            return pm.Literal(x, pm.XSD['float'])
+            return prov.Literal(x, prov.XSD['float'])
         if isinstance(x, (dict, list,)):
-            return pm.Literal(json.dumps(x),
-                              pm.XSD['string'])
-        return pm.Literal(b64encode(json.dumps(x)),
-                          pm.XSD['string'])
+            return prov.Literal(json.dumps(x),
+                              prov.XSD['string'])
+        return prov.Literal(b64encode(json.dumps(x)),
+                          prov.XSD['string'])
 
     get_id = lambda : nipype[uuid1().hex]
 
     user_agent = g.agent(get_id(),
-                         {pm.PROV["type"]: pm.PROV["Person"],
-                          pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
+                         {prov.PROV["type"]: prov.PROV["Person"],
+                          prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
                           foaf["name"]: safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
-    agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
-                  pm.PROV["label"]: "Nipype",
+    agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
+                  prov.PROV["label"]: "Nipype",
                   foaf["name"]: safe_encode("Nipype")}
     for key, value in get_info().items():
         agent_attr.update({nipype[key]: safe_encode(value)})
@@ -952,10 +953,13 @@ def write_prov(graph, filename=None, format='turtle'):
         g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
                        starter=processes[nodes.index(edgeinfo[0])])
     # write provenance
-    if format == 'json':
-        with open(filename + 'json', 'wt') as fp:
+    if format in ['provn', 'all']:
+        with open(filename + '.provn', 'wt') as fp:
+            fp.writelines(g.get_provn())
+    if format in ['json', 'all']:
+        with open(filename + '.json', 'wt') as fp:
             prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
-    elif format == 'turtle':
+    if format in ['turtle', 'all']:
         g.rdf().serialize(filename + '.ttl', format='turtle')
     return g
 
