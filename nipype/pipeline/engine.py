@@ -1825,7 +1825,7 @@ class MapNode(Node):
                     self._result.interface.insert(i, node.result.interface)
                     self._result.runtime[i] = node.result.runtime
                 if hasattr(node.result, 'provenance'):
-                    self._result.provenance[i] = node.result.provenance
+                    self._result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
                 for key, _ in self.outputs.items():
