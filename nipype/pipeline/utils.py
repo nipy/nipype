@@ -626,7 +626,6 @@ def generate_expanded_graph(graph_in):
                     dest = dests[0]
                 # reconnect each replication of the current join in-edge
                 # source
-                logger.debug(">>>>>>>>>NN %d vs %d" % (len(node_name_dict[src_name]), len(slot_dicts)))
                 for si, src in enumerate(node_name_dict[src_name]):
                     newdata = deepcopy(edge_data)
                     connects = newdata['connect']
