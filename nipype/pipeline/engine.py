@@ -1752,7 +1752,7 @@ class JoinNode(Node):
 
     """
 
-    def __init__(self, interface, name, joinsource, joinfield, **kwargs):
+    def __init__(self, interface, name, joinsource, joinfield=None, **kwargs):
         """
 
         Parameters
@@ -1764,7 +1764,8 @@ class JoinNode(Node):
         joinsource : node name
             name of the join predecessor iterable node
         joinfield : string or list of strings
-            name(s) of input fields that will collect inputs into a list
+            name(s) of list input fields that will be aggregatd
+            default is all of the join node input fields
 
         See Node docstring for additional keyword arguments.
         """
@@ -1774,9 +1775,9 @@ class JoinNode(Node):
         """the join predecessor iterable node"""
 
         if not joinfield:
-            raise ValueError("The JoinNode %s is missing a join field."
-                             % name)
-        if isinstance(joinfield, str):
+            # default is the interface fields
+            joinfield = self._interface.inputs.copyable_trait_names()
+        elif isinstance(joinfield, str):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -1836,7 +1837,7 @@ class JoinNode(Node):
 
     def _join_item_field_name(self, field, index):
         """Return the field suffixed by the index + 1"""
-        return "%s%d" % (field, index + 1)
+        return "%sJ%d" % (field, index + 1)
 
     def _override_join_traits(self, basetraits, fields):
         """Convert the given join fields to accept an input that
