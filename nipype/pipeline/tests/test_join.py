@@ -186,6 +186,34 @@ def test_set_join_node():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_unique_join_node():
+    global _sum_operands
+    _sum_operands = []
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [3, 1, 2, 1, 3])]
+    # a pre-join node in the iterated path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'input1')
+    # the set join node
+    join = pe.JoinNode(SumInterface(), joinsource='inputspec',
+        joinfield='input1', unique=True, name='join')
+    wf.connect(pre_join1, 'output1', join, 'input1')
+    
+    wf.run()
+    
+    # the join length is the number of unique inputs
+    assert_equal(_sum_operands, [4, 2, 3], "The unique join output value is incorrect: %s." % _sum_operands)
+
+    os.chdir(cwd)
+    rmtree(wd)
+
 def test_identity_join_node():
     cwd = os.getcwd()
     wd = mkdtemp()
