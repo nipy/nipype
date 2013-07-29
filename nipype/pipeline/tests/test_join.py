@@ -218,6 +218,45 @@ def test_identity_join_node():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_multifield_join_node():
+    global _products
+    _products = []
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']), name='inputspec')
+    inputspec.iterables = [('m', [1, 2]), ('n', [3, 4])]
+    # two pre-join nodes in a parallel iterated path
+    inc1 = pe.Node(IncrementInterface(), name='inc1')
+    wf.connect(inputspec, 'm', inc1, 'input1')
+    inc2 = pe.Node(IncrementInterface(), name='inc2')
+    wf.connect(inputspec, 'n', inc2, 'input1')
+    # the join node
+    join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
+        joinsource='inputspec', name='join')
+    wf.connect(inc1, 'output1', join, 'vector1')
+    wf.connect(inc2, 'output1', join, 'vector2')
+    # a post-join node
+    prod = pe.MapNode(ProductInterface(), name='prod', iterfield=['input1', 'input2'])
+    wf.connect(join, 'vector1', prod, 'input1')
+    wf.connect(join, 'vector2', prod, 'input2')
+    
+    result = wf.run()
+    
+    # the iterables are expanded as the cartesian product of the iterables values.
+    # thus, the expanded graph contains 2 * (2 * 2) iteration pre-join nodes, 1 join
+    # node and 1 post-join node.
+    assert_equal(len(result.nodes()), 10, "The number of expanded nodes is incorrect.")
+    # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
+    assert_equal(_products, [8, 10, 12, 15],
+                 "The post-join products is incorrect: %s." % _products)
+    os.chdir(cwd)
+    rmtree(wd)
+
 if __name__ == "__main__":
     import nose
     
