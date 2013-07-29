@@ -545,11 +545,14 @@ def generate_expanded_graph(graph_in):
         jnodes = [node for node in graph_in.nodes_iter()
             if hasattr(node, 'joinsource') and inode.name == node.joinsource]
 
-        # excise the join in-edges
+        # excise the join in-edges. save the excised edges in a
+        # {jnode: {source name: (destination name, edge data)}}
+        # dictionary
         jedge_dict = {}
         for jnode in jnodes:
+            in_edges = jedge_dict[jnode] = {}
             for src, dest, data in graph_in.in_edges_iter(jnode, True):
-                jedge_dict[src.name] = (dest.name, data)
+                in_edges[src.name] = (dest.name, data)
                 graph_in.remove_edge(src, dest)
                 logger.debug("Excised the %s -> %s join node in-edge."
                              % (src, dest))
@@ -579,7 +582,7 @@ def generate_expanded_graph(graph_in):
                                  iterables, iterable_prefix)
 
         # reconnect the join nodes
-        if jnodes:
+        for jnode in jnodes:
             # the {node name: replicated nodes} dictionary
             node_name_dict = defaultdict(list)
             for node in graph_in.nodes_iter():
@@ -587,6 +590,12 @@ def generate_expanded_graph(graph_in):
             # preserve the node iteration order by sorting on the node id
             for nodes in node_name_dict.values():
                 nodes.sort(key=str)
+            # the number of iterations. this magic formula is borrowed
+            # from _merge_graphs.
+            iter_cnt = len(list(walk(iterables.items())))
+            # make new join node fields to connect to each replicated
+            # join in-edge source node.
+            slot_dicts = [dest._add_join_item_fields() for _ in range(iter_cnt)]
             # for each join in-edge, connect every expanded source node
             # which matches on the in-edge source name to the destination
             # join node. Qualify each edge connect join field name by
@@ -595,8 +604,16 @@ def generate_expanded_graph(graph_in):
             # field 'in' are qualified as ('out_file', 'in1') and
             # ('out_file', 'in2'), resp. This preserves connection port
             # integrity.
-            for src_name, tgt in jedge_dict.iteritems():
+            # the {source name: (destination name, edge data)} dictionary
+            in_edges = jedge_dict[jnode]
+            # for each join in-edge source name, the replicated source
+            # nodes are the expansion graph nodes which match on the
+            # source name. reconnect each replicated source node to the
+            # join node.
+            for src_name, tgt in in_edges.iteritems():
                 dest_name, edge_data = tgt
+                # there is a single join destination, since the join node
+                # is not expanded
                 dests = node_name_dict[dest_name]
                 if not dests:
                     raise Exception("The execution graph does not contain"
@@ -607,18 +624,21 @@ def generate_expanded_graph(graph_in):
                                     % (dest_name, dests))
                 else:
                     dest = dests[0]
-                for src in node_name_dict[src_name]:
+                # reconnect each replication of the current join in-edge
+                # source
+                logger.debug(">>>>>>>>>NN %d vs %d" % (len(node_name_dict[src_name]), len(slot_dicts)))
+                for si, src in enumerate(node_name_dict[src_name]):
                     newdata = deepcopy(edge_data)
                     connects = newdata['connect']
                     join_fields = [field for _, field in connects
                         if field in dest.joinfield]
-                    slot_dict = dest._add_join_item_fields()
-                    for idx, connect in enumerate(connects):
+                    slots = slot_dicts[si]
+                    for ci, connect in enumerate(connects):
                         src_field, dest_field = connect
                         # qualify a join destination field name
-                        if dest_field in slot_dict:
-                            slot_field = slot_dict[dest_field]
-                            connects[idx] = (src_field, slot_field)
+                        if dest_field in slots:
+                            slot_field = slots[dest_field]
+                            connects[ci] = (src_field, slot_field)
                             logger.debug("Qualified the %s -> %s join field"
                                          " %s as %s." %
                                          (src, dest, dest_field, slot_field))
