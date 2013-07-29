@@ -383,7 +383,12 @@ class FEAT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+        try:
+            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+        except:
+            # in case FEAT was used to run an ICA job
+            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
+            
         return outputs
 
 
