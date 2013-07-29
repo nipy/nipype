@@ -13,6 +13,7 @@ The `Pipeline` class provides core functionality for batch processing.
 """
 
 from glob import glob
+from collections import OrderedDict
 import gzip
 from copy import deepcopy
 import cPickle
@@ -1705,7 +1706,8 @@ class JoinNode(Node):
 
     """
 
-    def __init__(self, interface, name, joinsource, joinfield=None, **kwargs):
+    def __init__(self, interface, name, joinsource, joinfield=None,
+        unique=False, **kwargs):
         """
 
         Parameters
@@ -1719,6 +1721,7 @@ class JoinNode(Node):
         joinfield : string or list of strings
             name(s) of list input fields that will be aggregatd
             default is all of the join node input fields
+        unique: flag indicating whether to ignore duplicate input values
 
         See Node docstring for additional keyword arguments.
         """
@@ -1738,6 +1741,9 @@ class JoinNode(Node):
         self._inputs = self._override_join_traits(self._interface.inputs,
                                                   self.joinfield)
         """the override inputs"""
+        
+        self._unique = unique
+        """flag indicating whether to ignore duplicate input values"""
 
         self._next_slot_index = 0
         """the joinfield index assigned to an iterated input"""
@@ -1830,7 +1836,8 @@ class JoinNode(Node):
         return super(JoinNode, self)._run_command(execute, copyfiles)
 
     def _collate_join_field_inputs(self):
-        """Collects each override join item field into the interface join
+        """
+        Collects each override join item field into the interface join
         field input."""
         for field in self.joinfield:
             val = self._collate_input_value(field)
@@ -1839,11 +1846,24 @@ class JoinNode(Node):
                      % (self._next_slot_index, self))
 
     def _collate_input_value(self, field):
+        """
+        Collects the join item field values into a list or set value for
+        the given field, as follows:
+        
+        - If the field trait is a Set, then the values are collected into
+        a set.
+        
+        - Otherwise, the values are collected into a list which preserves
+        the iterables order. If the ``unique`` flag is set, then duplicate
+        values are removed but the iterables order is preserved.
+        """
         val = [getattr(self._inputs, self._join_item_field_name(field, idx))
             for idx in range(self._next_slot_index)]
         basetrait = self._interface.inputs.trait(field)
         if isinstance(basetrait.trait_type, traits.Set):
             return set(val)
+        elif self._unique:
+            return list(OrderedDict.fromkeys(val))
         else:
             return val
 
