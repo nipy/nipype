@@ -34,8 +34,6 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-
-Workflow
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
