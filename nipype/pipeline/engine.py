@@ -1867,6 +1867,7 @@ class JoinNode(Node):
         else:
             return val
 
+
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
 
