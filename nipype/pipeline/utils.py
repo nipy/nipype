@@ -603,14 +603,18 @@ def generate_expanded_graph(graph_in):
             iter_src = None
             for node in graph_in.nodes_iter():
                 if (node.name == inode.itersource and
-                    graph_in.has_predecessor(node)):
+                    graph_in.has_predecessor(inode, node)):
                     iter_src = node
                     break
-            if not iter_src:
+            if not iter_src or not iter_fld_dict.has_key(inode.itersource):
                 raise ValueError("Iterable node %s source node not found: %s"
                                  % (inode, inode.itersource))
             src_fields = iter_fld_dict[inode.itersource]
-            key = tuple([getattr(iter_src, field) for field in src_fields])
+            values = [getattr(iter_src.inputs, field) for field in src_fields]
+            if len(values) == 1:
+                key = values[0]
+            else:
+                key = tuple(values)
             if not inode.iterables.has_key(key):
                 raise ValueError("Iterables key %s not found for the %s"
                                  " iterable source %s" % (key, inode, iter_src))
@@ -643,6 +647,7 @@ def generate_expanded_graph(graph_in):
         prior_prefix = sorted(prior_prefix)
         if not len(prior_prefix):
             iterable_prefix = 'a'
+            inodes = _iterable_nodes(graph_in)
         else:
             if prior_prefix[-1] == 'z':
                 raise ValueError('Too many iterables in the workflow')
@@ -732,7 +737,35 @@ def generate_expanded_graph(graph_in):
             node.parameterization = [param for _, param in
                                      sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
+
     return _remove_nonjoin_identity_nodes(graph_in)
+
+def _iterable_nodes(graph_in):
+    """ Returns the iterable nodes in the given graph
+    
+    The nodes are ordered as follows:
+    
+    - nodes without an itersource precede nodes with an itersource
+    - nodes without an itersource are sorted in reverse topological order
+    - nodes with an itersource are sorted in topological order
+    
+    This order implies the following:
+    
+    - every iterable node without an itersource is expanded before any
+      node with an itersource
+    
+    - every iterable node without an itersource is expanded before any
+      of it's predecessor iterable nodes without an itersource
+    
+    - every node with an itersource is expanded before any of it's
+      successor nodes with an itersource
+    """
+    nodes = nx.topological_sort(graph_in)
+    inodes = [node for node in nodes if node.iterables is not None]
+    inodes_no_src = [node for node in inodes if not node.itersource]
+    inodes_src = [node for node in inodes if node.itersource]
+    inodes_no_src.reverse()
+    return inodes_no_src + inodes_src
 
 def _iterable_nodes(graph_in):
     """ Returns the iterable nodes in the given graph
