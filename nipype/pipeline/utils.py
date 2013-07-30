@@ -496,34 +496,45 @@ def generate_expanded_graph(graph_in):
                                                   lambda: x[1]),
                                       node.iterables))
     allprefixes = list('abcdefghijklmnopqrstuvwxyz')
-    while moreiterables:
-        nodes = nx.topological_sort(graph_in)
-        nodes.reverse()
-        inodes = [node for node in nodes if node.iterables is not None]
-        if inodes:
-            node = inodes[0]
-            iterables = node.iterables.copy()
-            node.iterables = None
-            logger.debug('node: %s iterables: %s' % (node, iterables))
-            subnodes = [s for s in dfs_preorder(graph_in, node)]
-            prior_prefix = []
-            for s in subnodes:
-                prior_prefix.extend(re.findall('\.(.)I', s._id))
-            prior_prefix = sorted(prior_prefix)
-            if not len(prior_prefix):
-                iterable_prefix = 'a'
-            else:
-                if prior_prefix[-1] == 'z':
-                    raise ValueError('Too many iterables in the workflow')
-                iterable_prefix =\
-                allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
-            node._id += ('.' + iterable_prefix + 'I')
-            logger.debug(('subnodes:', subnodes))
-            subgraph = graph_in.subgraph(subnodes)
-            graph_in = _merge_graphs(graph_in, subnodes,
-                                     subgraph, node._hierarchy + node._id,
-                                     iterables, iterable_prefix)
-            #nx.write_dot(graph_in, '%s_post.dot'%node)
+
+    # the iterable nodes
+    inodes = _iterable_nodes(graph_in)
+    # record the iterable fields, since expansion removes them
+    iter_fld_dict = {inode.name: inode.iterables.keys()
+                     for inode in inodes}
+    # while there is an iterable node, expand the iterable node's
+    # subgraphs
+    while inodes:
+        inode = inodes[0]
+        if inode.itersource:
+            # find the unique iterable source node in the graph
+            iter_src = None
+            for node in graph_in.nodes_iter():
+                if (node.name == inode.itersource and
+                    graph_in.has_predecessor(node)):
+                    iter_src = node
+                    break
+            if not iter_src:
+                raise ValueError("Iterable node %s source node not found: %s"
+                                 % (inode, inode.itersource))
+            src_fields = iter_fld_dict[inode.itersource]
+            key = tuple([getattr(iter_src, field) for field in src_fields])
+            if not inode.iterables.has_key(key):
+                raise ValueError("Iterables key %s not found for the %s"
+                                 " iterable source %s" % (key, inode, iter_src))
+            iterables = inode.iterables[key]
+        iterables = inode.iterables.copy()
+        inode.iterables = None
+        logger.debug('node: %s iterables: %s' % (inode, iterables))
+
+        # collect the subnodes to expand
+        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        prior_prefix = []
+        for s in subnodes:
+            prior_prefix.extend(re.findall('\.(.)I', s._id))
+        prior_prefix = sorted(prior_prefix)
+        if not len(prior_prefix):
+            iterable_prefix = 'a'
         else:
             moreiterables = False
     for node in graph_in.nodes():
