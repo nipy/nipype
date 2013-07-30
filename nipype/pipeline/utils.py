@@ -591,10 +591,30 @@ def generate_expanded_graph(graph_in):
 
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
+    # record the iterable fields, since expansion removes them
+    iter_fld_dict = {inode.name: inode.iterables.keys()
+                     for inode in inodes}
     # while there is an iterable node, expand the iterable node's
     # subgraphs
     while inodes:
         inode = inodes[0]
+        if inode.itersource:
+            # find the unique iterable source node in the graph
+            iter_src = None
+            for node in graph_in.nodes_iter():
+                if (node.name == inode.itersource and
+                    graph_in.has_predecessor(node)):
+                    iter_src = node
+                    break
+            if not iter_src:
+                raise ValueError("Iterable node %s source node not found: %s"
+                                 % (inode, inode.itersource))
+            src_fields = iter_fld_dict[inode.itersource]
+            key = tuple([getattr(iter_src, field) for field in src_fields])
+            if not inode.iterables.has_key(key):
+                raise ValueError("Iterables key %s not found for the %s"
+                                 " iterable source %s" % (key, inode, iter_src))
+            iterables = inode.iterables[key]
         iterables = inode.iterables.copy()
         inode.iterables = None
         logger.debug('node: %s iterables: %s' % (inode, iterables))
