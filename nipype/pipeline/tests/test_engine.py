@@ -37,7 +37,7 @@ class TestInterface(nib.BaseInterface):
         return outputs
 
 
-# Workflow
+Workflow
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
@@ -208,6 +208,26 @@ def test_iterable_expansion():
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
+
+def test_itersource_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node1.iterables = ('input1',[1,2])
+    node3.itersource = 'node1'
+    node3.iterables = ('input1',{1:[3,4], 2:[5,6]})
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node1,'output1', node2, 'input1')
+    wf1.connect(node2,'output1', node3, 'input1')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
+
 
 def test_disconnect():
     import nipype.pipeline.engine as pe
