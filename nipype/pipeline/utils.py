@@ -509,24 +509,36 @@ def generate_expanded_graph(graph_in):
             # find the unique iterable source node in the graph
             iter_src = None
             for node in graph_in.nodes_iter():
-                if (node.name == inode.itersource and
-                    graph_in.has_predecessor(inode, node)):
+                if (node.name == inode.itersource
+                    and nx.has_path(graph_in, node, inode)):
                     iter_src = node
                     break
             if not iter_src or not iter_fld_dict.has_key(inode.itersource):
                 raise ValueError("Iterable node %s source node not found: %s"
                                  % (inode, inode.itersource))
+            # look up the iterables for this particular itersource descendant
+            # using the iterable source ancestor values as a key
+            iterables = {}
+            # the source node iterables fields
             src_fields = iter_fld_dict[inode.itersource]
-            values = [getattr(iter_src.inputs, field) for field in src_fields]
-            if len(values) == 1:
-                key = values[0]
+            # the source node iterables values
+            src_values = [getattr(iter_src.inputs, field) for field in src_fields]
+            # if there is one source field, then the key is the the source value,
+            # otherwise the key is the tuple of source values 
+            if len(src_values) == 1:
+                key = src_values[0]
             else:
-                key = tuple(values)
-            if not inode.iterables.has_key(key):
-                raise ValueError("Iterables key %s not found for the %s"
-                                 " iterable source %s" % (key, inode, iter_src))
-            iterables = inode.iterables[key]
-        iterables = inode.iterables.copy()
+                key = tuple(src_values)
+            # the iterables is a {field: lambda} dictionary, where the
+            # lambda returns a {source key: iteration list} dictionary
+            iterables = {}
+            for field, func in inode.iterables.iteritems():
+                # the {source key: iteration list} dictionary
+                lookup = func()
+                if lookup.has_key(key):
+                    iterables[field] = lambda: lookup[key]
+        else:
+            iterables = inode.iterables.copy()
         inode.iterables = None
         logger.debug('node: %s iterables: %s' % (inode, iterables))
 
@@ -538,11 +550,26 @@ def generate_expanded_graph(graph_in):
         prior_prefix = sorted(prior_prefix)
         if not len(prior_prefix):
             iterable_prefix = 'a'
-            inodes = _iterable_nodes(graph_in)
         else:
-            inodes = []
+            if prior_prefix[-1] == 'z':
+                raise ValueError('Too many iterables in the workflow')
+            iterable_prefix =\
+            allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+        logger.debug(('subnodes:', subnodes))
+
+        # append a suffix to the iterable node id
+        inode._id += ('.' + iterable_prefix + 'I')
+
+        # merge the iterated subgraphs
+        subgraph = graph_in.subgraph(subnodes)
+        graph_in = _merge_graphs(graph_in, subnodes,
+                                 subgraph, inode._hierarchy + inode._id,
+                                 iterables, iterable_prefix)
+
         #nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes
+        inodes = _iterable_nodes(graph_in)
+
     for node in graph_in.nodes():
         if node.parameterization:
             node.parameterization = [param for _, param in
