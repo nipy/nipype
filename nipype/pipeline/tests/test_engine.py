@@ -213,7 +213,7 @@ def test_itersource_expansion():
     node3 = pe.Node(TestInterface(),name='node3')
     node1.iterables = ('input1',[1,2])
     node3.itersource = 'node1'
-    node3.iterables = ('input1',{1:[3,4], 2:[5,6]})
+    node3.iterables = [('input1',{1:[3,4], 2:[5,6,7]}), ('input2',{1:[6,7]})]
     node4 = pe.Node(TestInterface(),name='node4')
     wf1.connect(node1,'output1', node2, 'input1')
     wf1.connect(node2,'output1', node3, 'input1')
@@ -222,8 +222,16 @@ def test_itersource_expansion():
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
-    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
-
+    
+    # each graph clone has:
+    # 2 node1 replicates,
+    # 2 node2 successors,
+    # 2 * 2 node3 replicates for the node1 input1 value 1 replicate,
+    # 3 node3 replicates for the node1 input1 value 2 replicate and
+    # 1 node4 successor per node3 replicate =
+    # 2 + 2 + (4 + 3) + 7 = 24 nodes per graph clone
+    # => 3 * 18 = 54 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 54
 
 def test_disconnect():
     import nipype.pipeline.engine as pe
