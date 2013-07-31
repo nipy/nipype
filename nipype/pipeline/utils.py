@@ -524,13 +524,13 @@ def generate_expanded_graph(graph_in):
 
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
+    # record the iterable fields, since expansion removes them
+    iter_fld_dict = {inode.name: inode.iterables.keys()
+                     for inode in inodes}
     # while there is an iterable node, expand the iterable node's
     # subgraphs
     while inodes:
         inode = inodes[0]
-        iterables = inode.iterables.copy()
-        inode.iterables = None
-        logger.debug('node: %s iterables: %s' % (inode, iterables))
 
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes_iter()
@@ -548,6 +548,42 @@ def generate_expanded_graph(graph_in):
                 logger.debug("Excised the %s -> %s join node in-edge."
                              % (src, dest))
 
+        if inode.itersource:
+            # find the unique iterable source node in the graph
+            iter_src = None
+            for node in graph_in.nodes_iter():
+                if (node.name == inode.itersource
+                    and nx.has_path(graph_in, node, inode)):
+                    iter_src = node
+                    break
+            if not iter_src or not iter_fld_dict.has_key(inode.itersource):
+                raise ValueError("Iterable node %s source node not found: %s"
+                                 % (inode, inode.itersource))
+            # look up the iterables for this particular itersource descendant
+            # using the iterable source ancestor values as a key
+            iterables = {}
+            # the source node iterables fields
+            src_fields = iter_fld_dict[inode.itersource]
+            # the source node iterables values
+            src_values = [getattr(iter_src.inputs, field) for field in src_fields]
+            # if there is one source field, then the key is the the source value,
+            # otherwise the key is the tuple of source values 
+            if len(src_values) == 1:
+                key = src_values[0]
+            else:
+                key = tuple(src_values)
+            # the iterables is a {field: lambda} dictionary, where the
+            # lambda returns a {source key: iteration list} dictionary
+            iterables = {}
+            for field, func in inode.iterables.iteritems():
+                # the {source key: iteration list} dictionary
+                lookup = func()
+                if lookup.has_key(key):
+                    iterables[field] = lambda: lookup[key]
+        else:
+            iterables = inode.iterables.copy()
+        inode.iterables = None
+        logger.debug('node: %s iterables: %s' % (inode, iterables))
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
         prior_prefix = []
@@ -646,6 +682,33 @@ def generate_expanded_graph(graph_in):
                                      sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
     return _remove_nonjoin_identity_nodes(graph_in)
+
+def _iterable_nodes(graph_in):
+    """ Returns the iterable nodes in the given graph
+    
+    The nodes are ordered as follows:
+    
+    - nodes without an itersource precede nodes with an itersource
+    - nodes without an itersource are sorted in reverse topological order
+    - nodes with an itersource are sorted in topological order
+    
+    This order implies the following:
+    
+    - every iterable node without an itersource is expanded before any
+      node with an itersource
+    
+    - every iterable node without an itersource is expanded before any
+      of it's predecessor iterable nodes without an itersource
+    
+    - every node with an itersource is expanded before any of it's
+      successor nodes with an itersource
+    """
+    nodes = nx.topological_sort(graph_in)
+    inodes = [node for node in nodes if node.iterables is not None]
+    inodes_no_src = [node for node in inodes if not node.itersource]
+    inodes_src = [node for node in inodes if node.itersource]
+    inodes_no_src.reverse()
+    return inodes_no_src + inodes_src
 
 def _iterable_nodes(graph_in):
     """ Returns the iterable nodes in the given graph
