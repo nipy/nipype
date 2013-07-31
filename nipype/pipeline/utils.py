@@ -638,15 +638,6 @@ def _iterable_nodes(graph_in):
     inodes_src = [node for node in inodes if node.itersource]
     inodes_no_src.reverse()
     return inodes_no_src + inodes_src
-
-def _iterable_nodes(graph_in):
-    """ Returns the iterable nodes in the given graph
-    
-    The nodes are sorted in reverse topological order.
-    """
-    nodes = nx.topological_sort(graph_in)
-    nodes.reverse()
-    return [node for node in nodes if node.iterables is not None]
     
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
