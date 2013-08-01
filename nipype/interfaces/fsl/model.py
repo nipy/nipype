@@ -383,12 +383,17 @@ class FEAT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        try:
-            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        except:
-            # in case FEAT was used to run an ICA job
+        is_ica = False
+        with open(self.inputs.fsf_file, 'rt') as fp:
+            text = fp.read()
+            if "set fmri(inmelodic) 1" in text:
+                is_ica = True
+
+        if is_ica:
             outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
-            
+        else:
+            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+
         return outputs
 
 
