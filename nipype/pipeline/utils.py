@@ -533,6 +533,7 @@ def generate_expanded_graph(graph_in):
 
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
+    logger.debug("Detected iterable nodes %s" % inodes)
     # record the iterable fields, since expansion removes them
     iter_fld_dict = {inode.name: inode.iterables.keys()
                      for inode in inodes}
@@ -540,6 +541,26 @@ def generate_expanded_graph(graph_in):
     # subgraphs
     while inodes:
         inode = inodes[0]
+        logger.debug("Expanding the iterable node %s..." % inode)
+
+        # the join successor nodes of the current iterable node
+        jnodes = [node for node in graph_in.nodes_iter()
+            if hasattr(node, 'joinsource')
+               and inode.name == node.joinsource
+               and nx.has_path(graph_in, inode, node)]
+
+        # excise the join in-edges. save the excised edges in a
+        # {jnode: {source name: (destination name, edge data)}}
+        # dictionary
+        jedge_dict = {}
+        for jnode in jnodes:
+            in_edges = jedge_dict[jnode] = {}
+            for src, dest, data in graph_in.in_edges_iter(jnode, True):
+                in_edges[src._id] = data
+                graph_in.remove_edge(src, dest)
+                logger.debug("Excised the %s -> %s join node in-edge."
+                             % (src, dest))
+
         if inode.itersource:
             # find the unique iterable source node in the graph
             iter_src = None
@@ -549,8 +570,9 @@ def generate_expanded_graph(graph_in):
                     iter_src = node
                     break
             if not iter_src or not iter_fld_dict.has_key(inode.itersource):
-                raise ValueError("Iterable node %s source node not found: %s"
-                                 % (inode, inode.itersource))
+                raise ValueError("The node %s itersource %s was not found"
+                                 " among the iterable nodes %s"
+                                 % (inode, inode.itersource, iter_fld_dict.keys()))
             # look up the iterables for this particular itersource descendant
             # using the iterable source ancestor values as a key
             iterables = {}
@@ -575,7 +597,6 @@ def generate_expanded_graph(graph_in):
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
-        logger.debug('node: %s iterables: %s' % (inode, iterables))
 
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
@@ -600,6 +621,58 @@ def generate_expanded_graph(graph_in):
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
                                  iterables, iterable_prefix)
+
+        # reconnect the join nodes
+        for jnode in jnodes:
+            # the {node id: edge data} dictionary for edges connecting
+            # to the join node in the unexpanded graph
+            old_edge_dict = jedge_dict[jnode]
+            # the edge source node replicates
+            expansions = defaultdict(list)
+            for node in graph_in.nodes_iter():
+                for src_id, edge_data in old_edge_dict.iteritems():
+                    if node._id.startswith(src_id):
+                        expansions[src_id].append(node)
+            # preserve the node iteration order by sorting on the node id
+            for src_nodes in expansions.itervalues():
+                src_nodes.sort(key=lambda node: node._id)
+
+            # the number of iterations. this magic formula is borrowed
+            # from _merge_graphs.
+            iter_cnt = len(list(walk(iterables.items())))
+            # make new join node fields to connect to each replicated
+            # join in-edge source node.
+            slot_dicts = [dest._add_join_item_fields() for _ in range(iter_cnt)]
+            # for each join in-edge, connect every expanded source node
+            # which matches on the in-edge source name to the destination
+            # join node. Qualify each edge connect join field name by
+            # appending the next join slot index, e.g. the connect
+            # from two expanded nodes from field 'out_file' to join
+            # field 'in' are qualified as ('out_file', 'in1') and
+            # ('out_file', 'in2'), resp. This preserves connection port
+            # integrity.
+            for old_id, src_nodes in expansions.iteritems():
+                # reconnect each replication of the current join in-edge
+                # source
+                for si, src in enumerate(src_nodes):
+                    olddata = old_edge_dict[old_id]
+                    newdata = deepcopy(olddata)
+                    connects = newdata['connect']
+                    join_fields = [field for _, field in connects
+                        if field in dest.joinfield]
+                    slots = slot_dicts[si]
+                    for ci, connect in enumerate(connects):
+                        src_field, dest_field = connect
+                        # qualify a join destination field name
+                        if dest_field in slots:
+                            slot_field = slots[dest_field]
+                            connects[ci] = (src_field, slot_field)
+                            logger.debug("Qualified the %s -> %s join field"
+                                         " %s as %s." %
+                                         (src, jnode, dest_field, slot_field))
+                    graph_in.add_edge(src, jnode, newdata)
+                    logger.debug("Connected the join node %s subgraph to the"
+                                 " expanded join point %s" % (jnode, src))
 
         #nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes

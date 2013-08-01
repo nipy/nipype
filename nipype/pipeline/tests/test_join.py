@@ -35,9 +35,9 @@ class IncrementInterface(nib.BaseInterface):
         outputs['output1'] = self.inputs.input1 + self.inputs.inc
         return outputs
 
-_sum = 0
+_sums = []
 
-_sum_operands = None
+_sum_operands = []
 
 class SumInputSpec(nib.TraitedSpec):
     input1 = nib.traits.List(nib.traits.Int, mandatory=True, desc='input')
@@ -58,8 +58,10 @@ class SumInterface(nib.BaseInterface):
         global _sum
         global _sum_operands
         outputs = self._outputs().get()
-        _sum_operands = outputs['operands'] = self.inputs.input1
-        _sum = outputs['output1'] = sum(self.inputs.input1)
+        outputs['operands'] = self.inputs.input1
+        _sum_operands.append(outputs['operands'])
+        outputs['output1'] = sum(self.inputs.input1)
+        _sums.append(outputs['output1'])
         return outputs
 
 
@@ -150,9 +152,11 @@ def test_join_expansion():
     # Nipype factors away the IdentityInterface.
     assert_equal(len(result.nodes()), 8, "The number of expanded nodes is incorrect.")
     # the join Sum result is (1 + 1 + 1) + (2 + 1 + 1)
-    assert_equal(_sum, 7, "The join Sum output value is incorrect: %s." % _sum)
+    assert_equal(len(_sums), 1,
+                 "The number of join outputs is incorrect")
+    assert_equal(_sums[0], 7, "The join Sum output value is incorrect: %s." % _sums[0])
     # the join input preserves the iterables input order
-    assert_equal(_sum_operands, [3, 4], "The join Sum input is incorrect: %s." % _sum_operands)
+    assert_equal(_sum_operands[0], [3, 4], "The join Sum input is incorrect: %s." % _sum_operands[0])
     # there are two iterations of the post-join node in the iterable path
     assert_equal(len(_products), 2,
                  "The number of iterated post-join outputs is incorrect")
@@ -209,12 +213,14 @@ def test_unique_join_node():
     wf.run()
     
     # the join length is the number of unique inputs
-    assert_equal(_sum_operands, [4, 2, 3], "The unique join output value is incorrect: %s." % _sum_operands)
+    assert_equal(_sum_operands[0], [4, 2, 3], "The unique join output value is incorrect: %s." % _sum_operands[0])
 
     os.chdir(cwd)
     rmtree(wd)
 
 def test_identity_join_node():
+    global _sum_operands
+    _sum_operands = []
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
@@ -241,8 +247,9 @@ def test_identity_join_node():
     # node and 1 post-join node. Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
     assert_equal(len(result.nodes()), 5, "The number of expanded nodes is incorrect.")
-    assert_equal(_sum_operands, [2, 3, 4],
-                 "The join Sum input is incorrect: %s." %_sum_operands)
+    assert_equal(_sum_operands[0], [2, 3, 4],
+                 "The join Sum input is incorrect: %s." %_sum_operands[0])
+
     os.chdir(cwd)
     rmtree(wd)
 
@@ -282,8 +289,65 @@ def test_multifield_join_node():
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
     assert_equal(_products, [8, 10, 12, 15],
                  "The post-join products is incorrect: %s." % _products)
+
     os.chdir(cwd)
     rmtree(wd)
+
+def test_itersource_join_source_node():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [1, 2])]
+    # an intermediate node in the first iteration path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'input1')
+    # an iterable pre-join node with an itersource
+    pre_join2 = pe.Node(ProductInterface(), name='pre_join2')
+    pre_join2.itersource = 'inputspec'
+    pre_join2.iterables = ('input1', {1: [3, 4], 2: [5, 6]})
+    wf.connect(pre_join1, 'output1', pre_join2, 'input2')
+    # an intermediate node in the second iteration path
+    pre_join3 = pe.Node(IncrementInterface(), name='pre_join3')
+    wf.connect(pre_join2, 'output1', pre_join3, 'input1')
+    # the join node
+    join = pe.JoinNode(IdentityInterface(fields=['vector']), joinsource='pre_join2',
+        joinfield='vector', name='join')
+    wf.connect(pre_join3, 'output1', join, 'vector')
+    # a join successor node
+    post_join1 = pe.Node(SumInterface(), name='post_join1')
+    wf.connect(join, 'vector', post_join1, 'input1')
+
+    result = wf.run()
+
+    # the expanded graph contains
+    # 1 pre_join1 replicate for each inputspec iteration,
+    # 2 pre_join2 replicates for each inputspec iteration,
+    # 1 pre_join3 for each pre_join2 iteration,
+    # 1 join replicate for each inputspec iteration and
+    # 1 post_join1 replicate for each join replicate =
+    # 2 + (2 * 2) + 4 + 2 + 2 = 14 expansion graph nodes.
+    # Nipype factors away the iterable input
+    # IdentityInterface but keeps the join IdentityInterface.
+    assert_equal(len(result.nodes()), 14, "The number of expanded nodes is incorrect.")
+    # The first join inputs are:
+    # 1 + (3 * 2) and 1 + (4 * 2)
+    # The second join inputs are:
+    # 1 + (5 * 3) and 1 + (6 * 3)
+    # the post-join nodes execution order is indeterminate;
+    # therefore, compare the lists item-wise.
+    assert_true([16, 19] in _sum_operands,
+                 "The join Sum input is incorrect: %s." % _sum_operands)
+    assert_true([7, 9] in _sum_operands,
+                 "The join Sum input is incorrect: %s." % _sum_operands)
+
+    os.chdir(cwd)
+    rmtree(wd)
+
 
 if __name__ == "__main__":
     import nose
