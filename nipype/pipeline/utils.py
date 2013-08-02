@@ -261,7 +261,7 @@ def expand_iterables(iterables, synchronize=False):
 
 def count_iterables(iterables, synchronize=False):
     """Return the number of iterable expansion nodes.
-
+    
     If synchronize is True, then the count is the maximum number
     of iterables value lists.
     Otherwise, the count is the product of the iterables value
@@ -272,7 +272,7 @@ def count_iterables(iterables, synchronize=False):
     else:
         op = lambda x,y: x*y
     return reduce(op, [len(func()) for _, func in iterables.iteritems()])
-
+    
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
 
@@ -305,9 +305,15 @@ def walk(children, level=0, path=None, usename=True):
 
 def synchronize_iterables(iterables):
     """Synchronize the given iterables in item-wise order.
+<<<<<<< HEAD
 
     Return: the {field: value} dictionary list
 
+=======
+    
+    Return: the {field: value} dictionary list
+    
+>>>>>>> Add iterables synchronize.
     Examples
     --------
     >>> from nipype.pipeline.utils import synchronize_iterables
@@ -695,7 +701,7 @@ def generate_expanded_graph(graph_in):
         subgraph = graph_in.subgraph(subnodes)
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
-                                 iterables, iterable_prefix)
+                                 iterables, iterable_prefix, inode.synchronize)
         
         # reconnect the join nodes
         for jnode in jnodes:
@@ -712,9 +718,8 @@ def generate_expanded_graph(graph_in):
             for src_nodes in expansions.itervalues():
                 src_nodes.sort(key=lambda node: node._id)
 
-            # the number of iterations. this magic formula is borrowed
-            # from _merge_graphs.
-            iter_cnt = len(list(walk(iterables.items())))
+            # the number of iterations.
+            iter_cnt = count_iterables(iterables, inode.synchronize)
             # make new join node fields to connect to each replicated
             # join in-edge source node.
             slot_dicts = [dest._add_join_item_fields() for _ in range(iter_cnt)]
