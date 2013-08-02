@@ -285,9 +285,52 @@ def test_multifield_join_node():
     # the iterables are expanded as the cartesian product of the iterables values.
     # thus, the expanded graph contains 2 * (2 * 2) iteration pre-join nodes, 1 join
     # node and 1 post-join node.
-    assert_equal(len(result.nodes()), 10, "The number of expanded nodes is incorrect.")
+    assert_equal(len(result.nodes()), 10,
+                 "The number of expanded nodes is incorrect.")
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
     assert_equal(_products, [8, 10, 12, 15],
+                 "The post-join products is incorrect: %s." % _products)
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_synchronize_join_node():
+    global _products
+    _products = []
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']), name='inputspec')
+    inputspec.iterables = [('m', [1, 2]), ('n', [3, 4])]
+    inputspec.synchronize = True
+    # two pre-join nodes in a parallel iterated path
+    inc1 = pe.Node(IncrementInterface(), name='inc1')
+    wf.connect(inputspec, 'm', inc1, 'input1')
+    inc2 = pe.Node(IncrementInterface(), name='inc2')
+    wf.connect(inputspec, 'n', inc2, 'input1')
+    # the join node
+    join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
+        joinsource='inputspec', name='join')
+    wf.connect(inc1, 'output1', join, 'vector1')
+    wf.connect(inc2, 'output1', join, 'vector2')
+    # a post-join node
+    prod = pe.MapNode(ProductInterface(), name='prod', iterfield=['input1', 'input2'])
+    wf.connect(join, 'vector1', prod, 'input1')
+    wf.connect(join, 'vector2', prod, 'input2')
+    
+    result = wf.run()
+    
+    # there are 3 iterables expansions.
+    # thus, the expanded graph contains 2 * 2 iteration pre-join nodes, 1 join
+    # node and 1 post-join node.
+    assert_equal(len(result.nodes()), 6,
+                 "The number of expanded nodes is incorrect.")
+    # the product inputs are [2, 3] and [4, 5]
+    assert_equal(_products, [8, 15],
                  "The post-join products is incorrect: %s." % _products)
 
     os.chdir(cwd)
@@ -315,8 +358,8 @@ def test_itersource_join_source_node():
     pre_join3 = pe.Node(IncrementInterface(), name='pre_join3')
     wf.connect(pre_join2, 'output1', pre_join3, 'input1')
     # the join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector']), joinsource='pre_join2',
-        joinfield='vector', name='join')
+    join = pe.JoinNode(IdentityInterface(fields=['vector']),
+        joinsource='pre_join2', joinfield='vector', name='join')
     wf.connect(pre_join3, 'output1', join, 'vector')
     # a join successor node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
@@ -333,7 +376,8 @@ def test_itersource_join_source_node():
     # 2 + (2 * 2) + 4 + 2 + 2 = 14 expansion graph nodes.
     # Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
-    assert_equal(len(result.nodes()), 14, "The number of expanded nodes is incorrect.")
+    assert_equal(len(result.nodes()), 14,
+                 "The number of expanded nodes is incorrect.")
     # The first join inputs are:
     # 1 + (3 * 2) and 1 + (4 * 2)
     # The second join inputs are:
