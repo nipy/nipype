@@ -1093,7 +1093,7 @@ class Node(WorkflowBase):
     """
 
     def __init__(self, interface, name, iterables=None, itersource=None,
-                 overwrite=None, needed_outputs=None,
+                 synchronize=False, overwrite=None, needed_outputs=None,
                  run_without_submitting=False, **kwargs):
         """
         Parameters
@@ -1106,7 +1106,7 @@ class Node(WorkflowBase):
             node specific name
 
         iterables : generator
-            input field and list to iterate using the pipeline engine
+            Input field and list to iterate using the pipeline engine
             for example to iterate over different frac values in fsl.Bet()
             for a single field the input can be a tuple, otherwise a list
             of tuples
@@ -1120,14 +1120,19 @@ class Node(WorkflowBase):
             node.itersource = 'inputspec'
             node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
                                        'img2.nii': [0.6, 0.7]})
-        
+            
         itersource: str
-            the name of the predecessor iterable node whose iterables
+            Whe name of the predecessor iterable node whose iterables
             field values comprise the key to the iterables dictionary
             values. 
-
-        joinsource: Node
-            The iterable node joined by this Join node
+        
+        synchronize: boolean
+            Flag indicating whether iterables are synchronized.
+            If the iterables are synchronized, then this iterable
+            node is expanded once per iteration over all of the
+            iterables values.
+            Otherwise, this iterable node is expanded once per
+            each permutation of the iterables values.
 
         overwrite : Boolean
             Whether to overwrite contents of output directory if it already
@@ -1154,6 +1159,7 @@ class Node(WorkflowBase):
         self.name = name
         self._result = None
         self.iterables = iterables
+        self.synchronize = synchronize
         self.itersource = itersource
         self.overwrite = overwrite
         self.parameterization = None
