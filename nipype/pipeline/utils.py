@@ -244,9 +244,35 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
+def expand_iterables(iterables, synchronize=False):
+    if synchronize:
+        return synchronize_iterables(iterables)
+    else:
+        return list(walk(iterables.items()))
 
+def count_iterables(iterables, synchronize=False):
+    """Return the number of iterable expansion nodes.
+    
+    If synchronize is True, then the count is the maximum number
+    of iterables value lists.
+    Otherwise, the count is the product of the iterables value
+    list sizes.
+    """
+    if synchronize:
+        op = max
+    else:
+        op = lambda x,y: x*y
+    return reduce(op, [len(func()) for _, func in iterables.iteritems()])
+    
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
+    
+    Examples
+    --------
+    >>> from nipype.pipeline.utils import walk
+    >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
+    >>> list(walk(iterables))
+    [{'a': 1, 'b': 3}, {'a': 1, 'b': 4}, {'a': 2, 'b': 3}, {'a': 2, 'b': 4}]
     """
     # Entry point
     if level == 0:
@@ -268,6 +294,29 @@ def walk(children, level=0, path=None, usename=True):
         for child_paths in walk(tail, level + 1, path, usename):
             yield child_paths
 
+def synchronize_iterables(iterables):
+    """Synchronize the given iterables in item-wise order.
+    
+    Return: the {field: value} dictionary list
+    
+    Examples
+    --------
+    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> iterables = dict(a=lambda: [1, 2]), b=lambda: [3, 4])
+    >>> synchronize_iterable_lists(iterables)
+    [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
+    >>> iterables = dict(a=lambda: [1, 2]), b=lambda: [3], c=lambda: [4, 5, 6])
+    >>> synchronize_iterable_lists(iterables)
+    [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
+    """
+    # Convert the (field, function) tuples into (field, value) lists
+    pair_lists = [[(field, value) for value in func()]
+        for field, func in iterables.iteritems()]
+    # A factory to make a dictionary from the mapped (field, value)
+    # key-value pairs. The filter removes any unmapped None items.
+    factory = lambda *pairs: dict(filter(None, pairs))
+    # Make a dictionary for each of the correlated (field, value) items
+    return map(factory, *pair_lists)
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -293,7 +342,8 @@ def get_levels(G):
     return levels
 
 
-def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
+def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
+                  prefix, synchronize=False):
     """Merges two graphs that share a subset of nodes.
 
     If the subgraph needs to be replicated for multiple iterables, the
@@ -343,7 +393,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
                                        supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
-    iterable_params = list(walk(iterables.items()))
+    iterable_params = expand_iterables(iterables, synchronize)
     # If there are no iterable subgraphs, then return
     if not iterable_params:
         return supergraph
@@ -628,7 +678,7 @@ def generate_expanded_graph(graph_in):
         subgraph = graph_in.subgraph(subnodes)
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
-                                 iterables, iterable_prefix)
+                                 iterables, iterable_prefix, inode.synchronize)
         
         # reconnect the join nodes
         for jnode in jnodes:
@@ -645,9 +695,8 @@ def generate_expanded_graph(graph_in):
             for src_nodes in expansions.itervalues():
                 src_nodes.sort(key=lambda node: node._id)
 
-            # the number of iterations. this magic formula is borrowed
-            # from _merge_graphs.
-            iter_cnt = len(list(walk(iterables.items())))
+            # the number of iterations.
+            iter_cnt = count_iterables(iterables, inode.synchronize)
             # make new join node fields to connect to each replicated
             # join in-edge source node.
             slot_dicts = [dest._add_join_item_fields() for _ in range(iter_cnt)]
