@@ -760,18 +760,18 @@ def _standardize_iterables(node):
     # The candidate iterable fields
     fields = set(node.inputs.copyable_trait_names())
     
+    # Synchronize iterables can be in [fields, value tuples] format
+    # rather than [(field, value list), (field, value list), ...]
+    if node.synchronize and len(iterables) == 2:
+        first, last = iterables
+        if all((isinstance(item, str) and item in fields
+                for item in first)):
+            iterables = _transpose_iterables(first, last)
     # Convert a tuple to a list
     if isinstance(iterables, tuple):
         iterables = [iterables]
     # Convert a list to a dictionary
     if isinstance(iterables, list):
-        # Synchronize iterables can be in [fields, value tuples] format
-        # rather than [(field, value list), (field, value list), ...]
-        if node.synchronize and len(iterables) == 2:
-            first, last = iterables
-            if all((isinstance(item, str) and item in fields
-                    for item in first)):
-                iterables = _transpose_iterables(first, last)
         # Validate the format
         for item in iterables:
             try:
