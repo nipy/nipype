@@ -351,7 +351,7 @@ def test_itersource_join_source_node():
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # an iterable pre-join node with an itersource
     pre_join2 = pe.Node(ProductInterface(), name='pre_join2')
-    pre_join2.itersource = 'inputspec'
+    pre_join2.itersource = ('inputspec', 'n')
     pre_join2.iterables = ('input1', {1: [3, 4], 2: [5, 6]})
     wf.connect(pre_join1, 'output1', pre_join2, 'input2')
     # an intermediate node in the second iteration path
