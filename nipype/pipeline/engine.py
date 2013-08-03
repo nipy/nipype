@@ -1113,18 +1113,28 @@ class Node(WorkflowBase):
             node.iterables = ('frac',[0.5,0.6,0.7])
             node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
             
-            if this node has an itersource, then the iterables values
-            is a dictionary whose keys are the iterable source node
-            iterables field values, e.g.:
+            If this node has an itersource, then the iterables values
+            is a dictionary which maps an iterable source field value
+            to the target iterables field values, e.g.:
             inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
-            node.itersource = 'inputspec'
+            node.itersource = ('inputspec', ['frac'])
             node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
-                                       'img2.nii': [0.6, 0.7]})
+                                       img2.nii': [0.6, 0.7]})
             
-        itersource: str
-            Whe name of the predecessor iterable node whose iterables
-            field values comprise the key to the iterables dictionary
-            values. 
+            If this node's synchronize flag is set, then an alternate
+            form of the iterables is a [fields, values] list, where
+            fields is the list of iterated fields and values is the
+            list of value tuples for the given fields, e.g.:
+            node.synchronize = True
+            node.iterables = [('frac', 'threshold'),
+                              [(0.5, True),
+                               (0.6, False)]]
+            
+        itersource: tuple
+            The (name, fields) iterables source which specifies the name
+            of the predecessor iterable node and the input fields to use
+            from that source node. The output field values comprise the
+            key to the iterables parameter value mapping dictionary. 
         
         synchronize: boolean
             Flag indicating whether iterables are synchronized.
