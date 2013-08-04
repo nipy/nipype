@@ -767,6 +767,7 @@ def _standardize_iterables(node):
         if all((isinstance(item, str) and item in fields
                 for item in first)):
             iterables = _transpose_iterables(first, last)
+            
     # Convert a tuple to a list
     if isinstance(iterables, tuple):
         iterables = [iterables]
@@ -806,7 +807,7 @@ def _transpose_iterables(fields, values):
     iterable (field: value list) pairs, suitable for setting
     a node iterables property.
     """
-    return zip(fields, [filter(lambda(v): v != None, transpose)
+    return zip(fields, [filter(lambda(v): v != None, list(transpose))
                         for transpose in zip(*values)])
     
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
