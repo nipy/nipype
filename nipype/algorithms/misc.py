@@ -437,6 +437,95 @@ class Overlap(BaseInterface):
         return outputs
 
 
+class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
+    in_ref = InputMultiPath( File(exists=True), mandatory=True,
+                   desc="Reference image. Requires the same dimensions as in_tst.")
+    in_tst = InputMultiPath( File(exists=True), mandatory=True,
+                   desc="Test image. Requires the same dimensions as in_ref.")
+    mask_volume = File( exists=True, desc="calculate overlap only within this mask.")
+    weighting = traits.Enum("none", "volume", desc='""none": no class-overlap weighting is performed\
+                            "volume": computed class-overlaps are weighted by class volume',usedefault=True)
+    out_file = File("diff.nii", usedefault=True)
+
+
+class FuzzyOverlapOutputSpec(TraitedSpec):
+    jaccard = traits.Float()
+    dice = traits.Float()
+    diff_file = File(exists=True)
+
+
+class FuzzyOverlap(BaseInterface):
+    """
+    Calculates various overlap measures between two maps, using the fuzzy definition
+    proposed in: Crum et al., Generalized Overlap Measures for Evaluation and Validation
+    in Medical Image Analysis, IEEE Trans. Med. Ima. 25(11),pp 1451-1461, Nov. 2006.
+
+    reference.nii and test.nii are lists of 2/3D images, each element on the list containing
+    one volume fraction map of a class in a fuzzy partition of the domain.
+
+    Example
+    -------
+
+    >>> overlap = FuzzyOverlap()
+    >>> overlap.inputs.in_ref = [ 'ref_class0.nii', 'ref_class1.nii', 'ref_class2.nii' ]
+    >>> overlap.inputs.in_tst = [ 'tst_class0.nii', 'tst_class1.nii', 'tst_class2.nii' ]
+    >>> overlap.inputs.weighting = 'volume'
+    >>> res = overlap.run() # doctest: +SKIP
+    """
+
+    input_spec =  FuzzyOverlapInputSpec
+    output_spec = FuzzyOverlapOutputSpec
+
+    def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
+        methods = {"dice": dice, "jaccard": jaccard}
+        if not (np.any(booldata1) or np.any(booldata2)):
+            return 0
+        return 1 - methods[method](booldata1.flat, booldata2.flat)
+
+    def _run_interface(self, runtime):
+        ncomp = len(self.inputs.in_ref)
+        assert( ncomp == len(self.inputs.in_tst) )
+        weights = np.ones( shape=ncomp )
+    
+        img_ref = np.array( [ nib.load( fname ).get_data() for fname in self.inputs.in_ref ] )
+        img_tst = np.array( [ nib.load( fname ).get_data() for fname in self.inputs.in_tst ] )
+
+        #check that volumes are normalized
+        img_ref = img_ref / np.sum( img_ref, axis=0 )
+        img_tst = img_tst / np.sum( img_tst, axis=0 )
+
+        num = float( np.minimum( img_ref, img_test ) )
+        ddr = float( np.maximum( img_ref, img_test ) )
+        both_data = num/ddr
+        
+        jaccards = np.sum( num, axis=0 ) / np.sum( ddr, axis=0 )
+        dices = 2.0*jaccards / (1.0+jaccards )
+
+        if self.inputs.weighting != "none":
+            weights = 1.0 / np.sum( img_ref, axis= 0 )
+
+        if self.inputs.weighting == "squared_vol":
+            weights = weights**2
+
+        setattr( self, '_jaccard',  np.sum( weights * jaccards ) / np.sum( weights ) )
+        setattr( self, '_dice', np.sum( weights * dices ) / np.sum( weights ) )
+        
+        # todo, this is a N+1 dimensional file, update header and affine.
+        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(),
+                nii1.get_header()), self.inputs.out_file)
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for method in ("dice", "jaccard"):
+            outputs[method] = getattr(self, '_' + method)
+        #outputs['volume_difference'] = self._volume
+        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(
