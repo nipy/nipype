@@ -442,9 +442,9 @@ class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
                    desc="Reference image. Requires the same dimensions as in_tst.")
     in_tst = InputMultiPath( File(exists=True), mandatory=True,
                    desc="Test image. Requires the same dimensions as in_ref.")
-    mask_volume = File( exists=True, desc="calculate overlap only within this mask.")
-    weighting = traits.Enum("none", "volume", desc='""none": no class-overlap weighting is performed\
-                            "volume": computed class-overlaps are weighted by class volume',usedefault=True)
+    weighting = traits.Enum("none", "volume", "squared_vol", desc='""none": no class-overlap weighting is performed\
+                            "volume": computed class-overlaps are weighted by class volume\
+                            "squared_vol": computed class-overlaps are weighted by the squared volume of the class',usedefault=True)
     out_file = File("diff.nii", usedefault=True)
 
 
@@ -452,6 +452,8 @@ class FuzzyOverlapOutputSpec(TraitedSpec):
     jaccard = traits.Float()
     dice = traits.Float()
     diff_file = File(exists=True)
+    class_ji = traits.List( traits.Float() )
+    class_dsc = traits.List( traits.Float() )
 
 
 class FuzzyOverlap(BaseInterface):
@@ -476,44 +478,59 @@ class FuzzyOverlap(BaseInterface):
     input_spec =  FuzzyOverlapInputSpec
     output_spec = FuzzyOverlapOutputSpec
 
-    def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
-        methods = {"dice": dice, "jaccard": jaccard}
-        if not (np.any(booldata1) or np.any(booldata2)):
-            return 0
-        return 1 - methods[method](booldata1.flat, booldata2.flat)
-
     def _run_interface(self, runtime):
         ncomp = len(self.inputs.in_ref)
         assert( ncomp == len(self.inputs.in_tst) )
         weights = np.ones( shape=ncomp )
     
-        img_ref = np.array( [ nib.load( fname ).get_data() for fname in self.inputs.in_ref ] )
-        img_tst = np.array( [ nib.load( fname ).get_data() for fname in self.inputs.in_tst ] )
+        img_ref = np.array( [ nb.load( fname ).get_data() for fname in self.inputs.in_ref ] )
+        img_tst = np.array( [ nb.load( fname ).get_data() for fname in self.inputs.in_tst ] )
+
+
+        msk = np.sum(img_ref, axis=0)
+        msk[msk>0] = 1.0
+        tst_msk = np.sum(img_tst, axis=0)
+        tst_msk[tst_msk>0] = 1.0
 
         #check that volumes are normalized
-        img_ref = img_ref / np.sum( img_ref, axis=0 )
-        img_tst = img_tst / np.sum( img_tst, axis=0 )
+        #img_ref[:][msk>0] = img_ref[:][msk>0] / (np.sum( img_ref, axis=0 ))[msk>0]
+        #img_tst[tst_msk>0] = img_tst[tst_msk>0] / np.sum( img_tst, axis=0 )[tst_msk>0]
 
-        num = float( np.minimum( img_ref, img_test ) )
-        ddr = float( np.maximum( img_ref, img_test ) )
-        both_data = num/ddr
-        
-        jaccards = np.sum( num, axis=0 ) / np.sum( ddr, axis=0 )
-        dices = 2.0*jaccards / (1.0+jaccards )
+        self._jaccards = []
+        volumes = []
+
+        diff_im = np.zeros( img_ref.shape )
+
+        for ref_comp, tst_comp, diff_comp in zip( img_ref, img_tst, diff_im ):
+            num = np.minimum( ref_comp, tst_comp )
+            ddr = np.maximum( ref_comp, tst_comp )
+            diff_comp[ddr>0]+= 1.0-(num[ddr>0]/ddr[ddr>0])
+            self._jaccards.append( np.sum( num ) / np.sum( ddr ) )
+            volumes.append( np.sum( ref_comp ) )
+
+        self._dices = 2.0*np.array(self._jaccards) / (np.array(self._jaccards) +1.0 )
 
         if self.inputs.weighting != "none":
-            weights = 1.0 / np.sum( img_ref, axis= 0 )
+            weights = 1.0 / np.array(volumes)
+            if self.inputs.weighting == "squared_vol":
+                weights = weights**2
 
-        if self.inputs.weighting == "squared_vol":
-            weights = weights**2
+        weights = weights / np.sum( weights )
 
-        setattr( self, '_jaccard',  np.sum( weights * jaccards ) / np.sum( weights ) )
-        setattr( self, '_dice', np.sum( weights * dices ) / np.sum( weights ) )
+        setattr( self, '_jaccard',  np.sum( weights * self._jaccards ) )
+        setattr( self, '_dice', np.sum( weights * self._dices ) )
+
+
+        diff = np.zeros( diff_im[0].shape )
+
+        for w,ch in zip(weights,diff_im):
+            ch[msk==0] = 0
+            diff+= w* ch
         
-        # todo, this is a N+1 dimensional file, update header and affine.
-        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(),
-                nii1.get_header()), self.inputs.out_file)
+        nb.save(nb.Nifti1Image(diff, nb.load( self.inputs.in_ref[0]).get_affine(),
+                nb.load( self.inputs.in_ref[0]).get_header()), self.inputs.out_file )
 
+ 
         return runtime
 
     def _list_outputs(self):
@@ -522,6 +539,8 @@ class FuzzyOverlap(BaseInterface):
             outputs[method] = getattr(self, '_' + method)
         #outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['class_ji'] =  np.array(self._jaccards).astype(float).tolist();
+        outputs['class_dsc']=  self._dices.astype(float).tolist();
         return outputs
 
 
