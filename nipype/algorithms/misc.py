@@ -445,15 +445,15 @@ class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
     weighting = traits.Enum("none", "volume", "squared_vol", desc='""none": no class-overlap weighting is performed\
                             "volume": computed class-overlaps are weighted by class volume\
                             "squared_vol": computed class-overlaps are weighted by the squared volume of the class',usedefault=True)
-    out_file = File("diff.nii", usedefault=True)
+    out_file = File("diff.nii", desc="alternative name for resulting difference-map", usedefault=True)
 
 
 class FuzzyOverlapOutputSpec(TraitedSpec):
-    jaccard = traits.Float()
-    dice = traits.Float()
-    diff_file = File(exists=True)
-    class_ji = traits.List( traits.Float() )
-    class_dsc = traits.List( traits.Float() )
+    jaccard = traits.Float( desc="Fuzzy Jaccard Index (fJI), all the classes" )
+    dice = traits.Float( desc="Fuzzy Dice Index (fDI), all the classes" )
+    diff_file = File(exists=True, desc="resulting difference-map of all classes, using the chosen weighting" )
+    class_fji = traits.List( traits.Float(), desc="Array containing the fJIs of each computed class" )
+    class_fdi = traits.List( traits.Float(), desc="Array containing the fDIs of each computed class" )
 
 
 class FuzzyOverlap(BaseInterface):
@@ -539,8 +539,8 @@ class FuzzyOverlap(BaseInterface):
             outputs[method] = getattr(self, '_' + method)
         #outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
-        outputs['class_ji'] =  np.array(self._jaccards).astype(float).tolist();
-        outputs['class_dsc']=  self._dices.astype(float).tolist();
+        outputs['class_fji'] =  np.array(self._jaccards).astype(float).tolist();
+        outputs['class_fdi']=  self._dices.astype(float).tolist();
         return outputs
 
 
