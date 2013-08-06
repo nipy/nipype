@@ -80,7 +80,8 @@ class CondorDAGManPlugin(GraphPluginBase):
                                                '%s.log' % name),
                      'getenv = True',
                      submit_specs,
-                     'queue'
+                     'queue',
+                     ''
                      ))
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
