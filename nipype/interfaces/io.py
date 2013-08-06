@@ -647,7 +647,8 @@ class DataGrabber2(IOBase):
 
             # Handle the case where nothing matched
             if not filelist:
-                msg = "No files were found matching %s template" % field
+                msg = "No files were found matching %s template: %s" % (
+                    field, template)
                 if self.inputs.raise_on_empty:
                     raise IOError(msg)
                 else:

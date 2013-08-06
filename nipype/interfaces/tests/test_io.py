@@ -3,8 +3,10 @@
 import os
 import glob
 import shutil
+import os.path as op
 from tempfile import mkstemp, mkdtemp
 
+import nipype
 from nipype.testing import assert_equal, assert_true, assert_false
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
@@ -14,6 +16,26 @@ def test_datagrabber():
     yield assert_equal, dg.inputs.template, Undefined
     yield assert_equal, dg.inputs.base_directory, Undefined
     yield assert_equal, dg.inputs.template_args,{'outfiles': []}
+
+
+def test_datagrabber2():
+    base_dir = op.dirname(nipype.__file__)
+    templates = {"model": "interfaces/{package}/model.py"}
+    dg = nio.DataGrabber2(["package"], templates=templates,
+                          base_directory=base_dir)
+    dg.inputs.package = "fsl"
+    res = dg.run()
+    wanted = op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")
+    yield assert_equal, res.outputs.model, wanted
+
+    dg = nio.DataGrabber2(["package"], templates=templates,
+                          base_directory=base_dir,
+                          force_lists=True)
+    dg.inputs.package = "spm"
+    res = dg.run()
+    wanted = op.join(op.dirname(nipype.__file__), "interfaces/spm/model.py")
+    yield assert_equal, res.outputs.model, [wanted]
+
 
 def test_datasink():
     ds = nio.DataSink()
@@ -25,6 +47,7 @@ def test_datasink():
     yield assert_equal, ds.inputs.base_directory, 'foo'
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+
 
 def test_datasink_substitutions():
     indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
