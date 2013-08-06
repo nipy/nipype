@@ -60,6 +60,9 @@ class P2PDistance(BaseInterface):
     >>> res = dist.run() # doctest: +SKIP
     """
 
+    input_spec = P2PDistanceInputSpec
+    output_spec = P2PDistanceOutputSpec
+
     def _run_interface(self, runtime):
         r1 = tvtk.PolyDataReader( file_name=self.inputs.surface1 )
         r2 = tvtk.PolyDataReader( file_name=self.inputs.surface2 )
