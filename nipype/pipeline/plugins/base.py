@@ -598,7 +598,7 @@ class SLURMLikeBatchManagerBase(SGELikeBatchManagerBase):
     """
 
     def __init__(self, template, plugin_args=None):
-        super(SLURMLikeBatchManagerBase, self).__init__(plugin_args=plugin_args)
+        super(SLURMLikeBatchManagerBase, self).__init__(template=template, plugin_args=plugin_args)
         self._template = template
         self._sbatch_args = None
         if plugin_args:

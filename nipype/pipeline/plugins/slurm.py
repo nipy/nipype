@@ -60,19 +60,19 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         
-        slurmargs = ''
-        if self._slurmargs:
-            slurmargs = self._slurm_args
-        if 'slurm_args' in node.plugin_args:
+        sbatch_args = ''
+        if self._sbatch_args:
+            sbatch_args = self._sbatch_args
+        if 'sbatch_args' in node.plugin_args:
             if 'overwrite' in node.plugin_args and\
                node.plugin_args['overwrite']:
-                slurmargs = node.plugin_args['slurm_args']
+                sbatch_args = node.plugin_args['sbatch_args']
             else:
-                slurmargs += (" " + node.plugin_args['slurm_args'])
-        if '-o' not in slurmargs:
-            slurmargs = '%s -o %s' % (slurmargs, path)
-        if '-e' not in slurmargs:
-            slurmargs = '%s -e %s' % (slurmargs, path)
+                sbatch_args += (" " + node.plugin_args['sbatch_args'])
+        if '-o' not in sbatch_args:
+            sbatch_args = '%s -o %s' % (sbatch_args, path)
+        if '-e' not in sbatch_args:
+            sbatch_args = '%s -e %s' % (sbatch_args, path)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
@@ -83,7 +83,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
-        cmd.inputs.args = '%s -J %s %s' % (slurmargs,
+        cmd.inputs.args = '%s -J %s %s' % (sbatch_args,
                                            jobname,
                                            scriptfile)
         oldlevel = iflogger.level
