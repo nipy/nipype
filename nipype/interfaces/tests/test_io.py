@@ -20,7 +20,8 @@ def test_datagrabber():
 
 def test_datagrabber2():
     base_dir = op.dirname(nipype.__file__)
-    templates = {"model": "interfaces/{package}/model.py"}
+    templates = {"model": "interfaces/{package}/model.py",
+                 "preprocess": "interfaces/{package}/preprocess.py"}
     dg = nio.DataGrabber2(["package"], templates=templates,
                           base_directory=base_dir)
     dg.inputs.package = "fsl"
