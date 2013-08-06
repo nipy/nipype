@@ -27,6 +27,24 @@ class CondorDAGManPlugin(GraphPluginBase):
     - dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
     """
+
+    default_submit_template = """
+universe = vanilla
+notification = Never
+executable = %(executable)s
+arguments = %(nodescript)s
+output = %(basename)s.out
+error = %(basename)s.err
+log = %(basename)s.log
+getenv = True
+"""
+    def _get_str_or_file(self, arg):
+        if os.path.isfile(arg):
+            content = open(arg).read()
+        else:
+            content = arg
+        return content
+
     # XXX feature wishlist
     # - infer data file dependencies from jobs
     # - infer CPU requirements from jobs
@@ -35,19 +53,21 @@ class CondorDAGManPlugin(GraphPluginBase):
     #   actually have to run. would be good to be able to decide whether they
     #   actually have to be scheduled (i.e. output already exist).
     def __init__(self, **kwargs):
-        self._template = "universe = vanilla\nnotification = Never"
-        self._submit_specs = ""
+        self._template = self.default_submit_template
+        self._initial_specs = ""
+        self._override_specs = ""
         self._dagman_args = ""
         if 'plugin_args' in kwargs and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
-                self._template = plugin_args['template']
-                if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
-            if 'submit_specs' in plugin_args:
-                self._submit_specs = plugin_args['submit_specs']
-                if os.path.isfile(self._submit_specs):
-                    self._submit_specs = open(self._submit_specs).read()
+                self._template = \
+                    self._get_str_or_file(plugin_args['template'])
+            if 'initial_specs' in plugin_args:
+                self._initial_specs = \
+                    self._get_str_or_file(plugin_args['initial_specs'])
+            if 'override_specs' in plugin_args:
+                self._override_specs = \
+                    self._get_str_or_file(plugin_args['override_specs'])
             if 'dagman_args' in plugin_args:
                 self._dagman_args = plugin_args['dagman_args']
         super(CondorDAGManPlugin, self).__init__(**kwargs)
@@ -62,27 +82,25 @@ class CondorDAGManPlugin(GraphPluginBase):
             # as jobs in the DAG
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                template, submit_specs = self._get_args(
-                    node, ["template", "submit_specs"])
                 # XXX redundant with previous value? or could it change between
                 # scripts?
+                template, initial_specs, override_specs = self._get_args(
+                    node, ["template", "initial_specs", "override_specs"])
+                # add required slots to the template
+                template = '%s\n%s\n%s\n' % ('%(initial_specs)s',
+                                             template,
+                                             '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
-                submitspec = '\n'.join(
-                    (template,
-                     'executable = %s' % sys.executable,
-                     'arguments = %s' % pyscript,
-                     'output = %s' % os.path.join(batch_dir,
-                                                  '%s.out' % name),
-                     'error = %s' % os.path.join(batch_dir,
-                                                 '%s.err' % name),
-                     'log = %s' % os.path.join(batch_dir,
-                                               '%s.log' % name),
-                     'getenv = True',
-                     submit_specs,
-                     'queue',
-                     ''
-                     ))
+                specs = dict(
+                    # TODO make parameter for this,
+                    initial_specs=initial_specs,
+                    executable=sys.executable,
+                    nodescript=pyscript,
+                    basename=os.path.join(batch_dir, name),
+                    override_specs=override_specs
+                    )
+                submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
                                           '%s.submit' % name)
