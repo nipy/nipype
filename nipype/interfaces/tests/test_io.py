@@ -21,7 +21,7 @@ def test_datagrabber():
 def test_datagrabber2():
     base_dir = op.dirname(nipype.__file__)
     templates = {"model": "interfaces/{package}/model.py",
-                 "preprocess": "interfaces/{package}/preprocess.py"}
+                 "preprocess": "interfaces/{package}/pre*.py"}
     dg = nio.DataGrabber2(["package"], templates=templates,
                           base_directory=base_dir)
     dg.inputs.package = "fsl"
@@ -34,8 +34,9 @@ def test_datagrabber2():
                           force_lists=True)
     dg.inputs.package = "spm"
     res = dg.run()
-    wanted = op.join(op.dirname(nipype.__file__), "interfaces/spm/model.py")
-    yield assert_equal, res.outputs.model, [wanted]
+    wanted = op.join(op.dirname(nipype.__file__),
+                     "interfaces/spm/preprocess.py")
+    yield assert_equal, res.outputs.preprocess, [wanted]
 
 
 def test_datasink():
