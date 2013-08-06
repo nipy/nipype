@@ -63,7 +63,7 @@ class P2PDistance(BaseInterface):
     input_spec = P2PDistanceInputSpec
     output_spec = P2PDistanceOutputSpec
 
-    def _triangle_area(A, B, C):
+    def _triangle_area(self, A, B, C):
         ABxAC = euclidean(A,B) *  euclidean(A,C)
         prod = np.dot(np.array(B)-np.array(A),np.array(C)-np.array(A))
         angle = np.arccos( prod / ABxAC )
