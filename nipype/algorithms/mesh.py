@@ -70,12 +70,12 @@ class P2PDistance(BaseInterface):
         vtk2 = r2.output
         r1.update()
         r2.update()
-
+        assert( len(vtk1.points) == len(vtk2.points) )
         d = 0.0
         totalWeight = 0.0
         for p1,p2 in zip( vtk1.points, vtk2.points ):
             weight = 1.0
-            if (self.inputs.method == 'surface'):
+            if (self.inputs.weighting == 'surface'):
                 #compute surfaces, set in weight
                 print "Error, not implemented"
 
