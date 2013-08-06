@@ -27,14 +27,14 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
 
     - template : template to use for batch job submission
     
+    - sbatch_args: arguments to pass prepend to the sbatch call 
+    
 
     '''
 
 
     def __init__(self, **kwargs):
-        '''
-        Constructor
-        '''
+        
         template="""
 #!/bin/sh
         """
@@ -56,6 +56,10 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         return o.find(taskid) > -1
 
     def _submit_batchtask(self, scriptfile, node):
+        """
+        This is more or less the _submit_batchtask from sge.py with flipped variable
+        names, different command line switches, and different output formatting/processing
+        """
         cmd = CommandLine('sbatch', environ=os.environ.data,
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
@@ -98,7 +102,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit slurm task'
+                    raise RuntimeError('\n'.join((('Could not submit sbatch task'
                                                    ' for node %s') % node._id,
                                                   str(e))))
             else:
@@ -109,5 +113,5 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         taskid = int(re.match("Your job ([0-9]*) .* has been submitted",
                               lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
-        logger.debug('submitted slurm task: %d for node %s' % (taskid, node._id))
+        logger.debug('submitted sbatch task: %d for node %s' % (taskid, node._id))
         return taskid

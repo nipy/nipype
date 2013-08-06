@@ -606,7 +606,7 @@ class SLURMLikeBatchManagerBase(SGELikeBatchManagerBase):
                 self._template = plugin_args['template']
                 if os.path.isfile(self._template):
                     self._template = open(self._template).read()
-            if 'sbatch' in plugin_args:
+            if 'sbatch_args' in plugin_args:
                 self._sbatch_args = plugin_args['sbatch_args']
         self._pending = {}
 
