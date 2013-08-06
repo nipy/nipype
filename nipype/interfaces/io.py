@@ -19,6 +19,7 @@
 """
 import glob
 import os
+import os.path as op
 import shutil
 import re
 import tempfile
@@ -550,6 +551,120 @@ class DataGrabber(IOBase):
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
         return outputs
+
+
+class DataGrabber2InputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+
+    base_directory = Directory(exists=True,
+        desc="Root path common to templates.")
+    templates = traits.Dict(mandatory=True,
+        key_traits=traits.Str,
+        value_traits=traits.Str,
+        desc="String formatting templates with {} syntax that form "\
+             "output file names given the values of the interface inputs.")
+    sort_filelist = traits.Bool(True, usedefault=True,
+        desc="When matching mutliple files, return them in sorted order.")
+    raise_on_empty = traits.Bool(True, usedefault=True,
+        desc="Raise an exception if a template pattern matches no files.")
+    force_lists = traits.Bool(False, usedefault=True,
+        desc="Return all values as lists even when matching a single file.")
+
+
+class DataGrabber2(IOBase):
+    """Flexibly collect data from disk to feed into workflows.
+
+    This interface uses the {}-based string formatting syntax to plug
+    values (possibly known only at workflow execution time) into string
+    templates and collect files from persistant storage. These templates
+    can also be combined with glob wildcards. The names used in the
+    formatting template should correspond to the input fields given
+    when you instatiate the interfacee, and the outputs are formed by the
+    keys in the `templates` dictionary.
+
+    Examples
+    --------
+
+    >>> from nipype import DataGrabber2
+    >>> import os
+    >>> dg = DataGrabber2(infields=["subject_id"],
+    ...                   base_directory=os.environ["SUBJECTS_DIR"])
+    ...                   templates={"T1": "{subject_id}/mri/T1.mgz",
+    ...                              "aseg": "{subject_id}/mri/aseg.mgz")
+    >>> print dg._outputs()
+
+    T1 = <undefined>
+    aseg = <undefined>
+
+    """
+    input_spec = DataGrabber2InputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def __init__(self, infields, **kwargs):
+        """Create an instance with specific input fields.
+
+        Parameters
+        ----------
+        infields : list of strings
+            Names of dynamic input fields to add to the interface. These
+            inputs can be used as names in the format templates to build
+            output filenames.
+
+        """
+        super(DataGrabber2, self).__init__(**kwargs)
+        self._infields = infields
+        self._outfields = list(self.inputs.templates)
+
+        # Manually handle the mandatory inputs
+        if not isdefined(self.inputs.templates):
+            raise ValueError("'templates' is a mandatory input.")
+
+        # Add the dynamic input fields
+        undefined_traits = {}
+        for field in infields:
+            self.inputs.add_trait(field, traits.Any)
+            undefined_traits[field] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+    def _list_outputs(self):
+        """Find the files and expose them as interface outputs."""
+        outputs = {}
+        info = {k: v for k, v in self.inputs.__dict__.items()
+                    if k in self._infields}
+
+        for field, template in self.inputs.templates.items():
+
+            # Build the full template path
+            if isdefined(self.inputs.base_directory):
+                template = op.abspath(op.join(
+                    self.inputs.base_directory, template))
+            else:
+                template = op.abspath(template)
+
+            # Fill in the template and glob for files
+            filled_template = template.format(**info)
+            filelist = glob.glob(filled_template)
+
+            # Handle the case where nothing matched
+            if not filelist:
+                msg = "No files were found matching %s template" % field
+                if self.inputs.raise_on_empty:
+                    raise IOError(msg)
+                else:
+                    warn(msg)
+
+            # Possibly sort the list
+            if self.inputs.sort_filelist:
+                filelist.sort()
+
+            # Handle whether this must be a list or not
+            if not self.inputs.force_lists:
+                filelist = list_to_filename(filelist)
+
+            outputs[field] = filelist
+
+        return outputs
+
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): 
     root_paths = traits.Either(traits.List(),
