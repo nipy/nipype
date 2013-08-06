@@ -631,14 +631,15 @@ def generate_expanded_graph(graph_in):
                 key = src_values[0]
             else:
                 key = tuple(src_values)
-            # the iterables is a {field: lambda} dictionary, where the
-            # lambda returns a {source key: iteration list} dictionary
-            iterables = {}
-            for field, func in inode.iterables.iteritems():
-                # the {source key: iteration list} dictionary
-                lookup = func()
-                if lookup.has_key(key):
-                    iterables[field] = lambda: lookup[key]
+            # The itersource iterables is a {field: lookup} dictionary, where the
+            # lookup is a {source key: iteration list} dictionary. Look up the
+            # current iterable value using the predecessor itersource input values.
+            iter_dict = {field: lookup[key] for field, lookup in inode.iterables
+                         if lookup.has_key(key)}
+            # convert the iterables to the standard {field: function} format
+            iter_items = map(lambda(field, value): (field, lambda: value),
+                             iter_dict.iteritems())
+            iterables = dict(iter_items)
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
@@ -768,56 +769,82 @@ def _standardize_iterables(node):
     iterables = node.iterables
     # The candidate iterable fields
     fields = set(node.inputs.copyable_trait_names())
-    
-    # Synchronize iterables can be in [fields, value tuples] format
-    # rather than [(field, value list), (field, value list), ...]
-    if node.synchronize and len(iterables) == 2:
-        first, last = iterables
-        if all((isinstance(item, str) and item in fields
-                for item in first)):
-            iterables = _transpose_iterables(first, last)
-            
+    # Flag indicating whether the iterables are in the alternate
+    # synchronize form and are not converted to a standard format.
+    synchronize = False
+    # A synchronize iterables node without an itersource can be in
+    # [fields, value tuples] format rather than
+    # [(field, value list), (field, value list), ...]
+    if node.synchronize:
+        if len(iterables) == 2:
+            first, last = iterables
+            if all((isinstance(item, str) and item in fields
+                    for item in first)):
+                iterables = _transpose_iterables(first, last)
+
     # Convert a tuple to a list
     if isinstance(iterables, tuple):
         iterables = [iterables]
+    # Validate the standard [(field, values)] format
+    _validate_iterables(node, iterables, fields)
     # Convert a list to a dictionary
     if isinstance(iterables, list):
-        # Validate the format
-        for item in iterables:
-            try:
-                if len(item) != 2:
-                    raise ValueError("The %s iterables do not consist of"
-                                     " (field, values) pairs" % node.name)
-            except TypeError, e:
-                raise TypeError("The %s iterables is not iterable: %s"
-                                % (node.name, e))
-        # Convert the values to functions. This is a legacy Nipype
-        # requirement with unknown rationale.
-        iter_items = map(lambda(field, value): (field, lambda: value),
-                         iterables)
-        # Make the iterables dictionary
-        iterables = dict(iter_items)
-    elif not isinstance(iterables, dict):
+        # Convert a values list to a function. This is a legacy
+        # Nipype requirement with unknown rationale.
+        if not node.itersource:
+            iter_items = map(lambda(field, value): (field, lambda: value),
+                             iterables)
+            iterables = dict(iter_items)
+    node.iterables = iterables
+
+def _validate_iterables(node, iterables, fields):
+    """
+    Raise TypeError if an iterables member is not iterable.
+
+    Raise ValueError if an iterables member is not a (field, values) pair.
+
+    Raise ValueError if an iterable field is not in the inputs.
+    """
+    # The iterables can be a {field: value list} dictionary.
+    if isinstance(iterables, dict):
+        iterables = iterables.items()
+    elif not isinstance(iterables, tuple) and not isinstance(iterables, list):
         raise ValueError("The %s iterables type is not a list or a dictionary:"
                          " %s" % (node.name, iterables.__class__))
-    
-    # Validate the iterable fields
-    for field in iterables.iterkeys():
+    for item in iterables:
+        try:
+            if len(item) != 2:
+                raise ValueError("The %s iterables is not a [(field, values)]"
+                                 " list" % node.name)
+        except TypeError, e:
+            raise TypeError("A %s iterables member is not iterable: %s"
+                            % (node.name, e))
+        field, _ = item
         if field not in fields:
             raise ValueError("The %s iterables field is unrecognized: %s"
                              % (node.name, field))
-    
-    # Assign to the standard form
-    node.iterables = iterables
 
 def _transpose_iterables(fields, values):
     """
-    Converts the given fields and tuple values into a list of
-    iterable (field: value list) pairs, suitable for setting
-    a node iterables property.
+    Converts the given fields and tuple values into a standardized
+    iterables value.
+    
+    If the input values is a synchronize iterables dictionary, then
+    the result is a (field, {key: values}) list.
+    
+    Otherwise, the result is a list of (field: value list) pairs.
     """
-    return zip(fields, [filter(lambda(v): v != None, list(transpose))
-                        for transpose in zip(*values)])
+    if isinstance(values, dict):
+        transposed = {field: defaultdict(list) for field in fields}
+        for key, tuples in values.iteritems():
+            for kvals in tuples:
+                for idx, val in enumerate(kvals):
+                    if val != None:
+                        transposed[fields[idx]][key].append(val)
+        return transposed.items()
+    else:
+        return zip(fields, [filter(lambda(v): v != None, list(transpose))
+                            for transpose in zip(*values)])
     
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
