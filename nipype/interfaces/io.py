@@ -578,7 +578,7 @@ class DataGrabber2(IOBase):
     templates and collect files from persistant storage. These templates
     can also be combined with glob wildcards. The names used in the
     formatting template should correspond to the input fields given
-    when you instatiate the interfacee, and the outputs are formed by the
+    when you instatiate the interface, and the outputs are formed by the
     keys in the `templates` dictionary.
 
     Examples
