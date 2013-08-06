@@ -15,7 +15,7 @@ class CondorDAGManPlugin(GraphPluginBase):
     """Execute using Condor DAGMan
 
     The plugin_args input to run can be used to control the DAGMan execution.
-    The value of any argument can be a literal string or a filename, where in
+    The value of most arguments can be a literal string or a filename, where in
     the latter case the content of the file will be used as the argument value.
 
     Currently supported options are:
@@ -26,6 +26,12 @@ class CondorDAGManPlugin(GraphPluginBase):
                  submit file
     - override_specs : additional submit specs that are appended to any job's
                  submit file
+    - wrapper_cmd : path to an exectuable that will be started instead of a node
+                 script. This is useful for wrapper script that execute certain
+                 functionality prior or after a node runs. If this option is
+                 given the wrapper command is called with the respective Python
+                 exectuable and the path to the node script as final arguments
+    - wrapper_args : optional additional arguments to a wrapper command
     - dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
     """
@@ -61,11 +67,16 @@ getenv = True
              ('_initial_specs', 'initial_specs', ''),
              ('_override_specs', 'submit_specs', ''),
              ('_override_specs', 'override_specs', ''),
+             ('_wrapper_cmd', 'wrapper_cmd', None),
+             ('_wrapper_args', 'wrapper_args', ''),
              ('_dagman_args', 'dagman_args', '')):
             if 'plugin_args' in kwargs \
                 and not kwargs['plugin_args'] is None \
                 and id_ in kwargs['plugin_args']:
-                    val = self._get_str_or_file(kwargs['plugin_args'][id_])
+                    if id_ == 'wrapper_cmd':
+                        val = os.path.abspath(kwargs['plugin_args'][id_])
+                    else:
+                        val = self._get_str_or_file(kwargs['plugin_args'][id_])
             setattr(self, var, val)
         # TODO remove after some time
         if 'plugin_args' in kwargs \
@@ -89,8 +100,11 @@ getenv = True
                 node = nodes[idx]
                 # XXX redundant with previous value? or could it change between
                 # scripts?
-                template, initial_specs, override_specs = self._get_args(
-                    node, ["template", "initial_specs", "override_specs"])
+                template, initial_specs, override_specs, wrapper_cmd, wrapper_args = \
+                    self._get_args(node,
+                                   ["template", "initial_specs",
+                                    "override_specs", "wrapper_cmd",
+                                    "wrapper_args"])
                 # add required slots to the template
                 template = '%s\n%s\n%s\n' % ('%(initial_specs)s',
                                              template,
@@ -105,6 +119,12 @@ getenv = True
                     basename=os.path.join(batch_dir, name),
                     override_specs=override_specs
                     )
+                if not wrapper_cmd is None:
+                    specs['executable'] = wrapper_cmd
+                    specs['nodescript'] = \
+                            '%s %s %s' % (wrapper_args % specs, # give access to variables
+                                          sys.executable,
+                                          pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,
