@@ -63,6 +63,13 @@ class P2PDistance(BaseInterface):
     input_spec = P2PDistanceInputSpec
     output_spec = P2PDistanceOutputSpec
 
+    def _triangle_area(A, B, C):
+        ABxAC = euclidean(A,B) *  euclidean(A,C)
+        prod = np.dot(np.array(B)-np.array(A),np.array(C)-np.array(A))
+        angle = np.arccos( prod / ABxAC )
+        area = 0.5 * ABxAC * np.sin( angle )
+        return area
+
     def _run_interface(self, runtime):
         r1 = tvtk.PolyDataReader( file_name=self.inputs.surface1 )
         r2 = tvtk.PolyDataReader( file_name=self.inputs.surface2 )
@@ -73,16 +80,27 @@ class P2PDistance(BaseInterface):
         assert( len(vtk1.points) == len(vtk2.points) )
         d = 0.0
         totalWeight = 0.0
-        for p1,p2 in zip( vtk1.points, vtk2.points ):
+        
+        points = vtk1.points
+        faces = vtk1.polys.to_array().reshape(-1,4).astype(int)[:,1:]
+
+        for p1,p2 in zip( points, vtk2.points ):
             weight = 1.0
             if (self.inputs.weighting == 'surface'):
                 #compute surfaces, set in weight
-                print "Error, not implemented"
+                weight = 0.0
+                point_faces = faces[ (faces[:,:]==0).any(axis=1) ]
 
-            d+= euclidean( p1, p2 )
+                for idset in point_faces:
+                    p1 = points[ int(idset[0]) ]
+                    p2 = points[ int(idset[1]) ]
+                    p3 = points[ int(idset[2]) ]
+                    weight = weight + self._triangle_area(p1, p2, p3)
+
+            d+= weight*euclidean( p1, p2 )
             totalWeight = totalWeight + weight
 
-        self._distance = d / weight
+        self._distance = d / totalWeight
         return runtime
 
     def _list_outputs(self):
