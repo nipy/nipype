@@ -106,9 +106,10 @@ getenv = True
                                     "override_specs", "wrapper_cmd",
                                     "wrapper_args"])
                 # add required slots to the template
-                template = '%s\n%s\n%s\n' % ('%(initial_specs)s',
-                                             template,
-                                             '%(override_specs)s')
+                template = '%s\n%s\n%s\nqueue\n' % (
+                                '%(initial_specs)s',
+                                template,
+                                '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 specs = dict(
