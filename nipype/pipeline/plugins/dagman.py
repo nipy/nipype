@@ -4,6 +4,7 @@
 import os
 import sys
 import uuid
+from warnings import warn
 
 from .base import (GraphPluginBase, logger)
 
@@ -14,16 +15,17 @@ class CondorDAGManPlugin(GraphPluginBase):
     """Execute using Condor DAGMan
 
     The plugin_args input to run can be used to control the DAGMan execution.
+    The value of any argument can be a literal string or a filename, where in
+    the latter case the content of the file will be used as the argument value.
+
     Currently supported options are:
 
-    - template : submit spec template for individual jobs in a DAG. All
-                 generated submit spec components (e.g. executable name and
-                 arguments) are appended to this template. This can be a str or
-                 a filename. In the latter case the file content is used as a
-                 template.
-    - submit_specs : additional submit specs that are appended to the generated
-                 submit specs to allow for overriding or extending the defaults.
-                 This can be a str or a filename.
+    - submit_template : submit spec template for individual jobs in a DAG (see
+                 CondorDAGManPlugin.default_submit_template for the default.
+    - initial_specs : additional submit specs that are prepended to any job's
+                 submit file
+    - override_specs : additional submit specs that are appended to any job's
+                 submit file
     - dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
     """
@@ -53,23 +55,26 @@ getenv = True
     #   actually have to run. would be good to be able to decide whether they
     #   actually have to be scheduled (i.e. output already exist).
     def __init__(self, **kwargs):
-        self._template = self.default_submit_template
-        self._initial_specs = ""
-        self._override_specs = ""
-        self._dagman_args = ""
-        if 'plugin_args' in kwargs and not kwargs['plugin_args'] is None:
+        for var, id_, val in \
+            (('_template', 'submit_template', self.default_submit_template),
+             ('_initial_specs', 'template', ''),
+             ('_initial_specs', 'initial_specs', ''),
+             ('_override_specs', 'submit_specs', ''),
+             ('_override_specs', 'override_specs', ''),
+             ('_dagman_args', 'dagman_args', '')):
+            if 'plugin_args' in kwargs \
+                and not kwargs['plugin_args'] is None \
+                and id_ in kwargs['plugin_args']:
+                    val = self._get_str_or_file(kwargs['plugin_args'][id_])
+            setattr(self, var, val)
+        # TODO remove after some time
+        if 'plugin_args' in kwargs \
+            and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
-                self._template = \
-                    self._get_str_or_file(plugin_args['template'])
-            if 'initial_specs' in plugin_args:
-                self._initial_specs = \
-                    self._get_str_or_file(plugin_args['initial_specs'])
-            if 'override_specs' in plugin_args:
-                self._override_specs = \
-                    self._get_str_or_file(plugin_args['override_specs'])
-            if 'dagman_args' in plugin_args:
-                self._dagman_args = plugin_args['dagman_args']
+                warn("the 'template' argument is deprecated, use 'initial_specs' instead")
+            if 'submit_specs' in plugin_args:
+                warn("the 'submit_specs' argument is deprecated, use 'override_specs' instead")
         super(CondorDAGManPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
