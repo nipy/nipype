@@ -4,6 +4,7 @@
 import os
 import sys
 import uuid
+import time
 from warnings import warn
 
 from .base import (GraphPluginBase, logger)
@@ -34,6 +35,8 @@ class CondorDAGManPlugin(GraphPluginBase):
     - wrapper_args : optional additional arguments to a wrapper command
     - dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
+    - block : if True the plugin call will block until Condor has finished
+                 prcoessing the entire workflow
     """
 
     default_submit_template = """
@@ -69,12 +72,15 @@ getenv = True
              ('_override_specs', 'override_specs', ''),
              ('_wrapper_cmd', 'wrapper_cmd', None),
              ('_wrapper_args', 'wrapper_args', ''),
+             ('_block', 'block', False),
              ('_dagman_args', 'dagman_args', '')):
             if 'plugin_args' in kwargs \
                 and not kwargs['plugin_args'] is None \
                 and id_ in kwargs['plugin_args']:
                     if id_ == 'wrapper_cmd':
                         val = os.path.abspath(kwargs['plugin_args'][id_])
+                    elif id_ == 'block':
+                        val = kwargs['plugin_args'][id_]
                     else:
                         val = self._get_str_or_file(kwargs['plugin_args'][id_])
             setattr(self, var, val)
@@ -150,3 +156,13 @@ getenv = True
                                                     self._dagman_args)
         cmd.run()
         logger.info('submitted all jobs to Condor DAGMan')
+        if self._block:
+            # wait for DAGMan to settle down, no time wasted it is already running
+            time.sleep(10)
+            if not os.path.exists('%s.condor.sub' % dagfilename):
+                raise EnvironmentError("DAGMan did not create its submit file, please check the logs")
+            # wait for completion
+            logger.info('waiting for DAGMan to finish')
+            lockfilename = '%s.lock' % dagfilename
+            while os.path.exists(lockfilename):
+                time.sleep(5)
