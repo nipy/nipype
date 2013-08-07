@@ -630,6 +630,10 @@ class SelectFiles(IOBase):
             undefined_traits[field] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
+    def _add_output_traits(self, base):
+        """Add the dynamic output fields"""
+        return add_traits(base, self.inputs.templates.keys())
+
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
