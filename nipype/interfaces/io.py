@@ -622,7 +622,6 @@ class SelectFiles(IOBase):
 
         self._infields = infields
         self._outfields = list(self.inputs.templates)
-        for 
 
         # Add the dynamic input fields
         undefined_traits = {}
