@@ -553,7 +553,7 @@ class DataGrabber(IOBase):
         return outputs
 
 
-class DataGrabber2InputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
         desc="Root path common to templates.")
@@ -570,7 +570,7 @@ class DataGrabber2InputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc="Return all values as lists even when matching a single file.")
 
 
-class DataGrabber2(IOBase):
+class SelectFiles(IOBase):
     """Flexibly collect data from disk to feed into workflows.
 
     This interface uses the {}-based string formatting syntax to plug
@@ -584,19 +584,19 @@ class DataGrabber2(IOBase):
     Examples
     --------
 
-    >>> from nipype import DataGrabber2
+    >>> from nipype import SelectFiles
     >>> import os
-    >>> dg = DataGrabber2(infields=["subject_id"],
-    ...                   base_directory=os.environ["SUBJECTS_DIR"])
-    ...                   templates={"T1": "{subject_id}/mri/T1.mgz",
-    ...                              "aseg": "{subject_id}/mri/aseg.mgz")
+    >>> dg = SelectFiles(infields=["subject_id"],
+    ...                  base_directory=os.environ["SUBJECTS_DIR"])
+    ...                  templates={"T1": "{subject_id}/mri/T1.mgz",
+    ...                             "aseg": "{subject_id}/mri/aseg.mgz")
     >>> print dg._outputs()
 
     T1 = <undefined>
     aseg = <undefined>
 
     """
-    input_spec = DataGrabber2InputSpec
+    input_spec = SelectFilesInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
 
@@ -611,7 +611,7 @@ class DataGrabber2(IOBase):
             output filenames.
 
         """
-        super(DataGrabber2, self).__init__(**kwargs)
+        super(SelectFiles, self).__init__(**kwargs)
         self._infields = infields
         self._outfields = list(self.inputs.templates)
 
