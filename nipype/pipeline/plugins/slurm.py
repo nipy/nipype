@@ -35,8 +35,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
 
     def __init__(self, **kwargs):
         
-        template="""
-#!/bin/sh
+        template="""#!/bin/sh
         """
         self._retry_timeout = 2
         self._max_tries = 2
@@ -77,6 +76,12 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
             sbatch_args = '%s -o %s' % (sbatch_args, path)
         if '-e' not in sbatch_args:
             sbatch_args = '%s -e %s' % (sbatch_args, path)
+        if '-p' not in sbatch_args:
+            sbatch_args = '%s -p normal' % (sbatch_args)
+        if '-n' not in sbatch_args:
+            sbatch_args = '%s -n 16' % (sbatch_args)
+        if '-t' not in sbatch_args:
+            sbatch_args = '%s -t 48:00:00' % (sbatch_args)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
@@ -110,7 +115,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         iflogger.setLevel(oldlevel)
         # retrieve sge taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]
-        taskid = int(re.match("Your job ([0-9]*) .* has been submitted",
+        taskid = int(re.match("Submitted batch job ([0-9]*)",
                               lines[-1]).groups()[0])
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted sbatch task: %d for node %s' % (taskid, node._id))
