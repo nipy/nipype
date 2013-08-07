@@ -437,7 +437,9 @@ class Registration(ANTSCommand):
         if isinstance(name_input, list):
             items = stage_inputs.items()
             indexes = range(0, len(name_input))
-            specs = [{k: v[i] for k, v in items} for i in indexes]
+            # dict-comprehension only works with python 2.7 and up
+            #specs = [{k: v[i] for k, v in items} for i in indexes]
+            specs = [dict([(k, v[i]) for k,v in items]) for i in indexes]
         else:
             specs = [stage_inputs]
         
