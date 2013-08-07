@@ -32,6 +32,8 @@ def test_selectfiles():
     dg = nio.SelectFiles(["package"], templates=templates,
                          base_directory=base_dir,
                          force_lists=True)
+    yield assert_equal, set(dg._outputs().get().keys()), {"model", "preprocess"}
+
     dg.inputs.package = "spm"
     res = dg.run()
     wanted = op.join(op.dirname(nipype.__file__),
