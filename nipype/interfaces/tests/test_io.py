@@ -18,20 +18,20 @@ def test_datagrabber():
     yield assert_equal, dg.inputs.template_args,{'outfiles': []}
 
 
-def test_datagrabber2():
+def test_selectfiles():
     base_dir = op.dirname(nipype.__file__)
     templates = {"model": "interfaces/{package}/model.py",
                  "preprocess": "interfaces/{package}/pre*.py"}
-    dg = nio.DataGrabber2(["package"], templates=templates,
-                          base_directory=base_dir)
+    dg = nio.SelectFiles(["package"], templates=templates,
+                         base_directory=base_dir)
     dg.inputs.package = "fsl"
     res = dg.run()
     wanted = op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")
     yield assert_equal, res.outputs.model, wanted
 
-    dg = nio.DataGrabber2(["package"], templates=templates,
-                          base_directory=base_dir,
-                          force_lists=True)
+    dg = nio.SelectFiles(["package"], templates=templates,
+                         base_directory=base_dir,
+                         force_lists=True)
     dg.inputs.package = "spm"
     res = dg.run()
     wanted = op.join(op.dirname(nipype.__file__),

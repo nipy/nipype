@@ -609,15 +609,20 @@ class SelectFiles(IOBase):
             Names of dynamic input fields to add to the interface. These
             inputs can be used as names in the format templates to build
             output filenames.
+        templates : dictionary
+            Dictionary mappying string fields to string tempalate values.
+            See SelectFiles.help() for more information.
 
         """
         super(SelectFiles, self).__init__(**kwargs)
-        self._infields = infields
-        self._outfields = list(self.inputs.templates)
 
         # Manually handle the mandatory inputs
         if not isdefined(self.inputs.templates):
             raise ValueError("'templates' is a mandatory input.")
+
+        self._infields = infields
+        self._outfields = list(self.inputs.templates)
+        for 
 
         # Add the dynamic input fields
         undefined_traits = {}

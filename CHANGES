@@ -1,7 +1,7 @@
 Next release
 ============
 
-* ENH: DataGrabber2: a streamlined version of DataGrabber
+* ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference
 
 * FIX: Deals properly with 3d files in SPM Realign
