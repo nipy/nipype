@@ -36,7 +36,7 @@ class CondorDAGManPlugin(GraphPluginBase):
     - dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
     - block : if True the plugin call will block until Condor has finished
-                 prcoessing the entire workflow
+                 prcoessing the entire workflow (default: False)
     """
 
     default_submit_template = """

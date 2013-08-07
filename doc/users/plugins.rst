@@ -174,7 +174,9 @@ Workflow execution with HTCondor DAGMan is done by calling::
        workflow.run(plugin='CondorDAGMan')
 
 Job execution behavior can be tweaked with the following optional plug-in
-arguments::
+arguments. The value of most arguments can be a literal string or a filename,
+where in the latter case the content of the file will be used as the argument
+value::
 
     submit_template : submit spec template for individual jobs in a DAG (see
                  CondorDAGManPlugin.default_submit_template for the default.
@@ -190,14 +192,24 @@ arguments::
     wrapper_args : optional additional arguments to a wrapper command
     dagman_args : arguments to be prepended to the job execution script in the
                   dagman call
+    block : if True the plugin call will block until Condor has finished
+            prcoessing the entire workflow (default: False)
 
 Please see the `HTCondor documentation`_ for details on possible configuration
 options and command line arguments.
 
 Using the ``wrapper_cmd`` argument it is possible to combine Nipype workflow
 execution with checkpoint/migration functionality offered by, for example,
-DMTCP_. On a Debian system, executing a workflow with support for
-checkpoint/migration for all nodes could look like this::
+DMTCP_. This is especially useful in the case of workflows with long running
+nodes, such as Freesurfer's recon-all pipeline, where Condor's job
+prioritization algorithm could lead to jobs being evicted from compute
+nodes in order to maximize overall troughput. With checkpoint/migration enabled
+such a job would be checkpointed prior eviction and resume work from the
+checkpointed state after being rescheduled -- instead of restarting from
+scratch.
+
+On a Debian system, executing a workflow with support for checkpoint/migration
+for all nodes could look like this::
 
   # define common parameters
   dmtcp_hdr = """
