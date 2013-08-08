@@ -584,16 +584,12 @@ class SelectFiles(IOBase):
     Examples
     --------
 
-    >>> from nipype import SelectFiles
-    >>> import os
+    >>> from nipype import SelectFiles, Node
     >>> dg = SelectFiles(infields=["subject_id"],
-    ...                  base_directory=os.environ["SUBJECTS_DIR"])
-    ...                  templates={"T1": "{subject_id}/mri/T1.mgz",
-    ...                             "aseg": "{subject_id}/mri/aseg.mgz")
-    >>> print dg._outputs()
-
-    T1 = <undefined>
-    aseg = <undefined>
+    ...                  templates={"T1": "{subject_id}/struct/T1.nii",
+    ...                             "epi": "{subject_id}/func/epi.nii"})
+    >>> Node(dg, "selectfiles").outputs.get()
+    {'T1': <undefined>, 'epi': <undefined>}
 
     """
     input_spec = SelectFilesInputSpec
