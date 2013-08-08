@@ -52,7 +52,8 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         o, _ = proc.communicate()
-        return o.find(taskid) > -1
+
+        return o.find(str(taskid)) > -1
 
     def _submit_batchtask(self, scriptfile, node):
         """
@@ -113,7 +114,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
             else:
                 break
         iflogger.setLevel(oldlevel)
-        # retrieve sge taskid
+        # retrieve taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]
         taskid = int(re.match("Submitted batch job ([0-9]*)",
                               lines[-1]).groups()[0])
