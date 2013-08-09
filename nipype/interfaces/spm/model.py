@@ -739,7 +739,7 @@ class FactorialDesign(SPMCommand):
         if opt in ['covariates']:
             outlist = []
             mapping = {'name': 'cname', 'vector': 'c',
-                       'interactions': 'iCFI',
+                       'interaction': 'iCFI',
                        'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
