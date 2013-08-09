@@ -33,8 +33,8 @@ class CondorDAGManPlugin(GraphPluginBase):
                  given the wrapper command is called with the respective Python
                  exectuable and the path to the node script as final arguments
     - wrapper_args : optional additional arguments to a wrapper command
-    - dagman_args : arguments to be prepended to the job execution script in the
-                  dagman call
+    - dagman_args : arguments to be prepended to the arguments of the
+                    condor_submit_dag call
     - block : if True the plugin call will block until Condor has finished
                  prcoessing the entire workflow (default: False)
     """
@@ -152,8 +152,8 @@ getenv = True
         cmd = CommandLine('condor_submit_dag', environ=os.environ.data,
                           terminal_output='allatonce')
         # needs -update_submit or re-running a workflow will fail
-        cmd.inputs.args = '-update_submit %s %s' % (dagfilename,
-                                                    self._dagman_args)
+        cmd.inputs.args = '%s -update_submit %s' % (self._dagman_args,
+                                                    dagfilename)
         cmd.run()
         logger.info('submitted all jobs to Condor DAGMan')
         if self._block:
