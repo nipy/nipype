@@ -141,9 +141,9 @@ def test_join_expansion():
     post_join2 = pe.Node(ProductInterface(), name='post_join2')
     wf.connect(join, 'output1', post_join2, 'input1')
     wf.connect(pre_join1, 'output1', post_join2, 'input2')
-    
+
     result = wf.run()
-    
+
     # the two expanded pre-join predecessor nodes feed into one join node
     joins = [node for node in result.nodes() if node.name == 'join']
     assert_equal(len(joins), 1, "The number of join result nodes is incorrect.")
@@ -156,7 +156,8 @@ def test_join_expansion():
                  "The number of join outputs is incorrect")
     assert_equal(_sums[0], 7, "The join Sum output value is incorrect: %s." % _sums[0])
     # the join input preserves the iterables input order
-    assert_equal(_sum_operands[0], [3, 4], "The join Sum input is incorrect: %s." % _sum_operands[0])
+    assert_equal(_sum_operands[0], [3, 4],
+        "The join Sum input is incorrect: %s." % _sum_operands[0])
     # there are two iterations of the post-join node in the iterable path
     assert_equal(len(_products), 2,
                  "The number of iterated post-join outputs is incorrect")
@@ -165,6 +166,7 @@ def test_join_expansion():
     rmtree(wd)
 
 def test_set_join_node():
+    """Test collecting join inputs to a set."""
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
@@ -181,16 +183,18 @@ def test_set_join_node():
     join = pe.JoinNode(SetInterface(), joinsource='inputspec',
         joinfield='input1', name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
-    
+
     wf.run()
-    
+
     # the join length is the number of unique inputs
-    assert_equal(_set_len, 3, "The join Set output value is incorrect: %s." % _set_len)
+    assert_equal(_set_len, 3,
+        "The join Set output value is incorrect: %s." % _set_len)
 
     os.chdir(cwd)
     rmtree(wd)
 
 def test_unique_join_node():
+    """Test join with the ``unique`` flag set to True."""
     global _sum_operands
     _sum_operands = []
     cwd = os.getcwd()
@@ -209,18 +213,19 @@ def test_unique_join_node():
     join = pe.JoinNode(SumInterface(), joinsource='inputspec',
         joinfield='input1', unique=True, name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
-    
+
     wf.run()
-    
-    # the join length is the number of unique inputs
-    assert_equal(_sum_operands[0], [4, 2, 3], "The unique join output value is incorrect: %s." % _sum_operands[0])
+
+    assert_equal(_sum_operands[0], [4, 2, 3],
+        "The unique join output value is incorrect: %s." % _sum_operands[0])
 
     os.chdir(cwd)
     rmtree(wd)
 
-def test_identity_join_node():
-    global _sum_operands
-    _sum_operands = []
+def test_multiple_join_nodes():
+    """Test two join nodes, one downstream of the other."""
+    global _products
+    _products = []
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
@@ -233,20 +238,80 @@ def test_identity_join_node():
     # a pre-join node in the iterated path
     pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
     wf.connect(inputspec, 'n', pre_join1, 'input1')
+    # the first join node
+    join1 = pe.JoinNode(IdentityInterface(fields=['vector']),
+                        joinsource='inputspec', joinfield='vector',
+                        name='join1')
+    wf.connect(pre_join1, 'output1', join1, 'vector')
+    # an uniterated post-join node
+    post_join1 = pe.Node(SumInterface(), name='post_join1')
+    wf.connect(join1, 'vector', post_join1, 'input1')
+    # the downstream join node connected to both an upstream join
+    # path output and a separate input in the iterated path
+    join2 = pe.JoinNode(IdentityInterface(fields=['vector', 'scalar']),
+                        joinsource='inputspec', joinfield='vector',
+                        name='join2')
+    wf.connect(pre_join1, 'output1', join2, 'vector')
+    wf.connect(post_join1, 'output1', join2, 'scalar')
+    # a second post-join node
+    post_join2 = pe.Node(SumInterface(), name='post_join2')
+    wf.connect(join2, 'vector', post_join2, 'input1')
+    # a third post-join node
+    post_join3 = pe.Node(ProductInterface(), name='post_join3')
+    wf.connect(post_join2, 'output1', post_join3, 'input1')
+    wf.connect(join2, 'scalar', post_join3, 'input2')
+
+    result = wf.run()
+
+    # The expanded graph contains one pre_join1 replicate per inputspec
+    # replicate and one of each remaining node = 3 + 5 = 8 nodes.
+    # The replicated inputspec nodes are factored out of the expansion.
+    assert_equal(len(result.nodes()), 8,
+                 "The number of expanded nodes is incorrect.")
+    # The outputs are:
+    # pre_join1: [2, 3, 4]
+    # post_join1: 9
+    # join2: [2, 3, 4] and 9
+    # post_join2: 9
+    # post_join3: 9 * 9 = 81
+    assert_equal(_products, [81], "The post-join product is incorrect")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_identity_join_node():
+    """Test an IdentityInterface join."""
+    global _sum_operands
+    _sum_operands = []
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']),
+                        name='inputspec')
+    inputspec.iterables = [('n', [1, 2, 3])]
+    # a pre-join node in the iterated path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the IdentityInterface join node
-    join = pe.JoinNode(IdentityInterface(fields=['vector']), joinsource='inputspec',
-        joinfield='vector', name='join')
+    join = pe.JoinNode(IdentityInterface(fields=['vector']),
+                       joinsource='inputspec', joinfield='vector',
+                       name='join')
     wf.connect(pre_join1, 'output1', join, 'vector')
     # an uniterated post-join node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
     wf.connect(join, 'vector', post_join1, 'input1')
-    
+
     result = wf.run()
-    
+
     # the expanded graph contains 1 * 3 iteration pre-join nodes, 1 join
     # node and 1 post-join node. Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
-    assert_equal(len(result.nodes()), 5, "The number of expanded nodes is incorrect.")
+    assert_equal(len(result.nodes()), 5,
+        "The number of expanded nodes is incorrect.")
     assert_equal(_sum_operands[0], [2, 3, 4],
                  "The join Sum input is incorrect: %s." %_sum_operands[0])
 
@@ -254,6 +319,7 @@ def test_identity_join_node():
     rmtree(wd)
 
 def test_multifield_join_node():
+    """Test join on several fields."""
     global _products
     _products = []
     cwd = os.getcwd()
@@ -263,7 +329,8 @@ def test_multifield_join_node():
     # Make the workflow.
     wf = pe.Workflow(name='test')
     # the iterated input node
-    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']), name='inputspec')
+    inputspec = pe.Node(IdentityInterface(fields=['m', 'n']),
+                        name='inputspec')
     inputspec.iterables = [('m', [1, 2]), ('n', [3, 4])]
     # two pre-join nodes in a parallel iterated path
     inc1 = pe.Node(IncrementInterface(), name='inc1')
@@ -272,16 +339,17 @@ def test_multifield_join_node():
     wf.connect(inputspec, 'n', inc2, 'input1')
     # the join node
     join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
-        joinsource='inputspec', name='join')
+                       joinsource='inputspec', name='join')
     wf.connect(inc1, 'output1', join, 'vector1')
     wf.connect(inc2, 'output1', join, 'vector2')
     # a post-join node
-    prod = pe.MapNode(ProductInterface(), name='prod', iterfield=['input1', 'input2'])
+    prod = pe.MapNode(ProductInterface(), name='prod',
+                       iterfield=['input1', 'input2'])
     wf.connect(join, 'vector1', prod, 'input1')
     wf.connect(join, 'vector2', prod, 'input2')
-    
+
     result = wf.run()
-    
+
     # the iterables are expanded as the cartesian product of the iterables values.
     # thus, the expanded graph contains 2 * (2 * 2) iteration pre-join nodes, 1 join
     # node and 1 post-join node.
@@ -295,6 +363,7 @@ def test_multifield_join_node():
     rmtree(wd)
 
 def test_synchronize_join_node():
+    """Test join on an input node which has the ``synchronize`` flag set to True."""
     global _products
     _products = []
     cwd = os.getcwd()
@@ -321,9 +390,9 @@ def test_synchronize_join_node():
     prod = pe.MapNode(ProductInterface(), name='prod', iterfield=['input1', 'input2'])
     wf.connect(join, 'vector1', prod, 'input1')
     wf.connect(join, 'vector2', prod, 'input2')
-    
+
     result = wf.run()
-    
+
     # there are 3 iterables expansions.
     # thus, the expanded graph contains 2 * 2 iteration pre-join nodes, 1 join
     # node and 1 post-join node.
@@ -337,6 +406,7 @@ def test_synchronize_join_node():
     rmtree(wd)
 
 def test_itersource_join_source_node():
+    """Test join on an input node which has an ``itersource``."""
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
@@ -395,5 +465,5 @@ def test_itersource_join_source_node():
 
 if __name__ == "__main__":
     import nose
-    
+
     nose.main(defaultTest=__name__)
