@@ -1112,7 +1112,7 @@ class Node(WorkflowBase):
             of tuples
             node.iterables = ('frac',[0.5,0.6,0.7])
             node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
-            
+
             If this node has an itersource, then the iterables values
             is a dictionary which maps an iterable source field value
             to the target iterables field values, e.g.:
@@ -1120,7 +1120,7 @@ class Node(WorkflowBase):
             node.itersource = ('inputspec', ['frac'])
             node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
                                        img2.nii': [0.6, 0.7]})
-            
+
             If this node's synchronize flag is set, then an alternate
             form of the iterables is a [fields, values] list, where
             fields is the list of iterated fields and values is the
@@ -1129,13 +1129,13 @@ class Node(WorkflowBase):
             node.iterables = [('frac', 'threshold'),
                               [(0.5, True),
                                (0.6, False)]]
-            
+
         itersource: tuple
             The (name, fields) iterables source which specifies the name
             of the predecessor iterable node and the input fields to use
             from that source node. The output field values comprise the
-            key to the iterables parameter value mapping dictionary. 
-        
+            key to the iterables parameter value mapping dictionary.
+
         synchronize: boolean
             Flag indicating whether iterables are synchronized.
             If the iterables are synchronized, then this iterable
@@ -1785,7 +1785,7 @@ class JoinNode(Node):
         self._inputs = self._override_join_traits(self._interface.inputs,
                                                   self.joinfield)
         """the override inputs"""
-        
+
         self._unique = unique
         """flag indicating whether to ignore duplicate input values"""
 
@@ -1813,7 +1813,7 @@ class JoinNode(Node):
         >>> join = pe.JoinNode(IdentityInterface(fields=['images', 'mask']),
         ...    joinsource='inputspec', joinfield='images', name='join')
         >>> join._add_join_item_fields()
-        {'image': 'image1', 'mask': 'mask1'}
+        {'image': 'imageJ1', 'mask': 'maskJ1'}
 
         Return the {base field: slot field} dictionary
         """
@@ -1822,6 +1822,7 @@ class JoinNode(Node):
         newfields = {field: self._add_join_item_field(field, idx)
             for field in self.joinfield}
         # increment the join slot index
+        logger.debug("Added the %s join item fields %s." % (self, newfields))
         self._next_slot_index += 1
         return newfields
 
@@ -1836,6 +1837,7 @@ class JoinNode(Node):
         trait = self._inputs.trait(field, False, True)
         # add the join item trait to the override traits
         self._inputs.add_trait(name, trait)
+
         return name
 
     def _join_item_field_name(self, field, index):
@@ -1883,9 +1885,16 @@ class JoinNode(Node):
         """
         Collects each override join item field into the interface join
         field input."""
-        for field in self.joinfield:
-            val = self._collate_input_value(field)
-            setattr(self._interface.inputs, field, val)
+        for field in self.inputs.copyable_trait_names():
+            if field in self.joinfield:
+                # collate the join field
+                val = self._collate_input_value(field)
+                setattr(self._interface.inputs, field, val)
+            elif hasattr(self._interface.inputs, field):
+                # copy the non-join field
+                val = getattr(self._inputs, field)
+                if isdefined(val):
+                    setattr(self._interface.inputs, field, val)
         logger.debug("Collated %d inputs into the %s node join fields"
                      % (self._next_slot_index, self))
 
@@ -1893,16 +1902,16 @@ class JoinNode(Node):
         """
         Collects the join item field values into a list or set value for
         the given field, as follows:
-        
+
         - If the field trait is a Set, then the values are collected into
         a set.
-        
+
         - Otherwise, the values are collected into a list which preserves
         the iterables order. If the ``unique`` flag is set, then duplicate
         values are removed but the iterables order is preserved.
         """
-        val = [getattr(self._inputs, self._join_item_field_name(field, idx))
-            for idx in range(self._next_slot_index)]
+        val = [self._slot_value(field, idx)
+               for idx in range(self._next_slot_index)]
         basetrait = self._interface.inputs.trait(field)
         if isinstance(basetrait.trait_type, traits.Set):
             return set(val)
@@ -1911,6 +1920,14 @@ class JoinNode(Node):
         else:
             return val
 
+    def _slot_value(self, field, index):
+        slot_field = self._join_item_field_name(field, index)
+        try:
+            return getattr(self._inputs, slot_field)
+        except AttributeError as e:
+            raise AttributeError("The join node %s does not have a slot field %s"
+                         " to hold the %s value at index %d: %s"
+                         % (self, slot_field, field, index, e))
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
