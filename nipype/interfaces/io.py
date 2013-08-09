@@ -572,17 +572,17 @@ class SelectFiles(IOBase):
     This interface uses the {}-based string formatting syntax to plug
     values (possibly known only at workflow execution time) into string
     templates and collect files from persistant storage. These templates
-    can also be combined with glob wildcards. The names used in the
-    formatting template should correspond to the input fields given
-    when you instantiate the interface, and the outputs are formed by the
-    keys in the `templates` dictionary.
+    can also be combined with glob wildcards. The field names in the
+    formatting template (i.e. the terms in braces) will become inputs
+    fields on the interface, and the keys in the templates dictionary
+    will form the output fields.
 
     Examples
     --------
 
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
-    ...            "epi": "{subject_id}/func/f[0,1].nii"}
+    ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> dg.outputs.get()
