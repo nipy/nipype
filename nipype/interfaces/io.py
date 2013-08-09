@@ -588,6 +588,13 @@ class SelectFiles(IOBase):
     >>> dg.outputs.get()
     {'T1': <undefined>, 'epi': <undefined>}
 
+    The same thing with dynamic grabbing of specific files:
+
+    >>> templates["epi"] = "{subject_id}/func/f{run!s}.nii"
+    >>> dg = Node(SelectFiles(templates), "selectfiles")
+    >>> dg.inputs.subject_id = "subj1"
+    >>> dg.inputs.run = [2, 4]
+
     """
     input_spec = SelectFilesInputSpec
     output_spec = DynamicTraitedSpec

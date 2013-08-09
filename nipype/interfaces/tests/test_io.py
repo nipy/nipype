@@ -42,6 +42,13 @@ def test_selectfiles():
                      "interfaces/spm/preprocess.py")
     yield assert_equal, res.outputs.preprocess, [wanted]
 
+    templates = {"converter": "interfaces/dcm{to!s}nii.py"}
+    dg = nio.SelectFiles(templates, base_directory=base_dir)
+    dg.inputs.to = 2
+    res = dg.run()
+    wanted = op.join(base_dir, "interfaces/dcm2nii.py")
+    yield assert_equal, res.outputs.converter, wanted
+
 
 def test_datasink():
     ds = nio.DataSink()
