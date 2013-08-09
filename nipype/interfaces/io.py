@@ -606,12 +606,14 @@ class SelectFiles(IOBase):
         Parameters
         ----------
         templates : dictionary
-            Mapping string keys to string tempalate values.
+            Mapping from string keys to string template values.
             The keys become output fields on the interface.
             The templates should use {}-formatting syntax, where
-            the keys in curly braces become inputs fields on the interface.
+            the names in curly braces become inputs fields on the interface.
             Format strings can also use glob wildcards to match multiple
-            files.
+            files. At runtime, the values of the interface inputs will be
+            plugged into these templates, and the resulting strings will be
+            used to select files.
 
         """
         super(SelectFiles, self).__init__(**kwargs)
