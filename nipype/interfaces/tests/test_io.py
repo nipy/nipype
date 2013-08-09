@@ -22,17 +22,19 @@ def test_selectfiles():
     base_dir = op.dirname(nipype.__file__)
     templates = {"model": "interfaces/{package}/model.py",
                  "preprocess": "interfaces/{package}/pre*.py"}
-    dg = nio.SelectFiles(["package"], templates=templates,
-                         base_directory=base_dir)
+    dg = nio.SelectFiles(templates, base_directory=base_dir)
+    yield assert_equal, dg._infields, ["package"]
+    yield assert_equal, sorted(dg._outfields), ["model", "preprocess"]
     dg.inputs.package = "fsl"
     res = dg.run()
     wanted = op.join(op.dirname(nipype.__file__), "interfaces/fsl/model.py")
     yield assert_equal, res.outputs.model, wanted
 
-    dg = nio.SelectFiles(["package"], templates=templates,
+    dg = nio.SelectFiles(templates,
                          base_directory=base_dir,
                          force_lists=True)
-    yield assert_equal, set(dg._outputs().get().keys()), {"model", "preprocess"}
+    outfields = sorted(dg._outputs().get())
+    yield assert_equal, outfields, ["model", "preprocess"]
 
     dg.inputs.package = "spm"
     res = dg.run()

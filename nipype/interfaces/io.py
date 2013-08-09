@@ -18,6 +18,7 @@
 
 """
 import glob
+import string
 import os
 import os.path as op
 import shutil
@@ -557,11 +558,6 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
         desc="Root path common to templates.")
-    templates = traits.Dict(mandatory=True,
-        key_traits=traits.Str,
-        value_traits=traits.Str,
-        desc="String formatting templates with {} syntax that form "\
-             "output file names given the values of the interface inputs.")
     sort_filelist = traits.Bool(True, usedefault=True,
         desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -585,10 +581,11 @@ class SelectFiles(IOBase):
     --------
 
     >>> from nipype import SelectFiles, Node
-    >>> dg = SelectFiles(infields=["subject_id"],
-    ...                  templates={"T1": "{subject_id}/struct/T1.nii",
-    ...                             "epi": "{subject_id}/func/epi.nii"})
-    >>> Node(dg, "selectfiles").outputs.get()
+    >>> templates={"T1": "{subject_id}/struct/T1.nii",
+    ...            "epi": "{subject_id}/func/f[0,1].nii"}
+    >>> dg = Node(SelectFiles(templates), "selectfiles")
+    >>> dg.inputs.subject_id = "subj1"
+    >>> dg.outputs.get()
     {'T1': <undefined>, 'epi': <undefined>}
 
     """
@@ -596,28 +593,32 @@ class SelectFiles(IOBase):
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def __init__(self, infields, **kwargs):
+    def __init__(self, templates, **kwargs):
         """Create an instance with specific input fields.
 
         Parameters
         ----------
-        infields : list of strings
-            Names of dynamic input fields to add to the interface. These
-            inputs can be used as names in the format templates to build
-            output filenames.
         templates : dictionary
-            Dictionary mappying string fields to string tempalate values.
-            See SelectFiles.help() for more information.
+            Mapping string keys to string tempalate values.
+            The keys become output fields on the interface.
+            The templates should use {}-formatting syntax, where
+            the keys in curly braces become inputs fields on the interface.
+            Format strings can also use glob wildcards to match multiple
+            files.
 
         """
         super(SelectFiles, self).__init__(**kwargs)
 
-        # Manually handle the mandatory inputs
-        if not isdefined(self.inputs.templates):
-            raise ValueError("'templates' is a mandatory input.")
+        # Infer the infields and outfields from the template
+        infields = []
+        for name, template in templates.iteritems():
+            for _, field_name, _, _ in string.Formatter().parse(template):
+                if field_name is not None and field_name not in infields:
+                    infields.append(field_name)
 
         self._infields = infields
-        self._outfields = list(self.inputs.templates)
+        self._outfields = list(templates)
+        self._templates = templates
 
         # Add the dynamic input fields
         undefined_traits = {}
@@ -628,15 +629,15 @@ class SelectFiles(IOBase):
 
     def _add_output_traits(self, base):
         """Add the dynamic output fields"""
-        return add_traits(base, self.inputs.templates.keys())
+        return add_traits(base, self._templates.keys())
 
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = {k: v for k, v in self.inputs.__dict__.items()
-                    if k in self._infields}
+        info = dict([(k, v) for k, v in self.inputs.__dict__.items()
+                     if k in self._infields])
 
-        for field, template in self.inputs.templates.items():
+        for field, template in self._templates.iteritems():
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
