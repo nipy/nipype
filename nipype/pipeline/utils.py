@@ -261,7 +261,7 @@ def expand_iterables(iterables, synchronize=False):
 
 def count_iterables(iterables, synchronize=False):
     """Return the number of iterable expansion nodes.
-    
+
     If synchronize is True, then the count is the maximum number
     of iterables value lists.
     Otherwise, the count is the product of the iterables value
@@ -272,10 +272,10 @@ def count_iterables(iterables, synchronize=False):
     else:
         op = lambda x,y: x*y
     return reduce(op, [len(func()) for _, func in iterables.iteritems()])
-    
+
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
-    
+
     Examples
     --------
     >>> from nipype.pipeline.utils import walk
@@ -305,9 +305,9 @@ def walk(children, level=0, path=None, usename=True):
 
 def synchronize_iterables(iterables):
     """Synchronize the given iterables in item-wise order.
-    
+
     Return: the {field: value} dictionary list
-    
+
     Examples
     --------
     >>> from nipype.pipeline.utils import synchronize_iterables
@@ -460,7 +460,7 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
 
 def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
     """Remove non-join identity nodes from the given graph
-    
+
     Iterable nodes are retained if and only if the keep_iterables
     flag is set to True.
     """
@@ -473,7 +473,7 @@ def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
 
 def _identity_nodes(graph, include_iterables):
     """Return the IdentityInterface nodes in the graph
-    
+
     The nodes are in topological sort order. The iterable nodes
     are included if and only if the include_iterables flag is set
     to True.
@@ -497,7 +497,7 @@ def _remove_identity_node(graph, node):
 
 def _node_ports(graph, node):
     """Return the given node's input and output ports
-    
+
     The return value is the (inputs, outputs) dictionaries.
     The inputs is a {destination field: (source node, source field)}
     dictionary.
@@ -626,7 +626,7 @@ def generate_expanded_graph(graph_in):
             # the source node iterables values
             src_values = [getattr(iter_src.inputs, field) for field in src_fields]
             # if there is one source field, then the key is the the source value,
-            # otherwise the key is the tuple of source values 
+            # otherwise the key is the tuple of source values
             if len(src_values) == 1:
                 key = src_values[0]
             else:
@@ -667,7 +667,7 @@ def generate_expanded_graph(graph_in):
         graph_in = _merge_graphs(graph_in, subnodes,
                                  subgraph, inode._hierarchy + inode._id,
                                  iterables, iterable_prefix, inode.synchronize)
-        
+
         # reconnect the join nodes
         for jnode in jnodes:
             # the {node id: edge data} dictionary for edges connecting
@@ -686,11 +686,11 @@ def generate_expanded_graph(graph_in):
             for in_nodes in expansions.itervalues():
                 in_nodes.sort(key=lambda node: node._id)
 
-            # the number of iterations.
+            # the number of join source replicates.
             iter_cnt = count_iterables(iterables, inode.synchronize)
             # make new join node fields to connect to each replicated
             # join in-edge source node.
-            slot_dicts = [dest._add_join_item_fields() for _ in range(iter_cnt)]
+            slot_dicts = [jnode._add_join_item_fields() for _ in range(iter_cnt)]
             # for each join in-edge, connect every expanded source node
             # which matches on the in-edge source name to the destination
             # join node. Qualify each edge connect join field name by
@@ -705,9 +705,15 @@ def generate_expanded_graph(graph_in):
                 for in_idx, in_node in enumerate(in_nodes):
                     olddata = old_edge_dict[old_id]
                     newdata = deepcopy(olddata)
+                    # the (source, destination) field tuples
                     connects = newdata['connect']
+                    # the join fields connected to the source
                     join_fields = [field for _, field in connects
-                        if field in dest.joinfield]
+                        if field in jnode.joinfield]
+                    # the {field: slot fields} maps assigned to the input
+                    # node, e.g. {'image': 'imageJ3', 'mask': 'maskJ3'}
+                    # for the third join source expansion replicate of a
+                    # join node with join fields image and mask
                     slots = slot_dicts[in_idx]
                     for con_idx, connect in enumerate(connects):
                         src_field, dest_field = connect
@@ -734,24 +740,27 @@ def generate_expanded_graph(graph_in):
     return _remove_identity_nodes(graph_in)
 
 def _iterable_nodes(graph_in):
-    """ Returns the iterable nodes in the given graph
-    
+    """Returns the iterable nodes in the given graph and their join
+    dependencies.
+
     The nodes are ordered as follows:
-    
+
     - nodes without an itersource precede nodes with an itersource
     - nodes without an itersource are sorted in reverse topological order
     - nodes with an itersource are sorted in topological order
-    
+
     This order implies the following:
-    
+
     - every iterable node without an itersource is expanded before any
       node with an itersource
-    
+
     - every iterable node without an itersource is expanded before any
       of it's predecessor iterable nodes without an itersource
-    
+
     - every node with an itersource is expanded before any of it's
       successor nodes with an itersource
+
+    Return the iterable nodes list
     """
     nodes = nx.topological_sort(graph_in)
     inodes = [node for node in nodes if node.iterables is not None]
@@ -828,10 +837,10 @@ def _transpose_iterables(fields, values):
     """
     Converts the given fields and tuple values into a standardized
     iterables value.
-    
+
     If the input values is a synchronize iterables dictionary, then
     the result is a (field, {key: values}) list.
-    
+
     Otherwise, the result is a list of (field: value list) pairs.
     """
     if isinstance(values, dict):
@@ -845,7 +854,7 @@ def _transpose_iterables(fields, values):
     else:
         return zip(fields, [filter(lambda(v): v != None, list(transpose))
                             for transpose in zip(*values)])
-    
+
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
                  simple_form=True):
