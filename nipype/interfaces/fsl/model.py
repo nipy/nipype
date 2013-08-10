@@ -1661,7 +1661,7 @@ class GLMInputSpec(FSLCommandInputSpec):
                                                         + ' contrasts'))
     mask = File(exists=True, argstr='-m %s', desc=('mask image file name if'
                                                    + ' input is image'))
-    dof = traits.Int(argstr='--dof %d', desc=('set degrees of freedom'
+    dof = traits.Int(argstr='--dof=%d', desc=('set degrees of freedom'
                                               + ' explicitly'))
     des_norm = traits.Bool(argstr='--des_norm', desc=('switch on normalization'
                                                       + ' of the design matrix'
