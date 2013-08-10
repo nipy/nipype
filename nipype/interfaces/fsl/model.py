@@ -1571,15 +1571,11 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     f_cm_thresh = traits.Float(
         argstr='-S %.2f', desc='carry out f cluster-mass thresholding')
     tfce_H = traits.Float(
-        argstr='--tfce_H %.2f', desc='TFCE height parameter (default=2)')
+        argstr='--tfce_H=%.2f', desc='TFCE height parameter (default=2)')
     tfce_E = traits.Float(
-        argstr='--tfce_E %.2f', desc='TFCE extent parameter (default=0.5)')
+        argstr='--tfce_E=%.2f', desc='TFCE extent parameter (default=0.5)')
     tfce_C = traits.Float(
-        argstr='--tfce_C %.2f', desc='TFCE connectivity (6 or 26; default=6)')
-    vxl = traits.List(traits.Int, argstr='--vxl %d', desc='list of numbers indicating voxelwise EVs' +
-                      'position in the design matrix (list order corresponds to files in vxf option)')
-    vxf = traits.List(traits.Int, argstr='--vxf %d', desc='list of 4D images containing voxelwise EVs' +
-                      '(list order corresponds to numbers in vxl option)')
+        argstr='--tfce_C=%.2f', desc='TFCE connectivity (6 or 26; default=6)')
 
 
 class RandomiseOutputSpec(TraitedSpec):
