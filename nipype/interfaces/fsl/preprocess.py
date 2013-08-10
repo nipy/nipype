@@ -803,10 +803,10 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     apply_inmask = traits.List(
         traits.Enum(0, 1), argstr='--applyinmask=%s', xor=['skip_inmask'],
               desc='list of iterations to use input mask on (1 to use, 0 to skip)', sep=",")
-    skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
+    skip_implicit_ref_masking = traits.Bool(argstr='--imprefm=0',
                                       desc='skip implicit masking  based on value'
                                             'in --ref image. Default = 0')
-    skip_implicit_in_masking = traits.Bool(argstr='--impinm 0',
+    skip_implicit_in_masking = traits.Bool(argstr='--impinm=0',
                                       desc='skip implicit masking  based on value'
                                            'in --in image. Default = 0')
     refmask_val = traits.Float(argstr='--imprefval=%f',
@@ -836,7 +836,7 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     regularization_lambda = traits.List(traits.Float, argstr='--lambda=%s',
                 desc='Weight of regularisation, default depending on --ssqlambda and --regmod '
                                          'switches. See user documetation.', sep=",")
-    skip_lambda_ssq = traits.Bool(argstr='--ssqlambda 0',
+    skip_lambda_ssq = traits.Bool(argstr='--ssqlambda=0',
                                   desc='If true, lambda is not weighted by current ssq, default false')
     jacobian_range = traits.Tuple(traits.Float, traits.Float,
                                   argstr='--jacrange=%f,%f',
