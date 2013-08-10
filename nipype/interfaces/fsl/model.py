@@ -1559,7 +1559,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     num_perm = traits.Int(
         argstr='-n %d', desc='number of permutations (default 5000, set to 0 for exhaustive)')
     seed = traits.Int(
-        argstr='--seed %d', desc='specific integer seed for random number generator')
+        argstr='--seed=%d', desc='specific integer seed for random number generator')
     var_smooth = traits.Int(
         argstr='-v %d', desc='use variance smoothing (std is in mm)')
     c_thresh = traits.Float(
