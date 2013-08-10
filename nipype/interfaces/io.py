@@ -710,12 +710,11 @@ class DataFinder(IOBase):
     Matched paths are available in the output 'out_paths'. Any named groups of
     captured text from the regular expression are also available as ouputs of
     the same name.
+    
     Examples
     --------
 
     >>> from nipype.interfaces.io import DataFinder
-    Look for Nifti files in directories with "ep2d_fid" or "qT1" in the name,
-    starting in the current directory.
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
@@ -737,6 +736,7 @@ class DataFinder(IOBase):
      'acquisition']
 
     """
+    
     input_spec = DataFinderInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
