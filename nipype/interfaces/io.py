@@ -540,11 +540,11 @@ class DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].insert(i, None)
+                        outputs[key].append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles.sort()
-                        outputs[key].insert(i, list_to_filename(outfiles))
+                        outputs[key].append(list_to_filename(outfiles))
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
