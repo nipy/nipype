@@ -30,7 +30,11 @@ from warnings import warn
 import urllib
 from uuid import uuid1
 
-import prov.model as pm
+try:
+    import prov.model as pm
+except ImportError:
+    from ..external import provcopy as pm
+
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
                                isdefined, File, Directory,
