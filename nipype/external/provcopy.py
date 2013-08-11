@@ -17,10 +17,13 @@ import re
 import collections
 from collections import defaultdict
 
-from rdflib.term import URIRef, BNode
-from rdflib.term import Literal as RDFLiteral
-from rdflib.graph import ConjunctiveGraph, Graph
-from rdflib.namespace import RDF
+try:
+    from rdflib.term import URIRef, BNode
+    from rdflib.term import Literal as RDFLiteral
+    from rdflib.graph import ConjunctiveGraph, Graph
+    from rdflib.namespace import RDF
+except ImportError:
+    pass
 
 try:
     from collections import OrderedDict
