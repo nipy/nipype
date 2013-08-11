@@ -14,7 +14,6 @@ from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
-import prov.model as prov
 
 package_check('networkx', '1.3')
 import json
@@ -26,6 +25,7 @@ from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
                                filename_to_list)
 from ..utils.misc import create_function_from_source, str2bool
 from ..interfaces.base import CommandLine, isdefined, Undefined, Bunch
+from ..interfaces.base import pm as prov, safe_encode
 from ..interfaces.utility import IdentityInterface
 
 from .. import __version__ as nipype_version
@@ -768,24 +768,6 @@ def write_prov(graph, filename=None, format='turtle'):
     g.add_namespace(dcterms)
     g.add_namespace(nipype)
 
-    def safe_encode(x):
-        if x is None:
-            return prov.Literal("Unknown", prov.XSD['string'])
-        if isinstance(x, (str, unicode)):
-            if os.path.exists(x):
-                return prov.URIRef('file://%s%s' % (getfqdn(), x))
-            else:
-                return prov.Literal(x, prov.XSD['string'])
-        if isinstance(x, (int,)):
-            return prov.Literal(int(x), prov.XSD['integer'])
-        if isinstance(x, (float,)):
-            return prov.Literal(x, prov.XSD['float'])
-        if isinstance(x, (dict, list,)):
-            return prov.Literal(json.dumps(x),
-                              prov.XSD['string'])
-        return prov.Literal(b64encode(json.dumps(x)),
-                          prov.XSD['string'])
-
     get_id = lambda : nipype[uuid1().hex]
 
     user_agent = g.agent(get_id(),
@@ -953,13 +935,17 @@ def write_prov(graph, filename=None, format='turtle'):
         g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
                        starter=processes[nodes.index(edgeinfo[0])])
     # write provenance
-    if format in ['provn', 'all']:
-        with open(filename + '.provn', 'wt') as fp:
-            fp.writelines(g.get_provn())
-    if format in ['json', 'all']:
-        with open(filename + '.json', 'wt') as fp:
-            prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
-    if format in ['turtle', 'all']:
-        g.rdf().serialize(filename + '.ttl', format='turtle')
+    try:
+        if format in ['turtle', 'all']:
+            g.rdf().serialize(filename + '.ttl', format='turtle')
+    except ImportError:
+        format = 'all'
+    finally:
+        if format in ['provn', 'all']:
+            with open(filename + '.provn', 'wt') as fp:
+                fp.writelines(g.get_provn())
+        if format in ['json', 'all']:
+            with open(filename + '.json', 'wt') as fp:
+                prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
     return g
 

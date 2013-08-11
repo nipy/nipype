@@ -11,6 +11,7 @@ Requires Packages to be installed
 from base64 import b64encode
 from ConfigParser import NoOptionError
 from copy import deepcopy
+from cPickle import dumps
 import datetime
 import errno
 import json
@@ -666,6 +667,36 @@ class Interface(object):
         raise NotImplementedError
 
 
+def safe_encode(x):
+    """Encodes a python value for prov
+    """
+    nipype = pm.Namespace("nipype","http://nipy.org/nipype/terms/")
+    if x is None:
+        return pm.Literal("Unknown", pm.XSD['string'])
+    if isinstance(x, (str, unicode)):
+        if os.path.exists(x):
+            return pm.URIRef('file://%s%s' % (getfqdn(), x))
+        else:
+            return pm.Literal(x, pm.XSD['string'])
+    if isinstance(x, (int,)):
+        return pm.Literal(int(x), pm.XSD['integer'])
+    if isinstance(x, (float,)):
+        return pm.Literal(x, pm.XSD['float'])
+    try:
+        if isinstance(x, dict):
+            outdict = {}
+            for key, value in x.items():
+                outdict[key] = safe_encode(value)
+            return pm.Literal(json.dumps(outdict), pm.XSD['string'])
+        if isinstance(x, list):
+            outlist = [safe_encode(value) for value in x]
+            return pm.Literal(json.dumps(outlist), pm.XSD['string'])
+        return pm.Literal(dumps(x),
+                          nipype['pickle'])
+    except TypeError:
+        return pm.Literal("Could not encode", pm.XSD['string'])
+
+
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
@@ -698,7 +729,6 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' % \
                                 self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
-        self._version = 'Unknown'
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1033,7 +1063,7 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
-    def write_provenance(self, results, filename='provenance', format='all'):
+    def write_provenance(self, results, filename='provenance', format='turtle'):
         runtime = results.runtime
         interface = results.interface
         inputs = results.inputs
@@ -1045,24 +1075,6 @@ class BaseInterface(Interface):
         nipype = pm.Namespace("nipype","http://nipy.org/nipype/terms/")
 
         get_id = lambda : nipype[uuid1().hex]
-
-        def safe_encode(x):
-            if x is None:
-                return pm.Literal("Unknown", pm.XSD['string'])
-            if isinstance(x, (str, unicode)):
-                if os.path.exists(x):
-                    return pm.URIRef('file://%s%s' % (getfqdn(), x))
-                else:
-                    return pm.Literal(x, pm.XSD['string'])
-            if isinstance(x, (int,)):
-                return pm.Literal(int(x), pm.XSD['integer'])
-            if isinstance(x, (float,)):
-                return pm.Literal(x, pm.XSD['float'])
-            if isinstance(x, (dict, list,)):
-                return pm.Literal(json.dumps(x),
-                                  pm.XSD['string'])
-            return pm.Literal(b64encode(json.dumps(x)),
-                              pm.XSD['string'])
 
         # create a provenance container
         g = pm.ProvBundle()
@@ -1168,11 +1180,18 @@ class BaseInterface(Interface):
         g.wasAssociatedWith(a0, software_agent, None, None,
                             {pm.PROV["Role"]: safe_encode("Software")})
         # write provenance
-        if format in ['json', 'all']:
-            with open(filename + '.json', 'wt') as fp:
-                json.dump(g, fp, cls= pm.ProvBundle.JSONEncoder)
-        if format in ['turtle', 'all']:
-            g.rdf().serialize(filename + '.ttl', format='turtle')
+        try:
+            if format in ['turtle', 'all']:
+                g.rdf().serialize(filename + '.ttl', format='turtle')
+        except ImportError:
+            format = 'all'
+        finally:
+            if format in ['provn', 'all']:
+                with open(filename + '.provn', 'wt') as fp:
+                    fp.writelines(g.get_provn())
+            if format in ['json', 'all']:
+                with open(filename + '.json', 'wt') as fp:
+                    prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
         return g
 
 
