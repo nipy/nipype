@@ -1422,7 +1422,7 @@ class CommandLine(BaseInterface):
     >>> cli.cmdline
     'ls -al'
 
-    >>> cli.inputs.trait_get()
+    >>> cli.inputs.trait_get() # doctest: +NORMALIZE_WHITESPACE
     {'ignore_exception': False, 'terminal_output': 'stream',
      'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
