@@ -938,7 +938,7 @@ def write_prov(graph, filename=None, format='turtle'):
     try:
         if format in ['turtle', 'all']:
             g.rdf().serialize(filename + '.ttl', format='turtle')
-    except ImportError:
+    except (ImportError, NameError):
         format = 'all'
     finally:
         if format in ['provn', 'all']:
@@ -946,6 +946,6 @@ def write_prov(graph, filename=None, format='turtle'):
                 fp.writelines(g.get_provn())
         if format in ['json', 'all']:
             with open(filename + '.json', 'wt') as fp:
-                prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+                prov.json.dump(g, fp, cls=prov.ProvBundle.JSONEncoder)
     return g
 

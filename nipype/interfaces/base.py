@@ -1192,7 +1192,7 @@ class BaseInterface(Interface):
         try:
             if format in ['turtle', 'all']:
                 g.rdf().serialize(filename + '.ttl', format='turtle')
-        except ImportError:
+        except (ImportError, NameError):
             format = 'all'
         finally:
             if format in ['provn', 'all']:
@@ -1200,7 +1200,7 @@ class BaseInterface(Interface):
                     fp.writelines(g.get_provn())
             if format in ['json', 'all']:
                 with open(filename + '.json', 'wt') as fp:
-                    prov.json.dump(g, fp, cls= prov.ProvBundle.JSONEncoder)
+                    pm.json.dump(g, fp, cls=pm.ProvBundle.JSONEncoder)
         return g
 
 
