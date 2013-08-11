@@ -22,5 +22,10 @@ before_install:
     - source ~/virtualenv/this/bin/activate
     - pip install https://github.com/RDFLib/rdflib/archive/master.zip
     - pip install https://github.com/satra/prov/archive/enh/rdf.zip
-install: python setup.py build_ext --inplace
-script: make test
+install:
+    - source ~/virtualenv/this/bin/activate
+    - python setup.py build_ext --inplace
+script:
+    - source ~/virtualenv/this/bin/activate
+    - make test
+
