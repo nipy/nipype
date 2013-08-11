@@ -16,7 +16,7 @@ def transpose(samples_over_fibres):
 def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fieldmap_registration=False):
     """Creates a workflow that chains the necessary pipelines to
     correct for motion, eddy currents, and, if selected, susceptibility
-    artifacts in EPI dMRI sequences. 
+    artifacts in EPI dMRI sequences.
 
     .. warning::
 
@@ -64,7 +64,7 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fiel
     Optional arguments::
         use_fieldmap - True if there are fieldmap files that should be used (default True)
         fieldmap_registration - True if registration to fieldmap should be performed (default False)
-        
+
 
     """
 
@@ -82,11 +82,11 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fiel
 
     motion = create_motion_correct_pipeline()
     eddy = create_eddy_correct_pipeline()
-    
+
     if use_fieldmap: # we have a fieldmap, so lets use it (yay!)
         susceptibility = create_susceptibility_correct_pipeline(
         fieldmap_registration=fieldmap_registration)
-        
+
         pipeline.connect([
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
@@ -110,7 +110,7 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fiel
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
                                               ('ref_num', 'inputnode.ref_num')]),
-                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]), 
+                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]),
                          (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
                          (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
                          (eddy, outputnode, [('outputnode.eddy_corrected', 'dmri_corrected')])

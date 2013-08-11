@@ -506,7 +506,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     bbrslope = traits.Float(
         argstr='-bbrslope %f', min_ver='5.0.0',
         desc='value of bbr slope')
-    
+
 
 
 class FLIRTOutputSpec(TraitedSpec):
@@ -1196,7 +1196,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     forward_warping = traits.Bool(
         False, usedefault=True,
         desc='apply forward warping instead of unwarping')
-    warped_file = File(argstr='--warp=%s', 
+    warped_file = File(argstr='--warp=%s',
                        desc='apply forward warping and save as filename',
                        hash_files=False)
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
@@ -1214,7 +1214,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
     save_shift = traits.Bool(desc='output pixel shift volume')
 
-    shift_out_file = traits.File(argstr='--saveshift=%s', 
+    shift_out_file = traits.File(argstr='--saveshift=%s',
                            desc='filename for saving pixel shift volume', hash_files=False)
 
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
@@ -1299,7 +1299,7 @@ class FUGUE(FSLCommand):
         outputs = self._outputs().get()
         if self.inputs.forward_warping:
             out_field = 'warped_file'
-        else: 
+        else:
             out_field = 'unwarped_file'
 
         out_file = getattr(self.inputs,out_field)
