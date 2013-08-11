@@ -3,7 +3,6 @@
 """Utility routines for workflow graphs
 """
 
-from base64 import b64encode
 from copy import deepcopy
 from glob import glob
 import os
@@ -42,7 +41,6 @@ except AttributeError:
 try:
     from os.path import relpath
 except ImportError:
-    import os
     import os.path as op
 
     def relpath(path, start=None):
@@ -61,7 +59,7 @@ except ImportError:
                                   "(%s and %s)") % (path, start))
             else:
                 raise ValueError("path is on drive %s, start on drive %s"
-                                             % (path_list[0], start_list[0]))
+                                 % (path_list[0], start_list[0]))
         # Work out how much of the filepath is shared by start and path.
         for i in range(min(len(start_list), len(path_list))):
             if start_list[i].lower() != path_list[i].lower():
@@ -141,11 +139,12 @@ def get_print_name(node, simple_form=True):
             name = '.'.join([node.fullname, interface]) + destclass
     if simple_form:
         parts = name.split('.')
-        if len(parts)>2:
+        if len(parts) > 2:
             return ' ('.join(parts[1:])+')'
-        elif len(parts)==2:
+        elif len(parts) == 2:
             return parts[1]
     return name
+
 
 def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     """Create a graph that can be pickled.
@@ -196,9 +195,9 @@ def _write_detailed_dot(graph, dotfilename):
                 ipstrip = 'in' + replacefunk(inport)
                 opstrip = 'out' + replacefunk(outport)
                 edges.append('%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''),
-                                                  opstrip,
-                                                  str(v).replace('.', ''),
-                                                  ipstrip))
+                                                      opstrip,
+                                                      str(v).replace('.', ''),
+                                                      ipstrip))
                 if inport not in inports:
                     inports.append(inport)
         inputstr = '{IN'
@@ -221,7 +220,6 @@ def _write_detailed_dot(graph, dotfilename):
         srcpackage = ''
         if hasattr(n, '_interface'):
             pkglist = n._interface.__class__.__module__.split('.')
-            interface = n._interface.__class__.__name__
             if len(pkglist) > 2:
                 srcpackage = pkglist[2]
         srchierarchy = '.'.join(nodename.split('.')[1:-1])
@@ -285,8 +283,8 @@ def evaluate_connect_function(function_source, args, first_arg):
         output_value = func(first_arg,
                             *list(args))
     except NameError as e:
-        if e.args[0].startswith("global name") and e.args[0].endswith(
-            "is not defined"):
+        if e.args[0].startswith("global name") and \
+                e.args[0].endswith("is not defined"):
             e.args = (e.args[0],
                       ("Due to engine constraints all imports have to be done "
                        "inside each function definition"))
@@ -350,7 +348,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
                 if n._hierarchy + n._id not in edgeinfo.keys():
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
-                                       supergraph.get_edge_data(*edge)))
+                                               supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     count = 0
@@ -423,7 +421,7 @@ def _remove_identity_nodes(graph, keep_iterables=False):
             for u, _, d in graph.in_edges_iter(node, data=True):
                 for src, dest in d['connect']:
                     portinputs[dest] = (u, src)
-            for  _, v, d in graph.out_edges_iter(node, data=True):
+            for _, v, d in graph.out_edges_iter(node, data=True):
                 for src, dest in d['connect']:
                     if isinstance(src, tuple):
                         srcport = src[0]
@@ -522,8 +520,8 @@ def generate_expanded_graph(graph_in):
             else:
                 if prior_prefix[-1] == 'z':
                     raise ValueError('Too many iterables in the workflow')
-                iterable_prefix =\
-                allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+                iterable_prefix = \
+                           allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
             node._id += ('.' + iterable_prefix + 'I')
             logger.debug(('subnodes:', subnodes))
             subgraph = graph_in.subgraph(subnodes)
@@ -698,7 +696,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
             if f not in needed_files:
                 if len(needed_dirs) == 0:
                     files2remove.append(f)
-                elif not any([f.startswith(dirname) for dirname in needed_dirs]):
+                elif not any([f.startswith(dname) for dname in needed_dirs]):
                     files2remove.append(f)
     else:
         if not str2bool(config['execution']['keep_inputs']):
@@ -755,9 +753,9 @@ def write_prov(graph, filename=None, format='turtle'):
     """
     if not filename:
         filename = os.path.join(os.getcwd(), 'workflow_provenance')
-    foaf = prov.Namespace("foaf","http://xmlns.com/foaf/0.1/")
-    dcterms = prov.Namespace("dcterms","http://purl.org/dc/terms/")
-    nipype = prov.Namespace("nipype","http://nipy.org/nipype/terms/")
+    foaf = prov.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
+    dcterms = prov.Namespace("dcterms", "http://purl.org/dc/terms/")
+    nipype = prov.Namespace("nipype", "http://nipy.org/nipype/terms/")
 
     # create a provenance container
     g = prov.ProvBundle()
@@ -768,7 +766,7 @@ def write_prov(graph, filename=None, format='turtle'):
     g.add_namespace(dcterms)
     g.add_namespace(nipype)
 
-    get_id = lambda : nipype[uuid1().hex]
+    get_id = lambda: nipype[uuid1().hex]
 
     user_agent = g.agent(get_id(),
                          {prov.PROV["type"]: prov.PROV["Person"],
@@ -791,13 +789,13 @@ def write_prov(graph, filename=None, format='turtle'):
             startTime = None
             endTime = None
             for runtime in result.runtime:
-                newStartTime=getattr(runtime, 'startTime')
+                newStartTime = getattr(runtime, 'startTime')
                 if startTime:
                     if newStartTime < startTime:
                         startTime = newStartTime
                 else:
                     startTime = newStartTime
-                newEndTime=getattr(runtime, 'endTime')
+                newEndTime = getattr(runtime, 'endTime')
                 if endTime:
                     if newEndTime > endTime:
                         endTime = newEndTime
@@ -881,7 +879,7 @@ def write_prov(graph, filename=None, format='turtle'):
             if isdefined(inputval[1]):
                 inport = inputval[0]
                 used_ports = []
-                for _,_,d in graph.in_edges_iter([node], data=True):
+                for _, _, d in graph.in_edges_iter([node], data=True):
                     for _, dest in d['connect']:
                         used_ports.append(dest)
                 if inport not in used_ports:
@@ -890,7 +888,7 @@ def write_prov(graph, filename=None, format='turtle'):
                                       prov.PROV["label"]: inport,
                                       nipype['port']: inport,
                                       prov.PROV["value"]: str(inputval[1])
-                                     })
+                                      })
                     g.used(process, param)
 
     # add dependencies (edges)
@@ -904,7 +902,7 @@ def write_prov(graph, filename=None, format='turtle'):
         else:
             outputs = node.result.outputs.get()
         used_ports = {}
-        for _,v,d in graph.out_edges_iter([node], data=True):
+        for _, v, d in graph.out_edges_iter([node], data=True):
             for src, dest in d['connect']:
                 if isinstance(src, tuple):
                     srcname = src[0]
@@ -919,9 +917,9 @@ def write_prov(graph, filename=None, format='turtle'):
             artifact = g.entity(uuid1().hex,
                                 {prov.PROV["type"]: nipype['artifact'],
                                  prov.PROV["label"]: nameval[0],
-                                 nipype['port'] : nameval[0],
+                                 nipype['port']: nameval[0],
                                  prov.PROV["value"]: str(nameval[1])
-                                })
+                                 })
             g.wasGeneratedBy(artifact, processes[idx])
             if nameval[0] in used_ports:
                 for destnode, portname in used_ports[nameval[0]]:
@@ -948,4 +946,3 @@ def write_prov(graph, filename=None, format='turtle'):
             with open(filename + '.json', 'wt') as fp:
                 prov.json.dump(g, fp, cls=prov.ProvBundle.JSONEncoder)
     return g
-
