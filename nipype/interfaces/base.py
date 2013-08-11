@@ -675,7 +675,11 @@ def safe_encode(x):
         return pm.Literal("Unknown", pm.XSD['string'])
     if isinstance(x, (str, unicode)):
         if os.path.exists(x):
-            return pm.URIRef('file://%s%s' % (getfqdn(), x))
+            try:
+                return pm.URIRef('file://%s%s' % (getfqdn(), x))
+            except AttributeError:
+                return pm.Literal('file://%s%s' % (getfqdn(), x),
+                                  pm.XSD['anyURI'])
         else:
             return pm.Literal(x, pm.XSD['string'])
     if isinstance(x, (int,)):
@@ -1085,8 +1089,7 @@ class BaseInterface(Interface):
         g.add_namespace(dcterms)
         g.add_namespace(nipype)
 
-        a0_attrs = {foaf["host"]: pm.URIRef(runtime.hostname),
-                    nipype['module']: self.__module__,
+        a0_attrs = {nipype['module']: self.__module__,
                     nipype["interface"]: classname,
                     pm.PROV["label"]: classname,
                     nipype['duration']: safe_encode(runtime.duration),
@@ -1095,6 +1098,12 @@ class BaseInterface(Interface):
                     nipype['platform']: safe_encode(runtime.platform),
                     nipype['version']: safe_encode(runtime.version),
                     }
+        try:
+            a0_attrs[foaf["host"]] = pm.URIRef(runtime.hostname)
+        except AttributeError:
+            a0_attrs[foaf["host"]] = pm.Literal(runtime.hostname,
+                                                pm.XSD['anyURI'])
+
         try:
             a0_attrs.update({nipype['command']: safe_encode(runtime.cmdline)})
             a0_attrs.update({nipype['command_path']: safe_encode(runtime.command_path)})
