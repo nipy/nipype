@@ -56,6 +56,7 @@ def motion_regressors(motion_params, order=2, derivatives=2):
     """
     from nipype.utils.filemanip import filename_to_list
     import numpy as np
+    import os
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -72,6 +73,63 @@ def motion_regressors(motion_params, order=2, derivatives=2):
         out_files.append(filename)
     return out_files
 
+def build_filter1(motion_params, comp_norm, outliers):
+    """Builds a regressor set comprisong motion parameters, composite norm and
+    outliers
+    """
+    from nipype.utils.filemanip import filename_to_list
+    import numpy as np
+    import os
+    out_files = []
+    for idx, filename in enumerate(filename_to_list(motion_params)):
+        params = np.genfromtxt(filename)
+        norm_val = np.genfromtxt(filename_to_list(comp_norm)[idx])
+        out_params = np.hstack((params, norm_val[:, None]))
+        try:
+            outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
+        except IOerror:
+            outlier_val = np.empty((0))
+        if outlier_val.shape[0] != 0:
+            for index in outlier_val:
+                outlier_vector = np.zeros((out_params.shape[0], 1))
+                outlier_vector[index] = 1
+                out_params = np.hstack((out_params, outlier_vector))
+        filename = os.path.join(os.getcwd(), "filter_regressor%02d.txt" % idx)
+        np.savetxt(filename, out_params, fmt="%.10f")
+        out_files.append(filename)
+    return out_files
+
+
+def extract_noise_components(realigned_file, mask_file, num_components=6):
+    """Derive components most reflective of physiological noise
+
+    Parameters
+    ----------
+    realigned_file :
+    mask_file :
+    num_components :
+
+    Returns
+    -------
+    components_file :
+    """
+
+    import os
+    from nibabel import load
+    import numpy as np
+    import scipy as sp
+
+    imgseries = load(realigned_file)
+    noise_mask = load(mask_file)
+    voxel_timecourses = imgseries.get_data()[np.nonzero(noise_mask.get_data())]
+    voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
+    voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+    _, _, v = sp.linalg.svd(voxel_timecourses, full_matrices=False)
+    components_file = os.path.join(os.getcwd(), 'noise_components.txt')
+    np.savetxt(components_file, v[:num_components, :].T)
+    return components_file
+
+
 def create_workflow(files,
                     subject_id,
                     n_vol=0,
@@ -79,7 +137,8 @@ def create_workflow(files,
                     TR=None,
                     slice_times=None,
                     fieldmap_images=None,
-                    norm_threshold=1):
+                    norm_threshold=1,
+                    num_components=6):
 
     wf = Workflow(name='resting')
 
@@ -144,8 +203,9 @@ def create_workflow(files,
     wmcsftransform.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
 
     wmcsf.inputs.wm_ven_csf = True
+    wmcsf.inputs.match = [4, 5, 14, 15, 24, 31, 43, 44, 63]
     wmcsf.inputs.binary_file = 'wmcsf.nii.gz'
-    wmcsf.inputs.erode = 2
+    wmcsf.inputs.erode = 1
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), wmcsf, 'in_file')
 
     wf.connect(calc_median, 'median_file', wmcsftransform, 'source_file')
@@ -161,7 +221,7 @@ def create_workflow(files,
     masktransform = wmcsftransform.clone("masktransform")
     wf.connect(calc_median, 'median_file', masktransform, 'source_file')
     wf.connect(register, 'out_reg_file', masktransform, 'reg_file')
-    wf.connect(wmcsf, 'binary_file', masktransform, 'target_file')
+    wf.connect(mask, 'binary_file', masktransform, 'target_file')
 
     #art outliers
     art = Node(interface=ArtifactDetect(use_differences=[True, False],
@@ -176,6 +236,47 @@ def create_workflow(files,
     wf.connect(realign, 'par_file',
                art, 'realignment_parameters')
     wf.connect(masktransform, 'transformed_file', art, 'mask_file')
+
+    motreg = Node(Function(input_names=['motion_params', 'order',
+                                        'derivatives'],
+                           output_names=['out_files'],
+                           function=motion_regressors),
+                  name='getmotionregress')
+    wf.connect(realign, 'par_file', motreg, 'motion_params')
+
+    createfilter1 = Node(Function(input_names=['motion_params', 'comp_norm',
+                                         'outliers'],
+                           output_names=['out_files'],
+                           function=build_filter1),
+                  name='makemotionbasedfilter')
+    wf.connect(motreg, 'out_files', createfilter1, 'motion_params')
+    wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
+    wf.connect(art, 'outlier_files', createfilter1, 'outliers')
+
+    filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
+                      iterfield=['in_file', 'design_file'],
+                      name='filtermotion')
+    wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+    wf.connect(createfilter1, 'out_files', filter1, 'design_file')
+    wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+
+    createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
+                                               'num_components'],
+                                     output_names=['out_files'],
+                                     function=extract_noise_components),
+                            iterfield=['realigned_file'],
+                            name='makecompcorrfilter')
+    createfilter2.inputs.num_components = num_components
+    wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
+    wf.connect(masktransform, 'transformed_file', createfilter2, 'mask_file')
+
+    filter2 = MapNode(fsl.FilterRegressor(filter_all=True),
+                      iterfield=['in_file', 'design_file'],
+                      name='filtercompcorr')
+    wf.connect(filter1, 'out_file', filter2, 'in_file')
+    wf.connect(createfilter2, 'out_files', filter2, 'design_file')
+    wf.connect(masktransform, 'transformed_file', filter2, 'mask')
+
     return wf
 
 if __name__ == "__main__":
@@ -200,20 +301,8 @@ if __name__ == "__main__":
 unwarp = MapNode(EPIDeWarp(), name='dewarp')
 
 
-# regress motion + art (compnorm + outliers) from realigned data
-def regress(filter):
-    return filtered_data
-
-#compute compcorr on wm, csf separately
-def compcorr():
-    return components
-
-#regress those out
-def regress(comps):
-    return filtered_data
-
 #smooth
-freesurfer.SurfaceSmooth()
+freesurfer.Smooth()
 
 #bandpass
 fsl.ImageMaths
@@ -225,5 +314,4 @@ def to_grayordinates():
 #compute similarity matrix and partial correlation
 def compute_similarity():
     return matrix
-
 '''
