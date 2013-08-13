@@ -87,7 +87,7 @@ def build_filter1(motion_params, comp_norm, outliers):
         out_params = np.hstack((params, norm_val[:, None]))
         try:
             outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
-        except IOerror:
+        except IOError:
             outlier_val = np.empty((0))
         if outlier_val.shape[0] != 0:
             for index in outlier_val:
@@ -140,7 +140,7 @@ def create_workflow(files,
                     norm_threshold=1,
                     num_components=6,
                     vol_fwhm=6,
-		    surf_fwhm=6,
+                    surf_fwhm=10,
                     lowpass_freq=.08,
                     highpass_freq=.9):
 
@@ -280,16 +280,19 @@ def create_workflow(files,
     wf.connect(filter1, 'out_file', filter2, 'in_file')
     wf.connect(createfilter2, 'out_files', filter2, 'design_file')
     wf.connect(masktransform, 'transformed_file', filter2, 'mask')
-    freesurfer.Smooth()
-    smooth = Node(freesurfer.Smooth(),
-                 name = 'smooth')
+
+    smooth = MapNode(freesurfer.Smooth(),
+                     iterfield=['in_file'],
+                     name = 'smooth')
+    smooth.inputs.proj_frac_avg = (0.1, 0.9, 0.1)
     smooth.inputs.surface_fwhm=surf_fwhm
     smooth.inputs.vol_fwhm=vol_fwhm
     wf.connect(filter2, 'out_file',  smooth, 'in_file')
     wf.connect(register, 'out_reg_file', smooth, 'reg_file')
     
-    bandpass = Node(fsl.TemporalFilter(),
-                    name='bandpassfilter')
+    bandpass = MapNode(fsl.TemporalFilter(),
+                       iterfield=['in_file'],
+                       name='bandpassfilter')
     if highpass_freq < 0:
             bandpass.inputs.highpass_sigma = -1
     else:
@@ -303,10 +306,10 @@ def create_workflow(files,
 
 if __name__ == "__main__":
     import argparse
-    #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
-    #niifile = '/software/data/sad_resting/resting.nii.gz'
-    dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
-    niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
+    dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
+    niifile = '/software/data/sad_resting/resting.nii.gz'
+    #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
+    #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
 
     TR, slice_times = get_info(dcmfile)
     wf = create_workflow(niifile,
@@ -315,6 +318,9 @@ if __name__ == "__main__":
                          despike=True,
                          TR=TR,
                          slice_times=slice_times,
+                         vol_fwhm=4,
+                         lowpass_freq=-1,
+                         highpass_freq=-1
                          )
     wf.config['execution'].update(**{'hash_method': 'content',
                                      'remove_unnecessary_outputs': False})
