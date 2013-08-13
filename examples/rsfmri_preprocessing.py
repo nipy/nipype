@@ -138,7 +138,11 @@ def create_workflow(files,
                     slice_times=None,
                     fieldmap_images=None,
                     norm_threshold=1,
-                    num_components=6):
+                    num_components=6,
+                    vol_fwhm=6,
+		    surf_fwhm=6,
+                    lowpass_freq=.08,
+                    highpass_freq=.9):
 
     wf = Workflow(name='resting')
 
@@ -276,13 +280,34 @@ def create_workflow(files,
     wf.connect(filter1, 'out_file', filter2, 'in_file')
     wf.connect(createfilter2, 'out_files', filter2, 'design_file')
     wf.connect(masktransform, 'transformed_file', filter2, 'mask')
-
+    freesurfer.Smooth()
+    smooth = Node(freesurfer.Smooth(),
+                 name = 'smooth')
+    smooth.inputs.surface_fwhm=surf_fwhm
+    smooth.inputs.vol_fwhm=vol_fwhm
+    wf.connect(filter2, 'out_file',  smooth, 'in_file')
+    wf.connect(register, 'out_reg_file', smooth, 'reg_file')
+    
+    bandpass = Node(fsl.TemporalFilter(),
+                    name='bandpassfilter')
+    if highpass_freq < 0:
+            bandpass.inputs.highpass_sigma = -1
+    else:
+            bandpass.inputs.highpass_sigma = 1 / (2 * TR * highpass_freq)
+    if lowpass_freq < 0:
+            bandpass.inputs.lowpass_sigma = -1
+    else:
+            bandpass.inputs.lowpass_sigma = 1 / (2 * TR * lowpass_freq)
+    wf.connect(smooth, 'smoothed_file', bandpass, 'in_file')
     return wf
 
 if __name__ == "__main__":
     import argparse
-    dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
-    niifile = '/software/data/sad_resting/resting.nii.gz'
+    #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
+    #niifile = '/software/data/sad_resting/resting.nii.gz'
+    dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
+    niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
+
     TR, slice_times = get_info(dcmfile)
     wf = create_workflow(niifile,
                          'SAD_024',
@@ -299,13 +324,6 @@ if __name__ == "__main__":
 '''
 #fieldmap dewarping
 unwarp = MapNode(EPIDeWarp(), name='dewarp')
-
-
-#smooth
-freesurfer.Smooth()
-
-#bandpass
-fsl.ImageMaths
 
 #convert to grayordinates
 def to_grayordinates():
