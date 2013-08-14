@@ -1793,6 +1793,19 @@ class JoinNode(Node):
         """the joinfield index assigned to an iterated input"""
 
     @property
+    def joinsource(self):
+        return self._joinsource
+
+    @joinsource.setter
+    def joinsource(self, value):
+        """Set the joinsource property. If the given value is a Node,
+        then the joinsource is set to the node name.
+        """
+        if isinstance(value, Node):
+            value = value.name
+        self._joinsource = value
+
+    @property
     def inputs(self):
         """The JoinNode inputs include the join field overrides."""
         return self._inputs
@@ -1889,7 +1902,10 @@ class JoinNode(Node):
             if field in self.joinfield:
                 # collate the join field
                 val = self._collate_input_value(field)
-                setattr(self._interface.inputs, field, val)
+                try:
+                    setattr(self._interface.inputs, field, val)
+                except Exception as e:
+                    raise ValueError(">>JN %s %s %s %s %s: %s" % (self, field, val, self.inputs.copyable_trait_names(), self.joinfield, e))
             elif hasattr(self._interface.inputs, field):
                 # copy the non-join field
                 val = getattr(self._inputs, field)
