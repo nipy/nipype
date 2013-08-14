@@ -165,6 +165,28 @@ def test_join_expansion():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_node_joinsource():
+    """Test setting the joinsource to a Node."""
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [1, 2])]
+    # the join node
+    join = pe.JoinNode(SetInterface(), joinsource=inputspec,
+        joinfield='input1', name='join')
+
+    # the joinsource is the inputspec name
+    assert_equal(join.joinsource, inputspec.name,
+        "The joinsource is not set to the node name.")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
 def test_set_join_node():
     """Test collecting join inputs to a set."""
     cwd = os.getcwd()
