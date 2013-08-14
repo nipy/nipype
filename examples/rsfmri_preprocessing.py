@@ -264,12 +264,20 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-    filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
-                      iterfield=['in_file', 'design_file'],
-                      name='filtermotion')
+    #filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
+    #                  iterfield=['in_file', 'design_file'],
+    #                  name='filtermotion')
+    #wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+    #wf.connect(createfilter1, 'out_files', filter1, 'design_file')
+    #wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+
+    filter1 = MapNode(fsl.GLM(),
+		     iterfield=['in_file', 'design_file'],
+		     name='filtermotion')
     wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
     wf.connect(createfilter1, 'out_files', filter1, 'design_file')
-    wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+    wf.connect(masktransform,'transformed_file',filter1,'mask')
+
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
                                                   'num_components'],
@@ -278,7 +286,9 @@ def create_workflow(files,
                             iterfield=['realigned_file'],
                             name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
-    wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
+    #wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
+    wf.connect(filter1, 'out_res', createfilter2,'realigned_file')
+
     wf.connect(masktransform, 'transformed_file', createfilter2, 'mask_file')
 
     filter2 = MapNode(fsl.FilterRegressor(filter_all=True),
