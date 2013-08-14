@@ -1,5 +1,8 @@
 import os
 
+from nipype.interfaces.base import CommandLine
+CommandLine.set_default_terminal_output('allatonce')
+
 from nipype import (afni, fsl, freesurfer, nipy, Function,
                     DataGrabber, DataSink)
 from nipype import Workflow, Node, MapNode
@@ -10,6 +13,7 @@ from nipype.interfaces.fsl.utils import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 
 import numpy as np
+
 
 #robust mean
 def median(in_files):
@@ -47,7 +51,8 @@ def get_info(dicom_files):
     meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
                                        stop_before_pixels=True,
                                        force=True))
-    return meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes']
+    return (meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes'],
+            meta['SpacingBetweenSlices'])
 
 
 def motion_regressors(motion_params, order=2, derivatives=2):
@@ -72,6 +77,7 @@ def motion_regressors(motion_params, order=2, derivatives=2):
         np.savetxt(filename, out_params2, fmt="%.10f")
         out_files.append(filename)
     return out_files
+
 
 def build_filter1(motion_params, comp_norm, outliers):
     """Builds a regressor set comprisong motion parameters, composite norm and
@@ -136,10 +142,11 @@ def create_workflow(files,
                     despike=True,
                     TR=None,
                     slice_times=None,
+                    slice_thickness=None,
                     fieldmap_images=None,
                     norm_threshold=1,
                     num_components=6,
-                    vol_fwhm=6,
+                    vol_fwhm=None,
                     surf_fwhm=10,
                     lowpass_freq=.08,
                     highpass_freq=.9):
@@ -175,9 +182,9 @@ def create_workflow(files,
     wf.connect(realign, 'out_file', tsnr, 'in_file')
 
     calc_median = Node(Function(input_names=['in_files'],
-                               output_names=['median_file'],
-                               function=median),
-                      name='median')
+                                output_names=['median_file'],
+                                function=median),
+                       name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
     register = Node(freesurfer.BBRegister(),
@@ -218,7 +225,7 @@ def create_workflow(files,
 
     mask.inputs.dilate = 3
     mask.inputs.binary_file = 'mask.nii.gz'
-    mask.inputs.erode = 2
+    mask.inputs.erode = int(slice_thickness)
     mask.inputs.min = 0.5
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), mask, 'in_file')
 
@@ -249,10 +256,10 @@ def create_workflow(files,
     wf.connect(realign, 'par_file', motreg, 'motion_params')
 
     createfilter1 = Node(Function(input_names=['motion_params', 'comp_norm',
-                                         'outliers'],
-                           output_names=['out_files'],
-                           function=build_filter1),
-                  name='makemotionbasedfilter')
+                                               'outliers'],
+                                  output_names=['out_files'],
+                                  function=build_filter1),
+                         name='makemotionbasedfilter')
     wf.connect(motreg, 'out_files', createfilter1, 'motion_params')
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
@@ -265,7 +272,7 @@ def create_workflow(files,
     wf.connect(masktransform, 'transformed_file', filter1, 'mask')
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
-                                               'num_components'],
+                                                  'num_components'],
                                      output_names=['out_files'],
                                      function=extract_noise_components),
                             iterfield=['realigned_file'],
@@ -283,13 +290,15 @@ def create_workflow(files,
 
     smooth = MapNode(freesurfer.Smooth(),
                      iterfield=['in_file'],
-                     name = 'smooth')
+                     name='smooth')
     smooth.inputs.proj_frac_avg = (0.1, 0.9, 0.1)
-    smooth.inputs.surface_fwhm=surf_fwhm
-    smooth.inputs.vol_fwhm=vol_fwhm
+    smooth.inputs.surface_fwhm = surf_fwhm
+    if vol_fwhm is None:
+        vol_fwhm = 2 * slice_thickness
+    smooth.inputs.vol_fwhm = vol_fwhm
     wf.connect(filter2, 'out_file',  smooth, 'in_file')
     wf.connect(register, 'out_reg_file', smooth, 'reg_file')
-    
+
     bandpass = MapNode(fsl.TemporalFilter(),
                        iterfield=['in_file'],
                        name='bandpassfilter')
@@ -302,30 +311,38 @@ def create_workflow(files,
     else:
             bandpass.inputs.lowpass_sigma = 1 / (2 * TR * lowpass_freq)
     wf.connect(smooth, 'smoothed_file', bandpass, 'in_file')
+
     return wf
 
 if __name__ == "__main__":
     import argparse
     dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
     niifile = '/software/data/sad_resting/resting.nii.gz'
+    subject_id = 'SAD_024'
+    dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
+    niifile = '/software/data/sad_resting/allyson/Resting1.nii'
+    fieldmaps = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
+                 '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
+    echo_time = 0.7
+    subject_id = '308'
     #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
     #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
 
-    TR, slice_times = get_info(dcmfile)
+    TR, slice_times, slice_thickness = get_info(dcmfile)
     wf = create_workflow(niifile,
-                         'SAD_024',
+                         subject_id,
                          n_vol=2,
                          despike=True,
                          TR=TR,
                          slice_times=slice_times,
-                         vol_fwhm=4,
+                         slice_thickness=np.round(slice_thickness),
                          lowpass_freq=-1,
                          highpass_freq=-1
                          )
     wf.config['execution'].update(**{'hash_method': 'content',
                                      'remove_unnecessary_outputs': False})
     wf.base_dir = os.getcwd()
-    wf.run()
+    wf.run(plugin='MultiProc')
 
 '''
 #fieldmap dewarping
