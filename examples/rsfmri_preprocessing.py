@@ -143,13 +143,17 @@ def create_workflow(files,
                     TR=None,
                     slice_times=None,
                     slice_thickness=None,
-                    fieldmap_images=None,
+                    fieldmap_images=[],
                     norm_threshold=1,
                     num_components=6,
                     vol_fwhm=None,
                     surf_fwhm=10,
-                    lowpass_freq=.08,
-                    highpass_freq=.9):
+                    lowpass_freq=-1,
+                    highpass_freq=-1,
+		    sink_directory=os.getcwd(),
+	            FM_TEdiff=2.46,
+	            FM_sigma=2,
+	            FM_echo_spacing=.7):
 
     wf = Workflow(name='resting')
 
@@ -195,7 +199,19 @@ def create_workflow(files,
     register.inputs.out_fsl_file = True
 
     if fieldmap_images:
-        pass
+	fieldmap=Node(interface=EPIDeWarp(), name ='fieldmap_unwarp')
+	dewarper=MapNode(interface=fsl.FUGUE(), iterfield=['in_file'], name = 'dewarper')
+	fieldmap.inputs.tediff=FM_TEdiff
+	fieldmap.inputs.esp=FM_echo_spacing
+	fieldmap.inputs.sigma=FM_sigma
+	fieldmap.inputs.mag_file=fieldmap_images[0]
+	fieldmap.inputs.dph_file=fieldmap_images[1]
+	wf.connect(calc_median,'median_file',fieldmap,'exf_file')
+	wf.connect(tsnr, 'detrended_file', dewarper, 'in_file')
+	wf.connect(fieldmap,'exf_mask', dewarper,'mask_file')
+	wf.connect(fieldmap, 'vsm_file', dewarper,'shift_in_file')
+	wf.connect(fieldmap,'exfdw',register, 'source_file')
+
     else:
         wf.connect(calc_median, 'median_file', register, 'source_file')
 
@@ -218,8 +234,11 @@ def create_workflow(files,
     wmcsf.inputs.binary_file = 'wmcsf.nii.gz'
     wmcsf.inputs.erode = 1
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), wmcsf, 'in_file')
-
-    wf.connect(calc_median, 'median_file', wmcsftransform, 'source_file')
+    
+    if fieldmap_images:
+        wf.connect(fieldmap,'exf_mask',wmcsftransform,'source_file')
+    else:
+    	wf.connect(calc_median, 'median_file', wmcsftransform, 'source_file')
     wf.connect(register, 'out_reg_file', wmcsftransform, 'reg_file')
     wf.connect(wmcsf, 'binary_file', wmcsftransform, 'target_file')
 
@@ -230,7 +249,10 @@ def create_workflow(files,
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), mask, 'in_file')
 
     masktransform = wmcsftransform.clone("masktransform")
-    wf.connect(calc_median, 'median_file', masktransform, 'source_file')
+    if fieldmap_images:
+        wf.connect(fieldmap,'exf_mask',masktransform,'source_file')
+    else:
+        wf.connect(calc_median, 'median_file', masktransform, 'source_file')
     wf.connect(register, 'out_reg_file', masktransform, 'reg_file')
     wf.connect(mask, 'binary_file', masktransform, 'target_file')
 
@@ -243,7 +265,10 @@ def create_workflow(files,
                                         bound_by_brainmask=True,
                                         mask_type='file'),
                name="art")
-    wf.connect(tsnr, 'detrended_file', art, 'realigned_files')
+    if fieldmap_images:
+        wf.connect(dewarper,'unwarped_file',art,'realigned_files')
+    else:
+        wf.connect(tsnr, 'detrended_file', art, 'realigned_files')
     wf.connect(realign, 'par_file',
                art, 'realignment_parameters')
     wf.connect(masktransform, 'transformed_file', art, 'mask_file')
@@ -264,19 +289,22 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-    #filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
-    #                  iterfield=['in_file', 'design_file'],
-    #                  name='filtermotion')
-    #wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
-    #wf.connect(createfilter1, 'out_files', filter1, 'design_file')
-    #wf.connect(masktransform, 'transformed_file', filter1, 'mask')
-
-    filter1 = MapNode(fsl.GLM(),
-		     iterfield=['in_file', 'design_file'],
-		     name='filtermotion')
-    wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+    filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
+                      iterfield=['in_file', 'design_file'],
+                      name='filtermotion')
+    if fieldmap_images:
+        wf.connect(dewarper,'unwarped_file',filter1,'in_file')
+    else:
+        wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
     wf.connect(createfilter1, 'out_files', filter1, 'design_file')
-    wf.connect(masktransform,'transformed_file',filter1,'mask')
+    wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+
+  #  filter1 = MapNode(fsl.GLM(),
+#		     iterfield=['in_file', 'design_file'],
+#		     name='filtermotion')
+    #wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+   # wf.connect(createfilter1, 'out_files', filter1, 'design_file')
+    #wf.connect(masktransform,'transformed_file',filter1,'mask')
 
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
@@ -286,10 +314,10 @@ def create_workflow(files,
                             iterfield=['realigned_file'],
                             name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
-    #wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
-    wf.connect(filter1, 'out_res', createfilter2,'realigned_file')
+    wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
+    #wf.connect(filter1, 'out_res', createfilter2,'realigned_file')
 
-    wf.connect(masktransform, 'transformed_file', createfilter2, 'mask_file')
+    wf.connect(wmcsftransform, 'transformed_file', createfilter2, 'mask_file')
 
     filter2 = MapNode(fsl.FilterRegressor(filter_all=True),
                       iterfield=['in_file', 'design_file'],
@@ -322,23 +350,46 @@ def create_workflow(files,
             bandpass.inputs.lowpass_sigma = 1 / (2 * TR * lowpass_freq)
     wf.connect(smooth, 'smoothed_file', bandpass, 'in_file')
 
+    datasink=Node(interface=DataSink(),
+                  name="datasink")
+    datasink.inputs.base_directory=sink_directory
+    wf.connect(despike,'out_file',datasink,'resting.despike')
+    wf.connect(realign,'par_file',datasink,'resting.motion')
+    wf.connect(tsnr,'tsnr_file',datasink,'resting.tsnr')
+    wf.connect(tsnr,'mean_file',datasink,'resting.tsnr.@mean')
+    wf.connect(tsnr,'stddev_file',datasink,'resting.tsnr.@stddev')
+    wf.connect(art,'norm_files',datasink,'resting.art')
+    wf.connect(art,'outlier_files',datasink,'resting.art.@outlier_files')
+    wf.connect(mask,'binary_file',datasink,'resting.mask')
+    wf.connect(masktransform,'transformed_file',datasink,'resting.mask.@transformed_file')
+    wf.connect(register,'out_reg_file',datasink,'resting.out_reg_file')
+    wf.connect(smooth,'smoothed_file',datasink,'resting.output.fullpass')
+    wf.connect(bandpass,'out_file',datasink,'resting.output.bandpassed')
+    wf.connect(createfilter1,'out_files',datasink,'resting.motion.@regressors')
+    wf.connect(createfilter2,'out_files',datasink,'resting.compcorr')
+    wf.connect(wmcsftransform,'transformed_file',datasink,'resting.compcorr.@transformed_file')
+
     return wf
 
 if __name__ == "__main__":
     import argparse
-    dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
-    niifile = '/software/data/sad_resting/resting.nii.gz'
-    subject_id = 'SAD_024'
-    dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
-    niifile = '/software/data/sad_resting/allyson/Resting1.nii'
-    fieldmaps = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
-                 '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
+    #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
+    #niifile = '/software/data/sad_resting/resting.nii.gz'
+    #subject_id = 'SAD_024'
+    #dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
+    #niifile = '/software/data/sad_resting/allyson/Resting1.nii'
+    #fieldmaps = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
+    #             '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
     echo_time = 0.7
     subject_id = '308'
     #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
     #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
-
+    dcmfile = '/mindhive/xnat/data/GATES/308/dicoms/562000-34-1.dcm'
+    niifile= '/mindhive/xnat/data/GATES/308/niftis/Resting1.nii'
+    fieldmap_images=['/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting1.nii',
+		     '/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting2.nii']
     TR, slice_times, slice_thickness = get_info(dcmfile)
+
     wf = create_workflow(niifile,
                          subject_id,
                          n_vol=2,
@@ -346,12 +397,21 @@ if __name__ == "__main__":
                          TR=TR,
                          slice_times=slice_times,
                          slice_thickness=np.round(slice_thickness),
-                         lowpass_freq=-1,
-                         highpass_freq=-1
-                         )
+                         lowpass_freq=.08,
+                    	 highpass_freq=.9,
+			 vol_fwhm=6,
+                    	 surf_fwhm=10,
+		    	 sink_directory=os.path.abspath('/mindhive/scratch/Wed/cdla/resting/sink/'),
+			 FM_TEdiff=2.46 ,
+			 FM_sigma=2 ,
+			 FM_echo_spacing=.7 ,
+			 fieldmap_images=fieldmap_images
+			 )
+
     wf.config['execution'].update(**{'hash_method': 'content',
                                      'remove_unnecessary_outputs': False})
     wf.base_dir = os.getcwd()
+    wf.write_graph(graph2use='flat')
     wf.run(plugin='MultiProc')
 
 '''
