@@ -43,6 +43,16 @@ def test_selectfiles():
                      "interfaces/spm/preprocess.py")
     yield assert_equal, res.outputs.preprocess, [wanted]
 
+    dg.inputs.package = "fsl"
+    dg.inputs.force_lists = ["model"]
+    res = dg.run()
+    preproc = op.join(op.dirname(nipype.__file__),
+                      "interfaces/fsl/preprocess.py")
+    model = [op.join(op.dirname(nipype.__file__),
+                     "interfaces/fsl/model.py")]
+    yield assert_equal, res.outputs.preprocess, preproc
+    yield assert_equal, res.outputs.model, model
+
     templates = {"converter": "interfaces/dcm{to!s}nii.py"}
     dg = nio.SelectFiles(templates, base_directory=base_dir)
     dg.inputs.to = 2
