@@ -653,6 +653,14 @@ class SelectFiles(IOBase):
         force_lists = self.inputs.force_lists
         if isinstance(force_lists, bool):
             force_lists = self._outfields if force_lists else []
+        bad_fields = set(force_lists) - set(self._outfields)
+        if bad_fields:
+            bad_fields = ", ".join(list(bad_fields))
+            plural = "s" if len(bad_fields) > 1 else ""
+            verb = "were" if len(bad_fields) > 1 else "was"
+            msg = ("The field%s '%s' %s set in 'force_lists' and not in "
+                   "'templates'.") % (plural, bad_fields, verb)
+            raise ValueError(msg)
 
         for field, template in self._templates.iteritems():
 
