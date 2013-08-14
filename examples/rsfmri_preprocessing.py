@@ -289,6 +289,7 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
+<<<<<<< HEAD
     filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
                       iterfield=['in_file', 'design_file'],
                       name='filtermotion')
@@ -296,8 +297,22 @@ def create_workflow(files,
         wf.connect(dewarper,'unwarped_file',filter1,'in_file')
     else:
         wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+=======
+    #filter1 = MapNode(fsl.FilterRegressor(filter_all=True),
+    #                  iterfield=['in_file', 'design_file'],
+    #                  name='filtermotion')
+    #wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+    #wf.connect(createfilter1, 'out_files', filter1, 'design_file')
+    #wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+
+    filter1 = MapNode(fsl.GLM(),
+		     iterfield=['in_file', 'design_file'],
+		     name='filtermotion')
+    wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
+>>>>>>> 39793ef71c08dae4a64f789808bd957362e0b729
     wf.connect(createfilter1, 'out_files', filter1, 'design_file')
-    wf.connect(masktransform, 'transformed_file', filter1, 'mask')
+    wf.connect(masktransform,'transformed_file',filter1,'mask')
+
 
   #  filter1 = MapNode(fsl.GLM(),
 #		     iterfield=['in_file', 'design_file'],
@@ -314,10 +329,17 @@ def create_workflow(files,
                             iterfield=['realigned_file'],
                             name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
+<<<<<<< HEAD
     wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
     #wf.connect(filter1, 'out_res', createfilter2,'realigned_file')
 
     wf.connect(wmcsftransform, 'transformed_file', createfilter2, 'mask_file')
+=======
+    #wf.connect(filter1, 'out_file', createfilter2, 'realigned_file')
+    wf.connect(filter1, 'out_res', createfilter2,'realigned_file')
+
+    wf.connect(masktransform, 'transformed_file', createfilter2, 'mask_file')
+>>>>>>> 39793ef71c08dae4a64f789808bd957362e0b729
 
     filter2 = MapNode(fsl.FilterRegressor(filter_all=True),
                       iterfield=['in_file', 'design_file'],
