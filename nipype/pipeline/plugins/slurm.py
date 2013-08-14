@@ -11,14 +11,14 @@ import re
 import subprocess
 from time import sleep
 
-from .base import (SLURMLikeBatchManagerBase, logger, iflogger, logging)
+from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 
 from nipype.interfaces.base import CommandLine
 
 
+       
 
-
-class SLURMPlugin(SLURMLikeBatchManagerBase):
+class SLURMPlugin(SGELikeBatchManagerBase):
     '''
     Execute using SLURM
 
@@ -39,11 +39,21 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
+        self._template = template
+        self._sbatch_args = None
+        
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if  'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
+            if 'template' in kwargs['plugin_args']:
+                self._template = kwargs['plugin_args']['template']
+                if os.path.isfile(self._template):
+                    self._template = open(self._template).read()
+            if 'sbatch_args' in kwargs['plugin_args']:
+                self._sbatch_args = kwargs['plugin_args']['sbatch_args']
+        self._pending = {}
         super(SLURMPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
@@ -82,7 +92,7 @@ class SLURMPlugin(SLURMLikeBatchManagerBase):
         if '-n' not in sbatch_args:
             sbatch_args = '%s -n 16' % (sbatch_args)
         if '-t' not in sbatch_args:
-            sbatch_args = '%s -t 48:00:00' % (sbatch_args)
+            sbatch_args = '%s -t 1:00:00' % (sbatch_args)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,

@@ -593,22 +593,7 @@ class GraphPluginBase(PluginBase):
         """
         raise NotImplementedError
 
-class SLURMLikeBatchManagerBase(SGELikeBatchManagerBase):
-    """Execute workflow with SLURM like batch system
-    """
 
-    def __init__(self, template, plugin_args=None):
-        super(SLURMLikeBatchManagerBase, self).__init__(template=template, plugin_args=plugin_args)
-        self._template = template
-        self._sbatch_args = None
-        if plugin_args:
-            if 'template' in plugin_args:
-                self._template = plugin_args['template']
-                if os.path.isfile(self._template):
-                    self._template = open(self._template).read()
-            if 'sbatch_args' in plugin_args:
-                self._sbatch_args = plugin_args['sbatch_args']
-        self._pending = {}
 
     def _get_result(self, taskid):
         if taskid not in self._pending:
