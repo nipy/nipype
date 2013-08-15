@@ -239,8 +239,8 @@ def create_workflow(files,
     wf.connect(register, 'out_reg_file', wmcsftransform, 'reg_file')
     wf.connect(wmcsf, 'binary_file', wmcsftransform, 'target_file')
 
-    mask.inputs.dilate = 3
     mask.inputs.binary_file = 'mask.nii.gz'
+    mask.inputs.dilate = int(slice_thickness) + 1
     mask.inputs.erode = int(slice_thickness)
     mask.inputs.min = 0.5
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), mask, 'in_file')
@@ -286,7 +286,8 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-    filter1 = MapNode(fsl.GLM(out_res_name='timeseries.nii.gz'),
+    filter1 = MapNode(fsl.GLM(out_res_name='timeseries.nii.gz',
+                              demean=True),
                       iterfield=['in_file', 'design'],
                       name='filtermotion')
     if fieldmap_images:
@@ -307,7 +308,8 @@ def create_workflow(files,
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
     wf.connect(masktransform, 'transformed_file', createfilter2, 'mask_file')
 
-    filter2 = MapNode(fsl.GLM(out_res_name='timeseries_cleaned.nii.gz'),
+    filter2 = MapNode(fsl.GLM(out_res_name='timeseries_cleaned.nii.gz',
+                              demean=True),
                       iterfield=['in_file', 'design'],
                       name='filtercompcorr')
     wf.connect(filter1, 'out_res', filter2, 'in_file')
@@ -333,11 +335,11 @@ def create_workflow(files,
     if highpass_freq < 0:
             bandpass.inputs.highpass_sigma = -1
     else:
-            bandpass.inputs.highpass_sigma = 1 / (2 * TR * highpass_freq)
+            bandpass.inputs.highpass_sigma = 1. / (2 * TR * highpass_freq)
     if lowpass_freq < 0:
             bandpass.inputs.lowpass_sigma = -1
     else:
-            bandpass.inputs.lowpass_sigma = 1 / (2 * TR * lowpass_freq)
+            bandpass.inputs.lowpass_sigma = 1. / (2 * TR * lowpass_freq)
     wf.connect(smooth, 'smoothed_file', bandpass, 'in_file')
 
     datasink = Node(interface=DataSink(), name="datasink")
@@ -365,12 +367,13 @@ def create_workflow(files,
 if __name__ == "__main__":
     import argparse
     from socket import getfqdn
-    if not 'mit.edu' in getfqdn():
+    if not 'ba3.mit.edu' in getfqdn():
         #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
         #niifile = '/software/data/sad_resting/resting.nii.gz'
         #subject_id = 'SAD_024'
         dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
         niifile = '/software/data/sad_resting/allyson/Resting1.nii'
+        fieldmap_images = []
         fieldmap_images = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
                            '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
         sink = os.path.join(os.getcwd(), 'output')
