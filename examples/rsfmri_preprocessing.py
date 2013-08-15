@@ -344,24 +344,27 @@ def create_workflow(files,
 
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
-    wf.connect(despike, 'out_file', datasink, 'resting.despike')
-    wf.connect(realign, 'par_file', datasink, 'resting.motion')
-    wf.connect(tsnr, 'tsnr_file', datasink, 'resting.tsnr')
-    wf.connect(tsnr, 'mean_file', datasink, 'resting.tsnr.@mean')
-    wf.connect(tsnr, 'stddev_file', datasink, 'resting.tsnr.@stddev')
-    wf.connect(art, 'norm_files', datasink, 'resting.art')
-    wf.connect(art, 'outlier_files', datasink, 'resting.art.@outlier_files')
+    datasink.inputs.container = subject_id
+    datasink.inputs.regexp_substitutions = (r'(_.*)(\d+/)', r'run\2')
+    wf.connect(despike, 'out_file', datasink, 'resting.qa.despike')
+    wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
+    wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.@tsnr')
+    wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.@tsnr_mean')
+    wf.connect(tsnr, 'stddev_file', datasink, 'resting.qa.@tsnr_stddev')
+    wf.connect(art, 'norm_files', datasink, 'resting.qa.@art')
+    wf.connect(art, 'outlier_files', datasink, 'resting.qa.@art_outlier_files')
     wf.connect(mask, 'binary_file', datasink, 'resting.mask')
     wf.connect(masktransform, 'transformed_file',
                datasink, 'resting.mask.@transformed_file')
-    wf.connect(register, 'out_reg_file', datasink, 'resting.out_reg_file')
-    wf.connect(smooth, 'smoothed_file', datasink, 'resting.output.fullpass')
-    wf.connect(bandpass, 'out_file', datasink, 'resting.output.bandpassed')
+    wf.connect(register, 'out_reg_file', datasink, 'resting.registration')
+    wf.connect(register, 'min_cost_file',
+               datasink, 'resting.registration.@mincost')
+    wf.connect(smooth, 'smoothed_file', datasink, 'resting.timeseries.fullpass')
+    wf.connect(bandpass, 'out_file', datasink, 'resting.timeseries.bandpassed')
     wf.connect(createfilter1, 'out_files',
-               datasink, 'resting.motion.@regressors')
-    wf.connect(createfilter2, 'out_files', datasink, 'resting.compcorr')
-    wf.connect(wmcsftransform, 'transformed_file',
-               datasink, 'resting.compcorr.@transformed_file')
+               datasink, 'resting.regress.@regressors')
+    wf.connect(createfilter2, 'out_files',
+               datasink, 'resting.regress.@compcorr')
     return wf
 
 if __name__ == "__main__":
@@ -405,11 +408,10 @@ if __name__ == "__main__":
                          fieldmap_images=fieldmap_images
                          )
 
-    wf.config['execution'].update(**{'hash_method': 'content',
-                                     'remove_unnecessary_outputs': False})
+    wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
     wf.base_dir = os.getcwd()
     wf.write_graph(graph2use='flat')
-    wf.run(plugin='MultiProc')
+    wf.run() #(plugin='MultiProc')
 
 '''
 #convert to grayordinates
