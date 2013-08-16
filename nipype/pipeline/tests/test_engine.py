@@ -277,7 +277,8 @@ def test_itersource_synchronize1_expansion():
     wf1.connect(node1,'output1', node2, 'input1')
     node3 = pe.Node(TestInterface(),name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
-    node3.iterables = [('input1', {(1,3):[5,6]}), ('input2', {(1,3):[7,8], (2,4): [9]})]
+    node3.iterables = [('input1', {(1,3):[5,6]}),
+                       ('input2', {(1,3):[7,8], (2,4): [9]})]
     wf1.connect(node2,'output1', node3, 'input1')
     node4 = pe.Node(TestInterface(),name='node4')
     wf1.connect(node3,'output1', node4, 'input1')
@@ -307,7 +308,8 @@ def test_itersource_synchronize2_expansion():
     node3 = pe.Node(TestInterface(),name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
     node3.synchronize = True
-    node3.iterables = [('input1', 'input2'), {(1,3):[(5,7), (6,8)], (2,4):[(None,9)]}]
+    node3.iterables = [('input1', 'input2'),
+                       {(1,3):[(5,7), (6,8)], (2,4):[(None,9)]}]
     wf1.connect(node2,'output1', node3, 'input1')
     node4 = pe.Node(TestInterface(),name='node4')
     wf1.connect(node3,'output1', node4, 'input1')
