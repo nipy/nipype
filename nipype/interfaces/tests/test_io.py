@@ -6,6 +6,7 @@ import shutil
 import os.path as op
 from tempfile import mkstemp, mkdtemp
 
+from nose.tools import assert_raises
 import nipype
 from nipype.testing import assert_equal, assert_true, assert_false
 import nipype.interfaces.io as nio
@@ -59,6 +60,17 @@ def test_selectfiles():
     res = dg.run()
     wanted = op.join(base_dir, "interfaces/dcm2nii.py")
     yield assert_equal, res.outputs.converter, wanted
+
+
+def test_selectfiles_valueerror():
+    """Test ValueError when force_lists has field that isn't in template."""
+    base_dir = op.dirname(nipype.__file__)
+    templates = {"model": "interfaces/{package}/model.py",
+                 "preprocess": "interfaces/{package}/pre*.py"}
+    force_lists = ["model", "preprocess", "registration"]
+    sf = nio.SelectFiles(templates, base_directory=base_dir,
+                         force_lists=force_lists)
+    yield assert_raises, ValueError, sf.run
 
 
 def test_datagrabber_order():
