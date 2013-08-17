@@ -10,3 +10,4 @@ from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
                   TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap,
                   ComputeFractionalAnisotropy, ComputeMeanDiffusivity,
                   ComputeTensorTrace,  ComputeEigensystem)
+from .odf import SFPICOCalibData
