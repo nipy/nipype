@@ -59,6 +59,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
 
 class SFPICOCalibDataOutputSpec(TraitedSpec):
     PICOCalib = File(exists=True, desc='Calibration dataset')
+    calib_info = File(exists=True, desc='Calibration dataset')
 
 class SFPICOCalibData(StdOutCommandLine):
     """
@@ -118,10 +119,11 @@ class SFPICOCalibData(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['PICOCalib'] = os.path.abspath(self._gen_outfilename())
+        outputs['PICOCalib'] = os.path.abspath(self._gen_calibdatafilename())
+        outputs['calib_info'] = os.path.abspath(self.inputs.info_file)
         return outputs
 
-    def _gen_outfilename(self):
+    def _gen_calibdatafilename(self):
         _, name , _ = split_filename(self.inputs.scheme_file)
         return name + '_PICOCalib.Bfloat'
 
