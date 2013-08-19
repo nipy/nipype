@@ -10,4 +10,5 @@ from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
                   TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap,
                   ComputeFractionalAnisotropy, ComputeMeanDiffusivity,
                   ComputeTensorTrace,  ComputeEigensystem)
-from .odf import SFPICOCalibData
+from .calib import (SFPICOCalibData, SFLUTGen)
+from .odf import (QBallMX, LinRecon, SFPeaks)
