@@ -149,7 +149,8 @@ def create_workflow(files,
                     sink_directory=os.getcwd(),
                     FM_TEdiff=2.46,
                     FM_sigma=2,
-                    FM_echo_spacing=.7):
+                    FM_echo_spacing=.7,
+                    target_subject='fsaverage4'):
 
     wf = Workflow(name='resting')
 
@@ -342,6 +343,44 @@ def create_workflow(files,
             bandpass.inputs.lowpass_sigma = 1. / (2 * TR * lowpass_freq)
     wf.connect(smooth, 'smoothed_file', bandpass, 'in_file')
 
+    aparctransform = wmcsftransform.clone("aparctransform")
+    if fieldmap_images:
+        wf.connect(fieldmap, 'exf_mask', aparctransform, 'source_file')
+    else:
+        wf.connect(calc_median, 'median_file', aparctransform, 'source_file')
+    wf.connect(register, 'out_reg_file', aparctransform, 'reg_file')
+    wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), aparctransform, 'target_file')
+
+    sampleaparc = MapNode(freesurfer.SegStats(avgwf_txt_file=True,
+                                              default_color_table=True),
+                          iterfield=['in_file'],
+                          name='aparc_ts')
+    wf.connect(aparctransform, 'transformed_file',
+               sampleaparc, 'segmentation_file')
+    wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
+
+    samplerlh = MapNode(freesurfer.SampleToSurface(),
+                        iterfield=['source_file'],
+                        name='sampler_lh')
+    samplerlh.inputs.sampling_method = "average"
+    samplerlh.inputs.sampling_range = (0.1, 0.9, 0.1)
+    samplerlh.inputs.sampling_units = "frac"
+    samplerlh.inputs.interp_method = "trilinear"
+    samplerlh.inputs.cortex_mask = True
+    samplerlh.inputs.target_subject = target_subject
+    samplerlh.inputs.out_type = 'niigz'
+    samplerlh.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
+
+    samplerrh = samplerlh.clone('sampler_rh')
+
+    samplerlh.inputs.hemi = 'lh'
+    wf.connect(bandpass, 'out_file', samplerlh, 'source_file')
+    wf.connect(register, 'out_reg_file', samplerlh, 'reg_file')
+
+    samplerrh.set_input('hemi', 'rh')
+    wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
+    wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
+
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
@@ -365,6 +404,10 @@ def create_workflow(files,
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
                datasink, 'resting.regress.@compcorr')
+    wf.connect(sampleaparc, 'summary_file',
+               datasink, 'resting.parcellations.aparc')
+    wf.connect(sampleaparc, 'avgwf_txt_file',
+               datasink, 'resting.parcellations.aparc.@avgwf')
     return wf
 
 if __name__ == "__main__":
@@ -411,7 +454,7 @@ if __name__ == "__main__":
     wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
     wf.base_dir = os.getcwd()
     wf.write_graph(graph2use='flat')
-    wf.run() #(plugin='MultiProc')
+    wf.run()  # (plugin='MultiProc')
 
 '''
 #convert to grayordinates
