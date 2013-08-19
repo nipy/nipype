@@ -119,11 +119,11 @@ class SFPICOCalibData(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['PICOCalib'] = os.path.abspath(self._gen_calibdatafilename())
+        outputs['PICOCalib'] = os.path.abspath(self._gen_PICOCalibfilename())
         outputs['calib_info'] = os.path.abspath(self.inputs.info_file)
         return outputs
 
-    def _gen_calibdatafilename(self):
+    def _gen_PICOCalibfilename(self):
         _, name , _ = split_filename(self.inputs.scheme_file)
         return name + '_PICOCalib.Bfloat'
 
