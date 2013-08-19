@@ -369,7 +369,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, str):
+        if isinstance(contents, str) or isinstance(contents, unicode):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))
