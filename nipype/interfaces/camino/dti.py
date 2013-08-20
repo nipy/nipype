@@ -158,7 +158,7 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
         argstr='-frange %s', minlen=2, maxlen=2, position=1,
         units='NA')
 
-    step = traits.Float(argstr='-step %d', units='NA',
+    step = traits.Float(argstr='-step %f', units='NA',
         desc='Distance between points in the LUT.' \
         'For example, if lrange is 1 to 10 and the step is 0.1, LUT entries will be computed ' \
         'at L1 / L3 = 1, 1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.' \
@@ -167,7 +167,7 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     samples = traits.Int(argstr='-samples %d', units='NA',
         desc='The number of synthetic measurements to generate at each point in the LUT. The default is 2000.')
 
-    snr = traits.Float(argstr='-snr %d', units='NA',
+    snr = traits.Float(argstr='-snr %f', units='NA',
         desc='The signal to noise ratio of the unweighted (q = 0) measurements.'\
         'This should match the SNR (in white matter) of the images that the LUTs are used with.')
 
@@ -180,7 +180,7 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     inversion = traits.Int(argstr='-inversion %d', units='NA',
         desc='Index of the inversion to use. The default is 1 (linear single tensor inversion).')
 
-    trace = traits.Float(argstr='-trace %d', units='NA',
+    trace = traits.Float(argstr='-trace %s', units='NA',
         desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
 
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,

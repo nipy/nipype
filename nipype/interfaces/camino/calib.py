@@ -162,7 +162,10 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
                                      'to increase the size of the calibration data set until the error goes.')
     directmap = traits.Bool(argstr='-directmap', 
                             desc='Use direct mapping between the eigenvalues and the distribution parameters'\
-                                 'instead of the log of the eigenvalues.')                      
+                                 'instead of the log of the eigenvalues.')   
+    order = traits.Int(argstr='-order %d', units='NA',
+                       desc='The order of the polynomial fitting the surface. Order 1 is linear.'\
+                            'Order 2 (default) is quadratic.')
 
 class SFLUTGenOutputSpec(TraitedSpec):
     lut_one_fibre = File(exists=True, desc='PICo lut for one-fibre model')
@@ -217,12 +220,9 @@ class SFLUTGen(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['lut_one_fibre'] = os.path.abspath(self._gen_outfilename1())
-        outputs['lut_two_fibres'] = os.path.abspath(self._gen_outfilename2())
+        outputs['lut_one_fibre'] = self.inputs.outputstem + '_oneFibreSurfaceCoeffs.Bdouble'
+        outputs['lut_two_fibres'] = self.inputs.outputstem + '_twoFibreSurfaceCoeffs.Bdouble'
         return outputs
 
-    def _gen_outfilename1(self):
-        return self.inputs.outputstem + '_oneFibreSurfaceCoeffs.Bdouble'
-        
-    def _gen_outfilename2(self):
-        return self.inputs.outputstem + '_twoFibreSurfaceCoeffs.Bdouble'
+    def _gen_outfilename(self):
+        return '/dev/null'

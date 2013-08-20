@@ -20,7 +20,8 @@ class QBallMXInputSpec(StdOutCommandLineInputSpec):
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     order = traits.Int(argstr='-order %d', units='NA',
-                             desc='Specific to sh. Maximum order of the spherical harmonic series.')
+                             desc='Specific to sh. Maximum order of the spherical harmonic series.'\
+                                  'Default is 4.')
     rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
                              desc='Specific to rbf. Sets the number of radial basis functions to use.' \
                                   'The value specified must be present in the Pointsets directory.'\
@@ -33,7 +34,7 @@ class QBallMXInputSpec(StdOutCommandLineInputSpec):
                                   'The default value is 0.1309 (7.5 degrees).')                          
 
 class QBallMXOutputSpec(TraitedSpec):
-    qball_mat = File(exists=True, desc='Q-Ball reconstruction matrix')
+    qmat = File(exists=True, desc='Q-Ball reconstruction matrix')
 
 class QBallMX(StdOutCommandLine):
     """
@@ -48,7 +49,7 @@ class QBallMX(StdOutCommandLine):
     >>> qballmx = cam.QBallMX()
     >>> qballmx.inputs.scheme_file = 'A.scheme'
     >>> qballmx.inputs.basistype = 'sh' 
-    >>> qballmx.inputs.order = 4
+    >>> qballmx.inputs.order = 6
     >>> qballmx.run()            # doctest: +SKIP 
 
     Example 2
@@ -69,8 +70,9 @@ class QBallMX(StdOutCommandLine):
     >>> qballcoeffs = cam.LinRecon()
     >>> qballcoeffs.inputs.dwidata = 'SubjectA.Bfloat'    
     >>> qballcoeffs.inputs.scheme_file = 'A.scheme'
-    >>> qballcoeffs.inputs.qball_mat = 'A_qball_mat.Bdouble'
+    >>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
     >>> qballcoeffs.inputs.normalize = True
+    >>> qballcoeffs.inputs.bgmask = 'brain_mask.nii'
     >>> qballcoeffs.run()             # doctest: +SKIP
     """
     _cmd = 'qballmx'
@@ -79,12 +81,12 @@ class QBallMX(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['qball_mat'] = os.path.abspath(self._gen_outfilename())
+        outputs['qmat'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.scheme_file)
-        return name + '_qball_mat.Bdouble'
+        return name + '_qmat.Bdouble'
 
 
 
@@ -101,9 +103,10 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
     log = traits.Bool(argstr='-log', 
                       desc='Transform the log measurements rather than the' \
                            'measurements themselves')
+    bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
 
 class LinReconOutputSpec(TraitedSpec):
-    recon_params = File(exists=True, desc='Reconstruction parameters')
+    recon_data = File(exists=True, desc='Transformed data')
 
 class LinRecon(StdOutCommandLine):
     """
@@ -138,9 +141,9 @@ class LinRecon(StdOutCommandLine):
     Then run it over each voxel using LinRecon
     
     >>> qballcoeffs = cam.LinRecon()
-    >>> qballcoeffs.inputs.dwidata = 'SubjectA.Bfloat'    
+    >>> qballcoeffs.inputs.in_file = 'SubjectA.Bfloat'    
     >>> qballcoeffs.inputs.scheme_file = 'A.scheme'
-    >>> qballcoeffs.inputs.qball_mat = 'A_qball_mat_sh.Bdouble'
+    >>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
     >>> qballcoeffs.inputs.normalize = True
     >>> qballcoeffs.run()         # doctest: +SKIP
     """
@@ -150,17 +153,17 @@ class LinRecon(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['recon_params'] = os.path.abspath(self._gen_outfilename())
+        outputs['recon_data'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.scheme_file)
-        return name + '_recon_params.Bdouble'
+        return name + '_recondata.Bdouble'
 
 class SFPeaksInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
                    desc='Voxel-order data of spherical functions')
-    inputmodel = traits.Enum('sh', 'maxent', 'rbf', argstr='-inputmodel %s',
+    inputmodel = traits.Enum('sh', 'maxent', 'rbf', argstr='-inputmodel %s', mandatory=True,
                              desc='Type of functions input via in_file. Currently supported options are:'\
                                   '  sh - Spherical harmonic series. Specify the maximum order of the SH series' \
                                   '       with the "order" attribute if different from the default of 4.'\
@@ -171,6 +174,14 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                                   '           "mepointset" attribute was set in MESD.'\
                                   '  rbf - Sums of radial basis functions. Specify the pointset with the attribute'\
                                   '        "rbfpointset" if different from the default. See QBallMX.')
+    order = traits.Int(argstr='-order %d', units='NA',
+                       desc='Specific to sh. Maximum order of the spherical harmonic series.')
+    scheme_file = File(exists=True, argstr='%s',
+                       desc='Specific to maxent. Specifies the scheme file.')
+    rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
+                             desc='Specific to rbf. Sets the number of radial basis functions to use.' \
+                                  'The value specified must be present in the Pointsets directory.'\
+                                  'The default value is 246.')
     mepointset = traits.Int(argstr='-mepointset %d', units='NA',
                             desc='Use a set of directions other than those in the scheme file for the deconvolution'\
                                  'kernel. The number refers to the number of directions on the unit sphere.'\
