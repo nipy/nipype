@@ -1298,6 +1298,10 @@ class Node(WorkflowBase):
                 logger.debug(("%s found and can_resume is True or Node is a "
                               "MapNode - resuming execution") %
                              hashfile_unfinished)
+                if isinstance(self, MapNode):
+                    # remove old json files
+                    for filename in glob(os.path.join(outdir, '*.json')):
+                        os.unlink(filename)
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
