@@ -208,9 +208,16 @@ class WarpImageMultiTransform(ANTSCommand):
 
 
 class ApplyTransformsInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(
-        3, 2, argstr='--dimensionality %d', usedefault=True,
-        desc='image dimension (2 or 3)')
+    dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
+                            desc=('This option forces the image to be treated '
+                                  'as a specified-dimensional image. If not '
+                                  'specified, antsWarp tries to infer the '
+                                  'dimensionality from the input image.'))
+    input_image_type = traits.Enum(0, 1, 2, 3,
+                                   argstr='--input-image-type %d',
+                                   desc=('Option specifying the input image '
+                                         'type of scalar (default), vector, '
+                                         'tensor, or time series.'))
     input_image = File(argstr='--input %s', mandatory=True,
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'),
