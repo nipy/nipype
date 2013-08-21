@@ -194,6 +194,10 @@ def create_workflow(files,
     realign = Node(nipy.FmriRealign4d(), name='realign')
     realign.inputs.tr = TR
     realign.inputs.time_interp = True
+    # FIX  # dbg
+    # This double argsort is necessary to convert slice order to space order
+    # that's required by nipy realign currently. This will change in the next
+    # release of Nipy.
     realign.inputs.slice_order = np.argsort(np.argsort(slice_times)).tolist()
     if despike:
         wf.connect(despike, 'out_file', realign, 'in_file')
@@ -478,7 +482,7 @@ def create_workflow(files,
                                            'indices'],
                               output_names=['out_file'],
                               function=extract_subrois),
-                     iterfield=['timeseries_file'], overwrite=True,
+                     iterfield=['timeseries_file'],
                      name='getsubcortts')
     ts2txt.inputs.indices = dict(zip([8] + range(10, 14) + [17, 18, 26, 47] + \
                                      range(49, 55) + [58],
@@ -495,20 +499,21 @@ def create_workflow(files,
     datasink.inputs.regexp_substitutions = (r'(_.*)(\d+/)', r'run\2')
     wf.connect(despike, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
-    wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.@tsnr')
-    wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.@tsnr_mean')
+    wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
+    wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.tsnr.@mean')
     wf.connect(tsnr, 'stddev_file', datasink, 'resting.qa.@tsnr_stddev')
-    wf.connect(art, 'norm_files', datasink, 'resting.qa.@art')
-    wf.connect(art, 'outlier_files', datasink, 'resting.qa.@art_outlier_files')
+    wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
+    wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
+    wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
     wf.connect(mask, 'binary_file', datasink, 'resting.mask')
     wf.connect(masktransform, 'transformed_file',
                datasink, 'resting.mask.@transformed_file')
     wf.connect(register, 'out_reg_file', datasink, 'resting.registration')
     wf.connect(register, 'min_cost_file',
-               datasink, 'resting.registration.@mincost')
+               datasink, 'resting.qa.bbreg.@mincost')
     wf.connect(smooth, 'smoothed_file', datasink, 'resting.timeseries.fullpass')
     wf.connect(bandpass, 'out_file', datasink, 'resting.timeseries.bandpassed')
-    wf.connect(sample2mni, 'output_image', ts2txt, 'resting.timeseries.mni')
+    wf.connect(sample2mni, 'output_image', datasink, 'resting.timeseries.mni')
     wf.connect(createfilter1, 'out_files',
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
