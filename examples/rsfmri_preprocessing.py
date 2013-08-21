@@ -1,12 +1,14 @@
 import os
 
-from nipype import (afni, fsl, freesurfer, nipy, Function, DataSink)
+from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.fsl.utils import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
+from nipype.interfaces.c3 import C3dAffineTool
+from nipype.interfaces.utility import Merge
 
 import numpy as np
 
@@ -130,6 +132,27 @@ def extract_noise_components(realigned_file, mask_file, num_components=6):
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
     np.savetxt(components_file, v[:num_components, :].T)
     return components_file
+
+
+def extract_subrois(timeseries_file, label_file, indices):
+    import os
+    import nibabel as nb
+    import numpy as np
+    img = nb.load(timeseries_file)
+    data = img.get_data()
+    roiimg = nb.load(label_file)
+    rois = roiimg.get_data()
+    out_ts_file = os.path.join(os.getcwd(), 'timeseries.txt')
+    with open(out_ts_file, 'wt') as fp:
+        for fsindex, cmaindex  in sorted(indices.items()):
+            ijk = np.nonzero(rois == cmaindex)
+            ts = data[ijk]
+            print fsindex, cmaindex, ts.shape
+            for i0, row in enumerate(ts):
+                fp.writelines('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
+                                               ijk[1][i0], ijk[2][i0]) +
+                              ','.join(['%.10f' % val for val in row]))
+    return out_ts_file
 
 
 def create_workflow(files,
@@ -355,6 +378,10 @@ def create_workflow(files,
                                               default_color_table=True),
                           iterfield=['in_file'],
                           name='aparc_ts')
+    sampleaparc.inputs.segment_id = [8] + range(10, 14) + [17, 18, 26, 47] + \
+                                    range(49, 55) + [58] + range(1001, 1036) + \
+                                    range(2001, 2036)
+
     wf.connect(aparctransform, 'transformed_file',
                sampleaparc, 'segmentation_file')
     wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
@@ -380,6 +407,109 @@ def create_workflow(files,
     samplerrh.set_input('hemi', 'rh')
     wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
+
+    # antsRegistration
+    reg = Node(ants.Registration(),
+                name='antsRegister')
+    #its=10000x111110x11110
+    reg.inputs.output_transform_prefix = "output_"
+    reg.inputs.transforms = ['Translation', 'Rigid', 'Affine', 'SyN']
+    reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.1,), (0.2, 3.0, 0.0)]
+    #reg.inputs.number_of_iterations = [[10000, 111110, 11110]]*3 + [[100, 50, 30]]
+    reg.inputs.number_of_iterations = [[100, 100, 100]]*3 + [[100, 20, 10]]
+    reg.inputs.dimension = 3
+    reg.inputs.write_composite_transform = True
+    reg.inputs.collapse_output_transforms = False
+    reg.inputs.metric = ['Mattes']*3 + [['Mattes', 'CC']]
+    reg.inputs.metric_weight = [1]*3 + [[0.5, 0.5]]
+    reg.inputs.radius_or_number_of_bins = [32]*3 + [[32, 4]]
+    reg.inputs.sampling_strategy = ['Regular']*3 + [[None, None]]
+    reg.inputs.sampling_percentage = [0.3]*3 +[[None, None]]
+    reg.inputs.convergence_threshold = [1.e-8]*3 + [-0.01]
+    reg.inputs.convergence_window_size = [20]*3 + [5]
+    reg.inputs.smoothing_sigmas = [[4,2,1]]*3 + [[1,0.5,0]]
+    reg.inputs.sigma_units = ['vox'] * 4
+    reg.inputs.shrink_factors = [[6,4,2]] + [[3,2,1]]*2 + [[4,2,1]]
+    reg.inputs.use_estimate_learning_rate_once = [True]*4
+    reg.inputs.use_histogram_matching = [False]*3 + [True] # This is the default
+    reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
+    reg.inputs.fixed_image = \
+        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    reg.inputs.num_threads = 4
+    reg.inputs.terminal_output = 'file'
+
+    convert = Node(freesurfer.MRIConvert(out_type='niigz'), name='convert2nii')
+    wf.connect(fssource, 'T1', convert, 'in_file')
+    maskT1 = Node(fsl.BinaryMaths(operation='mul'), name='maskT1')
+    wf.connect(mask, 'binary_file', maskT1, 'operand_file')
+    wf.connect(convert, 'out_file', maskT1, 'in_file')
+    wf.connect(maskT1, 'out_file', reg, 'moving_image')
+
+    convert2itk = MapNode(C3dAffineTool(),
+                          iterfield=['transform_file', 'source_file'],
+                          name='convert2itk')
+    convert2itk.inputs.fsl2ras = True
+    convert2itk.inputs.itk_transform = True
+    wf.connect(register, 'out_fsl_file', convert2itk, 'transform_file')
+    if fieldmap_images:
+        wf.connect(fieldmap, 'exf_mask', convert2itk, 'source_file')
+    else:
+        wf.connect(calc_median, 'median_file', convert2itk, 'source_file')
+    wf.connect(convert, 'out_file', convert2itk, 'reference_file')
+
+    pickfirst = lambda x : x[0]
+    merge = MapNode(Merge(2), iterfield=['in2'], name='mergexfm')
+    wf.connect(convert2itk, 'itk_transform', merge, 'in2')
+    wf.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+
+    sample2mni = MapNode(ants.ApplyTransforms(),
+                         iterfield=['input_image', 'transforms'],
+                         name='sample2mni')
+    sample2mni.inputs.input_image_type = 3
+    sample2mni.inputs.interpolation = 'BSpline'
+    sample2mni.inputs.invert_transform_flags = [False, False]
+    sample2mni.inputs.reference_image = \
+        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    sample2mni.inputs.terminal_output = 'file'
+
+    wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
+    wf.connect(merge, 'out', sample2mni, 'transforms')
+
+    '''
+    sample2mni = MapNode(freesurfer.ApplyVolTransform(),
+                         iterfield=['source_file'],
+                         name='sample2mni')
+    sample2mni.inputs.m3z_file = 'talairach.m3z'
+    sample2mni.inputs.target_file = os.path.join(os.environ['FREESURFER_HOME'],
+                                                 'subjects', 'fsaverage',
+                                                 'mri', 'aparc+aseg.mgz')
+    sample2mni.inputs.transformed_file = 'funcInMNI.nii'
+    sample2mni.inputs.interp = 'cubic'
+    wf.connect(bandpass, 'out_file', sample2mni, 'source_file')
+    wf.connect(register, 'out_reg_file', sample2mni, 'reg_file')
+    '''
+
+    ts2txt = MapNode(Function(input_names=['timeseries_file', 'label_file',
+                                           'indices'],
+                              output_names=['subcort_ts.txt'],
+                              function=extract_subrois),
+                     iterfield=['timeseries_file'], overwrite=True,
+                     name='getsubcortts')
+    '''
+    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] + \
+                            range(49, 55) + [58]
+    ts2txt.inputs.mask_file = os.path.join(os.environ['FREESURFER_HOME'],
+                                           'subjects', 'fsaverage',
+                                           'mri', 'aparc+aseg.mgz')
+    '''
+    ts2txt.inputs.indices = dict(zip([8] + range(10, 14) + [17, 18, 26, 47] + \
+                                     range(49, 55) + [58],
+                                     [39, 60, 37, 58, 56, 48, 32, 30,
+                                      38, 59, 36, 57, 55, 47, 31, 23]))
+    ts2txt.inputs.label_file = \
+        os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
+                         '_2mm.nii.gz'))
+    wf.connect(sample2mni, 'output_image', ts2txt, 'timeseries_file')
 
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
