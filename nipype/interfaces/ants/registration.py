@@ -283,7 +283,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   traits.Float())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
-    smoothing_sigmas = traits.List(traits.List(traits.Int()), mandatory=True)
+    smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
     sigma_units = traits.List(traits.Enum('mm', 'vox'),
                               requires=['smoothing_sigmas'],
                               desc="units for smoothing sigmas", mandatory=True)
@@ -370,7 +370,7 @@ class Registration(ANTSCommand):
     >>> reg3.cmdline
     'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1x0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2x1x0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
-    # Test collapse transforms flag
+    >>> # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
@@ -378,7 +378,7 @@ class Registration(ANTSCommand):
     {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
     >>> reg4.aggregate_outputs() #doctest: +SKIP
 
-    # Test multiple metrics per stage
+    >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
     >>> reg5.inputs.metric = ['CC', ['CC', 'Mattes']]
     >>> reg5.inputs.metric_weight = [1, [.5]*2]
