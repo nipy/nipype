@@ -1211,7 +1211,7 @@ class Node(WorkflowBase):
         outdir = self.output_dir()
         hashfiles = glob(os.path.join(outdir, '*.json'))
         if len(hashfiles) > 1:
-            warn('Removing multiple hashfiles and forcing node to rerun')
+            logger.info('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
                 os.unlink(hashfile)
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
