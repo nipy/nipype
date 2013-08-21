@@ -701,18 +701,28 @@ def safe_encode(x):
         return pm.Literal(int(x), pm.XSD['integer'])
     if isinstance(x, (float,)):
         return pm.Literal(x, pm.XSD['float'])
+    if isinstance(x, dict):
+        outdict = {}
+        for key, value in x.items():
+            encoded_value = safe_encode(value)
+            if isinstance(encoded_value, (pm.Literal,)):
+                outdict[key] = encoded_value.json_representation()
+            else:
+                outdict[key] = encoded_value
+        return pm.Literal(json.dumps(outdict), pm.XSD['string'])
+    if isinstance(x, list):
+        outlist = []
+        for value in x:
+            encoded_value = safe_encode(value)
+            if isinstance(encoded_value, (pm.Literal,)):
+                outlist.append(encoded_value.json_representation())
+            else:
+                outlist.append(encoded_value)
+        return pm.Literal(json.dumps(outlist), pm.XSD['string'])
     try:
-        if isinstance(x, dict):
-            outdict = {}
-            for key, value in x.items():
-                outdict[key] = safe_encode(value)
-            return pm.Literal(json.dumps(outdict), pm.XSD['string'])
-        if isinstance(x, list):
-            outlist = [safe_encode(value) for value in x]
-            return pm.Literal(json.dumps(outlist), pm.XSD['string'])
-        return pm.Literal(dumps(x),
-                          nipype['pickle'])
-    except TypeError:
+        return pm.Literal(dumps(x), nipype['pickle'])
+    except TypeError, e:
+        iflogger.info(e)
         return pm.Literal("Could not encode", pm.XSD['string'])
 
 
