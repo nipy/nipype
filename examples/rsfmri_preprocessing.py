@@ -7,7 +7,6 @@ from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.fsl.utils import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
-
 import numpy as np
 
 
@@ -79,6 +78,7 @@ def build_filter1(motion_params, comp_norm, outliers):
     """Builds a regressor set comprisong motion parameters, composite norm and
     outliers
     """
+
     from nipype.utils.filemanip import filename_to_list
     import numpy as np
     import os
@@ -370,7 +370,8 @@ def create_workflow(files,
 if __name__ == "__main__":
     import argparse
     from socket import getfqdn
-    if not 'ba3.mit.edu' in getfqdn():
+    from datetime import date
+    if not 'mit.edu' in getfqdn():
         #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
         #niifile = '/software/data/sad_resting/resting.nii.gz'
         #subject_id = 'SAD_024'
@@ -381,13 +382,14 @@ if __name__ == "__main__":
                            '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
         sink = os.path.join(os.getcwd(), 'output')
     else:
+	os.environ['SUBJECTS_DIR']='/mindhive/xnat/surfaces/GATES/'
         #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
         #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
         dcmfile = '/mindhive/xnat/data/GATES/308/dicoms/562000-34-1.dcm'
         niifile = '/mindhive/xnat/data/GATES/308/niftis/Resting1.nii'
         fieldmap_images = ['/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting1.nii',
                            '/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting2.nii']
-        sink = os.path.abspath('/mindhive/scratch/Wed/cdla/resting/sink/')
+        sink = os.path.join('/mindhive/scratch/',date.today().strftime('%a'),'cdla','restingwf','output')
     echo_time = 0.7
     subject_id = '308'
     TR, slice_times, slice_thickness = get_info(dcmfile)
