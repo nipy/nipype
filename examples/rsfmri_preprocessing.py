@@ -508,6 +508,7 @@ def create_workflow(files,
                datasink, 'resting.registration.@mincost')
     wf.connect(smooth, 'smoothed_file', datasink, 'resting.timeseries.fullpass')
     wf.connect(bandpass, 'out_file', datasink, 'resting.timeseries.bandpassed')
+    wf.connect(sample2mni, 'output_image', ts2txt, 'resting.timeseries.mni')
     wf.connect(createfilter1, 'out_files',
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
