@@ -147,7 +147,6 @@ def extract_subrois(timeseries_file, label_file, indices):
         for fsindex, cmaindex  in sorted(indices.items()):
             ijk = np.nonzero(rois == cmaindex)
             ts = data[ijk]
-            print fsindex, cmaindex, ts.shape
             for i0, row in enumerate(ts):
                 fp.writelines('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
                                                ijk[1][i0], ijk[2][i0]) +
@@ -475,33 +474,12 @@ def create_workflow(files,
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
 
-    '''
-    sample2mni = MapNode(freesurfer.ApplyVolTransform(),
-                         iterfield=['source_file'],
-                         name='sample2mni')
-    sample2mni.inputs.m3z_file = 'talairach.m3z'
-    sample2mni.inputs.target_file = os.path.join(os.environ['FREESURFER_HOME'],
-                                                 'subjects', 'fsaverage',
-                                                 'mri', 'aparc+aseg.mgz')
-    sample2mni.inputs.transformed_file = 'funcInMNI.nii'
-    sample2mni.inputs.interp = 'cubic'
-    wf.connect(bandpass, 'out_file', sample2mni, 'source_file')
-    wf.connect(register, 'out_reg_file', sample2mni, 'reg_file')
-    '''
-
     ts2txt = MapNode(Function(input_names=['timeseries_file', 'label_file',
                                            'indices'],
-                              output_names=['subcort_ts.txt'],
+                              output_names=['out_file'],
                               function=extract_subrois),
                      iterfield=['timeseries_file'], overwrite=True,
                      name='getsubcortts')
-    '''
-    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] + \
-                            range(49, 55) + [58]
-    ts2txt.inputs.mask_file = os.path.join(os.environ['FREESURFER_HOME'],
-                                           'subjects', 'fsaverage',
-                                           'mri', 'aparc+aseg.mgz')
-    '''
     ts2txt.inputs.indices = dict(zip([8] + range(10, 14) + [17, 18, 26, 47] + \
                                      range(49, 55) + [58],
                                      [39, 60, 37, 58, 56, 48, 32, 30,
@@ -538,6 +516,13 @@ def create_workflow(files,
                datasink, 'resting.parcellations.aparc')
     wf.connect(sampleaparc, 'avgwf_txt_file',
                datasink, 'resting.parcellations.aparc.@avgwf')
+    wf.connect(samplerlh, 'out_file',
+               datasink, 'resting.parcellations.grayo.@left')
+    wf.connect(samplerrh, 'out_file',
+               datasink, 'resting.parcellations.grayo.@right')
+    wf.connect(ts2txt, 'out_file',
+               datasink, 'resting.parcellations.grayo.@subcortical')
+
     return wf
 
 if __name__ == "__main__":
@@ -587,10 +572,6 @@ if __name__ == "__main__":
     wf.run()  # (plugin='MultiProc')
 
 '''
-#convert to grayordinates
-def to_grayordinates():
-    return grayordinates
-
 #compute similarity matrix and partial correlation
 def compute_similarity():
     return matrix
