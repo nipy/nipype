@@ -525,8 +525,8 @@ class FuzzyOverlap(BaseInterface):
     Evaluation and Validation in Medical Image Analysis, IEEE Trans. Med.
     Ima. 25(11),pp 1451-1461, Nov. 2006.
 
-    reference.nii and test.nii are lists of 2/3D images, each element on the
-    list containing one volume fraction map of a class in a fuzzy partition
+    in_ref and in_tst are lists of 2/3D images, each element on the list
+    containing one volume fraction map of a class in a fuzzy partition
     of the domain.
 
     Example
