@@ -12,6 +12,10 @@ This workflow makes use of:
 - FSL
 - NiPy
 
+For example:
+
+python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii -s subj001 -n 2 --despike -o output -p "plugin_args=dict(plugin='PBS', plugin_args=dict(qsub_args='-q many'))"
+
 """
 import os
 
@@ -256,12 +260,12 @@ def create_workflow(files,
 
     # Run AFNI's despike. This is always run, however, whether this is fed to
     # realign depends on the input configuration
-    despike = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
+    despiker = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
                       iterfield=['in_file'],
                       name='despike')
-    #despike.plugin_args = {'qsub_args': '-l nodes=1:ppn='}
+    #despiker.plugin_args = {'qsub_args': '-l nodes=1:ppn='}
 
-    wf.connect(remove_vol, 'roi_file', despike, 'in_file')
+    wf.connect(remove_vol, 'roi_file', despiker, 'in_file')
 
     # Run Nipy joint slice timing and realignment algorithm
     realign = Node(nipy.FmriRealign4d(), name='realign')
@@ -273,7 +277,7 @@ def create_workflow(files,
     # release of Nipy.
     realign.inputs.slice_order = np.argsort(np.argsort(slice_times)).tolist()
     if despike:
-        wf.connect(despike, 'out_file', realign, 'in_file')
+        wf.connect(despiker, 'out_file', realign, 'in_file')
     else:
         wf.connect(remove_vol, 'roi_file', realign, 'in_file')
 
@@ -593,7 +597,7 @@ def create_workflow(files,
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
     datasink.inputs.regexp_substitutions = (r'(_.*)(\d+/)', r'run\2')
-    wf.connect(despike, 'out_file', datasink, 'resting.qa.despike')
+    wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
     wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.tsnr.@mean')
@@ -633,50 +637,70 @@ def create_workflow(files,
     return wf
 
 if __name__ == "__main__":
-    import argparse
-    from socket import getfqdn
-    if not 'ba3.mit.edu' in getfqdn():
-        #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
-        #niifile = '/software/data/sad_resting/resting.nii.gz'
-        #subject_id = 'SAD_024'
-        dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
-        niifile = '/software/data/sad_resting/allyson/Resting1.nii'
-        fieldmap_images = []
-        fieldmap_images = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
-                           '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
-        sink = os.path.join(os.getcwd(), 'output')
-    else:
-        #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
-        #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
-        dcmfile = '/mindhive/xnat/data/GATES/308/dicoms/562000-34-1.dcm'
-        niifile = '/mindhive/xnat/data/GATES/308/niftis/Resting1.nii'
-        fieldmap_images = ['/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting1.nii',
-                           '/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting2.nii']
-        sink = os.path.abspath('/mindhive/scratch/Wed/cdla/resting/sink/')
-    echo_time = 0.7
-    subject_id = '308'
-    TR, slice_times, slice_thickness = get_info(dcmfile)
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("-d", "--dicom_file", dest="dicom_file",
+                        help="an example dicom file from the resting series")
+    parser.add_argument("-f", "--files", dest="files", nargs="+",
+                        help="4d nifti files for resting state",
+                        required=True)
+    parser.add_argument("-s", "--subject_id", dest="subject_id",
+                        help="FreeSurfer subject id", required=True)
+    parser.add_argument("-n", "--n_vol", dest="n_vol", default=0, type=int,
+                        help="Volumes to skip at the beginning")
+    parser.add_argument("--despike", dest="despike", default=False,
+                        action="store_true", help="Use despiked data")
+    parser.add_argument("--TR", dest="TR", default=None,
+                        help="TR if dicom not provided")
+    parser.add_argument("--slice_times", dest="slice_times", nargs="+",
+                        help="Slice times")
+    parser.add_argument("-l", "--lowpass_freq", dest="lowpass_freq",
+                        default=-1, help="Low pass frequency (Hz)")
+    parser.add_argument("-u", "--highpass_freq", dest="highpass_freq",
+                        default=-1, help="High pass frequency (Hz)")
+    parser.add_argument("-o", "--output_dir", dest="sink",
+                        help="Output directory base")
+    parser.add_argument("-w", "--work_dir", dest="work_dir",
+                        help="Output directory base")
+    parser.add_argument("-p", "--plugin_args", dest="plugin_args",
+                        default='plugin_args=dict()',
+                        help="Plugin args")
+    args = parser.parse_args()
 
-    wf = create_workflow(niifile,
-                         subject_id,
-                         n_vol=2,
-                         despike=True,
+    TR = args.TR
+    slice_times = args.slice_times
+    slice_thickness = None
+    if args.dicom_file:
+        TR, slice_times, slice_thickness = get_info(args.dicom_file)
+
+    if slice_thickness is None:
+        from nibabel import load
+        img = load(args.files[0])
+        slice_thickness = max(img.get_header().get_zooms()[:3])
+    print TR, slice_times, slice_thickness
+
+    wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+                         subject_id=args.subject_id,
+                         n_vol=args.n_vol,
+                         despike=args.despike,
                          TR=TR,
                          slice_times=slice_times,
-                         slice_thickness=np.round(slice_thickness),
-                         lowpass_freq=.08,
-                         highpass_freq=.9,
-                         sink_directory=sink,
-                         FM_TEdiff=2.46,
-                         FM_sigma=2,
-                         FM_echo_spacing=.7,
-                         fieldmap_images=fieldmap_images
-                         )
+                         slice_thickness=slice_thickness,
+                         lowpass_freq=args.lowpass_freq,
+                         highpass_freq=args.highpass_freq,
+                         sink_directory=os.path.abspath(args.sink))
+
+    if args.work_dir:
+        work_dir = os.path.abspath(args.workdir)
+    else:
+        work_dir = os.getcwd()
 
     wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
-    wf.base_dir = os.getcwd()
+    wf.base_dir = work_dir
     wf.write_graph(graph2use='flat')
-    wf.run()  # (plugin='MultiProc')
+    exec args.plugin_args
+    print plugin_args
+    wf.run(**plugin_args)
 
 '''
 #compute similarity matrix and partial correlation
