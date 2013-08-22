@@ -602,13 +602,19 @@ def create_workflow(files,
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
     wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.tsnr.@mean')
     wf.connect(tsnr, 'stddev_file', datasink, 'resting.qa.@tsnr_stddev')
+    if fieldmap_images:
+        wf.connect(fieldmap, 'exf_mask', datasink, 'resting.reference')
+    else:
+        wf.connect(calc_median, 'median_file', datasink, 'resting.reference')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
     wf.connect(mask, 'binary_file', datasink, 'resting.mask')
     wf.connect(masktransform, 'transformed_file',
                datasink, 'resting.mask.@transformed_file')
-    wf.connect(register, 'out_reg_file', datasink, 'resting.registration')
+    wf.connect(register, 'out_reg_file', datasink, 'resting.registration.bbreg')
+    wf.connect(reg, ('composite_transform', pickfirst),
+               datasink, 'resting.registration.ants')
     wf.connect(register, 'min_cost_file',
                datasink, 'resting.qa.bbreg.@mincost')
     wf.connect(smooth, 'smoothed_file', datasink, 'resting.timeseries.fullpass')
