@@ -383,7 +383,17 @@ class FEAT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+        is_ica = False
+        with open(self.inputs.fsf_file, 'rt') as fp:
+            text = fp.read()
+            if "set fmri(inmelodic) 1" in text:
+                is_ica = True
+
+        if is_ica:
+            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
+        else:
+            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+
         return outputs
 
 
@@ -1549,7 +1559,7 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     num_perm = traits.Int(
         argstr='-n %d', desc='number of permutations (default 5000, set to 0 for exhaustive)')
     seed = traits.Int(
-        argstr='--seed %d', desc='specific integer seed for random number generator')
+        argstr='--seed=%d', desc='specific integer seed for random number generator')
     var_smooth = traits.Int(
         argstr='-v %d', desc='use variance smoothing (std is in mm)')
     c_thresh = traits.Float(
@@ -1561,15 +1571,11 @@ class RandomiseInputSpec(FSLCommandInputSpec):
     f_cm_thresh = traits.Float(
         argstr='-S %.2f', desc='carry out f cluster-mass thresholding')
     tfce_H = traits.Float(
-        argstr='--tfce_H %.2f', desc='TFCE height parameter (default=2)')
+        argstr='--tfce_H=%.2f', desc='TFCE height parameter (default=2)')
     tfce_E = traits.Float(
-        argstr='--tfce_E %.2f', desc='TFCE extent parameter (default=0.5)')
+        argstr='--tfce_E=%.2f', desc='TFCE extent parameter (default=0.5)')
     tfce_C = traits.Float(
-        argstr='--tfce_C %.2f', desc='TFCE connectivity (6 or 26; default=6)')
-    vxl = traits.List(traits.Int, argstr='--vxl %d', desc='list of numbers indicating voxelwise EVs' +
-                      'position in the design matrix (list order corresponds to files in vxf option)')
-    vxf = traits.List(traits.Int, argstr='--vxf %d', desc='list of 4D images containing voxelwise EVs' +
-                      '(list order corresponds to numbers in vxl option)')
+        argstr='--tfce_C=%.2f', desc='TFCE connectivity (6 or 26; default=6)')
 
 
 class RandomiseOutputSpec(TraitedSpec):
@@ -1655,7 +1661,7 @@ class GLMInputSpec(FSLCommandInputSpec):
                                                         + ' contrasts'))
     mask = File(exists=True, argstr='-m %s', desc=('mask image file name if'
                                                    + ' input is image'))
-    dof = traits.Int(argstr='--dof %d', desc=('set degrees of freedom'
+    dof = traits.Int(argstr='--dof=%d', desc=('set degrees of freedom'
                                               + ' explicitly'))
     des_norm = traits.Bool(argstr='--des_norm', desc=('switch on normalization'
                                                       + ' of the design matrix'
