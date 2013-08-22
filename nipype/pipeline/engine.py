@@ -1205,7 +1205,7 @@ class Node(WorkflowBase):
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
-        hashfiles = glob(os.path.join(outdir, '*.json'))
+        hashfiles = glob(os.path.join(outdir, '_0x*.json'))
         if len(hashfiles) > 1:
             warn('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
@@ -1305,7 +1305,7 @@ class Node(WorkflowBase):
                              hashfile_unfinished)
                 if isinstance(self, MapNode):
                     # remove old json files
-                    for filename in glob(os.path.join(outdir, '*.json')):
+                    for filename in glob(os.path.join(outdir, '_0x*.json')):
                         os.unlink(filename)
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
