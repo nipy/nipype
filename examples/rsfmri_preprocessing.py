@@ -225,6 +225,24 @@ def extract_subrois(timeseries_file, label_file, indices):
     return out_ts_file
 
 
+def combine_hemi(left, right):
+    """Combine left and right hemisphere time series into a single text file
+    """
+    import os
+    from nibabel import load
+    import numpy as np
+    lh_data = load(left).get_data()
+    rh_data = load(right).get_data()
+
+    indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
+                         2000000 + np.arange(0, rh_data.shape[0])[:, None]))
+    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
+                                              rh_data.squeeze()))))
+    filename = 'combined_surf.txt'
+    np.savetxt(filename, all_data,
+               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] -1)))
+    return os.path.abspath(filename)
+
 """
 Creates the main preprocessing workflow
 """
@@ -485,7 +503,7 @@ def create_workflow(files,
     samplerlh.inputs.sampling_range = (0.1, 0.9, 0.1)
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
-    samplerlh.inputs.cortex_mask = True
+    #samplerlh.inputs.cortex_mask = True
     samplerlh.inputs.target_subject = target_subject
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
@@ -499,6 +517,15 @@ def create_workflow(files,
     samplerrh.set_input('hemi', 'rh')
     wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
+
+    # Combine left and right hemisphere to text file
+    combiner = MapNode(Function(input_names=['left', 'right'],
+                                output_names=['out_file'],
+                                function=combine_hemi),
+                       iterfield=['left', 'right'],
+                       name="combiner")
+    wf.connect(samplerlh, 'out_file', combiner, 'left')
+    wf.connect(samplerrh, 'out_file', combiner, 'right')
 
     # Compute registration between the subject's structural and MNI template
     # This is currently set to perform a very quick registration. However, the
@@ -628,10 +655,8 @@ def create_workflow(files,
                datasink, 'resting.parcellations.aparc')
     wf.connect(sampleaparc, 'avgwf_txt_file',
                datasink, 'resting.parcellations.aparc.@avgwf')
-    wf.connect(samplerlh, 'out_file',
-               datasink, 'resting.parcellations.grayo.@left')
-    wf.connect(samplerrh, 'out_file',
-               datasink, 'resting.parcellations.grayo.@right')
+    wf.connect(combiner, 'out_file',
+               datasink, 'resting.parcellations.grayo.@surface')
     wf.connect(ts2txt, 'out_file',
                datasink, 'resting.parcellations.grayo.@subcortical')
     return wf
