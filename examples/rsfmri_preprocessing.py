@@ -27,7 +27,8 @@ from nipype.algorithms.misc import TSNR
 from nipype.interfaces.fsl.utils import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
-from nipype.interfaces.utility import Merge
+from nipype.interfaces.utility import Merge, IdentityInterface
+from nipype.utils.filemanip import filename_to_list
 
 import numpy as np
 
@@ -148,11 +149,10 @@ def build_filter1(motion_params, comp_norm, outliers):
             outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
         except IOError:
             outlier_val = np.empty((0))
-        if outlier_val.shape[0] != 0:
-            for index in outlier_val:
-                outlier_vector = np.zeros((out_params.shape[0], 1))
-                outlier_vector[index] = 1
-                out_params = np.hstack((out_params, outlier_vector))
+        for index in np.atleast_1d(outlier_val):
+            outlier_vector = np.zeros((out_params.shape[0], 1))
+            outlier_vector[index] = 1
+            out_params = np.hstack((out_params, outlier_vector))
         filename = os.path.join(os.getcwd(), "filter_regressor%02d.txt" % idx)
         np.savetxt(filename, out_params, fmt="%.10f")
         out_files.append(filename)
@@ -213,7 +213,7 @@ def extract_subrois(timeseries_file, label_file, indices):
     data = img.get_data()
     roiimg = nb.load(label_file)
     rois = roiimg.get_data()
-    out_ts_file = os.path.join(os.getcwd(), 'timeseries.txt')
+    out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
     with open(out_ts_file, 'wt') as fp:
         for fsindex, cmaindex in sorted(indices.items()):
             ijk = np.nonzero(rois == cmaindex)
@@ -266,9 +266,10 @@ def create_workflow(files,
                     FM_TEdiff=2.46,
                     FM_sigma=2,
                     FM_echo_spacing=.7,
-                    target_subject='fsaverage4'):
+                    target_subject=['fsaverage3', 'fsaverage4'],
+                    name='resting'):
 
-    wf = Workflow(name='resting')
+    wf = Workflow(name=name)
 
     # Skip starting volumes
     remove_vol = MapNode(fsl.ExtractROI(t_min=n_vol, t_size=-1),
@@ -383,6 +384,7 @@ def create_workflow(files,
                                         zintensity_threshold=3,
                                         parameter_source='NiPy',
                                         bound_by_brainmask=True,
+                                        save_plot=False,
                                         mask_type='file'),
                name="art")
     if fieldmap_images:
@@ -494,8 +496,12 @@ def create_workflow(files,
                sampleaparc, 'segmentation_file')
     wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
 
+                  
     # Sample the time series onto the surface of the target surface. Performs
     # sampling into left and right hemisphere
+    target = Node(IdentityInterface(fields=['target_subject']), name='target')
+    target.iterables = ('target_subject', filename_to_list(target_subject))
+    
     samplerlh = MapNode(freesurfer.SampleToSurface(),
                         iterfield=['source_file'],
                         name='sampler_lh')
@@ -504,7 +510,6 @@ def create_workflow(files,
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
     #samplerlh.inputs.cortex_mask = True
-    samplerlh.inputs.target_subject = target_subject
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
 
@@ -513,10 +518,12 @@ def create_workflow(files,
     samplerlh.inputs.hemi = 'lh'
     wf.connect(bandpass, 'out_file', samplerlh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerlh, 'reg_file')
-
+    wf.connect(target, 'target_subject', samplerlh, 'target_subject')
+    
     samplerrh.set_input('hemi', 'rh')
     wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
+    wf.connect(target, 'target_subject', samplerrh, 'target_subject')
 
     # Combine left and right hemisphere to text file
     combiner = MapNode(Function(input_names=['left', 'right'],
@@ -560,6 +567,7 @@ def create_workflow(files,
         os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
     reg.inputs.num_threads = 4
     reg.inputs.terminal_output = 'file'
+    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
 
     # Convert T1.mgz to nifti for using with ANTS
     convert = Node(freesurfer.MRIConvert(out_type='niigz'), name='convert2nii')
@@ -623,7 +631,8 @@ def create_workflow(files,
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    datasink.inputs.regexp_substitutions = (r'(_.*)(\d+/)', r'run\2')
+    datasink.inputs.substitutions = [('_target_subject_', '')]
+    datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2') #(r'(_.*)(\d+/)', r'run\2')
     wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
@@ -716,13 +725,13 @@ if __name__ == "__main__":
                          sink_directory=os.path.abspath(args.sink))
 
     if args.work_dir:
-        work_dir = os.path.abspath(args.workdir)
+        work_dir = os.path.abspath(args.work_dir)
     else:
         work_dir = os.getcwd()
 
     wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
     wf.base_dir = work_dir
-    wf.write_graph(graph2use='flat')
+    #wf.write_graph(graph2use='flat')
     exec args.plugin_args
     print plugin_args
     wf.run(**plugin_args)
