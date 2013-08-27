@@ -267,8 +267,7 @@ def create_workflow(files,
                     FM_TEdiff=2.46,
                     FM_sigma=2,
                     FM_echo_spacing=.7,
-                    #target_subject=['fsaverage3', 'fsaverage4'],
-                    target_subject=['fsaverage4'],
+                    target_subject=['fsaverage3', 'fsaverage4'],
 		    name='resting'):
 
     wf = Workflow(name=name)
@@ -564,9 +563,8 @@ def create_workflow(files,
     reg.inputs.use_estimate_learning_rate_once = [True] * 4
     reg.inputs.use_histogram_matching = [False] * 3 + [True]
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
-    #reg.inputs.fixed_image = \
-    #    os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
-    reg.inputs.fixed_image='/software/brain_templates/OASIS-TRT-20_template_to_MNI152_2mm.nii.gz'
+    reg.inputs.fixed_image = \
+        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
     reg.inputs.num_threads = 4
     reg.inputs.terminal_output = 'file'
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
@@ -607,9 +605,8 @@ def create_workflow(files,
     sample2mni.inputs.input_image_type = 3
     sample2mni.inputs.interpolation = 'BSpline'
     sample2mni.inputs.invert_transform_flags = [False, False]
-    #sample2mni.inputs.reference_image = \
-    #    os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
-    sample2mni.inputs.reference_image='/software/brain_templates/OASIS-TRT-20_template_to_MNI152_2mm.nii.gz'
+    sample2mni.inputs.reference_image = \
+        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
     sample2mni.inputs.terminal_output = 'file'
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
@@ -625,10 +622,9 @@ def create_workflow(files,
                                      range(49, 55) + [58],
                                      [39, 60, 37, 58, 56, 48, 32, 30,
                                       38, 59, 36, 57, 55, 47, 31, 23]))
-    #ts2txt.inputs.label_file = \
-    #    os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
-    #                     '_2mm.nii.gz'))
-    ts2txt.inputs.label_file = '/software/brain_templates/OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz'
+    ts2txt.inputs.label_file = \
+        os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
+                         '_2mm.nii.gz'))
     wf.connect(sample2mni, 'output_image', ts2txt, 'timeseries_file')
 
     # Save the relevant data into an output directory
