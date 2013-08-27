@@ -12,6 +12,10 @@ This workflow makes use of:
 - FSL
 - NiPy
 
+For example:
+
+python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii -s subj001 -n 2 --despike -o output -p "plugin_args=dict(plugin='PBS', plugin_args=dict(qsub_args='-q many'))"
+
 """
 import os
 
@@ -22,12 +26,10 @@ from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.fsl.utils import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
-
-
 from nipype.interfaces.c3 import C3dAffineTool
-from nipype.interfaces.utility import Merge
+from nipype.interfaces.utility import Merge, IdentityInterface
+from nipype.utils.filemanip import filename_to_list
 
->>>>>>> 6fc397728989672a44fa5d890abf349bdfce6c89
 import numpy as np
 
 
@@ -135,7 +137,6 @@ def build_filter1(motion_params, comp_norm, outliers):
     components_file: a text file containing all the regressors
 
     """
-
     from nipype.utils.filemanip import filename_to_list
     import numpy as np
     import os
@@ -148,11 +149,10 @@ def build_filter1(motion_params, comp_norm, outliers):
             outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
         except IOError:
             outlier_val = np.empty((0))
-        if outlier_val.shape[0] != 0:
-            for index in outlier_val:
-                outlier_vector = np.zeros((out_params.shape[0], 1))
-                outlier_vector[index] = 1
-                out_params = np.hstack((out_params, outlier_vector))
+        for index in np.atleast_1d(outlier_val):
+            outlier_vector = np.zeros((out_params.shape[0], 1))
+            outlier_vector[index] = 1
+            out_params = np.hstack((out_params, outlier_vector))
         filename = os.path.join(os.getcwd(), "filter_regressor%02d.txt" % idx)
         np.savetxt(filename, out_params, fmt="%.10f")
         out_files.append(filename)
@@ -213,7 +213,7 @@ def extract_subrois(timeseries_file, label_file, indices):
     data = img.get_data()
     roiimg = nb.load(label_file)
     rois = roiimg.get_data()
-    out_ts_file = os.path.join(os.getcwd(), 'timeseries.txt')
+    out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
     with open(out_ts_file, 'wt') as fp:
         for fsindex, cmaindex in sorted(indices.items()):
             ijk = np.nonzero(rois == cmaindex)
@@ -223,6 +223,25 @@ def extract_subrois(timeseries_file, label_file, indices):
                                                 ijk[1][i0], ijk[2][i0]) +
                               ','.join(['%.10f' % val for val in row]))
     return out_ts_file
+
+
+def combine_hemi(left, right):
+    """Combine left and right hemisphere time series into a single text file
+    """
+    import os
+    from nibabel import load
+    import numpy as np
+    lh_data = load(left).get_data()
+    rh_data = load(right).get_data()
+
+    indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
+                         2000000 + np.arange(0, rh_data.shape[0])[:, None]))
+    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
+                                              rh_data.squeeze()))))
+    filename = 'combined_surf.txt'
+    np.savetxt(filename, all_data,
+               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] -1)))
+    return os.path.abspath(filename)
 
 
 """
@@ -248,9 +267,11 @@ def create_workflow(files,
                     FM_TEdiff=2.46,
                     FM_sigma=2,
                     FM_echo_spacing=.7,
-                    target_subject='fsaverage4'):
+                    #target_subject=['fsaverage3', 'fsaverage4'],
+                    target_subject=['fsaverage4'],
+		    name='resting'):
 
-    wf = Workflow(name='resting')
+    wf = Workflow(name=name)
 
     # Skip starting volumes
     remove_vol = MapNode(fsl.ExtractROI(t_min=n_vol, t_size=-1),
@@ -260,12 +281,12 @@ def create_workflow(files,
 
     # Run AFNI's despike. This is always run, however, whether this is fed to
     # realign depends on the input configuration
-    despike = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
+    despiker = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
                       iterfield=['in_file'],
                       name='despike')
-    #despike.plugin_args = {'qsub_args': '-l nodes=1:ppn='}
+    #despiker.plugin_args = {'qsub_args': '-l nodes=1:ppn='}
 
-    wf.connect(remove_vol, 'roi_file', despike, 'in_file')
+    wf.connect(remove_vol, 'roi_file', despiker, 'in_file')
 
     # Run Nipy joint slice timing and realignment algorithm
     realign = Node(nipy.FmriRealign4d(), name='realign')
@@ -277,7 +298,7 @@ def create_workflow(files,
     # release of Nipy.
     realign.inputs.slice_order = np.argsort(np.argsort(slice_times)).tolist()
     if despike:
-        wf.connect(despike, 'out_file', realign, 'in_file')
+        wf.connect(despiker, 'out_file', realign, 'in_file')
     else:
         wf.connect(remove_vol, 'roi_file', realign, 'in_file')
 
@@ -365,6 +386,7 @@ def create_workflow(files,
                                         zintensity_threshold=3,
                                         parameter_source='NiPy',
                                         bound_by_brainmask=True,
+                                        save_plot=False,
                                         mask_type='file'),
                name="art")
     if fieldmap_images:
@@ -402,7 +424,6 @@ def create_workflow(files,
         wf.connect(dewarper, 'unwarped_file', filter1, 'in_file')
     else:
         wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
-
     wf.connect(createfilter1, 'out_files', filter1, 'design')
     wf.connect(masktransform, 'transformed_file', filter1, 'mask')
 
@@ -476,8 +497,12 @@ def create_workflow(files,
                sampleaparc, 'segmentation_file')
     wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
 
+                  
     # Sample the time series onto the surface of the target surface. Performs
     # sampling into left and right hemisphere
+    target = Node(IdentityInterface(fields=['target_subject']), name='target')
+    target.iterables = ('target_subject', filename_to_list(target_subject))
+    
     samplerlh = MapNode(freesurfer.SampleToSurface(),
                         iterfield=['source_file'],
                         name='sampler_lh')
@@ -485,8 +510,7 @@ def create_workflow(files,
     samplerlh.inputs.sampling_range = (0.1, 0.9, 0.1)
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
-    samplerlh.inputs.cortex_mask = True
-    samplerlh.inputs.target_subject = target_subject
+    #samplerlh.inputs.cortex_mask = True
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
 
@@ -495,10 +519,21 @@ def create_workflow(files,
     samplerlh.inputs.hemi = 'lh'
     wf.connect(bandpass, 'out_file', samplerlh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerlh, 'reg_file')
-
+    wf.connect(target, 'target_subject', samplerlh, 'target_subject')
+    
     samplerrh.set_input('hemi', 'rh')
     wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
+    wf.connect(target, 'target_subject', samplerrh, 'target_subject')
+
+    # Combine left and right hemisphere to text file
+    combiner = MapNode(Function(input_names=['left', 'right'],
+                                output_names=['out_file'],
+                                function=combine_hemi),
+                       iterfield=['left', 'right'],
+                       name="combiner")
+    wf.connect(samplerlh, 'out_file', combiner, 'left')
+    wf.connect(samplerrh, 'out_file', combiner, 'right')
 
     # Compute registration between the subject's structural and MNI template
     # This is currently set to perform a very quick registration. However, the
@@ -529,10 +564,12 @@ def create_workflow(files,
     reg.inputs.use_estimate_learning_rate_once = [True] * 4
     reg.inputs.use_histogram_matching = [False] * 3 + [True]
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
-    reg.inputs.fixed_image = \
-        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    #reg.inputs.fixed_image = \
+    #    os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    reg.inputs.fixed_image='/software/brain_templates/OASIS-TRT-20_template_to_MNI152_2mm.nii.gz'
     reg.inputs.num_threads = 4
     reg.inputs.terminal_output = 'file'
+    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
 
     # Convert T1.mgz to nifti for using with ANTS
     convert = Node(freesurfer.MRIConvert(out_type='niigz'), name='convert2nii')
@@ -570,8 +607,9 @@ def create_workflow(files,
     sample2mni.inputs.input_image_type = 3
     sample2mni.inputs.interpolation = 'BSpline'
     sample2mni.inputs.invert_transform_flags = [False, False]
-    sample2mni.inputs.reference_image = \
-        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    #sample2mni.inputs.reference_image = \
+    #    os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+    sample2mni.inputs.reference_image='/software/brain_templates/OASIS-TRT-20_template_to_MNI152_2mm.nii.gz'
     sample2mni.inputs.terminal_output = 'file'
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
@@ -587,17 +625,19 @@ def create_workflow(files,
                                      range(49, 55) + [58],
                                      [39, 60, 37, 58, 56, 48, 32, 30,
                                       38, 59, 36, 57, 55, 47, 31, 23]))
-    ts2txt.inputs.label_file = \
-        os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
-                         '_2mm.nii.gz'))
+    #ts2txt.inputs.label_file = \
+    #    os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
+    #                     '_2mm.nii.gz'))
+    ts2txt.inputs.label_file = '/software/brain_templates/OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz'
     wf.connect(sample2mni, 'output_image', ts2txt, 'timeseries_file')
 
     # Save the relevant data into an output directory
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    datasink.inputs.regexp_substitutions = (r'(_.*)(\d+/)', r'run\2')
-    wf.connect(despike, 'out_file', datasink, 'resting.qa.despike')
+    datasink.inputs.substitutions = [('_target_subject_', '')]
+    datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2') #(r'(_.*)(\d+/)', r'run\2')
+    wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
     wf.connect(tsnr, 'mean_file', datasink, 'resting.qa.tsnr.@mean')
@@ -628,61 +668,100 @@ def create_workflow(files,
                datasink, 'resting.parcellations.aparc')
     wf.connect(sampleaparc, 'avgwf_txt_file',
                datasink, 'resting.parcellations.aparc.@avgwf')
-    wf.connect(samplerlh, 'out_file',
-               datasink, 'resting.parcellations.grayo.@left')
-    wf.connect(samplerrh, 'out_file',
-               datasink, 'resting.parcellations.grayo.@right')
+    wf.connect(combiner, 'out_file',
+               datasink, 'resting.parcellations.grayo.@surface')
     wf.connect(ts2txt, 'out_file',
                datasink, 'resting.parcellations.grayo.@subcortical')
     return wf
 
 if __name__ == "__main__":
-    import argparse
-    from socket import getfqdn
-    from datetime import date
-    if not 'mit.edu' in getfqdn():
-        #dcmfile = '/software/data/sad_resting/500000-32-1.dcm'
-        #niifile = '/software/data/sad_resting/resting.nii.gz'
-        #subject_id = 'SAD_024'
-        dcmfile = '/software/data/sad_resting/allyson/562000-34-1.dcm'
-        niifile = '/software/data/sad_resting/allyson/Resting1.nii'
-        fieldmap_images = []
-        fieldmap_images = ['/software/data/sad_resting/allyson/fieldmap_resting1.nii',
-                           '/software/data/sad_resting/allyson/fieldmap_resting2.nii']
-        sink = os.path.join(os.getcwd(), 'output')
-    else:
-	os.environ['SUBJECTS_DIR']='/mindhive/xnat/surfaces/GATES/'
-        #dcmfile = '/mindhive/xnat/dicom_storage/sad/SAD_024/dicoms/500000-32-1.dcm'
-        #niifile = '/mindhive/xnat/data/sad/SAD_024/BOLD/resting.nii.gz'
-        dcmfile = '/mindhive/xnat/data/GATES/308/dicoms/562000-34-1.dcm'
-        niifile = '/mindhive/xnat/data/GATES/308/niftis/Resting1.nii'
-        fieldmap_images = ['/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting1.nii',
-                           '/mindhive/xnat/data/GATES/308/niftis/fieldmap_resting2.nii']
-        sink = os.path.join('/mindhive/scratch/',date.today().strftime('%a'),'cdla','restingwf','output')
-    echo_time = 0.7
-    subject_id = '308'
-    TR, slice_times, slice_thickness = get_info(dcmfile)
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("-d", "--dicom_file", dest="dicom_file",
+                        help="an example dicom file from the resting series")
+    parser.add_argument("-f", "--files", dest="files", nargs="+",
+                        help="4d nifti files for resting state",
+                        required=True)
+    parser.add_argument("-s", "--subject_id", dest="subject_id",
+                        help="FreeSurfer subject id", required=True)
+    parser.add_argument("-n", "--n_vol", dest="n_vol", default=0, type=int,
+                        help="Volumes to skip at the beginning")
+    parser.add_argument("--despike", dest="despike", default=False,
+                        action="store_true", help="Use despiked data")
+    parser.add_argument("--TR", dest="TR", default=None,
+                        help="TR if dicom not provided")
+    parser.add_argument("--slice_times", dest="slice_times", nargs="+",
+                        help="Slice times")
+    parser.add_argument("-l", "--lowpass_freq", dest="lowpass_freq",
+                        default=-1, help="Low pass frequency (Hz)")
+    parser.add_argument("-u", "--highpass_freq", dest="highpass_freq",
+                        default=-1, help="High pass frequency (Hz)")
+    parser.add_argument("-o", "--output_dir", dest="sink",
+                        help="Output directory base")
+    parser.add_argument("-w", "--work_dir", dest="work_dir",
+                        help="Output directory base")
+    parser.add_argument("-p", "--plugin_args", dest="plugin_args",
+                        default='plugin_args=dict()',
+                        help="Plugin args")
+    parser.add_argument("--field_maps", dest="field_maps", nargs="+",
+		 	help="field map niftis")
+    parser.add_argument("--fm_echospacing",dest="echo_spacing",
+			help="field map echo spacing")
+    parser.add_argument("--fm_TE_diff", dest='TE_diff',
+			help="field map echo time difference")
+    parser.add_argument("--fm_sigma", dest='sigma',
+			help="field map sigma value")
+    args = parser.parse_args()
 
-    wf = create_workflow(niifile,
-                         subject_id,
-                         n_vol=2,
-                         despike=True,
-                         TR=TR,
-                         slice_times=slice_times,
-                         slice_thickness=np.round(slice_thickness),
-                         lowpass_freq=.08,
-                         highpass_freq=.9,
-                         sink_directory=sink,
-                         FM_TEdiff=2.46,
-                         FM_sigma=2,
-                         FM_echo_spacing=.7,
-                         fieldmap_images=fieldmap_images
-                         )
+    TR = args.TR
+    slice_times = args.slice_times
+    slice_thickness = None
+    if args.dicom_file:
+        TR, slice_times, slice_thickness = get_info(args.dicom_file)
+
+    if slice_thickness is None:
+        from nibabel import load
+        img = load(args.files[0])
+        slice_thickness = max(img.get_header().get_zooms()[:3])
+    if args.field_maps:
+	 wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+                             subject_id=args.subject_id,
+                             n_vol=args.n_vol,
+                             despike=args.despike,
+                             TR=TR,
+                             slice_times=slice_times,
+                             slice_thickness=slice_thickness,
+                             lowpass_freq=args.lowpass_freq,
+                             highpass_freq=args.highpass_freq,
+                             sink_directory=os.path.abspath(args.sink),
+	            	     fieldmap_images=args.field_maps,
+			     FM_TEdiff=float(args.TE_diff),
+        		     FM_echo_spacing=float(args.echo_spacing),
+        		     FM_sigma=int(args.sigma))
+
+    else:
+   	 wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+                             subject_id=args.subject_id,
+                             n_vol=args.n_vol,
+                             despike=args.despike,
+                             TR=TR,
+                             slice_times=slice_times,
+                             slice_thickness=slice_thickness,
+                             lowpass_freq=args.lowpass_freq,
+                             highpass_freq=args.highpass_freq,
+                             sink_directory=os.path.abspath(args.sink))
+
+    if args.work_dir:
+        work_dir = os.path.abspath(args.work_dir)
+    else:
+        work_dir = os.getcwd()
 
     wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
-    wf.base_dir = os.getcwd()
-    wf.write_graph(graph2use='flat')
-    wf.run()  # (plugin='MultiProc')
+    wf.base_dir = work_dir
+    #wf.write_graph(graph2use='flat')
+    exec args.plugin_args
+    print plugin_args
+    wf.run(**plugin_args)
 
 '''
 #compute similarity matrix and partial correlation
