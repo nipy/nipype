@@ -731,10 +731,10 @@ if __name__ == "__main__":
                              lowpass_freq=args.lowpass_freq,
                              highpass_freq=args.highpass_freq,
                              sink_directory=os.path.abspath(args.sink),
-	            	     fieldmap_images=args.field_maps,
-			     FM_TEdiff=float(args.TE_diff),
-        		     FM_echo_spacing=float(args.echo_spacing),
-        		     FM_sigma=int(args.sigma))
+                             fieldmap_images=args.field_maps,
+                             FM_TEdiff=float(args.TE_diff),
+                             FM_echo_spacing=float(args.echo_spacing),
+                             FM_sigma=int(args.sigma))
 
     else:
    	 wf = create_workflow([os.path.abspath(filename) for filename in args.files],
