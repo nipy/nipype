@@ -716,10 +716,10 @@ if __name__ == "__main__":
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
 
     if slice_thickness is None:
-		from nibabel import load
-		img = load(args.files[0])
-		slice_thickness = max(img.get_header().get_zooms()[:3])
-	print TR, slice_times, slice_thickness
+        from nibabel import load
+        img = load(args.files[0])
+        slice_thickness = max(img.get_header().get_zooms()[:3])
+    print TR, slice_times, slice_thickness
 
 
     if args.field_maps:
