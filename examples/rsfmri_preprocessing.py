@@ -719,7 +719,7 @@ if __name__ == "__main__":
 		from nibabel import load
 		img = load(args.files[0])
 		slice_thickness = max(img.get_header().get_zooms()[:3])
-		print TR, slice_times, slice_thickness
+	print TR, slice_times, slice_thickness
 	if args.field_maps:
 		wf = create_workflow([os.path.abspath(filename) for filename in args.files],
                              subject_id=args.subject_id,
@@ -735,7 +735,6 @@ if __name__ == "__main__":
                              FM_TEdiff=float(args.TE_diff),
                              FM_echo_spacing=float(args.echo_spacing),
                              FM_sigma=int(args.sigma))
-
 	else:
 		wf = create_workflow([os.path.abspath(filename) for filename in args.files],
                              subject_id=args.subject_id,
