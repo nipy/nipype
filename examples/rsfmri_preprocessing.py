@@ -720,7 +720,8 @@ if __name__ == "__main__":
 		img = load(args.files[0])
 		slice_thickness = max(img.get_header().get_zooms()[:3])
 	print TR, slice_times, slice_thickness
-	if args.field_maps:
+
+    if args.field_maps:
         wf = create_workflow([os.path.abspath(filename) for filename in args.files],
                              subject_id=args.subject_id,
                              n_vol=args.n_vol,
