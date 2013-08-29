@@ -701,11 +701,11 @@ if __name__ == "__main__":
                         help="Plugin args")
     parser.add_argument("--field_maps", dest="field_maps", nargs="+",
 		 	help="field map niftis")
-    parser.add_argument("--fm_echospacing",dest="echo_spacing",
+    parser.add_argument("--fm_echospacing",dest="echo_spacing", type=float,
 			help="field map echo spacing")
-    parser.add_argument("--fm_TE_diff", dest='TE_diff',
+    parser.add_argument("--fm_TE_diff", dest='TE_diff', type=float,
 			help="field map echo time difference")
-    parser.add_argument("--fm_sigma", dest='sigma',
+    parser.add_argument("--fm_sigma", dest='sigma', type=int,
 			help="field map sigma value")
     args = parser.parse_args()
 
@@ -734,9 +734,9 @@ if __name__ == "__main__":
                              highpass_freq=args.highpass_freq,
                              sink_directory=os.path.abspath(args.sink),
                              fieldmap_images=args.field_maps,
-                             FM_TEdiff=float(args.TE_diff),
-                             FM_echo_spacing=float(args.echo_spacing),
-                             FM_sigma=int(args.sigma))
+                             FM_TEdiff=args.TE_diff,
+                             FM_echo_spacing=args.echo_spacing,
+                             FM_sigma=args.sigma)
     else:
         wf = create_workflow([os.path.abspath(filename) for filename in args.files],
                              subject_id=args.subject_id,
