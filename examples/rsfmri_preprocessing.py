@@ -243,6 +243,7 @@ def combine_hemi(left, right):
                fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] -1)))
     return os.path.abspath(filename)
 
+
 """
 Creates the main preprocessing workflow
 """
@@ -422,7 +423,6 @@ def create_workflow(files,
         wf.connect(dewarper, 'unwarped_file', filter1, 'in_file')
     else:
         wf.connect(tsnr, 'detrended_file', filter1, 'in_file')
-
     wf.connect(createfilter1, 'out_files', filter1, 'design')
     wf.connect(masktransform, 'transformed_file', filter1, 'mask')
 
@@ -699,6 +699,14 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--plugin_args", dest="plugin_args",
                         default='plugin_args=dict()',
                         help="Plugin args")
+    parser.add_argument("--field_maps", dest="field_maps", nargs="+",
+		 	help="field map niftis")
+    parser.add_argument("--fm_echospacing",dest="echo_spacing", type=float,
+			help="field map echo spacing")
+    parser.add_argument("--fm_TE_diff", dest='TE_diff', type=float,
+			help="field map echo time difference")
+    parser.add_argument("--fm_sigma", dest='sigma', type=int,
+			help="field map sigma value")
     args = parser.parse_args()
 
     TR = args.TR
@@ -713,16 +721,33 @@ if __name__ == "__main__":
         slice_thickness = max(img.get_header().get_zooms()[:3])
     print TR, slice_times, slice_thickness
 
-    wf = create_workflow([os.path.abspath(filename) for filename in args.files],
-                         subject_id=args.subject_id,
-                         n_vol=args.n_vol,
-                         despike=args.despike,
-                         TR=TR,
-                         slice_times=slice_times,
-                         slice_thickness=slice_thickness,
-                         lowpass_freq=args.lowpass_freq,
-                         highpass_freq=args.highpass_freq,
-                         sink_directory=os.path.abspath(args.sink))
+
+    if args.field_maps:
+        wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+                             subject_id=args.subject_id,
+                             n_vol=args.n_vol,
+                             despike=args.despike,
+                             TR=TR,
+                             slice_times=slice_times,
+                             slice_thickness=slice_thickness,
+                             lowpass_freq=args.lowpass_freq,
+                             highpass_freq=args.highpass_freq,
+                             sink_directory=os.path.abspath(args.sink),
+                             fieldmap_images=args.field_maps,
+                             FM_TEdiff=args.TE_diff,
+                             FM_echo_spacing=args.echo_spacing,
+                             FM_sigma=args.sigma)
+    else:
+        wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+                             subject_id=args.subject_id,
+                             n_vol=args.n_vol,
+                             despike=args.despike,
+                             TR=TR,
+                             slice_times=slice_times,
+                             slice_thickness=slice_thickness,
+                             lowpass_freq=args.lowpass_freq,
+                             highpass_freq=args.highpass_freq,
+                             sink_directory=os.path.abspath(args.sink))
 
     if args.work_dir:
         work_dir = os.path.abspath(args.work_dir)
