@@ -219,9 +219,9 @@ def extract_subrois(timeseries_file, label_file, indices):
             ijk = np.nonzero(rois == cmaindex)
             ts = data[ijk]
             for i0, row in enumerate(ts):
-                fp.writelines('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
-                                                ijk[1][i0], ijk[2][i0]) +
-                              ','.join(['%.10f' % val for val in row]))
+                fp.write('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
+                                           ijk[1][i0], ijk[2][i0]) +
+                         ','.join(['%.10f' % val for val in row]) + '\n')
     return out_ts_file
 
 
@@ -664,10 +664,15 @@ def create_workflow(files,
                datasink, 'resting.parcellations.aparc')
     wf.connect(sampleaparc, 'avgwf_txt_file',
                datasink, 'resting.parcellations.aparc.@avgwf')
-    wf.connect(combiner, 'out_file',
-               datasink, 'resting.parcellations.grayo.@surface')
     wf.connect(ts2txt, 'out_file',
                datasink, 'resting.parcellations.grayo.@subcortical')
+    datasink2 = Node(interface=DataSink(), name="datasink2")
+    datasink2.inputs.base_directory = sink_directory
+    datasink2.inputs.container = subject_id
+    datasink2.inputs.substitutions = [('_target_subject_', '')]
+    datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2') #(r'(_.*)(\d+/)', r'run\2')
+    wf.connect(combiner, 'out_file',
+               datasink2, 'resting.parcellations.grayo.@surface')
     return wf
 
 if __name__ == "__main__":
