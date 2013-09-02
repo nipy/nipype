@@ -240,7 +240,7 @@ def combine_hemi(left, right):
                                               rh_data.squeeze()))))
     filename = 'combined_surf.txt'
     np.savetxt(filename, all_data,
-               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] -1)))
+               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
 
 
@@ -281,8 +281,8 @@ def create_workflow(files,
     # Run AFNI's despike. This is always run, however, whether this is fed to
     # realign depends on the input configuration
     despiker = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
-                      iterfield=['in_file'],
-                      name='despike')
+                       iterfield=['in_file'],
+                       name='despike')
     #despiker.plugin_args = {'qsub_args': '-l nodes=1:ppn='}
 
     wf.connect(remove_vol, 'roi_file', despiker, 'in_file')
@@ -496,12 +496,11 @@ def create_workflow(files,
                sampleaparc, 'segmentation_file')
     wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
 
-                  
     # Sample the time series onto the surface of the target surface. Performs
     # sampling into left and right hemisphere
     target = Node(IdentityInterface(fields=['target_subject']), name='target')
     target.iterables = ('target_subject', filename_to_list(target_subject))
-    
+
     samplerlh = MapNode(freesurfer.SampleToSurface(),
                         iterfield=['source_file'],
                         name='sampler_lh')
@@ -519,7 +518,7 @@ def create_workflow(files,
     wf.connect(bandpass, 'out_file', samplerlh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerlh, 'reg_file')
     wf.connect(target, 'target_subject', samplerlh, 'target_subject')
-    
+
     samplerrh.set_input('hemi', 'rh')
     wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
@@ -632,7 +631,7 @@ def create_workflow(files,
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
     datasink.inputs.substitutions = [('_target_subject_', '')]
-    datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2') #(r'(_.*)(\d+/)', r'run\2')
+    datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
@@ -670,7 +669,7 @@ def create_workflow(files,
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
     datasink2.inputs.substitutions = [('_target_subject_', '')]
-    datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2') #(r'(_.*)(\d+/)', r'run\2')
+    datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf
@@ -705,13 +704,13 @@ if __name__ == "__main__":
                         default='plugin_args=dict()',
                         help="Plugin args")
     parser.add_argument("--field_maps", dest="field_maps", nargs="+",
-		 	help="field map niftis")
-    parser.add_argument("--fm_echospacing",dest="echo_spacing", type=float,
-			help="field map echo spacing")
+                        help="field map niftis")
+    parser.add_argument("--fm_echospacing", dest="echo_spacing", type=float,
+                        help="field map echo spacing")
     parser.add_argument("--fm_TE_diff", dest='TE_diff', type=float,
-			help="field map echo time difference")
-    parser.add_argument("--fm_sigma", dest='sigma', type=int,
-			help="field map sigma value")
+                        help="field map echo time difference")
+    parser.add_argument("--fm_sigma", dest='sigma', type=float,
+                        help="field map sigma value")
     args = parser.parse_args()
 
     TR = args.TR
@@ -724,11 +723,10 @@ if __name__ == "__main__":
         from nibabel import load
         img = load(args.files[0])
         slice_thickness = max(img.get_header().get_zooms()[:3])
-    print TR, slice_times, slice_thickness
-
 
     if args.field_maps:
-        wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+        wf = create_workflow([os.path.abspath(filename) for
+                              filename in args.files],
                              subject_id=args.subject_id,
                              n_vol=args.n_vol,
                              despike=args.despike,
@@ -743,7 +741,8 @@ if __name__ == "__main__":
                              FM_echo_spacing=args.echo_spacing,
                              FM_sigma=args.sigma)
     else:
-        wf = create_workflow([os.path.abspath(filename) for filename in args.files],
+        wf = create_workflow([os.path.abspath(filename) for
+                              filename in args.files],
                              subject_id=args.subject_id,
                              n_vol=args.n_vol,
                              despike=args.despike,
@@ -761,13 +760,5 @@ if __name__ == "__main__":
 
     wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
     wf.base_dir = work_dir
-    #wf.write_graph(graph2use='flat')
     exec args.plugin_args
-    print plugin_args
     wf.run(**plugin_args)
-
-'''
-#compute similarity matrix and partial correlation
-def compute_similarity():
-    return matrix
-'''
