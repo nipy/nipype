@@ -636,22 +636,6 @@ def generate_expanded_graph(graph_in):
         inode.iterables = None
         logger.debug('node: %s iterables: %s' % (inode, iterables))
 
-        # the join successor nodes of the current iterable node
-        jnodes = [node for node in graph_in.nodes_iter()
-            if hasattr(node, 'joinsource') and inode.name == node.joinsource]
-
-        # excise the join in-edges. save the excised edges in a
-        # {jnode: {source name: (destination name, edge data)}}
-        # dictionary
-        jedge_dict = {}
-        for jnode in jnodes:
-            in_edges = jedge_dict[jnode] = {}
-            for src, dest, data in graph_in.in_edges_iter(jnode, True):
-                in_edges[src.name] = (dest.name, data)
-                graph_in.remove_edge(src, dest)
-                logger.debug("Excised the %s -> %s join node in-edge."
-                             % (src, dest))
-
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
         prior_prefix = []
