@@ -1763,9 +1763,9 @@ class JoinNode(Node):
         joinsource : node name
             name of the join predecessor iterable node
         joinfield : string or list of strings
-            name(s) of list input fields that will be aggregatd
-            default is all of the join node input fields
-        unique: flag indicating whether to ignore duplicate input values
+            name(s) of list input fields that will be aggregated.
+            The default is all of the join node input fields.
+        unique : flag indicating whether to ignore duplicate input values
 
         See Node docstring for additional keyword arguments.
         """
