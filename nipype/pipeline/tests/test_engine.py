@@ -560,3 +560,8 @@ def test_old_config():
     yield assert_false, error_raised
     os.chdir(cwd)
     rmtree(wd)
+
+if __name__ == "__main__":
+    import nose
+    
+    nose.main(defaultTest=__name__)
