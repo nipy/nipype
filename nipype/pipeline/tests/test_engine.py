@@ -561,6 +561,7 @@ def test_old_config():
     os.chdir(cwd)
     rmtree(wd)
 
+
 if __name__ == "__main__":
     import nose
     
