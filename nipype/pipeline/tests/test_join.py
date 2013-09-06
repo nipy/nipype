@@ -484,6 +484,51 @@ def test_itersource_join_source_node():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_itersource_two_join_nodes():
+    """Test join with a midstream ``itersource`` and an upstream
+    iterable."""
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [1, 2])]
+    # an intermediate node in the first iteration path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'input1')
+    # an iterable pre-join node with an itersource
+    pre_join2 = pe.Node(ProductInterface(), name='pre_join2')
+    pre_join2.itersource = ('inputspec', 'n')
+    pre_join2.iterables = ('input1', {1: [3, 4], 2: [5, 6]})
+    wf.connect(pre_join1, 'output1', pre_join2, 'input2')
+    # an intermediate node in the second iteration path
+    pre_join3 = pe.Node(IncrementInterface(), name='pre_join3')
+    wf.connect(pre_join2, 'output1', pre_join3, 'input1')
+    # the first join node
+    join1 = pe.JoinNode(IdentityInterface(fields=['vector']),
+        joinsource='pre_join2', joinfield='vector', name='join1')
+    wf.connect(pre_join3, 'output1', join1, 'vector')
+    # a join successor node
+    post_join1 = pe.Node(SumInterface(), name='post_join1')
+    wf.connect(join1, 'vector', post_join1, 'input1')
+    # a summary join node
+    join2 = pe.JoinNode(IdentityInterface(fields=['vector']),
+        joinsource='inputspec', joinfield='vector', name='join2')
+    wf.connect(post_join1, 'output1', join2, 'vector')
+
+    result = wf.run()
+
+    # the expanded graph contains the 14 test_itersource_join_source_node
+    # nodes plus the summary join node.
+    assert_equal(len(result.nodes()), 15,
+                 "The number of expanded nodes is incorrect.")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
 
 if __name__ == "__main__":
     import nose
