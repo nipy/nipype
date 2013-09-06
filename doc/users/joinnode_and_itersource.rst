@@ -5,13 +5,15 @@ JoinNode, synchronize and itersource
 ====================================
 The previous :doc:`mapnode_and_iterables` chapter described how to
 fork and join nodes using MapNode and iterables. In this chapter, we
-introduce features which build on these concepts to add workflow flexibility.
+introduce features which build on these concepts to add workflow
+flexibility.
 
 JoinNode, joinsource and joinfield
 ==================================
 
-A *JoinNode* generalizes MapNode to operate in conjunction with an upstream
-iterable node to reassemble downstream results, e.g.:
+A :class:`nipype.pipeline.engine.JoinNode` generalizes MapNode to
+operate in conjunction with an upstream iterable node to reassemble
+downstream results, e.g.:
 
 .. digraph:: joinnode_ex
 
@@ -37,11 +39,11 @@ The code to achieve this is as follows:
                        (c,d,[('out_file','in_files')])
                        ])
 
-This example assumes that interface "A" has one output "subject",
-interface "B" has two inputs "subject" and "in_file" and one output
-"out_file", interface "C" has one input "in_file" and one output 
-"out_file", and interface D has one list input "in_files". The
-"images" variable is a list of input image file names.
+This example assumes that interface "A" has one output *subject*,
+interface "B" has two inputs *subject* and *in_file* and one output
+*out_file*, interface "C" has one input *in_file* and one output 
+*out_file*, and interface D has one list input *in_files*. The
+*images* variable is a list of three input image file names.
 
 As with *iterables* and the MapNode *iterfield*, the *joinfield*
 can be a list of fields. Thus, the declaration in the previous example
@@ -52,7 +54,7 @@ is equivalent to the following:
   d = pe.JoinNode(interface=D(), joinsource="b",
                   joinfield=["in_files"], name="d")
 
-The joinfield defaults to all of the JoinNode input fields, so the
+The *joinfield* defaults to all of the JoinNode input fields, so the
 declaration is also equivalent to the following:
 
 ::
@@ -74,8 +76,8 @@ synchronize
 ===========
 
 The :class:`nipype.pipeline.engine.Node` *iterables* parameter can be
-be a single field or a list of fields. If it is a list, execution is
-performed over all permutations of the list items. For example:
+be a single field or a list of fields. If it is a list, then execution
+is performed over all permutations of the list items. For example:
 
 ::
 
@@ -83,17 +85,17 @@ performed over all permutations of the list items. For example:
 
 results in the execution graph:
 
-.. digraph:: mapnode_recap
+.. digraph:: multiple_iterables_ex
 
    "A" -> "B13" -> "C";
    "A" -> "B14" -> "C";
    "A" -> "B23" -> "C";
    "A" -> "B24" -> "C";
 
-where "B13" has inputs *m* = 1, *n = 3, "B14" has inputs  *m* = 1,
+where "B13" has inputs *m* = 1, *n* = 3, "B14" has inputs  *m* = 1,
 *n* = 4, etc.
 
-The *synchronize* parameter synchronizes the iterables inputs, e.g.:
+The *synchronize* parameter synchronizes the iterables lists, e.g.:
 
 ::
 
@@ -102,7 +104,7 @@ The *synchronize* parameter synchronizes the iterables inputs, e.g.:
 
 results in the execution graph:
 
-.. digraph:: mapnode_recap
+.. digraph:: synchronize_ex
 
    "A" -> "B13" -> "C";
    "A" -> "B24" -> "C";
@@ -136,7 +138,7 @@ based on a mapping of an upstream iterable. For example:
 
 results in the execution graph:
 
-.. digraph:: mapnode_recap
+.. digraph:: itersource_ex
 
    "A" -> "B1" -> "C1" -> "D13";
    "C1" -> "D14";
@@ -159,7 +161,7 @@ This example can be extended with a summary JoinNode:
 
 resulting in the graph:
 
-.. digraph:: mapnode_recap
+.. digraph:: itersource_with_join_ex
 
    "A" -> "B1" -> "C1" -> "D13" -> "E";
    "C1" -> "D14" -> "E";
@@ -170,4 +172,4 @@ The combination of iterables, MapNode, JoinNode, synchronize and
 itersource enables the creation of arbitrarily complex workflow graphs.
 The astute workflow builder will recognize that this flexibility is
 both a blessing and a curse. These advanced features are handy additions
-to the Nipype toolkit when used sparingly in the right circumstances.
+to the Nipype toolkit when used judiciously.
