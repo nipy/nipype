@@ -34,8 +34,6 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-
-# Workflow
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
@@ -206,6 +204,129 @@ def test_iterable_expansion():
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
+
+def test_synchronize_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]),('input2',[3,4,5])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input2')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    # Each expanded graph clone has:
+    # 3 node1 expansion nodes and
+    # 1 node2 replicate per node1 replicate
+    # => 2 * 3 = 6 nodes per expanded subgraph
+    # => 18 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
+
+def test_synchronize_tuples_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node1.iterables = [('input1','input2'), [(1,3), (2,4), (None,5)]]
+    node1.synchronize = True
+    wf1.connect(node1,'output1', node2, 'input2')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    # Identical to test_synchronize_expansion
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
+
+def test_itersource_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = ('input1',[1,2])
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', 'input1')
+    node3.iterables = [('input1', {1:[3,4], 2:[5,6,7]})]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 3 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
+    # => 3 * 14 = 42 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
+def test_itersource_synchronize1_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]), ('input2',[3,4])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', ['input1', 'input2'])
+    node3.iterables = [('input1', {(1,3):[5,6]}),
+                       ('input2', {(1,3):[7,8], (2,4): [9]})]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 3 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
+    # => 3 * 14 = 42 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
+def test_itersource_synchronize2_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]), ('input2',[3,4])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', ['input1', 'input2'])
+    node3.synchronize = True
+    node3.iterables = [('input1', 'input2'),
+                       {(1,3):[(5,7), (6,8)], (2,4):[(None,9)]}]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 1 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 1) + 3 = 10 nodes per expanded graph clone
+    # => 3 * 10 = 30 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 30
 
 def test_disconnect():
     import nipype.pipeline.engine as pe
@@ -439,3 +560,9 @@ def test_old_config():
     yield assert_false, error_raised
     os.chdir(cwd)
     rmtree(wd)
+
+
+if __name__ == "__main__":
+    import nose
+    
+    nose.main(defaultTest=__name__)

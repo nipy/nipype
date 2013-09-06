@@ -246,8 +246,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         trait=sampling_percentage_stage_trait, requires=['sampling_strategy'],
         desc="the metric sampling percentage(s) to use for each stage")
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
-    use_histogram_matching = traits.List(
-        traits.Bool(argstr='%s'), default=True, usedefault=True)
+    use_histogram_matching = traits.Either(traits.Bool, traits.List(traits.Bool(argstr='%s')),
+        default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
@@ -284,9 +284,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Int()), mandatory=True)
-    sigma_units = traits.List(traits.Enum('mm', 'vox'),
+    # The vox option results in an antsRegistration error
+    # (cf. https://groups.google.com/forum/#!topic/nipy-user/gvKCXDlSQDU).
+    # Disable for now and revisit when it is fixed in an ANTS release.
+    sigma_units = traits.List(traits.Enum('mm'), #, 'vox'),
                               requires=['smoothing_sigmas'],
-                              desc="units for smoothing sigmas", mandatory=True)
+                              desc="units for smoothing sigmas")
     shrink_factors = traits.List(traits.List(traits.Int()), mandatory=True)
     convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
     convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
@@ -486,17 +489,25 @@ class Registration(ANTSCommand):
             for metric in self._formatMetric(ii):
                 retval.append('--metric %s' % metric)
             retval.append('--convergence %s' % self._formatConvergence(ii))
-            retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
-                self.inputs.smoothing_sigmas[ii]),
-                          self.inputs.sigma_units[ii]))
+            if self.inputs.sigma_units:
+                retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
+                    self.inputs.smoothing_sigmas[ii], self.inputs.sigma_units[ii])))
+            else:
+                retval.append('--smoothing-sigmas %s' %
+                    self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
             retval.append('--shrink-factors %s' %
                           self._antsJoinList(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
                 retval.append('--use-estimate-learning-rate-once %d' %
                               self.inputs.use_estimate_learning_rate_once[ii])
             if isdefined(self.inputs.use_histogram_matching):
-                retval.append('--use-histogram-matching %d' %
-                              self.inputs.use_histogram_matching[ii])
+                # use_histogram_matching is either a common flag for all transforms
+                # or a list of transform-specific flags
+                if isinstance(self.inputs.use_histogram_matching, bool):
+                    histval = self.inputs.use_histogram_matching
+                else:
+                    histval = self.inputs.use_histogram_matching[ii]
+                retval.append('--use-histogram-matching %d' % histval)
         return " ".join(retval)
 
     def _antsJoinList(self, antsList):
@@ -593,7 +604,6 @@ class Registration(ANTSCommand):
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid': 'Rigid.mat',
-                                           #seems counterontuitive, but his is how ANTS is calling it
                                            'Affine': 'Affine.mat',
                                            'GenericAffine': 'GenericAffine.mat',
                                            'CompositeAffine': 'Affine.mat',

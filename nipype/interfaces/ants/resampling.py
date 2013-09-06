@@ -217,7 +217,10 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                        exists=True)
     output_image = traits.Str(argstr='--output %s',
                               desc=('output file name'), genfile=True,
-                              hash_file=False)
+                              hash_file=False, xor=['out_postfix'])
+    out_postfix = File("_trans", usedefault=True, hash_files=False,
+                       desc=('Postfix that is appended to all output '
+                             'files (default = _trans)'), xor=['output_image'])
     reference_image = File(argstr='--reference-image %s', mandatory=True,
                            desc='reference image space that you wish to warp INTO',
                            exists=True)
