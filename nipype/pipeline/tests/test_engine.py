@@ -3,6 +3,7 @@
 """Tests for the engine module
 """
 from copy import deepcopy
+from glob import glob
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -13,6 +14,7 @@ from nipype.testing import (assert_raises, assert_equal, assert_true,
                             assert_false)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
+from nipype import logging
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -435,6 +437,50 @@ def test_old_config():
         w1.run(plugin='Linear')
     except Exception, e:
         pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+
+
+def test_mapnode_json():
+    """Tests that mapnodes don't generate excess jsons
+    """
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function, Workflow
+    def func1(in1):
+        return in1 + 1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 name='n1')
+    n1.inputs.in1 = [1]
+    w1 = Workflow(name='test')
+    w1.base_dir = wd
+    w1.config = {'crashdump_dir': wd}
+    w1.add_nodes([n1])
+    w1.run()
+    n1.inputs.in1 = [2]
+    w1.run()
+    # should rerun
+    n1.inputs.in1 = [1]
+    eg = w1.run()
+
+    node = eg.nodes()[0]
+    outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
+    yield assert_equal, len(outjson), 1
+
+    # check that multiple json's don't trigger rerun
+    with open(os.path.join(node.output_dir(), 'test.json'), 'wt') as fp:
+        fp.write('dummy file')
+    w1.config['execution'].update(**{'stop_on_first_rerun': True})
+    error_raised = False
+    try:
+        w1.run()
+    except:
         error_raised = True
     yield assert_false, error_raised
     os.chdir(cwd)

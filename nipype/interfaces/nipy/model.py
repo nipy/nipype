@@ -20,7 +20,7 @@ except Exception, e:
     warnings.warn('nipy not installed')
 else:
     import nipy.modalities.fmri.design_matrix as dm
-    import nipy.labs.glm as GLM
+    import nipy.labs.glm.glm as GLM
 
 if have_nipy:
     try:
