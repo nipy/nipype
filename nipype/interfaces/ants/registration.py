@@ -390,7 +390,7 @@ class Registration(ANTSCommand):
     """
     DEF_SAMPLING_STRATEGY = 'Dense'
     """The default sampling stratey argument."""
-    
+
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
@@ -399,7 +399,7 @@ class Registration(ANTSCommand):
     def _formatMetric(self, index):
         """
         Format the antsRegistration -m metric argument(s).
-        
+
         Parameters
         ----------
         index: the stage index
@@ -427,7 +427,7 @@ class Registration(ANTSCommand):
             sampling_percentage = self.inputs.sampling_percentage[index]
             if sampling_percentage:
                 stage_inputs['sampling_percentage'] = sampling_percentage
-        
+
         # Make a list of metric specifications, one per -m command line
         # argument for the current stage.
         # If there are multiple inputs for this stage, then convert the
@@ -442,15 +442,15 @@ class Registration(ANTSCommand):
             specs = [dict([(k, v[i]) for k,v in items]) for i in indexes]
         else:
             specs = [stage_inputs]
-        
+
         # Format the --metric command line metric arguments, one per specification.
         return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
-    
+
     def _formatMetricArgument(self, fixed, moving, **kwargs):
         retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
                                          fixed, moving, kwargs['weight'],
                                          kwargs['radius_or_bins'])
-        
+
         # The optional sampling strategy.
         if kwargs.has_key('sampling_strategy'):
             sampling_strategy = kwargs['sampling_strategy']
@@ -465,9 +465,9 @@ class Registration(ANTSCommand):
             retval += ', %s' % sampling_strategy
             if kwargs.has_key('sampling_percentage'):
                 retval += ', %g' % kwargs['sampling_percentage']
-        
+
         retval += ' ]'
-        
+
         return retval
 
     def _formatTransform(self, index):

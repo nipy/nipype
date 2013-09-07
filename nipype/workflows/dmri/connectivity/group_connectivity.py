@@ -324,7 +324,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
 	l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVnodemetrics=[['group_id']], CSVglobalmetrics=[['group_id']], CSVmatrices=[['group_id']])
 	l3source.inputs.template = op.join(output_dir,'%s/%s')
 
-	l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVnodemetrics=op.join(output_dir,'%s/node_csv/*.csv'), 
+	l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVnodemetrics=op.join(output_dir,'%s/node_csv/*.csv'),
 	CSVglobalmetrics=op.join(output_dir,'%s/global_csv/*.csv'), CSVmatrices=op.join(output_dir,'%s/cmatrices_csv/*/*.csv'))
 
 	l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVnodemetrics', 'Group_CSVglobalmetrics', 'Group_CSVmatrices']), name='l3inputnode')
