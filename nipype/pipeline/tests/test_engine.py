@@ -3,6 +3,7 @@
 """Tests for the engine module
 """
 from copy import deepcopy
+from glob import glob
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
@@ -437,5 +438,35 @@ def test_old_config():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+
+
+def test_mapnode_json():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function, Workflow
+    def func1(in1):
+        return in1 + 1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 name='n1')
+    n1.inputs.in1 = [1]
+    w1 = Workflow(name='test')
+    w1.base_dir = wd
+    w1.config = {'crashdump_dir': wd}
+    w1.add_nodes([n1])
+    w1.run()
+    n1.inputs.in1 = [2]
+    w1.run()
+    n1.inputs.in1 = [1]
+    eg = w1.run()
+
+    node = eg.nodes()[0]
+    outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
+    yield assert_equal, len(outjson), 1
     os.chdir(cwd)
     rmtree(wd)
