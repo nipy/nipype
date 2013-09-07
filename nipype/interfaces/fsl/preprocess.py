@@ -1316,7 +1316,7 @@ class FUGUE(FSLCommand):
         return None
 
     def _parse_inputs(self, skip=None):
-        if skip == None:
+        if skip is None:
             skip = []
 
         if not isdefined(self.inputs.save_shift) or not self.inputs.save_shift:
