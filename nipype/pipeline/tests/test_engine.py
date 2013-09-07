@@ -14,6 +14,7 @@ from nipype.testing import (assert_raises, assert_equal, assert_true,
                             assert_false)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
+from nipype import logging
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -443,6 +444,8 @@ def test_old_config():
 
 
 def test_mapnode_json():
+    """Tests that mapnodes don't generate excess jsons
+    """
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
@@ -462,11 +465,23 @@ def test_mapnode_json():
     w1.run()
     n1.inputs.in1 = [2]
     w1.run()
+    # should rerun
     n1.inputs.in1 = [1]
     eg = w1.run()
 
     node = eg.nodes()[0]
     outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
     yield assert_equal, len(outjson), 1
+
+    # check that multiple json's don't trigger rerun
+    with open(os.path.join(node.output_dir(), 'test.json'), 'wt') as fp:
+        fp.write('dummy file')
+    w1.config['execution'].update(**{'stop_on_first_rerun': True})
+    error_raised = False
+    try:
+        w1.run()
+    except:
+        error_raised = True
+    yield assert_false, error_raised
     os.chdir(cwd)
     rmtree(wd)
