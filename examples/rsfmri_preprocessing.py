@@ -319,6 +319,7 @@ def create_workflow(files,
     register.inputs.init = 'fsl'
     register.inputs.contrast_type = 't2'
     register.inputs.out_fsl_file = True
+    register.inputs.epi_mask = True
 
     # Compute fieldmaps and unwarp using them
     if fieldmap_images:
@@ -356,7 +357,7 @@ def create_workflow(files,
     wmcsf.inputs.wm_ven_csf = True
     wmcsf.inputs.match = [4, 5, 14, 15, 24, 31, 43, 44, 63]
     wmcsf.inputs.binary_file = 'wmcsf.nii.gz'
-    wmcsf.inputs.erode = 1
+    wmcsf.inputs.erode = int(slice_thickness)
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), wmcsf, 'in_file')
     if fieldmap_images:
         wf.connect(fieldmap, 'exf_mask', wmcsftransform, 'source_file')
