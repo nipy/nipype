@@ -99,7 +99,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
                                                         self.inputs.out_postfix,
                                                         ext)))
         return outputs
-    
+
     def _run_interface(self, runtime):
         runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes = [0,1])
         if "100 % complete" not in runtime.stdout:
