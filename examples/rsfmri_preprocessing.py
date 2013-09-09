@@ -344,7 +344,7 @@ def create_workflow(files,
     wmcsf.inputs.wm_ven_csf = True
     wmcsf.inputs.match = [4, 5, 14, 15, 24, 31, 43, 44, 63]
     wmcsf.inputs.binary_file = 'wmcsf.nii.gz'
-    wmcsf.inputs.erode = int(slice_thickness)
+    wmcsf.inputs.erode = int(np.ceil(slice_thickness))
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), wmcsf, 'in_file')
     if fieldmap_images:
         wf.connect(fieldmap, 'exf_mask', wmcsftransform, 'source_file')
@@ -354,8 +354,8 @@ def create_workflow(files,
     wf.connect(wmcsf, 'binary_file', wmcsftransform, 'target_file')
 
     mask.inputs.binary_file = 'mask.nii.gz'
-    mask.inputs.dilate = int(slice_thickness) + 1
-    mask.inputs.erode = int(slice_thickness)
+    mask.inputs.dilate = int(np.ceil(slice_thickness)) + 1
+    mask.inputs.erode = int(np.ceil(slice_thickness))
     mask.inputs.min = 0.5
     wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), mask, 'in_file')
     masktransform = wmcsftransform.clone("masktransform")
