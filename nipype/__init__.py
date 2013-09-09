@@ -15,7 +15,7 @@ from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
 
-from pipeline import Node, MapNode, Workflow
+from pipeline import Node, MapNode, JoinNode, Workflow
 from interfaces import (fsl, spm, freesurfer, afni, ants, slicer, dipy, nipy,
                         mrtrix, camino, DataGrabber, DataSink, SelectFiles,
                         IdentityInterface, Rename, Function, Select, Merge)
