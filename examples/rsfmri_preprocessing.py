@@ -14,9 +14,11 @@ This workflow makes use of:
 
 For example:
 
-python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii -s subj001 -n 2 --despike -o output -p "plugin_args=dict(plugin='PBS', plugin_args=dict(qsub_args='-q many'))"
-
+python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
+      -s subj001 -n 2 --despike -o output
+      -p "plugin_args=dict(plugin='PBS', plugin_args=dict(qsub_args='-q many'))"
 """
+
 import os
 
 from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
@@ -42,6 +44,23 @@ imports = ['import os',
            'import scipy as sp',
            'from nipype.utils.filemanip import filename_to_list'
            ]
+
+
+def get_info(dicom_files):
+    """Given a Siemens dicom file return metadata
+
+    Returns
+    -------
+    RepetitionTime
+    Slice Acquisition Times
+    Spacing between slices
+    """
+    meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
+                                       stop_before_pixels=True,
+                                       force=True))
+    return (meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes'],
+            meta['SpacingBetweenSlices'])
+
 
 def median(in_files):
     """Computes an average of the median of each realigned timeseries
@@ -78,22 +97,6 @@ def get_aparc_aseg(files):
         if 'aparc+aseg.mgz' in name:
             return name
     raise ValueError('aparc+aseg.mgz not found')
-
-
-def get_info(dicom_files):
-    """Given a Siemens dicom file return metadata
-
-    Returns
-    -------
-    RepetitionTime
-    Slice Acquisition Times
-    Spacing between slices
-    """
-    meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
-                                       stop_before_pixels=True,
-                                       force=True))
-    return (meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes'],
-            meta['SpacingBetweenSlices'])
 
 
 def motion_regressors(motion_params, order=2, derivatives=2):
@@ -273,14 +276,11 @@ def create_workflow(files,
     wf.connect(remove_vol, 'roi_file', despiker, 'in_file')
 
     # Run Nipy joint slice timing and realignment algorithm
-    realign = Node(nipy.FmriRealign4d(), name='realign')
+    realign = Node(nipy.SpaceTimeRealigner(), name='realign')
     realign.inputs.tr = TR
-    realign.inputs.time_interp = True
-    # FIX  # dbg
-    # This double argsort is necessary to convert slice order to space order
-    # that's required by nipy realign currently. This will change in the next
-    # release of Nipy.
-    realign.inputs.slice_order = np.argsort(np.argsort(slice_times)).tolist()
+    realign.inputs.slice_times = (np.array(slice_times)/1000.).tolist()
+    realign.inputs.slice_info = 2
+
     if despike:
         wf.connect(despiker, 'out_file', realign, 'in_file')
     else:
@@ -671,6 +671,7 @@ def create_workflow(files,
 Creates the full workflow including getting information from dicom files
 """
 
+
 def create_resting_workflow(args):
     TR = args.TR
     slice_times = args.slice_times
@@ -683,8 +684,8 @@ def create_resting_workflow(args):
         img = load(args.files[0])
         slice_thickness = max(img.get_header().get_zooms()[:3])
 
-    kwargs = dict(files =[os.path.abspath(filename) for
-                          filename in args.files],
+    kwargs = dict(files=[os.path.abspath(filename) for
+                         filename in args.files],
                   subject_id=args.subject_id,
                   n_vol=args.n_vol,
                   despike=args.despike,
