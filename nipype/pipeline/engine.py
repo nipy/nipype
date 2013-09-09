@@ -1716,23 +1716,24 @@ class JoinNode(Node):
     --------
 
     >>> import nipype.pipeline.engine as pe
+    >>> from nipype import Node, JoinNode, Workflow
     >>> from nipype.interfaces.utility import IdentityInterface
     >>> from nipype.interfaces import (ants, dcm2nii, fsl)
-    >>> wf = pe.Workflow(name='preprocess')
-    >>> inputspec = pe.Node(IdentityInterface(fields=['image']),
+    >>> wf = Workflow(name='preprocess')
+    >>> inputspec = Node(IdentityInterface(fields=['image']),
     ...                     name='inputspec')
     >>> inputspec.iterables = [('image',
     ...                        ['img1.nii', 'img2.nii', 'img3.nii'])]
-    >>> img2flt = pe.Node(fsl.ImageMaths(out_data_type='float'),
+    >>> img2flt = Node(fsl.ImageMaths(out_data_type='float'),
     ...                   name='img2flt')
     >>> wf.connect(inputspec, 'image', img2flt, 'in_file')
-    >>> average = pe.JoinNode(ants.AverageImages(), joinsource='inputspec',
+    >>> average = JoinNode(ants.AverageImages(), joinsource='inputspec',
     ...                       joinfield='images', name='average')
     >>> wf.connect(img2flt, 'out_file', average, 'images')
-    >>> realign = pe.Node(fsl.FLIRT(), name='realign')
+    >>> realign = Node(fsl.FLIRT(), name='realign')
     >>> wf.connect(img2flt, 'out_file', realign, 'in_file')
     >>> wf.connect(average, 'output_average_image', realign, 'reference')
-    >>> strip = pe.Node(fsl.BET(), name='strip')
+    >>> strip = Node(fsl.BET(), name='strip')
     >>> wf.connect(realign, 'out_file', strip, 'in_file')
 
     """
