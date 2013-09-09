@@ -33,6 +33,8 @@ from nipype.utils.filemanip import filename_to_list
 import numpy as np
 import scipy as sp
 import nibabel as nb
+from dcmstack.extract import default_extractor
+from dicom import read_file
 
 imports = ['import os',
            'import nibabel as nb',
@@ -87,9 +89,6 @@ def get_info(dicom_files):
     Slice Acquisition Times
     Spacing between slices
     """
-    from dcmstack.extract import default_extractor
-    from dicom import read_file
-    from nipype.utils.filemanip import filename_to_list
     meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
                                        stop_before_pixels=True,
                                        force=True))
