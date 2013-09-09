@@ -294,7 +294,8 @@ def create_workflow(files,
     # Compute the median image across runs
     calc_median = Node(Function(input_names=['in_files'],
                                 output_names=['median_file'],
-                                function=median),
+                                function=median,
+                                imports=imports),
                        name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
@@ -387,7 +388,8 @@ def create_workflow(files,
     motreg = Node(Function(input_names=['motion_params', 'order',
                                         'derivatives'],
                            output_names=['out_files'],
-                           function=motion_regressors),
+                           function=motion_regressors,
+                           imports=imports),
                   name='getmotionregress')
     wf.connect(realign, 'par_file', motreg, 'motion_params')
 
@@ -395,7 +397,8 @@ def create_workflow(files,
     createfilter1 = Node(Function(input_names=['motion_params', 'comp_norm',
                                                'outliers'],
                                   output_names=['out_files'],
-                                  function=build_filter1),
+                                  function=build_filter1,
+                                  imports=imports),
                          name='makemotionbasedfilter')
     wf.connect(motreg, 'out_files', createfilter1, 'motion_params')
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
@@ -417,7 +420,8 @@ def create_workflow(files,
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
                                                   'num_components'],
                                      output_names=['out_files'],
-                                     function=extract_noise_components),
+                                     function=extract_noise_components,
+                                     imports=imports),
                             iterfield=['realigned_file'],
                             name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
@@ -514,7 +518,8 @@ def create_workflow(files,
     # Combine left and right hemisphere to text file
     combiner = MapNode(Function(input_names=['left', 'right'],
                                 output_names=['out_file'],
-                                function=combine_hemi),
+                                function=combine_hemi,
+                                imports=imports),
                        iterfield=['left', 'right'],
                        name="combiner")
     wf.connect(samplerlh, 'out_file', combiner, 'left')
@@ -601,7 +606,8 @@ def create_workflow(files,
     ts2txt = MapNode(Function(input_names=['timeseries_file', 'label_file',
                                            'indices'],
                               output_names=['out_file'],
-                              function=extract_subrois),
+                              function=extract_subrois,
+                              imports=imports),
                      iterfield=['timeseries_file'],
                      name='getsubcortts')
     ts2txt.inputs.indices = dict(zip([8] + range(10, 14) + [17, 18, 26, 47] +
