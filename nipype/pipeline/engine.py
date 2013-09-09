@@ -1809,12 +1809,13 @@ class JoinNode(Node):
 
         >>> from nipype.interfaces.utility import IdentityInterface
         >>> import nipype.pipeline.engine as pe
-        >>> inputspec = pe.Node(IdentityInterface(fields=['image']),
+        >>> from nipype import Node, JoinNode, Workflow
+        >>> inputspec = Node(IdentityInterface(fields=['image']),
         ...    name='inputspec'),
-        >>> join = pe.JoinNode(IdentityInterface(fields=['images', 'mask']),
+        >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
         ...    joinsource='inputspec', joinfield='images', name='join')
         >>> join._add_join_item_fields()
-        {'image': 'imageJ1', 'mask': 'maskJ1'}
+        {'images': 'imagesJ1'}
 
         Return the {base field: slot field} dictionary
         """
