@@ -31,7 +31,15 @@ from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 
 import numpy as np
+import scipy as sp
+import nibabel as nb
 
+imports = ['import os',
+           'import nibabel as nb',
+           'import numpy as np',
+           'import scipy as sp',
+           'from nipype.utils.filemanip import filename_to_list'
+           ]
 
 def median(in_files):
     """Computes an average of the median of each realigned timeseries
@@ -47,10 +55,6 @@ def median(in_files):
     out_file: a 3D Nifti file
     """
 
-    import os
-    import nibabel as nb
-    import numpy as np
-    from nipype.utils.filemanip import filename_to_list
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
@@ -98,9 +102,6 @@ def motion_regressors(motion_params, order=2, derivatives=2):
 
     motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)
     """
-    from nipype.utils.filemanip import filename_to_list
-    import numpy as np
-    import os
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -137,9 +138,6 @@ def build_filter1(motion_params, comp_norm, outliers):
     components_file: a text file containing all the regressors
 
     """
-    from nipype.utils.filemanip import filename_to_list
-    import numpy as np
-    import os
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -172,14 +170,8 @@ def extract_noise_components(realigned_file, mask_file, num_components=6):
     -------
     components_file: a text file containing the noise components
     """
-
-    import os
-    from nibabel import load
-    import numpy as np
-    import scipy as sp
-
-    imgseries = load(realigned_file)
-    noise_mask = load(mask_file)
+    imgseries = nb.load(realigned_file)
+    noise_mask = nb.load(mask_file)
     voxel_timecourses = imgseries.get_data()[np.nonzero(noise_mask.get_data())]
     voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
     voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
@@ -206,9 +198,6 @@ def extract_subrois(timeseries_file, label_file, indices):
         The first four columns are: freesurfer index, i, j, k positions in the
         label file
     """
-    import os
-    import nibabel as nb
-    import numpy as np
     img = nb.load(timeseries_file)
     data = img.get_data()
     roiimg = nb.load(label_file)
@@ -228,11 +217,8 @@ def extract_subrois(timeseries_file, label_file, indices):
 def combine_hemi(left, right):
     """Combine left and right hemisphere time series into a single text file
     """
-    import os
-    from nibabel import load
-    import numpy as np
-    lh_data = load(left).get_data()
-    rh_data = load(right).get_data()
+    lh_data = nb.load(left).get_data()
+    rh_data = nb.load(right).get_data()
 
     indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))
@@ -675,6 +661,42 @@ def create_workflow(files,
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf
 
+
+"""
+Creates the full workflow including getting information from dicom files
+"""
+
+def create_resting_workflow(args):
+    TR = args.TR
+    slice_times = args.slice_times
+    slice_thickness = None
+    if args.dicom_file:
+        TR, slice_times, slice_thickness = get_info(args.dicom_file)
+
+    if slice_thickness is None:
+        from nibabel import load
+        img = load(args.files[0])
+        slice_thickness = max(img.get_header().get_zooms()[:3])
+
+    kwargs = dict(files =[os.path.abspath(filename) for
+                          filename in args.files],
+                  subject_id=args.subject_id,
+                  n_vol=args.n_vol,
+                  despike=args.despike,
+                  TR=TR,
+                  slice_times=slice_times,
+                  slice_thickness=slice_thickness,
+                  lowpass_freq=args.lowpass_freq,
+                  highpass_freq=args.highpass_freq,
+                  sink_directory=os.path.abspath(args.sink))
+    if args.field_maps:
+        kwargs.update(**dict(fieldmap_images=args.field_maps,
+                             FM_TEdiff=args.TE_diff,
+                             FM_echo_spacing=args.echo_spacing,
+                             FM_sigma=args.sigma))
+    wf = create_workflow(**kwargs)
+    return wf
+
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser(description=__doc__)
@@ -714,52 +736,13 @@ if __name__ == "__main__":
                         help="field map sigma value")
     args = parser.parse_args()
 
-    TR = args.TR
-    slice_times = args.slice_times
-    slice_thickness = None
-    if args.dicom_file:
-        TR, slice_times, slice_thickness = get_info(args.dicom_file)
-
-    if slice_thickness is None:
-        from nibabel import load
-        img = load(args.files[0])
-        slice_thickness = max(img.get_header().get_zooms()[:3])
-
-    if args.field_maps:
-        wf = create_workflow([os.path.abspath(filename) for
-                              filename in args.files],
-                             subject_id=args.subject_id,
-                             n_vol=args.n_vol,
-                             despike=args.despike,
-                             TR=TR,
-                             slice_times=slice_times,
-                             slice_thickness=slice_thickness,
-                             lowpass_freq=args.lowpass_freq,
-                             highpass_freq=args.highpass_freq,
-                             sink_directory=os.path.abspath(args.sink),
-                             fieldmap_images=args.field_maps,
-                             FM_TEdiff=args.TE_diff,
-                             FM_echo_spacing=args.echo_spacing,
-                             FM_sigma=args.sigma)
-    else:
-        wf = create_workflow([os.path.abspath(filename) for
-                              filename in args.files],
-                             subject_id=args.subject_id,
-                             n_vol=args.n_vol,
-                             despike=args.despike,
-                             TR=TR,
-                             slice_times=slice_times,
-                             slice_thickness=slice_thickness,
-                             lowpass_freq=args.lowpass_freq,
-                             highpass_freq=args.highpass_freq,
-                             sink_directory=os.path.abspath(args.sink))
+    wf = create_resting_workflow(args)
 
     if args.work_dir:
         work_dir = os.path.abspath(args.work_dir)
     else:
         work_dir = os.getcwd()
 
-    wf.config['execution'].update(**{'remove_unnecessary_outputs': False})
     wf.base_dir = work_dir
     exec args.plugin_args
     wf.run(**plugin_args)
