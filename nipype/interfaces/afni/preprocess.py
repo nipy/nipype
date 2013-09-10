@@ -1241,3 +1241,35 @@ class Calc(AFNICommand):
         """
         return super(Calc, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'other'))
+
+
+class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file to 3dAFNItoNIFTI',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    out_file = File("%s.nii", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+
+class AFNItoNIFTI(AFNICommand):
+    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
+
+    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
+    Also can take in 2dimensional or 3dimensional data, which then undergoes numpy.squeeze()
+    
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> a2n = afni.AFNItoNIFTI()
+    >>> a2n.inputs.in_file = 'afni_output.3D'
+    >>> a2n.inputs.out_file =  'afni_output.nii'
+    >>> a2n.cmdline
+    '3dAFNItoNIFTI afni_output.3D'
+
+    """
+
+    _cmd = '3dAFNItoNIFTI'
+    input_spec = AFNItoNIFTIInputSpec
+    output_spec = AFNICommandOutputSpec
