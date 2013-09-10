@@ -1804,7 +1804,6 @@ class GLM(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name in ('out_file'):
-            return fname_presuffix(self.inputs.in_file,
-                                   suffix='_glm.txt', use_ext=False)
+        if name in ['out_file']:
+            return self._gen_fname(self.inputs.in_file, suffix='_glm')
         return None
