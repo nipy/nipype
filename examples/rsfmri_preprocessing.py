@@ -16,7 +16,7 @@ For example:
 
 python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
       -s subj001 -n 2 --despike -o output
-      -p "plugin_args=dict(plugin='PBS', plugin_args=dict(qsub_args='-q many'))"
+      -p PBS --plugin_args "dict(qsub_args='-q many')"
 """
 
 import os
@@ -471,7 +471,8 @@ def create_workflow(files,
     else:
         wf.connect(calc_median, 'median_file', aparctransform, 'source_file')
     wf.connect(register, 'out_reg_file', aparctransform, 'reg_file')
-    wf.connect(fssource, ('aparc_aseg', get_aparc_aseg), aparctransform, 'target_file')
+    wf.connect(fssource, ('aparc_aseg', get_aparc_aseg),
+               aparctransform, 'target_file')
 
     # Sample the average time series in aparc ROIs
     sampleaparc = MapNode(freesurfer.SegStats(avgwf_txt_file=True,
@@ -729,9 +730,11 @@ if __name__ == "__main__":
                         help="Output directory base")
     parser.add_argument("-w", "--work_dir", dest="work_dir",
                         help="Output directory base")
-    parser.add_argument("-p", "--plugin_args", dest="plugin_args",
-                        default='plugin_args=dict()',
-                        help="Plugin args")
+    parser.add_argument("-p", "--plugin", dest="plugin",
+                        default='Linear',
+                        help="Plugin to use")
+    parser.add_argument("--plugin_args", dest="plugin_args",
+                        help="Plugin arguments")
     parser.add_argument("--field_maps", dest="field_maps", nargs="+",
                         help="field map niftis")
     parser.add_argument("--fm_echospacing", dest="echo_spacing", type=float,
@@ -750,5 +753,7 @@ if __name__ == "__main__":
         work_dir = os.getcwd()
 
     wf.base_dir = work_dir
-    exec args.plugin_args
-    wf.run(**plugin_args)
+    if args.plugin_args:
+        wf.run(args.plugin, plugin_args=eval(args.plugin_args))
+    else:
+        wf.run(args.plugin)
