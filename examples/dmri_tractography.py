@@ -5,6 +5,7 @@ Created on Thu May 16 20:39:00 2013
 @author: bao
 """
 import os
+import nipype.interfaces.io as nio
 import nipype.interfaces.utility as util
 import nipype.pipeline.engine as pe
 
@@ -13,7 +14,7 @@ from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 
 from dmri_classInterfaces import EddyCorrection, ResampleVoxelSize, TensorModel, Tracking
  
-path ='/home/bao/tiensy/Nipype_tutorial/data/dmri/temp7/'
+path ='/home/bao/tiensy/Nipype_tutorial/data/dmri/temp8/'
 data = path+ 'raw.nii.gz'
                                         
 ###### WORKFLOW DEFINITION #######
@@ -22,6 +23,8 @@ wf.base_dir= path + 'results'
 wf.config['execution'] = {'remove_unnecessary_outputs': 'True'}
 
 ###### NODE DEFINITION #######
+datasink = pe.Node(nio.DataSink(), name='sinker')
+datasink.inputs.base_directory = path + 'out/'
 brain_extraction_node = pe.Node(fsl.BET(), name="brain_extraction_node")
 eddy_current_correction_node = create_eddy_correct_pipeline("nipype_eddycorrect_wkf")
 resample_voxel_size_node = pe.Node(ResampleVoxelSize(), name='resample_voxel_size_node')
@@ -34,7 +37,7 @@ brain_extraction_node.inputs.in_file=data
 brain_extraction_node.inputs.frac = 0.2
 brain_extraction_node.inputs.functional = True
 brain_extraction_node.inputs.vertical_gradient = 0
-brain_extraction_node.inputs.out_file = path + 'raw_bet.nii.gz'
+#brain_extraction_node.inputs.out_file = path + 'raw_bet.nii.gz'
 
 #inputs: eddy_current_correction_node
 eddy_current_correction_node.inputs.inputnode.ref_num = 0
@@ -59,6 +62,13 @@ wf.connect(eddy_current_correction_node,'outputnode.eddy_corrected', resample_vo
 wf.connect(resample_voxel_size_node,'resample_file',tensor_model_node ,'input_filename_data')
 wf.connect(tensor_model_node, 'tensor_fa_file', tracking_node,'input_filename_fa')
 wf.connect(tensor_model_node, 'tensor_evecs_file', tracking_node , 'input_filename_evecs')
+
+wf.connect(brain_extraction_node, 'out_file', datasink, 'raw_bet.@nii.@gz')
+wf.connect(eddy_current_correction_node, 'outputnode.eddy_corrected', datasink, 'raw_bet_ecc.@nii.@gz')
+wf.connect(resample_voxel_size_node, 'resample_file', datasink, 'data_bet_ecc_iso.@nii.@gz')
+wf.connect(tensor_model_node, 'tensor_fa_file', datasink, 'tensor_fa.@nii.@gz')
+wf.connect(tensor_model_node, 'tensor_evecs_file', datasink, 'tensor_evecs.@nii.@gz')
+wf.connect(tracking_node, 'tracks_file', datasink, 'dti_tracks.@dpy')
 
 ###### GRAPH and RUN #######
 wf.write_graph()
