@@ -278,7 +278,7 @@ def create_workflow(files,
     # Run Nipy joint slice timing and realignment algorithm
     realign = Node(nipy.SpaceTimeRealigner(), name='realign')
     realign.inputs.tr = TR
-    realign.inputs.slice_times = (np.array(slice_times)/1000.).tolist()
+    realign.inputs.slice_times = slice_times
     realign.inputs.slice_info = 2
 
     if despike:
@@ -679,6 +679,7 @@ def create_resting_workflow(args):
     slice_thickness = None
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
+        slice_times = (np.array(slice_times)/1000.).tolist()
 
     if slice_thickness is None:
         from nibabel import load
@@ -719,9 +720,9 @@ if __name__ == "__main__":
     parser.add_argument("--despike", dest="despike", default=False,
                         action="store_true", help="Use despiked data")
     parser.add_argument("--TR", dest="TR", default=None,
-                        help="TR if dicom not provided")
+                        help="TR if dicom not provided in seconds")
     parser.add_argument("--slice_times", dest="slice_times", nargs="+",
-                        help="Slice times")
+                        type=float, help="Slice times in seconds")
     parser.add_argument("-l", "--lowpass_freq", dest="lowpass_freq",
                         default=-1, help="Low pass frequency (Hz)")
     parser.add_argument("-u", "--highpass_freq", dest="highpass_freq",
