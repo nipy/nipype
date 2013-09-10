@@ -559,7 +559,7 @@ def create_workflow(files,
     # registration can be made significantly more accurate for cortical
     # structures by increasing the number of iterations
     # All parameters are set using the example from:
-    #
+    # https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
     reg = Node(ants.Registration(), name='antsRegister')
     reg.inputs.output_transform_prefix = "output_"
     reg.inputs.transforms = ['Translation', 'Rigid', 'Affine', 'SyN']
