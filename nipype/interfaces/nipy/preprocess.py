@@ -116,7 +116,6 @@ class FmriRealign4dOutputSpec(TraitedSpec):
                                desc="Motion parameter files")
 
 
-@np.deprecate_with_doc('Please use SpaceTimeRealign instead')
 class FmriRealign4d(BaseInterface):
     """Simultaneous motion and slice timing correction algorithm
 
@@ -278,14 +277,14 @@ class SpaceTimeRealigner(BaseInterface):
         return nipy.__version__
 
     def _run_interface(self, runtime):
-        from nipy.algorithms.registration import SpaceTimeRealign
-        from nipy.algorithms.registration.groupwise_registration import SpaceRealign
-
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.slice_times):
+            from nipy.algorithms.registration.groupwise_registration import \
+                SpaceRealign
             R = SpaceRealign(all_ims)
         else:
+            from nipy.algorithms.registration import SpaceTimeRealign
             R = SpaceTimeRealign(all_ims,
                                  tr=self.inputs.tr,
                                  slice_times=self.inputs.slice_times,
