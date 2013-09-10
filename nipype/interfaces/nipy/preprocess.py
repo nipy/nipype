@@ -23,6 +23,7 @@ except Exception, e:
 else:
     import nipy
     from nipy import save_image, load_image
+    nipy_version = nipy.__version__
 
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -273,8 +274,9 @@ class SpaceTimeRealigner(BaseInterface):
     output_spec = SpaceTimeRealignerOutputSpec
     keywords = ['slice timing', 'motion correction']
 
+    @property
     def version(self):
-        return nipy.__version__
+        return nipy_version
 
     def _run_interface(self, runtime):
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
