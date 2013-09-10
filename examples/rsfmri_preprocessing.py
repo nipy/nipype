@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 """
+================================================================
+rsfMRI: AFNI, ANTS, DicomStack, FreeSurfer, FSL, Nipy, aCompCorr
+================================================================
+
+
 A preprocessing workflow for Siemens resting state data.
 
 This workflow makes use of:
@@ -12,14 +17,41 @@ This workflow makes use of:
 - FSL
 - NiPy
 
-For example:
+For example::
 
-python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
+  python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
       -s subj001 -n 2 --despike -o output
       -p PBS --plugin_args "dict(qsub_args='-q many')"
+
+This workflow takes resting timeseries and a Siemens dicom file corresponding
+to it and preprocesses it to produce timeseries coordinates or grayordinates.
+
+This workflow also requires 2mm subcortical atlas and templates that are
+available from:
+
+http://mindboggle.info/data.html
+
+specifically the 2mm versions of:
+
+- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz>`_
+- `MNI template <http://mindboggle.info/data/templates/ants/OASIS-TRT-20_template_in_MNI152_2mm.nii.gz>`_
+
+The 2mm version was generated with::
+
+   >>> from nipype import freesurfer as fs
+   >>> rs = fs.Resample()
+   >>> rs.inputs.in_file = 'OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152.nii.gz'
+   >>> rs.inputs.resampled_file = 'OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz'
+   >>> rs.inputs.voxel_size = (2., 2., 2.)
+   >>> rs.inputs.args = '-rt nearest -ns 1'
+   >>> res = rs.run()
+
 """
 
 import os
+
+from nipype.interfaces.base import CommandLine
+CommandLine.set_default_terminal_output('file')
 
 from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
@@ -75,7 +107,6 @@ def median(in_files):
 
     out_file: a 3D Nifti file
     """
-
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
@@ -138,7 +169,6 @@ def build_filter1(motion_params, comp_norm, outliers):
     Returns
     -------
     components_file: a text file containing all the regressors
-
     """
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
@@ -191,8 +221,7 @@ def extract_subrois(timeseries_file, label_file, indices):
 
     timeseries_file: a 4D Nifti file
     label_file: a 3D file containing rois in the same space/size of the 4D file
-    indices: a list of indices for ROIs to extract. Currently a dictionary
-        mapping freesurfer indices to CMA/Label Fusion indices are being used
+    indices: a list of indices for ROIs to extract.
 
     Returns
     -------
@@ -206,8 +235,8 @@ def extract_subrois(timeseries_file, label_file, indices):
     rois = roiimg.get_data()
     out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
     with open(out_ts_file, 'wt') as fp:
-        for fsindex, cmaindex in sorted(indices.items()):
-            ijk = np.nonzero(rois == cmaindex)
+        for fsindex in indices:
+            ijk = np.nonzero(rois == fsindex)
             ts = data[ijk]
             for i0, row in enumerate(ts):
                 fp.write('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
@@ -557,7 +586,6 @@ def create_workflow(files,
     reg.inputs.fixed_image = \
         os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
     reg.inputs.num_threads = 4
-    reg.inputs.terminal_output = 'file'
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
 
     # Convert T1.mgz to nifti for using with ANTS
@@ -610,10 +638,8 @@ def create_workflow(files,
                               imports=imports),
                      iterfield=['timeseries_file'],
                      name='getsubcortts')
-    ts2txt.inputs.indices = dict(zip([8] + range(10, 14) + [17, 18, 26, 47] +
-                                     range(49, 55) + [58],
-                                     [39, 60, 37, 58, 56, 48, 32, 30,
-                                      38, 59, 36, 57, 55, 47, 31, 23]))
+    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] +\
+                            range(49, 55) + [58]
     ts2txt.inputs.label_file = \
         os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
                          '_2mm.nii.gz'))
