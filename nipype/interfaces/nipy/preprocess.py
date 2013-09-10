@@ -21,11 +21,8 @@ try:
 except Exception, e:
     warnings.warn('nipy not installed')
 else:
-    from nipy.labs.mask import compute_mask
-    from nipy.algorithms.registration import FmriRealign4d as FR4d
+    import nipy
     from nipy import save_image, load_image
-    from nipy.algorithms.registration import SpaceTimeRealign
-    from nipy.algorithms.registration.groupwise_registration import SpaceRealign
 
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -52,7 +49,7 @@ class ComputeMask(BaseInterface):
     output_spec = ComputeMaskOutputSpec
 
     def _run_interface(self, runtime):
-
+        from nipy.labs.mask import compute_mask
         args = {}
         for key in [k for k, _ in self.inputs.items()
                     if k not in BaseInterfaceInputSpec().trait_names()]:
@@ -149,7 +146,7 @@ class FmriRealign4d(BaseInterface):
     keywords = ['slice timing', 'motion correction']
 
     def _run_interface(self, runtime):
-
+        from nipy.algorithms.registration import FmriRealign4d as FR4d
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.tr_slices):
@@ -202,7 +199,7 @@ class FmriRealign4d(BaseInterface):
 class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
     in_file = InputMultiPath(exists=True,
-                             mandatory=True,
+                             mandatory=True, min_ver='0.4.0.dev',
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds", requires=['slice_times'])
     slice_times = traits.Either(traits.List(traits.Float()),
@@ -277,7 +274,12 @@ class SpaceTimeRealigner(BaseInterface):
     output_spec = SpaceTimeRealignerOutputSpec
     keywords = ['slice timing', 'motion correction']
 
+    def version(self):
+        return nipy.__version__
+
     def _run_interface(self, runtime):
+        from nipy.algorithms.registration import SpaceTimeRealign
+        from nipy.algorithms.registration.groupwise_registration import SpaceRealign
 
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
