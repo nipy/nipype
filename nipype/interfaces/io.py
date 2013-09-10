@@ -214,7 +214,7 @@ class DataSink(IOBase):
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
-    def __init__(self, infields=None, **kwargs):
+    def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
         ----------
@@ -232,6 +232,8 @@ class DataSink(IOBase):
                 self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        if force_run:
+            self._always_run = True
 
     def _get_dst(self, src):
         ## If path is directory with trailing os.path.sep,
