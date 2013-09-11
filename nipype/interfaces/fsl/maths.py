@@ -129,12 +129,12 @@ class MaxImage(MathsCommand):
     Examples
     --------
     from nipype.interfaces.fsl.maths import MaxImage
-    maxer = MaxImage() 
+    maxer = MaxImage()
     maxer.inputs.in_file = "functional.nii"
     maxer.dimension = "T"
     maths.cmdline
     fslmaths functional.nii -Tmax functional_max.nii
-    
+
     """
     input_spec = MaxImageInput
     _suffix = "_max"
@@ -143,9 +143,9 @@ class MaxImage(MathsCommand):
 class IsotropicSmoothInput(MathsInput):
 
     fwhm = traits.Float(mandatory=True, xor=["sigma"], position=4, argstr="-s %.5f",
-                        desc="fwhm of smoothing kernel")
+                        desc="fwhm of smoothing kernel [mm]")
     sigma = traits.Float(mandatory=True, xor=["fwhm"], position=4, argstr="-s %.5f",
-                         desc="sigma of smoothing kernel")
+                         desc="sigma of smoothing kernel [mm]")
 
 
 class IsotropicSmooth(MathsCommand):

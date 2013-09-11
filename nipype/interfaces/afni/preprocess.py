@@ -81,7 +81,7 @@ class To3D(AFNICommand):
     >>> To3D.inputs.filetype = "anat"
     >>> To3D.inputs.outputtype = "NIFTI"
     >>> To3D.cmdline #doctest: +ELLIPSIS
-    'to3d -datum float -anat -prefix .../dicomdir.nii ./*.dcm'
+    'to3d -datum float -anat -prefix dicomdir.nii ./*.dcm'
     >>> res = To3D.run() #doctest: +SKIP
 
    """
@@ -334,9 +334,9 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
                                     argstr="-mask_only_targets",
                                     xor=['mask_source'])
-                                    
-    mask_source = File(exists=True, 
-                        desc="mask for source voxels", 
+
+    mask_source = File(exists=True,
+                        desc="mask for source voxels",
                         argstr="-mask_source %s",
                         xor=['mask_only_targets'])
 
@@ -361,7 +361,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask = 'mask.nii'
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
-    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix ...my_similarity_matrix.1D -polort -1 functional.nii'
+    '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix my_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
     input_spec = AutoTcorrelateInputSpec
@@ -373,9 +373,6 @@ class AutoTcorrelate(AFNICommand):
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
         return os.path.join(path, base + ext)
-
-    def _gen_filename(self, name):
-        return os.path.abspath(super(AutoTcorrelate, self)._gen_filename(name))
 
 
 class TStatInputSpec(AFNICommandInputSpec):
@@ -510,20 +507,12 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     erode = traits.Int(desc='erode the mask inwards',
                        argstr="-erode %s")
 
-    mask_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="out_file")
-    apply_suffix = traits.Str(
-        desc="out_file suffix", depracated=0.8, new_name="brain_file")
-    apply_mask = File(desc="output file from 3dAutomask",
-                      argstr='-apply_prefix %s',
-                      name_source="in_file", depracated=0.8, new_name="brain_file")
-
 
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(desc='mask file',
                     exists=True)
 
-    brain_file = File(desc='brain file (skull stripped)')
+    brain_file = File(desc='brain file (skull stripped)', exists=True)
 
 
 class Automask(AFNICommand):
@@ -549,46 +538,6 @@ class Automask(AFNICommand):
     _cmd = '3dAutomask'
     input_spec = AutomaskInputSpec
     output_spec = AutomaskOutputSpec
-
-    def _gen_filename(self, name):
-        trait_spec = self.inputs.trait(name)
-        if name == "out_file" and isdefined(self.inputs.mask_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.mask_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif name == "brain_file" and isdefined(self.inputs.apply_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.apply_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif name == "apply_mask" and isdefined(self.inputs.apply_suffix):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.apply_suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-        elif hasattr(self.inputs, name) and isdefined(getattr(self.inputs, name)):
-            return super(Automask, self)._gen_filename(name)
-        return Undefined
-
-    def _list_outputs(self):
-        outputs = super(Automask, self)._list_outputs()
-        if isdefined(self.inputs.apply_mask):
-            outputs['brain_file'] = os.path.abspath(
-                self._gen_filename('apply_mask'))
-        return outputs
 
 
 class VolregInputSpec(AFNICommandInputSpec):
@@ -1163,6 +1112,7 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True)
     out_file = File("%s_maskave.1D", desc='output image file name',
+                    keep_extension=True,
                     argstr="> %s", name_source="in_file", usedefault=True, position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
@@ -1558,7 +1508,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix .../functional_calc.nii'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii'
 
     """
 
@@ -1591,13 +1541,9 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = File(
-        '%s_blur',
-        desc='output to the file',
-        argstr='-prefix %s',
-        name_source='in_file',
-        position=-1,
-        genfile=True)
+    out_file = File('%s_blur', desc='output to the file', argstr='-prefix %s',
+                    name_source='in_file', position=-1, genfile=True,
+                    usedefault=True)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1635,6 +1581,8 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.in_file = 'functional.nii'
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
+    >>> bim.cmdline #doctest: +ELLIPSIS
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix .../functional_blur+orig.BRIK'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
@@ -1642,19 +1590,6 @@ class BlurInMask(AFNICommand):
     _cmd = '3dBlurInMask'
     input_spec = BlurInMaskInputSpec
     output_spec = AFNICommandOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
 
 
 class TCorrMapInputSpec(AFNIBaseCommandInputSpec):

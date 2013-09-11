@@ -11,7 +11,8 @@ Miscellaneous algorithms
 
 '''
 
-import os, os.path as op
+import os
+import os.path as op
 
 import nibabel as nb
 import numpy as np
@@ -23,6 +24,7 @@ from scipy.ndimage.measurements import center_of_mass, label
 from scipy.special import legendre
 import scipy.io as sio
 import itertools
+import scipy.stats as stats
 
 from .. import logging
 
@@ -36,15 +38,21 @@ iflogger = logging.getLogger('interface')
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.",
                  mandatory=True)
-    labels = traits.Either(traits.Int, traits.List(traits.Int),
-                           desc=("Labels of regions that will be included in"
-                           "the mask. Must be compatible with the atlas used."),
-                           compulsory=True)
-    hemi = traits.Enum('both', 'left', 'right',
-                desc="Restrict the mask to only one hemisphere: left or right",
-                       usedefault=True)
-    dilation_size = traits.Int(usedefault=True,
-            desc="Defines how much the mask will be dilated (expanded in 3D).")
+    labels = traits.Either(
+        traits.Int, traits.List(traits.Int),
+        desc=("Labels of regions that will be included in the mask. Must be\
+        compatible with the atlas used."),
+        compulsory=True
+    )
+    hemi = traits.Enum(
+        'both', 'left', 'right',
+        desc="Restrict the mask to only one hemisphere: left or right",
+        usedefault=True
+    )
+    dilation_size = traits.Int(
+        usedefault=True,
+        desc="Defines how much the mask will be dilated (expanded in 3D)."
+    )
     output_file = File(desc="Where to store the output mask.")
 
 
@@ -53,6 +61,7 @@ class PickAtlasOutputSpec(TraitedSpec):
 
 
 class PickAtlas(BaseInterface):
+
     '''
     Returns ROI masks given an atlas and a list of labels. Supports dilation
     and left right masking (assuming the atlas is properly aligned).
@@ -88,12 +97,14 @@ class PickAtlas(BaseInterface):
         if self.inputs.hemi == 'right':
             newdata[floor(float(origdata.shape[0]) / 2):, :, :] = 0
         elif self.inputs.hemi == 'left':
-            newdata[:ceil(float(origdata.shape[0]) / 2), :, : ] = 0
+            newdata[:ceil(float(origdata.shape[0]) / 2), :, :] = 0
 
         if self.inputs.dilation_size != 0:
-            newdata = grey_dilation(newdata , (2 * self.inputs.dilation_size + 1,
-                                               2 * self.inputs.dilation_size + 1,
-                                               2 * self.inputs.dilation_size + 1))
+            newdata = grey_dilation(
+                newdata, (2 * self.inputs.dilation_size + 1,
+                          2 * self.inputs.dilation_size +
+                          1,
+                          2 * self.inputs.dilation_size + 1))
 
         return nb.Nifti1Image(newdata, nii.get_affine(), nii.get_header())
 
@@ -104,12 +115,18 @@ class PickAtlas(BaseInterface):
 
 
 class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
-    volumes = InputMultiPath(File(exists=True), desc='volumes to be thresholded', mandatory=True)
-    threshold = traits.Float(desc='volumes to be thresholdedeverything below this value will be set to zero', mandatory=True)
+    volumes = InputMultiPath(
+        File(exists=True), desc='volumes to be thresholded', mandatory=True)
+    threshold = traits.Float(
+        desc='volumes to be thresholdedeverything below this value will be set\
+        to zero',
+        mandatory=True
+    )
 
 
 class SimpleThresholdOutputSpec(TraitedSpec):
-    thresholded_volumes = OutputMultiPath(File(exists=True), desc="thresholded volumes")
+    thresholded_volumes = OutputMultiPath(
+        File(exists=True), desc="thresholded volumes")
 
 
 class SimpleThreshold(BaseInterface):
@@ -126,7 +143,8 @@ class SimpleThreshold(BaseInterface):
             thresholded_map = np.zeros(data.shape)
             thresholded_map[active_map] = data[active_map]
 
-            new_img = nb.Nifti1Image(thresholded_map, img.get_affine(), img.get_header())
+            new_img = nb.Nifti1Image(
+                thresholded_map, img.get_affine(), img.get_header())
             _, base, _ = split_filename(fname)
             nb.save(new_img, base + '_thresholded.nii')
 
@@ -137,13 +155,24 @@ class SimpleThreshold(BaseInterface):
         outputs["thresholded_volumes"] = []
         for fname in self.inputs.volumes:
             _, base, _ = split_filename(fname)
-            outputs["thresholded_volumes"].append(os.path.abspath(base + '_thresholded.nii'))
+            outputs["thresholded_volumes"].append(
+                os.path.abspath(base + '_thresholded.nii'))
         return outputs
 
 
 class ModifyAffineInputSpec(BaseInterfaceInputSpec):
-    volumes = InputMultiPath(File(exists=True), desc='volumes which affine matrices will be modified', mandatory=True)
-    transformation_matrix = traits.Array(value=np.eye(4), shape=(4, 4), desc="transformation matrix that will be left multiplied by the affine matrix", usedefault=True)
+    volumes = InputMultiPath(
+        File(exists=True),
+        desc='volumes which affine matrices will be modified',
+        mandatory=True
+    )
+    transformation_matrix = traits.Array(
+        value=np.eye(4),
+        shape=(4, 4),
+        desc="transformation matrix that will be left multiplied by the\
+        affine matrix",
+        usedefault=True
+    )
 
 
 class ModifyAffineOutputSpec(TraitedSpec):
@@ -151,8 +180,10 @@ class ModifyAffineOutputSpec(TraitedSpec):
 
 
 class ModifyAffine(BaseInterface):
+
     '''
-    Left multiplies the affine matrix with a specified values. Saves the volume as a nifti file.
+    Left multiplies the affine matrix with a specified values. Saves the volume
+    as a nifti file.
     '''
     input_spec = ModifyAffineInputSpec
     output_spec = ModifyAffineOutputSpec
@@ -168,7 +199,8 @@ class ModifyAffine(BaseInterface):
             affine = img.get_affine()
             affine = np.dot(self.inputs.transformation_matrix, affine)
 
-            nb.save(nb.Nifti1Image(img.get_data(), affine, img.get_header()), self._gen_output_filename(fname))
+            nb.save(nb.Nifti1Image(img.get_data(), affine,
+                    img.get_header()), self._gen_output_filename(fname))
 
         return runtime
 
@@ -176,20 +208,33 @@ class ModifyAffine(BaseInterface):
         outputs = self._outputs().get()
         outputs['transformed_volumes'] = []
         for fname in self.inputs.volumes:
-            outputs['transformed_volumes'].append(self._gen_output_filename(fname))
+            outputs['transformed_volumes'].append(
+                self._gen_output_filename(fname))
         return outputs
 
 
 class DistanceInputSpec(BaseInterfaceInputSpec):
-    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
-    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    method = traits.Enum("eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", "eucl_max", desc='""eucl_min": Euclidean distance between two closest points\
-    "eucl_cog": mean Euclidian distance between the Center of Gravity of volume1 and CoGs of volume2\
-    "eucl_mean": mean Euclidian minimum distance of all volume2 voxels to volume1\
-    "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels to volume1 weighted by their values\
-    "eucl_max": maximum over minimum Euclidian distances of all volume2 voxels to volume1 (also known as the Hausdorff distance)',
-    usedefault=True)
-    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
+    volume1 = File(exists=True, mandatory=True,
+                   desc="Has to have the same dimensions as volume2.")
+    volume2 = File(
+        exists=True, mandatory=True,
+        desc="Has to have the same dimensions as volume1."
+    )
+    method = traits.Enum(
+        "eucl_min", "eucl_cog", "eucl_mean", "eucl_wmean", "eucl_max",
+        desc='""eucl_min": Euclidean distance between two closest points\
+        "eucl_cog": mean Euclidian distance between the Center of Gravity\
+        of volume1 and CoGs of volume2\
+        "eucl_mean": mean Euclidian minimum distance of all volume2 voxels\
+        to volume1\
+        "eucl_wmean": mean Euclidian minimum distance of all volume2 voxels\
+        to volume1 weighted by their values\
+        "eucl_max": maximum over minimum Euclidian distances of all volume2\
+        voxels to volume1 (also known as the Hausdorff distance)',
+        usedefault=True
+    )
+    mask_volume = File(
+        exists=True, desc="calculate overlap only within this mask.")
 
 
 class DistanceOutputSpec(TraitedSpec):
@@ -200,6 +245,7 @@ class DistanceOutputSpec(TraitedSpec):
 
 
 class Distance(BaseInterface):
+
     '''
     Calculates distance between two volumes.
     '''
@@ -233,8 +279,15 @@ class Distance(BaseInterface):
         set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
 
         dist_matrix = cdist(set1_coordinates.T, set2_coordinates.T)
-        (point1, point2) = np.unravel_index(np.argmin(dist_matrix), dist_matrix.shape)
-        return (euclidean(set1_coordinates.T[point1, :], set2_coordinates.T[point2, :]), set1_coordinates.T[point1, :], set2_coordinates.T[point2, :])
+        (point1, point2) = np.unravel_index(
+            np.argmin(dist_matrix), dist_matrix.shape)
+        return (
+            euclidean(
+                set1_coordinates.T[point1, :],
+                set2_coordinates.T[point2, :]
+            ),
+            set1_coordinates.T[point1, :], set2_coordinates.T[point2, :]
+        )
 
     def _eucl_cog(self, nii1, nii2):
         origdata1 = nii1.get_data().astype(np.bool)
@@ -248,7 +301,8 @@ class Distance(BaseInterface):
         cogs = np.ones((4, n_labels))
 
         for i in range(n_labels):
-            cogs[:3, i] = np.array(center_of_mass(origdata2, labeled_data, i + 1))
+            cogs[:3, i] = np.array(center_of_mass(origdata2,
+                                   labeled_data, i + 1))
 
         cogs_coor = np.dot(nii2.get_affine(), cogs)[:3, :]
 
@@ -275,19 +329,25 @@ class Distance(BaseInterface):
         plt.close()
 
         if weighted:
-            return np.average(min_dist_matrix, weights=nii2.get_data()[origdata2].flat)
+            return np.average(
+                min_dist_matrix,
+                weights=nii2.get_data()[origdata2].flat
+            )
         else:
             return np.mean(min_dist_matrix)
 
     def _eucl_max(self, nii1, nii2):
         origdata1 = nii1.get_data()
-        origdata1 = np.logical_not(np.logical_or(origdata1 == 0, np.isnan(origdata1)))
+        origdata1 = np.logical_not(
+            np.logical_or(origdata1 == 0, np.isnan(origdata1)))
         origdata2 = nii2.get_data()
-        origdata2 = np.logical_not(np.logical_or(origdata2 == 0, np.isnan(origdata2)))
+        origdata2 = np.logical_not(
+            np.logical_or(origdata2 == 0, np.isnan(origdata2)))
 
         if isdefined(self.inputs.mask_volume):
             maskdata = nb.load(self.inputs.mask_volume).get_data()
-            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            maskdata = np.logical_not(
+                np.logical_or(maskdata == 0, np.isnan(maskdata)))
             origdata1 = np.logical_and(maskdata, origdata1)
             origdata2 = np.logical_and(maskdata, origdata2)
 
@@ -300,7 +360,8 @@ class Distance(BaseInterface):
         set1_coordinates = self._get_coordinates(border1, nii1.get_affine())
         set2_coordinates = self._get_coordinates(border2, nii2.get_affine())
         distances = cdist(set1_coordinates.T, set2_coordinates.T)
-        mins = np.concatenate((np.amin(distances, axis=0), np.amin(distances, axis=1)))
+        mins = np.concatenate(
+            (np.amin(distances, axis=0), np.amin(distances, axis=1)))
 
         return np.max(mins)
 
@@ -309,7 +370,8 @@ class Distance(BaseInterface):
         nii2 = nb.load(self.inputs.volume2)
 
         if self.inputs.method == "eucl_min":
-            self._distance, self._point1, self._point2 = self._eucl_min(nii1, nii2)
+            self._distance, self._point1, self._point2 = self._eucl_min(
+                nii1, nii2)
 
         elif self.inputs.method == "eucl_cog":
             self._distance = self._eucl_cog(nii1, nii2)
@@ -336,9 +398,12 @@ class Distance(BaseInterface):
 
 
 class OverlapInputSpec(BaseInterfaceInputSpec):
-    volume1 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume2.")
-    volume2 = File(exists=True, mandatory=True, desc="Has to have the same dimensions as volume1.")
-    mask_volume = File(exists=True, desc="calculate overlap only within this mask.")
+    volume1 = File(exists=True, mandatory=True,
+                   desc="Has to have the same dimensions as volume2.")
+    volume2 = File(exists=True, mandatory=True,
+                   desc="Has to have the same dimensions as volume1.")
+    mask_volume = File(
+        exists=True, desc="calculate overlap only within this mask.")
     out_file = File("diff.nii", usedefault=True)
 
 
@@ -350,6 +415,7 @@ class OverlapOutputSpec(TraitedSpec):
 
 
 class Overlap(BaseInterface):
+
     """
     Calculates various overlap measures between two maps.
 
@@ -375,17 +441,21 @@ class Overlap(BaseInterface):
         nii1 = nb.load(self.inputs.volume1)
         nii2 = nb.load(self.inputs.volume2)
 
-        origdata1 = np.logical_not(np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
-        origdata2 = np.logical_not(np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
+        origdata1 = np.logical_not(
+            np.logical_or(nii1.get_data() == 0, np.isnan(nii1.get_data())))
+        origdata2 = np.logical_not(
+            np.logical_or(nii2.get_data() == 0, np.isnan(nii2.get_data())))
 
         if isdefined(self.inputs.mask_volume):
             maskdata = nb.load(self.inputs.mask_volume).get_data()
-            maskdata = np.logical_not(np.logical_or(maskdata == 0, np.isnan(maskdata)))
+            maskdata = np.logical_not(
+                np.logical_or(maskdata == 0, np.isnan(maskdata)))
             origdata1 = np.logical_and(maskdata, origdata1)
             origdata2 = np.logical_and(maskdata, origdata2)
 
         for method in ("dice", "jaccard"):
-            setattr(self, '_' + method, self._bool_vec_dissimilarity(origdata1, origdata2, method=method))
+            setattr(self, '_' + method, self._bool_vec_dissimilarity(
+                origdata1, origdata2, method=method))
 
         self._volume = int(origdata1.sum() - origdata2.sum())
 
@@ -393,7 +463,8 @@ class Overlap(BaseInterface):
         both_data[origdata1] = 1
         both_data[origdata2] += 2
 
-        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(), nii1.get_header()), self.inputs.out_file)
+        nb.save(nb.Nifti1Image(both_data, nii1.get_affine(),
+                nii1.get_header()), self.inputs.out_file)
 
         return runtime
 
@@ -406,9 +477,143 @@ class Overlap(BaseInterface):
         return outputs
 
 
+class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
+    in_ref = InputMultiPath(
+        File(exists=True), mandatory=True,
+        desc="Reference image. Requires the same dimensions as in_tst."
+    )
+    in_tst = InputMultiPath(
+        File(exists=True), mandatory=True,
+        desc="Test image. Requires the same dimensions as in_ref."
+    )
+    weighting = traits.Enum(
+        "none", "volume", "squared_vol",
+        desc='""none": no class-overlap weighting is performed\
+        "volume": computed class-overlaps are weighted by class volume\
+        "squared_vol": computed class-overlaps are weighted by the squared\
+        volume of the class', usedefault=True
+    )
+    out_file = File(
+        "diff.nii",
+        desc="alternative name for resulting difference-map",
+        usedefault=True
+    )
+
+
+class FuzzyOverlapOutputSpec(TraitedSpec):
+    jaccard = traits.Float(desc="Fuzzy Jaccard Index (fJI), all the classes")
+    dice = traits.Float(desc="Fuzzy Dice Index (fDI), all the classes")
+    diff_file = File(
+        exists=True, desc="resulting difference-map of all classes,\
+        using the chosen weighting"
+    )
+    class_fji = traits.List(
+        traits.Float(),
+        desc="Array containing the fJIs of each computed class"
+    )
+    class_fdi = traits.List(
+        traits.Float(),
+        desc="Array containing the fDIs of each computed class"
+    )
+
+
+class FuzzyOverlap(BaseInterface):
+
+    """
+    Calculates various overlap measures between two maps, using the fuzzy
+    definition proposed in: Crum et al., Generalized Overlap Measures for
+    Evaluation and Validation in Medical Image Analysis, IEEE Trans. Med.
+    Ima. 25(11),pp 1451-1461, Nov. 2006.
+
+    in_ref and in_tst are lists of 2/3D images, each element on the list
+    containing one volume fraction map of a class in a fuzzy partition
+    of the domain.
+
+    Example
+    -------
+
+    >>> overlap = FuzzyOverlap()
+    >>> overlap.inputs.in_ref = [ 'ref_class0.nii', 'ref_class1.nii' ]
+    >>> overlap.inputs.in_tst = [ 'tst_class0.nii', 'tst_class1.nii' ]
+    >>> overlap.inputs.weighting = 'volume'
+    >>> res = overlap.run() # doctest: +SKIP
+    """
+
+    input_spec = FuzzyOverlapInputSpec
+    output_spec = FuzzyOverlapOutputSpec
+
+    def _run_interface(self, runtime):
+        ncomp = len(self.inputs.in_ref)
+        assert(ncomp == len(self.inputs.in_tst))
+        weights = np.ones(shape=ncomp)
+
+        img_ref = np.array([nb.load(fname).get_data()
+                           for fname in self.inputs.in_ref])
+        img_tst = np.array([nb.load(fname).get_data()
+                           for fname in self.inputs.in_tst])
+
+        msk = np.sum(img_ref, axis=0)
+        msk[msk > 0] = 1.0
+        tst_msk = np.sum(img_tst, axis=0)
+        tst_msk[tst_msk > 0] = 1.0
+
+        self._jaccards = []
+        volumes = []
+
+        diff_im = np.zeros(img_ref.shape)
+
+        for ref_comp, tst_comp, diff_comp in zip(img_ref, img_tst, diff_im):
+            num = np.minimum(ref_comp, tst_comp)
+            ddr = np.maximum(ref_comp, tst_comp)
+            diff_comp[ddr > 0] += 1.0 - (num[ddr > 0] / ddr[ddr > 0])
+            self._jaccards.append(np.sum(num) / np.sum(ddr))
+            volumes.append(np.sum(ref_comp))
+
+        self._dices = 2.0 * \
+            np.array(self._jaccards) / (np.array(self._jaccards) + 1.0)
+
+        if self.inputs.weighting != "none":
+            weights = 1.0 / np.array(volumes)
+            if self.inputs.weighting == "squared_vol":
+                weights = weights ** 2
+
+        weights = weights / np.sum(weights)
+
+        setattr(self, '_jaccard',  np.sum(weights * self._jaccards))
+        setattr(self, '_dice', np.sum(weights * self._dices))
+
+        diff = np.zeros(diff_im[0].shape)
+
+        for w, ch in zip(weights, diff_im):
+            ch[msk == 0] = 0
+            diff += w * ch
+
+        nb.save(
+            nb.Nifti1Image(
+                diff,
+                nb.load(self.inputs.in_ref[0]).get_affine(),
+                nb.load(self.inputs.in_ref[0]).get_header()
+            ),
+            self.inputs.out_file
+        )
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        for method in ("dice", "jaccard"):
+            outputs[method] = getattr(self, '_' + method)
+        outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['class_fji'] = np.array(
+            self._jaccards).astype(float).tolist()
+        outputs['class_fdi'] = self._dices.astype(float).tolist()
+        return outputs
+
+
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
-    header_file = File(exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
+    header_file = File(
+        exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
     affine = traits.Array(exists=True, desc="affine transformation array")
 
 
@@ -425,7 +630,8 @@ class CreateNifti(BaseInterface):
         return os.path.abspath(base + ".nii")
 
     def _run_interface(self, runtime):
-        hdr = nb.AnalyzeHeader.from_fileobj(open(self.inputs.header_file, 'rb'))
+        hdr = nb.AnalyzeHeader.from_fileobj(
+            open(self.inputs.header_file, 'rb'))
 
         if isdefined(self.inputs.affine):
             affine = self.inputs.affine
@@ -446,7 +652,7 @@ class CreateNifti(BaseInterface):
 
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
-                   desc='realigned 4D file or a list of 3D files')
+                             desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Int(min=1, desc='Remove polynomials')
 
 
@@ -458,6 +664,7 @@ class TSNROutputSpec(TraitedSpec):
 
 
 class TSNR(BaseInterface):
+
     """Computes the time-course SNR for a time series
 
     Typically you want to run this on a realigned time-series.
@@ -486,7 +693,8 @@ class TSNR(BaseInterface):
         img = nb.load(self.inputs.in_file[0])
         header = img.get_header().copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
-        data = np.concatenate([vol.get_data().reshape(vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+        data = np.concatenate([vol.get_data().reshape(
+            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
         if data.dtype.kind == 'i':
             header.set_data_dtype(np.float32)
             data = data.astype(np.float32)
@@ -494,10 +702,12 @@ class TSNR(BaseInterface):
             timepoints = img.get_shape()[-1]
             X = np.ones((timepoints, 1))
             for i in range(self.inputs.regress_poly):
-                X = np.hstack((X, legendre(i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
+                X = np.hstack((X, legendre(
+                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
             betas = np.dot(np.linalg.pinv(X), np.rollaxis(data, 3, 2))
             datahat = np.rollaxis(np.dot(X[:, 1:],
-                                         np.rollaxis(betas[1:, :, :, :], 0, 3)),
+                                         np.rollaxis(
+                                             betas[1:, :, :, :], 0, 3)),
                                   0, 4)
             data = data - datahat
             img = nb.Nifti1Image(data, img.get_affine(), header)
@@ -522,13 +732,17 @@ class TSNR(BaseInterface):
             outputs['detrended_file'] = self._gen_output_file_name('detrended')
         return outputs
 
+
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
+
 
 class GunzipOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
+
 class Gunzip(BaseInterface):
+
     """
 
     """
@@ -555,34 +769,49 @@ class Gunzip(BaseInterface):
         outputs['out_file'] = self._gen_output_file_name()
         return outputs
 
+
 def replaceext(in_list, ext):
     out_list = list()
     for filename in in_list:
         path, name, _ = split_filename(op.abspath(filename))
-        out_name = op.join(path,name) + ext
+        out_name = op.join(path, name) + ext
         out_list.append(out_name)
     return out_list
 
+
 def matlab2csv(in_array, name, reshape):
     output_array = np.asarray(in_array)
-    if reshape == True:
-		if len(np.shape(output_array)) > 1:
-			output_array = np.reshape(output_array,(np.shape(output_array)[0]*np.shape(output_array)[1],1))
-			iflogger.info(np.shape(output_array))
+    if reshape:
+        if len(np.shape(output_array)) > 1:
+            output_array = np.reshape(output_array, (
+                np.shape(output_array)[0] * np.shape(output_array)[1], 1))
+            iflogger.info(np.shape(output_array))
     output_name = op.abspath(name + '.csv')
     np.savetxt(output_name, output_array, delimiter=',')
     return output_name
 
+
 class Matlab2CSVInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True, desc='Input MATLAB .mat file')
-    reshape_matrix = traits.Bool(True, usedefault=True, desc='The output of this interface is meant for R, so matrices will be reshaped to vectors by default.')
+    reshape_matrix = traits.Bool(
+        True, usedefault=True,
+        desc='The output of this interface is meant for R, so matrices will be\
+        reshaped to vectors by default.'
+    )
+
 
 class Matlab2CSVOutputSpec(TraitedSpec):
-    csv_files = OutputMultiPath(File(desc='Output CSV files for each variable saved in the input .mat file'))
+    csv_files = OutputMultiPath(
+        File(desc='Output CSV files for each variable saved in the input .mat\
+        file')
+    )
+
 
 class Matlab2CSV(BaseInterface):
+
     """
-    Simple interface to save the components of a MATLAB .mat file as a text file with comma-separated values (CSVs).
+    Simple interface to save the components of a MATLAB .mat file as a text
+    file with comma-separated values (CSVs).
 
     CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
@@ -601,28 +830,40 @@ class Matlab2CSV(BaseInterface):
     def _run_interface(self, runtime):
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
 
-        # Check if the file has multiple variables in it. If it does, loop through them and save them as individual CSV files.
-        # If not, save the variable as a single CSV file using the input file name and a .csv extension.
+        # Check if the file has multiple variables in it. If it does, loop
+        # through them and save them as individual CSV files.
+        # If not, save the variable as a single CSV file using the input file
+        # name and a .csv extension.
 
         saved_variables = list()
         for key in in_dict.keys():
             if not key.startswith('__'):
-				if isinstance(in_dict[key][0],np.ndarray):
-					saved_variables.append(key)
-				else:
-					iflogger.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
+                if isinstance(in_dict[key][0], np.ndarray):
+                    saved_variables.append(key)
+                else:
+                    iflogger.info(
+                        'One of the keys in the input file, {k},\
+                        is not a Numpy array'.format(k=key)
+                    )
 
         if len(saved_variables) > 1:
-            iflogger.info('{N} variables found:'.format(N=len(saved_variables)))
+            iflogger.info(
+                '{N} variables found:'.format(N=len(saved_variables)))
             iflogger.info(saved_variables)
             for variable in saved_variables:
-                iflogger.info('...Converting {var} - type {ty} - to CSV'.format(var=variable, ty=type(in_dict[variable])))
-                matlab2csv(in_dict[variable], variable, self.inputs.reshape_matrix)
+                iflogger.info(
+                    '...Converting {var} - type {ty} - to\
+                    CSV'.format(var=variable, ty=type(in_dict[variable]))
+                )
+                matlab2csv(
+                    in_dict[variable], variable, self.inputs.reshape_matrix)
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
-            iflogger.info('Single variable found {var}, type {ty}:'.format(var=variable, ty=type(in_dict[variable])))
-            iflogger.info('...Converting {var} to CSV from {f}'.format(var=variable, f=self.inputs.in_file))
+            iflogger.info('Single variable found {var}, type {ty}:'.format(
+                var=variable, ty=type(in_dict[variable])))
+            iflogger.info('...Converting {var} to CSV from {f}'.format(
+                var=variable, f=self.inputs.in_file))
             matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
             iflogger.error('No values in the MATLAB file?!')
@@ -634,10 +875,11 @@ class Matlab2CSV(BaseInterface):
         saved_variables = list()
         for key in in_dict.keys():
             if not key.startswith('__'):
-				if isinstance(in_dict[key][0],np.ndarray):
-					saved_variables.append(key)
-				else:
-					iflogger.error('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
+                if isinstance(in_dict[key][0], np.ndarray):
+                    saved_variables.append(key)
+                else:
+                    iflogger.error('One of the keys in the input file, {k}, is\
+                                   not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
             outputs['csv_files'] = replaceext(saved_variables, '.csv')
@@ -647,6 +889,7 @@ class Matlab2CSV(BaseInterface):
         else:
             iflogger.error('No values in the MATLAB file?!')
         return outputs
+
 
 def merge_csvs(in_list):
     for idx, in_file in enumerate(in_list):
@@ -661,9 +904,15 @@ def merge_csvs(in_list):
                 header_list = header_line.split(',')
                 n_cols = len(header_list)
                 try:
-                    in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols))
+                    in_array = np.loadtxt(
+                        in_file, delimiter=',', skiprows=1,
+                        usecols=range(1, n_cols)
+                    )
                 except ValueError, ex:
-                    in_array = np.loadtxt(in_file, delimiter=',', skiprows=1, usecols=range(1,n_cols-1))
+                    in_array = np.loadtxt(
+                        in_file, delimiter=',', skiprows=1,
+                        usecols=range(1, n_cols - 1)
+                    )
         if idx == 0:
             out_array = in_array
         else:
@@ -673,6 +922,7 @@ def merge_csvs(in_list):
     iflogger.info(np.shape(out_array))
     return out_array
 
+
 def remove_identical_paths(in_files):
     import os.path as op
     from nipype.utils.filemanip import split_filename
@@ -680,7 +930,7 @@ def remove_identical_paths(in_files):
         out_names = list()
         commonprefix = op.commonprefix(in_files)
         lastslash = commonprefix.rfind('/')
-        commonpath = commonprefix[0:(lastslash+1)]
+        commonpath = commonprefix[0:(lastslash + 1)]
         for fileidx, in_file in enumerate(in_files):
             path, name, ext = split_filename(in_file)
             in_file = op.join(path, name)
@@ -692,57 +942,77 @@ def remove_identical_paths(in_files):
         out_names = [name]
     return out_names
 
+
 def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     typelist = []
     if rowheadings:
-        typelist.append(('heading','a40'))
+        typelist.append(('heading', 'a40'))
     if len(shape) > 1:
-        for idx in range(1,(min(shape)+1)):
+        for idx in range(1, (min(shape) + 1)):
             typelist.append((str(idx), float))
     else:
-        for idx in range(1,(shape[0]+1)):
+        for idx in range(1, (shape[0] + 1)):
             typelist.append((str(idx), float))
     if extraheadingBool:
         typelist.append((extraheading, 'a40'))
     iflogger.info(typelist)
     return typelist
 
-def makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool):
+
+def makefmtlist(output_array, typelist, rowheadingsBool,
+                shape, extraheadingBool):
     fmtlist = []
     if rowheadingsBool:
         fmtlist.append('%s')
     if len(shape) > 1:
         output = np.zeros(max(shape), typelist)
-        for idx in range(1,min(shape)+1):
-            output[str(idx)] = output_array[:,idx-1]
+        for idx in range(1, min(shape) + 1):
+            output[str(idx)] = output_array[:, idx - 1]
             fmtlist.append('%f')
     else:
         output = np.zeros(1, typelist)
-        for idx in range(1,len(output_array)+1):
-            output[str(idx)] = output_array[idx-1]
+        for idx in range(1, len(output_array) + 1):
+            output[str(idx)] = output_array[idx - 1]
             fmtlist.append('%f')
     if extraheadingBool:
         fmtlist.append('%s')
     fmt = ','.join(fmtlist)
     return fmt, output
 
+
 class MergeCSVFilesInputSpec(TraitedSpec):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Input comma-separated value (CSV) files')
-    out_file = File('merged.csv', usedefault=True, desc='Output filename for merged CSV file')
-    column_headings = traits.List(traits.Str, desc='List of column headings to save in merged CSV file (must be equal to number of input files). If left undefined, these will be pulled from the input filenames.')
-    row_headings = traits.List(traits.Str, desc='List of row headings to save in merged CSV file (must be equal to number of rows in the input files).')
-    row_heading_title = traits.Str('label', usedefault=True, desc='Column heading for the row headings added')
-    extra_column_heading = traits.Str(desc='New heading to add for the added field.')
-    extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
+    in_files = InputMultiPath(File(exists=True), mandatory=True,
+                              desc='Input comma-separated value (CSV) files')
+    out_file = File('merged.csv', usedefault=True,
+                    desc='Output filename for merged CSV file')
+    column_headings = traits.List(
+        traits.Str, desc='List of column headings to save in merged CSV file\
+        (must be equal to number of input files). If left undefined, these\
+        will be pulled from the input filenames.')
+    row_headings = traits.List(
+        traits.Str, desc='List of row headings to save in merged CSV file\
+        (must be equal to number of rows in the input files).')
+    row_heading_title = traits.Str(
+        'label', usedefault=True, desc='Column heading for the row headings\
+         added')
+    extra_column_heading = traits.Str(
+        desc='New heading to add for the added field.')
+    extra_field = traits.Str(
+        desc='New field to add to each row. This is useful for saving the\
+        group or subject ID in the file.')
+
 
 class MergeCSVFilesOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing columns ')
 
+
 class MergeCSVFiles(BaseInterface):
+
     """
     This interface is designed to facilitate data loading in the R environment.
     It takes input CSV files and merges them into a single CSV file.
-    If provided, it will also incorporate column heading names into the resulting CSV file.
+    If provided, it will also incorporate column heading names into the
+    resulting CSV file.
 
     CSV files are easily loaded in R, for use in statistical processing.
     For further information, see cran.r-project.org/doc/manuals/R-data.pdf
@@ -770,26 +1040,31 @@ class MergeCSVFiles(BaseInterface):
             iflogger.info('Column headings have been provided:')
             headings = self.inputs.column_headings
         else:
-            iflogger.info('Column headings not provided! Pulled from input filenames:')
+            iflogger.info(
+                'Column headings not provided! Pulled from input filenames:')
             headings = remove_identical_paths(self.inputs.in_files)
 
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
-                iflogger.info('Extra column heading provided: {col}'.format(col=extraheading))
+                iflogger.info('Extra column heading provided: {col}'.format(
+                    col=extraheading))
             else:
                 extraheading = 'type'
-                iflogger.info('Extra column heading was not defined. Using "type"')
+                iflogger.info(
+                    'Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
-            extraheadingBool = True            
+            extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
             iflogger.warn('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
-            iflogger.info('Row headings have been provided. Adding "labels" column header.')
+            iflogger.info('Row headings have been provided. Adding "labels"\
+                          column header.')
             prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
-            csv_headings = prefix + '","'.join(itertools.chain(headings)) + '"\n'
+            csv_headings = prefix + '","'.join(itertools.chain(
+                headings)) + '"\n'
             rowheadingsBool = True
         else:
             iflogger.info('Row headings have not been provided.')
@@ -808,12 +1083,14 @@ class MergeCSVFiles(BaseInterface):
             ext = '.csv'
 
         out_file = op.abspath(name + ext)
-        file_handle = open(out_file,'w')
+        file_handle = open(out_file, 'w')
         file_handle.write(csv_headings)
 
         shape = np.shape(output_array)
-        typelist = maketypelist(rowheadingsBool, shape, extraheadingBool, extraheading)
-        fmt, output = makefmtlist(output_array, typelist, rowheadingsBool, shape, extraheadingBool)
+        typelist = maketypelist(
+            rowheadingsBool, shape, extraheadingBool, extraheading)
+        fmt, output = makefmtlist(
+            output_array, typelist, rowheadingsBool, shape, extraheadingBool)
 
         if rowheadingsBool:
             row_heading_list = self.inputs.row_headings
@@ -830,7 +1107,7 @@ class MergeCSVFiles(BaseInterface):
                 mx = shape[0]
             else:
                 mx = 1
-            for idx in range(0,mx):
+            for idx in range(0, mx):
                 extrafieldlist.append(self.inputs.extra_field)
             iflogger.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist
@@ -849,16 +1126,25 @@ class MergeCSVFiles(BaseInterface):
         outputs['csv_file'] = out_file
         return outputs
 
+
 class AddCSVColumnInputSpec(TraitedSpec):
-    in_file = File(exists=True, mandatory=True, desc='Input comma-separated value (CSV) files')
-    out_file = File('extra_heading.csv', usedefault=True, desc='Output filename for merged CSV file')
-    extra_column_heading = traits.Str(desc='New heading to add for the added field.')
-    extra_field = traits.Str(desc='New field to add to each row. This is useful for saving the group or subject ID in the file.')
+    in_file = File(exists=True, mandatory=True,
+                   desc='Input comma-separated value (CSV) files')
+    out_file = File('extra_heading.csv', usedefault=True,
+                    desc='Output filename for merged CSV file')
+    extra_column_heading = traits.Str(
+        desc='New heading to add for the added field.')
+    extra_field = traits.Str(
+        desc='New field to add to each row. This is useful for saving the\
+        group or subject ID in the file.')
+
 
 class AddCSVColumnOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing columns ')
 
+
 class AddCSVColumn(BaseInterface):
+
     """
     Short interface to add an extra column and field to a text file
 
@@ -876,22 +1162,23 @@ class AddCSVColumn(BaseInterface):
     output_spec = AddCSVColumnOutputSpec
 
     def _run_interface(self, runtime):
-		in_file = open(self.inputs.in_file, 'r')
-		_, name, ext = split_filename(self.inputs.out_file)
-		if not ext == '.csv':
-			ext = '.csv'
-		out_file = op.abspath(name + ext)
+        in_file = open(self.inputs.in_file, 'r')
+        _, name, ext = split_filename(self.inputs.out_file)
+        if not ext == '.csv':
+            ext = '.csv'
+        out_file = op.abspath(name + ext)
 
-		out_file = open(out_file, 'w')
-		firstline = in_file.readline()
-		firstline = firstline.replace('\n','')
-		new_firstline = firstline + ',"' + self.inputs.extra_column_heading + '"\n'
-		out_file.write(new_firstline)
-		for line in in_file:
-			new_line = line.replace('\n','')
-			new_line = new_line + ',' + self.inputs.extra_field + '\n'
-			out_file.write(new_line)
-		return runtime
+        out_file = open(out_file, 'w')
+        firstline = in_file.readline()
+        firstline = firstline.replace('\n', '')
+        new_firstline = firstline + ',"' + \
+            self.inputs.extra_column_heading + '"\n'
+        out_file.write(new_firstline)
+        for line in in_file:
+            new_line = line.replace('\n', '')
+            new_line = new_line + ',' + self.inputs.extra_field + '\n'
+            out_file.write(new_line)
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -901,3 +1188,64 @@ class AddCSVColumn(BaseInterface):
         out_file = op.abspath(name + ext)
         outputs['csv_file'] = out_file
         return outputs
+
+
+class CalculateNormalizedMomentsInputSpec(TraitedSpec):
+    timeseries_file = File(
+        exists=True, mandatory=True,
+        desc='Text file with timeseries in columns and timepoints in rows,\
+        whitespace separated')
+    moment = traits.Int(
+        mandatory=True,
+        desc="Define which moment should be calculated, 3 for skewness, 4 for\
+        kurtosis.")
+
+
+class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
+    moments = traits.List(traits.Float(), desc='Moments')
+
+
+class CalculateNormalizedMoments(BaseInterface):
+
+    """
+    Calculates moments of timeseries.
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> skew = misc.CalculateNormalizedMoments()
+    >>> skew.inputs.moment = 3
+    >>> skew.inputs.timeseries_file = 'timeseries.txt'
+    >>> skew.run() # doctest: +SKIP
+    """
+    input_spec = CalculateNormalizedMomentsInputSpec
+    output_spec = CalculateNormalizedMomentsOutputSpec
+
+    def _run_interface(self, runtime):
+
+        self._moments = calc_moments(
+            self.inputs.timeseries_file, self.inputs.moment)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['skewness'] = self._moments
+        return outputs
+
+
+def calc_moments(timeseries_file, moment):
+    """
+    Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
+    (list of values; one per timeseries).
+
+    Keyword arguments:
+    timeseries_file -- text file with white space separated timepoints in rows
+
+    """
+    timeseries = np.genfromtxt(timeseries_file)
+
+    m2 = stats.moment(timeseries, 2, axis=0)
+    m3 = stats.moment(timeseries, moment, axis=0)
+    zero = (m2 == 0)
+    return np.where(zero, 0, m3 / m2 ** (moment / 2.0))

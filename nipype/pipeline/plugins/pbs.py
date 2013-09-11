@@ -19,8 +19,12 @@ class PBSPlugin(SGELikeBatchManagerBase):
     - template : template to use for batch job submission
     - qsub_args : arguments to be prepended to the job execution script in the
                   qsub call
+    - max_jobname_len: maximum length of the job name.  Default 15.
 
     """
+
+    # Addtional class variables
+    _max_jobname_len = 15
 
     def __init__(self, **kwargs):
         template = """
@@ -28,11 +32,14 @@ class PBSPlugin(SGELikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
+        self._max_jobname_length = 15
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if  'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
+            if  'max_jobname_len' in kwargs['plugin_args']:
+                self._max_jobname_len = kwargs['plugin_args']['max_jobname_len']
         super(PBSPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
@@ -71,6 +78,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
+        jobname = jobname[0:self._max_jobname_len]
         cmd.inputs.args = '%s -N %s %s' % (qsubargs,
                                            jobname,
                                            scriptfile)

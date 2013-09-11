@@ -100,6 +100,7 @@ class MRISPreproc(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outfile = self.inputs.out_file
+        outputs['out_file'] = outfile
         if not isdefined(outfile):
             outputs['out_file'] = os.path.join(os.getcwd(),
                                    'concat_%s_%s.mgz' % (self.inputs.hemi,
@@ -341,9 +342,9 @@ class OneSampleTTest(GLMFit):
 class BinarizeInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='--i %s', mandatory=True,
                   copyfile=False, desc='input volume')
-    min = traits.Float(argstr='--min %f',
+    min = traits.Float(argstr='--min %f', xor=['wm_ven_csf'],
                        desc='min thresh')
-    max = traits.Float(argstr='--max %f',
+    max = traits.Float(argstr='--max %f', xor=['wm_ven_csf'],
                        desc='max thresh')
     rmin = traits.Float(argstr='--rmin %f',
                         desc='compute min based on rmin*globalmean')
@@ -355,7 +356,7 @@ class BinarizeInputSpec(FSTraitedSpec):
          desc='set match vals to 2 and 41 (aseg for cerebral WM)')
     ventricles = traits.Bool(argstr='--ventricles',
          desc='set match vals those for aseg ventricles+choroid (not 4th)')
-    wm_ven_csf = traits.Bool(argstr='--wm+vcsf',
+    wm_ven_csf = traits.Bool(argstr='--wm+vcsf', xor=['min', 'max'],
           desc='WM and ventricular CSF, including choroid (not 4th)')
     binary_file = File(argstr='--o %s', genfile=True,
                   desc='binary output volume')
@@ -429,7 +430,7 @@ class Binarize(FSCommand):
                 outfile = fname_presuffix(self.inputs.in_file,
                                           newpath=os.getcwd(),
                                           suffix='_thresh')
-        outputs['binary_file'] = outfile
+        outputs['binary_file'] = os.path.abspath(outfile)
         value = self.inputs.count_file
         if isdefined(value):
             if isinstance(value, bool):
