@@ -2,8 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
-                                    BaseInterfaceInputSpec, isdefined, 
+from nipype.interfaces.base import (TraitedSpec, BaseInterface,
+                                    BaseInterfaceInputSpec, isdefined,
                                     OutputMultiPath, InputMultiPath)
 from nipype.interfaces.base import File, traits
 from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_list,list_to_filename

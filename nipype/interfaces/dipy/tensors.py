@@ -19,7 +19,7 @@ from ... import logging
 iflogger = logging.getLogger('interface')
 
 try:
-    package_check('dipy', version='0.7.0')
+    package_check('dipy', version='0.6.0')
     import dipy.reconst.dti as dti
     from dipy.core.gradients import GradientTable
 except Exception, e:

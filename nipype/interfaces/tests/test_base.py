@@ -205,19 +205,19 @@ def test_TraitedSpec_withNoFileHashing():
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     yield assert_equal, hashval[1], '642c326a05add933e9cdc333ce2d0ac2'
-    
+
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True, name_source="doo")
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec3(moo=nme, doo=[tmp_infile])
     hashval1 = infields.get_hashval(hash_method='content')
-    
+
     class spec4(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec4(moo=nme, doo=[tmp_infile])
     hashval2 = infields.get_hashval(hash_method='content')
-    
+
     yield assert_not_equal, hashval1[1],  hashval2[1]
     os.chdir(pwd)
     teardown_file(tmpd)

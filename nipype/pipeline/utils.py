@@ -6,19 +6,29 @@
 from copy import deepcopy
 from glob import glob
 import os
+import pickle
+import pwd
 import re
+from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
+
 package_check('networkx', '1.3')
+import json
+from socket import gethostname, getfqdn
+
 import networkx as nx
 
-from nipype.interfaces.base import CommandLine, isdefined, Undefined
-from nipype.utils.filemanip import fname_presuffix, FileNotFoundError,\
-    filename_to_list
-from nipype.utils.misc import create_function_from_source, str2bool
-from nipype.interfaces.utility import IdentityInterface
+from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
+                               filename_to_list)
+from ..utils.misc import create_function_from_source, str2bool
+from ..interfaces.base import CommandLine, isdefined, Undefined, Bunch
+from ..interfaces.base import pm as prov, safe_encode
+from ..interfaces.utility import IdentityInterface
 
+from .. import __version__ as nipype_version
+from .. import get_info
 from .. import logging, config
 logger = logging.getLogger('workflow')
 
@@ -31,7 +41,6 @@ except AttributeError:
 try:
     from os.path import relpath
 except ImportError:
-    import os
     import os.path as op
 
     def relpath(path, start=None):
@@ -50,7 +59,7 @@ except ImportError:
                                   "(%s and %s)") % (path, start))
             else:
                 raise ValueError("path is on drive %s, start on drive %s"
-                                             % (path_list[0], start_list[0]))
+                                 % (path_list[0], start_list[0]))
         # Work out how much of the filepath is shared by start and path.
         for i in range(min(len(start_list), len(path_list))):
             if start_list[i].lower() != path_list[i].lower():
@@ -130,11 +139,12 @@ def get_print_name(node, simple_form=True):
             name = '.'.join([node.fullname, interface]) + destclass
     if simple_form:
         parts = name.split('.')
-        if len(parts)>2:
+        if len(parts) > 2:
             return ' ('.join(parts[1:])+')'
-        elif len(parts)==2:
+        elif len(parts) == 2:
             return parts[1]
     return name
+
 
 def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
     """Create a graph that can be pickled.
@@ -185,9 +195,9 @@ def _write_detailed_dot(graph, dotfilename):
                 ipstrip = 'in' + replacefunk(inport)
                 opstrip = 'out' + replacefunk(outport)
                 edges.append('%s:%s:e -> %s:%s:w;' % (str(u).replace('.', ''),
-                                                  opstrip,
-                                                  str(v).replace('.', ''),
-                                                  ipstrip))
+                                                      opstrip,
+                                                      str(v).replace('.', ''),
+                                                      ipstrip))
                 if inport not in inports:
                     inports.append(inport)
         inputstr = '{IN'
@@ -210,7 +220,6 @@ def _write_detailed_dot(graph, dotfilename):
         srcpackage = ''
         if hasattr(n, '_interface'):
             pkglist = n._interface.__class__.__module__.split('.')
-            interface = n._interface.__class__.__name__
             if len(pkglist) > 2:
                 srcpackage = pkglist[2]
         srchierarchy = '.'.join(nodename.split('.')[1:-1])
@@ -274,8 +283,8 @@ def evaluate_connect_function(function_source, args, first_arg):
         output_value = func(first_arg,
                             *list(args))
     except NameError as e:
-        if e.args[0].startswith("global name") and e.args[0].endswith(
-            "is not defined"):
+        if e.args[0].startswith("global name") and \
+                e.args[0].endswith("is not defined"):
             e.args = (e.args[0],
                       ("Due to engine constraints all imports have to be done "
                        "inside each function definition"))
@@ -339,7 +348,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
                 if n._hierarchy + n._id not in edgeinfo.keys():
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
-                                       supergraph.get_edge_data(*edge)))
+                                               supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     count = 0
@@ -412,7 +421,7 @@ def _remove_identity_nodes(graph, keep_iterables=False):
             for u, _, d in graph.in_edges_iter(node, data=True):
                 for src, dest in d['connect']:
                     portinputs[dest] = (u, src)
-            for  _, v, d in graph.out_edges_iter(node, data=True):
+            for _, v, d in graph.out_edges_iter(node, data=True):
                 for src, dest in d['connect']:
                     if isinstance(src, tuple):
                         srcport = src[0]
@@ -511,8 +520,8 @@ def generate_expanded_graph(graph_in):
             else:
                 if prior_prefix[-1] == 'z':
                     raise ValueError('Too many iterables in the workflow')
-                iterable_prefix =\
-                allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+                iterable_prefix = \
+                           allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
             node._id += ('.' + iterable_prefix + 'I')
             logger.debug(('subnodes:', subnodes))
             subgraph = graph_in.subgraph(subnodes)
@@ -669,7 +678,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
         inputdict = inputs.get()
         input_files.extend(walk_outputs(inputdict))
         needed_files += [path for path, type in input_files if type == 'f']
-    for extra in ['_0x*.json', 'provenance.xml', 'pyscript*.m',
+    for extra in ['_0x*.json', 'provenance.*', 'pyscript*.m',
                   'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:
@@ -687,7 +696,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
             if f not in needed_files:
                 if len(needed_dirs) == 0:
                     files2remove.append(f)
-                elif not any([f.startswith(dirname) for dirname in needed_dirs]):
+                elif not any([f.startswith(dname) for dname in needed_dirs]):
                     files2remove.append(f)
     else:
         if not str2bool(config['execution']['keep_inputs']):
@@ -737,3 +746,203 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
         else:
             result[k] = v
     return result
+
+
+def write_prov(graph, filename=None, format='turtle'):
+    """Write W3C PROV Model JSON file
+    """
+    if not filename:
+        filename = os.path.join(os.getcwd(), 'workflow_provenance')
+    foaf = prov.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
+    dcterms = prov.Namespace("dcterms", "http://purl.org/dc/terms/")
+    nipype = prov.Namespace("nipype", "http://nipy.org/nipype/terms/")
+
+    # create a provenance container
+    g = prov.ProvBundle()
+
+    # Set the default _namespace name
+    #g.set_default_namespace(nipype.get_uri())
+    g.add_namespace(foaf)
+    g.add_namespace(dcterms)
+    g.add_namespace(nipype)
+
+    get_id = lambda: nipype[uuid1().hex]
+
+    user_agent = g.agent(get_id(),
+                         {prov.PROV["type"]: prov.PROV["Person"],
+                          prov.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
+                          foaf["name"]: safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
+    agent_attr = {prov.PROV["type"]: prov.PROV["SoftwareAgent"],
+                  prov.PROV["label"]: "Nipype",
+                  foaf["name"]: safe_encode("Nipype")}
+    for key, value in get_info().items():
+        agent_attr.update({nipype[key]: safe_encode(value)})
+    software_agent = g.agent(get_id(), agent_attr)
+
+    processes = []
+    nodes = graph.nodes()
+    for idx, node in enumerate(nodes):
+        result = node.result
+        classname = node._interface.__class__.__name__
+        _, hashval, _, _ = node.hash_exists()
+        if isinstance(result.runtime, list):
+            startTime = None
+            endTime = None
+            for runtime in result.runtime:
+                newStartTime = getattr(runtime, 'startTime')
+                if startTime:
+                    if newStartTime < startTime:
+                        startTime = newStartTime
+                else:
+                    startTime = newStartTime
+                newEndTime = getattr(runtime, 'endTime')
+                if endTime:
+                    if newEndTime > endTime:
+                        endTime = newEndTime
+                else:
+                    endTime = newEndTime
+            attrs = {foaf["host"]: gethostname(),
+                     prov.PROV["type"]: nipype[classname],
+                     prov.PROV["label"]: '_'.join((classname,
+                                                   node.name)),
+                     nipype['hashval']: hashval}
+            process = g.activity(uuid1().hex, startTime,
+                                 endTime, attrs)
+            process.add_extra_attributes({prov.PROV["type"]: nipype["MapNode"]})
+            # add info about sub processes
+            for runtime in result.runtime:
+                attrs = {foaf["host"]: runtime.hostname,
+                         prov.PROV["type"]: nipype[classname],
+                         prov.PROV["label"]: '_'.join((classname,
+                                                       node.name)),
+                         #nipype['hashval']: hashval,
+                         nipype['duration']: runtime.duration,
+                         nipype['working_directory']: runtime.cwd,
+                         nipype['return_code']: runtime.returncode,
+                         nipype['platform']: runtime.platform,
+                         }
+                try:
+                    attrs.update({nipype['command']: runtime.cmdline})
+                    attrs.update({nipype['command_path']: runtime.command_path})
+                    attrs.update({nipype['dependencies']: runtime.dependencies})
+                except AttributeError:
+                    pass
+                process_sub = g.activity(uuid1().hex, runtime.startTime,
+                                     runtime.endTime, attrs)
+                process_sub.add_extra_attributes({prov.PROV["type"]: nipype["Node"]})
+                g.wasAssociatedWith(process_sub, user_agent, None, None,
+                                    {prov.PROV["Role"]: "LoggedInUser"})
+                g.wasAssociatedWith(process_sub, software_agent, None, None,
+                                    {prov.PROV["Role"]: prov.PROV["SoftwareAgent"]})
+                g.wasInformedBy(process_sub, process)
+                # environment
+                id = uuid1().hex
+                environ = g.entity(id)
+                environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
+                                              prov.PROV['label']: "environment",
+                                              nipype['environ_json']: json.dumps(runtime.environ)})
+                g.used(process_sub, id)
+        else:
+            runtime = result.runtime
+            attrs = {foaf["host"]: runtime.hostname,
+                     prov.PROV["type"]: nipype[classname],
+                     prov.PROV["label"]: '_'.join((classname,
+                                                   node.name)),
+                     nipype['hashval']: hashval,
+                     nipype['duration']: runtime.duration,
+                     nipype['working_directory']: runtime.cwd,
+                     nipype['return_code']: runtime.returncode,
+                     nipype['platform']: runtime.platform,
+                     }
+            try:
+                attrs.update({nipype['command']: runtime.cmdline})
+                attrs.update({nipype['command_path']: runtime.command_path})
+                attrs.update({nipype['dependencies']: runtime.dependencies})
+            except AttributeError:
+                pass
+            process = g.activity(uuid1().hex, runtime.startTime,
+                                 runtime.endTime, attrs)
+            process.add_extra_attributes({prov.PROV["type"]: nipype["Node"]})
+            # environment
+            id = uuid1().hex
+            environ = g.entity(id)
+            environ.add_extra_attributes({prov.PROV['type']: nipype['environment'],
+                                          prov.PROV['label']: "environment",
+                                          nipype['environ_json']: json.dumps(runtime.environ)})
+            g.used(process, id)
+        processes.append(process)
+        g.wasAssociatedWith(process, user_agent, None, None,
+                {prov.PROV["Role"]: "LoggedInUser"})
+        g.wasAssociatedWith(process, software_agent, None, None,
+                {prov.PROV["Role"]: prov.PROV["SoftwareAgent"]})
+        for inidx, inputval in enumerate(sorted(node.inputs.get().items())):
+            if isdefined(inputval[1]):
+                inport = inputval[0]
+                used_ports = []
+                for _, _, d in graph.in_edges_iter([node], data=True):
+                    for _, dest in d['connect']:
+                        used_ports.append(dest)
+                if inport not in used_ports:
+                    param = g.entity(uuid1().hex,
+                                     {prov.PROV["type"]: nipype['input'],
+                                      prov.PROV["label"]: inport,
+                                      nipype['port']: inport,
+                                      prov.PROV["value"]: str(inputval[1])
+                                      })
+                    g.used(process, param)
+
+    # add dependencies (edges)
+    # add artifacts (files)
+    counter = 0
+    for idx, node in enumerate(nodes):
+        if node.result.outputs is None:
+            continue
+        if isinstance(node.result.outputs, Bunch):
+            outputs = node.result.outputs.dictcopy()
+        else:
+            outputs = node.result.outputs.get()
+        used_ports = {}
+        for _, v, d in graph.out_edges_iter([node], data=True):
+            for src, dest in d['connect']:
+                if isinstance(src, tuple):
+                    srcname = src[0]
+                else:
+                    srcname = src
+                if srcname not in used_ports:
+                    used_ports[srcname] = []
+                used_ports[srcname].append((v, dest))
+        for outidx, nameval in enumerate(sorted(outputs.items())):
+            if not isdefined(nameval[1]):
+                continue
+            artifact = g.entity(uuid1().hex,
+                                {prov.PROV["type"]: nipype['artifact'],
+                                 prov.PROV["label"]: nameval[0],
+                                 nipype['port']: nameval[0],
+                                 prov.PROV["value"]: str(nameval[1])
+                                 })
+            g.wasGeneratedBy(artifact, processes[idx])
+            if nameval[0] in used_ports:
+                for destnode, portname in used_ports[nameval[0]]:
+                    counter += 1
+                    # Used: Artifact->Process
+                    attrs = {prov.PROV["label"]: portname}
+                    g.used(processes[nodes.index(destnode)], artifact,
+                           other_attributes=attrs)
+    # Process->Process
+    for idx, edgeinfo in enumerate(graph.in_edges_iter()):
+        g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
+                       starter=processes[nodes.index(edgeinfo[0])])
+    # write provenance
+    try:
+        if format in ['turtle', 'all']:
+            g.rdf().serialize(filename + '.ttl', format='turtle')
+    except (ImportError, NameError):
+        format = 'all'
+    finally:
+        if format in ['provn', 'all']:
+            with open(filename + '.provn', 'wt') as fp:
+                fp.writelines(g.get_provn())
+        if format in ['json', 'all']:
+            with open(filename + '.json', 'wt') as fp:
+                prov.json.dump(g, fp, cls=prov.ProvBundle.JSONEncoder)
+    return g

@@ -101,7 +101,7 @@ class Info(object):
 class AFNIBaseCommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
                              desc='AFNI output filetype')
-    
+
 class AFNITraitedSpec(AFNIBaseCommandInputSpec):
     pass
 
@@ -113,12 +113,12 @@ class AFNIBaseCommand(CommandLine):
 
     input_spec = AFNIBaseCommandInputSpec
     _outputtype = None
-    
+
 
     def __init__(self, **inputs):
         super(AFNIBaseCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
-        
+
         if self._outputtype is None:
             self._outputtype = Info.outputtype()
 

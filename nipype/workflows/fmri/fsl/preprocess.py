@@ -4,8 +4,6 @@
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.spm as spm
 
 from ...smri.freesurfer.utils import create_getmask_flow
 
@@ -1117,17 +1115,10 @@ def create_reg_workflow(name='registration'):
     as FSL appears to be breaking.
     """
 
-    #fast = pe.Node(fsl.FAST(), name='fast')
-    #fast.config = {'execution': {'keep_unncessary_outputs': True}}
-    #register.connect(inputnode, 'anatomical_image', fast, 'in_files')
-
-    convert = pe.Node(fs.MRIConvert(out_type='nii'), name='convert')
-    register.connect(inputnode, 'anatomical_image', convert, 'in_file')
-
-    segment = pe.Node(spm.Segment(), name='segment')
-    segment.inputs.wm_output_type = [False, False, True]
-    segment.config = {'execution': {'keep_unnecessary_outputs': 'true'}}
-    register.connect(convert, 'out_file', segment, 'data')
+    stripper = pe.Node(fsl.BET(), name='stripper')
+    register.connect(inputnode, 'anatomical_image', stripper, 'in_file')
+    fast = pe.Node(fsl.FAST(), name='fast')
+    register.connect(stripper, 'out_file', fast, 'in_files')
 
     """
     Binarize the segmentation
@@ -1135,10 +1126,9 @@ def create_reg_workflow(name='registration'):
 
     binarize = pe.Node(fsl.ImageMaths(op_string='-nan -thr 0.5 -bin'),
                        name='binarize')
-    #pickindex = lambda x, i: x[i]
-    #register.connect(fast, ('partial_volume_files', pickindex, 1),
-    #                 binarize, 'in_file')
-    register.connect(segment, 'native_wm_image', binarize, 'in_file')
+    pickindex = lambda x, i: x[i]
+    register.connect(fast, ('partial_volume_files', pickindex, 2),
+                     binarize, 'in_file')
 
     """
     Calculate rigid transform from mean image to anatomical image
@@ -1177,8 +1167,6 @@ def create_reg_workflow(name='registration'):
     anat2target_nonlinear = pe.Node(fsl.FNIRT(), name='anat2target_nonlinear')
     register.connect(anat2target_affine, 'out_matrix_file',
                      anat2target_nonlinear, 'affine_file')
-    #anat2target_nonlinear.inputs.in_fwhm = [8, 4, 2, 2]
-    #anat2target_nonlinear.inputs.subsampling_scheme = [4, 2, 1, 1]
     anat2target_nonlinear.inputs.warp_resolution = (8, 8, 8)
     register.connect(inputnode, 'anatomical_image', anat2target_nonlinear, 'in_file')
     register.connect(inputnode, 'target_image',
@@ -1193,7 +1181,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', warp2anat, 'ref_file')
     register.connect(mean2anatbbr, 'out_matrix_file', warp2anat, 'premat')
 
-    warpmean = pe.Node(fsl.ApplyWarp(interp='spline'), name='warpmean')
+    warpmean = warp2anat.clone(name='warpmean')
     register.connect(warp2anat, 'out_file', warpmean, 'in_file')
     register.connect(inputnode, 'target_image', warpmean, 'ref_file')
     register.connect(anat2target_affine, 'out_matrix_file', warpmean, 'premat')
@@ -1211,8 +1199,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', warpall2anat, 'ref_file')
     register.connect(mean2anatbbr, 'out_matrix_file', warpall2anat, 'premat')
 
-    warpall = pe.MapNode(fsl.ApplyWarp(interp='spline'), name='warpall',
-                         iterfield=['in_file'])
+    warpall = warpall2anat.clone(name='warpall')
     register.connect(warpall2anat, 'out_file', warpall, 'in_file')
     register.connect(inputnode, 'target_image', warpall, 'ref_file')
     register.connect(anat2target_affine, 'out_matrix_file', warpall, 'premat')
