@@ -28,6 +28,8 @@ class C3dAffineTool(SEMLikeCommandLine):
     """Converts fsl-style Affine registration into ANTS compatible itk format
 
     Example
+    =======
+
     >>> from nipype.interfaces.c3 import C3dAffineTool
     >>> c3 = C3dAffineTool()
     >>> c3.inputs.source_file = 'cmatrix.mat'

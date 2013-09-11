@@ -1152,8 +1152,12 @@ class Node(WorkflowBase):
 
     @property
     def result(self):
-        """Return the result object after the node has run"""
-        return self._result
+        if self._result:
+            return self._result
+        else:
+            cwd = self.output_dir()
+            result, _, _ = self._load_resultfile(cwd)
+            return result
 
     @property
     def inputs(self):
@@ -1191,7 +1195,7 @@ class Node(WorkflowBase):
             val = getattr(self._result.outputs, parameter)
         else:
             cwd = self.output_dir()
-            result, aggregate, attribute_error = self._load_resultfile(cwd)
+            result, _, _ = self._load_resultfile(cwd)
             if result and result.outputs:
                 val = getattr(result.outputs, parameter)
         return val
@@ -1205,6 +1209,12 @@ class Node(WorkflowBase):
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
+        hashfiles = glob(os.path.join(outdir, '_0x*.json'))
+        if len(hashfiles) > 1:
+            logger.info(hashfiles)
+            logger.info('Removing multiple hashfiles and forcing node to rerun')
+            for hashfile in hashfiles:
+                os.unlink(hashfile)
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
         if updatehash and os.path.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
@@ -1298,6 +1308,10 @@ class Node(WorkflowBase):
                 logger.debug(("%s found and can_resume is True or Node is a "
                               "MapNode - resuming execution") %
                              hashfile_unfinished)
+                if isinstance(self, MapNode):
+                    # remove old json files
+                    for filename in glob(os.path.join(outdir, '_0x*.json')):
+                        os.unlink(filename)
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
@@ -1468,8 +1482,7 @@ class Node(WorkflowBase):
                     except FileNotFoundError:
                         logger.debug(('conversion to full path results in '
                                       'non existent file'))
-                    else:
-                        aggregate = False
+                aggregate = False
             pkl_file.close()
         logger.debug('Aggregate: %s', aggregate)
         return result, aggregate, attribute_error
@@ -1813,13 +1826,16 @@ class MapNode(Node):
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       outputs=self.outputs)
+                                       provenance=[], outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
             self._result.runtime.insert(i, None)
-            if node.result and hasattr(node.result, 'runtime'):
-                self._result.interface.insert(i, node.result.interface)
-                self._result.runtime[i] = node.result.runtime
+            if node.result:
+                if hasattr(node.result, 'runtime'):
+                    self._result.interface.insert(i, node.result.interface)
+                    self._result.runtime[i] = node.result.runtime
+                if hasattr(node.result, 'provenance'):
+                    self._result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
                 for key, _ in self.outputs.items():

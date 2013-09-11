@@ -51,7 +51,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     Matlab2CSV_node = pe.Node(interface=misc.Matlab2CSV(), name="Matlab2CSV_node")
     MergeCSVFiles_node = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles_node")
     MergeCSVFiles_node.inputs.extra_column_heading = extra_column_heading
-   
+
     Matlab2CSV_global = Matlab2CSV_node.clone(name="Matlab2CSV_global")
     MergeCSVFiles_global = MergeCSVFiles_node.clone(name="MergeCSVFiles_global")
     MergeCSVFiles_global.inputs.extra_column_heading = extra_column_heading

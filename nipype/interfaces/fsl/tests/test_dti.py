@@ -124,7 +124,7 @@ def test_probtrackx():
                      os2t = dict(argstr='--os2t',),
                      out_dir = dict(argstr='--dir=%s',),
                      output_type = dict(),
-                     rand_fib = dict(argstr='--randfib %d',),
+                     rand_fib = dict(argstr='--randfib=%d',),
                      random_seed = dict(argstr='--rseed',),
                      s2tastext = dict(argstr='--s2tastext',),
                      sample_random_points = dict(argstr='--sampvox',),
@@ -342,7 +342,7 @@ def test_randomise2():
                           int_seed=4)
 
     actualCmdline = sorted(rand2.cmdline.split())
-    cmd = 'randomise -i infile2 -o outfile2 -1 -f infile.f --seed 4'
+    cmd = 'randomise -i infile2 -o outfile2 -1 -f infile.f --seed=4'
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 
@@ -379,13 +379,13 @@ def test_randomise2():
               'diagnostics_off':                    ('--quiet', True),
               'output_raw':                         ('-R', True),
               'output_perm_vect':                   ('-P', True),
-              'int_seed':                           ('--seed 20', 20),
-              'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
-              'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
-              'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl 1,2,3,4',
+              'int_seed':                           ('--seed=20', 20),
+              'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
+              'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
+              'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
+              'list_num_voxel_EVs_pos':             ('--vxl=1,2,3,4',
                                                      '1,2,3,4'),
-              'list_img_voxel_EVs':                 ('--vxf 6,7,8,9,3',
+              'list_img_voxel_EVs':                 ('--vxf=6,7,8,9,3',
                                                      '6,7,8,9,3')}
 
     for name, settings in opt_map.items():
@@ -423,7 +423,7 @@ def test_Randomise_parallel():
                           int_seed=4)
 
     actualCmdline = sorted(rand2.cmdline.split())
-    cmd = 'randomise_parallel -i infile2 -o outfile2 -1 -f infile.f --seed 4'
+    cmd = 'randomise_parallel -i infile2 -o outfile2 -1 -f infile.f --seed=4'
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 
@@ -460,14 +460,14 @@ def test_Randomise_parallel():
               'diagnostics_off':                    ('--quiet', True),
               'output_raw':                         ('-R', True),
               'output_perm_vect':                   ('-P', True),
-              'int_seed':                           ('--seed 20', 20),
-              'TFCE_height_param':                  ('--tfce_H 0.11', 0.11),
-              'TFCE_extent_param':                  ('--tfce_E 0.50', 0.50),
-              'TFCE_connectivity':                  ('--tfce_C 0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl ' \
+              'int_seed':                           ('--seed=20', 20),
+              'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
+              'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
+              'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
+              'list_num_voxel_EVs_pos':             ('--vxl=' \
                                                          + repr([1, 2, 3, 4]),
                                                      repr([1, 2, 3, 4])),
-              'list_img_voxel_EVs':               ('--vxf ' \
+              'list_img_voxel_EVs':               ('--vxf=' \
                                                        + repr([6, 7, 8, 9, 3]),
                                                      repr([6, 7, 8, 9, 3]))}
 
@@ -584,7 +584,7 @@ def test_Vec_reg():
                'tensor':            ('--tensor', True),
                'affineTmat':        ('-t Tmat', 'Tmat'),
                'warpFile':          ('-w wrpFile', 'wrpFile'),
-               'interpolation':     ('--interp sinc', 'sinc'),
+               'interpolation':     ('--interp=sinc', 'sinc'),
                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in opt_map.items():
