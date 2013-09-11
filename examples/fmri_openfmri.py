@@ -387,12 +387,13 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                                              'crashdumps'),
                                   stop_on_first_crash=True)
     #wf.run('MultiProc', plugin_args={'n_procs': 4})
-    wf.run('Linear', plugin_args={'n_procs': 4})
+    eg = wf.run('Linear')
     wf.export('openfmri.py')
     wf.write_graph(dotfilename='hgraph.dot', graph2use='hierarchical')
     wf.write_graph(dotfilename='egraph.dot', graph2use='exec')
     wf.write_graph(dotfilename='fgraph.dot', graph2use='flat')
     wf.write_graph(dotfilename='ograph.dot', graph2use='orig')
+    return eg
 
 if __name__ == '__main__':
     import argparse
@@ -403,7 +404,9 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--model', default=1)
     parser.add_argument('-t', '--task', default=1)
     args = parser.parse_args()
-    analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
+    eg = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                              subject=args.subject,
                              model_id=int(args.model),
                              task_id=int(args.task))
+    from nipype.pipeline.utils import write_prov
+    g = write_prov(eg, format='turtle')

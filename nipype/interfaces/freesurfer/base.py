@@ -114,6 +114,10 @@ class FSCommand(CommandLine):
     def set_default_subjects_dir(cls, subjects_dir):
         cls._subjects_dir = subjects_dir
 
+    @property
+    def version(self):
+        return Info.version()
+
     def run(self, **inputs):
         if 'subjects_dir' in inputs:
             self.inputs.subjects_dir = inputs['subjects_dir']

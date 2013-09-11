@@ -409,13 +409,13 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                            argstr='-datatype %s',
                            desc='force output data type')
     cost = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                       'leastsq', 'labeldiff','bbr',
+                       'leastsq', 'labeldiff', 'bbr',
                        argstr='-cost %s',
                        desc='cost function')
     # XXX What is the difference between 'cost' and 'searchcost'?  Are
     # these both necessary or do they map to the same variable.
     cost_func = traits.Enum('mutualinfo', 'corratio', 'normcorr', 'normmi',
-                            'leastsq', 'labeldiff','bbr',
+                            'leastsq', 'labeldiff', 'bbr',
                             argstr='-searchcost %s',
                             desc='cost function')
     uses_qform = traits.Bool(argstr='-usesqform',
@@ -423,53 +423,53 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     display_init = traits.Bool(argstr='-displayinit',
                                desc='display initial matrix')
     angle_rep = traits.Enum('quaternion', 'euler',
-                           argstr='-anglerep %s',
-                           desc='representation of rotation angles')
+                            argstr='-anglerep %s',
+                            desc='representation of rotation angles')
     interp = traits.Enum('trilinear', 'nearestneighbour', 'sinc', 'spline',
                          argstr='-interp %s',
                          desc='final interpolation method used in reslicing')
     sinc_width = traits.Int(argstr='-sincwidth %d', units='voxels',
-                           desc='full-width in voxels')
+                            desc='full-width in voxels')
     sinc_window = traits.Enum('rectangular', 'hanning', 'blackman',
-                             argstr='-sincwindow %s',
-                             desc='sinc window')  # XXX better doc
+                              argstr='-sincwindow %s',
+                              desc='sinc window')  # XXX better doc
     bins = traits.Int(argstr='-bins %d', desc='number of histogram bins')
     dof = traits.Int(argstr='-dof %d',
                      desc='number of transform degrees of freedom')
     no_resample = traits.Bool(argstr='-noresample',
-                             desc='do not change input sampling')
+                              desc='do not change input sampling')
     force_scaling = traits.Bool(argstr='-forcescaling',
-                               desc='force rescaling even for low-res images')
+                                desc='force rescaling even for low-res images')
     min_sampling = traits.Float(argstr='-minsampling %f', units='mm',
-                               desc='set minimum voxel dimension for sampling')
+                                desc='set minimum voxel dimension for sampling')
     padding_size = traits.Int(argstr='-paddingsize %d', units='voxels',
-                             desc='for applyxfm: interpolates outside image '
-                                 'by size')
+                              desc='for applyxfm: interpolates outside image '
+                              'by size')
     searchr_x = traits.List(traits.Int, minlen=2, maxlen=2, units='degrees',
-                           argstr='-searchrx %s',
-                           desc='search angles along x-axis, in degrees')
+                            argstr='-searchrx %s',
+                            desc='search angles along x-axis, in degrees')
     searchr_y = traits.List(traits.Int, minlen=2, maxlen=2, units='degrees',
-                           argstr='-searchry %s',
-                           desc='search angles along y-axis, in degrees')
+                            argstr='-searchry %s',
+                            desc='search angles along y-axis, in degrees')
     searchr_z = traits.List(traits.Int, minlen=2, maxlen=2, units='degrees',
-                           argstr='-searchrz %s',
-                           desc='search angles along z-axis, in degrees')
+                            argstr='-searchrz %s',
+                            desc='search angles along z-axis, in degrees')
     no_search = traits.Bool(argstr='-nosearch',
-                           desc='set all angular searches to ranges 0 to 0')
+                            desc='set all angular searches to ranges 0 to 0')
     coarse_search = traits.Int(argstr='-coarsesearch %d', units='degrees',
-                              desc='coarse search delta angle')
+                               desc='coarse search delta angle')
     fine_search = traits.Int(argstr='-finesearch %d', units='degrees',
-                            desc='fine search delta angle')
+                             desc='fine search delta angle')
     schedule = File(exists=True, argstr='-schedule %s',
                     desc='replaces default schedule')
     ref_weight = File(exists=True, argstr='-refweight %s',
-                     desc='File for reference weighting volume')
+                      desc='File for reference weighting volume')
     in_weight = File(exists=True, argstr='-inweight %s',
-                    desc='File for input weighting volume')
+                     desc='File for input weighting volume')
     no_clamp = traits.Bool(argstr='-noclamp',
-                          desc='do not use intensity clamping')
+                           desc='do not use intensity clamping')
     no_resample_blur = traits.Bool(argstr='-noresampblur',
-                               desc='do not use blurring on downsampling')
+                                   desc='do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr='-2D',
                           desc='use 2D rigid body mode - ignores dof')
 
@@ -506,15 +506,14 @@ class FLIRTInputSpec(FSLCommandInputSpec):
     bbrslope = traits.Float(
         argstr='-bbrslope %f', min_ver='5.0.0',
         desc='value of bbr slope')
-    
 
 
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True,
-                   desc='path/name of registered file (if generated)')
+                    desc='path/name of registered file (if generated)')
     out_matrix_file = File(exists=True,
                            desc='path/name of calculated affine transform '
-                         '(if generated)')
+                           '(if generated)')
     out_log = File(desc='path/name of output log (if generated)')
 
 
@@ -549,7 +548,7 @@ class FLIRT(FSLCommand):
         # Generate an out_file if one is not provided
         if not isdefined(outputs['out_file']):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                 suffix='_flirt')
+                                                  suffix='_flirt')
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
 
         outputs['out_matrix_file'] = self.inputs.out_matrix_file
@@ -557,8 +556,8 @@ class FLIRT(FSLCommand):
         # Generate an out_matrix file if one is not provided
         if not isdefined(outputs['out_matrix_file']):
             outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
-                                                   suffix='_flirt.mat',
-                                                   change_ext=False)
+                                                         suffix='_flirt.mat',
+                                                         change_ext=False)
         outputs['out_matrix_file'] = os.path.abspath(
             outputs['out_matrix_file'])
 
@@ -567,8 +566,8 @@ class FLIRT(FSLCommand):
             # Generate an out_log file if one is not provided
             if not isdefined(outputs['out_log']):
                 outputs['out_log'] = self._gen_fname(self.inputs.in_file,
-                                                       suffix='_flirt.log',
-                                                       change_ext=False)
+                                                     suffix='_flirt.log',
+                                                     change_ext=False)
             outputs['out_log'] = os.path.abspath(outputs['out_log'])
         return outputs
 
@@ -635,7 +634,7 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
                     desc="file to write", hash_files=False)
     cost = traits.Enum(
         'mutualinfo', 'woods', 'corratio', 'normcorr', 'normmi', 'leastsquares',
-                       argstr='-cost %s', desc="cost function to optimize")
+        argstr='-cost %s', desc="cost function to optimize")
     bins = traits.Int(argstr='-bins %d', desc="number of histogram bins")
     dof = traits.Int(
         argstr='-dof %d', desc="degrees of freedom for the transformation")
@@ -717,9 +716,9 @@ class MCFLIRT(FSLCommand):
             outputs['variance_img'] = self._gen_fname(outputs['out_file'] +
                                                       '_variance.ext', cwd=cwd)
             outputs['std_img'] = self._gen_fname(outputs['out_file'] +
-                                                      '_sigma.ext', cwd=cwd)
+                                                 '_sigma.ext', cwd=cwd)
             outputs['mean_img'] = self._gen_fname(outputs['out_file'] +
-                                                      '_meanvol.ext', cwd=cwd)
+                                                  '_meanvol.ext', cwd=cwd)
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
@@ -756,16 +755,16 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='--ref=%s', mandatory=True,
                     desc='name of reference image')
     in_file = File(exists=True, argstr='--in=%s', mandatory=True,
-                  desc='name of input image')
+                   desc='name of input image')
     affine_file = File(exists=True, argstr='--aff=%s',
                        desc='name of file containing affine transform')
     inwarp_file = File(exists=True, argstr='--inwarp=%s',
                        desc='name of file containing initial non-linear warps')
     in_intensitymap_file = File(exists=True, argstr='--intin=%s',
-                             desc='name of file/files containing initial intensity maping'
+                                desc='name of file/files containing initial intensity maping'
                                 'usually generated by previos fnirt run')
     fieldcoeff_file = traits.Either(traits.Bool, File, argstr='--cout=%s',
-                           desc='name of output file with field coefficients or true')
+                                    desc='name of output file with field coefficients or true')
     warped_file = File(argstr='--iout=%s',
                        desc='name of output image', genfile=True, hash_files=False)
     field_file = traits.Either(traits.Bool, File,
@@ -780,46 +779,46 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                       desc='name of file for writing out intensity modulated'
                                       '--ref (for diagnostic purposes)', hash_files=False)
     out_intensitymap_file = traits.Either(traits.Bool, File,
-                                      argstr='--intout=%s',
-                                      desc='name of files for writing information pertaining '
+                                          argstr='--intout=%s',
+                                          desc='name of files for writing information pertaining '
                                           'to intensity mapping', hash_files=False)
     log_file = File(argstr='--logout=%s',
-                             desc='Name of log-file', genfile=True, hash_files=False)
+                    desc='Name of log-file', genfile=True, hash_files=False)
     config_file = traits.Either(
         traits.Enum("T1_2_MNI152_2mm", "FA_2_FMRIB58_1mm"), File(exists=True), argstr='--config=%s',
-                       desc='Name of config file specifying command line arguments')
+        desc='Name of config file specifying command line arguments')
     refmask_file = File(exists=True, argstr='--refmask=%s',
                         desc='name of file with mask in reference space')
     inmask_file = File(exists=True, argstr='--inmask=%s',
                        desc='name of file with mask in input image space')
     skip_refmask = traits.Bool(
         argstr='--applyrefmask=0', xor=['apply_refmask'],
-                              desc='Skip specified refmask if set, default false')
+        desc='Skip specified refmask if set, default false')
     skip_inmask = traits.Bool(argstr='--applyinmask=0', xor=['apply_inmask'],
-                             desc='skip specified inmask if set, default false')
+                              desc='skip specified inmask if set, default false')
     apply_refmask = traits.List(
         traits.Enum(0, 1), argstr='--applyrefmask=%s', xor=['skip_refmask'],
-              desc='list of iterations to use reference mask on (1 to use, 0 to skip)', sep=",")
+        desc='list of iterations to use reference mask on (1 to use, 0 to skip)', sep=",")
     apply_inmask = traits.List(
         traits.Enum(0, 1), argstr='--applyinmask=%s', xor=['skip_inmask'],
-              desc='list of iterations to use input mask on (1 to use, 0 to skip)', sep=",")
-    skip_implicit_ref_masking = traits.Bool(argstr='--imprefm 0',
-                                      desc='skip implicit masking  based on value'
+        desc='list of iterations to use input mask on (1 to use, 0 to skip)', sep=",")
+    skip_implicit_ref_masking = traits.Bool(argstr='--imprefm=0',
+                                            desc='skip implicit masking  based on value'
                                             'in --ref image. Default = 0')
-    skip_implicit_in_masking = traits.Bool(argstr='--impinm 0',
-                                      desc='skip implicit masking  based on value'
+    skip_implicit_in_masking = traits.Bool(argstr='--impinm=0',
+                                           desc='skip implicit masking  based on value'
                                            'in --in image. Default = 0')
     refmask_val = traits.Float(argstr='--imprefval=%f',
-                              desc='Value to mask out in --ref image. Default =0.0')
+                               desc='Value to mask out in --ref image. Default =0.0')
     inmask_val = traits.Float(argstr='--impinval=%f',
                               desc='Value to mask out in --in image. Default =0.0')
     max_nonlin_iter = traits.List(traits.Int,
-                                   argstr='--miter=%s',
-                                   desc='Max # of non-linear iterations list, default [5, 5, 5, 5]', sep=",")
+                                  argstr='--miter=%s',
+                                  desc='Max # of non-linear iterations list, default [5, 5, 5, 5]', sep=",")
     subsampling_scheme = traits.List(traits.Int,
-                                   argstr='--subsamp=%s',
-                                   desc='sub-sampling scheme, list, default [4, 2, 1, 1]',
-                                   sep=",")
+                                     argstr='--subsamp=%s',
+                                     desc='sub-sampling scheme, list, default [4, 2, 1, 1]',
+                                     sep=",")
     warp_resolution = traits.Tuple(traits.Int, traits.Int, traits.Int,
                                    argstr='--warpres=%d,%d,%d',
                                    desc='(approximate) resolution (in mm) of warp basis '
@@ -827,16 +826,16 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     spline_order = traits.Int(argstr='--splineorder=%d',
                               desc='Order of spline, 2->Qadratic spline, 3->Cubic spline. Default=3')
     in_fwhm = traits.List(traits.Int, argstr='--infwhm=%s',
-                           desc='FWHM (in mm) of gaussian smoothing kernel for input volume, default [6, 4, 2, 2]', sep=",")
+                          desc='FWHM (in mm) of gaussian smoothing kernel for input volume, default [6, 4, 2, 2]', sep=",")
     ref_fwhm = traits.List(traits.Int, argstr='--reffwhm=%s',
                            desc='FWHM (in mm) of gaussian smoothing kernel for ref volume, default [4, 2, 0, 0]', sep=",")
     regularization_model = traits.Enum('membrane_energy', 'bending_energy',
                                        argstr='--regmod=%s',
-        desc='Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy')
+                                       desc='Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy')
     regularization_lambda = traits.List(traits.Float, argstr='--lambda=%s',
-                desc='Weight of regularisation, default depending on --ssqlambda and --regmod '
-                                         'switches. See user documetation.', sep=",")
-    skip_lambda_ssq = traits.Bool(argstr='--ssqlambda 0',
+                                        desc='Weight of regularisation, default depending on --ssqlambda and --regmod '
+                                        'switches. See user documetation.', sep=",")
+    skip_lambda_ssq = traits.Bool(argstr='--ssqlambda=0',
                                   desc='If true, lambda is not weighted by current ssq, default false')
     jacobian_range = traits.Tuple(traits.Float, traits.Float,
                                   argstr='--jacrange=%f,%f',
@@ -857,10 +856,10 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                               desc='Weight of regularisation for bias-field, default 10000')
     skip_intensity_mapping = traits.Bool(
         argstr='--estint=0', xor=['apply_intensity_mapping'],
-                                         desc='Skip estimate intensity-mapping default false')
+        desc='Skip estimate intensity-mapping default false')
     apply_intensity_mapping = traits.List(
         traits.Enum(0, 1), argstr='--estint=%s', xor=['skip_intensity_mapping'],
-                                        desc='List of subsampling levels to apply intensity mapping for (0 to skip, 1 to apply)', sep=",")
+        desc='List of subsampling levels to apply intensity mapping for (0 to skip, 1 to apply)', sep=",")
     hessian_precision = traits.Enum('double', 'float', argstr='--numprec=%s',
                                     desc='Precision for representing Hessian, double or float. Default double')
 
@@ -872,7 +871,7 @@ class FNIRTOutputSpec(TraitedSpec):
     jacobian_file = File(desc='file containing Jacobian of the field')
     modulatedref_file = File(desc='file containing intensity modulated --ref')
     out_intensitymap_file = File(
-                        desc='file containing info pertaining to intensity mapping')
+        desc='file containing info pertaining to intensity mapping')
     log_file = File(desc='Name of log-file')
 
 
@@ -972,15 +971,15 @@ class FNIRT(FSLCommand):
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                  mandatory=True,
-                  desc='image to be warped')
+                   mandatory=True,
+                   desc='image to be warped')
     out_file = File(argstr='--out=%s', genfile=True,
-                   desc='output filename', hash_files=False)
+                    desc='output filename', hash_files=False)
     ref_file = File(exists=True, argstr='--ref=%s',
-                     mandatory=True,
-                     desc='reference image')
+                    mandatory=True,
+                    desc='reference image')
     field_file = File(exists=True, argstr='--warp=%s',
-                     desc='file containing warp field')
+                      desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc="treat warp field as absolute: x' = w(x)")
     relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
@@ -992,16 +991,16 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
                               desc='intermediary supersampling of output, default is off')
     superlevel = traits.Either(traits.Enum('a'), traits.Int,
                                argstr='--superlevel=%s',
-                desc="level of intermediary supersampling, a for 'automatic' or integer level. Default = 2")
+                               desc="level of intermediary supersampling, a for 'automatic' or integer level. Default = 2")
     premat = File(exists=True, argstr='--premat=%s',
                   desc='filename for pre-transform (affine matrix)')
     postmat = File(exists=True, argstr='--postmat=%s',
-                  desc='filename for post-transform (affine matrix)')
+                   desc='filename for post-transform (affine matrix)')
     mask_file = File(exists=True, argstr='--mask=%s',
-                    desc='filename for mask image (in reference space)')
+                     desc='filename for mask image (in reference space)')
     interp = traits.Enum(
         'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s',
-                         desc='interpolation method')
+        desc='interpolation method')
 
 
 class ApplyWarpOutputSpec(TraitedSpec):
@@ -1037,7 +1036,7 @@ class ApplyWarp(FSLCommand):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                             suffix='_warp')
+                                                  suffix='_warp')
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1196,7 +1195,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     forward_warping = traits.Bool(
         False, usedefault=True,
         desc='apply forward warping instead of unwarping')
-    warped_file = File(argstr='--warp=%s', 
+    warped_file = File(argstr='--warp=%s',
                        desc='apply forward warping and save as filename',
                        hash_files=False)
     phasemap_file = File(exists=True, argstr='--phasemap=%s',
@@ -1214,7 +1213,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
 
     save_shift = traits.Bool(desc='output pixel shift volume')
 
-    shift_out_file = traits.File(argstr='--saveshift=%s', 
+    shift_out_file = traits.File(argstr='--saveshift=%s',
                            desc='filename for saving pixel shift volume', hash_files=False)
 
     shift_in_file = File(exists=True, argstr='--loadshift=%s',
@@ -1256,7 +1255,8 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     save_unmasked_shift = traits.Bool(argstr='--unmaskshift',
                                       requires=['shift_out_file'],
                                       desc='saves the unmasked shiftmap when using --saveshift')
-    nokspace = traits.Bool(argstr='--nokspace', desc='do not use k-space forward warping')
+    nokspace = traits.Bool(
+        argstr='--nokspace', desc='do not use k-space forward warping')
 
 
 class FUGUEOutputSpec(TraitedSpec):
@@ -1264,6 +1264,7 @@ class FUGUEOutputSpec(TraitedSpec):
     warped_file = File(desc='forward warped file')
     shift_out_file = File(desc='voxel shift map file')
     fmap_out_file = File(desc='fieldmap file')
+
 
 class FUGUE(FSLCommand):
     """Use FSL FUGUE to unwarp epi's with fieldmaps
@@ -1284,25 +1285,14 @@ class FUGUE(FSLCommand):
         warn(
             'This interface has not been fully tested. Please report any failures.')
 
-    def _parse_inputs(self, skip=None):
-        skip = []
-        if not isdefined(self.inputs.save_shift) or not self.inputs.save_shift:
-            skip.append('shift_out_file')
-        if not isdefined(self.inputs.save_warped) or not self.inputs.save_warped:
-            skip.append('warped_file')
-        else:
-            skip.append('unwarped_file')
-
-        return super(FUGUE, self)._parse_inputs(skip=skip)
-
     def _list_outputs(self):
         outputs = self._outputs().get()
         if self.inputs.forward_warping:
             out_field = 'warped_file'
-        else: 
+        else:
             out_field = 'unwarped_file'
 
-        out_file = getattr(self.inputs,out_field)
+        out_file = getattr(self.inputs, out_field)
         if not isdefined(out_file):
             if isdefined(self.inputs.in_file):
                 out_file = self._gen_fname(self.inputs.in_file,
@@ -1310,9 +1300,11 @@ class FUGUE(FSLCommand):
         if isdefined(out_file):
             outputs[out_field] = os.path.abspath(out_file)
         if isdefined(self.inputs.fmap_out_file):
-            outputs['fmap_out_file'] = os.path.abspath(self.inputs.fmap_out_file)
+            outputs['fmap_out_file'] = os.path.abspath(
+                self.inputs.fmap_out_file)
         if isdefined(self.inputs.shift_out_file):
-            outputs['shift_out_file'] = os.path.abspath(self.inputs.shift_out_file)
+            outputs['shift_out_file'] = os.path.abspath(
+                self.inputs.shift_out_file)
 
         return outputs
 
@@ -1323,14 +1315,30 @@ class FUGUE(FSLCommand):
             return self._list_outputs()['warped_file']
         return None
 
-    def _parse_inputs(self,skip=None):
-        if skip==None:
-            skip=[]
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not isdefined(self.inputs.save_shift) or not self.inputs.save_shift:
+            skip += ['shift_out_file']
+        else:
+            if not isdefined(self.inputs.shift_out_file):
+                self.inputs.shift_out_file = self._gen_fname(
+                    self.inputs.in_file, suffix='_vsm')
+
         if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip+=['unwarped_file']
+            skip += ['unwarped_file']
+            if not isdefined(self.inputs.warped_file):
+                self.inputs.warped_file = self._gen_fname(
+                    self.inputs.in_file, suffix='_warped')
         if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip+=['warped_file']
-        return super(FUGUE,self)._parse_inputs(skip=skip)
+            skip += ['warped_file']
+            if not isdefined(self.inputs.unwarped_file):
+                self.inputs.unwarped_file = self._gen_fname(
+                    self.inputs.in_file, suffix='_unwarped')
+
+        return super(FUGUE, self)._parse_inputs(skip=skip)
+
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',

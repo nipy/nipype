@@ -18,7 +18,9 @@
 
 """
 import glob
+import string
 import os
+import os.path as op
 import shutil
 import re
 import tempfile
@@ -212,7 +214,7 @@ class DataSink(IOBase):
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
-    def __init__(self, infields=None, **kwargs):
+    def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
         ----------
@@ -230,6 +232,8 @@ class DataSink(IOBase):
                 self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        if force_run:
+            self._always_run = True
 
     def _get_dst(self, src):
         ## If path is directory with trailing os.path.sep,
@@ -528,9 +532,9 @@ class DataGrabber(IOBase):
                     filledtemplate = template
                     if argtuple:
                         try:
-                            filledtemplate = template%tuple(argtuple)
+                            filledtemplate = template % tuple(argtuple)
                         except TypeError as e:
-                            raise TypeError(e.message + ": Template %s failed to convert with args %s"%(template, str(tuple(argtuple))))
+                            raise TypeError(e.message + ": Template %s failed to convert with args %s" % (template, str(tuple(argtuple))))
                     outfiles = glob.glob(filledtemplate)
                     if len(outfiles) == 0:
                         msg = 'Output key: %s Template: %s returned no files' % (key, filledtemplate)
@@ -538,11 +542,11 @@ class DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].insert(i, None)
+                        outputs[key].append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles.sort()
-                        outputs[key].insert(i, list_to_filename(outfiles))
+                        outputs[key].append(list_to_filename(outfiles))
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
@@ -551,18 +555,162 @@ class DataGrabber(IOBase):
                 outputs[key] = outputs[key][0]
         return outputs
 
-class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec): 
+
+class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+
+    base_directory = Directory(exists=True,
+        desc="Root path common to templates.")
+    sort_filelist = traits.Bool(True, usedefault=True,
+        desc="When matching mutliple files, return them in sorted order.")
+    raise_on_empty = traits.Bool(True, usedefault=True,
+        desc="Raise an exception if a template pattern matches no files.")
+    force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
+        default=False, usedefault=True,
+        desc=("Whether to return outputs as a list even when only one file "
+              "matches the template. Either a boolean that applies to all "
+              "output fields or a list of output field names to coerce to "
+              " a list"))
+
+
+class SelectFiles(IOBase):
+    """Flexibly collect data from disk to feed into workflows.
+
+    This interface uses the {}-based string formatting syntax to plug
+    values (possibly known only at workflow execution time) into string
+    templates and collect files from persistant storage. These templates
+    can also be combined with glob wildcards. The field names in the
+    formatting template (i.e. the terms in braces) will become inputs
+    fields on the interface, and the keys in the templates dictionary
+    will form the output fields.
+
+    Examples
+    --------
+
+    >>> from nipype import SelectFiles, Node
+    >>> templates={"T1": "{subject_id}/struct/T1.nii",
+    ...            "epi": "{subject_id}/func/f[0, 1].nii"}
+    >>> dg = Node(SelectFiles(templates), "selectfiles")
+    >>> dg.inputs.subject_id = "subj1"
+    >>> dg.outputs.get()
+    {'T1': <undefined>, 'epi': <undefined>}
+
+    The same thing with dynamic grabbing of specific files:
+
+    >>> templates["epi"] = "{subject_id}/func/f{run!s}.nii"
+    >>> dg = Node(SelectFiles(templates), "selectfiles")
+    >>> dg.inputs.subject_id = "subj1"
+    >>> dg.inputs.run = [2, 4]
+
+    """
+    input_spec = SelectFilesInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def __init__(self, templates, **kwargs):
+        """Create an instance with specific input fields.
+
+        Parameters
+        ----------
+        templates : dictionary
+            Mapping from string keys to string template values.
+            The keys become output fields on the interface.
+            The templates should use {}-formatting syntax, where
+            the names in curly braces become inputs fields on the interface.
+            Format strings can also use glob wildcards to match multiple
+            files. At runtime, the values of the interface inputs will be
+            plugged into these templates, and the resulting strings will be
+            used to select files.
+
+        """
+        super(SelectFiles, self).__init__(**kwargs)
+
+        # Infer the infields and outfields from the template
+        infields = []
+        for name, template in templates.iteritems():
+            for _, field_name, _, _ in string.Formatter().parse(template):
+                if field_name is not None and field_name not in infields:
+                    infields.append(field_name)
+
+        self._infields = infields
+        self._outfields = list(templates)
+        self._templates = templates
+
+        # Add the dynamic input fields
+        undefined_traits = {}
+        for field in infields:
+            self.inputs.add_trait(field, traits.Any)
+            undefined_traits[field] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+    def _add_output_traits(self, base):
+        """Add the dynamic output fields"""
+        return add_traits(base, self._templates.keys())
+
+    def _list_outputs(self):
+        """Find the files and expose them as interface outputs."""
+        outputs = {}
+        info = dict([(k, v) for k, v in self.inputs.__dict__.items()
+                     if k in self._infields])
+
+        force_lists = self.inputs.force_lists
+        if isinstance(force_lists, bool):
+            force_lists = self._outfields if force_lists else []
+        bad_fields = set(force_lists) - set(self._outfields)
+        if bad_fields:
+            bad_fields = ", ".join(list(bad_fields))
+            plural = "s" if len(bad_fields) > 1 else ""
+            verb = "were" if len(bad_fields) > 1 else "was"
+            msg = ("The field%s '%s' %s set in 'force_lists' and not in "
+                   "'templates'.") % (plural, bad_fields, verb)
+            raise ValueError(msg)
+
+        for field, template in self._templates.iteritems():
+
+            # Build the full template path
+            if isdefined(self.inputs.base_directory):
+                template = op.abspath(op.join(
+                    self.inputs.base_directory, template))
+            else:
+                template = op.abspath(template)
+
+            # Fill in the template and glob for files
+            filled_template = template.format(**info)
+            filelist = glob.glob(filled_template)
+
+            # Handle the case where nothing matched
+            if not filelist:
+                msg = "No files were found matching %s template: %s" % (
+                    field, template)
+                if self.inputs.raise_on_empty:
+                    raise IOError(msg)
+                else:
+                    warn(msg)
+
+            # Possibly sort the list
+            if self.inputs.sort_filelist:
+                filelist.sort()
+
+            # Handle whether this must be a list or not
+            if field not in force_lists:
+                filelist = list_to_filename(filelist)
+
+            outputs[field] = filelist
+
+        return outputs
+
+
+class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     root_paths = traits.Either(traits.List(),
                                traits.Str(),
                                mandatory=True,)
-    match_regex = traits.Str('(.+)', 
+    match_regex = traits.Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
                              "paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
                                  "if any match the path it will be "
                                  "ignored.")
-                                )
+                                 )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
     min_depth = traits.Int(desc="The minimum depth to search beneath "
@@ -573,23 +721,18 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 
 class DataFinder(IOBase):
-    """Search for paths that match a given regular expression. Allows a less 
+    """Search for paths that match a given regular expression. Allows a less
     proscriptive approach to gathering input files compared to DataGrabber.
-    Will recursively search any subdirectories by default. This can be limited 
-    with the min/max depth options.     
-    
-    Matched paths are available in the output 'out_paths'. Any named groups of 
-    captured text from the regular expression are also available as ouputs of 
+    Will recursively search any subdirectories by default. This can be limited
+    with the min/max depth options.
+    Matched paths are available in the output 'out_paths'. Any named groups of
+    captured text from the regular expression are also available as ouputs of
     the same name.
-    
+
     Examples
     --------
 
     >>> from nipype.interfaces.io import DataFinder
-    
-    Look for Nifti files in directories with "ep2d_fid" or "qT1" in the name, 
-    starting in the current directory.
-    
     >>> df = DataFinder()
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
@@ -599,13 +742,11 @@ class DataFinder(IOBase):
      './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
      './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
      './013-ep2d_fid_T1_pre/acquisition.nii.gz']
-    
     >>> print result.outputs.series_dir # doctest: +SKIP
     ['027-ep2d_fid_T1_Gd4',
      '018-ep2d_fid_T1_Gd2',
      '016-ep2d_fid_T1_Gd1',
      '013-ep2d_fid_T1_pre']
-     
     >>> print result.outputs.basename # doctest: +SKIP
     ['acquisition',
      'acquisition',
@@ -613,31 +754,28 @@ class DataFinder(IOBase):
      'acquisition']
 
     """
-    
+
     input_spec = DataFinderInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
-    
+
     def _match_path(self, target_path):
         #Check if we should ignore the path
         for ignore_re in self.ignore_regexes:
             if ignore_re.search(target_path):
                 return
-                    
         #Check if we can match the path
         match = self.match_regex.search(target_path)
         if not match is None:
             match_dict = match.groupdict()
-            
             if self.result is None:
-                self.result = {'out_paths' : []}
+                self.result = {'out_paths': []}
                 for key in match_dict.keys():
                     self.result[key] = []
-                    
             self.result['out_paths'].append(target_path)
             for key, val in match_dict.iteritems():
                 self.result[key].append(val)
-    
+
     def _run_interface(self, runtime):
         #Prepare some of the inputs
         if isinstance(self.inputs.root_paths, str):
@@ -655,33 +793,27 @@ class DataFinder(IOBase):
             self.ignore_regexes = []
         else:
             self.ignore_regexes = \
-                [re.compile(regex) 
+                [re.compile(regex)
                  for regex in self.inputs.ignore_regexes]
-            
         self.result = None
         for root_path in self.inputs.root_paths:
             #Handle tilda/env variables and remove extra seperators
             root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
-            
             #Check if the root_path is a file
             if os.path.isfile(root_path):
                 if min_depth == 0:
                     self._match_path(root_path)
                 continue
-                
-            #Walk through directory structure checking paths 
+            #Walk through directory structure checking paths
             for curr_dir, sub_dirs, files in os.walk(root_path):
                 #Determine the current depth from the root_path
-                curr_depth = (curr_dir.count(os.sep) - 
+                curr_depth = (curr_dir.count(os.sep) -
                               root_path.count(os.sep))
-                
-                #If the max path depth has been reached, clear sub_dirs 
+                #If the max path depth has been reached, clear sub_dirs
                 #and files
-                if (not max_depth is None and 
-                    curr_depth >= max_depth):
+                if not max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
-                    
                 #Test the path for the curr_dir and all files
                 if curr_depth >= min_depth:
                     self._match_path(curr_dir)
@@ -689,21 +821,20 @@ class DataFinder(IOBase):
                     for infile in files:
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
-            
-        if (self.inputs.unpack_single and 
+        if (self.inputs.unpack_single and
             len(self.result['out_paths']) == 1
-           ):
+            ):
             for key, vals in self.result.iteritems():
                 self.result[key] = vals[0]
-            
         if not self.result:
             raise RuntimeError("Regular expression did not match any files!")
         return runtime
-            
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs.update(self.result)
         return outputs
+
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(mandatory=True,
