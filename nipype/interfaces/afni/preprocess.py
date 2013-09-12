@@ -1762,3 +1762,53 @@ class Autobox(AFNICommand):
         if name == 'out_file' and (not isdefined(self.inputs.out_file)):
             return Undefined
         return super(Autobox, self)._gen_filename(name)
+
+class RetroicorInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file to 3dretroicor',
+                  argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
+    out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
+    card = File(desc='1D cardiac data file for cardiac correction',
+                    argstr='-card %s',
+                    position=-2)
+    resp = File(desc='1D respiratory waveform data for correction',
+                    argstr='-resp %s',
+                    position=-3)
+    threshold = traits.Int(desc='Threshold for detection of R-wave peaks in input (Make sure it is above the background noise level, Try 3/4 or 4/5 times range plus minimum)',
+                      argstr='-threshold %d',
+                      position=-4)
+    order = traits.Int(desc='The order of the correction (2 is typical)',
+                    argstr='-order %s',
+                    position=-5)
+
+    cardphase = File(desc='Filename for 1D cardiac phase output',
+                    argstr='-cardphase %s',
+                    position=-6)
+    respphase = File(desc='Filename for 1D resp phase output',
+                    argstr='-respphase %s',
+                    position=-7)
+
+
+class Retroicor(AFNICommand):
+    """Performs Retrospective Image Correction for physiological
+    motion effects, using a slightly modified version of the
+    RETROICOR algorithm
+
+    For complete details, see the `3dretroicor Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni as afni
+    >>> ret = afni.Retroicor()
+    >>> ret.inputs.in_file = 'functional.nii'
+    >>> ret.inputs.card = 'mask.1D'
+    >>> ret.inputs.resp = 'resp.1D'
+    >>> res = ret.run()   # doctest: +SKIP
+    """
+
+    _cmd = '3dretroicor'
+    input_spec = RetroicorInputSpec
+    output_spec = AFNICommandOutputSpec
