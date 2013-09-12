@@ -699,7 +699,7 @@ Creates the full workflow including getting information from dicom files
 """
 
 
-def create_resting_workflow(args):
+def create_resting_workflow(args, name='resting'):
     TR = args.TR
     slice_times = args.slice_times
     slice_thickness = None
@@ -722,7 +722,8 @@ def create_resting_workflow(args):
                   slice_thickness=slice_thickness,
                   lowpass_freq=args.lowpass_freq,
                   highpass_freq=args.highpass_freq,
-                  sink_directory=os.path.abspath(args.sink))
+                  sink_directory=os.path.abspath(args.sink),
+                  name=name)
     if args.field_maps:
         kwargs.update(**dict(fieldmap_images=args.field_maps,
                              FM_TEdiff=args.TE_diff,
