@@ -996,8 +996,8 @@ class BaseInterface(Interface):
             runtime = self._run_interface(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
-            runtime.duration = (parseutc(runtime.endTime) -
-                                parseutc(runtime.startTime)).total_seconds()
+            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+            runtime.duration = timediff.days * 86400 + timediff.seconds
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1005,8 +1005,8 @@ class BaseInterface(Interface):
             results.provenance = prov_record
         except Exception, e:
             runtime.endTime = dt.isoformat(dt.utcnow())
-            runtime.duration = (parseutc(runtime.endTime) -
-                                parseutc(runtime.startTime)).total_seconds()
+            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+            runtime.duration = timediff.days * 86400 + timediff.seconds
             if len(e.args) == 0:
                 e.args = ("")
 
