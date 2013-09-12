@@ -625,7 +625,7 @@ def create_workflow(files,
     sample2mni.inputs.interpolation = 'BSpline'
     sample2mni.inputs.invert_transform_flags = [False, False]
     sample2mni.inputs.reference_image = \
-        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+        os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     sample2mni.inputs.terminal_output = 'file'
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
