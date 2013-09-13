@@ -434,6 +434,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
                 for info in edgeinfo[node._hierarchy + node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += template % i
+    logger.debug('Expanded %d iterables in node %s.' % (count, nodeid))
     return supergraph
 
 def _connect_nodes(graph, srcnode, destnode, connection_info):
@@ -628,7 +629,6 @@ def generate_expanded_graph(graph_in):
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
-        logger.debug('node: %s iterables: %s' % (inode, iterables))
 
         # collect the subnodes to expand
         subnodes = [s for s in dfs_preorder(graph_in, inode)]
