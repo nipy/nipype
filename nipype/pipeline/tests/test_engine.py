@@ -238,7 +238,7 @@ def test_synchronize_tuples_expansion():
     wf3._flatgraph = wf3._create_flat_graph()
     # Identical to test_synchronize_expansion
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
-
+ 
 def test_itersource_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
@@ -259,13 +259,35 @@ def test_itersource_expansion():
     
     # each expanded graph clone has:
     # 2 node1 expansion nodes,
-    # 1 node2 per node1 replicate,
+    # 1 node2 replicates per node1 replicate,
     # 2 node3 replicates for the node1 input1 value 1,
     # 3 node3 replicates for the node1 input1 value 2 and
     # 1 node4 successor per node3 replicate
     # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
     # => 3 * 14 = 42 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
+def test_child_workflow_itersource_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node2.itersource = ('node1', 'input1')
+    node2.iterables = [('input1', {1:[3,4], 2:[5,6,7]})]
+    wf1.connect(node1,'output1', node2, 'input1')
+    wf2 = pe.Workflow(name='parent')
+    node3 = pe.Node(TestInterface(),name='node1')
+    node3.iterables = ('input1',[1,2])
+    wf2.connect(node3, 'output1', wf1, 'node1.input1')
+    wf2._flatgraph = wf2._create_flat_graph()
+    
+    # the expanded graph has:
+    # 2 node3 replicates,
+    # 1 node1 replicate per node3 replicate,
+    # 2 node2 replicates per node3 value 1 and
+    # 3 node2 replicates per node3 value 2
+    # => 2 + 2 + 2 + 3 = 9 nodes
+    yield assert_equal, len(pe.generate_expanded_graph(wf2._flatgraph).nodes()), 9
 
 def test_itersource_synchronize1_expansion():
     import nipype.pipeline.engine as pe
