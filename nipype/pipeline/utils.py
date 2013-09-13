@@ -332,7 +332,6 @@ def evaluate_connect_function(function_source, args, first_arg):
         raise e
     return output_value
 
-
 def get_levels(G):
     levels = {}
     for n in nx.topological_sort(G):
@@ -340,7 +339,6 @@ def get_levels(G):
         for pred in G.predecessors_iter(n):
             levels[n] = max(levels[n], levels[pred] + 1)
     return levels
-
 
 def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
                   prefix, synchronize=False):
@@ -438,7 +436,6 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
             node._id += template % i
     return supergraph
 
-
 def _connect_nodes(graph, srcnode, destnode, connection_info):
     """Add a connection between two nodes
     """
@@ -470,8 +467,8 @@ def _identity_nodes(graph, include_iterables):
     to True.
     """
     return [node for node in nx.topological_sort(graph)
-        if isinstance(node._interface, IdentityInterface) and
-           (include_iterables or getattr(node, 'iterables') is None)]
+            if (isinstance(node._interface, IdentityInterface) and
+                (include_iterables or getattr(node, 'iterables') is None))]
 
 def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
@@ -480,7 +477,7 @@ def _remove_identity_node(graph, node):
     for field, connections in portoutputs.items():
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
-                                            portinputs)
+                                       portinputs)
         else:
             _propagate_root_output(graph, node, field, connections)
     graph.remove_nodes_from([node])
@@ -601,14 +598,11 @@ def generate_expanded_graph(graph_in):
             if isinstance(src_fields, str):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
-            try:
-                iter_src = next((node for node in graph_in.nodes_iter()
-                                 if node.name == src_name
-                                 and nx.has_path(graph_in, node, inode)))
-            except StopIteration:
+            iter_src = _find_ancestor(graph_in, inode, src_name)
+            if not iter_src:
                 raise ValueError("The node %s itersource %s was not found"
-                                 " among the iterable predecessor nodes"
-                                 % (inode, src_name))
+                                 " among the ancestor nodes" %
+                                 (inode, src_name))
             logger.debug("The node %s has iterable source node %s"
                          % (inode, iter_src))
             # look up the iterables for this particular itersource descendant
@@ -731,6 +725,17 @@ def generate_expanded_graph(graph_in):
     logger.debug("PE: expanding iterables ... done")
 
     return _remove_nonjoin_identity_nodes(graph_in)
+
+def _find_ancestor(graph, node, name):
+    """Finds a node in the given graph which matches the
+    given search name and has a path to the search node.
+    """
+    try:
+        return next((other for other in graph.nodes_iter()
+                     if (name == other.name and
+                         nx.has_path(graph, other, node))))
+    except StopIteration:
+        pass
 
 def _iterable_nodes(graph_in):
     """Returns the iterable nodes in the given graph and their join
