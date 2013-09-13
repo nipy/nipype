@@ -1800,6 +1800,19 @@ class Retroicor(AFNICommand):
     motion effects, using a slightly modified version of the
     RETROICOR algorithm
 
+    The durations of the physiological inputs are assumed to equal
+    the duration of the dataset. Any constant sampling rate may be
+    used, but 40 Hz seems to be acceptable. This program's cardiac
+    peak detection algorithm is rather simplistic, so you might try
+    using the scanner's cardiac gating output (transform it to a
+    spike wave if necessary).
+
+    This program uses slice timing information embedded in the
+    dataset to estimate the proper cardiac/respiratory phase for
+    each slice. It makes sense to run this program before any
+    program that may destroy the slice timings (e.g. 3dvolreg for
+    motion correction).
+
     For complete details, see the `3dretroicor Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
 
