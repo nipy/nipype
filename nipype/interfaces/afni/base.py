@@ -206,6 +206,11 @@ class AFNICommand(AFNIBaseCommand):
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
 
 
+    def _format_arg(self, name, trait_spec, value):
+        if isdefined(value):
+            return super(AFNICommand,self)._format_arg(name, trait_spec, value)
+
+
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)

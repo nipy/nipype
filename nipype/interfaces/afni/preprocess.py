@@ -183,8 +183,6 @@ class RefitInputSpec(AFNICommandInputSpec):
                          argstr='-yorigin %s')
     zorigin = traits.Str(desc='z distance for edge voxel offset',
                          argstr='-zorigin %s')
-    suffix = traits.Str('_refit', desc="out_file suffix", usedefault=True)
-
 
 class Refit(AFNICommand):
     """Changes some of the information inside a 3D dataset's header
@@ -216,8 +214,9 @@ class WarpInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True)
 
-    out_file = File("%s_warp", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File(
+        "%s_warp", desc='output image file name',
+        argstr='-prefix %s', name_source="in_file", usedefault=True)
 
     tta2mni = traits.Bool(desc='transform dataset from Talairach to MNI152',
                           argstr='-tta2mni')
@@ -243,8 +242,6 @@ class WarpInputSpec(AFNICommandInputSpec):
     zpad = traits.Int(desc="pad input dataset with N planes" +
                       " of zero on all sides.",
                       argstr="-zpad %d")
-
-    suffix = traits.Str('_warp', desc="out_file suffix", usedefault=True)
 
 
 class Warp(AFNICommand):
@@ -881,9 +878,7 @@ if not given the reference will be the first volume of in_file.""")
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
         position=-2,
-        name_source='%s_allineate',
-        genfile=True)
-    suffix = traits.Str('_allineate', desc="out_file suffix", usedefault=True)
+        name_source='%s_allineate')
 
     out_param_file = File(
         argstr='-1Dparam_save %s',
@@ -1090,20 +1085,6 @@ class Allineate(AFNICommand):
             arg = ' '.join([trait_spec.argstr % v for v in value])
             return arg
         return super(Allineate, self)._format_arg(name, trait_spec, value)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
-        else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-
 
 class MaskaveInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dmaskave',
@@ -1488,8 +1469,6 @@ class CalcInputSpec(AFNICommandInputSpec):
                           requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for in_file_a')
     other = File(desc='other options', argstr='')
-    suffix = traits.Str('_calc', desc="out_file suffix", usedefault=True)
-
 
 class Calc(AFNICommand):
     """This program does voxel-by-voxel arithmetic on 3D datasets
@@ -1564,7 +1543,6 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         desc='Save dataset as floats, no matter what the input data type is.',
         argstr='-float')
     options = traits.Str(desc='options', argstr='%s', position=2)
-    suffix = traits.Str('_blurmask', desc="out_file suffix", usedefault=True)
 
 
 class BlurInMask(AFNICommand):
@@ -1605,23 +1583,23 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     seeds_width = traits.Float(argstr='-Mseed %f', xor=('seeds'))
 
     # outputs
-    mean_file = File(argstr='-Mean %s', suffix='_mean', name_source="in_file")
-    zmean = File(argstr='-Zmean %s', suffix='_zmean', name_source="in_file")
-    qmean = File(argstr='-Qmean %s', suffix='_qmean', name_source="in_file")
-    pmean = File(argstr='-Pmean %s', suffix='_pmean', name_source="in_file")
+    mean_file = File(argstr='-Mean %s', name_source="in_file")
+    zmean = File(argstr='-Zmean %s', name_source="in_file")
+    qmean = File(argstr='-Qmean %s', name_source="in_file")
+    pmean = File(argstr='-Pmean %s', name_source="in_file")
 
     _thresh_opts = ('absolute_threshold',
                     'var_absolute_threshold',
                     'var_absolute_threshold_normalize')
     thresholds = traits.List(traits.Int())
     absolute_threshold = File(
-        argstr='-Thresh %f %s', suffix='_thresh',
+        argstr='-Thresh %f %s',
         name_source="in_file", xor=_thresh_opts)
     var_absolute_threshold = File(
-        argstr='-VarThresh %f %f %f %s', suffix='_varthresh',
+        argstr='-VarThresh %f %f %f %s',
         name_source="in_file", xor=_thresh_opts)
     var_absolute_threshold_normalize = File(
-        argstr='-VarThreshN %f %f %f %s', suffix='_varthreshn',
+        argstr='-VarThreshN %f %f %f %s', 
         name_source="in_file", xor=_thresh_opts)
 
     correlation_maps = File(
@@ -1632,17 +1610,17 @@ class TCorrMapInputSpec(AFNIBaseCommandInputSpec):
     _expr_opts = ('average_expr', 'average_expr_nonzero', 'sum_expr')
     expr = traits.Str()
     average_expr = File(
-        argstr='-Aexpr %s %s', suffix='_aexpr',
+        argstr='-Aexpr %s %s',
         name_source='in_file', xor=_expr_opts)
     average_expr_nonzero = File(
-        argstr='-Cexpr %s %s', suffix='_cexpr',
+        argstr='-Cexpr %s %s',
         name_source='in_file', xor=_expr_opts)
     sum_expr = File(
-        argstr='-Sexpr %s %s', suffix='_sexpr',
+        argstr='-Sexpr %s %s',
         name_source='in_file', xor=_expr_opts)
     histogram_bin_numbers = traits.Int()
     histogram = File(
-        name_source='in_file', argstr='-Hist %d %s', suffix='_hist')
+        name_source='in_file', argstr='-Hist %d %s')
 
 
 class TCorrMapOutputSpec(TraitedSpec):
@@ -1746,7 +1724,7 @@ class Autobox(AFNICommand):
     output_spec = AutoboxOuputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = self._outputs()
+        outputs = super(Autobox, self).aggregate_outputs()
         pattern = 'x=(?P<x_min>-?\d+)\.\.(?P<x_max>-?\d+)  y=(?P<y_min>-?\d+)\.\.(?P<y_max>-?\d+)  z=(?P<z_min>-?\d+)\.\.(?P<z_max>-?\d+)'
         for line in runtime.stderr.split('\n'):
             m = re.search(pattern, line)
@@ -1755,10 +1733,4 @@ class Autobox(AFNICommand):
                 for k in d.keys():
                     d[k] = int(d[k])
                 outputs.set(**d)
-        outputs.set(out_file=self._gen_filename('out_file'))
         return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file' and (not isdefined(self.inputs.out_file)):
-            return Undefined
-        return super(Autobox, self)._gen_filename(name)
