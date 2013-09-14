@@ -284,8 +284,8 @@ class CopyMeta(BaseInterface):
         # Update the shape and slice dimension to reflect the meta extension update.
         dest.meta_ext.slice_dim = src.meta_ext.slice_dim
         dest.meta_ext.shape = src.meta_ext.shape
-            
-        self.out_path = path.join(os.getcwd(), 
+
+        self.out_path = path.join(os.getcwd(),
                                   path.basename(self.inputs.dest_file))
         dest.to_filename(self.out_path)
 

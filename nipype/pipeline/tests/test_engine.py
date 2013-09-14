@@ -258,7 +258,7 @@ def test_itersource_expansion():
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
-    
+
     # each expanded graph clone has:
     # 2 node1 expansion nodes,
     # 1 node2 per node1 replicate,
@@ -288,7 +288,7 @@ def test_itersource_synchronize1_expansion():
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
-    
+
     # each expanded graph clone has:
     # 2 node1 expansion nodes,
     # 1 node2 per node1 replicate,
@@ -319,7 +319,7 @@ def test_itersource_synchronize2_expansion():
     for i in [0,1,2]:
         wf3.add_nodes([wf1.clone(name='test%d'%i)])
     wf3._flatgraph = wf3._create_flat_graph()
-    
+
     # each expanded graph clone has:
     # 2 node1 expansion nodes,
     # 1 node2 per node1 replicate,
