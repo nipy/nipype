@@ -1160,7 +1160,10 @@ class Node(WorkflowBase):
             multiprocessing pool
 
         """
-        super(Node, self).__init__(name, **kwargs)
+        base_dir = None
+        if 'base_dir' in kwargs:
+            base_dir = kwargs['base_dir']
+        super(Node, self).__init__(name, base_dir)
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):

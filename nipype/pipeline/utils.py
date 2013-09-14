@@ -311,12 +311,14 @@ def synchronize_iterables(iterables):
     Examples
     --------
     >>> from nipype.pipeline.utils import synchronize_iterables
-    >>> iterables = dict(a=lambda: [1, 2]), b=lambda: [3, 4])
-    >>> synchronize_iterable_lists(iterables)
-    [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
-    >>> iterables = dict(a=lambda: [1, 2]), b=lambda: [3], c=lambda: [4, 5, 6])
-    >>> synchronize_iterable_lists(iterables)
-    [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
+    >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
+    >>> synced = synchronize_iterables(iterables)
+    >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
+    True
+    >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3], c=lambda: [4, 5, 6])
+    >>> synced = synchronize_iterables(iterables)
+    >>> synced == [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
+    True
     """
     # Convert the (field, function) tuples into (field, value) lists
     pair_lists = [[(field, value) for value in func()]

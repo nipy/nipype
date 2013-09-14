@@ -486,9 +486,10 @@ class Registration(ANTSCommand):
             for metric in self._formatMetric(ii):
                 retval.append('--metric %s' % metric)
             retval.append('--convergence %s' % self._formatConvergence(ii))
-            if self.inputs.sigma_units:
-                retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
-                    self.inputs.smoothing_sigmas[ii], self.inputs.sigma_units[ii])))
+            if isdefined(self.inputs.sigma_units):
+                retval.append('--smoothing-sigmas %s%s' %
+                        (self._antsJoinList(self.inputs.smoothing_sigmas[ii]),
+                         self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %
                     self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
