@@ -233,7 +233,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     return pipeline
 
 
-def create_susceptibility_correct_pipeline(name="susceptibility_correct", fieldmap_registration=False):
+def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
     for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
     information (Jezzard et al., 1995) using FSL's FUGUE. The registration to the (warped) fieldmap
@@ -242,7 +242,7 @@ def create_susceptibility_correct_pipeline(name="susceptibility_correct", fieldm
     Example
     -------
 
-    >>> nipype_epicorrect = create_susceptibility_correct_pipeline("nipype_epicorrect", fieldmap_registration=False)
+    >>> nipype_epicorrect = create_epidewarp_pipeline("nipype_epidewarp", fieldmap_registration=False)
     >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
