@@ -1251,12 +1251,13 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         exists=True)
     out_file = File("%s.nii", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file", usedefault=True)
+    hash_files = False
 
 class AFNItoNIFTI(AFNICommand):
     """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
     see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
-    Also can take in 2dimensional or 3dimensional data, which then undergoes numpy.squeeze()
+    this can also convert 2D or 1D data, which you can numpy.squeeze() to remove extra dimensions
     
     Examples
     ========
@@ -1273,3 +1274,12 @@ class AFNItoNIFTI(AFNICommand):
     _cmd = '3dAFNItoNIFTI'
     input_spec = AFNItoNIFTIInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def _overload_extension(self, value):
+        path, base, ext = split_filename(value)
+        if ext.lower() not in [".1d", ".nii.gz", ".1D"]:
+            ext = ext + ".nii"
+        return os.path.join(path, base + ext)
+
+    def _gen_filename(self, name):
+        return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
