@@ -94,7 +94,7 @@ class TOPUPInputSpec( FSLCommandInputSpec ):
     warp_res = traits.Float( 10.0, argstr='--warpres %f', desc='(approximate) resolution (in mm) of warp basis for the different sub-sampling levels' )
     subsamp = traits.Int( 1, argstr='--subsamp %d', desc='sub-sampling scheme, default 1' )
     fwhm = traits.Float( 8.0, argstr='--fwhm %f', desc='FWHM (in mm) of gaussian smoothing kernel' )
-    config = traits.String('b02b0.cnf' desc='Name of config file specifying command line arguments', argstr='--config %s' )
+    config = traits.String('b02b0.cnf', desc='Name of config file specifying command line arguments', argstr='--config %s', usedefault=True )
     max_iter = traits.Int( 5, argstr='--miter %d', desc='max # of non-linear iterations')
     #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
     #ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
@@ -108,7 +108,7 @@ class TOPUPInputSpec( FSLCommandInputSpec ):
     regrid = traits.Enum( 1, 0, argstr='--regrid %d', desc='If set (=1), the calculations are done in a different grid' )
 
 class TOPUPOutputSpec( TraitedSpec ):
-    out_field = File( exists=True, desc='file containing the field coefficients' )
+    out_fieldcoef = File( exists=True, desc='file containing the field coefficients' )
     out_movpar = File( exists=True, desc='movpar.txt output file' )
 
     out_topup = File( desc='basename for the <out_base>_fieldcoef.nii.gz and <out_base>_movpar.txt files' )
@@ -128,7 +128,7 @@ class TOPUP( FSLCommand ):
         --------
         >>> topup = TOPUP()
         >>> topup.inputs.in_file = "b0_b0rev.nii"
-        >>> topup.inputs.encoding_file = "encoding.txt"
+        >>> topup.inputs.encoding_file = "topup_encoding.txt"
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -148,7 +148,7 @@ class TOPUP( FSLCommand ):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_topup'] = self.inputs.out_base
-        outputs['out_field'] = '%s_%s.nii.gz' % (self.inputs.out_base, 'fieldcoef' )
+        outputs['out_fieldcoef'] = '%s_%s.nii.gz' % (self.inputs.out_base, 'fieldcoef' )
         outputs['out_movpar'] = '%s_%s.txt' % (self.inputs.out_base, 'movpar' )
 
         if isdefined( self.inputs.out_field ):
