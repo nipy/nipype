@@ -17,6 +17,9 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
                     SwapDimensions, PowerSpectrum, SigLoss, Reorient2Std,
                     Complex, InvWarp)
+
+from .epi import (EPIDewarp, SigLoss,EddyCorrect)
+
 from .dti import (EddyCorrect, BEDPOSTX, DTIFit, ProbTrackX, VecReg, ProjThresh,
                   FindTheBiggest, DistanceMap, TractSkeleton, XFibres,
                   MakeDyadicVectors)
