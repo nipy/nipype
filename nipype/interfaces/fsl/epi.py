@@ -96,6 +96,7 @@ class TOPUPInputSpec( FSLCommandInputSpec ):
     fwhm = traits.Float( 8.0, argstr='--fwhm %f', desc='FWHM (in mm) of gaussian smoothing kernel' )
     config = traits.String('b02b0.cnf', desc='Name of config file specifying command line arguments', argstr='--config %s', usedefault=True )
     max_iter = traits.Int( 5, argstr='--miter %d', desc='max # of non-linear iterations')
+    # @oesteban: I don't know how to implement these 3 parameters, AFAIK there's no documentation.
     #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
     #ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
     #regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
@@ -168,52 +169,74 @@ class TOPUP( FSLCommand ):
 
         return outputs
  
-# class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
-# 	in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
-# 	encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
-#     in_index = traits.List( argstr='-x %s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
-#     in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='-t %s' )
-#     
-#     out_base = File( desc='basename for output (warped) image', argstr='-o %s' )
-#     method = traits.Enum( ('jac','lsr'), argstr='-m %s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
-#     interp = traits.Enum( ('trilinear','spline'), argstr='-n %s', desc='interpolation method' )
-#     datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d %s', desc='force output data type' )
-# 
-# 
-# class ApplyTOPUPOutputSpec( TraitedSpec ):
-#     out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
-#     out_logfile = File( argstr='--logout %s', desc='name of log-file' )
-# 
-# class ApplyTOPUP( FSLCommand ):
-#     """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
-#         Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide
-#         Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
-# 
-#         topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
-# 
-# 
-#         Examples
-#         --------
-#         >>> applytopup = ApplyTOPUP()
-#         >>> applytopup.inputs.in_file = "dwi_combined.nii"
-#         >>> applytopup.inputs.encoding_file = "encoding.txt"
-#         >>> applytopup.inputs.in_index = 1,2
-#         >>> applytopup.inputs.in_topup = "my_topup_results"
-#         >>> res = applytopup.run() # doctest: +SKIP
-# 
-#     """
-#     _cmd = 'topup'
-#     input_spec = ApplyTOPUPInputSpec
-#     output_spec = ApplyTOPUPOutputSpec
-# 
-#     def _list_outputs(self):
-#         outputs = self.output_spec().get()
-# 
-#         return outputs
-# 
-# 
-# 
-# 
+class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
+    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='name of 4D file with images', argstr='%s' )
+    encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
+    in_index = traits.List( argstr='%s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
+    in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='-t=%s' )
+    
+    out_base = File( desc='basename for output (warped) image', argstr='-o=%s' )
+    method = traits.Enum( ('jac','lsr'), argstr='-m=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
+    interp = traits.Enum( ('trilinear','spline'), argstr='-n=%s', desc='interpolation method' )
+    datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d=%s', desc='force output data type' )
+
+
+class ApplyTOPUPOutputSpec( TraitedSpec ):
+    out_corrected = File( exists=True, desc='name of 4D image file with unwarped images' )
+
+class ApplyTOPUP( FSLCommand ):
+    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
+        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide
+        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
+
+        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+
+
+        Examples
+        --------
+        >>> applytopup = ApplyTOPUP()
+        >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
+        >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
+        >>> applytopup.inputs.in_index = [ 1,2 ]
+        >>> applytopup.inputs.in_topup = "my_topup_results"
+        >>> res = applytopup.run() # doctest: +SKIP
+
+    """
+    _cmd = 'topup'
+    input_spec = ApplyTOPUPInputSpec
+    output_spec = ApplyTOPUPOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        # first do what should be done in general
+        formated = super(ApplyTOPUP, self)._format_arg(name, spec, value)
+        if name == 'in_files' or name == 'in_index':
+            if name == 'in_files':
+                formated = '--imain='
+            else:
+                formated = '--inindex='
+
+            formated = formated + "%s" % value[0]
+            for fname in value[1:]:
+                formated = formated + ",%s" % value
+        return formated
+
+    def _parse_inputs( self, skip=None ):
+        if skip is None:
+            skip = []
+        
+        if not isdefined(self.inputs.out_base ):
+            self.inputs.out_base = os.path.abspath( './nipype_applytopup' )
+        return super(TOPUP, self)._parse_inputs(skip=skip)
+
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
+        return outputs
+
+
+
+
 
 
 class EPIDeWarpInputSpec(FSLCommandInputSpec):
