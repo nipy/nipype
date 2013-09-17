@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """The fsl module provides classes for interfacing with the `FSL
 <http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
-was written to work with FSL version 4.1.4.
+was written to work with FSL version 5.0.4.
 
 Examples
 --------
@@ -45,7 +45,7 @@ class PrepareFieldmapOutputSpec( TraitedSpec ):
     out_fieldmap = File( exists=True, desc='output name for prepared fieldmap' )
 
 class PrepareFieldmap(FSLCommand):
-    """ Interface for the fsl_prepare_fieldmap script
+    """ Interface for the fsl_prepare_fieldmap script (FSL 5.0)
 
     Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in rad/s format
     e.g. fsl_prepare_fieldmap SIEMENS images_3_gre_field_mapping images_4_gre_field_mapping fmap_rads 2.65
@@ -84,65 +84,90 @@ class PrepareFieldmap(FSLCommand):
 
 
 
-# class TOPUPInputSpec( FSLCommandInputSpec ):
-# 	in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
-# 	encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
-# 	out_base = File( desc='base-name of output files (spline coefficients (Hz) and movement parameters)', argstr='--out %s' )
-#     out_field = File( argstr='--fout %s', desc='name of image file with field (Hz)' )
-#     out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
-#     out_logfile = File( argstr='--logout %s', desc='name of log-file' )
-#     warp_res = traits.Float( 10.0, argstr='--warpres %f', desc='(approximate) resolution (in mm) of warp basis for the different sub-sampling levels' )
-#     subsamp = traits.Int( 1, argstr='--subsamp %d', desc='sub-sampling scheme, default 1' )
-#     fwhm = traits.Float( 8.0, argstr='--fwhm %f', desc='FWHM (in mm) of gaussian smoothing kernel' )
-# 	config = File( desc='Name of config file specifying command line arguments', argstr='--config %s' )
-#     max_iter = traits.Int( 5, argstr='--miter %d', desc='max # of non-linear iterations')
-#     #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
-# 	#ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
-# 	#regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
-# 	estmov = traits.Either( (0,1), desc='estimate movements if set', argstr='--estmov %d' )
-#    	minmet = traits.Either( (0,1), desc='Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient', argstr='--minmet %d' )
-# 	splineorder = traits.Int( 3, argstr='--splineorder %d', desc='order of spline, 2->Qadratic spline, 3->Cubic spline' )
-#     numprec = traits.Either( ('float','double'), argstr='--numprec %s', desc='Precision for representing Hessian, double or float.' )
-#     interp = traits.Either( ('linear','spline'), argstr='--interp %s', desc='Image interpolation model, linear or spline.' )
-#     scale = traits.Either( (0,1), argstr='--scale %d', desc='If set (=1), the images are individually scaled to a common mean' )
-#     regrid = traits.Either( (0,1), argstr='--regrid %d', desc='If set (=1), the calculations are done in a different grid' )
-# 
-# 
-# 
-# class TOPUPOutputSpec( TraitedSpec ):
-#     out_field = File( argstr='--fout %s', desc='name of image file with field (Hz)' )
-#     out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
-#     out_logfile = File( argstr='--logout %s', desc='name of log-file' )
-# 
-# 
-# 
-# class TOPUP( FSLCommand ):
-#     """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
-#         Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP
-#         Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
-# 
-#         topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
-# 
-# 
-#         Examples
-#         --------
-#         >>> topup = TOPUP()
-#         >>> topup.inputs.in_file = "dwi_combined.nii"
-#         >>> topup.inputs.encoding_file = "encoding.txt"
-#         >>> res = topup.run() # doctest: +SKIP
-# 
-#     """
-#     _cmd = 'topup'
-#     input_spec = TOPUPInputSpec
-#     output_spec = TOPUPOutputSpec
-# 
-#     def _list_outputs(self):
-#         outputs = self.output_spec().get()
-# 
-#         return outputs
-# 
-# 
-# 
+class TOPUPInputSpec( FSLCommandInputSpec ):
+    in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
+    encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
+    out_base = File( desc='base-name of output files (spline coefficients (Hz) and movement parameters)', argstr='--out %s' )
+    out_field = File( argstr='--fout %s', desc='name of image file with field (Hz)' )
+    out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
+    out_logfile = File( argstr='--logout %s', desc='name of log-file' )
+    warp_res = traits.Float( 10.0, argstr='--warpres %f', desc='(approximate) resolution (in mm) of warp basis for the different sub-sampling levels' )
+    subsamp = traits.Int( 1, argstr='--subsamp %d', desc='sub-sampling scheme, default 1' )
+    fwhm = traits.Float( 8.0, argstr='--fwhm %f', desc='FWHM (in mm) of gaussian smoothing kernel' )
+    config = traits.String('b02b0.cnf' desc='Name of config file specifying command line arguments', argstr='--config %s' )
+    max_iter = traits.Int( 5, argstr='--miter %d', desc='max # of non-linear iterations')
+    #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
+    #ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
+    #regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
+    estmov = traits.Enum( 1, 0, desc='estimate movements if set', argstr='--estmov %d' )
+    minmet = traits.Enum( 0, 1, desc='Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient', argstr='--minmet %d' )
+    splineorder = traits.Int( 3, argstr='--splineorder %d', desc='order of spline, 2->Qadratic spline, 3->Cubic spline' )
+    numprec = traits.Enum( 'double', 'float', argstr='--numprec %s', desc='Precision for representing Hessian, double or float.' )
+    interp = traits.Enum( 'spline', 'linear' , argstr='--interp %s', desc='Image interpolation model, linear or spline.' )
+    scale = traits.Enum( 0, 1, argstr='--scale %d', desc='If set (=1), the images are individually scaled to a common mean' )
+    regrid = traits.Enum( 1, 0, argstr='--regrid %d', desc='If set (=1), the calculations are done in a different grid' )
+
+class TOPUPOutputSpec( TraitedSpec ):
+    out_field = File( exists=True, desc='file containing the field coefficients' )
+    out_movpar = File( exists=True, desc='movpar.txt output file' )
+
+    out_topup = File( desc='basename for the <out_base>_fieldcoef.nii.gz and <out_base>_movpar.txt files' )
+    out_field = File( desc='name of image file with field (Hz)' )
+    out_corrected = File( desc='name of 4D image file with unwarped images' )
+    out_logfile = File( desc='name of log-file' )
+
+class TOPUP( FSLCommand ):
+    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
+        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP
+        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
+
+        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+
+
+        Examples
+        --------
+        >>> topup = TOPUP()
+        >>> topup.inputs.in_file = "b0_b0rev.nii"
+        >>> topup.inputs.encoding_file = "encoding.txt"
+        >>> res = topup.run() # doctest: +SKIP
+
+    """
+    _cmd = 'topup'
+    input_spec = TOPUPInputSpec
+    output_spec = TOPUPOutputSpec
+
+    def _parse_inputs( self, skip=None ):
+        if skip is None:
+            skip = []
+        
+        if not isdefined(self.inputs.out_base ):
+            self.inputs.out_base = os.path.abspath( './nipype_topup' )
+
+        return super(TOPUP, self)._parse_inputs(skip=skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_topup'] = self.inputs.out_base
+        outputs['out_field'] = '%s_%s.nii.gz' % (self.inputs.out_base, 'fieldcoef' )
+        outputs['out_movpar'] = '%s_%s.txt' % (self.inputs.out_base, 'movpar' )
+
+        if isdefined( self.inputs.out_field ):
+            outputs['out_field'] = self.inputs.out_field
+        else:
+            outputs['out_field'] = None
+
+        if isdefined( self.inputs.out_corrected ):
+            outputs['out_corrected'] = self.inputs.out_corrected
+        else:
+            outputs['out_corrected'] = None
+
+        if isdefined( self.inputs.out_logfile ):
+            outputs['out_logfile'] = self.inputs.out_logfile
+        else:
+            outputs['out_logfile'] = None
+
+        return outputs
+ 
 # class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
 # 	in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
 # 	encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
@@ -150,9 +175,9 @@ class PrepareFieldmap(FSLCommand):
 #     in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='-t %s' )
 #     
 #     out_base = File( desc='basename for output (warped) image', argstr='-o %s' )
-#     method = traits.Either( ('jac','lsr'), argstr='-m %s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
-#     interp = traits.Either( ('trilinear','spline'), argstr='-n %s', desc='interpolation method' )
-#     datatype = traits.Either( ('char', 'short', 'int', 'float', 'double' ), argstr='-d %s', desc='force output data type' )
+#     method = traits.Enum( ('jac','lsr'), argstr='-m %s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
+#     interp = traits.Enum( ('trilinear','spline'), argstr='-n %s', desc='interpolation method' )
+#     datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d %s', desc='force output data type' )
 # 
 # 
 # class ApplyTOPUPOutputSpec( TraitedSpec ):
