@@ -95,19 +95,19 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
 
     residualmap = File(argstr='-residualmap %s', exists=True, desc='Specifies the name of the file to contain the weighted residual errors after computing a weighted linear tensor fit. One value is produced per measurement, in voxel order.The data type of this file is big-endian double. Images of the residuals for each measurement can be extracted with shredder.')
 
-    sigma = traits.Float(argstr='-sigma %s', desc='Specifies the standard deviation of the noise in the data. Required by the RESTORE algorithm.')
+    sigma = traits.Float(argstr='-sigma %G', desc='Specifies the standard deviation of the noise in the data. Required by the RESTORE algorithm.')
 
-    bgthresh = traits.Float(argstr='-bgthresh %s', desc='Sets a threshold on the average q=0 measurement to separate foreground and background. The program does not process background voxels, but outputs the same number of values in background voxels and foreground voxels. Each value is zero in background voxels apart from the exit code which is -1.')
+    bgthresh = traits.Float(argstr='-bgthresh %G', desc='Sets a threshold on the average q=0 measurement to separate foreground and background. The program does not process background voxels, but outputs the same number of values in background voxels and foreground voxels. Each value is zero in background voxels apart from the exit code which is -1.')
 
     bgmask = File(argstr='-bgmask %s', exists=True, desc='Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
 
-    cfthresh = traits.Float(argstr='-csfthresh %s', desc='Sets a threshold on the average q=0 measurement to determine which voxels are CSF. This program does not treat CSF voxels any different to other voxels.')
+    cfthresh = traits.Float(argstr='-csfthresh %G', desc='Sets a threshold on the average q=0 measurement to determine which voxels are CSF. This program does not treat CSF voxels any different to other voxels.')
 
     fixedmodq = traits.List(traits.Float, argstr='-fixedmod %s', minlen=4, maxlen=4, desc='Specifies <M> <N> <Q> <tau> a spherical acquisition scheme with M measurements with q=0 and N measurements with |q|=Q and diffusion time tau. The N measurements with |q|=Q have unique directions. The program reads in the directions from the files in directory PointSets.')
 
     fixedbvalue = traits.List(traits.Float, argstr='-fixedbvalue %s', minlen=3, maxlen=3, desc='As above, but specifies <M> <N> <b>. The resulting scheme is the same whether you specify b directly or indirectly using -fixedmodq.')
 
-    tau = traits.Float(argstr='-tau %s', desc='Sets the diffusion time separately. This overrides the diffusion time specified in a scheme file or by a scheme index for both the acquisition scheme and in the data synthesis.')
+    tau = traits.Float(argstr='-tau %G', desc='Sets the diffusion time separately. This overrides the diffusion time specified in a scheme file or by a scheme index for both the acquisition scheme and in the data synthesis.')
 
 class ModelFitOutputSpec(TraitedSpec):
     fitted_data = File(exists=True, desc='output file of 4D volume in voxel order')
@@ -180,7 +180,7 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     inversion = traits.Int(argstr='-inversion %d', units='NA',
         desc='Index of the inversion to use. The default is 1 (linear single tensor inversion).')
 
-    trace = traits.Float(argstr='-trace %s', units='NA',
+    trace = traits.Float(argstr='-trace %G', units='NA',
         desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
 
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
@@ -310,11 +310,11 @@ class TrackInputSpec(CommandLineInputSpec):
         argstr='-voxeldims %s', minlen=3, maxlen=3,
         units='mm')
 
-    ipthresh = traits.Float(argstr='-ipthresh %s', desc='Curvature threshold for tracking, expressed as the minimum dot product between two streamline orientations calculated over the length of a voxel. If the dot product between the previous and current directions is less than this threshold, then the streamline terminates. The default setting will terminate fibres that curve by more than 80 degrees. Set this to -1.0 to disable curvature checking completely.')
+    ipthresh = traits.Float(argstr='-ipthresh %f', desc='Curvature threshold for tracking, expressed as the minimum dot product between two streamline orientations calculated over the length of a voxel. If the dot product between the previous and current directions is less than this threshold, then the streamline terminates. The default setting will terminate fibres that curve by more than 80 degrees. Set this to -1.0 to disable curvature checking completely.')
 
-    curvethresh = traits.Float(argstr='-curvethresh %s', desc='Curvature threshold for tracking, expressed as the maximum angle (in degrees) between between two streamline orientations calculated over the length of a voxel. If the angle is greater than this, then the streamline terminates.')
+    curvethresh = traits.Float(argstr='-curvethresh %f', desc='Curvature threshold for tracking, expressed as the maximum angle (in degrees) between between two streamline orientations calculated over the length of a voxel. If the angle is greater than this, then the streamline terminates.')
 
-    anisthresh = traits.Float(argstr='-anisthresh %s', desc='Terminate fibres that enter a voxel with lower anisotropy than the threshold.')
+    anisthresh = traits.Float(argstr='-anisthresh %f', desc='Terminate fibres that enter a voxel with lower anisotropy than the threshold.')
 
     anisfile = File(argstr='-anisfile %s', exists=True, desc='File containing the anisotropy map. This is required to apply an anisotropy threshold with non tensor data. If the map issupplied it is always used, even in tensor data.')
 
@@ -421,9 +421,9 @@ class TrackBayesDiracInputSpec(TrackInputSpec):
 
     datamodel = traits.Enum('cylsymmdt', 'ballstick', argstr='-datamodel %s', desc='Model of the data for Bayesian tracking. The default model is "cylsymmdt", a diffusion tensor with cylindrical symmetry about e_1, ie L1 >= L_2 = L_3. The other model is "ballstick", the partial volume model (see ballstickfit).')
 
-    curvepriork = traits.Float(argstr='-curvepriork %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of k make curvature less likely.')
+    curvepriork = traits.Float(argstr='-curvepriork %G', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of k make curvature less likely.')
 
-    curvepriorg = traits.Float(argstr='-curvepriorg %s', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of g make curvature less likely.')
+    curvepriorg = traits.Float(argstr='-curvepriorg %G', desc='Concentration parameter for the prior distribution on fibre orientations given the fibre orientation at the previous step. Larger values of g make curvature less likely.')
 
     extpriorfile = File(exists=True, argstr='-extpriorfile %s', desc='Path to a PICo image produced by picopdfs. The PDF in each voxel is used as a prior for the fibre orientation in Bayesian tracking. The prior image must be in the same space as the diffusion data.')
 
