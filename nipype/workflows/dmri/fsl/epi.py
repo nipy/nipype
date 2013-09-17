@@ -257,7 +257,6 @@ def fieldmap_correction(name="fieldmap_correction"):
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
     >>> nipype_epicorrect.inputs.inputnode.te_diff = 2.46
     >>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
-    >>> nipype_epicorrect.inputs.inputnode.pi_accel_factor = 1.0
     >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
     >>> nipype_epicorrect.run() # doctest: +SKIP
  
@@ -268,10 +267,11 @@ def fieldmap_correction(name="fieldmap_correction"):
         inputnode.fieldmap_pha - The phase difference map from the fieldmapping, registered to in_file
         inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan) 
                                  from the fieldmapping, registered to in_file
-        inputnode.te_diff - Time difference between TE in ms of the fieldmapping (usually a GRE sequence).
-        inputnode.epi_echospacing - The echo spacing (aka dwell time) in the EPI sequence
-        inputnode.encoding_dir - The phase encoding direction in EPI acquisition (default y)
-        inputnode.pi_accel_factor - Acceleration factor used for EPI parallel imaging (GRAPPA)
+        inputnode.te_diff - Time difference in msec. between TE in ms of the fieldmapping (usually a GRE sequence).
+        inputnode.epi_echospacing - The effective echo spacing (aka dwell time) in msec. of the EPI sequence. If
+                                    EPI was acquired with parallel imaging, then the effective echo spacing is 
+                                    eff_es = es / acc_factor.
+        inputnode.encoding_direction - The phase encoding direction in EPI acquisition (default y)
         inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
  
  
@@ -333,15 +333,18 @@ def fieldmap_correction(name="fieldmap_correction"):
                     ,(inputnode,      mask_mag, [('in_mask', 'mask_file' )])
                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
                     ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
-                    ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
                     ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_file')])
-                    ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d'), 
+                    ,(inputnode,           vsm, [('fieldmap_mag', 'in_file'),
+                                                 ('encoding_direction','unwarp_direction'),
+                                                 (('te_diff', _ms2sec), 'asym_se_time'),
+                                                 ('vsm_sigma', 'smooth2d'), 
                                                  (('epi_echospacing', _ms2sec), 'dwell_time')])
                     ,(mask_mag,            vsm, [('out_file', 'mask_file')])
                     ,(inputnode,     dwi_split, [('in_file', 'in_file')])
                     ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
                     ,(mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')])
                     ,(vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')])
+                    ,(inputnode,  dwi_applyxfm, [('encoding_direction','unwarp_direction')])
                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
                     ])
