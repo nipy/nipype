@@ -15,23 +15,23 @@ from nipype.utils.filemanip import split_filename
 
 class QBallMXInputSpec(StdOutCommandLineInputSpec):
     basistype = traits.Enum('rbf', 'sh', argstr='-basistype %s', 
-                             desc='Basis function type. "rbf" to use radial basis functions' \
-                                  '"sh" to use spherical harmonics', usedefault=True)
+                             desc=('Basis function type. "rbf" to use radial basis functions '
+                                  '"sh" to use spherical harmonics'), usedefault=True)
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     order = traits.Int(argstr='-order %d', units='NA',
-                             desc='Specific to sh. Maximum order of the spherical harmonic series.'\
-                                  'Default is 4.')
+                             desc=('Specific to sh. Maximum order of the spherical harmonic series. '
+                                   'Default is 4.'))
     rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
-                             desc='Specific to rbf. Sets the number of radial basis functions to use.' \
-                                  'The value specified must be present in the Pointsets directory.'\
-                                  'The default value is 246.')
+                             desc=('Specific to rbf. Sets the number of radial basis functions to use. '
+                                   'The value specified must be present in the Pointsets directory. '
+                                   'The default value is 246.'))
     rbfsigma = traits.Float(argstr='-rbfsigma %f', units='NA',
-                             desc='Specific to rbf. Sets the width of the interpolating basis functions.' \
-                                  'The default value is 0.2618 (15 degrees).')
+                            desc=('Specific to rbf. Sets the width of the interpolating basis functions. '
+                                  'The default value is 0.2618 (15 degrees).'))
     smoothingsigma = traits.Float(argstr='-smoothingsigma %f', units='NA',
-                             desc='Specific to rbf. Sets the width of the smoothing basis functions.' \
-                                  'The default value is 0.1309 (7.5 degrees).')                          
+                                  desc=('Specific to rbf. Sets the width of the smoothing basis functions. '
+                                        'The default value is 0.1309 (7.5 degrees).'))                          
 
 class QBallMXOutputSpec(TraitedSpec):
     qmat = File(exists=True, desc='Q-Ball reconstruction matrix')
@@ -98,11 +98,11 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
     qball_mat = File(exists=True, argstr='%s', mandatory=True, position=3,
                      desc='Linear transformation matrix.')
     normalize = traits.Bool(argstr='-normalize', 
-                            desc='Normalize the measurements and discard' \
-                                 'the zero measurements before the linear transform.')
+                            desc=('Normalize the measurements and discard '
+                                  'the zero measurements before the linear transform.'))
     log = traits.Bool(argstr='-log', 
-                      desc='Transform the log measurements rather than the' \
-                           'measurements themselves')
+                      desc=('Transform the log measurements rather than the '
+                            'measurements themselves'))
     bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
 
 class LinReconOutputSpec(TraitedSpec):
@@ -164,30 +164,30 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
                    desc='Voxel-order data of spherical functions')
     inputmodel = traits.Enum('sh', 'maxent', 'rbf', argstr='-inputmodel %s', mandatory=True,
-                             desc='Type of functions input via in_file. Currently supported options are:'\
-                                  '  sh - Spherical harmonic series. Specify the maximum order of the SH series' \
-                                  '       with the "order" attribute if different from the default of 4.'\
-                                  '  maxent - Maximum entropy representations output by MESD. The reconstruction' \
-                                  '           directions input to MESD must be specified. By default this is the'\
-                                  '           same set of gradient directions (excluding zero gradients) in the'\
-                                  '           scheme file, so specify the "schemefile" attribute unless the'\
-                                  '           "mepointset" attribute was set in MESD.'\
-                                  '  rbf - Sums of radial basis functions. Specify the pointset with the attribute'\
-                                  '        "rbfpointset" if different from the default. See QBallMX.')
+                             desc=('Type of functions input via in_file. Currently supported options are: '
+                                   '  sh - Spherical harmonic series. Specify the maximum order of the SH series '
+                                   '       with the "order" attribute if different from the default of 4. '
+                                   '  maxent - Maximum entropy representations output by MESD. The reconstruction '
+                                   '           directions input to MESD must be specified. By default this is the '
+                                   '           same set of gradient directions (excluding zero gradients) in the '
+                                   '           scheme file, so specify the "schemefile" attribute unless the '
+                                   '           "mepointset" attribute was set in MESD. '
+                                   '  rbf - Sums of radial basis functions. Specify the pointset with the attribute '
+                                   '        "rbfpointset" if different from the default. See QBallMX.'))
     order = traits.Int(argstr='-order %d', units='NA',
                        desc='Specific to sh. Maximum order of the spherical harmonic series.')
     scheme_file = File(exists=True, argstr='%s',
                        desc='Specific to maxent. Specifies the scheme file.')
     rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
-                             desc='Specific to rbf. Sets the number of radial basis functions to use.' \
-                                  'The value specified must be present in the Pointsets directory.'\
-                                  'The default value is 246.')
+                             desc=('Specific to rbf. Sets the number of radial basis functions to use. '
+                                   'The value specified must be present in the Pointsets directory. '
+                                   'The default value is 246.'))
     mepointset = traits.Int(argstr='-mepointset %d', units='NA',
-                            desc='Use a set of directions other than those in the scheme file for the deconvolution'\
-                                 'kernel. The number refers to the number of directions on the unit sphere.'\
-                                 'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt"'\
-                                 'Use this option only if you told MESD to use a custom set of directions with the same'\
-                                 'option. Otherwise, specify the scheme file with the "schemefile" attribute.')
+                            desc=('Use a set of directions other than those in the scheme file for the deconvolution '
+                                 'kernel. The number refers to the number of directions on the unit sphere. '
+                                 'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt" '
+                                 'Use this option only if you told MESD to use a custom set of directions with the same '
+                                 'option. Otherwise, specify the scheme file with the "schemefile" attribute.'))
     numpds = traits.Int(argstr='-numpds %d', units='NA',
                         desc='The largest number of peak directions to output in each voxel.')
     noconsistencycheck = traits.Bool(argstr='-noconsistencycheck', 
@@ -195,20 +195,20 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
     searchradius = traits.Float(argstr='-searchradius %f', units='NA',
                                 desc='The search radius in the peak finding algorithm. The default is 0.4 (cf. "density")')
     density = traits.Int(argstr='-density %d', units='NA',
-                         desc='The  number  of  randomly  rotated icosahedra to use in constructing the set of points for'\
-                              'random sampling in the peak finding algorithm. Default is 1000, which works well for very'\
-                              'spiky maxent functions. For other types of function, it is reasonable to set the density'\
-                              'much lower and increase the search radius slightly, which speeds up the computation.')
+                         desc=('The  number  of  randomly  rotated icosahedra to use in constructing the set of points for '
+                               'random sampling in the peak finding algorithm. Default is 1000, which works well for very '
+                               'spiky maxent functions. For other types of function, it is reasonable to set the density '
+                               'much lower and increase the search radius slightly, which speeds up the computation.'))
     pointset = traits.Int(argstr='-pointset %d', units='NA',
-                          desc='To sample using an evenly distributed set of points instead. The integer can be'\
-                               '0, 1, ..., 7. Index 0 gives 1082 points, 1 gives 1922, 2 gives 3002, 3 gives 4322,'\
-                               '4 gives 5882, 5 gives 8672, 6 gives 12002, 7 gives 15872.')
+                          desc=('To sample using an evenly distributed set of points instead. The integer can be '
+                                '0, 1, ..., 7. Index 0 gives 1082 points, 1 gives 1922, 2 gives 3002, 3 gives 4322, '
+                                '4 gives 5882, 5 gives 8672, 6 gives 12002, 7 gives 15872.'))
     pdthresh = traits.Float(argstr='-pdthresh %f', units='NA',
-                            desc='Base threshold on the actual peak direction strength divided by the mean of the'\
-                                 'function.  The default is 1.0 (the peak must be equal or greater than the mean).')
+                            desc=('Base threshold on the actual peak direction strength divided by the mean of the '
+                                  'function.  The default is 1.0 (the peak must be equal or greater than the mean).'))
     stdsfrommean = traits.Float(argstr='-stdsfrommean %f', units='NA',
-                            desc='This is the number of standard deviations of the function to be added to the'\
-                                 '"pdthresh" attribute in the peak directions pruning.')
+                            desc=('This is the number of standard deviations of the function to be added to the '
+                                 '"pdthresh" attribute in the peak directions pruning.'))
 
 class SFPeaksOutputSpec(TraitedSpec):
     peaks = File(exists=True, desc='Peaks of the spherical functions.')

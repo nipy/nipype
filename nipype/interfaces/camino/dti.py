@@ -231,15 +231,13 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
     inputmodel = traits.Enum('dt', 'multitensor', 'pds',
         argstr='-inputmodel %s', position=2, desc='input model type', usedefault=True)
 
-    #luts = File(exists=True, argstr='-luts %s',
-        #mandatory=False, position=3,
     luts = traits.List(File(exists=True), argstr='-luts %s', minlen=1, maxlen=3, mandatory=True,
         desc='Files containing the lookup tables.'\
         'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'\
         'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'\
         'These LUTs may be generated with dtlutgen.')
 
-    pdf = traits.Enum('watson', 'bingham', 'acg',
+    pdf = traits.Enum('bingham', 'watson', 'acg',
         argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:'\
         'watson - The Watson distribution. This distribution is rotationally symmetric.'\
         'bingham - The Bingham distributionn, which allows elliptical probability density contours.'\
@@ -292,7 +290,7 @@ class TrackInputSpec(CommandLineInputSpec):
 
     seed_file = File(exists=True, argstr='-seedfile %s', mandatory=False, position=2, desc='seed file')
 
-    inputmodel = traits.Enum('dt', 'multitensor', 'pds', 'pico', 'bootstrap', 'ballstick', 'bayesdirac',
+    inputmodel = traits.Enum('dt', 'multitensor', 'sfpeak', 'pico', 'repbs_dt', 'repbs_multitensor', 'ballstick', 'wildbs_dt', 'bayesdirac', 'bayesdirac_dt',
         argstr='-inputmodel %s', desc='input model type', usedefault=True)
 
     inputdatatype = traits.Enum('float', 'double', argstr='-inputdatatype %s', desc='input file type')
@@ -301,6 +299,8 @@ class TrackInputSpec(CommandLineInputSpec):
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
         desc="The maximum number of tensor components in a voxel. This determines the size of the input file and does not say anything about the voxel classification. The default is 2 if the input model is multitensor and 1 if the input model is dt.")
+
+    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel for input models sfpeak and pico. The default is 3 for input model sfpeak and 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking. For tensor data, use the -maxcomponents option.")
 
     data_dims = traits.List(traits.Int, desc='data dimensions in voxels',
         argstr='-datadims %s', minlen=3, maxlen=3,
@@ -386,8 +386,6 @@ class TrackDT(Track):
         return super(TrackDT, self).__init__(command, **inputs)
 
 class TrackPICoInputSpec(TrackInputSpec):
-    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel. The default is 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking.")
-
     pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo parameters. The default is "bingham.')
 
     iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
@@ -618,7 +616,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_FA.img' #Need to change to self.inputs.outputdatatype
+        return name + '_FA.Bdouble' #Need to change to self.inputs.outputdatatype
 
 class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
