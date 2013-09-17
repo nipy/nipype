@@ -28,25 +28,24 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
-    scanner = traits.String('SIEMENS', desc='must be SIEMENS', position=0, usedefault=True)
-    in_phase = File( exists=True, desc='Phase difference map, in SIEMENS format range from 0-4096 or 0-8192 )',
-                     position=1, mandatory=True )
-    in_magnitude = File(exists=True, 
-                        position=2, 
-                        desc='Magnitude difference map, brain extracted',
-                        mandatory=True
-                       )
-    out_fieldmap = File( desc='output name for prepared fieldmap', position=3 )
-    delta_TE = traits.Float(2.46,desc='echo time difference of the fielmap sequence in ms. (usually 2.46ms in Siemens)',
-                            position=4, usedefault=True )
-    nocheck = traits.Bool(False,desc='do not perform sanity checks for image size/range/dimensions',
-                          position=5, argstr='--nocheck' )
+    scanner = traits.String('SIEMENS', argstr='%s', position=1, desc='must be SIEMENS', usedefault=True)
+    in_phase = File( exists=True, argstr='%s', position=2, mandatory=True,
+                     desc='Phase difference map, in SIEMENS format range from 0-4096 or 0-8192 )' )
+    in_magnitude = File(exists=True, argstr='%s', position=3, mandatory=True,
+                        desc='Magnitude difference map, brain extracted')
+    delta_TE = traits.Float(2.46, usedefault=True, mandatory=True, argstr='%f', position=-2,
+                            desc='echo time difference of the fielmap sequence in ms. (usually 2.46ms in Siemens)')
+                            
+    nocheck = traits.Bool(False, position=-1, argstr='--nocheck',usedefault=True,
+                          desc='do not perform sanity checks for image size/range/dimensions')
+    out_fieldmap = File( argstr='%s', position=5, desc='output name for prepared fieldmap' )
+
 
 class PrepareFieldmapOutputSpec( TraitedSpec ):
     out_fieldmap = File( exists=True, desc='output name for prepared fieldmap' )
 
 class PrepareFieldmap(FSLCommand):
-    """ Interface for the fsl_prepare_fielmap script
+    """ Interface for the fsl_prepare_fieldmap script
 
     Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in rad/s format
     e.g. fsl_prepare_fieldmap SIEMENS images_3_gre_field_mapping images_4_gre_field_mapping fmap_rads 2.65
@@ -78,12 +77,11 @@ class PrepareFieldmap(FSLCommand):
 
         return super(PrepareFieldmap, self)._parse_inputs(skip=skip)
 
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_fieldmap'] = self.inputs.out_fieldmap
-
         return outputs
+
 
 
 # class TOPUPInputSpec( FSLCommandInputSpec ):
