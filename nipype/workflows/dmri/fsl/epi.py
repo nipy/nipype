@@ -233,6 +233,127 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     return pipeline
 
 
+
+
+def fieldmap_correction(name="fieldmap_correction"):
+    """ 
+    Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
+    artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
+    to EPI data, and a brain mask is required.
+
+    Replaces the former workflow, still available as create_epidewarp_pipeline().  The difference
+    with respect the epidewarp pipeline is that now the workflow uses the new fsl_prepare_fieldmap
+    available as of FSL 5.0. 
+
+
+
+    Example
+    -------
+ 
+    >>> nipype_epicorrect = fieldmap_correction("nipype_epidewarp")
+    >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> nipype_epicorrect.inputs.inputnode.in_mask = 'brainmask.nii'
+    >>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
+    >>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
+    >>> nipype_epicorrect.inputs.inputnode.te_diff = 2.46
+    >>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
+    >>> nipype_epicorrect.inputs.inputnode.pi_accel_factor = 1.0
+    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
+    >>> nipype_epicorrect.run() # doctest: +SKIP
+ 
+    Inputs::
+ 
+        inputnode.in_file - The volume acquired with EPI sequence
+        inputnode.in_mask - A brain mask
+        inputnode.fieldmap_pha - The phase difference map from the fieldmapping, registered to in_file
+        inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan) 
+                                 from the fieldmapping, registered to in_file
+        inputnode.te_diff - Time difference between TE in ms of the fieldmapping (usually a GRE sequence).
+        inputnode.epi_echospacing - The echo spacing (aka dwell time) in the EPI sequence
+        inputnode.encoding_dir - The phase encoding direction in EPI acquisition (default y)
+        inputnode.pi_accel_factor - Acceleration factor used for EPI parallel imaging (GRAPPA)
+        inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
+ 
+ 
+    Outputs::
+ 
+        outputnode.epi_corrected
+ 
+    """
+ 
+    inputnode = pe.Node(niu.IdentityInterface(
+                        fields=["in_file",
+                        "in_mask",
+                        "fieldmap_pha",
+                        "fieldmap_mag",
+                        "te_diff",
+                        "epi_echospacing",
+                        "vsm_sigma",
+                        "encoding_direction"
+                        ]), name="inputnode"
+                       )
+ 
+    pipeline = pe.Workflow(name=name)
+ 
+    # Keep first frame from magnitude
+    select_mag = pe.Node(fsl.utils.ExtractROI(
+        t_size=1, t_min=0), name="select_magnitude")
+
+    # Mask magnitude (it is required by PreparedFieldMap)
+    mask_mag = pe.Node( fsl.maths.ApplyMask(), name='mask_magnitude' )
+ 
+    # Run fsl_prepare_fieldmap
+    fslprep = pe.Node( fsl.PrepareFieldmap(), name="prepare_fieldmap" )
+
+    fill_phase = pe.Node(niu.Function(input_names=["in_file"], output_names=[
+                         "out_file"], function=_fill_phase), name='fill_phasediff')
+ 
+    # Use FUGUE to generate the voxel shift map (vsm)
+    vsm = pe.Node(fsl.FUGUE(save_shift=True), name="generate_vsm")
+
+    # VSM demean is not anymore present in the epi_reg script
+    #vsm_mean = pe.Node(niu.Function(input_names=["in_file", "mask_file", "in_unwarped"], output_names=[
+    #                   "out_file"], function=_vsm_remove_mean), name="vsm_mean_shift")
+ 
+    # fugue_epi
+    dwi_split = pe.Node(niu.Function(input_names=[
+                        'in_file'], output_names=['out_files'], function=_split_dwi), name='dwi_split')
+
+    # 'fugue -i %s -u %s --loadshift=%s --mask=%s' % ( vol_name, out_vol_name, vsm_name, mask_name )
+    dwi_applyxfm = pe.MapNode(fsl.FUGUE(
+        icorr=True, save_shift=False), iterfield=['in_file'], name='dwi_fugue')
+    # Merge back all volumes
+    dwi_merge = pe.Node(fsl.utils.Merge(
+        dimension='t'), name='dwi_merge')
+ 
+    outputnode = pe.Node(
+        niu.IdentityInterface(fields=["epi_corrected"]),
+                        name="outputnode")
+ 
+    pipeline.connect([
+                     (inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
+                    ,(inputnode,       fslprep, [('fieldmap_pha', 'in_phase'),('te_diff', 'delta_TE') ])
+                    ,(inputnode,      mask_mag, [('in_mask', 'mask_file' )])
+                    ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
+                    ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
+                    ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
+                    ,(fslprep,      fill_phase, [('out_fieldmap', 'in_file')])
+                    ,(fill_phase,          vsm, [('out_file', 'phasemap_file')])
+                    ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d'), 
+                                                 (('epi_echospacing', _ms2sec), 'dwell_time')])
+                    ,(mask_mag,            vsm, [('out_file', 'mask_file')])
+                    ,(inputnode,     dwi_split, [('in_file', 'in_file')])
+                    ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
+                    ,(mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')])
+                    ,(vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')])
+                    ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
+                    ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
+                    ])
+
+ 
+    return pipeline
+
+
 def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
     for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
@@ -453,6 +574,10 @@ def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False
 
     return dwell_time
 
+def _effective_echospacing( dwell_time, pi_factor=1.0 ):
+    dwelltime = 1.0e-3 * dwelltime * ( 1.0/pi_factor )
+    return dwelltime
+
 
 def _prepare_phasediff(in_file):
     import nibabel as nib
@@ -500,7 +625,7 @@ def _fill_phase(in_file):
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
-    out_file = os.path.abspath('./%s_phase_unwrapped.nii.gz' % name)
+    out_file = os.path.abspath('./%s_fill.nii.gz' % name)
     nib.save(out_nii, out_file)
     return out_file
 
