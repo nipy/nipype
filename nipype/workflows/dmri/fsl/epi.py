@@ -305,9 +305,6 @@ def fieldmap_correction(name="fieldmap_correction"):
     # Run fsl_prepare_fieldmap
     fslprep = pe.Node( fsl.PrepareFieldmap(), name="prepare_fieldmap" )
 
-    fill_phase = pe.Node(niu.Function(input_names=["in_file"], output_names=[
-                         "out_file"], function=_fill_phase), name='fill_phasediff')
- 
     # Use FUGUE to generate the voxel shift map (vsm)
     vsm = pe.Node(fsl.FUGUE(save_shift=True), name="generate_vsm")
 
@@ -337,8 +334,7 @@ def fieldmap_correction(name="fieldmap_correction"):
                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
                     ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
-                    ,(fslprep,      fill_phase, [('out_fieldmap', 'in_file')])
-                    ,(fill_phase,          vsm, [('out_file', 'phasemap_file')])
+                    ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_file')])
                     ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d'), 
                                                  (('epi_echospacing', _ms2sec), 'dwell_time')])
                     ,(mask_mag,            vsm, [('out_file', 'mask_file')])

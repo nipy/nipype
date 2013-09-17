@@ -15,6 +15,7 @@ from glob import glob
 import warnings
 
 import numpy as np
+import nibabel as nib
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
@@ -81,6 +82,19 @@ class PrepareFieldmap(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_fieldmap'] = self.inputs.out_fieldmap
         return outputs
+
+    def _run_interface( self, runtime ):
+        runtime = super( PrepareFieldmap, self )._run_interface(runtime)
+
+        if runtime.returncode == 0:
+            out_file = self.inputs.out_fieldmap
+            im = nib.load( out_file )
+            dumb_img = nib.Nifti1Image(np.zeros(
+                      im.get_shape()), im.get_affine(), im.get_header())
+            out_nii = nib.funcs.concat_images((im, dumb_img))
+            nib.save( out_nii, out_file )
+
+        return runtime        
 
 
 
