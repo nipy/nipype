@@ -25,6 +25,154 @@ warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
 
+class PrepareFieldmapInputSpec(FSLCommandInputSpec):
+    scanner = traits.String('SIEMENS', desc='must be SIEMENS', position=0, usedefault=True)
+    in_phase = File( exists=True, desc='Phase difference map, in SIEMENS format range from 0-4096 or 0-8192 )',
+                     position=1, mandatory=True )
+    in_magnitude = File(exists=True, 
+                        position=2, 
+                        desc='Magnitude difference map, brain extracted',
+                        mandatory=True
+                       )
+    out_fieldmap = File()
+    delta_TE = traits.Float(2.46,desc='echo time difference of the fielmap sequence in ms. (usually 2.46ms in Siemens)',
+                            usedefault=True )
+    nocheck = traits.Bool(False,desc='do not perform sanity checks for image size/range/dimensions',
+                           argstr='--nocheck' )
+
+class PrepareFieldmapOutputSpec( FSLCommandOutputSpec ):
+    out_fieldmap = File( exists=True )
+
+class PrepareFieldmap(FSLCommand):
+    """ Interface for the fsl_prepare_fielmap script
+
+    Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in rad/s format
+    e.g. fsl_prepare_fieldmap SIEMENS images_3_gre_field_mapping images_4_gre_field_mapping fmap_rads 2.65
+
+
+    Examples
+    --------
+    >>> prepare = PrepareFieldmap()
+    >>> prepare.inputs.in_phase = "phase.nii"
+    >>> prepare.inputs.in_magnitude = "magnitude.nii"
+    >>> res = prepare.run() # doctest: +SKIP
+
+
+    """
+    _cmd = 'fsl_prepare_fieldmap'
+    input_spec = PrepareFieldmapInputSpec
+    output_spec = PrepareFieldmapOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        return outputs
+
+
+class TOPUPInputSpec( FSLCommandInputSpec ):
+	in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
+	encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
+	out_base = File( desc='base-name of output files (spline coefficients (Hz) and movement parameters)', argstr='--out %s' )
+    out_field = File( argstr='--fout %s', desc='name of image file with field (Hz)' )
+    out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
+    out_logfile = File( argstr='--logout %s', desc='name of log-file' )
+    warp_res = traits.Float( 10.0, argstr='--warpres %f', desc='(approximate) resolution (in mm) of warp basis for the different sub-sampling levels' )
+    subsamp = traits.Int( 1, argstr='--subsamp %d', desc='sub-sampling scheme, default 1' )
+    fwhm = traits.Float( 8.0, argstr='--fwhm %f', desc='FWHM (in mm) of gaussian smoothing kernel' )
+	config = File( desc='Name of config file specifying command line arguments', argstr='--config %s' )
+    max_iter = traits.Int( 5, argstr='--miter %d', desc='max # of non-linear iterations')
+    #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
+	#ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
+	#regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
+	estmov = traits.Either( (0,1), desc='estimate movements if set', argstr='--estmov %d' )
+   	minmet = traits.Either( (0,1), desc='Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient', argstr='--minmet %d' )
+	splineorder = traits.Int( 3, argstr='--splineorder %d', desc='order of spline, 2->Qadratic spline, 3->Cubic spline' )
+    numprec = traits.Either( ('float','double'), argstr='--numprec %s', desc='Precision for representing Hessian, double or float.' )
+    interp = traits.Either( ('linear','spline'), argstr='--interp %s', desc='Image interpolation model, linear or spline.' )
+    scale = traits.Either( (0,1), argstr='--scale %d', desc='If set (=1), the images are individually scaled to a common mean' )
+    regrid = traits.Either( (0,1), argstr='--regrid %d', desc='If set (=1), the calculations are done in a different grid' )
+
+
+
+class TOPUPOutputSpec( FSLCommandOutputSpec ):
+    out_field = File( argstr='--fout %s', desc='name of image file with field (Hz)' )
+    out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
+    out_logfile = File( argstr='--logout %s', desc='name of log-file' )
+
+
+
+class TOPUP( FSLCommand ):
+    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
+        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP
+        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
+
+        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+
+
+        Examples
+        --------
+        >>> topup = TOPUP()
+        >>> topup.inputs.in_file = "dwi_combined.nii"
+        >>> topup.inputs.encoding_file = "encoding.txt"
+        >>> res = topup.run() # doctest: +SKIP
+
+    """
+    _cmd = 'topup'
+    input_spec = TOPUPInputSpec
+    output_spec = TOPUPOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        return outputs
+
+
+
+class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
+	in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain %s' )
+	encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain %s' )
+    in_index = traits.List( argstr='-x %s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
+    in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='-t %s' )
+    
+    out_base = File( desc='basename for output (warped) image', argstr='-o %s' )
+    method = traits.Either( ('jac','lsr'), argstr='-m %s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
+    interp = traits.Either( ('trilinear','spline'), argstr='-n %s', desc='interpolation method' )
+    datatype = traits.Either( ('char', 'short', 'int', 'float', 'double' ), argstr='-d %s', desc='force output data type' )
+
+
+class ApplyTOPUPOutputSpec( FSLCommandOutputSpec ):
+    out_corrected = File( argstr='--iout %s', desc='name of 4D image file with unwarped images' )
+    out_logfile = File( argstr='--logout %s', desc='name of log-file' )
+
+class ApplyTOPUP( FSLCommand ):
+    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
+        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide
+        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
+
+        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+
+
+        Examples
+        --------
+        >>> applytopup = ApplyTOPUP()
+        >>> applytopup.inputs.in_file = "dwi_combined.nii"
+        >>> applytopup.inputs.encoding_file = "encoding.txt"
+        >>> applytopup.inputs.in_index = 1,2
+        >>> applytopup.inputs.in_topup = "my_topup_results"
+        >>> res = applytopup.run() # doctest: +SKIP
+
+    """
+    _cmd = 'topup'
+    input_spec = ApplyTOPUPInputSpec
+    output_spec = ApplyTOPUPOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        return outputs
+
+
+
 
 
 
