@@ -100,7 +100,9 @@ class PrepareFieldmap(FSLCommand):
 
 class TOPUPInputSpec( FSLCommandInputSpec ):
     in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain=%s' )
-    encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
+    encoding_file = File( exists=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
+    encoding_direction = traits.Enum( 'y','x','z','x-','y-','z-', desc='encoding direction for automatic generation of encoding_file' )
+    readout_times = traits.List( desc='readout times (dwell times by # phase-encode steps minus 1)' )
     out_base = File( desc='base-name of output files (spline coefficients (Hz) and movement parameters)', argstr='--out=%s' )
     out_field = File( argstr='--fout=%s', desc='name of image file with field (Hz)' )
     out_corrected = File( argstr='--iout=%s', desc='name of 4D image file with unwarped images' )
@@ -126,6 +128,7 @@ class TOPUPOutputSpec( TraitedSpec ):
     out_fieldcoef = File( exists=True, desc='file containing the field coefficients' )
     out_movpar = File( exists=True, desc='movpar.txt output file' )
 
+    out_enc_direction= File( desc='encoding directions file output for applytopup' )
     out_topup = File( desc='basename for the <out_base>_fieldcoef.nii.gz and <out_base>_movpar.txt files' )
     out_field = File( desc='name of image file with field (Hz)' )
     out_corrected = File( desc='name of 4D image file with unwarped images' )
@@ -158,6 +161,20 @@ class TOPUP( FSLCommand ):
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './nipype_topup' )
 
+        if isdefined( self.inputs.encoding_file ):
+            skip.append( 'encoding_direction' )
+            skip.append( 'readout_times' )
+        else:
+            encdir = 'y'
+            enctimes = [1.0,1.0]
+            if isdefined( self.inputs.encoding_direction ):
+                encdir = self.inputs.encoding_direction
+
+            if isdefined( self.inputs.readout_times ):
+                enctimes = np.array( self.inputs.readout_times, dtype=float )
+
+            self.inputs.encoding_file = self._generate_encfile( encdir, enctimes )
+
         return super(TOPUP, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
@@ -165,6 +182,7 @@ class TOPUP( FSLCommand ):
         outputs['out_topup'] = self.inputs.out_base
         outputs['out_fieldcoef'] = '%s_%s.nii.gz' % (self.inputs.out_base, 'fieldcoef' )
         outputs['out_movpar'] = '%s_%s.txt' % (self.inputs.out_base, 'movpar' )
+        outputs['out_enc_file'] = self.inputs.encoding_file
 
         if isdefined( self.inputs.out_field ):
             outputs['out_field'] = self.inputs.out_field
@@ -182,6 +200,23 @@ class TOPUP( FSLCommand ):
             outputs['out_logfile'] = None
 
         return outputs
+
+    def _generate_encfile( self, encdir,enctime ):
+        out_file = '%s_encfile.txt' % self.inputs.out_base 
+        direction = 1.0 
+        if len(encdir)==2 and encdir[1]=='-':
+            direction = -1.0
+
+        file1 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
+        file2 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
+        
+        file1.append( enctime[0] )
+        file2.append( enctime[1] )
+        
+
+        np.savetxt( out_file, np.array( [ file1, file2 ] ), fmt='%.2f' ) 
+
+        return out_file
  
 class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='name of 4D file with images', argstr='%s' )
