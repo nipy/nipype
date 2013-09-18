@@ -8,6 +8,9 @@ Next release
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
 
+* ENH: New interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP
+* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
+
 Release 0.8.0 (May 8, 2013)
 ===========================
 
