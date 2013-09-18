@@ -267,6 +267,20 @@ def test_itersource_expansion():
     # => 3 * 14 = 42 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
 
+def test_noniterable_itersource():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = ('input1',[1,2])
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node2', 'input1')
+    node3.iterables = [('input1', {1:[3,4], 2:[5,6,7]})]
+    wf1.connect(node2,'output1', node3, 'input1')
+    expand = lambda: pe.generate_expanded_graph(wf1._create_flat_graph())
+    yield assert_raises, ValueError, expand
+
 def test_child_workflow_itersource_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')

@@ -568,6 +568,16 @@ def generate_expanded_graph(graph_in):
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
     logger.debug("Detected iterable nodes %s" % inodes)
+    # validate that each itersource is iterable
+    for inode in inodes:
+        if inode.itersource:
+            try:
+                src_name, _ = inode.itersource
+                next((n for n in inodes if n.name == src_name
+                      and n.iterables))
+            except StopIteration:
+                raise ValueError("The node %s itersource %s iterables is not"
+                                 " set" % (inode.name, inode.itersource))
     # while there is an iterable node, expand the iterable node's
     # subgraphs
     while inodes:
