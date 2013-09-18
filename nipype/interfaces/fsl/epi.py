@@ -19,7 +19,7 @@ import nibabel as nib
 
 from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
-                                    isdefined)
+                                    isdefined, Undefined )
 
 
 from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
@@ -128,7 +128,7 @@ class TOPUPOutputSpec( TraitedSpec ):
     out_fieldcoef = File( exists=True, desc='file containing the field coefficients' )
     out_movpar = File( exists=True, desc='movpar.txt output file' )
 
-    out_enc_direction= File( desc='encoding directions file output for applytopup' )
+    out_enc_file= File( desc='encoding directions file output for applytopup' )
     out_topup = File( desc='basename for the <out_base>_fieldcoef.nii.gz and <out_base>_movpar.txt files' )
     out_field = File( desc='name of image file with field (Hz)' )
     out_corrected = File( desc='name of 4D image file with unwarped images' )
@@ -159,7 +159,7 @@ class TOPUP( FSLCommand ):
             skip = []
         
         if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipype_topup' )
+            self.inputs.out_base = os.path.abspath( './nipypetu' )
 
         if isdefined( self.inputs.encoding_file ):
             skip.append( 'encoding_direction' )
@@ -187,18 +187,17 @@ class TOPUP( FSLCommand ):
         if isdefined( self.inputs.out_field ):
             outputs['out_field'] = self.inputs.out_field
         else:
-            outputs['out_field'] = None
+            outputs['out_field'] = Undefined
 
         if isdefined( self.inputs.out_corrected ):
             outputs['out_corrected'] = self.inputs.out_corrected
         else:
-            outputs['out_corrected'] = None
+            outputs['out_corrected'] = Undefined
 
         if isdefined( self.inputs.out_logfile ):
             outputs['out_logfile'] = self.inputs.out_logfile
         else:
-            outputs['out_logfile'] = None
-
+            outputs['out_logfile'] = Undefined
         return outputs
 
     def _generate_encfile( self, encdir,enctime ):
@@ -208,7 +207,7 @@ class TOPUP( FSLCommand ):
             direction = -1.0
 
         file1 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
-        file2 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
+        file2 = [  float(val[0]==encdir[0]) * direction * -1.0  for val in [ 'x', 'y', 'z' ] ]
         
         file1.append( enctime[0] )
         file2.append( enctime[1] )
@@ -274,7 +273,7 @@ class ApplyTOPUP( FSLCommand ):
             skip = []
         
         if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipype_applytopup' )
+            self.inputs.out_base = os.path.abspath( './nipypeatu' )
         return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
 

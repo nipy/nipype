@@ -353,6 +353,77 @@ def fieldmap_correction(name="fieldmap_correction"):
     return pipeline
 
 
+def topup_correction( name='topup' ):
+    """ 
+        Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
+        been acquired
+
+
+    Example
+    -------
+ 
+    >>> nipype_epicorrect = topup_correction("nipype_topup")
+    >>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
+    >>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
+    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
+    >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
+    >>> nipype_epicorrect.run() # doctest: +SKIP
+ 
+    Inputs::
+        inputnode.in_file_dir - EPI volume acquired in 'forward' phase encoding 
+        inputnode.in_file_rev - EPI volume acquired in 'reversed' phase encoding
+        inputnode.encoding_direction - Direction encoding of in_file_dir
+        inputnode.ref_num - Identifier of the reference volumes (usually B0 volume)
+ 
+    Outputs::
+ 
+        outputnode.epi_corrected
+ 
+ 
+    """
+    pipeline = pe.Workflow(name=name)
+
+    inputnode = pe.Node(niu.IdentityInterface(
+                        fields=["in_file_dir",
+                                "in_file_rev",
+                                "encoding_direction",
+                                "ref_num"
+                        ]), name="inputnode"
+                       )
+
+    outputnode = pe.Node( niu.IdentityInterface(
+                          fields=["out_fieldcoef",
+                                  "out_movpar",
+                                  "epi_corrected"
+                          ]), name='outputnode'
+                        )
+    
+    b0_dir = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_1' )
+    b0_rev = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_2' )
+    combin = pe.Node( niu.Merge(2), name='merge' )
+    combin2 = pe.Node( niu.Merge(2), name='merge2' )
+    merged = pe.Node( fsl.Merge( dimension='t' ), name='b0_comb' )
+    
+    topup = pe.Node( fsl.TOPUP(), name='topup' )
+    applytopup = pe.Node( fsl.ApplyTOPUP(in_index=[1,2] ), name='applytopup' )
+
+    pipeline.connect([
+                      (inputnode,     b0_dir, [('in_file_dir','in_file'),('ref_num','t_min')] )
+                     ,(inputnode,     b0_rev, [('in_file_rev','in_file'),('ref_num','t_min')] )
+                     ,(inputnode,    combin2, [('in_file_dir','in1'),('in_file_rev','in2') ] )
+                     ,(b0_dir,        combin, [('roi_file','in1')] )
+                     ,(b0_rev,        combin, [('roi_file','in2')] )
+                     ,(combin,        merged, [('out', 'in_files')] )
+                     ,(merged,         topup, [('merged_file','in_file')])
+                     ,(topup,     applytopup, [('out_topup','in_topup'),('out_enc_file','encoding_file')])
+                     ,(combin2,   applytopup, [('out','in_files')] )
+                     ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar') ])
+                     ,(applytopup,outputnode, [('out_corrected','epi_corrected')])
+                     ])
+
+    return pipeline
+
+
 def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
     for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
