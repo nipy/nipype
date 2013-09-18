@@ -9,7 +9,7 @@ from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_equal, assert_true)
+from nipype.testing import (assert_equal, assert_true, assert_raises)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import IdentityInterface
@@ -161,6 +161,25 @@ def test_join_expansion():
     # there are two iterations of the post-join node in the iterable path
     assert_equal(len(_products), 2,
                  "The number of iterated post-join outputs is incorrect")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_noniterable_joinsource():
+    """Test validation that the joinsource has iterables."""
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    # the join node
+    make_join = lambda: pe.JoinNode(SetInterface(), joinsource=inputspec,
+                                    joinfield='input1', name='join')
+    assert_raises(Exception,  "The joinsource is not set to the node name.",
+                  make_join)
 
     os.chdir(cwd)
     rmtree(wd)

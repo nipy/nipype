@@ -559,17 +559,15 @@ def generate_expanded_graph(graph_in):
     """
     logger.debug("PE: expanding iterables")
     graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
-    # standardize the iterables as {(field, function)} dictionaries
-    for node in graph_in.nodes_iter():
-        if node.iterables:
-            _standardize_iterables(node)
-    allprefixes = list('abcdefghijklmnopqrstuvwxyz')
-
     # the iterable nodes
     inodes = _iterable_nodes(graph_in)
     logger.debug("Detected iterable nodes %s" % inodes)
-    # validate that each itersource is iterable
+
+    # pre-process the iterable nodes as follows:
+    # * standardize the iterables as {(field, function)} dictionaries
+    # * validate that each itersource is iterable
     for inode in inodes:
+        _standardize_iterables(inode)
         if inode.itersource:
             try:
                 src_name, _ = inode.itersource
@@ -578,8 +576,19 @@ def generate_expanded_graph(graph_in):
             except StopIteration:
                 raise ValueError("The node %s itersource %s iterables is not"
                                  " set" % (inode.name, inode.itersource))
+
+    # validate that each joinsource has iterables
+    inode_names = {inode.name for inode in inodes}
+    for node in graph_in.nodes_iter():
+        if hasattr(node, 'joinsource'):
+            if node.joinsource not in inode_names:
+                raise Exception("The node '%s' joinsource '%s' was not"
+                                " found in the iterable nodes %s." %
+                                (node.name, node.joinsource, inode_names))
+
     # while there is an iterable node, expand the iterable node's
     # subgraphs
+    allprefixes = list('abcdefghijklmnopqrstuvwxyz')
     while inodes:
         inode = inodes[0]
         logger.debug("Expanding the iterable node %s..." % inode)
