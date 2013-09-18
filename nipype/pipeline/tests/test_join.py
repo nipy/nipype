@@ -244,6 +244,37 @@ def test_unique_join_node():
     os.chdir(cwd)
     rmtree(wd)
 
+def test_child_workflow_join():
+    global _sum_operands
+    _sum_operands = []
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+
+    # the child workflow
+    inner_wf = pe.Workflow(name='inner')
+    # a pre-join node in the iterated path
+    pre_join1 = pe.Node(IncrementInterface(), name='pre_join1')
+    inner_wf.add_nodes([pre_join1])
+    # the outer workflow
+    outer_wf = pe.Workflow(name='outer')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [1, 2, 3])]
+    outer_wf.connect(inputspec, 'n', inner_wf, 'pre_join1.input1')
+    # the join node
+    join = pe.JoinNode(SumInterface(), joinsource='inputspec',
+        joinfield='input1', name='join')
+    outer_wf.connect(inner_wf, 'pre_join1.output1', join, 'input1')
+
+    outer_wf.run()
+
+    assert_equal(_sum_operands[0], [2, 3, 4],
+        "The child workflow join output value is incorrect: %s." % _sum_operands[0])
+
+    os.chdir(cwd)
+    rmtree(wd)
+
 def test_multiple_join_nodes():
     """Test two join nodes, one downstream of the other."""
     global _products
@@ -477,9 +508,9 @@ def test_itersource_join_source_node():
     # the post-join nodes execution order is indeterminate;
     # therefore, compare the lists item-wise.
     assert_true([16, 19] in _sum_operands,
-                 "The join Sum input is incorrect: %s." % _sum_operands)
+                "The join Sum input is incorrect: %s." % _sum_operands)
     assert_true([7, 9] in _sum_operands,
-                 "The join Sum input is incorrect: %s." % _sum_operands)
+                "The join Sum input is incorrect: %s." % _sum_operands)
 
     os.chdir(cwd)
     rmtree(wd)
