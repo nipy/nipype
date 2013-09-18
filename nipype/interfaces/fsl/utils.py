@@ -1203,7 +1203,7 @@ class InvWarp(FSLCommand):
     >>> invwarp.inputs.reference = "anatomical.nii"
     >>> invwarp.inputs.inverse_warp = "mni2t1.nii"
     >>> res = invwarp.run() # doctest: +SKIP
-    >>> 
+    >>>
     """
 
     input_spec = InvWarpInputSpec
@@ -1234,7 +1234,7 @@ class ComplexInputSpec(FSLCommandInputSpec):
                    'complex_cartesian','complex_polar',
                    'complex_split','complex_merge',]
 
-    complex_out_file = File(genfile=True, argstr="%s", position=-3, 
+    complex_out_file = File(genfile=True, argstr="%s", position=-3,
                             xor=_ofs+_conversion[:2])
     magnitude_out_file = File(genfile=True, argstr="%s", position=-4,
                               xor=_ofs[:1]+_ofs[3:]+_conversion[1:])
@@ -1275,8 +1275,8 @@ class ComplexOuputSpec(TraitedSpec):
     real_out_file = File()
     imaginary_out_file = File()
     complex_out_file = File()
-    
-    
+
+
 class Complex(FSLCommand):
     """fslcomplex is a tool for converting complex data
     Examples

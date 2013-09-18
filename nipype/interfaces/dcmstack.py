@@ -12,12 +12,12 @@ from __future__ import absolute_import
 import os, string
 from os import path
 from glob import glob
-from nipype.interfaces.base import (TraitedSpec, 
-                                    DynamicTraitedSpec, 
-                                    InputMultiPath, 
+from nipype.interfaces.base import (TraitedSpec,
+                                    DynamicTraitedSpec,
+                                    InputMultiPath,
                                     File,
-                                    Directory, 
-                                    traits, 
+                                    Directory,
+                                    traits,
                                     BaseInterface,
                                    )
 import nibabel as nb
@@ -43,19 +43,19 @@ def sanitize_path_comp(path_comp):
 class NiftiGeneratorBaseInputSpec(TraitedSpec):
     out_format = traits.Str(desc="String which can be formatted with "
                             "meta data to create the output filename(s)")
-    out_ext = traits.Str('.nii.gz', 
-                         usedefault=True, 
+    out_ext = traits.Str('.nii.gz',
+                         usedefault=True,
                          desc="Determines output file type")
 
 class NiftiGeneratorBase(BaseInterface):
-    '''Base class for interfaces that produce Nifti files, potentially with 
+    '''Base class for interfaces that produce Nifti files, potentially with
     embeded meta data.'''
     def _get_out_path(self, meta, idx=None):
         '''Return the output path for the gernerated Nifti.'''
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
-            #If no out_format is specified, use a sane default that will work 
+            #If no out_format is specified, use a sane default that will work
             #with the provided meta data.
             out_fmt = []
             if not idx is None:
@@ -76,43 +76,43 @@ class NiftiGeneratorBase(BaseInterface):
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     dicom_files = traits.Either(InputMultiPath(File(exists=True)),
                                 Directory(exists=True),
-                                traits.Str(), 
+                                traits.Str(),
                                 mandatory=True)
     embed_meta = traits.Bool(desc="Embed DICOM meta data into result")
     exclude_regexes = traits.List(desc="Meta data to exclude, suplementing "
                                   "any default exclude filters")
     include_regexes = traits.List(desc="Meta data to include, overriding any "
                                   "exclude filters")
-    
+
 class DcmStackOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True)
 
 class DcmStack(NiftiGeneratorBase):
-    '''Create one Nifti file from a set of DICOM files. Can optionally embed 
+    '''Create one Nifti file from a set of DICOM files. Can optionally embed
     meta data.
 
     Example
     -------
-    
+
     >>> from nipype.interfaces.dcmstack import DcmStack
     >>> stacker = DcmStack()
     >>> stacker.inputs.dicom_files = 'path/to/series/'
     >>> stacker.run() # doctest: +SKIP
     >>> result.outputs.out_file # doctest: +SKIP
-    '/path/to/cwd/sequence.nii.gz' 
+    '/path/to/cwd/sequence.nii.gz'
     '''
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec
-    
+
     def _get_filelist(self, trait_input):
         if isinstance(trait_input, str):
             if path.isdir(trait_input):
                 return glob(path.join(trait_input, '*.dcm'))
             else:
                 return glob(trait_input)
-        
+
         return trait_input
-    
+
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
         include_regexes = dcmstack.default_key_incl_res
@@ -121,8 +121,8 @@ class DcmStack(NiftiGeneratorBase):
         exclude_regexes = dcmstack.default_key_excl_res
         if isdefined(self.inputs.exclude_regexes):
             exclude_regexes += self.inputs.exclude_regexes
-        meta_filter = dcmstack.make_key_regex_filter(exclude_regexes, 
-                                                     include_regexes)   
+        meta_filter = dcmstack.make_key_regex_filter(exclude_regexes,
+                                                     include_regexes)
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             src_dcm = dicom.read_file(src_path, force=True)
@@ -135,7 +135,7 @@ class DcmStack(NiftiGeneratorBase):
             nw.remove_extension()
         nb.save(nii, self.out_path)
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = self.out_path
@@ -149,11 +149,11 @@ class GroupAndStack(DcmStack):
     '''
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec
-    
+
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
         stacks = dcmstack.parse_and_stack(src_paths)
-        
+
         self.out_list = []
         for key, stack in stacks.iteritems():
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
@@ -163,7 +163,7 @@ class GroupAndStack(DcmStack):
                 nw.remove_extension()
             nb.save(nw.nii_img, out_path)
             self.out_list.append(out_path)
-            
+
         return runtime
 
     def _list_outputs(self):
@@ -172,23 +172,23 @@ class GroupAndStack(DcmStack):
         return outputs
 
 class LookupMetaInputSpec(TraitedSpec):
-    in_file = File(mandatory=True, 
-                   exists=True, 
+    in_file = File(mandatory=True,
+                   exists=True,
                    desc='The input Nifti file')
     meta_keys = traits.Either(traits.List(),
                               traits.Dict(),
                               mandatory=True,
-                              desc=("List of meta data keys to lookup, or a " 
+                              desc=("List of meta data keys to lookup, or a "
                               "dict where keys specify the meta data keys to "
                               "lookup and the values specify the output names")
                              )
 
 class LookupMeta(BaseInterface):
     '''Lookup meta data values from a Nifti with embeded meta data.
-    
+
     Example
     -------
-    
+
     >>> from nipype.interfaces import dcmstack
     >>> lookup = dcmstack.LookupMeta()
     >>> lookup.inputs.in_file = 'functional.nii'
@@ -223,7 +223,7 @@ class LookupMeta(BaseInterface):
         for out_name in self._meta_keys.values():
             _ = getattr(outputs, out_name)
         return outputs
-        
+
     def _run_interface(self, runtime):
         #If the 'meta_keys' input is a list, covert it to a dict
         self._make_name_map()
@@ -231,14 +231,14 @@ class LookupMeta(BaseInterface):
         self.result = {}
         for meta_key, out_name in self._meta_keys.iteritems():
             self.result[out_name] = nw.meta_ext.get_values(meta_key)
-            
+
         return runtime
-            
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs.update(self.result)
         return outputs
-       
+
 class CopyMetaInputSpec(TraitedSpec):
     src_file = traits.File(mandatory=True,
                          exists=True,
@@ -250,16 +250,16 @@ class CopyMetaInputSpec(TraitedSpec):
                                   "specified include everything.")
     exclude_classes = traits.List(desc="List of meta data "
                                   "classifications to exclude")
-    
+
 class CopyMetaOutputSpec(TraitedSpec):
     dest_file = traits.File(exists=True)
-    
+
 class CopyMeta(BaseInterface):
-    '''Copy meta data from one Nifti file to another. Useful for preserving 
+    '''Copy meta data from one Nifti file to another. Useful for preserving
     meta data after some processing steps.'''
     input_spec = CopyMetaInputSpec
     output_spec = CopyMetaOutputSpec
-    
+
     def _run_interface(self, runtime):
         src_nii = nb.load(self.inputs.src_file)
         src = NiftiWrapper(src_nii, make_empty=True)
@@ -267,27 +267,27 @@ class CopyMeta(BaseInterface):
         dest = NiftiWrapper(dest_nii, make_empty=True)
         classes = src.meta_ext.get_valid_classes()
         if self.inputs.include_classes:
-            classes = [cls 
-                       for cls in classes 
+            classes = [cls
+                       for cls in classes
                        if cls in self.inputs.include_classes
                       ]
         if self.inputs.exclude_classes:
-            classes = [cls 
-                       for cls in classes 
+            classes = [cls
+                       for cls in classes
                        if not cls in self.inputs.exclude_classes
                       ]
-        
+
         for cls in classes:
             src_dict = src.meta_ext.get_class_dict(cls)
             dest_dict = dest.meta_ext.get_class_dict(cls)
             dest_dict.update(src_dict)
-            
-        self.out_path = path.join(os.getcwd(), 
+
+        self.out_path = path.join(os.getcwd(),
                                   path.basename(self.inputs.dest_file))
         dest.to_filename(self.out_path)
-        
+
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['dest_file'] = self.out_path
@@ -303,29 +303,29 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     merge_dim = traits.Int(desc="Dimension to merge along. If not "
                            "specified, the last singular or "
                            "non-existant dimension is used.")
-        
+
 class MergeNiftiOutputSpec(TraitedSpec):
     out_file = traits.File(exists=True,
                            desc="Merged Nifti file")
-        
+
 def make_key_func(meta_keys, index=None):
     def key_func(src_nii):
         result = [src_nii.get_meta(key, index) for key in meta_keys]
         return result
-    
+
     return key_func
-    
+
 class MergeNifti(NiftiGeneratorBase):
-    '''Merge multiple Nifti files into one. Merges together meta data 
+    '''Merge multiple Nifti files into one. Merges together meta data
     extensions as well.'''
     input_spec = MergeNiftiInputSpec
     output_spec = MergeNiftiOutputSpec
-        
+
     def _run_interface(self, runtime):
-        niis = [nb.load(fn) 
+        niis = [nb.load(fn)
                 for fn in self.inputs.in_files
                ]
-        nws = [NiftiWrapper(nii, make_empty=True) 
+        nws = [NiftiWrapper(nii, make_empty=True)
                for nii in niis
               ]
         if self.inputs.sort_order:
@@ -342,7 +342,7 @@ class MergeNifti(NiftiGeneratorBase):
         self.out_path = self._get_out_path(const_meta)
         nb.save(merged.nii_img, self.out_path)
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_file'] = self.out_path
@@ -354,17 +354,17 @@ class SplitNiftiInputSpec(NiftiGeneratorBaseInputSpec):
                           desc="Nifti file to split")
     split_dim = traits.Int(desc="Dimension to split along. If not "
                            "specified, the last dimension is used.")
-        
+
 class SplitNiftiOutputSpec(TraitedSpec):
     out_list = traits.List(exists=True,
                            desc="Split Nifti files")
-                           
+
 class SplitNifti(NiftiGeneratorBase):
-    '''Split one Nifti file into many along the specified dimension. Each 
+    '''Split one Nifti file into many along the specified dimension. Each
     result has an updated meta data extension as well.'''
     input_spec = SplitNiftiInputSpec
     output_spec = SplitNiftiOutputSpec
-        
+
     def _run_interface(self, runtime):
         self.out_list = []
         nii = nb.load(self.inputs.in_file)
@@ -379,9 +379,9 @@ class SplitNifti(NiftiGeneratorBase):
             out_path = self._get_out_path(const_meta, idx=split_idx)
             nb.save(split_nw.nii_img, out_path)
             self.out_list.append(out_path)
-            
+
         return runtime
-        
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_list'] = self.out_list

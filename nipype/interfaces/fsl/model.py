@@ -384,16 +384,26 @@ class FEAT(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         is_ica = False
+        outputs['feat_dir']=None
         with open(self.inputs.fsf_file, 'rt') as fp:
             text = fp.read()
             if "set fmri(inmelodic) 1" in text:
                 is_ica = True
+            for line in text.split('\n'):
+                if line.find("set fmri(outputdir)")>-1:
+                    try:
+                        outputdir_spec=line.split('"')[-2]
+                        if os.path.exists(outputdir_spec):
+                           outputs['feat_dir']=outputdir_spec
 
-        if is_ica:
-            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
-        else:
-            outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-
+                    except:
+                        pass
+        if not outputs['feat_dir']:
+            if is_ica:
+                outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
+            else:
+                outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
+        print 'Outputs from FEATmodel:',outputs
         return outputs
 
 
@@ -1794,7 +1804,6 @@ class GLM(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name in ('out_file'):
-            return fname_presuffix(self.inputs.in_file,
-                                   suffix='_glm.txt', use_ext=False)
+        if name in ['out_file']:
+            return self._gen_fname(self.inputs.in_file, suffix='_glm')
         return None

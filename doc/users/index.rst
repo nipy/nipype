@@ -28,6 +28,7 @@
    :maxdepth: 1
 
    grabbing_and_sinking
+   select_files
    function_interface
    mapnode_and_iterables
    model_specification

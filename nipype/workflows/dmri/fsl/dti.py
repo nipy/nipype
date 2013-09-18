@@ -185,5 +185,3 @@ def create_bedpostx_pipeline(name="bedpostx"):
                       ])
     return bedpostx
 
-
-

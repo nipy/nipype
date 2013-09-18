@@ -974,7 +974,7 @@ class SmoothTessellation(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
-    
+
     def _run_interface(self, runtime):
         # The returncode is meaningless in BET.  So check the output
         # in stderr and if it's set, then update the returncode
