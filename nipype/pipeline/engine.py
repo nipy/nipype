@@ -1891,10 +1891,7 @@ class JoinNode(Node):
             if field in self.joinfield:
                 # collate the join field
                 val = self._collate_input_value(field)
-                try:
-                    setattr(self._interface.inputs, field, val)
-                except Exception as e:
-                    raise ValueError(">>JN %s %s %s %s %s: %s" % (self, field, val, self.inputs.copyable_trait_names(), self.joinfield, e))
+                setattr(self._interface.inputs, field, val)
             elif hasattr(self._interface.inputs, field):
                 # copy the non-join field
                 val = getattr(self._inputs, field)
