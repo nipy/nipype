@@ -1209,7 +1209,12 @@ class BaseInterface(Interface):
             attr = {pm.PROV["label"]: key,
                     nipype[key]: safe_encode(value)}
             id = get_id()
-            g.entity(get_id(), attr)
+            try:
+                g.entity(get_id(), attr)
+            except UnicodeDecodeError:
+                attr = {pm.PROV["label"]: key,
+                        nipype[key]: safe_encode(value.replace('\xd9', ''))}
+                g.entity(get_id(), attr)
             g.hadMember(runtime_collection, id)
         # create agents
         user_agent = g.agent(get_id(),
