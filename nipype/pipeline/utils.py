@@ -589,8 +589,11 @@ def generate_expanded_graph(graph_in):
     # while there is an iterable node, expand the iterable node's
     # subgraphs
     allprefixes = list('abcdefghijklmnopqrstuvwxyz')
-    while inodes:
-        inode = inodes[0]
+    unexpanded_inodes = inodes
+    iter_src_filter = lambda node: any((node._id.startswith(inode._id)
+                                        for inode in inodes))
+    while unexpanded_inodes:
+        inode = unexpanded_inodes[0]
         logger.debug("Expanding the iterable node %s..." % inode)
 
         # the join successor nodes of the current iterable node
@@ -618,7 +621,7 @@ def generate_expanded_graph(graph_in):
             if isinstance(src_fields, str):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
-            iter_src = _find_ancestor(graph_in, inode, src_name)
+            iter_src = _find_ancestor(graph_in, inode, src_name, iter_src_filter)
             if not iter_src:
                 raise ValueError("The node %s itersource %s was not found"
                                  " among the ancestor nodes" %
@@ -735,7 +738,7 @@ def generate_expanded_graph(graph_in):
 
         #nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes
-        inodes = _iterable_nodes(graph_in)
+        unexpanded_inodes = _iterable_nodes(graph_in)
 
     for node in graph_in.nodes():
         if node.parameterization:
@@ -745,14 +748,17 @@ def generate_expanded_graph(graph_in):
 
     return _remove_nonjoin_identity_nodes(graph_in)
 
-def _find_ancestor(graph, node, name):
+
+def _find_ancestor(graph, node, name, filter=None):
     """Finds a node in the given graph which matches the
-    given search name and has a path to the search node.
+    given search name, has a path to the search node and
+    matches the optional filter
     """
     try:
         return next((other for other in graph.nodes_iter()
                      if (name == other.name and
-                         nx.has_path(graph, other, node))))
+                         nx.has_path(graph, other, node) and
+                         (not filter or filter(other)))))
     except StopIteration:
         pass
 
