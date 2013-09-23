@@ -224,6 +224,10 @@ class SPMCommand(BaseInterface):
             self.mlab.inputs.nosplash = Undefined
 
     @property
+    def version(self):
+        return Info.version()
+
+    @property
     def jobtype(self):
         return self._jobtype
 

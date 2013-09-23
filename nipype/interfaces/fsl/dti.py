@@ -345,7 +345,7 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
     loop_check = traits.Bool(argstr='--loopcheck', desc='perform loop_checks on paths -' +
                             ' slower, but allows lower curvature threshold')
     use_anisotropy = traits.Bool(argstr='--usef', desc='use anisotropy to constrain tracking')
-    rand_fib = traits.Enum(0, 1, 2, 3, argstr='--randfib %d',
+    rand_fib = traits.Enum(0, 1, 2, 3, argstr='--randfib=%d',
                            desc='options: 0 - default, 1 - to randomly sample' +
                             ' initial fibres (with f > fibthresh), 2 - to sample in ' +
                             'proportion fibres (with f>fibthresh) to f, 3 - to sample ALL ' +

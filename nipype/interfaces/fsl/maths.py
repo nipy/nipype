@@ -129,12 +129,12 @@ class MaxImage(MathsCommand):
     Examples
     --------
     from nipype.interfaces.fsl.maths import MaxImage
-    maxer = MaxImage() 
+    maxer = MaxImage()
     maxer.inputs.in_file = "functional.nii"
     maxer.dimension = "T"
     maths.cmdline
     fslmaths functional.nii -Tmax functional_max.nii
-    
+
     """
     input_spec = MaxImageInput
     _suffix = "_max"
