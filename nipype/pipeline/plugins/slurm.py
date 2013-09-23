@@ -35,8 +35,8 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     def __init__(self, **kwargs):
         
-        template="""#!/bin/sh
-        """
+        template="#!/bin/bash"
+        
         self._retry_timeout = 2
         self._max_tries = 2
         self._template = template
@@ -84,9 +84,9 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             else:
                 sbatch_args += (" " + node.plugin_args['sbatch_args'])
         if '-o' not in sbatch_args:
-            sbatch_args = '%s -o %s' % (sbatch_args, path)
+            sbatch_args = '%s -o %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
         if '-e' not in sbatch_args:
-            sbatch_args = '%s -e %s' % (sbatch_args, path)
+            sbatch_args = '%s -e %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
         if '-p' not in sbatch_args:
             sbatch_args = '%s -p normal' % (sbatch_args)
         if '-n' not in sbatch_args:
@@ -123,6 +123,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                                                   str(e))))
             else:
                 break
+        logger.debug('Ran command ({0})'.format(cmd.cmdline))
         iflogger.setLevel(oldlevel)
         # retrieve taskid
         lines = [line for line in result.runtime.stdout.split('\n') if line]

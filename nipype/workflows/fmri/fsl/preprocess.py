@@ -6,6 +6,7 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.spm as spm
+import os
 
 from ...smri.freesurfer.utils import create_getmask_flow
 
@@ -1156,7 +1157,8 @@ def create_reg_workflow(name='registration'):
     mean2anatbbr = pe.Node(fsl.FLIRT(), name='mean2anatbbr')
     mean2anatbbr.inputs.dof = 6
     mean2anatbbr.inputs.cost = 'bbr'
-    mean2anatbbr.inputs.schedule = '/usr/local/fsl/etc/flirtsch/bbr.sch'
+    os.environ['FSLDIR']
+    mean2anatbbr.inputs.schedule = os.path.join(os.environ['FSLDIR'],'etc/flirtsch/bbr.sch')
     register.connect(inputnode, 'mean_image', mean2anatbbr, 'in_file')
     register.connect(binarize, 'out_file', mean2anatbbr, 'wm_seg')
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
