@@ -264,8 +264,9 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                 'nmi' - Normalised Mutual Information,
                 'ecc' - Entropy Correlation Coefficient,
                 'ncc' - Normalised Cross Correlation""")
-    fwhm = traits.Float(field='eoptions.fwhm',
-                        desc='gaussian smoothing kernel width (mm)')
+    fwhm = traits.List(traits.Float(), minlen=2, maxlen=2,
+                       field='eoptions.fwhm',
+                       desc='gaussian smoothing kernel width (mm)')
     separation = traits.List(traits.Float(), field='eoptions.sep',
                              desc='sampling separation in mm')
     tolerance = traits.List(traits.Float(), field='eoptions.tol',
