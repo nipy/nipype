@@ -64,7 +64,7 @@ class Conmat(CommandLine):
     >>> mapper.inputs.roi_file = 'wm_undersampled.nii'
     >>> mapper.run()                  # doctest: +SKIP
     """
-    _cmd = 'cat %s | conmat'
+    _cmd = 'conmat'
     input_spec=ConmatInputSpec
     output_spec=ConmatOutputSpec
 
@@ -72,8 +72,7 @@ class Conmat(CommandLine):
         if skip is None:
             skip = []
 
-        self._cmd = self._cmd % self.inputs.in_file
-        print self._cmd
+        self._cmd = 'cat %s | conmat' % self.inputs.in_file
         skip+= 'in_file'
 
         if not isdefined( self.inputs.out_prefix ):
@@ -85,7 +84,7 @@ class Conmat(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self._gen_outfilename()
-        outputs['out_tracstat'] = Undefined
+        outputs['out_tractstat'] = Undefined
         if isdefined( self.inputs.scalar_file ):
             outputs['out_tractstat'] = self.inputs.out_prefix + 'ts.csv'
 
