@@ -91,13 +91,6 @@ def report_nodes_not_run(notrun):
                             'Check log for details'))
 
 
-def write_matplotlibrc(batch_dir):
-    """Set the matplotlib backend in a local rc file."""
-    backend = nipype.config.get("execution", "matplotlib_backend")
-    with open(os.path.join(batch_dir, "matplotlibrc"), "w") as fid:
-        fid.write("backend : %s" % backend)
-
-
 def create_pyscript(node, updatehash=False, store_exception=True):
     # pickle node
     timestamp = strftime('%Y%m%d_%H%M%S')
@@ -111,12 +104,14 @@ def create_pyscript(node, updatehash=False, store_exception=True):
         batch_dir = os.path.join(node.base_dir, 'batch')
     if not os.path.exists(batch_dir):
         os.makedirs(batch_dir)
-        write_matplotlibrc(batch_dir)
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
+    mpl_backend = nipype.config.get("execution", "matplotlib_backend")
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+import matplotlib
+matplotlib.use('%s')
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
@@ -162,7 +157,7 @@ except Exception, e:
         report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
-    cmdstr = cmdstr % (pkl_file, batch_dir, node.config, suffix)
+    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
     fp = open(pyscript, 'wt')
     fp.writelines(cmdstr)
