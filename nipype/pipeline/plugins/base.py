@@ -20,7 +20,6 @@ import scipy.sparse as ssp
 from ..utils import (nx, dfs_preorder)
 from ..engine import (MapNode, str2bool)
 
-import nipype
 from nipype.utils.filemanip import savepkl, loadpkl
 from nipype.interfaces.utility import Function
 
@@ -106,7 +105,7 @@ def create_pyscript(node, updatehash=False, store_exception=True):
         os.makedirs(batch_dir)
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
-    mpl_backend = nipype.config.get("execution", "matplotlib_backend")
+    mpl_backend = node.config["execution"]["matplotlib_backend"]
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
