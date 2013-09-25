@@ -5,7 +5,7 @@ import nipype.interfaces.utility as niu
 import nipype.interfaces.fsl as fsl
 import os
 
-def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fieldmap_registration=False):
+def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
     """Creates a workflow that chains the necessary pipelines to
     correct for motion, eddy currents, and, if selected, susceptibility
     artifacts in EPI dMRI sequences. 
@@ -20,7 +20,7 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fiel
     Example
     -------
 
-    >>> nipype_dmri_preprocess = create_dmri_preprocessing("nipype_dmri_prep")
+    >>> nipype_dmri_preprocess = create_dmri_preprocessing('nipype_dmri_prep')
     >>> nipype_dmri_preprocess.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_dmri_preprocess.inputs.inputnode.in_bvec = 'diffusion.bvec'
     >>> nipype_dmri_preprocess.inputs.inputnode.ref_num = 0
@@ -111,7 +111,7 @@ def create_dmri_preprocessing(name="dMRI_preprocessing", use_fieldmap=True, fiel
     return pipeline
 
 
-def create_motion_correct_pipeline(name="motion_correct"):
+def create_motion_correct_pipeline(name='motion_correct'):
     """Creates a pipeline that corrects for motion artifact in dMRI sequences.
     It takes a series of diffusion weighted images and rigidly co-registers
     them to one reference image. Finally, the b-matrix is rotated accordingly
@@ -128,7 +128,7 @@ def create_motion_correct_pipeline(name="motion_correct"):
     Example
     -------
 
-    >>> nipype_motioncorrect = create_motion_correct_pipeline("nipype_motioncorrect")
+    >>> nipype_motioncorrect = create_motion_correct_pipeline('nipype_motioncorrect')
     >>> nipype_motioncorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_motioncorrect.inputs.inputnode.in_bvec = 'diffusion.bvec'
     >>> nipype_motioncorrect.inputs.inputnode.ref_num = 0
@@ -149,40 +149,40 @@ def create_motion_correct_pipeline(name="motion_correct"):
 
     inputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["in_file", "ref_num", "in_bvec"]),
-                        name="inputnode")
+            fields=['in_file', 'ref_num', 'in_bvec']),
+                        name='inputnode')
 
     pipeline = pe.Workflow(name=name)
 
-    split = pe.Node(fsl.Split(dimension='t'), name="split")
-    pick_ref = pe.Node(niu.Select(), name="pick_ref")
+    split = pe.Node(fsl.Split(dimension='t'), name='split')
+    pick_ref = pe.Node(niu.Select(), name='pick_ref')
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, interp='spline',
-                                padding_size=1, dof=6), name="coregistration", iterfield=["in_file"])
-    rotate_bvecs = pe.Node(niu.Function(input_names=["in_bvec", "in_matrix"], output_names=[
-                           "out_file"], function=_rotate_bvecs), name="rotate_b_matrix")
-    merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
+                                padding_size=1, dof=6), name='coregistration', iterfield=['in_file'])
+    rotate_bvecs = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'], output_names=[
+                           'out_file'], function=_rotate_bvecs), name='rotate_b_matrix')
+    merge = pe.Node(fsl.Merge(dimension='t'), name='merge')
     outputnode = pe.Node(
         niu.IdentityInterface(
-            fields=["motion_corrected", "out_bvec"]),
-                        name="outputnode")
+            fields=['motion_corrected', 'out_bvec']),
+                        name='outputnode')
 
     pipeline.connect([
-                       (inputnode, split, [("in_file", "in_file")])
-                      ,(split, pick_ref, [("out_files", "inlist")])
-                      ,(inputnode, pick_ref, [("ref_num", "index")])
-                      ,(split, coregistration, [("out_files", "in_file")])
-                      ,(inputnode, rotate_bvecs, [("in_bvec", "in_bvec")])
-                      ,(coregistration, rotate_bvecs, [("out_matrix_file", "in_matrix")])
-                      ,(pick_ref, coregistration, [("out", "reference")])
-                      ,(coregistration, merge, [("out_file", "in_files")])
-                      ,(merge, outputnode, [("merged_file", "motion_corrected")])
-                      ,(rotate_bvecs, outputnode, [("out_file", "out_bvec")])
+                       (inputnode, split, [('in_file', 'in_file')])
+                      ,(split, pick_ref, [('out_files', 'inlist')])
+                      ,(inputnode, pick_ref, [('ref_num', 'index')])
+                      ,(split, coregistration, [('out_files', 'in_file')])
+                      ,(inputnode, rotate_bvecs, [('in_bvec', 'in_bvec')])
+                      ,(coregistration, rotate_bvecs, [('out_matrix_file', 'in_matrix')])
+                      ,(pick_ref, coregistration, [('out', 'reference')])
+                      ,(coregistration, merge, [('out_file', 'in_files')])
+                      ,(merge, outputnode, [('merged_file', 'motion_corrected')])
+                      ,(rotate_bvecs, outputnode, [('out_file', 'out_bvec')])
                     ])
 
     return pipeline
 
 
-def create_eddy_correct_pipeline(name="eddy_correct"):
+def create_eddy_correct_pipeline(name='eddy_correct'):
     """Creates a pipeline that replaces eddy_correct script in FSL. It takes a
     series of diffusion weighted images and linearly co-registers them to one
     reference image. No rotation of the B-matrix is performed, so this pipeline
@@ -191,7 +191,7 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     Example
     -------
 
-    >>> nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
+    >>> nipype_eddycorrect = create_eddy_correct_pipeline('nipype_eddycorrect')
     >>> nipype_eddycorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_eddycorrect.inputs.inputnode.ref_num = 0
     >>> nipype_eddycorrect.run() # doctest: +SKIP
@@ -207,35 +207,35 @@ def create_eddy_correct_pipeline(name="eddy_correct"):
     """
 
     inputnode = pe.Node(
-        niu.IdentityInterface(fields=["in_file", "ref_num"]),
-                        name="inputnode")
+        niu.IdentityInterface(fields=['in_file', 'ref_num']),
+                        name='inputnode')
 
     pipeline = pe.Workflow(name=name)
 
-    split = pe.Node(fsl.Split(dimension='t'), name="split")
-    pick_ref = pe.Node(niu.Select(), name="pick_ref")
+    split = pe.Node(fsl.Split(dimension='t'), name='split')
+    pick_ref = pe.Node(niu.Select(), name='pick_ref')
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1,
-                                dof=12, interp='spline'), name="coregistration", iterfield=["in_file"])
-    merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
+                                dof=12, interp='spline'), name='coregistration', iterfield=['in_file'])
+    merge = pe.Node(fsl.Merge(dimension='t'), name='merge')
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["eddy_corrected"]),
-                        name="outputnode")
+        niu.IdentityInterface(fields=['eddy_corrected']),
+                        name='outputnode')
 
     pipeline.connect([
-                      (inputnode, split, [("in_file", "in_file")])
-                     ,(split, pick_ref, [("out_files", "inlist")])
-                     ,(inputnode, pick_ref, [("ref_num", "index")])
-                     ,(split, coregistration, [("out_files", "in_file")])
-                     ,(pick_ref, coregistration, [("out", "reference")])
-                     ,(coregistration, merge, [("out_file", "in_files")])
-                     ,(merge, outputnode, [("merged_file", "eddy_corrected")])
+                      (inputnode, split, [('in_file', 'in_file')])
+                     ,(split, pick_ref, [('out_files', 'inlist')])
+                     ,(inputnode, pick_ref, [('ref_num', 'index')])
+                     ,(split, coregistration, [('out_files', 'in_file')])
+                     ,(pick_ref, coregistration, [('out', 'reference')])
+                     ,(coregistration, merge, [('out_file', 'in_files')])
+                     ,(merge, outputnode, [('merged_file', 'eddy_corrected')])
                     ])
     return pipeline
 
 
 
 
-def fieldmap_correction(name="fieldmap_correction"):
+def fieldmap_correction(name='fieldmap_correction'):
     """ 
     Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
     artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
@@ -250,7 +250,7 @@ def fieldmap_correction(name="fieldmap_correction"):
     Example
     -------
  
-    >>> nipype_epicorrect = fieldmap_correction("nipype_epidewarp")
+    >>> nipype_epicorrect = fieldmap_correction('nipype_epidewarp')
     >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_mask = 'brainmask.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
@@ -278,39 +278,40 @@ def fieldmap_correction(name="fieldmap_correction"):
     Outputs::
  
         outputnode.epi_corrected
+        outputnode.out_vsm
  
     """
  
     inputnode = pe.Node(niu.IdentityInterface(
-                        fields=["in_file",
-                        "in_mask",
-                        "fieldmap_pha",
-                        "fieldmap_mag",
-                        "te_diff",
-                        "epi_echospacing",
-                        "vsm_sigma",
-                        "encoding_direction"
-                        ]), name="inputnode"
+                        fields=['in_file',
+                        'in_mask',
+                        'fieldmap_pha',
+                        'fieldmap_mag',
+                        'te_diff',
+                        'epi_echospacing',
+                        'vsm_sigma',
+                        'encoding_direction'
+                        ]), name='inputnode'
                        )
  
     pipeline = pe.Workflow(name=name)
  
     # Keep first frame from magnitude
     select_mag = pe.Node(fsl.utils.ExtractROI(
-        t_size=1, t_min=0), name="select_magnitude")
+        t_size=1, t_min=0), name='select_magnitude')
 
     # Mask magnitude (it is required by PreparedFieldMap)
     mask_mag = pe.Node( fsl.maths.ApplyMask(), name='mask_magnitude' )
  
     # Run fsl_prepare_fieldmap
-    fslprep = pe.Node( fsl.PrepareFieldmap(), name="prepare_fieldmap" )
+    fslprep = pe.Node( fsl.PrepareFieldmap(), name='prepare_fieldmap' )
 
     # Use FUGUE to generate the voxel shift map (vsm)
-    vsm = pe.Node(fsl.FUGUE(save_shift=True), name="generate_vsm")
+    vsm = pe.Node(fsl.FUGUE(save_shift=True), name='generate_vsm')
 
     # VSM demean is not anymore present in the epi_reg script
-    #vsm_mean = pe.Node(niu.Function(input_names=["in_file", "mask_file", "in_unwarped"], output_names=[
-    #                   "out_file"], function=_vsm_remove_mean), name="vsm_mean_shift")
+    #vsm_mean = pe.Node(niu.Function(input_names=['in_file', 'mask_file', 'in_unwarped'], output_names=[
+    #                   'out_file'], function=_vsm_remove_mean), name='vsm_mean_shift')
  
     # fugue_epi
     dwi_split = pe.Node(niu.Function(input_names=[
@@ -324,8 +325,8 @@ def fieldmap_correction(name="fieldmap_correction"):
         dimension='t'), name='dwi_merge')
  
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["epi_corrected"]),
-                        name="outputnode")
+        niu.IdentityInterface(fields=['epi_corrected','out_vsm']),
+                        name='outputnode')
  
     pipeline.connect([
                      (inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
@@ -347,6 +348,7 @@ def fieldmap_correction(name="fieldmap_correction"):
                     ,(inputnode,  dwi_applyxfm, [('encoding_direction','unwarp_direction')])
                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
+                    ,(vsm,          outputnode, [('shift_out_file','out_vsm') ])
                     ])
 
  
@@ -362,7 +364,7 @@ def topup_correction( name='topup' ):
     Example
     -------
  
-    >>> nipype_epicorrect = topup_correction("nipype_topup")
+    >>> nipype_epicorrect = topup_correction('nipype_topup')
     >>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
     >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
@@ -384,17 +386,19 @@ def topup_correction( name='topup' ):
     pipeline = pe.Workflow(name=name)
 
     inputnode = pe.Node(niu.IdentityInterface(
-                        fields=["in_file_dir",
-                                "in_file_rev",
-                                "encoding_direction",
-                                "ref_num"
-                        ]), name="inputnode"
+                        fields=['in_file_dir',
+                                'in_file_rev',
+                                'encoding_direction',
+                                'ref_num'
+                        ]), name='inputnode'
                        )
 
     outputnode = pe.Node( niu.IdentityInterface(
-                          fields=["out_fieldcoef",
-                                  "out_movpar",
-                                  "epi_corrected"
+                          fields=['out_fieldcoef',
+                                  'out_movpar',
+                                  'out_topup',
+                                  'out_enc_file',
+                                  'epi_corrected'
                           ]), name='outputnode'
                         )
     
@@ -417,14 +421,15 @@ def topup_correction( name='topup' ):
                      ,(merged,         topup, [('merged_file','in_file')])
                      ,(topup,     applytopup, [('out_topup','in_topup'),('out_enc_file','encoding_file')])
                      ,(combin2,   applytopup, [('out','in_files')] )
-                     ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar') ])
+                     ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar'),
+                                               ('out_topup','out_topup'),('out_enc_file','out_enc_file') ])
                      ,(applytopup,outputnode, [('out_corrected','epi_corrected')])
                      ])
 
     return pipeline
 
 
-def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
+def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
     """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
     for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
     information (Jezzard et al., 1995) using FSL's FUGUE. The registration to the (warped) fieldmap
@@ -433,7 +438,7 @@ def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
     Example
     -------
 
-    >>> nipype_epicorrect = create_epidewarp_pipeline("nipype_epidewarp", fieldmap_registration=False)
+    >>> nipype_epicorrect = create_epidewarp_pipeline('nipype_epidewarp', fieldmap_registration=False)
     >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
     >>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
@@ -469,51 +474,51 @@ def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
 
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=["in_file",
-                                                                   "fieldmap_mag",
-                                                                   "fieldmap_pha",
-                                                                   "te_diff",
-                                                                   "epi_echospacing",
-                                                                   "epi_ph_encoding_dir",
-                                                                   "epi_rev_encoding",
-                                                                   "pi_accel_factor",
-                                                                   "vsm_sigma",
-                                                                   "ref_num",
-                                                                   "unwarp_direction"
-                                                                   ]), name="inputnode")
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file',
+                                                                   'fieldmap_mag',
+                                                                   'fieldmap_pha',
+                                                                   'te_diff',
+                                                                   'epi_echospacing',
+                                                                   'epi_ph_encoding_dir',
+                                                                   'epi_rev_encoding',
+                                                                   'pi_accel_factor',
+                                                                   'vsm_sigma',
+                                                                   'ref_num',
+                                                                   'unwarp_direction'
+                                                                   ]), name='inputnode')
 
     pipeline = pe.Workflow(name=name)
 
     # Keep first frame from magnitude
     select_mag = pe.Node(fsl.utils.ExtractROI(
-        t_size=1, t_min=0), name="select_magnitude")
+        t_size=1, t_min=0), name='select_magnitude')
 
     # mask_brain
     mask_mag = pe.Node(fsl.BET(mask=True), name='mask_magnitude')
     mask_mag_dil = pe.Node(niu.Function(input_names=[
-                           "in_file"], output_names=["out_file"], function=_dilate_mask), name='mask_dilate')
+                           'in_file'], output_names=['out_file'], function=_dilate_mask), name='mask_dilate')
 
     # Compute dwell time
-    dwell_time = pe.Node(niu.Function(input_names=["dwell_time", "pi_factor", "is_reverse_encoding"], output_names=[
-                         "dwell_time"], function=_compute_dwelltime), name='dwell_time')
+    dwell_time = pe.Node(niu.Function(input_names=['dwell_time', 'pi_factor', 'is_reverse_encoding'], output_names=[
+                         'dwell_time'], function=_compute_dwelltime), name='dwell_time')
 
     # Normalize phase diff to be [-pi, pi)
-    norm_pha = pe.Node(niu.Function(input_names=["in_file"], output_names=[
-                       "out_file"], function=_prepare_phasediff), name='normalize_phasediff')
+    norm_pha = pe.Node(niu.Function(input_names=['in_file'], output_names=[
+                       'out_file'], function=_prepare_phasediff), name='normalize_phasediff')
     # Execute FSL PRELUDE: prelude -p %s -a %s -o %s -f -v -m %s
     prelude = pe.Node(fsl.PRELUDE(
         process3d=True), name='phase_unwrap')
-    fill_phase = pe.Node(niu.Function(input_names=["in_file"], output_names=[
-                         "out_file"], function=_fill_phase), name='fill_phasediff')
+    fill_phase = pe.Node(niu.Function(input_names=['in_file'], output_names=[
+                         'out_file'], function=_fill_phase), name='fill_phasediff')
 
     # to assure that vsm is same dimension as mag. The input only affects the output dimension.
     # The content of the input has no effect on the vsm. The de-warped mag volume is
     # meaningless and will be thrown away
     # fugue -i %s -u %s -p %s --dwell=%s --asym=%s --mask=%s --saveshift=%s %
     # ( mag_name, magdw_name, ph_name, esp, tediff, mask_name, vsmmag_name)
-    vsm = pe.Node(fsl.FUGUE(save_shift=True), name="generate_vsm")
-    vsm_mean = pe.Node(niu.Function(input_names=["in_file", "mask_file", "in_unwarped"], output_names=[
-                       "out_file"], function=_vsm_remove_mean), name="vsm_mean_shift")
+    vsm = pe.Node(fsl.FUGUE(save_shift=True), name='generate_vsm')
+    vsm_mean = pe.Node(niu.Function(input_names=['in_file', 'mask_file', 'in_unwarped'], output_names=[
+                       'out_file'], function=_vsm_remove_mean), name='vsm_mean_shift')
 
     # fugue_epi
     dwi_split = pe.Node(niu.Function(input_names=[
@@ -526,8 +531,8 @@ def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
         dimension='t'), name='dwi_merge')
 
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=["epi_corrected"]),
-                        name="outputnode")
+        niu.IdentityInterface(fields=['epi_corrected']),
+                        name='outputnode')
 
     pipeline.connect([
                      (inputnode,    dwell_time, [('epi_echospacing', 'dwell_time'), ('pi_accel_factor', 'pi_factor'), ('epi_rev_encoding', 'is_reverse_encoding')])
@@ -559,14 +564,14 @@ def create_epidewarp_pipeline(name="epidewarp", fieldmap_registration=False):
         # Select reference volume from EPI (B0 in dMRI and a middle frame in
         # fMRI)
         select_epi = pe.Node(fsl.utils.ExtractROI(
-            t_size=1), name="select_epi")
+            t_size=1), name='select_epi')
 
         # fugue -i %s -w %s --loadshift=%s --mask=%s % ( mag_name, magfw_name,
         # vsmmag_name, mask_name ), log ) # Forward Map
         vsm_fwd = pe.Node(fsl.FUGUE(
-            save_warped=True), name="vsm_fwd")
+            save_warped=True), name='vsm_fwd')
         vsm_reg = pe.Node(fsl.FLIRT(bins=256, cost='corratio', dof=6, interp='spline',  searchr_x=[
-                          -10, 10], searchr_y=[-10, 10], searchr_z=[-10, 10]), name="vsm_registration")
+                          -10, 10], searchr_y=[-10, 10], searchr_z=[-10, 10]), name='vsm_registration')
         # 'flirt -in %s -ref %s -out %s -init %s -applyxfm' % ( vsmmag_name, ref_epi, vsmmag_name, magfw_mat_out )
         vsm_applyxfm = pe.Node(fsl.ApplyXfm(
             interp='spline'), name='vsm_apply_xfm')
@@ -626,10 +631,10 @@ def _cat_logs(in_files):
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_ecclog.log' % name)
-    out_str = ""
+    out_str = ''
     with open(out_file, 'wb') as totallog:
         for i, fname in enumerate(in_files):
-            totallog.write("\n\npreprocessing %d\n" % i)
+            totallog.write('\n\npreprocessing %d\n' % i)
             with open(fname) as inlog:
                 for line in inlog:
                     totallog.write(line)
