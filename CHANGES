@@ -3,7 +3,7 @@ Next release
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI,
-       spm.utils.DicomImport
+       spm.DicomImport
 * ENH: W3C PROV support with optional RDF export built into Nipype
 
 * FIX: Deals properly with 3d files in SPM Realign
