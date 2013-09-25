@@ -105,9 +105,15 @@ def create_pyscript(node, updatehash=False, store_exception=True):
         os.makedirs(batch_dir)
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
+    mpl_backend = node.config["execution"]["matplotlib_backend"]
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+try:
+    import matplotlib
+    matplotlib.use('%s')
+except ImportError:
+    pass
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
@@ -153,7 +159,7 @@ except Exception, e:
         report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
-    cmdstr = cmdstr % (pkl_file, batch_dir, node.config, suffix)
+    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
     fp = open(pyscript, 'wt')
     fp.writelines(cmdstr)
