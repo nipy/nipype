@@ -355,7 +355,7 @@ def fieldmap_correction(name='fieldmap_correction'):
     return pipeline
 
 
-def topup_correction( name='topup' ):
+def topup_correction( name='topup_correction' ):
     """ 
         Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
         been acquired
