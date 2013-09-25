@@ -20,6 +20,7 @@ import scipy.sparse as ssp
 from ..utils import (nx, dfs_preorder)
 from ..engine import (MapNode, str2bool)
 
+import nipype
 from nipype.utils.filemanip import savepkl, loadpkl
 from nipype.interfaces.utility import Function
 
@@ -90,6 +91,13 @@ def report_nodes_not_run(notrun):
                             'Check log for details'))
 
 
+def write_matplotlibrc(batch_dir):
+    """Set the matplotlib backend in a local rc file."""
+    backend = nipype.config.get("execution", "matplotlib_backend")
+    with open(os.path.join(batch_dir, "matplotlibrc"), "w") as fid:
+        fid.write("backend : %s" % backend)
+
+
 def create_pyscript(node, updatehash=False, store_exception=True):
     # pickle node
     timestamp = strftime('%Y%m%d_%H%M%S')
@@ -103,6 +111,7 @@ def create_pyscript(node, updatehash=False, store_exception=True):
         batch_dir = os.path.join(node.base_dir, 'batch')
     if not os.path.exists(batch_dir):
         os.makedirs(batch_dir)
+        write_matplotlibrc(batch_dir)
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
     # create python script to load and trap exception
