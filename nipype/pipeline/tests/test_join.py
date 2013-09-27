@@ -178,7 +178,7 @@ def test_noniterable_joinsource():
     # the join node
     make_join = lambda: pe.JoinNode(SetInterface(), joinsource=inputspec,
                                     joinfield='input1', name='join')
-    assert_raises(Exception,  "The joinsource is not set to the node name.",
+    assert_raises(Exception, "The joinsource is not set to the node name.",
                   make_join)
 
     os.chdir(cwd)
@@ -201,7 +201,7 @@ def test_node_joinsource():
 
     # the joinsource is the inputspec name
     assert_equal(join.joinsource, inputspec.name,
-        "The joinsource is not set to the node name.")
+                 "The joinsource is not set to the node name.")
 
     os.chdir(cwd)
     rmtree(wd)
@@ -229,7 +229,7 @@ def test_set_join_node():
 
     # the join length is the number of unique inputs
     assert_equal(_set_len, 3,
-        "The join Set output value is incorrect: %s." % _set_len)
+                 "The join Set output value is incorrect: %s." % _set_len)
 
     os.chdir(cwd)
     rmtree(wd)
@@ -252,7 +252,7 @@ def test_unique_join_node():
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the set join node
     join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-        joinfield='input1', unique=True, name='join')
+                      joinfield='input1', unique=True, name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
 
     wf.run()
@@ -283,13 +283,14 @@ def test_child_workflow_join():
     outer_wf.connect(inputspec, 'n', inner_wf, 'pre_join1.input1')
     # the join node
     join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-        joinfield='input1', name='join')
+                       joinfield='input1', name='join')
     outer_wf.connect(inner_wf, 'pre_join1.output1', join, 'input1')
 
     outer_wf.run()
 
     assert_equal(_sum_operands[0], [2, 3, 4],
-        "The child workflow join output value is incorrect: %s." % _sum_operands[0])
+                 "The child workflow join output value is incorrect: %s." %
+                 _sum_operands[0])
 
     os.chdir(cwd)
     rmtree(wd)
