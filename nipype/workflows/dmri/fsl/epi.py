@@ -389,6 +389,7 @@ def topup_correction( name='topup_correction' ):
                         fields=['in_file_dir',
                                 'in_file_rev',
                                 'encoding_direction',
+                                'readout_times'
                                 'ref_num'
                         ]), name='inputnode'
                        )
@@ -419,6 +420,7 @@ def topup_correction( name='topup_correction' ):
                      ,(b0_rev,        combin, [('roi_file','in2')] )
                      ,(combin,        merged, [('out', 'in_files')] )
                      ,(merged,         topup, [('merged_file','in_file')])
+                     ,(inputnode,      topup, [('encoding_direction','encoding_direction'),('readout_times','readout_times') ])
                      ,(topup,     applytopup, [('out_topup','in_topup'),('out_enc_file','encoding_file')])
                      ,(combin2,   applytopup, [('out','in_files')] )
                      ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar'),
