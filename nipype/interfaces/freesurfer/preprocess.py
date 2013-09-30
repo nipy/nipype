@@ -773,7 +773,7 @@ class ReconAll(CommandLine):
         if os.path.isdir(os.path.join(subjects_dir,
                                       self.inputs.subject_id,'mri')):
             setattr(runtime, 'cmdline', self._resume_cmdline())
-            logger.info('resume recon-all : %s'%runtime.cmdline)
+            iflogger.info('resume recon-all : %s'%runtime.cmdline)
         runtime = run_command(runtime, output=self.inputs.terminal_output)
         return super(ReconAll,self)._run_command(runtime, output)
 
