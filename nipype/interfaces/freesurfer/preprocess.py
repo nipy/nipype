@@ -17,6 +17,8 @@ from glob import glob
 #import itertools
 import numpy as np
 
+logger = logging.getLogger('workflow')
+
 from nibabel import load
 from nipype.utils.filemanip import fname_presuffix
 from nipype.interfaces.io import FreeSurferSource
@@ -760,7 +762,6 @@ class ReconAll(CommandLine):
         self.inputs.directive = directive
         allargs = self._parse_inputs(skip=skip)
         allargs.insert(0, self.cmd)
-        print allargs
         return ' '.join(allargs)
     
     def _run_command(self, runtime, output):
