@@ -628,6 +628,7 @@ class ReconAll(CommandLine):
     _cmd = 'recon-all'
     input_spec = ReconAllInputSpec
     output_spec = ReconAllIOutputSpec
+    _can_resume = True
 
     def _gen_subjects_dir(self):
         return os.getcwd()
@@ -659,6 +660,17 @@ class ReconAll(CommandLine):
         outputs['subjects_dir'] = subjects_dir
         return outputs
 
+    def _resume_cmdline(self):
+        self._check_mandatory_inputs()
+        allargs = self._parse_inputs(skip=['T1_files'])
+        allargs.insert(0, self.cmd)
+        return ' '.join(allargs)
+    
+    def _run_interface(self,runtime):
+        if os.path.isdir(os.path.join(self.inputs.subjects_dir,
+                                      self.subject_id,'mri')):
+            runtime['cmdline'] = self._resume_cmdline()
+        return super(ReconAll,self)._run_interface(runtime)
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
