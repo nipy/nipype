@@ -25,7 +25,8 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+                                    CommandLineInputSpec, isdefined,
+                                    run_command)
 
 
 from ... import logging
@@ -596,7 +597,8 @@ class ReconAllInputSpec(CommandLineInputSpec):
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
                             'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
                             'autorecon3', 'localGI', 'qcache', argstr='-%s',
-                            desc='process directive', usedefault=True)
+                            desc='process directive', usedefault=True,
+                            position=0)
     hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
@@ -635,6 +637,7 @@ class ReconAll(CommandLine):
 
 
     _steps = [
+        #autorecon1
         ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
         ('talairach', ['mri/transforms/talairach.auto.xfm',
                        'mri/transforms/talairach.xfm']),
@@ -644,6 +647,7 @@ class ReconAll(CommandLine):
          ['mri/transforms/talairach_with_skull.lta',
           'mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
+        #autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),
         ('canorm', ['mri/norm.mgz']),
         ('careg', ['mri/transforms/talairach.m3z']),
@@ -670,8 +674,8 @@ class ReconAll(CommandLine):
           'surf/rh.curv',
           'surf/lh.area',
           'surf/rh.area',
-          'surf/lh.cortex.label',
-          'surf/rh.cortex.label']),
+          'label/lh.cortex.label',
+          'label/rh.cortex.label']),
         ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm']),
         ('inflate2',
          ['surf/lh.inflated',
@@ -682,6 +686,7 @@ class ReconAll(CommandLine):
           'surf/rh.inflated.H',
           'surf/lh.inflated.K',
           'surf/rh.inflated.K']),
+        #autorecon3
         ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
         ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
         ('jacobian_white', ['surf/lh.jacobian_white',
@@ -711,7 +716,6 @@ class ReconAll(CommandLine):
         ('balabels', ['BA.ctab', 'BA.thresh.ctab']),
         ('label-exvivo-ec', ['label/lh.entorhinal_exvivo.label',
                              'label/rh.entorhinal_exvivo.label'])]
-
 
     def _gen_subjects_dir(self):
         return os.getcwd()
@@ -753,12 +757,14 @@ class ReconAll(CommandLine):
         directive = 'all'
         for idx, step in enumerate(self._steps):
             step, outfiles = step
-            if idx > 5 :
-                directive = 'autorecon2'
-            elif idx > 20:
-                directive = 'autorecon3'
             if all([os.path.exists(os.path.join(subjects_dir,self.inputs.subject_id,f)) for f  in outfiles]):
                 flags.append('-no%s'%step)
+                if idx > 4:
+                    directive = 'autorecon2'
+                elif idx > 23:
+                    directive = 'autorecon3'
+            else:
+                flags.append('-%s'%step)
         self.inputs.args = ' '.join([self.inputs.args] + flags)
         self.inputs.directive = directive
         allargs = self._parse_inputs(skip=skip)
@@ -776,6 +782,7 @@ class ReconAll(CommandLine):
             iflogger.info('resume recon-all : %s'%runtime.cmdline)
         runtime = run_command(runtime, output=self.inputs.terminal_output)
         return super(ReconAll,self)._run_command(runtime, output)
+
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
