@@ -630,6 +630,86 @@ class ReconAll(CommandLine):
     output_spec = ReconAllIOutputSpec
     _can_resume = True
 
+
+    _steps = [
+        ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
+        ('talairach', ['mri/transforms/talairach.auto.xfm',
+                       'mri/transforms/talairach.xfm']),
+        ('nuintensitycor', ['mri/nu.mgz']),
+        ('normalization', ['mri/T1.mgz']),
+        ('skullstrip',
+         ['mri/transforms/talairach_with_skull.lta',
+          'mri/brainmask.auto.mgz',
+          'mri/brainmask.mgz']),
+        ('gcareg', ['mri/transforms/talairach.lta']),
+        ('canorm', ['mri/norm.mgz']),
+        ('careg', ['mri/transforms/talairach.m3z']),
+        ('careginv', ['mri/transforms/talairach.m3z.inv.x.mgz',
+                      'mri/transforms/talairach.m3z.inv.y.mgz',
+                      'mri/transforms/talairach.m3z.inv.z.mgz']),
+        ('rmneck', ['mri/nu_noneck.mgz']),
+        ('skull-lta', ['mri/transforms/talairach_with_skull_2.lta']),
+        ('calabel',
+         ['mri/aseg.auto_noCCseg.mgz', 'mri/aseg.auto.mgz', 'mri/aseg.mgz']),
+        ('normalization2', ['mri/brain.mgz']),
+        ('maskbfs', ['mri/brain.finalsurfs.mgz']),
+        ('segmentation', ['mri/wm.asegedit.mgz', 'mri/wm.mgz']),
+        ('fill', ['mri/filled.mgz']),
+        ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix']),
+        ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix']),
+        ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix']),
+        ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix']),
+        ('fix', ['surf/lh.orig', 'surf/rh.orig']),
+        ('white',
+         ['surf/lh.white',
+          'surf/rh.white',
+          'surf/lh.curv',
+          'surf/rh.curv',
+          'surf/lh.area',
+          'surf/rh.area',
+          'surf/lh.cortex.label',
+          'surf/rh.cortex.label']),
+        ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm']),
+        ('inflate2',
+         ['surf/lh.inflated',
+          'surf/rh.inflated',
+          'surf/lh.sulc',
+          'surf/rh.sulc',
+          'surf/lh.inflated.H',
+          'surf/rh.inflated.H',
+          'surf/lh.inflated.K',
+          'surf/rh.inflated.K']),
+        ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
+        ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
+        ('jacobian_white', ['surf/lh.jacobian_white',
+                            'surf/rh.jacobian_white']),
+        ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv']),
+        ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot']),
+        ('pial',
+         ['surf/lh.pial',
+          'surf/rh.pial',
+          'surf/lh.curv.pial',
+          'surf/rh.curv.pial',
+          'surf/lh.area.pial',
+          'surf/rh.area.pial',
+          'surf/lh.thickness',
+          'surf/rh.thickness']),
+        ('cortparc2', ['label/lh.aparc.a2009s.annot',
+                       'label/rh.aparc.a2009s.annot']),
+        ('parcstats2',
+         ['stats/lh.aparc.a2009s.stats',
+          'stats/rh.aparc.a2009s.stats',
+          'stats/aparc.annot.a2009s.ctab']),
+        ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
+                        'mri/ribbon.mgz']),
+        ('segstats', ['stats/aseg.stats']),
+        ('aparc2aseg', ['mri/aparc+aseg.mgz', 'mri/aparc.a2009s+aseg.mgz']),
+        ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats']),
+        ('balabels', ['BA.ctab', 'BA.thresh.ctab']),
+        ('label-exvivo-ec', ['label/lh.entorhinal_exvivo.label',
+                             'label/rh.entorhinal_exvivo.label'])]
+
+
     def _gen_subjects_dir(self):
         return os.getcwd()
 
@@ -662,15 +742,38 @@ class ReconAll(CommandLine):
 
     def _resume_cmdline(self):
         self._check_mandatory_inputs()
-        allargs = self._parse_inputs(skip=['T1_files'])
+        skip = ['T1_files']
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        flags = []
+        directive = 'all'
+        for idx, step in enumerate(self._steps):
+            step, outfiles = step
+            if idx > 5 :
+                directive = 'autorecon2'
+            elif idx > 20:
+                directive = 'autorecon3'
+            if all([os.path.exists(os.path.join(subjects_dir,self.inputs.subject_id,f)) for f  in outfiles]):
+                flags.append('-no%s'%step)
+        self.inputs.args = ' '.join([self.inputs.args] + flags)
+        self.inputs.directive = directive
+        allargs = self._parse_inputs(skip=skip)
         allargs.insert(0, self.cmd)
+        print allargs
         return ' '.join(allargs)
     
-    def _run_interface(self,runtime):
-        if os.path.isdir(os.path.join(self.inputs.subjects_dir,
-                                      self.subject_id,'mri')):
-            runtime['cmdline'] = self._resume_cmdline()
-        return super(ReconAll,self)._run_interface(runtime)
+    def _run_command(self, runtime, output):
+        if isdefined(self.inputs.subjects_dir):
+            subjects_dir = self.inputs.subjects_dir
+        else:
+            subjects_dir = self._gen_subjects_dir()
+        if os.path.isdir(os.path.join(subjects_dir,
+                                      self.inputs.subject_id,'mri')):
+            setattr(runtime, 'cmdline', self._resume_cmdline())
+            logger.info('resume recon-all : %s'%runtime.cmdline)
+        runtime = run_command(runtime, output=self.inputs.terminal_output)
+        return super(ReconAll,self)._run_command(runtime, output)
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
