@@ -1829,3 +1829,46 @@ class Retroicor(AFNICommand):
     _cmd = '3dretroicor'
     input_spec = RetroicorInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file to 3dAFNItoNIFTI',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    out_file = File("%s.nii", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    hash_files = False
+
+class AFNItoNIFTI(AFNICommand):
+    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
+
+    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
+    this can also convert 2D or 1D data, which you can numpy.squeeze() to remove extra dimensions
+    
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> a2n = afni.AFNItoNIFTI()
+    >>> a2n.inputs.in_file = 'afni_output.3D'
+    >>> a2n.inputs.out_file =  'afni_output.nii'
+    >>> a2n.cmdline
+    '3dAFNItoNIFTI afni_output.3D'
+
+    """
+
+    _cmd = '3dAFNItoNIFTI'
+    input_spec = AFNItoNIFTIInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _overload_extension(self, value):
+        path, base, ext = split_filename(value)
+        if ext.lower() not in [".1d", ".nii.gz", ".1D"]:
+            ext = ext + ".nii"
+        return os.path.join(path, base + ext)
+
+    def _gen_filename(self, name):
+        return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+
