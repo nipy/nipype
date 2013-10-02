@@ -326,8 +326,8 @@ class Eddy( FSLCommand ):
         >>> eddy.inputs.in_mask  = 'epi_mask.nii'
         >>> eddy.inputs.in_index = 'epi_index.txt'
         >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
-        >>> eddy.inputs.in_bvec  = 'bvecs'
-        >>> eddy.inputs.in_bval  = 'bvals'
+        >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
+        >>> eddy.inputs.in_bval  = 'bvals.scheme'
         >>> eddy.cmdline
         >>> res = eddy.run() # doctest: +SKIP
 
