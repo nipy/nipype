@@ -57,6 +57,7 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare = PrepareFieldmap()
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
+    >>> prepare.cmdline
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -147,6 +148,7 @@ class TOPUP( FSLCommand ):
         >>> topup = TOPUP()
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
+        >>> topup.cmdline
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -251,6 +253,7 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
         >>> applytopup.inputs.in_topup = "my_topup_results"
+        >>> applytopup.cmdline
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -288,7 +291,66 @@ class ApplyTOPUP( FSLCommand ):
 
 
 
+class EddyInputSpec( FSLCommandInputSpec ):
+    in_file =  File(exists=True, mandatory=True, desc='File containing all the images to estimate distortions for', argstr='--imain=%s' )
+    in_mask =  File(exists=True, mandatory=True, desc='Mask to indicate brain', argstr='--mask=%s' )
+    in_index = File(exists=True, mandatory=True, desc='File containing indices for all volumes in --imain into --acqp and --topup', argstr='--index=%s' )
+    in_acqp =  File(exists=True, mandatory=True, desc='File containing acquisition parameters', argstr='--acqp=%s' )
+    in_bvec =  File(exists=True, mandatory=True, desc='File containing the b-vectors for all volumes in --imain', argstr='--bvecs=%s' )
+    in_bval =  File(exists=True, mandatory=True, desc='File containing the b-values for all volumes in --imain', argstr='--bvals=%s' )
+ 
+    out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
 
+    
+    session =  File(exists=True, desc='File containing session indices for all volumes in --imain', argstr='--session=%s' )
+    in_topup =  File(exists=True, desc='Base name for output files from topup', argstr='--topup=%s' )
+    flm =  traits.Enum( ('linear','quadratic','cubic'), desc='First level EC model', argstr='--flm=%s' )
+    fwhm = traits.Float( desc='FWHM for conditioning filter when estimating the parameters', argstr='--fwhm=%s' )
+    niter = traits.Int( 5, desc='Number of iterations', argstr='--niter=%s' )
+    method = traits.Enum( ('jac','lsr'), argstr='--resamp=%s', desc='Final resampling method (jacobian/least squeares)' )
+    repol = traits.Bool( False, desc='Detect and replace outlier slices', argstr='--repol' )
+
+class EddyOutputSpec( TraitedSpec ):
+    out_corrected = File( exists=True, desc='4D image file containing all the corrected volumes' )
+    out_parameter = File( exists=True, desc='text file with parameters definining the field and movement for each scan')
+
+class Eddy( FSLCommand ):
+    """ Interface for FSL eddy, a tool for estimating and correcting eddy currents induced distortions
+        User guide: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide
+        Regarding acqp file: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file 
+
+        Examples
+        --------
+        >>> eddy = Eddy()
+        >>> eddy.inputs.in_files = 'epi.nii'
+        >>> eddy.inputs.in_mask  = 'epi_mask.nii'
+        >>> eddy.inputs.in_index = 'epi_index.txt'
+        >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
+        >>> eddy.inputs.in_bvec  = 'bvecs'
+        >>> eddy.inputs.in_bval  = 'bvals'
+        >>> eddy.cmdline
+        >>> res = eddy.run() # doctest: +SKIP
+
+
+    """
+    _cmd = 'eddy'
+    input_spec = EddyInputSpec
+    output_spec = EddyOutputSpec
+
+    def _parse_inputs( self, skip=None ):
+        if skip is None:
+            skip = []
+        
+        if not isdefined(self.inputs.out_base ):
+            self.inputs.out_base = os.path.abspath( './eddy_corrected' )
+        return super(Eddy, self)._parse_inputs(skip=skip)
+
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
+        outputs['out_parameter'] = '%s..eddy_parameters' % self.inputs.out_base
+        return outputs
 
 
 class EPIDeWarpInputSpec(FSLCommandInputSpec):
@@ -343,6 +405,7 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.epi_file = "functional.nii"
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
+    >>> dewarp.cmdline
     >>> res = dewarp.run() # doctest: +SKIP
 
     References
@@ -426,6 +489,7 @@ class SigLoss(FSLCommand):
     >>> sigloss = SigLoss()
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
+    >>> sigloss.cmdline
     >>> res = sigloss.run() # doctest: +SKIP
     """
     input_spec = SigLossInputSpec
