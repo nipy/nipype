@@ -389,7 +389,7 @@ def topup_correction( name='topup_correction' ):
                         fields=['in_file_dir',
                                 'in_file_rev',
                                 'encoding_direction',
-                                'readout_times'
+                                'readout_times',
                                 'ref_num'
                         ]), name='inputnode'
                        )
