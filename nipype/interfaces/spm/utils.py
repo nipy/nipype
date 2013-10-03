@@ -371,7 +371,7 @@ class DicomImportInputSpec(SPMCommandInputSpec):
         field='root',
         usedefault=True,
         desc='directory structure for the output.')
-    output_dir = traits.Str('./',
+    output_dir = traits.Str('./converted_dicom',
         field='outdir',
         usedefault=True,
         desc='output directory.')
