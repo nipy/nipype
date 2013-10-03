@@ -393,7 +393,7 @@ class DicomImportOutputSpec(TraitedSpec):
                                 desc='converted files')
 
 class DicomImport(SPMCommand):
-    """ Uses spm to comvert DICOM files to nii or img+hdr.
+    """ Uses spm to convert DICOM files to nii or img+hdr.
 
     Examples
     --------
