@@ -322,7 +322,7 @@ class Eddy( FSLCommand ):
         Examples
         --------
         >>> eddy = Eddy()
-        >>> eddy.inputs.in_files = 'epi.nii'
+        >>> eddy.inputs.in_file = 'epi.nii'
         >>> eddy.inputs.in_mask  = 'epi_mask.nii'
         >>> eddy.inputs.in_index = 'epi_index.txt'
         >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'

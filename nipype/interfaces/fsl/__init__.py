@@ -18,7 +18,7 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     SwapDimensions, PowerSpectrum, Reorient2Std,
                     Complex, InvWarp)
 
-from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, EPIDeWarp, 
+from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp, 
                   SigLoss, EddyCorrect)
 
 from .dti import (BEDPOSTX, DTIFit, ProbTrackX, VecReg, ProjThresh,
