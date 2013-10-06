@@ -225,11 +225,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         requires=['metric'], mandatory=True,
         desc='the metric weight(s) for each stage. '
         'The weights must sum to 1 per stage.')
-    radius_bins_item_trait = traits.Float(64)
+    radius_bins_item_trait = traits.Int(5)
     radius_bins_stage_trait = traits.Either(
         radius_bins_item_trait, traits.List(radius_bins_item_trait))
     radius_or_number_of_bins = traits.List(
-        radius_bins_stage_trait, value=[64], usedefault=True,
+        radius_bins_stage_trait, value=[5], usedefault=True,
         requires=['metric_weight'],
         desc='the number of bins in each stage for the MI and Mattes metric, '
         'the radius for other metrics')
