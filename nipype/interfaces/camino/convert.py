@@ -259,7 +259,6 @@ class ProcStreamlines(StdOutCommandLine):
     >>> import nipype.interfaces.camino as cmon
     >>> proc = cmon.ProcStreamlines()
     >>> proc.inputs.in_file = 'tract_data.Bfloat'
-    >>> proc.inputs.outputtracts = 'oogl'
     >>> proc.run()                  # doctest: +SKIP
     """
     _cmd = 'procstreamlines'

@@ -68,7 +68,7 @@ class QBallMX(StdOutCommandLine):
     be run over each voxel using LinRecon
     
     >>> qballcoeffs = cam.LinRecon()
-    >>> qballcoeffs.inputs.dwidata = 'SubjectA.Bfloat'    
+    >>> qballcoeffs.inputs.in_file = 'SubjectA.Bfloat'    
     >>> qballcoeffs.inputs.scheme_file = 'A.scheme'
     >>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
     >>> qballcoeffs.inputs.normalize = True
@@ -222,7 +222,7 @@ class SFPeaks(StdOutCommandLine):
     value of the function at each of a set of sample points. Then it 
     finds local maxima by finding all points at which the function is 
     larger than for any other point within a fixed search radius (the  
-    default  is 0.4). The utility then uses Powell´s algorithm to 
+    default  is 0.4). The utility then uses Powell's algorithm to 
     optimize the position of each local maximum. Finally the utility
     removes duplicates and tiny peaks with function value smaller than
     some threshold, which is the mean of the function plus some number

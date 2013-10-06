@@ -101,7 +101,7 @@ class Conmat(CommandLine):
     >>> import nipype.interfaces.camino as cam
     >>> conmat = cam.Conmat()
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
-    >>> conmat.inputs.targetfile = 'atlas.nii.gz'
+    >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.run()        # doctest: +SKIP 
     
     Example 1
@@ -111,8 +111,8 @@ class Conmat(CommandLine):
     >>> import nipype.interfaces.camino as cam
     >>> conmat = cam.Conmat()
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
-    >>> conmat.inputs.targetfile = 'atlas.nii.gz'
-    >>> conmat.inputs.scalarfile = 'fa.nii.gz'
+    >>> conmat.inputs.target_file = 'atlas.nii.gz'
+    >>> conmat.inputs.scalar_file = 'fa.nii.gz'
     >>> conmat.run()        # doctest: +SKIP 
     """
     _cmd = 'conmat'

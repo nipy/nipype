@@ -268,7 +268,7 @@ class PicoPDFs(StdOutCommandLine):
     >>> import nipype.interfaces.camino as cmon
     >>> pdf = cmon.PicoPDFs()
     >>> pdf.inputs.inputmodel = 'dt'
-    >>> pdf.inputs.luts = 'lut_file'
+    >>> pdf.inputs.luts = ['lut_file']
     >>> pdf.inputs.in_file = 'voxel-order_data.Bfloat'
     >>> pdf.run()                  # doctest: +SKIP
     """
@@ -477,11 +477,7 @@ class TrackBootstrapInputSpec(TrackInputSpec):
 
     bsdatafiles = traits.List(File, mandatory=True, exists=True, argstr='-bsdatafile %s', desc='Specifies files containing raw data for repetition bootstrapping. Use -inputfile for wild bootstrap data.')
 
-    bsmodel = traits.Enum('dt', 'multitensor', argstr = '-bsmodel %s', desc = 'Model to fit to bootstrap data. This is used for repetition bootstrapping. May be "dt" (default) or "multitensor". This option may be omitted if -inversion is specified.')
-
     bgmask = File(argstr='-bgmask %s', exists=True, desc = 'Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
-
-    wildbsmodel = traits.Enum('dt', argstr='-wildbsmodel %s', desc='The model to fit to the data, for wild bootstrapping. The same model is used to generate the the wild bootstrap data. Must be "dt", which is the default.')
 
 class TrackBootstrap(Track):
     """
@@ -492,6 +488,7 @@ class TrackBootstrap(Track):
 
     >>> import nipype.interfaces.camino as cmon
     >>> track = cmon.TrackBootstrap()
+    >>> track.inputs.inputmodel='repbs_dt'
     >>> track.inputs.scheme_file = 'bvecs.scheme'
     >>> track.inputs.bsdatafiles = ['fitted_data1.Bfloat', 'fitted_data2.Bfloat']
     >>> track.inputs.seed_file = 'seed_mask.nii'
@@ -501,7 +498,6 @@ class TrackBootstrap(Track):
     input_spec = TrackBootstrapInputSpec
 
     def __init__(self, command=None, **inputs):
-        inputs["inputmodel"] = "bootstrap"
         return super(TrackBootstrap, self).__init__(command, **inputs)
 
 class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
