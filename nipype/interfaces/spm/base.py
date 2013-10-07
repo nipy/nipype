@@ -224,6 +224,10 @@ class SPMCommand(BaseInterface):
             self.mlab.inputs.nosplash = Undefined
 
     @property
+    def version(self):
+        return Info.version()
+
+    @property
     def jobtype(self):
         return self._jobtype
 
@@ -409,7 +413,7 @@ class SPMCommand(BaseInterface):
         if self.mlab.inputs.mfile:
             if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
                                 'fmri_spec', 'fmri_est', 'factorial_design',
-                                'defs']:
+                                'defs', 'dicom']:
                 # parentheses
                 mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                               (self.jobtype, self.jobname),

@@ -112,20 +112,20 @@ recommendations.
 Must Have
 ~~~~~~~~~
 
-Python_ 2.6 -2.7
+Python_ 2.6 - 2.7
 
-Nibabel_ 1.0 - 1.2
+Nibabel_ 1.0 - 1.4
   Neuroimaging file i/o library
 
-NetworkX_ 1.0 - 1.4
+NetworkX_ 1.0 - 1.8
   Python package for working with complex networks.
 
-NumPy_ 1.3 - 1.6
+NumPy_ 1.3 - 1.7
 
-SciPy_ 0.7 - 0.10
+SciPy_ 0.7 - 0.12
   Numpy and Scipy are high-level, optimized scientific computing libraries.
 
-Enthought_ Traits_ 4.0.0
+Enthought_ Traits_ 4.0.0 - 4.3.0
 
 .. note::
 
@@ -135,14 +135,17 @@ Enthought_ Traits_ 4.0.0
 Strong Recommendations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-IPython_ 0.10.2 - 0.13
+IPython_ 0.10.2 - 1.0.0
   Interactive python environment. This is necessary for some parallel
   components of the pipeline engine.
 
-Matplotlib_ 1.0
+Matplotlib_ 1.0 - 1.2
   Plotting library
 
-Sphinx_
+`RDFLib <http://rdflib.readthedocs.org/en/latest/>`_ 4.1
+RDFLibrary required for provenance export as RDF
+
+Sphinx_ 1.1
   Required for building the documentation
 
 `Graphviz <http://www.graphviz.org/>`_

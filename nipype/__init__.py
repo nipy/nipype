@@ -15,12 +15,6 @@ from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
 
-from pipeline import Node, MapNode, Workflow
-from interfaces import (fsl, spm, freesurfer, afni, ants, slicer, dipy, nipy,
-                        mrtrix, camino, DataGrabber, DataSink, SelectFiles,
-                        IdentityInterface, Rename, Function, Select, Merge)
-
-
 class _NoseTester(nosetester.NoseTester):
     """ Subclass numpy's NoseTester to add doctests by default
     """
@@ -80,40 +74,7 @@ except:
     pass
 
 
-def check_for_updates():
-    from urllib import urlopen
-    import re
-    devdata = urlopen(('http://www.mit.edu/~satra/nipype-nightly'
-                       '/version.html')).read()
-    try:
-        dev_ver = re.search('Release:</th><td class="field-body">(.*)</td>\n',
-                            devdata).groups()[0]
-    except AttributeError:
-        dev_ver = 'unknown'
-
-    devdata = urlopen(('http://nipy.org/nipype/version.html')).read()
-    try:
-        rel_ver = re.search('Release:</th><td class="field-body">(.*)</td>\n',
-                            devdata).groups()[0]
-    except AttributeError:
-        rel_ver = 'unknown'
-    print "Installed version: %s" % __version__
-    print "Current stable version: %s" % rel_ver
-    print "Current dev version: %s" % dev_ver
-
-"""
-Disabling check for current version due to portalocker issues.
-
-if int(config.get('check', 'interval')) > 0:
-    from time import time
-    t = time()
-    last_check = config.get_data('last_check')
-    if last_check is None or (t - last_check) > int(config.get('check',
-                                                               'interval')):
-        try:
-            check_for_updates()
-        except Exception, e:
-            print e
-        finally:
-            config.save_data('last_check', t)
-"""
+from pipeline import Node, MapNode, Workflow
+from interfaces import (fsl, spm, freesurfer, afni, ants, slicer, dipy, nipy,
+                        mrtrix, camino, DataGrabber, DataSink, SelectFiles,
+                        IdentityInterface, Rename, Function, Select, Merge)

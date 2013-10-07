@@ -334,9 +334,9 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
     mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
                                     argstr="-mask_only_targets",
                                     xor=['mask_source'])
-                                    
-    mask_source = File(exists=True, 
-                        desc="mask for source voxels", 
+
+    mask_source = File(exists=True,
+                        desc="mask for source voxels",
                         argstr="-mask_source %s",
                         xor=['mask_only_targets'])
 
@@ -1762,3 +1762,113 @@ class Autobox(AFNICommand):
         if name == 'out_file' and (not isdefined(self.inputs.out_file)):
             return Undefined
         return super(Autobox, self)._gen_filename(name)
+
+class RetroicorInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file to 3dretroicor',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
+    out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
+    card = File(desc='1D cardiac data file for cardiac correction',
+                argstr='-card %s',
+                position=-2,
+                exists=True)
+    resp = File(desc='1D respiratory waveform data for correction',
+                argstr='-resp %s',
+                position=-3,
+                exists=True)
+    threshold = traits.Int(desc='Threshold for detection of R-wave peaks in input (Make sure it is above the background noise level, Try 3/4 or 4/5 times range plus minimum)',
+                           argstr='-threshold %d',
+                           position=-4)
+    order = traits.Int(desc='The order of the correction (2 is typical)',
+                       argstr='-order %s',
+                       position=-5)
+
+    cardphase = File(desc='Filename for 1D cardiac phase output',
+                     argstr='-cardphase %s',
+                     position=-6,
+                     hash_files=False)
+    respphase = File(desc='Filename for 1D resp phase output',
+                     argstr='-respphase %s',
+                     position=-7,
+                     hash_files=False)
+
+
+class Retroicor(AFNICommand):
+    """Performs Retrospective Image Correction for physiological
+    motion effects, using a slightly modified version of the
+    RETROICOR algorithm
+
+    The durations of the physiological inputs are assumed to equal
+    the duration of the dataset. Any constant sampling rate may be
+    used, but 40 Hz seems to be acceptable. This program's cardiac
+    peak detection algorithm is rather simplistic, so you might try
+    using the scanner's cardiac gating output (transform it to a
+    spike wave if necessary).
+
+    This program uses slice timing information embedded in the
+    dataset to estimate the proper cardiac/respiratory phase for
+    each slice. It makes sense to run this program before any
+    program that may destroy the slice timings (e.g. 3dvolreg for
+    motion correction).
+
+    For complete details, see the `3dretroicor Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import afni as afni
+    >>> ret = afni.Retroicor()
+    >>> ret.inputs.in_file = 'functional.nii'
+    >>> ret.inputs.card = 'mask.1D'
+    >>> ret.inputs.resp = 'resp.1D'
+    >>> res = ret.run()   # doctest: +SKIP
+    """
+
+    _cmd = '3dretroicor'
+    input_spec = RetroicorInputSpec
+    output_spec = AFNICommandOutputSpec
+
+
+class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
+    in_file = File(desc='input file to 3dAFNItoNIFTI',
+        argstr='%s',
+        position=-1,
+        mandatory=True,
+        exists=True)
+    out_file = File("%s.nii", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    hash_files = False
+
+class AFNItoNIFTI(AFNICommand):
+    """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
+
+    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
+    this can also convert 2D or 1D data, which you can numpy.squeeze() to remove extra dimensions
+    
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> a2n = afni.AFNItoNIFTI()
+    >>> a2n.inputs.in_file = 'afni_output.3D'
+    >>> a2n.inputs.out_file =  'afni_output.nii'
+    >>> a2n.cmdline
+    '3dAFNItoNIFTI afni_output.3D'
+
+    """
+
+    _cmd = '3dAFNItoNIFTI'
+    input_spec = AFNItoNIFTIInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _overload_extension(self, value):
+        path, base, ext = split_filename(value)
+        if ext.lower() not in [".1d", ".nii.gz", ".1D"]:
+            ext = ext + ".nii"
+        return os.path.join(path, base + ext)
+
+    def _gen_filename(self, name):
+        return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+

@@ -214,7 +214,7 @@ class DataSink(IOBase):
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
-    def __init__(self, infields=None, **kwargs):
+    def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
         ----------
@@ -232,6 +232,8 @@ class DataSink(IOBase):
                 self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+        if force_run:
+            self._always_run = True
 
     def _get_dst(self, src):
         ## If path is directory with trailing os.path.sep,
@@ -562,8 +564,12 @@ class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
         desc="Raise an exception if a template pattern matches no files.")
-    force_lists = traits.Bool(False, usedefault=True,
-        desc="Return all values as lists even when matching a single file.")
+    force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
+        default=False, usedefault=True,
+        desc=("Whether to return outputs as a list even when only one file "
+              "matches the template. Either a boolean that applies to all "
+              "output fields or a list of output field names to coerce to "
+              " a list"))
 
 
 class SelectFiles(IOBase):
@@ -646,6 +652,18 @@ class SelectFiles(IOBase):
         info = dict([(k, v) for k, v in self.inputs.__dict__.items()
                      if k in self._infields])
 
+        force_lists = self.inputs.force_lists
+        if isinstance(force_lists, bool):
+            force_lists = self._outfields if force_lists else []
+        bad_fields = set(force_lists) - set(self._outfields)
+        if bad_fields:
+            bad_fields = ", ".join(list(bad_fields))
+            plural = "s" if len(bad_fields) > 1 else ""
+            verb = "were" if len(bad_fields) > 1 else "was"
+            msg = ("The field%s '%s' %s set in 'force_lists' and not in "
+                   "'templates'.") % (plural, bad_fields, verb)
+            raise ValueError(msg)
+
         for field, template in self._templates.iteritems():
 
             # Build the full template path
@@ -673,7 +691,7 @@ class SelectFiles(IOBase):
                 filelist.sort()
 
             # Handle whether this must be a list or not
-            if not self.inputs.force_lists:
+            if field not in force_lists:
                 filelist = list_to_filename(filelist)
 
             outputs[field] = filelist
@@ -710,7 +728,7 @@ class DataFinder(IOBase):
     Matched paths are available in the output 'out_paths'. Any named groups of
     captured text from the regular expression are also available as ouputs of
     the same name.
-    
+
     Examples
     --------
 
@@ -736,7 +754,7 @@ class DataFinder(IOBase):
      'acquisition']
 
     """
-    
+
     input_spec = DataFinderInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
