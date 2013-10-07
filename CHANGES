@@ -6,6 +6,24 @@ Next release
        spm.DicomImport
 * ENH: W3C PROV support with optional RDF export built into Nipype
 
+* ENH: Several new interfaces related to Camino were added:
+        - camino.SFPICOCalibData
+        - camino.Conmat
+        - camino.QBallMX
+        - camino.LinRecon
+        - camino.SFPeaks
+        One outdated interface no longer part of Camino was removed:
+        - camino.Conmap
+        
+* FIX: Several fixes related to Camino interfaces:
+        - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
+        - DTLUTGen would silently round the "step", "snr" and "trace" parameters to integers
+        - PicoPDFs would not accept more than one lookup table
+        - PicoPDFs default pdf did not correspond to Camino default
+        - Track input model names were outdated (and would generate an error)
+        - Track numpds parameter could not be set for deterministic tractography
+        - FA created output files with erroneous extension
+        
 * FIX: Deals properly with 3d files in SPM Realign
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
