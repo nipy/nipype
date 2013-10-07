@@ -189,7 +189,6 @@ def create_connectivity_pipeline(name="connectivity"):
 
     vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
     procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-    procstreamlines.inputs.outputtracts = 'oogl'
 
     """
     We can easily produce a variety of scalar values from our fitted tensors. The following nodes generate the
