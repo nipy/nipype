@@ -25,7 +25,7 @@ try:
 except ImportError:
     pass
 
-from copy import deepcopy
+from copy import deepcopy, copy
 
 try:
     from collections import OrderedDict
@@ -173,6 +173,12 @@ PROV_RECORD_IDS_MAP = dict((PROV_N_MAP[rec_type_id], rec_type_id) for rec_type_i
 PROV_ID_ATTRIBUTES_MAP = dict((prov_id, attribute) for (prov_id, attribute) in PROV_RECORD_ATTRIBUTES)
 PROV_ATTRIBUTES_ID_MAP = dict((attribute, prov_id) for (prov_id, attribute) in PROV_RECORD_ATTRIBUTES)
 
+
+# Converting an attribute to the normal form for comparison purposes
+_normalise_attributes = lambda attr: (unicode(attr[0]), unicode(attr[1]))
+
+
+#  Datatypes
 _r_xsd_dateTime = re.compile(""" ^
     (?P<year>-?[0-9]{4}) - (?P<month>[0-9]{2}) - (?P<day>[0-9]{2})
     T (?P<hour>[0-9]{2}) : (?P<minute>[0-9]{2}) : (?P<second>[0-9]{2})
@@ -181,29 +187,23 @@ _r_xsd_dateTime = re.compile(""" ^
       Z | (?P<tz_hr>[-+][0-9]{2}) : (?P<tz_min>[0-9]{2})
     )?
     $ """, re.X)
-_r_typed_literal_uri = re.compile(r'^"(?P<value>[^"\\]*(?:\\.[^"\\]*)*)"\^\^<(?P<datatype>[^>\\]*(?:\\.[^>\\]*)*)>$', re.X)
-_r_typed_literal_qname = re.compile(r'^"(?P<value>[^"\\]*(?:\\.[^"\\]*)*)"\^\^(?P<datatype>[^>\\]*(?:\\.[^>\\]*)*)$', re.X)
 
 attr2rdf = lambda attr: PROV[PROV_ID_ATTRIBUTES_MAP[attr].split('prov:')[1]].rdf_representation()
 
-# Converting an attribute to the normal form for comparison purposes
-_normalise_attributes = lambda attr: (unicode(attr[0]), unicode(attr[1]))
-
-# Datatypes
 def _parse_xsd_dateTime(s):
     """Returns datetime or None."""
     m = _r_xsd_dateTime.match(s)
     if m is not None:
         values = m.groupdict()
-    if values["microsecond"] is None:
-        values["microsecond"] = 0
+        if values["microsecond"] is None:
+            values["microsecond"] = 0
+        else:
+            values["microsecond"] = values["microsecond"][1:]
+            values["microsecond"] += "0" * (6 - len(values["microsecond"]))
+        values = dict((k, int(v)) for k, v in values.iteritems() if not k.startswith("tz"))
+        return datetime.datetime(**values)
     else:
-        values["microsecond"] = values["microsecond"][1:]
-        values["microsecond"] += "0" * (6 - len(values["microsecond"]))
-    values = dict((k, int(v)) for k, v in values.iteritems()
-                  if not k.startswith("tz"))
-
-    return datetime.datetime(**values)
+        return None
 
 
 def _ensure_datetime(time):
@@ -251,9 +251,14 @@ def parse_xsd_types(value, datatype):
     return XSD_DATATYPE_PARSERS[datatype](value) if datatype in XSD_DATATYPE_PARSERS else None
 
 
+def _ensure_multiline_string_triple_quoted(s):
+    format_str = u'"""%s"""' if '\n' in s else u'"%s"'
+    return format_str % s
+
+
 def encoding_PROV_N_value(value):
     if isinstance(value, basestring):
-        return '"%s"' % value
+        return _ensure_multiline_string_triple_quoted(value)
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
     elif isinstance(value, float):
@@ -304,9 +309,9 @@ class Literal(object):
     def provn_representation(self):
         if self._langtag:
             #  a langtag can only goes with string
-            return u'"%s"@%s' % (unicode(self._value), unicode(self._langtag))
+            return u'%s@%s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._langtag))
         else:
-            return u'"%s" %%%% %s' % (unicode(self._value), unicode(self._datatype))
+            return u'%s %%%% %s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._datatype))
 
     def json_representation(self):
         if self._langtag:
@@ -494,7 +499,7 @@ class ProvRecord(object):
         if type_identifier not in asserted_types:
             if self._extra_attributes is None:
                 self._extra_attributes = set()
-            self._extra_attributes.update(set([(PROV['type'], type_identifier)]))
+            self._extra_attributes.add((PROV['type'], type_identifier))
 
     def get_attribute(self, attr_name):
         if not self._extra_attributes:
@@ -542,19 +547,18 @@ class ProvRecord(object):
 
     def parse_extra_attributes(self, extra_attributes):
         if isinstance(extra_attributes, dict):
-            #  This will only work if extra_attributes is a dictionary
             #  Converting the dictionary into a list of tuples (i.e. attribute-value pairs)
             extra_attributes = extra_attributes.items()
-        attr_list = set((self._bundle.valid_identifier(attribute), self._auto_literal_conversion(value)) for attribute, value in extra_attributes)
-        return attr_list
+        attr_set = set((self._bundle.valid_identifier(attribute), self._auto_literal_conversion(value)) for attribute, value in extra_attributes)
+        return attr_set
 
     def add_extra_attributes(self, extra_attributes):
         if extra_attributes:
             if self._extra_attributes is None:
                 self._extra_attributes = set()
-            attr_list = self.parse_extra_attributes(extra_attributes)
             #  Check attributes for valid qualified names
-            self._extra_attributes.update(attr_list)
+            attr_set = self.parse_extra_attributes(extra_attributes)
+            self._extra_attributes.update(attr_set)
 
     def add_attributes(self, attributes, extra_attributes):
         if attributes:
@@ -1219,11 +1223,12 @@ PROV_REC_CLS = {
 
 #  Bundle
 class NamespaceManager(dict):
-    def __init__(self, default_namespaces={PROV.get_prefix(): PROV, XSD.get_prefix(): XSD}, default=None, parent=None):
+    def __init__(self, namespaces={}, default_namespaces={PROV.get_prefix(): PROV, XSD.get_prefix(): XSD}, default=None, parent=None):
         self._default_namespaces = {}
         self._default_namespaces.update(default_namespaces)
-        self._namespaces = {}
         self.update(self._default_namespaces)
+        self._namespaces = {}
+
         if default is not None:
             self.set_default_namespace(default)
         else:
@@ -1232,6 +1237,7 @@ class NamespaceManager(dict):
         #  TODO check if default is in the default namespaces
         self._anon_id_count = 0
         self._rename_map = {}
+        self.add_namespaces(namespaces)
 
     def get_namespace(self, uri):
         for namespace in self.values():
@@ -1267,6 +1273,13 @@ class NamespaceManager(dict):
             namespace = new_namespace
         self._namespaces[prefix] = namespace
         self[prefix] = namespace
+        return namespace
+
+    def add_namespaces(self, namespaces):
+        if namespaces:
+            for prefix, uri in namespaces.items():
+                ns = Namespace(prefix, uri)
+                self.add_namespace(ns)
 
     def get_valid_identifier(self, identifier):
         if not identifier:
@@ -1274,11 +1287,21 @@ class NamespaceManager(dict):
         if isinstance(identifier, Identifier):
             if isinstance(identifier, QName):
                 #  Register the namespace if it has not been registered before
-                namespace = identifier.get_namespace()
-                if namespace not in self.values():
-                    self.add_namespace(namespace)
-            #  return the original identifier
-            return identifier
+                namespace = identifier._namespace
+                prefix = namespace.get_prefix()
+                if prefix in self and self[prefix] == namespace:
+                    # No need to add the namespace
+                    existing_ns = self[prefix]
+                    if existing_ns is namespace:
+                        return identifier
+                    else:
+                        return existing_ns[identifier._localpart]  # reuse the existing namespace
+                else:
+                    ns = self.add_namespace(deepcopy(namespace))  # Do not reuse the namespace object
+                    return ns[identifier._localpart]
+            else:
+                #  return the original identifier
+                return identifier
         elif isinstance(identifier, (str, unicode)):
             if identifier.startswith('_:'):
                 return None
@@ -1325,15 +1348,16 @@ class NamespaceManager(dict):
 
 
 class ProvBundle(ProvEntity):
-    def __init__(self, bundle=None, identifier=None, attributes=None, other_attributes=None, asserted=True):
+    def __init__(self, bundle=None, identifier=None, attributes=None, other_attributes=None, asserted=True, namespaces={}):
         #  Initializing bundle-specific attributes
         self._records = list()
         self._id_map = dict()
         self._bundles = dict()
         if bundle is None:
-            self._namespaces = NamespaceManager()
+            self._namespaces = NamespaceManager(namespaces)
         else:
             self._namespaces = bundle._namespaces
+            self._namespaces.add_namespaces(namespaces)
 
         #  Initializing record-specific attributes
         super(ProvBundle, self).__init__(bundle, identifier, attributes, other_attributes, asserted)
@@ -1631,14 +1655,28 @@ class ProvBundle(ProvEntity):
         return json.loads(json_content, cls=ProvBundle.JSONDecoder, **kw)
 
     def get_flattened(self):
-        flattened = deepcopy(self)
-        for bundle in flattened._bundles.values():
+        namespaces = dict((ns.get_prefix(), ns.get_uri()) for ns in self.get_registered_namespaces())
+        document = ProvBundle(namespaces=namespaces)
+        default_ns_uri = self.get_default_namespace()
+        if default_ns_uri is not None:
+            document.set_default_namespace(default_ns_uri)
+        # Enumerate records and bundles
+        bundles = []
+        records = []
+        for record in self.get_records():
+            if isinstance(record, ProvBundle):
+                bundles.append(record)
+            else:
+                records.append(record)
+        records = deepcopy(records)
+        for record in records:
+            document._add_record(record)
+        for bundle in bundles:
             for record in bundle._records:
-                flattened.add_record(record.get_type(), record._identifier, record._attributes, record._extra_attributes, record._asserted)
-            flattened._records.remove(bundle)
-
-        flattened._bundles = {}
-        return flattened
+                document.add_record(record.get_type(), copy(record._identifier),
+                                    deepcopy(record._attributes), deepcopy(record._extra_attributes),
+                                    record._asserted)
+        return document
 
     def __eq__(self, other):
         try:
