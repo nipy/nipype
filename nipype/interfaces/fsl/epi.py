@@ -54,10 +54,13 @@ class PrepareFieldmap(FSLCommand):
 
     Examples
     --------
+
+    >>> from nipype.interfaces.fsl import PrepareFieldmap
     >>> prepare = PrepareFieldmap()
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
-    >>> prepare.cmdline # doctest: +SKIP
+    >>> prepare.cmdline
+    'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii /home/oesteban/workspace/nipype/nipype/testing/data/phase_fslprepared.nii.gz 2.460000'
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -145,10 +148,13 @@ class TOPUP( FSLCommand ):
 
         Examples
         --------
+
+        >>> from nipype.interfaces.fsl import TOPUP
         >>> topup = TOPUP()
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
-        >>> topup.cmdline # doctest: +SKIP
+        >>> topup.cmdline
+        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=/home/oesteban/workspace/nipype/nipype/testing/data/nipypetu'
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -239,21 +245,22 @@ class ApplyTOPUPOutputSpec( TraitedSpec ):
     out_corrected = File( exists=True, desc='name of 4D image file with unwarped images' )
 
 class ApplyTOPUP( FSLCommand ):
-    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
-        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide
-        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
-
-        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions.
+        `General reference <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide>`_
+        and `use example <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup>`_.
 
 
         Examples
         --------
+
+        >>> from nipype.interfaces.fsl import ApplyTOPUP
         >>> applytopup = ApplyTOPUP()
         >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
         >>> applytopup.inputs.in_topup = "my_topup_results"
-        >>> applytopup.cmdline # doctest: +SKIP
+        >>> applytopup.cmdline
+        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=my_topup_results --out=/home/oesteban/workspace/nipype/nipype/testing/data/nipypeatu'
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -315,12 +322,14 @@ class EddyOutputSpec( TraitedSpec ):
     out_parameter = File( exists=True, desc='text file with parameters definining the field and movement for each scan')
 
 class Eddy( FSLCommand ):
-    """ Interface for FSL eddy, a tool for estimating and correcting eddy currents induced distortions
-        User guide: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide
-        Regarding acqp file: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file 
+    """ Interface for FSL eddy, a tool for estimating and correcting eddy currents induced distortions.
+        `User guide <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide>`_ and
+        `more info regarding acqp file <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file>`_.
 
         Examples
         --------
+
+        >>> from nipype.interfaces.fsl import Eddy
         >>> eddy = Eddy()
         >>> eddy.inputs.in_file = 'epi.nii'
         >>> eddy.inputs.in_mask  = 'epi_mask.nii'
@@ -328,7 +337,8 @@ class Eddy( FSLCommand ):
         >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
         >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
         >>> eddy.inputs.in_bval  = 'bvals.scheme'
-        >>> eddy.cmdline # doctest: +SKIP
+        >>> eddy.cmdline
+        'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii --out=/home/oesteban/workspace/nipype/nipype/testing/data/eddy_corrected'
         >>> res = eddy.run() # doctest: +SKIP
 
 
@@ -401,11 +411,14 @@ class EPIDeWarp(FSLCommand):
 
     Examples
     --------
+
+    >>> from nipype.interfaces.fsl import EPIDeWarp
     >>> dewarp = EPIDeWarp()
     >>> dewarp.inputs.epi_file = "functional.nii"
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
-    >>> dewarp.cmdline # doctest: +SKIP
+    >>> dewarp.cmdline
+    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii --esp 0.58 --exfdw /home/oesteban/workspace/nipype/nipype/testing/data/exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 --tmpdir /home/oesteban/workspace/nipype/nipype/testing/data/temp --vsm /home/oesteban/workspace/nipype/nipype/testing/data/vsm.nii.gz'
     >>> res = dewarp.run() # doctest: +SKIP
 
     References
@@ -486,10 +499,13 @@ class SigLoss(FSLCommand):
 
     Examples
     --------
+
+    >>> from nipype.interfaces.fsl import SigLoss
     >>> sigloss = SigLoss()
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
-    >>> sigloss.cmdline # doctest: +SKIP
+    >>> sigloss.cmdline
+    'sigloss --te=0.030000 -i phase.nii -s /home/oesteban/workspace/nipype/nipype/testing/data/phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
     """
     input_spec = SigLossInputSpec
@@ -525,9 +541,10 @@ class EddyCorrect(FSLCommand):
     Example
     -------
 
-    >>> from nipype.interfaces import fsl
-    >>> eddyc = fsl.EddyCorrect(in_file='diffusion.nii', out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline # doctest: +SKIP
+    >>> from nipype.interfaces.fsl import EddyCorrect
+    >>> eddyc = EddyCorrect(in_file='diffusion.nii', out_file="diffusion_edc.nii", ref_num=0)
+    >>> eddyc.cmdline
+    'eddy_correct diffusion.nii diffusion_edc.nii 0'
 
     """
     _cmd = 'eddy_correct'
