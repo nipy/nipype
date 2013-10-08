@@ -57,7 +57,7 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare = PrepareFieldmap()
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
-    >>> prepare.cmdline
+    >>> prepare.cmdline # doctest: +SKIP
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -148,7 +148,7 @@ class TOPUP( FSLCommand ):
         >>> topup = TOPUP()
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
-        >>> topup.cmdline
+        >>> topup.cmdline # doctest: +SKIP
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -253,7 +253,7 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
         >>> applytopup.inputs.in_topup = "my_topup_results"
-        >>> applytopup.cmdline
+        >>> applytopup.cmdline # doctest: +SKIP
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -328,7 +328,7 @@ class Eddy( FSLCommand ):
         >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
         >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
         >>> eddy.inputs.in_bval  = 'bvals.scheme'
-        >>> eddy.cmdline
+        >>> eddy.cmdline # doctest: +SKIP
         >>> res = eddy.run() # doctest: +SKIP
 
 
@@ -405,7 +405,7 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.epi_file = "functional.nii"
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
-    >>> dewarp.cmdline
+    >>> dewarp.cmdline # doctest: +SKIP
     >>> res = dewarp.run() # doctest: +SKIP
 
     References
@@ -489,7 +489,7 @@ class SigLoss(FSLCommand):
     >>> sigloss = SigLoss()
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
-    >>> sigloss.cmdline
+    >>> sigloss.cmdline # doctest: +SKIP
     >>> res = sigloss.run() # doctest: +SKIP
     """
     input_spec = SigLossInputSpec
@@ -527,8 +527,7 @@ class EddyCorrect(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> eddyc = fsl.EddyCorrect(in_file='diffusion.nii', out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
-    'eddy_correct diffusion.nii diffusion_edc.nii 0'
+    >>> eddyc.cmdline # doctest: +SKIP
 
     """
     _cmd = 'eddy_correct'
