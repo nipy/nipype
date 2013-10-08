@@ -53,6 +53,9 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('file')
 
+from nipype import config
+config.enable_provenance()
+
 from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
 
