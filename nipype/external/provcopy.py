@@ -252,7 +252,9 @@ def parse_xsd_types(value, datatype):
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = u'"""%s"""' if '\n' in s else u'"%s"'
+    format_str = '%s'
+    if isinstance(s, basestring):
+        format_str = u'"""%s"""' if '\n' in s else u'"%s"'
     return format_str % s
 
 
