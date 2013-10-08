@@ -626,6 +626,7 @@ class ReconAll(CommandLine):
     """
 
     _cmd = 'recon-all'
+    _additional_metadata = ['loc', 'altkey']
     input_spec = ReconAllInputSpec
     output_spec = ReconAllIOutputSpec
 

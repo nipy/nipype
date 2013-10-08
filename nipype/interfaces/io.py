@@ -943,6 +943,7 @@ class FreeSurferSource(IOBase):
     input_spec = FSSourceInputSpec
     output_spec = FSSourceOutputSpec
     _always_run = True
+    _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = ''
