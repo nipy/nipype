@@ -10,14 +10,11 @@ Requires Packages to be installed
 
 from ConfigParser import NoOptionError
 from copy import deepcopy
-from cPickle import dumps
 import datetime
 import errno
-import json
 import os
 import re
 import platform
-import pwd
 from socket import getfqdn
 from string import Template
 import select
@@ -27,12 +24,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from uuid import uuid1
 
-try:
-    import prov.model as pm
-except ImportError:
-    from ..external import provcopy as pm
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
@@ -42,12 +34,11 @@ from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp, save_json,
                                split_filename)
 from ..utils.misc import is_container, trim, str2bool
+from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
 
 nipype_version = LooseVersion(__version__)
-
-from .. import get_info
 
 iflogger = logging.getLogger('interface')
 
@@ -682,50 +673,6 @@ class Interface(object):
         raise NotImplementedError
 
 
-def safe_encode(x):
-    """Encodes a python value for prov
-    """
-    nipype = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
-    if x is None:
-        return pm.Literal("Unknown", pm.XSD['string'])
-    if isinstance(x, (str, unicode)):
-        if os.path.exists(x):
-            try:
-                return pm.URIRef('file://%s%s' % (getfqdn(), x))
-            except AttributeError:
-                return pm.Literal('file://%s%s' % (getfqdn(), x),
-                                  pm.XSD['anyURI'])
-        else:
-            return pm.Literal(x, pm.XSD['string'])
-    if isinstance(x, (int,)):
-        return pm.Literal(int(x), pm.XSD['integer'])
-    if isinstance(x, (float,)):
-        return pm.Literal(x, pm.XSD['float'])
-    if isinstance(x, dict):
-        outdict = {}
-        for key, value in x.items():
-            encoded_value = safe_encode(value)
-            if isinstance(encoded_value, (pm.Literal,)):
-                outdict[key] = encoded_value.json_representation()
-            else:
-                outdict[key] = encoded_value
-        return pm.Literal(json.dumps(outdict), pm.XSD['string'])
-    if isinstance(x, list):
-        outlist = []
-        for value in x:
-            encoded_value = safe_encode(value)
-            if isinstance(encoded_value, (pm.Literal,)):
-                outlist.append(encoded_value.json_representation())
-            else:
-                outlist.append(encoded_value)
-        return pm.Literal(json.dumps(outlist), pm.XSD['string'])
-    try:
-        return pm.Literal(dumps(x), nipype['pickle'])
-    except TypeError, e:
-        iflogger.info(e)
-        return pm.Literal("Could not encode", pm.XSD['string'])
-
-
 class BaseInterfaceInputSpec(TraitedSpec):
     ignore_exception = traits.Bool(False, desc="Print an error message instead \
 of throwing an exception in case the interface fails to run", usedefault=True,
@@ -1002,7 +949,9 @@ class BaseInterface(Interface):
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
-            prov_record = self.write_provenance(results)
+            prov_record = None
+            if str2bool(config.get('execution', 'write_provenance')):
+                prov_record = write_provenance(results)
             results.provenance = prov_record
         except Exception, e:
             runtime.endTime = dt.isoformat(dt.utcnow())
@@ -1037,10 +986,12 @@ class BaseInterface(Interface):
             except Exception, e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
-            try:
-                prov_record = self.write_provenance(results)
-            except Exception:
-                prov_record = None
+            prov_record = None
+            if str2bool(config.get('execution', 'write_provenance')):
+                try:
+                    prov_record = write_provenance(results)
+                except Exception:
+                    prov_record = None
             results.provenance = prov_record
             if hasattr(self.inputs, 'ignore_exception') and \
                     isdefined(self.inputs.ignore_exception) and \
@@ -1096,152 +1047,6 @@ class BaseInterface(Interface):
                 raise ValueError('Interface %s has no version information' %
                                  self.__class__.__name__)
         return self._version
-
-    def write_provenance(self, results, filename='provenance', format='turtle'):
-        runtime = results.runtime
-        interface = results.interface
-        inputs = results.inputs
-        outputs = results.outputs
-        classname = self.__class__.__name__
-
-        foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
-        dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
-        nipype = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
-
-        get_id = lambda: nipype[uuid1().hex]
-
-        # create a provenance container
-        g = pm.ProvBundle()
-
-        # Set the default _namespace name
-        # g.set_default_namespace(nipype.get_uri())
-        g.add_namespace(foaf)
-        g.add_namespace(dcterms)
-        g.add_namespace(nipype)
-
-        a0_attrs = {nipype['module']: self.__module__,
-                    nipype["interface"]: classname,
-                    pm.PROV["label"]: classname,
-                    nipype['duration']: safe_encode(runtime.duration),
-                    nipype['working_directory']: safe_encode(runtime.cwd),
-                    nipype['return_code']: runtime.returncode,
-                    nipype['platform']: safe_encode(runtime.platform),
-                    nipype['version']: safe_encode(runtime.version),
-                    }
-        try:
-            a0_attrs[foaf["host"]] = pm.URIRef(runtime.hostname)
-        except AttributeError:
-            a0_attrs[foaf["host"]] = pm.Literal(runtime.hostname,
-                                                pm.XSD['anyURI'])
-
-        try:
-            a0_attrs.update({nipype['command']: safe_encode(runtime.cmdline)})
-            a0_attrs.update({nipype['command_path']:
-                                 safe_encode(runtime.command_path)})
-            a0_attrs.update({nipype['dependencies']:
-                                 safe_encode(runtime.dependencies)})
-        except AttributeError:
-            pass
-        a0 = g.activity(get_id(), runtime.startTime, runtime.endTime,
-                        a0_attrs)
-        # environment
-        id = get_id()
-        env_collection = g.collection(id)
-        env_collection.add_extra_attributes({pm.PROV['type']:
-                                                 nipype['environment'],
-                                             pm.PROV['label']: "Environment"})
-        g.used(a0, id)
-        # write environment entities
-        for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
-            in_attr = {pm.PROV["label"]: key,
-                       nipype["environment_variable"]: key,
-                       nipype["value"]: safe_encode(val)}
-            id = get_id()
-            g.entity(id, in_attr)
-            g.hadMember(env_collection, id)
-        # write input entities
-        if inputs:
-            id = get_id()
-            input_collection = g.collection(id)
-            input_collection.add_extra_attributes({pm.PROV['type']:
-                                                       nipype['inputs'],
-                                                   pm.PROV['label']: "Inputs"})
-            g.used(a0, id)
-            # write input entities
-            for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_attr = {pm.PROV["label"]: key,
-                           nipype["in_port"]: key,
-                           nipype["value"]: safe_encode(val)}
-                id = get_id()
-                g.entity(id, in_attr)
-                g.hadMember(input_collection, id)
-        # write output entities
-        if outputs:
-            id = get_id()
-            output_collection = g.collection(id)
-            outputs = outputs.get_traitsfree()
-            output_collection.add_extra_attributes({pm.PROV['type']:
-                                                        nipype['outputs'],
-                                                    pm.PROV['label']:
-                                                        "Outputs"})
-            g.wasGeneratedBy(output_collection, a0)
-            # write input entities
-            for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_attr = {pm.PROV["label"]: key,
-                            nipype["out_port"]: key,
-                            nipype["value"]: safe_encode(val)}
-                id = get_id()
-                g.entity(id, out_attr)
-                g.hadMember(output_collection, id)
-        # write runtime entities
-        id = get_id()
-        runtime_collection = g.collection(id)
-        runtime_collection.add_extra_attributes({pm.PROV['type']:
-                                                     nipype['runtime'],
-                                                 pm.PROV['label']:
-                                                     "RuntimeInfo"})
-        g.wasGeneratedBy(runtime_collection, a0)
-        for key, value in sorted(runtime.items()):
-            if not value:
-                continue
-            if key not in ['stdout', 'stderr', 'merged']:
-                continue
-            attr = {pm.PROV["label"]: key,
-                    nipype[key]: safe_encode(value)}
-            id = get_id()
-            g.entity(get_id(), attr)
-            g.hadMember(runtime_collection, id)
-        # create agents
-        user_agent = g.agent(get_id(),
-                             {pm.PROV["type"]: pm.PROV["Person"],
-                              pm.PROV["label"]:
-                                  pwd.getpwuid(os.geteuid()).pw_name,
-                              foaf["name"]:
-                               safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
-        agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
-                      pm.PROV["label"]: "Nipype",
-                      foaf["name"]: safe_encode("Nipype")}
-        for key, value in get_info().items():
-            agent_attr.update({nipype[key]: safe_encode(value)})
-        software_agent = g.agent(get_id(), agent_attr)
-        g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("LoggedInUser")})
-        g.wasAssociatedWith(a0, software_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("Software")})
-        # write provenance
-        try:
-            if format in ['turtle', 'all']:
-                g.rdf().serialize(filename + '.ttl', format='turtle')
-        except (ImportError, NameError):
-            format = 'all'
-        finally:
-            if format in ['provn', 'all']:
-                with open(filename + '.provn', 'wt') as fp:
-                    fp.writelines(g.get_provn())
-            if format in ['json', 'all']:
-                with open(filename + '.json', 'wt') as fp:
-                    pm.json.dump(g, fp, cls=pm.ProvBundle.JSONEncoder)
-        return g
 
 
 class Stream(object):

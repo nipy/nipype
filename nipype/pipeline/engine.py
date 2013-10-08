@@ -12,10 +12,11 @@ The `Pipeline` class provides core functionality for batch processing.
 
 """
 
-from glob import glob
-import gzip
+from datetime import datetime
 from copy import deepcopy
 import cPickle
+from glob import glob
+import gzip
 import inspect
 import os
 import os.path as op
@@ -49,7 +50,7 @@ from ..utils.filemanip import (save_json, FileNotFoundError,
                                write_rst_list)
 
 from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, make_output_dir,
+                    export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot,
                     get_print_name, merge_dict, evaluate_connect_function)
 
@@ -681,6 +682,12 @@ connected.
         if str2bool(self.config['execution']['create_report']):
             self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
+        datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
+        if str2bool(self.config['execution']['write_provenance']):
+            write_workflow_prov(execgraph,
+                                os.path.join(self.base_dir,
+                                             'workflow_provenance_%s' % datestr),
+                                format='all')
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
@@ -1826,13 +1833,15 @@ class MapNode(Node):
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       provenance=[], outputs=self.outputs)
+                                       provenance=[], inputs=[],
+                                       outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
             self._result.runtime.insert(i, None)
             if node.result:
                 if hasattr(node.result, 'runtime'):
                     self._result.interface.insert(i, node.result.interface)
+                    self._result.inputs.insert(i, node.result.inputs)
                     self._result.runtime[i] = node.result.runtime
                 if hasattr(node.result, 'provenance'):
                     self._result.provenance.insert(i, node.result.provenance)
