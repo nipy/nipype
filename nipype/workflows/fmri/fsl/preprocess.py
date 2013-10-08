@@ -1,6 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+import os
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -1146,7 +1147,8 @@ def create_reg_workflow(name='registration'):
     mean2anatbbr = pe.Node(fsl.FLIRT(), name='mean2anatbbr')
     mean2anatbbr.inputs.dof = 6
     mean2anatbbr.inputs.cost = 'bbr'
-    mean2anatbbr.inputs.schedule = '/usr/local/fsl/etc/flirtsch/bbr.sch'
+    mean2anatbbr.inputs.schedule = os.path.join(os.getenv['FSLDIR'],
+                                                'etc/flirtsch/bbr.sch')
     register.connect(inputnode, 'mean_image', mean2anatbbr, 'in_file')
     register.connect(binarize, 'out_file', mean2anatbbr, 'wm_seg')
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
