@@ -65,7 +65,7 @@ def test_dicom_import():
     di = spmu.DicomImport(matlab_cmd = 'mymatlab')
     assert_equal(di.inputs.matlab_cmd, 'mymatlab')
     assert_equal(di.inputs.output_dir_struct, 'flat')
-    assert_equal(di.inputs.output_dir, './converted_dicom/')
+    assert_equal(di.inputs.output_dir, './converted_dicom')
     assert_equal(di.inputs.format, 'nii')
     assert_equal(di.inputs.icedims, False)
     assert_raises(TraitError,di.inputs.trait_set,output_dir_struct = 'wrong')
