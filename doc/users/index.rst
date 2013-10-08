@@ -33,7 +33,7 @@
    mapnode_and_iterables
    model_specification
    saving_workflows
-
+   spmmcr
 
  
 
