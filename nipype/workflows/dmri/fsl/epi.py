@@ -76,8 +76,8 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
     eddy = create_eddy_correct_pipeline()
     
     if use_fieldmap: # we have a fieldmap, so lets use it (yay!)
-        susceptibility = create_susceptibility_correct_pipeline(
-        fieldmap_registration=fieldmap_registration)
+        susceptibility = create_epidewarp_pipeline(
+                         fieldmap_registration=fieldmap_registration)
         
         pipeline.connect([
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
