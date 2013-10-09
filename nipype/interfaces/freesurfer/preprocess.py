@@ -931,7 +931,7 @@ class Smooth(FSCommand):
     >>> from nipype.interfaces.freesurfer import Smooth
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
+    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
 
     """
 
