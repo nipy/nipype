@@ -34,7 +34,7 @@
    joinnode_and_itersource
    model_specification
    saving_workflows
-
+   spmmcr
 
  
 
