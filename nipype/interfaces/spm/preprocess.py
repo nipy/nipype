@@ -271,7 +271,7 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                              desc='sampling separation in mm')
     tolerance = traits.List(traits.Float(), field='eoptions.tol',
                         desc='acceptable tolerance for each of 12 params')
-    write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
+    write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                              field='roptions.wrap',
@@ -397,7 +397,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox',
                                     minlen=3, maxlen=3,
                                     desc='3-element list (opt)')
-    write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
+    write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc=('Check if interpolation should wrap in [x,y,z] '

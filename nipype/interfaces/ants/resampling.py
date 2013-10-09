@@ -224,7 +224,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                        exists=True)
     output_image = traits.Str(argstr='--output %s',
                               desc=('output file name'), genfile=True,
-                              hash_file=False)
+                              hash_files=False)
     reference_image = File(argstr='--reference-image %s', mandatory=True,
                            desc='reference image space that you wish to warp INTO',
                            exists=True)

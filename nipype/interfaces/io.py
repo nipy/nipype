@@ -1231,12 +1231,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         xor=['assessor_id']
     )
 
-    share = traits.Bool(
+    share = traits.Bool(False,
         desc=('Option to share the subjects from the original project'
               'instead of creating new ones when possible - the created '
               'experiments are then shared backk to the original project'
               ),
-        value=False,
         usedefault=True,
         mandatory=False,
     )

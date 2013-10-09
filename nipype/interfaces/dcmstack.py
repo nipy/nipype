@@ -85,7 +85,7 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                   "exclude filters")
 
 class DcmStackOutputSpec(TraitedSpec):
-    out_file = traits.File(exists=True)
+    out_file = File(exists=True)
 
 class DcmStack(NiftiGeneratorBase):
     '''Create one Nifti file from a set of DICOM files. Can optionally embed
@@ -240,11 +240,8 @@ class LookupMeta(BaseInterface):
         return outputs
 
 class CopyMetaInputSpec(TraitedSpec):
-    src_file = traits.File(mandatory=True,
-                         exists=True,
-                        )
-    dest_file = traits.File(mandatory=True,
-                            exists=True)
+    src_file = File(mandatory=True, exists=True)
+    dest_file = File(mandatory=True, exists=True)
     include_classes = traits.List(desc="List of specific meta data "
                                   "classifications to include. If not "
                                   "specified include everything.")
@@ -252,7 +249,7 @@ class CopyMetaInputSpec(TraitedSpec):
                                   "classifications to exclude")
 
 class CopyMetaOutputSpec(TraitedSpec):
-    dest_file = traits.File(exists=True)
+    dest_file = File(exists=True)
 
 class CopyMeta(BaseInterface):
     '''Copy meta data from one Nifti file to another. Useful for preserving
@@ -305,8 +302,7 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
                            "non-existant dimension is used.")
 
 class MergeNiftiOutputSpec(TraitedSpec):
-    out_file = traits.File(exists=True,
-                           desc="Merged Nifti file")
+    out_file = File(exists=True, desc="Merged Nifti file")
 
 def make_key_func(meta_keys, index=None):
     def key_func(src_nii):
@@ -349,14 +345,12 @@ class MergeNifti(NiftiGeneratorBase):
         return outputs
 
 class SplitNiftiInputSpec(NiftiGeneratorBaseInputSpec):
-    in_file = traits.File(exists=True,
-                          mandatory=True,
-                          desc="Nifti file to split")
+    in_file = File(exists=True, mandatory=True, desc="Nifti file to split")
     split_dim = traits.Int(desc="Dimension to split along. If not "
                            "specified, the last dimension is used.")
 
 class SplitNiftiOutputSpec(TraitedSpec):
-    out_list = traits.List(exists=True,
+    out_list = traits.List(File(exists=True),
                            desc="Split Nifti files")
 
 class SplitNifti(NiftiGeneratorBase):

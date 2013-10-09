@@ -1,3 +1,14 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+""" Fixes meshes:
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
 from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
 				    traits, TraitedSpec, isdefined,
 				    File)
@@ -7,7 +18,7 @@ from nipype.utils.filemanip import split_filename
 class MeshFixInputSpec(CommandLineInputSpec):
     number_of_biggest_shells = traits.Int(argstr='--shells %d', desc="Only the N biggest shells are kept")
 
-    epsilon_angle = traits.Float(argstr='-a %f', min=0, max=2, desc="Epsilon angle in degrees (must be between 0 and 2)")
+    epsilon_angle = traits.Range(argstr='-a %f', low=0.0, high=2.0, desc="Epsilon angle in degrees (must be between 0 and 2)")
 
     join_overlapping_largest_components = traits.Bool(argstr='-j', xor=['join_closest_components'], desc='Join 2 biggest components if they overlap, remove the rest.')
 
@@ -23,9 +34,9 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     remove_handles = traits.Bool(argstr='--remove-handles', desc="Remove handles")
 
-    uniform_remeshing_steps = traits.Int(argstr='-u %d', req=['uniform_remeshing_vertices'], desc="Number of steps for uniform remeshing of the whole mesh")
+    uniform_remeshing_steps = traits.Int(argstr='-u %d', requires=['uniform_remeshing_vertices'], desc="Number of steps for uniform remeshing of the whole mesh")
 
-    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', req=['uniform_remeshing_steps'], desc="Constrains the number of vertices." \
+    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', requires=['uniform_remeshing_steps'], desc="Constrains the number of vertices." \
 	"Must be used with uniform_remeshing_steps")
 
     laplacian_smoothing_steps = traits.Int(argstr='--smooth %d', desc="The number of laplacian smoothing steps to apply")
@@ -42,12 +53,12 @@ class MeshFixInputSpec(CommandLineInputSpec):
     decouple_outout = traits.Int(argstr='--decouple-outout %d', desc="Treat 1st file as outer, 2nd file as inner component." \
 	"Resolve overlaps by moving outers triangles outwards. Constrain the min distance between the components > d.")
 
-    finetuning_inwards = traits.Bool(argstr='--fineTuneIn ', req=['finetuning_distance', 'finetuning_substeps'])
-    finetuning_outwards = traits.Bool(argstr='--fineTuneIn ', req=['finetuning_distance', 'finetuning_substeps'], xor=['finetuning_inwards'],
+    finetuning_inwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'])
+    finetuning_outwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'], xor=['finetuning_inwards'],
 	desc = 'Similar to finetuning_inwards, but ensures minimal distance in the other direction')
-    finetuning_distance = traits.Float(argstr='%f', req=['finetuning_substeps'], desc="Used to fine-tune the minimal distance between surfaces." \
+    finetuning_distance = traits.Float(argstr='%f', requires=['finetuning_substeps'], desc="Used to fine-tune the minimal distance between surfaces." \
 	"A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)")
-    finetuning_substeps = traits.Int(argstr='%d', req=['finetuning_distance'], desc="Used to fine-tune the minimal distance between surfaces." \
+    finetuning_substeps = traits.Int(argstr='%d', requires=['finetuning_distance'], desc="Used to fine-tune the minimal distance between surfaces." \
 	"A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)")
 
     dilation = traits.Int(argstr='--dilate %d', desc="Dilate the surface by d. d < 0 means shrinking.")
