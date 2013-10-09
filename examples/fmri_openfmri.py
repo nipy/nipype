@@ -12,6 +12,9 @@ This script demonstrates how to use nipype to analyze a data set.
     python fmri_openfmri.py --datasetdir ds107
 """
 
+from nipype import config
+config.enable_provenance()
+
 from glob import glob
 import os
 
@@ -84,7 +87,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
-                             task_id=None, work_dir=None):
+                             task_id=None, work_dir=None, output_dir=None):
     """Analyzes an open fmri dataset
 
     Parameters
@@ -379,21 +382,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelfit.inputs.inputspec.model_serial_correlations = True
     modelfit.inputs.inputspec.film_threshold = 1000
 
-    if work_dir is None:
-        work_dir = os.path.join(os.getcwd(), 'working')
-    wf.base_dir = work_dir
-    datasink.inputs.base_directory = os.path.join(work_dir, 'output')
-    wf.config['execution'] = dict(crashdump_dir=os.path.join(work_dir,
-                                                             'crashdumps'),
-                                  stop_on_first_crash=True)
-    #wf.run('MultiProc', plugin_args={'n_procs': 4})
-    eg = wf.run('Linear')
-    wf.export('openfmri.py')
-    wf.write_graph(dotfilename='hgraph.dot', graph2use='hierarchical')
-    wf.write_graph(dotfilename='egraph.dot', graph2use='exec')
-    wf.write_graph(dotfilename='fgraph.dot', graph2use='flat')
-    wf.write_graph(dotfilename='ograph.dot', graph2use='orig')
-    return eg
+    datasink.inputs.base_directory = output_dir
+    return wf
 
 if __name__ == '__main__':
     import argparse
@@ -403,10 +393,34 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--subject', default=None)
     parser.add_argument('-m', '--model', default=1)
     parser.add_argument('-t', '--task', default=1)
+    parser.add_argument("-o", "--output_dir", dest="sink",
+                        help="Output directory base")
+    parser.add_argument("-w", "--work_dir", dest="work_dir",
+                        help="Output directory base")
+    parser.add_argument("-p", "--plugin", dest="plugin",
+                        default='Linear',
+                        help="Plugin to use")
+    parser.add_argument("--plugin_args", dest="plugin_args",
+                        help="Plugin arguments")
     args = parser.parse_args()
-    eg = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
+    outdir = args.outdir
+    work_dir = os.getcwd()
+    if args.work_dir:
+        work_dir = os.path.abspath(args.work_dir)
+    if outdir:
+        outdir = os.path.abspath(outdir)
+    else:
+        outdir = os.path.join(work_dir, 'output')
+    outdir = os.path.join(outdir, 'model%02d' + int(args.model),
+                          'task%3d' % int(args.task))
+    wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                              subject=args.subject,
                              model_id=int(args.model),
-                             task_id=int(args.task))
-    from nipype.pipeline.utils import write_prov
-    g = write_prov(eg, format='turtle')
+                             task_id=int(args.task),
+                             work_dir=os.path.abspath(args.workdir),
+                             output_dir=outdir)
+    wf.base_dir = work_dir
+    if args.plugin_args:
+        wf.run(args.plugin, plugin_args=eval(args.plugin_args))
+    else:
+        wf.run(args.plugin)
