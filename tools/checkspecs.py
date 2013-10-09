@@ -177,9 +177,10 @@ class InterfaceChecker(object):
         allowed_keys = ['desc', 'genfile', 'xor', 'requires', 'desc',
                         'nohash', 'argstr', 'position', 'mandatory',
                         'copyfile', 'usedefault', 'sep', 'hash_files',
-                        'deprecated', 'default', 'min_ver', 'max_ver',
-                        'name_source', 'units']
-        in_built = ['type', 'copy', 'parent', 'instance_handler']
+                        'deprecated', 'new_name', 'min_ver', 'max_ver',
+                        'name_source', 'keep_extension', 'units']
+        in_built = ['type', 'copy', 'parent', 'instance_handler',
+                    'comparison_mode', 'array', 'default', 'editor']
         bad_specs = []
         for c in classes:
             __import__(uri)
@@ -198,16 +199,24 @@ class InterfaceChecker(object):
                 for key in trait.__dict__:
                     if key in in_built:
                         continue
-                    if key not in allowed_keys + classinst._additional_metadata:
-                        bad_specs.append([uri, c, traitname, key])
+                    parent_metadata = []
+                    if 'parent' in trait.__dict__:
+                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                    if key not in allowed_keys + classinst._additional_metadata\
+                        + parent_metadata:
+                        bad_specs.append([uri, c, 'Inputs', traitname, key])
             if not classinst.output_spec:
                 continue
             for traitname, trait in classinst.output_spec().traits(transient=None).items():
                 for key in trait.__dict__:
                     if key in in_built:
                         continue
-                    if key not in allowed_keys + classinst._additional_metadata:
-                        bad_specs.append([uri, c, traitname, key])
+                    parent_metadata = []
+                    if 'parent' in trait.__dict__:
+                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                    if key not in allowed_keys + classinst._additional_metadata\
+                            + parent_metadata:
+                        bad_specs.append([uri, c, 'Outputs', traitname, key])
         return bad_specs
 
 
