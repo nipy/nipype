@@ -228,8 +228,8 @@ def test_smooth():
                      reg_file = dict(argstr='--reg %s',mandatory=True,),
                      smoothed_file = dict(argstr='--o %s',),
                      subjects_dir = dict(),
-                     surface_fwhm = dict(xor=['num_iters'],mandatory=True,argstr='--fwhm %d',requires=['reg_file'],),
-                     vol_fwhm = dict(argstr='--vol-fwhm %d',),
+                     surface_fwhm = dict(xor=['num_iters'],mandatory=True,argstr='--fwhm %f',requires=['reg_file'],),
+                     vol_fwhm = dict(argstr='--vol-fwhm %f',),
                      )
     instance = freesurfer.Smooth()
     for key, metadata in input_map.items():

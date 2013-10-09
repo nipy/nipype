@@ -171,30 +171,30 @@ class BEDPOSTXInputSpec(FSLCommandInputSpec):
 
 
 class BEDPOSTXOutputSpec(TraitedSpec):
-    bpx_out_directory = Directory(exists=True, field='dir',
+    bpx_out_directory = Directory(exists=True,
                                   desc='path/name of directory with all ' +
                                        'bedpostx output files for this subject')
-    xfms_directory = Directory(exists=True, field='dir',
+    xfms_directory = Directory(exists=True,
                               desc='path/name of directory with the ' +
                                    'tranformation matrices')
-    merged_thsamples = traits.List(File, exists=True,
+    merged_thsamples = traits.List(File(exists=True),
                                    desc='a list of path/name of 4D volume ' +
                                         'with samples from the distribution ' +
                                         'on theta')
-    merged_phsamples = traits.List(File, exists=True,
+    merged_phsamples = traits.List(File(exists=True),
                                    desc='a list of path/name of file with '
                                         'samples from the distribution on phi')
-    merged_fsamples = traits.List(File, exists=True,
+    merged_fsamples = traits.List(File(exists=True),
                                    desc='a list of path/name of 4D volume ' +
                                         'with samples from the distribution ' +
                                         'on anisotropic volume fraction')
-    mean_thsamples = traits.List(File, exists=True,
+    mean_thsamples = traits.List(File(exists=True),
                                  desc='a list of path/name of 3D volume with mean of distribution on theta')
-    mean_phsamples = traits.List(File, exists=True,
+    mean_phsamples = traits.List(File(exists=True),
                                  desc='a list of path/name of 3D volume with mean of distribution on phi')
-    mean_fsamples = traits.List(File, exists=True,
+    mean_fsamples = traits.List(File(exists=True),
                                  desc='a list of path/name of 3D volume with mean of distribution on f anisotropy')
-    dyads = traits.List(File, exists=True,  desc='a list of path/name of mean of PDD distribution in vector form')
+    dyads = traits.List(File(exists=True),  desc='a list of path/name of mean of PDD distribution in vector form')
 
 
 class BEDPOSTX(FSLCommand):
@@ -368,8 +368,8 @@ class ProbTrackXOutputSpec(TraitedSpec):
     way_total = File(exists=True, desc='path/name of a text file containing a single number ' +
                     'corresponding to the total number of generated tracts that ' +
                     'have not been rejected by inclusion/exclusion mask criteria')
-    targets = traits.List(File, exists=True, desc='a list with all generated seeds_to_target files')
-    particle_files = traits.List(File, exists=True, desc='Files describing ' +
+    targets = traits.List(File(exists=True), desc='a list with all generated seeds_to_target files')
+    particle_files = traits.List(File(exists=True), desc='Files describing ' +
                                  'all of the tract samples. Generated only if ' +
                                  'verbose is set to 2')
 
@@ -566,7 +566,7 @@ class VecReg(FSLCommand):
 
 
 class ProjThreshInputSpec(FSLCommandInputSpec):
-    in_files = traits.List(File, exists=True, argstr='%s',
+    in_files = traits.List(File(exists=True), argstr='%s',
                            desc='a list of input volumes',
                            mandatory=True, position=0)
     threshold = traits.Int(argstr='%d', desc='threshold indicating minimum ' +
@@ -575,7 +575,7 @@ class ProjThreshInputSpec(FSLCommandInputSpec):
 
 
 class ProjThreshOuputSpec(TraitedSpec):
-    out_files = traits.List(File, exists=True, desc='path/name of output volume after thresholding')
+    out_files = traits.List(File(exists=True), desc='path/name of output volume after thresholding')
 
 
 class ProjThresh(FSLCommand):
@@ -610,9 +610,11 @@ class ProjThresh(FSLCommand):
 
 
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
-    in_files = traits.List(File, exists=True, argstr='%s', desc='a list of input volumes or a singleMatrixFile',
+    in_files = traits.List(File(exists=True), argstr='%s',
+                           desc='a list of input volumes or a singleMatrixFile',
                           position=0, mandatory=True)
-    out_file = File(argstr='%s', desc='file with the resulting segmentation', position=2, genfile=True, hash_files=False)
+    out_file = File(argstr='%s', desc='file with the resulting segmentation',
+                    position=2, genfile=True, hash_files=False)
 
 
 class FindTheBiggestOutputSpec(TraitedSpec):

@@ -699,6 +699,7 @@ class BaseInterface(Interface):
     """
     input_spec = BaseInterfaceInputSpec
     _version = None
+    _additional_metadata = []
 
     def __init__(self, **inputs):
         if not self.input_spec:

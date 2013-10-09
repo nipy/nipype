@@ -42,7 +42,7 @@ class PickAtlasInputSpec(BaseInterfaceInputSpec):
         traits.Int, traits.List(traits.Int),
         desc=("Labels of regions that will be included in the mask. Must be\
         compatible with the atlas used."),
-        compulsory=True
+        mandatory=True
     )
     hemi = traits.Enum(
         'both', 'left', 'right',
@@ -614,7 +614,7 @@ class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(
         exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
-    affine = traits.Array(exists=True, desc="affine transformation array")
+    affine = traits.Array(desc="affine transformation array")
 
 
 class CreateNiftiOutputSpec(TraitedSpec):
@@ -653,7 +653,7 @@ class CreateNifti(BaseInterface):
 class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
-    regress_poly = traits.Int(min=1, desc='Remove polynomials')
+    regress_poly = traits.Range(low=1, desc='Remove polynomials')
 
 
 class TSNROutputSpec(TraitedSpec):

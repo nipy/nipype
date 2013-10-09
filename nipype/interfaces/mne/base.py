@@ -26,7 +26,8 @@ class WatershedBEMInputSpec(FSTraitedSpec):
 
 class WatershedBEMOutputSpec(TraitedSpec):
     mesh_files = OutputMultiPath(File(exists=True),
-                           desc='Paths to the output meshes (brain, inner skull, outer skull, outer skin)')
+                           desc=('Paths to the output meshes (brain, inner '
+                                 'skull, outer skull, outer skin)'))
     brain_surface = File(exists=True, loc='bem/watershed',
                            desc='Brain surface (in Freesurfer format)')
     inner_skull_surface = File(exists=True, loc='bem/watershed',
@@ -37,8 +38,8 @@ class WatershedBEMOutputSpec(TraitedSpec):
                            desc='Outer skin surface (in Freesurfer format)')
     fif_file = File(exists=True, loc='bem', altkey='fif',
                            desc='"fif" format file for EEG processing in MNE')
-    cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws', altkey='COR',
-                           desc='"COR" format files')
+    cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws',
+                                altkey='COR', desc='"COR" format files')
 
 
 class WatershedBEM(FSCommand):
@@ -60,6 +61,7 @@ class WatershedBEM(FSCommand):
     _cmd = 'mne_watershed_bem'
     input_spec = WatershedBEMInputSpec
     output_spec = WatershedBEMOutputSpec
+    _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = '*'

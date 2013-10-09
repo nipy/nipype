@@ -26,7 +26,8 @@ warnings.filterwarnings('always', category=UserWarning)
 
 class To3DInputSpec(AFNICommandInputSpec):
     out_file = File("%s", desc='output image file name',
-                    argstr='-prefix %s', name_source=["in_folder", "infolder"], usedefault=True)
+                    argstr='-prefix %s', name_source=["in_folder", "infolder"],
+                    usedefault=True)
     in_xor = ["infolder", "in_folder"]
     in_folder = Directory(desc='folder with DICOM images to convert',
                           argstr='%s/*.dcm',
@@ -776,7 +777,7 @@ class BandpassInputSpec(AFNICommandInputSpec):
                    ++ You would only want to do this if the dataset
                       had been detrended already in some other program.""")
     tr = traits.Float(
-        arsgtr="-dt %f",
+        argstr="-dt %f",
         desc="set time step (TR) in sec [default=from dataset header]")
     nfft = traits.Int(
         argstr='-nfft %d',
@@ -1113,7 +1114,8 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    exists=True)
     out_file = File("%s_maskave.1D", desc='output image file name',
                     keep_extension=True,
-                    argstr="> %s", name_source="in_file", usedefault=True, position=-1)
+                    argstr="> %s", name_source="in_file", usedefault=True,
+                    position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
                 position=1,
@@ -1685,6 +1687,7 @@ class TCorrMap(AFNICommand):
     _cmd = '3dTcorrMap'
     input_spec = TCorrMapInputSpec
     output_spec = TCorrMapOutputSpec
+    _additional_metadata = ['suffix']
 
     def _format_arg(self, name, trait_spec, value):
         if name in self.inputs._thresh_opts:

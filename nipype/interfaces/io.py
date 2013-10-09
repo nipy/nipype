@@ -943,6 +943,7 @@ class FreeSurferSource(IOBase):
     input_spec = FSSourceInputSpec
     output_spec = FSSourceOutputSpec
     _always_run = True
+    _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = ''
@@ -1230,12 +1231,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         xor=['assessor_id']
     )
 
-    share = traits.Bool(
+    share = traits.Bool(False,
         desc=('Option to share the subjects from the original project'
               'instead of creating new ones when possible - the created '
               'experiments are then shared back to the original project'
               ),
-        value=False,
         usedefault=True,
         mandatory=False,
     )

@@ -209,6 +209,7 @@ class SPMCommand(BaseInterface):
     WARNING: Pseudo prototype class, meant to be subclassed
     """
     input_spec = SPMCommandInputSpec
+    _additional_metadata = ['field']
 
     _jobtype = 'basetype'
     _jobname = 'basename'
