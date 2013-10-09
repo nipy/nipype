@@ -235,7 +235,7 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
 
 
 
-def fieldmap_correction(name='fieldmap_correction'):
+def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     """ 
     Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
     artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
@@ -305,6 +305,9 @@ def fieldmap_correction(name='fieldmap_correction'):
  
     # Run fsl_prepare_fieldmap
     fslprep = pe.Node( fsl.PrepareFieldmap(), name='prepare_fieldmap' )
+
+    if nocheck:
+        fslprep.inputs.nocheck = True
 
     # Use FUGUE to generate the voxel shift map (vsm)
     vsm = pe.Node(fsl.FUGUE(save_shift=True), name='generate_vsm')
