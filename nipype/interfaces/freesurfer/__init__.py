@@ -4,7 +4,7 @@
 
 from .base import Info, FSCommand
 from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
-                         ReconAll, BBRegister, ApplyVolTransform, Smooth,
+                         ReconAll, BBRegister, ApplyVolTransform, Surface2VolTransform, Smooth,
                          DICOMConvert, RobustRegister, FitMSParams,
                          SynthesizeFLASH)
 from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
