@@ -46,10 +46,18 @@ class IdentityInterface(IOBase):
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
-            raise Exception('Identity Interface fields must be a non-empty list')
+            raise ValueError('Identity Interface fields must be a non-empty list')
+        # Each input must be in the fields.
+        for in_field in inputs:
+            if in_field not in fields:
+                raise ValueError('Identity Interface input is not in the fields: %s' % in_field)
         self._fields = fields
         self._mandatory_inputs = mandatory_inputs
         add_traits(self.inputs, fields)
+        # Adding any traits wipes out all input values set in superclass initialization,
+        # even it the trait is not in the add_traits argument. The work-around is to reset
+        # the values after adding the traits.
+        self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
