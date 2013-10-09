@@ -5,6 +5,7 @@
 
 from copy import deepcopy
 from glob import glob
+from collections import defaultdict
 import os
 import pwd
 import re
@@ -250,9 +251,35 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
+def expand_iterables(iterables, synchronize=False):
+    if synchronize:
+        return synchronize_iterables(iterables)
+    else:
+        return list(walk(iterables.items()))
+
+def count_iterables(iterables, synchronize=False):
+    """Return the number of iterable expansion nodes.
+
+    If synchronize is True, then the count is the maximum number
+    of iterables value lists.
+    Otherwise, the count is the product of the iterables value
+    list sizes.
+    """
+    if synchronize:
+        op = max
+    else:
+        op = lambda x,y: x*y
+    return reduce(op, [len(func()) for _, func in iterables.iteritems()])
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
+
+    Examples
+    --------
+    >>> from nipype.pipeline.utils import walk
+    >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
+    >>> list(walk(iterables))
+    [{'a': 1, 'b': 3}, {'a': 1, 'b': 4}, {'a': 2, 'b': 3}, {'a': 2, 'b': 4}]
     """
     # Entry point
     if level == 0:
@@ -274,6 +301,31 @@ def walk(children, level=0, path=None, usename=True):
         for child_paths in walk(tail, level + 1, path, usename):
             yield child_paths
 
+def synchronize_iterables(iterables):
+    """Synchronize the given iterables in item-wise order.
+
+    Return: the {field: value} dictionary list
+
+    Examples
+    --------
+    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
+    >>> synced = synchronize_iterables(iterables)
+    >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
+    True
+    >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3], c=lambda: [4, 5, 6])
+    >>> synced = synchronize_iterables(iterables)
+    >>> synced == [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
+    True
+    """
+    # Convert the (field, function) tuples into (field, value) lists
+    pair_lists = [[(field, value) for value in func()]
+        for field, func in iterables.iteritems()]
+    # A factory to make a dictionary from the mapped (field, value)
+    # key-value pairs. The filter removes any unmapped None items.
+    factory = lambda *pairs: dict(filter(None, pairs))
+    # Make a dictionary for each of the correlated (field, value) items
+    return map(factory, *pair_lists)
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -299,7 +351,8 @@ def get_levels(G):
     return levels
 
 
-def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
+def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
+                  prefix, synchronize=False):
     """Merges two graphs that share a subset of nodes.
 
     If the subgraph needs to be replicated for multiple iterables, the
@@ -349,11 +402,15 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables, prefix):
                                                supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
-    count = 0
-    for i, params in enumerate(walk(iterables.items())):
-        count += 1
+    iterable_params = expand_iterables(iterables, synchronize)
+    # If there are no iterable subgraphs, then return
+    if not iterable_params:
+        return supergraph
+    # Make an iterable subgraph node id template
+    count = len(iterable_params)
     template = '.%s%%0%dd' % (prefix, np.ceil(np.log10(count)))
-    for i, params in enumerate(walk(iterables.items())):
+    # Copy the iterable subgraphs
+    for i, params in enumerate(iterable_params):
         Gc = deepcopy(subgraph)
         ids = [n._hierarchy + n._id for n in Gc.nodes()]
         nodeidx = ids.index(nodeid)
@@ -401,82 +458,107 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
     else:
         data['connect'].extend(connection_info)
 
+def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
+    """Remove non-join identity nodes from the given graph
 
-def _remove_identity_nodes(graph, keep_iterables=False):
-    """Remove identity nodes from an execution graph
+    Iterable nodes are retained if and only if the keep_iterables
+    flag is set to True.
     """
-    identity_nodes = []
-    for node in nx.topological_sort(graph):
-        if isinstance(node._interface, IdentityInterface):
-            if keep_iterables and getattr(node, 'iterables') is not None:
-                pass
-            else:
-                identity_nodes.append(node)
-    if identity_nodes:
-        for node in identity_nodes:
-            portinputs = {}
-            portoutputs = {}
-            for u, _, d in graph.in_edges_iter(node, data=True):
-                for src, dest in d['connect']:
-                    portinputs[dest] = (u, src)
-            for _, v, d in graph.out_edges_iter(node, data=True):
-                for src, dest in d['connect']:
-                    if isinstance(src, tuple):
-                        srcport = src[0]
-                    else:
-                        srcport = src
-                    if srcport not in portoutputs:
-                        portoutputs[srcport] = []
-                    portoutputs[srcport].append((v, dest, src))
-            if not portoutputs:
-                pass
-            elif not portinputs:
-                for key, connections in portoutputs.items():
-                    for destnode, inport, src in connections:
-                        value = getattr(node.inputs, key)
-                        if isinstance(src, tuple):
-                            value = evaluate_connect_function(src[1], src[2],
-                                                              value)
-                        destnode.set_input(inport, value)
-            else:
-                for key, connections in portoutputs.items():
-                    for destnode, inport, src in connections:
-                        if key not in portinputs:
-                            value = getattr(node.inputs, key)
-                            if isinstance(src, tuple):
-                                value = evaluate_connect_function(src[1],
-                                                                  src[2],
-                                                                  value)
-                            destnode.set_input(inport, value)
-                        else:
-                            srcnode, srcport = portinputs[key]
-                            if isinstance(srcport, tuple) and isinstance(src,
-                                                                         tuple):
-                                raise ValueError(("Does not support two inline "
-                                                  "functions in series (\'%s\' "
-                                                  "and \'%s\'). Please use a "
-                                                  "Function node") %
-                                            (srcport[1].split("\\n")[0][6:-1],
-                                             src[1].split("\\n")[0][6:-1]))
-                            connect = graph.get_edge_data(srcnode,
-                                                          destnode,
-                                                       default={'connect': []})
-                            if isinstance(src, tuple):
-                                connect['connect'].append(((srcport,
-                                                            src[1],
-                                                            src[2]),
-                                                           inport))
-                            else:
-                                connect = {'connect': [(srcport, inport)]}
-                            old_connect = graph.get_edge_data(srcnode,
-                                                              destnode,
-                                                        default={'connect': []})
-                            old_connect['connect'] += connect['connect']
-                            graph.add_edges_from([(srcnode, destnode,
-                                                   old_connect)])
-            graph.remove_nodes_from([node])
+    # if keep_iterables is False, then include the iterable
+    # and join nodes in the nodes to delete
+    for node in _identity_nodes(graph, not keep_iterables):
+        if not hasattr(node, 'joinsource'):
+            _remove_identity_node(graph, node)
     return graph
 
+def _identity_nodes(graph, include_iterables):
+    """Return the IdentityInterface nodes in the graph
+
+    The nodes are in topological sort order. The iterable nodes
+    are included if and only if the include_iterables flag is set
+    to True.
+    """
+    return [node for node in nx.topological_sort(graph)
+        if isinstance(node._interface, IdentityInterface) and
+           (include_iterables or getattr(node, 'iterables') is None)]
+
+def _remove_identity_node(graph, node):
+    """Remove identity nodes from an execution graph
+    """
+    portinputs, portoutputs = _node_ports(graph, node)
+    for field, connections in portoutputs.items():
+        if portinputs:
+            _propagate_internal_output(graph, node, field, connections,
+                                            portinputs)
+        else:
+            _propagate_root_output(graph, node, field, connections)
+    graph.remove_nodes_from([node])
+    logger.debug("Removed the identity node %s from the graph." % node)
+
+def _node_ports(graph, node):
+    """Return the given node's input and output ports
+
+    The return value is the (inputs, outputs) dictionaries.
+    The inputs is a {destination field: (source node, source field)}
+    dictionary.
+    The outputs is a {source field: destination items} dictionary,
+    where each destination item is a
+    (destination node, destination field, source field) tuple.
+    """
+    portinputs = {}
+    portoutputs = {}
+    for u, _, d in graph.in_edges_iter(node, data=True):
+        for src, dest in d['connect']:
+            portinputs[dest] = (u, src)
+    for  _, v, d in graph.out_edges_iter(node, data=True):
+        for src, dest in d['connect']:
+            if isinstance(src, tuple):
+                srcport = src[0]
+            else:
+                srcport = src
+            if srcport not in portoutputs:
+                portoutputs[srcport] = []
+            portoutputs[srcport].append((v, dest, src))
+    return (portinputs, portoutputs)
+
+def _propagate_root_output(graph, node, field, connections):
+    """Propagates the given graph root node output port
+    field connections to the out-edge destination nodes."""
+    for destnode, inport, src in connections:
+        value = getattr(node.inputs, field)
+        if isinstance(src, tuple):
+            value = evaluate_connect_function(src[1], src[2],
+                                              value)
+        destnode.set_input(inport, value)
+
+def _propagate_internal_output(graph, node, field, connections, portinputs):
+    """Propagates the given graph internal node output port
+    field connections to the out-edge source node and in-edge
+    destination nodes."""
+    for destnode, inport, src in connections:
+        if field in portinputs:
+            srcnode, srcport = portinputs[field]
+            if isinstance(srcport, tuple) and isinstance(src, tuple):
+                raise ValueError(("Does not support two inline functions "
+                                  "in series (\'%s\'  and \'%s\'). "
+                                  "Please use a Function node") %
+                                  (srcport[1].split("\\n")[0][6:-1],
+                                   src[1].split("\\n")[0][6:-1]))
+            connect = graph.get_edge_data(srcnode, destnode,
+                                          default={'connect': []})
+            if isinstance(src, tuple):
+                connect['connect'].append(((srcport, src[1], src[2]), inport))
+            else:
+                connect = {'connect': [(srcport, inport)]}
+            old_connect = graph.get_edge_data(srcnode, destnode,
+                                              default={'connect': []})
+            old_connect['connect'] += connect['connect']
+            graph.add_edges_from([(srcnode, destnode, old_connect)])
+        else:
+            value = getattr(node.inputs, field)
+            if isinstance(src, tuple):
+                value = evaluate_connect_function(src[1], src[2], value)
+            destnode.set_input(inport, value)
 
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
@@ -487,55 +569,293 @@ def generate_expanded_graph(graph_in):
     parameterized as (a=1,b=3), (a=1,b=4), (a=2,b=3) and (a=2,b=4).
     """
     logger.debug("PE: expanding iterables")
-    graph_in = _remove_identity_nodes(graph_in, keep_iterables=True)
-    moreiterables = True
-    # convert list of tuples to dict fields
-    for node in graph_in.nodes():
-        if isinstance(node.iterables, tuple):
-            node.iterables = [node.iterables]
-    for node in graph_in.nodes():
-        if isinstance(node.iterables, list):
-            node.iterables = dict(map(lambda(x): (x[0],
-                                                  lambda: x[1]),
-                                      node.iterables))
+    graph_in = _remove_nonjoin_identity_nodes(graph_in, keep_iterables=True)
+    # standardize the iterables as {(field, function)} dictionaries
+    for node in graph_in.nodes_iter():
+        if node.iterables:
+            _standardize_iterables(node)
     allprefixes = list('abcdefghijklmnopqrstuvwxyz')
-    while moreiterables:
-        nodes = nx.topological_sort(graph_in)
-        nodes.reverse()
-        inodes = [node for node in nodes if node.iterables is not None]
-        if inodes:
-            node = inodes[0]
-            iterables = node.iterables.copy()
-            node.iterables = None
-            logger.debug('node: %s iterables: %s' % (node, iterables))
-            subnodes = [s for s in dfs_preorder(graph_in, node)]
-            prior_prefix = []
-            for s in subnodes:
-                prior_prefix.extend(re.findall('\.(.)I', s._id))
-            prior_prefix = sorted(prior_prefix)
-            if not len(prior_prefix):
-                iterable_prefix = 'a'
+
+    # the iterable nodes
+    inodes = _iterable_nodes(graph_in)
+    logger.debug("Detected iterable nodes %s" % inodes)
+    # while there is an iterable node, expand the iterable node's
+    # subgraphs
+    while inodes:
+        inode = inodes[0]
+        logger.debug("Expanding the iterable node %s..." % inode)
+
+        # the join successor nodes of the current iterable node
+        jnodes = [node for node in graph_in.nodes_iter()
+            if hasattr(node, 'joinsource')
+               and inode.name == node.joinsource
+               and nx.has_path(graph_in, inode, node)]
+
+        # excise the join in-edges. save the excised edges in a
+        # {jnode: {source name: (destination name, edge data)}}
+        # dictionary
+        jedge_dict = {}
+        for jnode in jnodes:
+            in_edges = jedge_dict[jnode] = {}
+            for src, dest, data in graph_in.in_edges_iter(jnode, True):
+                in_edges[src._id] = data
+                graph_in.remove_edge(src, dest)
+                logger.debug("Excised the %s -> %s join node in-edge."
+                             % (src, dest))
+
+        if inode.itersource:
+            # the itersource is a (node name, fields) tuple
+            src_name, src_fields = inode.itersource
+            # convert a single field to a list
+            if isinstance(src_fields, str):
+                src_fields = [src_fields]
+            # find the unique iterable source node in the graph
+            try:
+                iter_src = next((node for node in graph_in.nodes_iter()
+                                 if node.name == src_name
+                                 and nx.has_path(graph_in, node, inode)))
+            except StopIteration:
+                raise ValueError("The node %s itersource %s was not found"
+                                 " among the iterable predecessor nodes"
+                                 % (inode, src_name))
+            logger.debug("The node %s has iterable source node %s"
+                         % (inode, iter_src))
+            # look up the iterables for this particular itersource descendant
+            # using the iterable source ancestor values as a key
+            iterables = {}
+            # the source node iterables values
+            src_values = [getattr(iter_src.inputs, field) for field in src_fields]
+            # if there is one source field, then the key is the the source value,
+            # otherwise the key is the tuple of source values
+            if len(src_values) == 1:
+                key = src_values[0]
             else:
-                if prior_prefix[-1] == 'z':
-                    raise ValueError('Too many iterables in the workflow')
-                iterable_prefix = \
-                           allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
-            node._id += ('.' + iterable_prefix + 'I')
-            logger.debug(('subnodes:', subnodes))
-            subgraph = graph_in.subgraph(subnodes)
-            graph_in = _merge_graphs(graph_in, subnodes,
-                                     subgraph, node._hierarchy + node._id,
-                                     iterables, iterable_prefix)
-            #nx.write_dot(graph_in, '%s_post.dot'%node)
+                key = tuple(src_values)
+            # The itersource iterables is a {field: lookup} dictionary, where the
+            # lookup is a {source key: iteration list} dictionary. Look up the
+            # current iterable value using the predecessor itersource input values.
+            iter_dict = {field: lookup[key] for field, lookup in inode.iterables
+                         if key in lookup}
+            # convert the iterables to the standard {field: function} format
+            iter_items = map(lambda(field, value): (field, lambda: value),
+                             iter_dict.iteritems())
+            iterables = dict(iter_items)
         else:
-            moreiterables = False
+            iterables = inode.iterables.copy()
+        inode.iterables = None
+        logger.debug('node: %s iterables: %s' % (inode, iterables))
+
+        # collect the subnodes to expand
+        subnodes = [s for s in dfs_preorder(graph_in, inode)]
+        prior_prefix = []
+        for s in subnodes:
+            prior_prefix.extend(re.findall('\.(.)I', s._id))
+        prior_prefix = sorted(prior_prefix)
+        if not len(prior_prefix):
+            iterable_prefix = 'a'
+        else:
+            if prior_prefix[-1] == 'z':
+                raise ValueError('Too many iterables in the workflow')
+            iterable_prefix =\
+            allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+        logger.debug(('subnodes:', subnodes))
+
+        # append a suffix to the iterable node id
+        inode._id += ('.' + iterable_prefix + 'I')
+
+        # merge the iterated subgraphs
+        subgraph = graph_in.subgraph(subnodes)
+        graph_in = _merge_graphs(graph_in, subnodes,
+                                 subgraph, inode._hierarchy + inode._id,
+                                 iterables, iterable_prefix, inode.synchronize)
+
+        # reconnect the join nodes
+        for jnode in jnodes:
+            # the {node id: edge data} dictionary for edges connecting
+            # to the join node in the unexpanded graph
+            old_edge_dict = jedge_dict[jnode]
+            # the edge source node replicates
+            expansions = defaultdict(list)
+            for node in graph_in.nodes_iter():
+                for src_id, edge_data in old_edge_dict.iteritems():
+                    if node._id.startswith(src_id):
+                        expansions[src_id].append(node)
+            for in_id, in_nodes in expansions.iteritems():
+                logger.debug("The join node %s input %s was expanded"
+                         " to %d nodes." %(jnode, in_id, len(in_nodes)))
+            # preserve the node iteration order by sorting on the node id
+            for in_nodes in expansions.itervalues():
+                in_nodes.sort(key=lambda node: node._id)
+
+            # the number of join source replicates.
+            iter_cnt = count_iterables(iterables, inode.synchronize)
+            # make new join node fields to connect to each replicated
+            # join in-edge source node.
+            slot_dicts = [jnode._add_join_item_fields() for _ in range(iter_cnt)]
+            # for each join in-edge, connect every expanded source node
+            # which matches on the in-edge source name to the destination
+            # join node. Qualify each edge connect join field name by
+            # appending the next join slot index, e.g. the connect
+            # from two expanded nodes from field 'out_file' to join
+            # field 'in' are qualified as ('out_file', 'in1') and
+            # ('out_file', 'in2'), resp. This preserves connection port
+            # integrity.
+            for old_id, in_nodes in expansions.iteritems():
+                # reconnect each replication of the current join in-edge
+                # source
+                for in_idx, in_node in enumerate(in_nodes):
+                    olddata = old_edge_dict[old_id]
+                    newdata = deepcopy(olddata)
+                    # the (source, destination) field tuples
+                    connects = newdata['connect']
+                    # the join fields connected to the source
+                    join_fields = [field for _, field in connects
+                        if field in jnode.joinfield]
+                    # the {field: slot fields} maps assigned to the input
+                    # node, e.g. {'image': 'imageJ3', 'mask': 'maskJ3'}
+                    # for the third join source expansion replicate of a
+                    # join node with join fields image and mask
+                    slots = slot_dicts[in_idx]
+                    for con_idx, connect in enumerate(connects):
+                        src_field, dest_field = connect
+                        # qualify a join destination field name
+                        if dest_field in slots:
+                            slot_field = slots[dest_field]
+                            connects[con_idx] = (src_field, slot_field)
+                            logger.debug("Qualified the %s -> %s join field"
+                                         " %s as %s." %
+                                         (in_node, jnode, dest_field, slot_field))
+                    graph_in.add_edge(in_node, jnode, newdata)
+                    logger.debug("Connected the join node %s subgraph to the"
+                                 " expanded join point %s" % (jnode, in_node))
+
+        #nx.write_dot(graph_in, '%s_post.dot' % node)
+        # the remaining iterable nodes
+        inodes = _iterable_nodes(graph_in)
+
     for node in graph_in.nodes():
         if node.parameterization:
             node.parameterization = [param for _, param in
                                      sorted(node.parameterization)]
     logger.debug("PE: expanding iterables ... done")
-    return _remove_identity_nodes(graph_in)
 
+    return _remove_nonjoin_identity_nodes(graph_in)
+
+def _iterable_nodes(graph_in):
+    """Returns the iterable nodes in the given graph and their join
+    dependencies.
+
+    The nodes are ordered as follows:
+
+    - nodes without an itersource precede nodes with an itersource
+    - nodes without an itersource are sorted in reverse topological order
+    - nodes with an itersource are sorted in topological order
+
+    This order implies the following:
+
+    - every iterable node without an itersource is expanded before any
+      node with an itersource
+
+    - every iterable node without an itersource is expanded before any
+      of it's predecessor iterable nodes without an itersource
+
+    - every node with an itersource is expanded before any of it's
+      successor nodes with an itersource
+
+    Return the iterable nodes list
+    """
+    nodes = nx.topological_sort(graph_in)
+    inodes = [node for node in nodes if node.iterables is not None]
+    inodes_no_src = [node for node in inodes if not node.itersource]
+    inodes_src = [node for node in inodes if node.itersource]
+    inodes_no_src.reverse()
+    return inodes_no_src + inodes_src
+
+def _standardize_iterables(node):
+    """Converts the given iterables to a {field: function} dictionary,
+    if necessary, where the function returns a list."""
+    # trivial case
+    if not node.iterables:
+        return
+    iterables = node.iterables
+    # The candidate iterable fields
+    fields = set(node.inputs.copyable_trait_names())
+    # Flag indicating whether the iterables are in the alternate
+    # synchronize form and are not converted to a standard format.
+    synchronize = False
+    # A synchronize iterables node without an itersource can be in
+    # [fields, value tuples] format rather than
+    # [(field, value list), (field, value list), ...]
+    if node.synchronize:
+        if len(iterables) == 2:
+            first, last = iterables
+            if all((isinstance(item, str) and item in fields
+                    for item in first)):
+                iterables = _transpose_iterables(first, last)
+
+    # Convert a tuple to a list
+    if isinstance(iterables, tuple):
+        iterables = [iterables]
+    # Validate the standard [(field, values)] format
+    _validate_iterables(node, iterables, fields)
+    # Convert a list to a dictionary
+    if isinstance(iterables, list):
+        # Convert a values list to a function. This is a legacy
+        # Nipype requirement with unknown rationale.
+        if not node.itersource:
+            iter_items = map(lambda(field, value): (field, lambda: value),
+                             iterables)
+            iterables = dict(iter_items)
+    node.iterables = iterables
+
+def _validate_iterables(node, iterables, fields):
+    """
+    Raise TypeError if an iterables member is not iterable.
+
+    Raise ValueError if an iterables member is not a (field, values) pair.
+
+    Raise ValueError if an iterable field is not in the inputs.
+    """
+    # The iterables can be a {field: value list} dictionary.
+    if isinstance(iterables, dict):
+        iterables = iterables.items()
+    elif not isinstance(iterables, tuple) and not isinstance(iterables, list):
+        raise ValueError("The %s iterables type is not a list or a dictionary:"
+                         " %s" % (node.name, iterables.__class__))
+    for item in iterables:
+        try:
+            if len(item) != 2:
+                raise ValueError("The %s iterables is not a [(field, values)]"
+                                 " list" % node.name)
+        except TypeError, e:
+            raise TypeError("A %s iterables member is not iterable: %s"
+                            % (node.name, e))
+        field, _ = item
+        if field not in fields:
+            raise ValueError("The %s iterables field is unrecognized: %s"
+                             % (node.name, field))
+
+def _transpose_iterables(fields, values):
+    """
+    Converts the given fields and tuple values into a standardized
+    iterables value.
+
+    If the input values is a synchronize iterables dictionary, then
+    the result is a (field, {key: values}) list.
+
+    Otherwise, the result is a list of (field: value list) pairs.
+    """
+    if isinstance(values, dict):
+        transposed = {field: defaultdict(list) for field in fields}
+        for key, tuples in values.iteritems():
+            for kvals in tuples:
+                for idx, val in enumerate(kvals):
+                    if val != None:
+                        transposed[fields[idx]][key].append(val)
+        return transposed.items()
+    else:
+        return zip(fields, [filter(lambda(v): v != None, list(transpose))
+                            for transpose in zip(*values)])
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',

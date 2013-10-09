@@ -31,6 +31,7 @@
    select_files
    function_interface
    mapnode_and_iterables
+   joinnode_and_itersource
    model_specification
    saving_workflows
 
