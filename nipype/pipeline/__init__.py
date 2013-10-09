@@ -6,4 +6,3 @@ Package contains modules for generating pipelines using interfaces
 """
 __docformat__ = 'restructuredtext'
 from engine import Node, MapNode, JoinNode, Workflow
-from .utils import write_prov
