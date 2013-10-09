@@ -224,7 +224,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                        exists=True)
     output_image = traits.Str(argstr='--output %s',
                               desc=('output file name'), genfile=True,
-                              hash_file=False)
+                              hash_files=False)
     out_postfix = traits.Str("_trans", usedefault=True,
                              desc=('Postfix that is appended to all output '
                                    'files (default = _trans)'))

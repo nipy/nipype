@@ -251,7 +251,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     mixel_smooth = traits.Range(low=0.0, high=1.0,
                                 desc='spatial smoothness for mixeltype',
                                 argstr='-R %.2f')
-    iters_afterbias = traits.Range(low=1, hight=20,
+    iters_afterbias = traits.Range(low=1, high=20,
                                    desc='number of main-loop iterations '
                                    'after bias-field removal',
                                    argstr='-O %d')

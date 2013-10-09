@@ -366,7 +366,7 @@ class Level1Design(BaseInterface):
 
 
 class FEATInputSpec(FSLCommandInputSpec):
-    fsf_file = File(exist=True, mandatory=True, argstr="%s", position=0,
+    fsf_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                     desc="File specifying the feat design spec file")
 
 
@@ -408,7 +408,7 @@ class FEAT(FSLCommand):
 
 
 class FEATModelInputSpec(FSLCommandInputSpec):
-    fsf_file = File(exist=True, mandatory=True, argstr="%s", position=0,
+    fsf_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                     desc="File specifying the feat design spec file",
                     copyfile=False)
     ev_files = traits.List(File(exists=True),
@@ -483,14 +483,14 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     design_file = File(exists=True, position=-2,
                        argstr='%s',
                        desc='design matrix file')
-    threshold = traits.Float(1000, min=0, argstr='%f',
-                             position=-1,
+    threshold = traits.Range(default=1000., low=0.0, argstr='%f',
+                             position=-1, usedefault=True,
                              desc='threshold')
     smooth_autocorr = traits.Bool(argstr='-sa',
                                   desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='-ms %d',
                            desc="susan mask size")
-    brightness_threshold = traits.Int(min=0, argstr='-epith %d',
+    brightness_threshold = traits.Range(low=0, argstr='-epith %d',
                                       desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
@@ -601,10 +601,10 @@ threshold=10, results_dir='stats')
 
 class FEATRegisterInputSpec(BaseInterfaceInputSpec):
     feat_dirs = InputMultiPath(
-        Directory(), exist=True, desc="Lower level feat dirs",
+        Directory(exists=True), desc="Lower level feat dirs",
         mandatory=True)
     reg_image = File(
-        exist=True, desc="image to register to (will be treated as standard)",
+        exists=True, desc="image to register to (will be treated as standard)",
         mandatory=True)
     reg_dof = traits.Int(
         12, desc="registration degrees of freedom", usedefault=True)
@@ -689,31 +689,34 @@ class FLAMEOInputSpec(FSLCommandInputSpec):
 
 
 class FLAMEOOutputSpec(TraitedSpec):
-    pes = OutputMultiPath(exists=True, desc="Parameter estimates for each column of the design matrix" +
-                          "for each voxel")
-    res4d = OutputMultiPath(
-        exists=True, desc="Model fit residual mean-squared error for each time point")
-    copes = OutputMultiPath(
-        exists=True, desc="Contrast estimates for each contrast")
-    var_copes = OutputMultiPath(
-        exists=True, desc="Variance estimates for each contrast")
-    zstats = OutputMultiPath(exists=True, desc="z-stat file for each contrast")
-    tstats = OutputMultiPath(exists=True, desc="t-stat file for each contrast")
-    zfstats = OutputMultiPath(
-        exists=True, desc="z stat file for each f contrast")
-    fstats = OutputMultiPath(exists=True, desc="f-stat file for each contrast")
-    mrefvars = OutputMultiPath(
-        exists=True, desc="mean random effect variances for each contrast")
-    tdof = OutputMultiPath(
-        exists=True, desc="temporal dof file for each contrast")
-    weights = OutputMultiPath(
-        exists=True, desc="weights file for each contrast")
-    stats_dir = Directory(
-        exists=True, desc="directory storing model estimation output")
+    pes = OutputMultiPath(File(exists=True),
+                          desc=("Parameter estimates for each column of the "
+                                "design matrix for each voxel"))
+    res4d = OutputMultiPath(File(exists=True),
+                            desc=("Model fit residual mean-squared error for "
+                                  "each time point"))
+    copes = OutputMultiPath(File(exists=True),
+                            desc="Contrast estimates for each contrast")
+    var_copes = OutputMultiPath(File(exists=True),
+                                desc="Variance estimates for each contrast")
+    zstats = OutputMultiPath(File(exists=True),
+                             desc="z-stat file for each contrast")
+    tstats = OutputMultiPath(File(exists=True),
+                             desc="t-stat file for each contrast")
+    zfstats = OutputMultiPath(File(exists=True),
+                              desc="z stat file for each f contrast")
+    fstats = OutputMultiPath(File(exists=True),
+                             desc="f-stat file for each contrast")
+    mrefvars = OutputMultiPath(File(exists=True),
+                               desc=("mean random effect variances for each "
+                                     "contrast"))
+    tdof = OutputMultiPath(File(exists=True),
+                           desc="temporal dof file for each contrast")
+    weights = OutputMultiPath(File(exists=True),
+                              desc="weights file for each contrast")
+    stats_dir = Directory(File(exists=True),
+                          desc="directory storing model estimation output")
 
-
-# interface to fsl command line higher level model fit
-# satra: 2010-01-09
 
 class FLAMEO(FSLCommand):
     """Use FSL flameo command to perform higher level model fits
@@ -832,7 +835,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
     sigmasquareds = File(exists=True, argstr='', position=-2,
                          copyfile=False, mandatory=True,
                          desc='summary of residuals, See Woolrich, et. al., 2001')
-    contrast_num = traits.Int(min=1, argstr='-cope',
+    contrast_num = traits.Range(low=1, argstr='-cope',
                               desc='contrast number to start labeling copes from')
     suffix = traits.Str(argstr='-suffix %s',
                         desc='suffix to put on the end of the cope filename before the contrast number, default is nothing')
@@ -952,8 +955,8 @@ class ContrastMgr(FSLCommand):
 
 
 class L2ModelInputSpec(BaseInterfaceInputSpec):
-    num_copes = traits.Int(min=1, mandatory=True,
-                           desc='number of copes to be combined')
+    num_copes = traits.Range(low=1, mandatory=True,
+                             desc='number of copes to be combined')
 
 
 class L2ModelOutputSpec(TraitedSpec):
@@ -1191,7 +1194,7 @@ class SMMInputSpec(FSLCommandInputSpec):
     spatial_data_file = File(
         exists=True, position=0, argstr='--sdf="%s"', mandatory=True,
         desc="statistics spatial map", copyfile=False)
-    mask = File(exist=True, position=1, argstr='--mask="%s"', mandatory=True,
+    mask = File(exists=True, position=1, argstr='--mask="%s"', mandatory=True,
                 desc="mask file", copyfile=False)
     no_deactivation_class = traits.Bool(position=2, argstr="--zfstatmode",
                                         desc="enforces no deactivation class")
@@ -1716,30 +1719,37 @@ class GLMInputSpec(FSLCommandInputSpec):
 
 class GLMOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc=('file name of GLM parameters'
-                                       + ' (if generated)'))
-    out_cope = OutputMultiPath(exists=True, desc='output file name for COPEs' +
-                               ' (either as text file or image)')
-    out_z = OutputMultiPath(exists=True, desc='output file name for COPEs' +
-                            ' (either as text file or image)')
-    out_t = OutputMultiPath(exists=True, desc='output file name for t-stats' +
-                            ' (either as text file or image)')
-    out_p = OutputMultiPath(exists=True, desc='output file name for p-values' +
-                            '  of Z-stats (either as text file or image)')
-    out_f = OutputMultiPath(exists=True, desc='output file name for F-value' +
-                            ' of full model fit')
-    out_pf = OutputMultiPath(exists=True, desc='output file name for p-value' +
-                             ' for full model fit')
-    out_res = OutputMultiPath(exists=True, desc='output file name for' +
-                              ' residuals')
-    out_varcb = OutputMultiPath(exists=True, desc='output file name for' +
-                                ' variance of COPEs')
-    out_sigsq = OutputMultiPath(exists=True, desc='output file name for' +
-                                ' residual noise variance sigma-square')
-    out_data = OutputMultiPath(exists=True, desc='output file name for' +
-                               ' residual noise variance sigma-square')
-    out_vnscales = OutputMultiPath(exists=True, desc='output file name' +
-                                   ' for scaling factors for variance' +
-                                   ' normalisation')
+                                       ' (if generated)'))
+    out_cope = OutputMultiPath(File(exists=True),
+                               desc=('output file name for COPEs (either as '
+                                     'text file or image)'))
+    out_z = OutputMultiPath(File(exists=True),
+                            desc=('output file name for COPEs (either as text '
+                                  'file or image)'))
+    out_t = OutputMultiPath(File(exists=True),
+                            desc=('output file name for t-stats (either as '
+                                  'text file or image)'))
+    out_p = OutputMultiPath(File(exists=True),
+                            desc=('output file name for p-values of Z-stats '
+                                  '(either as text file or image)'))
+    out_f = OutputMultiPath(File(exists=True),
+                            desc=('output file name for F-value of full model '
+                                  'fit'))
+    out_pf = OutputMultiPath(File(exists=True),
+                             desc=('output file name for p-value for full '
+                                   'model fit'))
+    out_res = OutputMultiPath(File(exists=True),
+                              desc='output file name for residuals')
+    out_varcb = OutputMultiPath(File(exists=True),
+                                desc='output file name for variance of COPEs')
+    out_sigsq = OutputMultiPath(File(exists=True),
+                                desc=('output file name for residual noise '
+                                      'variance sigma-square'))
+    out_data = OutputMultiPath(File(exists=True),
+                               desc='output file for preprocessed data')
+    out_vnscales = OutputMultiPath(File(exists=True),
+                                   desc=('output file name for scaling factors '
+                                         'for variance normalisation'))
 
 
 class GLM(FSLCommand):

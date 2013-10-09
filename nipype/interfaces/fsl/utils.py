@@ -181,7 +181,7 @@ class ExtractROIInputSpec(FSLCommandInputSpec):
                  'y_size', 'z_min', 'z_size', 't_min', 't_size']
     crop_list = traits.List(traits.Tuple(traits.Int, traits.Int),
                             argstr="%s", position=2, xor=_crop_xor,
-                            help="list of two tuples specifying crop options")
+                            desc="list of two tuples specifying crop options")
 
 
 class ExtractROIOutputSpec(TraitedSpec):
@@ -1324,7 +1324,7 @@ class InvWarpInputSpec(FSLCommandInputSpec):
     inverse_warp = File(exists=True,
                         desc='Name of output file, containing warps that are the "reverse" of those in --warp. This will be a field-file (rather than a file of spline coefficients), and it will have any affine component included as part of the displacements.',
                         argstr='--out=%s',
-                        gen_file=True)
+                        genfile=True)
 
     absolute = traits.Bool(argstr='--abs',
                            desc='If set it indicates that the warps in --warp should be interpreted as absolute, provided that it is not created by fnirt (which always uses relative warps). If set it also indicates that the output --out should be absolute.',
