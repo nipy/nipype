@@ -59,8 +59,9 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare = PrepareFieldmap()
     >>> prepare.inputs.in_phase = "phase.nii"
     >>> prepare.inputs.in_magnitude = "magnitude.nii"
-    >>> prepare.cmdline
-    'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii /home/oesteban/workspace/nipype/nipype/testing/data/phase_fslprepared.nii.gz 2.460000'
+    >>> prepare.inputs.output_type = "NIFTI_GZ"
+    >>> prepare.cmdline #doctest: +ELLIPSIS
+    'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii .../phase_fslprepared.nii.gz 2.460000'
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -153,8 +154,8 @@ class TOPUP( FSLCommand ):
         >>> topup = TOPUP()
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
-        >>> topup.cmdline
-        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=/home/oesteban/workspace/nipype/nipype/testing/data/nipypetu'
+        >>> topup.cmdline #doctest: +ELLIPSIS
+        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=.../nipypetu'
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -259,8 +260,8 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
         >>> applytopup.inputs.in_topup = "my_topup_results"
-        >>> applytopup.cmdline
-        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=my_topup_results --out=/home/oesteban/workspace/nipype/nipype/testing/data/nipypeatu'
+        >>> applytopup.cmdline #doctest: +ELLIPSIS
+        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=my_topup_results --out=.../nipypeatu'
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -337,8 +338,8 @@ class Eddy( FSLCommand ):
         >>> eddy.inputs.in_acqp  = 'epi_acqp.txt'
         >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
         >>> eddy.inputs.in_bval  = 'bvals.scheme'
-        >>> eddy.cmdline
-        'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii --out=/home/oesteban/workspace/nipype/nipype/testing/data/eddy_corrected'
+        >>> eddy.cmdline #doctest: +ELLIPSIS
+        'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii --out=.../eddy_corrected'
         >>> res = eddy.run() # doctest: +SKIP
 
 
@@ -417,8 +418,9 @@ class EPIDeWarp(FSLCommand):
     >>> dewarp.inputs.epi_file = "functional.nii"
     >>> dewarp.inputs.mag_file = "magnitude.nii"
     >>> dewarp.inputs.dph_file = "phase.nii"
-    >>> dewarp.cmdline
-    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii --esp 0.58 --exfdw /home/oesteban/workspace/nipype/nipype/testing/data/exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 --tmpdir /home/oesteban/workspace/nipype/nipype/testing/data/temp --vsm /home/oesteban/workspace/nipype/nipype/testing/data/vsm.nii.gz'
+    >>> dewarp.inputs.output_type = "NIFTI_GZ"
+    >>> dewarp.cmdline #doctest: +ELLIPSIS
+    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 --tmpdir .../temp --vsm .../vsm.nii.gz'
     >>> res = dewarp.run() # doctest: +SKIP
 
     References
@@ -504,8 +506,9 @@ class SigLoss(FSLCommand):
     >>> sigloss = SigLoss()
     >>> sigloss.inputs.in_file = "phase.nii"
     >>> sigloss.inputs.echo_time = 0.03
-    >>> sigloss.cmdline
-    'sigloss --te=0.030000 -i phase.nii -s /home/oesteban/workspace/nipype/nipype/testing/data/phase_sigloss.nii.gz'
+    >>> sigloss.inputs.output_type = "NIFTI_GZ"
+    >>> sigloss.cmdline #doctest: +ELLIPSIS
+    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
     """
     input_spec = SigLossInputSpec
