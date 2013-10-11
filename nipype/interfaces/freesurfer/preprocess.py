@@ -877,6 +877,7 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     surf_file = File(exists=True, argstr='--surf %s',desc='surfname (default is white)')
     projfrac_file = File(exists=True, argstr='--projfrac %s',desc='thickness fraction')
     subjects_dir = traits.Str(argstr='--sd %s',desc='freesurfer subjects directory defaults to $SUBJECTS_DIR')
+    identity = traits.Str(argstr='--identity %s',desc='use identity (must supply subject name)')
 
 class Surface2VolTransformOutputSpec(TraitedSpec):
     transformed_file = File(exists=True, desc='Path to output file if used normally')
