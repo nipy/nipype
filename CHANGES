@@ -2,6 +2,7 @@ Next release
 ============
 
 * ENH: New interfaces: spm.ResliceToReference
+* ENH: Added support for Simple Linux Utility Resource Management (SLURM) 
 
 * FIX: Deals properly with 3d files in SPM Realign
 
