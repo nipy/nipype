@@ -5,6 +5,8 @@ import os
 import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
+import nipype.interfaces.freesurfer as fs    # freesurfer
+import nipype.interfaces.spm as spm
 
 from ...smri.freesurfer.utils import create_getmask_flow
 

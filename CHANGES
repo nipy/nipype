@@ -5,6 +5,7 @@ Next release
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
        spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
+* ENH: Added support for Simple Linux Utility Resource Management (SLURM) 
 
 * ENH: Several new interfaces related to Camino were added:
         - camino.SFPICOCalibData
