@@ -18,12 +18,15 @@ import warnings
 import nibabel as nb
 import numpy as np
 from scipy.spatial.distance import euclidean
+from nipype.utils.misc import package_check
 
 try:
-    from tvtk.api import tvtk
-except ImportError:
+    package_check('tvtk')
+except Exception, e:
     warnings.warn('tvtk or vtk not installed')
-    raise
+else:
+    from tvtk.api import tvtk
+
 
 from .. import logging
 
