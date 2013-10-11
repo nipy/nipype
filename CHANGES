@@ -3,7 +3,7 @@ Next release
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
-       spm.DicomImport
+       spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
 
 * ENH: Several new interfaces related to Camino were added:
