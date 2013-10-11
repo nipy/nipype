@@ -1,7 +1,7 @@
 Next release
 ============
 
-* ENH: New interfaces: spm.ResliceToReference
+* ENH: New interfaces: spm.ResliceToReference, P2PDistance
 
 * FIX: Deals properly with 3d files in SPM Realign
 
