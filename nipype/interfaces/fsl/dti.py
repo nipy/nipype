@@ -100,59 +100,6 @@ class DTIFit(FSLCommand):
         return outputs
 
 
-class EddyCorrectInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, desc='4D input file', argstr='%s', position=0, mandatory=True)
-    out_file = File(desc='4D output file', argstr='%s', position=1, genfile=True, hash_files=False)
-    ref_num = traits.Int(argstr='%d', position=2, desc='reference number', mandatory=True)
-
-
-class EddyCorrectOutputSpec(TraitedSpec):
-    eddy_corrected = File(exists=True, desc='path/name of 4D eddy corrected output file')
-
-
-class EddyCorrect(FSLCommand):
-    """  Deprecated! Please use create_eddy_correct_pipeline instead
-
-    Example
-    -------
-
-    >>> from nipype.interfaces import fsl
-    >>> eddyc = fsl.EddyCorrect(in_file='diffusion.nii', out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
-    'eddy_correct diffusion.nii diffusion_edc.nii 0'
-
-    """
-    _cmd = 'eddy_correct'
-    input_spec = EddyCorrectInputSpec
-    output_spec = EddyCorrectOutputSpec
-
-    def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_eddy_correct_pipeline instead", DeprecationWarning)
-        return super(EddyCorrect, self).__init__(**inputs)
-
-    def _run_interface(self, runtime):
-        if not isdefined(self.inputs.out_file):
-            self.inputs.out_file = self._gen_fname(self.inputs.in_file, suffix='_edc')
-        runtime = super(EddyCorrect, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['eddy_corrected'] = self.inputs.out_file
-        if not isdefined(outputs['eddy_corrected']):
-            outputs['eddy_corrected'] = self._gen_fname(self.inputs.in_file, suffix='_edc')
-        outputs['eddy_corrected'] = os.path.abspath(outputs['eddy_corrected'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._list_outputs()['eddy_corrected']
-        else:
-            return None
-
-
 class BEDPOSTXInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file', mandatory=True)
     mask = File(exists=True, desc='bet binary mask file', mandatory=True)
