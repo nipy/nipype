@@ -206,6 +206,9 @@ class InterfaceChecker(object):
                     if key not in allowed_keys + classinst._additional_metadata\
                         + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
+                    if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
+                        bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
+
             if not classinst.output_spec:
                 continue
             for traitname, trait in classinst.output_spec().traits(transient=None).items():
