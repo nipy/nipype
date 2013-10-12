@@ -779,12 +779,14 @@ class BaseInterface(Interface):
             return helpstr
 
         manhelpstr = ['', '\t[Mandatory]']
-        for name, spec in sorted(inputs.traits(mandatory=True).items()):
+        mandatory_items = inputs.traits(mandatory=True)
+        for name, spec in sorted(mandatory_items.items()):
             manhelpstr += cls._get_trait_desc(inputs, name, spec)
 
         opthelpstr = ['', '\t[Optional]']
-        for name, spec in sorted(inputs.traits(mandatory=None,
-                                               transient=None).items()):
+        for name, spec in sorted(inputs.traits(transient=None).items()):
+            if spec in mandatory_items:
+                continue
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
 
         if manhelpstr:

@@ -245,10 +245,10 @@ def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
     yield assert_equal, nib.BaseInterface._get_filecopy_info(), []
 
-
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
         goo = nib.traits.Int(desc='a random int', mandatory=True)
+        moo = nib.traits.Int(desc='a random int', mandatory=False)
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
         zoo = nib.File(desc='a file', copyfile=False)
         woo = nib.File(desc='a file', copyfile=True)
@@ -258,6 +258,7 @@ def test_BaseInterface():
         input_spec = InputSpec
 
     yield assert_equal, DerivedInterface.help(), None
+    yield assert_true, 'moo' in ''.join(DerivedInterface._inputs_help())
     yield assert_equal, DerivedInterface()._outputs(), None
     yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
     yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']
