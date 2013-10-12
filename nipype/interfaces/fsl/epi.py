@@ -36,7 +36,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
                         desc='Magnitude difference map, brain extracted')
     delta_TE = traits.Float(2.46, usedefault=True, mandatory=True, argstr='%f', position=-2,
                             desc='echo time difference of the fielmap sequence in ms. (usually 2.46ms in Siemens)')
-                            
+
     nocheck = traits.Bool(False, position=-1, argstr='--nocheck',usedefault=True,
                           desc='do not perform sanity checks for image size/range/dimensions')
     out_fieldmap = File( argstr='%s', position=5, desc='output name for prepared fieldmap' )
@@ -73,7 +73,7 @@ class PrepareFieldmap(FSLCommand):
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-        
+
         if not isdefined(self.inputs.out_fieldmap ):
             self.inputs.out_fieldmap = self._gen_fname(
                 self.inputs.in_phase, suffix='_fslprepared' )
@@ -99,7 +99,7 @@ class PrepareFieldmap(FSLCommand):
             out_nii = nib.funcs.concat_images((im, dumb_img))
             nib.save( out_nii, out_file )
 
-        return runtime        
+        return runtime
 
 
 
@@ -166,7 +166,7 @@ class TOPUP( FSLCommand ):
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-        
+
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './nipypetu' )
 
@@ -211,8 +211,8 @@ class TOPUP( FSLCommand ):
         return outputs
 
     def _generate_encfile( self, encdir, enctime=None ):
-        out_file = '%s_encfile.txt' % self.inputs.out_base 
-        direction = 1.0 
+        out_file = '%s_encfile.txt' % self.inputs.out_base
+        direction = 1.0
         if len(encdir)==2 and encdir[1]=='-':
             direction = -1.0
 
@@ -221,21 +221,21 @@ class TOPUP( FSLCommand ):
 
         file1 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
         file2 = [  float(val[0]==encdir[0]) * direction * -1.0  for val in [ 'x', 'y', 'z' ] ]
-        
+
         file1.append( enctime[0] )
         file2.append( enctime[1] )
-        
 
-        np.savetxt( out_file, np.array( [ file1, file2 ] ), fmt='%.2f' ) 
+
+        np.savetxt( out_file, np.array( [ file1, file2 ] ), fmt='%.2f' )
 
         return out_file
- 
+
 class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='name of 4D file with images', argstr='%s' )
     encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
     in_index = traits.List( argstr='%s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
     in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='--topup=%s' )
-    
+
     out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
     method = traits.Enum( ('jac','lsr'), argstr='-m=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
     interp = traits.Enum( ('trilinear','spline'), argstr='-n=%s', desc='interpolation method' )
@@ -286,7 +286,7 @@ class ApplyTOPUP( FSLCommand ):
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-        
+
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './nipypeatu' )
         return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
@@ -306,10 +306,10 @@ class EddyInputSpec( FSLCommandInputSpec ):
     in_acqp =  File(exists=True, mandatory=True, desc='File containing acquisition parameters', argstr='--acqp=%s' )
     in_bvec =  File(exists=True, mandatory=True, desc='File containing the b-vectors for all volumes in --imain', argstr='--bvecs=%s' )
     in_bval =  File(exists=True, mandatory=True, desc='File containing the b-values for all volumes in --imain', argstr='--bvals=%s' )
- 
+
     out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
 
-    
+
     session =  File(exists=True, desc='File containing session indices for all volumes in --imain', argstr='--session=%s' )
     in_topup =  File(exists=True, desc='Base name for output files from topup', argstr='--topup=%s' )
     flm =  traits.Enum( ('linear','quadratic','cubic'), desc='First level EC model', argstr='--flm=%s' )
@@ -351,7 +351,7 @@ class Eddy( FSLCommand ):
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-        
+
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './eddy_corrected' )
         return super(Eddy, self)._parse_inputs(skip=skip)
@@ -483,7 +483,7 @@ class SigLossInputSpec(FSLCommandInputSpec):
     out_file = File(argstr='-s %s',
                     desc='output signal loss estimate file',
                     genfile=True)
-    
+
     mask_file = File(exists=True,
                      argstr='-m %s',
                      desc='brain mask file')
@@ -522,12 +522,12 @@ class SigLoss(FSLCommand):
             outputs['out_file']=self._gen_fname(self.inputs.in_file,
                                                 suffix='_sigloss')
         return outputs
-    
+
     def _gen_filename(self, name):
         if name=='out_file':
             return self._list_outputs()['out_file']
         return None
-    
+
 class EddyCorrectInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='%s', position=0, mandatory=True)
     out_file = File(desc='4D output file', argstr='%s', position=1, genfile=True, hash_files=False)

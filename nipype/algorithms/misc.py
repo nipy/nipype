@@ -514,7 +514,7 @@ class FuzzyOverlap(BaseInterface):
         ncomp = len(self.inputs.in_ref)
         assert( ncomp == len(self.inputs.in_tst) )
         weights = np.ones( shape=ncomp )
-    
+
         img_ref = np.array( [ nb.load( fname ).get_data() for fname in self.inputs.in_ref ] )
         img_tst = np.array( [ nb.load( fname ).get_data() for fname in self.inputs.in_tst ] )
 
@@ -558,11 +558,11 @@ class FuzzyOverlap(BaseInterface):
         for w,ch in zip(weights,diff_im):
             ch[msk==0] = 0
             diff+= w* ch
-        
+
         nb.save(nb.Nifti1Image(diff, nb.load( self.inputs.in_ref[0]).get_affine(),
                 nb.load( self.inputs.in_ref[0]).get_header()), self.inputs.out_file )
 
- 
+
         return runtime
 
     def _list_outputs(self):

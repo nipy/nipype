@@ -12,46 +12,36 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 '''
 
 
-import os
-import os.path as op
-import warnings
-import nibabel as nb
 import numpy as np
 from scipy.spatial.distance import euclidean
-from nipype.utils.misc import package_check
-
-try:
-    package_check('tvtk')
-except Exception, e:
-    warnings.warn('tvtk or vtk not installed')
-else:
-    from tvtk.api import tvtk
-
 
 from .. import logging
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiPath, OutputMultiPath,
-                               BaseInterfaceInputSpec, isdefined)
-from ..utils.filemanip import fname_presuffix, split_filename
+                               BaseInterfaceInputSpec)
 iflogger = logging.getLogger('interface')
 
 
 class P2PDistanceInputSpec(BaseInterfaceInputSpec):
     surface1 = File(exists=True, mandatory=True,
-                    desc="Reference surface (vtk format) to which compute distance.")
+                    desc=("Reference surface (vtk format) to which compute "
+                          "distance."))
     surface2 = File(exists=True, mandatory=True,
-                    desc="Test surface (vtk format) from which compute distance.")
-    weighting = traits.Enum("none", "surface", desc='""none": no weighting is performed\
-                            "surface": edge distance is weighted by the corresponding surface area',usedefault=True)
+                    desc=("Test surface (vtk format) from which compute "
+                          "distance."))
+    weighting = traits.Enum("none", "surface", usedefault=True,
+                            desc=('"none": no weighting is performed, '
+                                  '"surface": edge distance is weighted by the '
+                                  'corresponding surface area'))
 
 class P2PDistanceOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
 
 class P2PDistance(BaseInterface):
-    """
-    Calculates a point-to-point (p2p) distance between two corresponding meshes or contours.
-    Therefore, a point-to-point correspondence between nodes is required
+    """Calculates a point-to-point (p2p) distance between two corresponding
+    VTK-readable meshes or contours.
+
+    A point-to-point correspondence between nodes is required
 
     Example
     -------
@@ -74,6 +64,7 @@ class P2PDistance(BaseInterface):
         return area
 
     def _run_interface(self, runtime):
+        from tvtk.api import tvtk
         r1 = tvtk.PolyDataReader( file_name=self.inputs.surface1 )
         r2 = tvtk.PolyDataReader( file_name=self.inputs.surface2 )
         vtk1 = r1.output
@@ -83,7 +74,7 @@ class P2PDistance(BaseInterface):
         assert( len(vtk1.points) == len(vtk2.points) )
         d = 0.0
         totalWeight = 0.0
-        
+
         points = vtk1.points
         faces = vtk1.polys.to_array().reshape(-1,4).astype(int)[:,1:]
 
@@ -110,4 +101,4 @@ class P2PDistance(BaseInterface):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
         return outputs
-    
+
