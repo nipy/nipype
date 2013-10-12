@@ -152,6 +152,12 @@ class RealignInputSpec(SPMCommandInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
+    in_files = OutputMultiPath(traits.Either(
+        traits.List(File(exists=True)),
+        File(exists=True)),
+        desc='Copies of all files passed to in_files. Headers will have been modified\
+              to align all images with the first, or optionally to first do that,\
+              extract a mean image, and re-align to that.')
     realigned_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                     File(exists=True)),
                                       desc='Realigned files')
@@ -202,6 +208,7 @@ class Realign(SPMCommand):
         resliced_mean = self.inputs.write_which[1] > 0
         if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
+            outputs['in_files'] = self.inputs.in_files
         for imgf in self.inputs.in_files:
             if isinstance(imgf, list):
                 tmp_imgf = imgf[0]
