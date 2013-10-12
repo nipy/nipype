@@ -1213,8 +1213,8 @@ class InvWarp(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'inverse_warp':
-            warp = self.inputs.warp
-            return '%s_inv%s' % os.path.splitext(warp)
+            _, warpname , _ = split_filename(self.inputs.warp)
+            return warpname + '_inv'
         else:
             raise NotImplementedError
 
