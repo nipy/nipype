@@ -20,18 +20,18 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     info_file = File(desc='The name to be given to the information output filename.',
-                     argstr='-infooutputfile %s', mandatory=True, genfile=True, 
+                     argstr='-infooutputfile %s', mandatory=True, genfile=True,
                      hash_files=False) # Genfile and hash_files?
     trace = traits.Float(argstr='-trace %f', units='NA',
-                         desc='Trace of the diffusion tensor(s) used in the test function.')       
-    onedtfarange = traits.List(traits.Float, argstr='-onedtfarange %s', 
+                         desc='Trace of the diffusion tensor(s) used in the test function.')
+    onedtfarange = traits.List(traits.Float, argstr='-onedtfarange %s',
                                minlen=2, maxlen=2, units='NA',
                                desc=('Minimum and maximum FA for the single tensor '
                                      'synthetic data.'))
     onedtfastep = traits.Float(argstr='-onedtfastep %f', units='NA',
                                desc=('FA step size controlling how many steps there are '
                                      'between the minimum and maximum FA settings.'))
-    twodtfarange = traits.List(traits.Float, argstr='-twodtfarange %s', 
+    twodtfarange = traits.List(traits.Float, argstr='-twodtfarange %s',
                                minlen=2, maxlen=2, units='NA',
                                desc=('Minimum and maximum FA for the two tensor '
                                      'synthetic data. FA is varied for both tensors '
@@ -40,7 +40,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
                                desc=('FA step size controlling how many steps there are '
                                     'between the minimum and maximum FA settings '
                                     'for the two tensor cases.'))
-    twodtanglerange = traits.List(traits.Float, argstr='-twodtanglerange %s', 
+    twodtanglerange = traits.List(traits.Float, argstr='-twodtanglerange %s',
                                   minlen=2, maxlen=2, units='NA',
                                   desc=('Minimum and maximum crossing angles '
                                         'between the two fibres.'))
@@ -55,7 +55,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
                                 desc=('Mixing parameter step size for the two tensor cases. '
                                       'Specify how many mixing parameter increments to use.'))
     seed = traits.Float(argstr='-seed %f', units='NA',
-                        desc='Specifies the random seed to use for noise generation in simulation trials.')                             
+                        desc='Specifies the random seed to use for noise generation in simulation trials.')
 
 class SFPICOCalibDataOutputSpec(TraitedSpec):
     PICOCalib = File(exists=True, desc='Calibration dataset')
@@ -64,37 +64,37 @@ class SFPICOCalibDataOutputSpec(TraitedSpec):
 class SFPICOCalibData(StdOutCommandLine):
     """
     Generates Spherical Function PICo Calibration Data.
-    
-    SFPICOCalibData creates synthetic data for use with SFLUTGen. The 
-    synthetic data is generated using a mixture of gaussians, in the 
-    same way datasynth generates data.  Each voxel of data models a 
+
+    SFPICOCalibData creates synthetic data for use with SFLUTGen. The
+    synthetic data is generated using a mixture of gaussians, in the
+    same way datasynth generates data.  Each voxel of data models a
     slightly different fibre configuration (varying FA and fibre-
-    crossings) and undergoes a random rotation to help account for any 
-    directional bias in the chosen acquisition scheme.  A second file, 
+    crossings) and undergoes a random rotation to help account for any
+    directional bias in the chosen acquisition scheme.  A second file,
     which stores information about the datafile, is generated along with
     the datafile.
 
     Example 1
     ---------
     To create a calibration dataset using the default settings
-    
+
     >>> import nipype.interfaces.camino as cam
     >>> calib = cam.SFPICOCalibData()
     >>> calib.inputs.scheme_file = 'A.scheme'
     >>> calib.inputs.snr = 20
     >>> calib.inputs.info_file = 'PICO_calib.info'
-    >>> calib.run()           # doctest: +SKIP 
-    
-    The default settings create a large dataset (249,231 voxels), of 
-    which 3401 voxels contain a single fibre population per voxel and 
-    the rest of the voxels contain two fibre-populations. The amount of 
-    data produced can be varied by specifying the ranges and steps of 
+    >>> calib.run()           # doctest: +SKIP
+
+    The default settings create a large dataset (249,231 voxels), of
+    which 3401 voxels contain a single fibre population per voxel and
+    the rest of the voxels contain two fibre-populations. The amount of
+    data produced can be varied by specifying the ranges and steps of
     the parameters for both the one and two fibre datasets used.
-    
+
     Example 2
     ---------
     To create a custom calibration dataset
-    
+
     >>> import nipype.interfaces.camino as cam
     >>> calib = cam.SFPICOCalibData()
     >>> calib.inputs.scheme_file = 'A.scheme'
@@ -106,11 +106,11 @@ class SFPICOCalibData(StdOutCommandLine):
     >>> calib.inputs.twodtanglestep = 0.03925
     >>> calib.inputs.twodtmixmax = 0.8
     >>> calib.inputs.twodtmixstep = 0.1
-    >>> calib.run()              # doctest: +SKIP 
-    
+    >>> calib.run()              # doctest: +SKIP
+
     This would provide 76,313 voxels of synthetic data, where 3401 voxels
-    simulate the one fibre cases and 72,912 voxels simulate the various 
-    two fibre cases. However, care should be taken to ensure that enough 
+    simulate the one fibre cases and 72,912 voxels simulate the various
+    two fibre cases. However, care should be taken to ensure that enough
     data is generated for calculating the LUT.      # doctest: +SKIP
     """
     _cmd = 'sfpicocalibdata'
@@ -140,7 +140,7 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
                                   '[outputstem]_oneFibreSurfaceCoeffs.Bdouble and '
                                   '[outputstem]_twoFibreSurfaceCoeffs.Bdouble'),
                             usedefault=True)
-    pdf = traits.Enum('bingham', 'watson', argstr='-pdf %s', 
+    pdf = traits.Enum('bingham', 'watson', argstr='-pdf %s',
                       desc=('Sets the distribution to use for the calibration. The default is the Bingham '
                             'distribution, which allows elliptical  probability  density  contours. '
                             'Currently supported options are: '
@@ -160,7 +160,7 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
                                       'number  per  bin to get things running in quick tests, but the sta- '
                                       'tistics will not be reliable and for serious applications, you need  '
                                       'to increase the size of the calibration data set until the error goes.'))
-    directmap = traits.Bool(argstr='-directmap', 
+    directmap = traits.Bool(argstr='-directmap',
                             desc=('Use direct mapping between the eigenvalues and the distribution parameters '
                                   'instead of the log of the eigenvalues.'))
     order = traits.Int(argstr='-order %d', units='NA',
@@ -170,21 +170,21 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
 class SFLUTGenOutputSpec(TraitedSpec):
     lut_one_fibre = File(exists=True, desc='PICo lut for one-fibre model')
     lut_two_fibres = File(exists=True, desc='PICo lut for two-fibre model')
-    
+
 class SFLUTGen(StdOutCommandLine):
     """
     Generates PICo lookup tables (LUT) for multi-fibre methods such as
     PASMRI and Q-Ball.
-    
+
     SFLUTGen creates the lookup tables for the generalized multi-fibre
     implementation of the PICo tractography algorithm.  The outputs of
     this utility are either surface or line coefficients up to a given
     order. The calibration can be performed for different distributions,
     such as the Bingham and Watson distributions.
-    
+
     This utility uses calibration data generated from SFPICOCalibData
     and peak information created by SFPeaks.
-    
+
     The utility outputs two lut's, *_oneFibreSurfaceCoeffs.Bdouble and
     *_twoFibreSurfaceCoeffs.Bdouble. Each of these files contains big-
     endian doubles as standard. The format of the output is:
@@ -194,9 +194,9 @@ class SFLUTGen(StdOutCommandLine):
       coefficient_2
       ...
       coefficient_N
-    In  the case of the Watson, there is a single set of coefficients, 
-    which are ordered: 
-      constant, x, x^2, ..., x^order. 
+    In  the case of the Watson, there is a single set of coefficients,
+    which are ordered:
+      constant, x, x^2, ..., x^order.
     In the case of the Bingham, there are two sets of coefficients (one
     for each surface), ordered so that:
       for j = 1 to order
@@ -207,12 +207,12 @@ class SFLUTGen(StdOutCommandLine):
     Example
     ---------
     To create a calibration dataset using the default settings
-    
+
     >>> import nipype.interfaces.camino as cam
     >>> lutgen = cam.SFLUTGen()
     >>> lutgen.inputs.in_file = 'QSH_peaks.Bdouble'
     >>> lutgen.inputs.info_file = 'PICO_calib.info'
-    >>> lutgen.run()        # doctest: +SKIP 
+    >>> lutgen.run()        # doctest: +SKIP
     """
     _cmd = 'sflutgen'
     input_spec=SFLUTGenInputSpec

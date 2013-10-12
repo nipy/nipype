@@ -38,9 +38,9 @@ class ConmatInputSpec(CommandLineInputSpec):
                                  'matrices will be ordered by label intensity.'))
 
     tract_stat = traits.Enum("mean", "min", "max", "sum", "median", "var", argstr='-tractstat %s', units='NA',
-                             desc=("Tract statistic to use. See TractStats for other options."), 
+                             desc=("Tract statistic to use. See TractStats for other options."),
                              requires=['scalar_file'])
-                
+
     output_root = File(argstr='-outputroot %s', genfile=True,
         desc=('filename root prepended onto the names of the output files. '
               'The extension will be determined from the input.'))
@@ -53,7 +53,7 @@ class Conmat(CommandLine):
     """
     Creates  a  connectivity  matrix  using a 3D label image (the target image)
     and a set of streamlines. The connectivity matrix records how many stream-
-    lines connect each pair of targets, and optionally the mean tractwise 
+    lines connect each pair of targets, and optionally the mean tractwise
     statistic (eg tract-averaged FA, or length).
 
     The output is a comma separated variable file or files. The first row of
@@ -74,18 +74,18 @@ class Conmat(CommandLine):
          0,1,0
 
     There  are  zero  connections  to A because in streamline 1, the connection
-    to B is closer to the seed than the connection to A, and in streamline 2 
+    to B is closer to the seed than the connection to A, and in streamline 2
     there is no region reached in the other direction.
 
     The connected target regions can have the same label, as long as the seed
     point is outside of the labeled region and both ends connect to the same
     label (which may  be in different locations). Therefore this is allowed:
          A------SEED-------A
-         
-    Such fibers will add to the diagonal elements of the matrix. To remove 
+
+    Such fibers will add to the diagonal elements of the matrix. To remove
     these entries, run procstreamlines with -endpointfile before running conmat.
 
-    If the seed point is inside a labled region, it counts as one end of the 
+    If the seed point is inside a labled region, it counts as one end of the
     connection.  So
          ----[SEED inside A]---------B
     counts as a connection between A and B, while
@@ -97,23 +97,23 @@ class Conmat(CommandLine):
     Example 1
     ---------
     To create a standard connectivity matrix based on streamline counts.
-    
+
     >>> import nipype.interfaces.camino as cam
     >>> conmat = cam.Conmat()
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
-    >>> conmat.run()        # doctest: +SKIP 
-    
+    >>> conmat.run()        # doctest: +SKIP
+
     Example 1
     ---------
     To create a standard connectivity matrix and mean tractwise FA statistics.
-    
+
     >>> import nipype.interfaces.camino as cam
     >>> conmat = cam.Conmat()
     >>> conmat.inputs.in_file = 'tracts.Bdouble'
     >>> conmat.inputs.target_file = 'atlas.nii.gz'
     >>> conmat.inputs.scalar_file = 'fa.nii.gz'
-    >>> conmat.run()        # doctest: +SKIP 
+    >>> conmat.run()        # doctest: +SKIP
     """
     _cmd = 'conmat'
     input_spec=ConmatInputSpec
@@ -128,16 +128,16 @@ class Conmat(CommandLine):
 
     def _gen_outfilename(self):
         return self._gen_outputroot()
-        
+
     def _gen_outputroot(self):
         output_root = self.inputs.output_root
         if not isdefined(output_root):
             output_root = self._gen_filename('output_root')
         return output_root
-        
+
     def _gen_filename(self, name):
         if name == 'output_root':
             _, filename , _ = split_filename(self.inputs.in_file)
             filename = filename + "_"
         return filename
-            
+

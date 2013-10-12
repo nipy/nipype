@@ -1,6 +1,6 @@
 from dti import create_bedpostx_pipeline
 
-from epi import (fieldmap_correction, topup_correction, 
+from epi import (fieldmap_correction, topup_correction,
                  create_eddy_correct_pipeline,
                  create_epidewarp_pipeline, create_dmri_preprocessing)
 
