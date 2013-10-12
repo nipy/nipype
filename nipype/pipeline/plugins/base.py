@@ -607,17 +607,17 @@ class GraphPluginBase(PluginBase):
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
-        
-       
+
+
         logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                               '..'))))
         logger.debug(os.listdir(node_dir))
         glob(os.path.join(node_dir, 'result_*.pklz')).pop()
-                
+
         results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
         result_data = loadpkl(results_file)
         result_out = dict(result=None, traceback=None)
-        
+
         if isinstance(result_data, dict):
             result_out['result'] = result_data['result']
             result_out['traceback'] = result_data['traceback']
@@ -627,6 +627,6 @@ class GraphPluginBase(PluginBase):
                 os.rename(results_file, crash_file)
         else:
             result_out['result'] = result_data
-            
+
         return result_out
 

@@ -1849,7 +1849,7 @@ class AFNItoNIFTI(AFNICommand):
 
     see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
     this can also convert 2D or 1D data, which you can numpy.squeeze() to remove extra dimensions
-    
+
     Examples
     ========
 

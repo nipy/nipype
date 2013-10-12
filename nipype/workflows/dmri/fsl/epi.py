@@ -8,7 +8,7 @@ import os
 def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
     """Creates a workflow that chains the necessary pipelines to
     correct for motion, eddy currents, and, if selected, susceptibility
-    artifacts in EPI dMRI sequences. 
+    artifacts in EPI dMRI sequences.
 
     .. warning::
 
@@ -56,7 +56,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
     Optional arguments::
         use_fieldmap - True if there are fieldmap files that should be used (default True)
         fieldmap_registration - True if registration to fieldmap should be performed (default False)
-        
+
 
     """
 
@@ -74,11 +74,11 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
 
     motion = create_motion_correct_pipeline()
     eddy = create_eddy_correct_pipeline()
-    
+
     if use_fieldmap: # we have a fieldmap, so lets use it (yay!)
         susceptibility = create_epidewarp_pipeline(
                          fieldmap_registration=fieldmap_registration)
-        
+
         pipeline.connect([
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
@@ -102,7 +102,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
                                               ('ref_num', 'inputnode.ref_num')]),
-                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]), 
+                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]),
                          (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
                          (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
                          (eddy, outputnode, [('outputnode.eddy_corrected', 'dmri_corrected')])
@@ -236,20 +236,20 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
 
 
 def fieldmap_correction(name='fieldmap_correction', nocheck=False):
-    """ 
+    """
     Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
     artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
     to EPI data, and a brain mask is required.
 
     Replaces the former workflow, still available as create_epidewarp_pipeline().  The difference
     with respect the epidewarp pipeline is that now the workflow uses the new fsl_prepare_fieldmap
-    available as of FSL 5.0. 
+    available as of FSL 5.0.
 
 
 
     Example
     -------
- 
+
     >>> nipype_epicorrect = fieldmap_correction('nipype_epidewarp')
     >>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_mask = 'brainmask.nii'
@@ -259,29 +259,29 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     >>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
     >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
     >>> nipype_epicorrect.run() # doctest: +SKIP
- 
+
     Inputs::
- 
+
         inputnode.in_file - The volume acquired with EPI sequence
         inputnode.in_mask - A brain mask
         inputnode.fieldmap_pha - The phase difference map from the fieldmapping, registered to in_file
-        inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan) 
+        inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan)
                                  from the fieldmapping, registered to in_file
         inputnode.te_diff - Time difference in msec. between TE in ms of the fieldmapping (usually a GRE sequence).
         inputnode.epi_echospacing - The effective echo spacing (aka dwell time) in msec. of the EPI sequence. If
-                                    EPI was acquired with parallel imaging, then the effective echo spacing is 
+                                    EPI was acquired with parallel imaging, then the effective echo spacing is
                                     eff_es = es / acc_factor.
         inputnode.encoding_direction - The phase encoding direction in EPI acquisition (default y)
         inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
- 
- 
+
+
     Outputs::
- 
+
         outputnode.epi_corrected
         outputnode.out_vsm
- 
+
     """
- 
+
     inputnode = pe.Node(niu.IdentityInterface(
                         fields=['in_file',
                         'in_mask',
@@ -293,16 +293,16 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                         'encoding_direction'
                         ]), name='inputnode'
                        )
- 
+
     pipeline = pe.Workflow(name=name)
- 
+
     # Keep first frame from magnitude
     select_mag = pe.Node(fsl.utils.ExtractROI(
         t_size=1, t_min=0), name='select_magnitude')
 
     # Mask magnitude (it is required by PreparedFieldMap)
     mask_mag = pe.Node( fsl.maths.ApplyMask(), name='mask_magnitude' )
- 
+
     # Run fsl_prepare_fieldmap
     fslprep = pe.Node( fsl.PrepareFieldmap(), name='prepare_fieldmap' )
 
@@ -315,7 +315,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     # VSM demean is not anymore present in the epi_reg script
     #vsm_mean = pe.Node(niu.Function(input_names=['in_file', 'mask_file', 'in_unwarped'], output_names=[
     #                   'out_file'], function=_vsm_remove_mean), name='vsm_mean_shift')
- 
+
     # fugue_epi
     dwi_split = pe.Node(niu.Function(input_names=[
                         'in_file'], output_names=['out_files'], function=_split_dwi), name='dwi_split')
@@ -326,11 +326,11 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     # Merge back all volumes
     dwi_merge = pe.Node(fsl.utils.Merge(
         dimension='t'), name='dwi_merge')
- 
+
     outputnode = pe.Node(
         niu.IdentityInterface(fields=['epi_corrected','out_vsm']),
                         name='outputnode')
- 
+
     pipeline.connect([
                      (inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
                     ,(inputnode,       fslprep, [('fieldmap_pha', 'in_phase'),('te_diff', 'delta_TE') ])
@@ -341,7 +341,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file'),
                                                  ('encoding_direction','unwarp_direction'),
                                                  (('te_diff', _ms2sec), 'asym_se_time'),
-                                                 ('vsm_sigma', 'smooth2d'), 
+                                                 ('vsm_sigma', 'smooth2d'),
                                                  (('epi_echospacing', _ms2sec), 'dwell_time')])
                     ,(mask_mag,            vsm, [('out_file', 'mask_file')])
                     ,(inputnode,     dwi_split, [('in_file', 'in_file')])
@@ -354,37 +354,37 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                     ,(vsm,          outputnode, [('shift_out_file','out_vsm') ])
                     ])
 
- 
+
     return pipeline
 
 
 def topup_correction( name='topup_correction' ):
-    """ 
+    """
         Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
         been acquired
 
 
     Example
     -------
- 
+
     >>> nipype_epicorrect = topup_correction('nipype_topup')
     >>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
     >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
     >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
     >>> nipype_epicorrect.run() # doctest: +SKIP
- 
+
     Inputs::
-        inputnode.in_file_dir - EPI volume acquired in 'forward' phase encoding 
+        inputnode.in_file_dir - EPI volume acquired in 'forward' phase encoding
         inputnode.in_file_rev - EPI volume acquired in 'reversed' phase encoding
         inputnode.encoding_direction - Direction encoding of in_file_dir
         inputnode.ref_num - Identifier of the reference volumes (usually B0 volume)
- 
+
     Outputs::
- 
+
         outputnode.epi_corrected
- 
- 
+
+
     """
     pipeline = pe.Workflow(name=name)
 
@@ -405,13 +405,13 @@ def topup_correction( name='topup_correction' ):
                                   'epi_corrected'
                           ]), name='outputnode'
                         )
-    
+
     b0_dir = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_1' )
     b0_rev = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_2' )
     combin = pe.Node( niu.Merge(2), name='merge' )
     combin2 = pe.Node( niu.Merge(2), name='merge2' )
     merged = pe.Node( fsl.Merge( dimension='t' ), name='b0_comb' )
-    
+
     topup = pe.Node( fsl.TOPUP(), name='topup' )
     applytopup = pe.Node( fsl.ApplyTOPUP(in_index=[1,2] ), name='applytopup' )
 
