@@ -26,7 +26,7 @@ except Exception, e:
 else:
     import dipy.reconst.dti as dti
     from dipy.core.gradients import GradientTable
-
+    
 
 class TensorModeInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
@@ -44,6 +44,7 @@ class TensorModeOutputSpec(TraitedSpec):
 
 
 class TensorMode(BaseInterface):
+
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and
@@ -69,31 +70,31 @@ class TensorMode(BaseInterface):
     output_spec = TensorModeOutputSpec
 
     def _run_interface(self, runtime):
-        ## Load the 4D image files
+        # Load the 4D image files
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         affine = img.get_affine()
 
-        ## Load the gradient strengths and directions
+        # Load the gradient strengths and directions
         bvals = np.loadtxt(self.inputs.bvals)
         gradients = np.loadtxt(self.inputs.bvecs).T
 
-        ## Place in Dipy's preferred format
+        # Place in Dipy's preferred format
         gtab = GradientTable(gradients)
         gtab.bvals = bvals
 
-        ## Mask the data so that tensors are not fit for
-        ## unnecessary voxels
+        # Mask the data so that tensors are not fit for
+        # unnecessary voxels
         mask = data[..., 0] > 50
 
-        ## Fit the tensors to the data
+        # Fit the tensors to the data
         tenmodel = dti.TensorModel(gtab)
         tenfit = tenmodel.fit(data, mask)
 
-        ## Calculate the mode of each voxel's tensor
+        # Calculate the mode of each voxel's tensor
         mode_data = tenfit.mode
 
-        ## Write as a 3D Nifti image with the original affine
+        # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(mode_data, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
@@ -114,3 +115,112 @@ class TensorMode(BaseInterface):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_mode.nii'
+
+
+class EstimateConductivityInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='The input 4D diffusion-weighted image file')
+    bvecs = File(exists=True, mandatory=True,
+                 desc='The input b-vector text file')
+    bvals = File(exists=True, mandatory=True,
+                 desc='The input b-value text file')
+    out_filename = File(
+        genfile=True, desc='The output filename for the conductivity tensor image')
+
+
+class EstimateConductivityOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class EstimateConductivity(BaseInterface):
+
+    """
+    Estimates electrical conductivity from a set of diffusion-weighted
+    images, as well as their associated b-values and b-vectors. Fits 
+    the diffusion tensors and calculates conductivity with Dipy.
+
+    Tensors are assumed to be in the white matter of a human brain and 
+    a default conductivity value and eigenvalue scaling factor is included.
+    Options are provided for correcting implausibly high conductivity values
+    to a maximum value (0.4 [S/m]). Direct mapping of the tensor [1]_.,
+    as well as volume-normalized mapping [2]_., are supported. Adapted
+    from the SimNibs package [3]_.
+
+    References
+    ----------
+
+    .. [1] Tuch, D. S., Wedeen, V. J., Dale, A. M., George, J. S., and
+        Belliveau, J. W., "Conductivity tensor mapping of the human
+        brain using diffusion tensor MRI" in Proceedings of the National
+        Academy of Sciences 98, 11697–11701, 2001
+
+    .. [2] Güllmar, D., Haueisen, J., and Reichenbach, J. R., "Influence of
+        anisotropic electrical conductivity in white matter tissue on
+        the EEG/MEG forward and inverse solution. A high-resolution
+        whole head simulation study", NeuroImage 51, 145–163, 2010.
+
+    .. [3] Windhoff, M., Opitz, A., and Thielscher A., "Electric field
+        calculations in brain stimulation based on finite elements:
+        An optimized processing pipeline for the generation and usage of
+        accurate individual head models", Human Brain Mapping, 2011.
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.dipy as dipy
+    >>> conduct = dipy.EstimateConductivity()
+    >>> conduct.inputs.in_file = 'diffusion.nii'
+    >>> conduct.inputs.bvecs = 'bvecs'
+    >>> conduct.inputs.bvals = 'bvals'
+    >>> conduct.run()                                   # doctest: +SKIP
+    """
+    input_spec = EstimateConductivityInputSpec
+    output_spec = EstimateConductivityOutputSpec
+
+    def _run_interface(self, runtime):
+        # Load the 4D image files
+        img = nb.load(self.inputs.in_file)
+        data = img.get_data()
+        affine = img.get_affine()
+
+        # Load the gradient strengths and directions
+        bvals = np.loadtxt(self.inputs.bvals)
+        gradients = np.loadtxt(self.inputs.bvecs).T
+
+        # Place in Dipy's preferred format
+        gtab = GradientTable(gradients)
+        gtab.bvals = bvals
+
+        # Mask the data so that tensors are not fit for
+        # unnecessary voxels
+        mask = data[..., 0] > 50
+
+        # Fit the tensors to the data
+        tenmodel = dti.TensorModel(gtab)
+        tenfit = tenmodel.fit(data, mask)
+
+        # Calculate the mode of each voxel's tensor
+        conductivity_data = tenfit.conductivity
+
+        # Write as a 4D Nifti tensor image with the original affine
+        img = nb.Nifti1Image(mode_conductivity, affine)
+        out_file = op.abspath(self._gen_outfilename())
+        nb.save(img, out_file)
+        iflogger.info('Conductivity tensor image saved as {i}'.format(i=out_file))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_filename':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        return name + '_conductivity.nii'
