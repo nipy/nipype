@@ -87,7 +87,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
-                             task_id=None, work_dir=None, output_dir=None):
+                             task_id=None, output_dir=None):
     """Analyzes an open fmri dataset
 
     Parameters
@@ -393,7 +393,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--subject', default=None)
     parser.add_argument('-m', '--model', default=1)
     parser.add_argument('-t', '--task', default=1)
-    parser.add_argument("-o", "--output_dir", dest="sink",
+    parser.add_argument("-o", "--output_dir", dest="outdir",
                         help="Output directory base")
     parser.add_argument("-w", "--work_dir", dest="work_dir",
                         help="Output directory base")
@@ -411,13 +411,12 @@ if __name__ == '__main__':
         outdir = os.path.abspath(outdir)
     else:
         outdir = os.path.join(work_dir, 'output')
-    outdir = os.path.join(outdir, 'model%02d' + int(args.model),
-                          'task%3d' % int(args.task))
+    outdir = os.path.join(outdir, 'model%02d' % int(args.model),
+                          'task%03d' % int(args.task))
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                              subject=args.subject,
                              model_id=int(args.model),
                              task_id=int(args.task),
-                             work_dir=os.path.abspath(args.workdir),
                              output_dir=outdir)
     wf.base_dir = work_dir
     if args.plugin_args:
