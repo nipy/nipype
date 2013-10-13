@@ -7,7 +7,7 @@
 """
 
 from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, File)
+    TraitedSpec, BaseInterface, File, traits)
 from nipype.utils.filemanip import split_filename
 import os.path as op
 import nibabel as nb
@@ -124,6 +124,14 @@ class EstimateConductivityInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
+    use_outlier_correction = traits.Bool(False, usedefault=True,
+        desc='')
+    volume_normalized_mapping = traits.Bool(False, usedefault=True,
+        desc='')
+    sigma_white_matter = traits.Float(0.126, usedefault=True, units = 'NA',
+                desc="Diffusion time")
+    eigenvalue_scaling_factor = traits.Float(237.5972, usedefault=True, units = 'NA',
+                desc="Diffusion time")
     out_filename = File(
         genfile=True, desc='The output filename for the conductivity tensor image')
 
@@ -204,7 +212,7 @@ class EstimateConductivity(BaseInterface):
         conductivity_data = tenfit.conductivity
 
         # Write as a 4D Nifti tensor image with the original affine
-        img = nb.Nifti1Image(mode_conductivity, affine)
+        img = nb.Nifti1Image(conductivity_data, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
         iflogger.info('Conductivity tensor image saved as {i}'.format(i=out_file))
