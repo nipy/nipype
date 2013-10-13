@@ -204,10 +204,8 @@ def test_flirt():
     flirter.inputs.reference = reffile
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
-    outfile = os.path.join(os.getcwd(),
-                           fsl_name(flirter, '%s_flirt' %fname))
+    outfile = fsl_name(flirter, '%s_flirt' %fname)
     outmat = '%s_flirt.mat' % fname
-    outmat = os.path.join(os.getcwd(), outmat)
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     yield assert_equal, flirter.cmdline, realcmd
@@ -242,12 +240,10 @@ def test_flirt():
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
-        outfile = os.path.join(os.getcwd(),
-                               fsl_name(fsl.FLIRT(),'%s_flirt' % fname))
+        outfile = fsl_name(fsl.FLIRT(),'%s_flirt' % fname)
         outfile = ' '.join(['-out', outfile])
         # Handle autogeneration of outmatrix
         outmatrix = '%s_flirt.mat' % fname
-        outmatrix = os.path.join(os.getcwd(), outmatrix)
         outmatrix = ' '.join(['-omat', outmatrix])
         # Build command line
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
