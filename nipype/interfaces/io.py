@@ -1220,14 +1220,12 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     assessor_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
-        mandatory=False,
         xor=['reconstruction_id']
     )
 
     reconstruction_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
-        mandatory=False,
         xor=['assessor_id']
     )
 
@@ -1236,9 +1234,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
               'instead of creating new ones when possible - the created '
               'experiments are then shared back to the original project'
               ),
-        usedefault=True,
-        mandatory=False,
-    )
+        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():

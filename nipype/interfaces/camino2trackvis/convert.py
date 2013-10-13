@@ -17,10 +17,10 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
         desc='The input .Bfloat (camino) file.')
 
-    out_file = File(argstr='-o %s', genfile=True, mandatory=False, position=2,
+    out_file = File(argstr='-o %s', genfile=True, position=2,
         desc='The filename to which to write the .trk (trackvis) file.')
 
-    min_length = traits.Float(argstr='-l %d', mandatory=False, position=3,
+    min_length = traits.Float(argstr='-l %d', position=3,
         units='mm', desc='The minimum length of tracts to output')
 
     data_dims = traits.List(traits.Int, argstr='-d %s', sep=',',
@@ -42,7 +42,7 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
         Read coordinate system from a NIfTI file.')
 
     nifti_file = File(argstr='--nifti %s', exists=True,
-    mandatory=False, position=7, desc='Read coordinate system from a NIfTI file.')
+    position=7, desc='Read coordinate system from a NIfTI file.')
 
 class Camino2TrackvisOutputSpec(TraitedSpec):
     trackvis = File(exists=True, desc='The filename to which to write the .trk (trackvis) file.')
@@ -104,10 +104,10 @@ class Trackvis2CaminoInputSpec(CommandLineInputSpec):
     desc='The input .trk (trackvis) file.')
 
     out_file = File(argstr='-o %s', genfile=True,
-    mandatory=False, position=2, desc='The filename to which to write the .Bfloat (camino).')
+    position=2, desc='The filename to which to write the .Bfloat (camino).')
 
     append_file = File(exists=True, argstr='-a %s',
-    mandatory=False, position=2, desc='A file to which the append the .Bfloat data. ')
+    position=2, desc='A file to which the append the .Bfloat data. ')
 
 class Trackvis2CaminoOutputSpec(TraitedSpec):
     camino = File(exists=True, desc='The filename to which to write the .Bfloat (camino).')

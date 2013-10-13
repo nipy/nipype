@@ -288,7 +288,7 @@ class PicoPDFs(StdOutCommandLine):
 class TrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1, desc='input data file')
 
-    seed_file = File(exists=True, argstr='-seedfile %s', mandatory=False, position=2, desc='seed file')
+    seed_file = File(exists=True, argstr='-seedfile %s', position=2, desc='seed file')
 
     inputmodel = traits.Enum('dt', 'multitensor', 'sfpeak', 'pico', 'repbs_dt', 'repbs_multitensor', 'ballstick', 'wildbs_dt', 'bayesdirac', 'bayesdirac_dt',
         argstr='-inputmodel %s', desc='input model type', usedefault=True)
@@ -325,7 +325,7 @@ class TrackInputSpec(CommandLineInputSpec):
         desc='output data file')
 
     output_root = File(exists=False, argstr='-outputroot %s',
-        mandatory=False, position= -1,
+        position= -1,
         desc='root directory for output')
 
 class TrackOutputSpec(TraitedSpec):
@@ -508,7 +508,7 @@ class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
-    scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
+    scheme_file = File(exists=True, argstr='%s', position=2,
         desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     out_file = File(argstr="> %s", position=-1, genfile=True)
@@ -563,7 +563,7 @@ class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
-    scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
+    scheme_file = File(exists=True, argstr='%s', position=2,
         desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',
@@ -622,7 +622,7 @@ class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
         desc='Tensor-fitted data filename')
 
-    scheme_file = File(exists=True, argstr='%s', mandatory=False, position=2,
+    scheme_file = File(exists=True, argstr='%s', position=2,
         desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',

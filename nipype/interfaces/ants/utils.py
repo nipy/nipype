@@ -134,16 +134,24 @@ class MultiplyImages(ANTSCommand):
 
 
 class JacobianDeterminantInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0, desc='image dimension (2 or 3)')
+    dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
+                            position=0, desc='image dimension (2 or 3)')
     warp_file = File(argstr='%s', exists=True, mandatory=True,
                      position=1, desc='input warp file')
-    output_prefix = File(argstr='%s', genfile=True, hash_files=False, position=2, desc='prefix of the output image filename: PREFIX(log)jacobian.nii.gz')
-    use_log = traits.Enum(0, 1, argstr='%d', mandatory=False, position=3,
+    output_prefix = File(argstr='%s', genfile=True, hash_files=False,
+                         position=2,
+                         desc=('prefix of the output image filename: '
+                               'PREFIX(log)jacobian.nii.gz'))
+    use_log = traits.Enum(0, 1, argstr='%d', position=3,
                           desc='log transform the jacobian determinant')
-    template_mask = File(argstr='%s', exists=True, mandatory=False, position=4,
+    template_mask = File(argstr='%s', exists=True, position=4,
                          desc='template mask to adjust for head size')
-    norm_by_total = traits.Enum(0, 1, argstr='%d', mandatory=False, position=5, desc='normalize jacobian by total in mask to adjust for head size')
-    projection_vector = traits.List(traits.Float(), argstr='%s', sep='x', mandatory=False, position=6, desc='vector to project warp against')
+    norm_by_total = traits.Enum(0, 1, argstr='%d', position=5,
+                                desc=('normalize jacobian by total in mask to '
+                                      'adjust for head size'))
+    projection_vector = traits.List(traits.Float(), argstr='%s', sep='x',
+                                    position=6,
+                                    desc='vector to project warp against')
 
 
 class JacobianDeterminantOutputSpec(TraitedSpec):
