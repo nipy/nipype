@@ -208,8 +208,18 @@ class EstimateConductivity(BaseInterface):
         tenmodel = dti.TensorModel(gtab)
         tenfit = tenmodel.fit(data, mask)
 
-        # Calculate the mode of each voxel's tensor
+        # Estimate electrical conductivity
+        scale_factor = self.inputs.eigenvalue_scaling_factor
+        sigma_white_matter = self.inputs.sigma_white_matter
+        outlier_correction = self.inputs.use_outlier_correction
+        volume_normalized = self.inputs.volume_normalized_mapping
+
         conductivity_data = tenfit.conductivity
+
+        #conductivity_data = tenfit.conductivity(scale_factor=scale_factor,
+        #                                        sigma_white_matter=sigma_white_matter,
+        #                                        outlier_correction=outlier_correction,
+        #                                        volume_normalized=volume_normalized)
 
         # Write as a 4D Nifti tensor image with the original affine
         img = nb.Nifti1Image(conductivity_data, affine)

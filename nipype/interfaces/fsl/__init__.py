@@ -26,4 +26,5 @@ from .dti import (BEDPOSTX, DTIFit, ProbTrackX, VecReg, ProjThresh,
                   MakeDyadicVectors)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
-                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths,
+                    DecomposeTensor)

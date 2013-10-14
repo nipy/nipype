@@ -323,3 +323,48 @@ class TemporalFilter(MathsCommand):
     """
     input_spec = TemporalFilterInput
     _suffix = "_filt"
+
+
+class DecomposeTensorInput(FSLCommandInputSpec):
+
+    in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
+                desc="image to operate on")
+    _dtypes = ["float", "char", "int", "short", "double", "input"]
+    internal_datatype = traits.Enum(*_dtypes, position=1, argstr="-dt %s",
+                                    desc="datatype to use for calculations (default is float)")
+    output_datatype = traits.Enum(*_dtypes,
+                                  position=-1, argstr="-odt %s",
+                                  desc="datatype to use for output (default uses input type)")
+
+    base_name = traits.Str("tensor", desc='base_name that all output files will start with',
+                           argstr='-tensor_decomp %s', position=-1, usedefault=True)
+
+class DecomposeTensorOutput(TraitedSpec):
+
+    V1 = File(exists=True, desc='path/name of file with the 1st eigenvector')
+    V2 = File(exists=True, desc='path/name of file with the 2nd eigenvector')
+    V3 = File(exists=True, desc='path/name of file with the 3rd eigenvector')
+    L1 = File(exists=True, desc='path/name of file with the 1st eigenvalue')
+    L2 = File(exists=True, desc='path/name of file with the 2nd eigenvalue')
+    L3 = File(exists=True, desc='path/name of file with the 3rd eigenvalue')
+    MD = File(exists=True, desc='path/name of file with the mean diffusivity')
+    FA = File(exists=True, desc='path/name of file with the fractional anisotropy')
+    MO = File(exists=True, desc='path/name of file with the mode of anisotropy')
+
+class DecomposeTensor(FSLCommand):
+
+    _cmd = "fslmaths"
+    input_spec = DecomposeTensorInput
+    output_spec = DecomposeTensorOutput
+    _suffix = "_maths"
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for k in outputs.keys():
+            if k not in ('outputtype', 'environ', 'args'):
+                    outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
+        return outputs
+
+    def _gen_filename(self, name):
+        return self._list_outputs()[name]
+        return None
