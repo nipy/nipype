@@ -1844,8 +1844,8 @@ class JoinNode(Node):
         """
         # create the new join item fields
         idx = self._next_slot_index
-        newfields = {field: self._add_join_item_field(field, idx)
-            for field in self.joinfield}
+        newfields = dict([(field, self._add_join_item_field(field, idx))
+                          for field in self.joinfield])
         # increment the join slot index
         logger.debug("Added the %s join item fields %s." % (self, newfields))
         self._next_slot_index += 1
