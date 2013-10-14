@@ -17,9 +17,12 @@ from ...utils.filemanip import copyfile
 
 
 class AtroposInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, 4, argstr='--image-dimensionality %d', usedefault=True,
+    dimension = traits.Enum(3, 2, 4, argstr='--image-dimensionality %d',
+                            usedefault=True,
                             desc='image dimension (2, 3, or 4)')
-    intensity_images = InputMultiPath(File(exists=True), argstr="--intensity-image %s...", madatory=True)
+    intensity_images = InputMultiPath(File(exists=True),
+                                      argstr="--intensity-image %s...",
+                                      mandatory=True)
     mask_image = File(exists=True, argstr='--mask-image %s', mandatory=True)
     initialization = traits.Enum('Random', 'Otsu', 'KMeans',
                                  'PriorProbabilityImages', 'PriorLabelImage',
@@ -40,9 +43,10 @@ class AtroposInputSpec(ANTSCommandInputSpec):
     posterior_formulation = traits.Str(argstr="%s")
     use_mixture_model_proportions = traits.Bool(requires=['posterior_formulation'])
     out_classified_image_name = File(argstr="%s", genfile=True,
-                                     hash_file=False)
+                                     hash_files=False)
     save_posteriors = traits.Bool()
-    output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz', usedefault=True)
+    output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz',
+                                                 usedefault=True)
 
 
 class AtroposOutputSpec(TraitedSpec):
@@ -157,7 +161,8 @@ class Atropos(ANTSCommand):
         return outputs
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--image-dimension %d', usedefault=True,
+    dimension = traits.Enum(3, 2, argstr='--image-dimension %d',
+                            usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input-image %s', mandatory=True,
                         desc=('image to apply transformation to (generally a '
@@ -165,11 +170,15 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     mask_image = File(argstr='--mask-image %s')
     output_image = traits.Str(argstr='--output %s',
                              desc=('output file name'), genfile=True,
-                             hash_file=False)
+                             hash_files=False)
     bspline_fitting_distance = traits.Float(argstr="--bsline-fitting [%g]")
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s", sep="x", requires=['convergence_threshold'], position=1)
-    convergence_threshold = traits.Float(argstr=",%g]", requires=['n_iterations'], position=2)
+    n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s",
+                               sep="x", requires=['convergence_threshold'],
+                               position=1)
+    convergence_threshold = traits.Float(argstr=",%g]",
+                                         requires=['n_iterations'],
+                                         position=2)
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):

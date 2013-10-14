@@ -42,13 +42,13 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     surface = traits.String(argstr="--surf", desc="target surface (default is white)")
 
     reg_xors = ["reg_file", "reg_header", "mni152reg"]
-    reg_file = File(exists=True, argstr="--reg %s", required=True, xor=reg_xors,
+    reg_file = File(exists=True, argstr="--reg %s", mandatory=True, xor=reg_xors,
                     desc="source-to-reference registration file")
     reg_header = traits.Bool(argstr="--regheader %s", requires=["subject_id"],
-                             required=True, xor=reg_xors,
+                             mandatory=True, xor=reg_xors,
                              desc="register based on header geometry")
     mni152reg = traits.Bool(argstr="--mni152reg",
-                            required=True, xor=reg_xors,
+                            mandatory=True, xor=reg_xors,
                             desc="source volume is in MNI152 space")
 
     apply_rot = traits.Tuple(traits.Float, traits.Float, traits.Float,
@@ -296,24 +296,32 @@ class SurfaceSmooth(FSCommand):
 class SurfaceTransformInputSpec(FSTraitedSpec):
     source_file = File(exists=True, mandatory=True, argstr="--sval %s",
                        xor=['source_annot_file'],
-                       help="surface file with source values")
-    source_annot_file = File(exists=True, mandatory=True, argstr="--sval-annot %s",
+                       desc="surface file with source values")
+    source_annot_file = File(exists=True, mandatory=True,
+                             argstr="--sval-annot %s",
                              xor=['source_file'],
-                             help="surface annotation file")
+                             desc="surface annotation file")
     source_subject = traits.String(mandatory=True, argstr="--srcsubject %s",
-                                   help="subject id for source surface")
+                                   desc="subject id for source surface")
     hemi = traits.Enum("lh", "rh", argstr="--hemi %s", mandatory=True,
                        desc="hemisphere to transform")
     target_subject = traits.String(mandatory=True, argstr="--trgsubject %s",
-                                   help="subject id of target surface")
-    target_ico_order = traits.Enum(1, 2, 3, 4, 5, 6, 7, argstr="--trgicoorder %d",
-                                   help="order of the icosahedron if target_subject is 'ico'")
-    source_type = traits.Enum(filetypes, argstr='--sfmt %s', requires=['source_file'],
-                              help="source file format")
-    target_type = traits.Enum(filetypes, argstr='--tfmt %s', help="output format")
-    reshape = traits.Bool(argstr="--reshape", help="reshape output surface to conform with Nifti")
-    reshape_factor = traits.Int(argstr="--reshape-factor", help="number of slices in reshaped image")
-    out_file = File(argstr="--tval %s", genfile=True, desc="surface file to write")
+                                   desc="subject id of target surface")
+    target_ico_order = traits.Enum(1, 2, 3, 4, 5, 6, 7,
+                                   argstr="--trgicoorder %d",
+                                   desc=("order of the icosahedron if "
+                                         "target_subject is 'ico'"))
+    source_type = traits.Enum(filetypes, argstr='--sfmt %s',
+                              requires=['source_file'],
+                              desc="source file format")
+    target_type = traits.Enum(filetypes, argstr='--tfmt %s',
+                              desc="output format")
+    reshape = traits.Bool(argstr="--reshape",
+                          desc="reshape output surface to conform with Nifti")
+    reshape_factor = traits.Int(argstr="--reshape-factor",
+                                desc="number of slices in reshaped image")
+    out_file = File(argstr="--tval %s", genfile=True,
+                    desc="surface file to write")
 
 
 class SurfaceTransformOutputSpec(TraitedSpec):

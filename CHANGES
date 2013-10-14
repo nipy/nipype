@@ -3,12 +3,36 @@ Next release
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
-       spm.DicomImport
+       spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
+* ENH: Added support for Simple Linux Utility Resource Management (SLURM) 
 
+* ENH: Several new interfaces related to Camino were added:
+        - camino.SFPICOCalibData
+        - camino.Conmat
+        - camino.QBallMX
+        - camino.LinRecon
+        - camino.SFPeaks
+        One outdated interface no longer part of Camino was removed:
+        - camino.Conmap
+        
+* FIX: Several fixes related to Camino interfaces:
+        - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
+        - DTLUTGen would silently round the "step", "snr" and "trace" parameters to integers
+        - PicoPDFs would not accept more than one lookup table
+        - PicoPDFs default pdf did not correspond to Camino default
+        - Track input model names were outdated (and would generate an error)
+        - Track numpds parameter could not be set for deterministic tractography
+        - FA created output files with erroneous extension
+        
 * FIX: Deals properly with 3d files in SPM Realign
+* FIX: SPM with MCR fixed
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
+* API: SPM now defaults to SPM8 or SPM12b job format
+
+* ENH: New FSL interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP, fsl.Eddy
+* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
 
 Release 0.8.0 (May 8, 2013)
 ===========================

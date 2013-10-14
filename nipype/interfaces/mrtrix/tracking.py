@@ -72,17 +72,17 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_file = File(exists=True, argstr='-seed %s', mandatory=False, position=2, desc='seed file')
-    seed_spec = traits.List(traits.Int, desc='seed specification in voxels and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='voxels')
+    seed_spec = traits.List(traits.Float, desc='seed specification in mm and radius (x y z r)', position=2,
+        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
     include_file = File(exists=True, argstr='-include %s', mandatory=False, position=2, desc='inclusion file')
-    include_spec = traits.List(traits.Int, desc='inclusion specification in voxels and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='voxels')
+    include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
+        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
     exclude_file = File(exists=True, argstr='-exclude %s', mandatory=False, position=2, desc='exclusion file')
-    exclude_spec = traits.List(traits.Int, desc='exclusion specification in voxels and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='voxels')
+    exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
+        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
     mask_file = File(exists=True, argstr='-exclude %s', mandatory=False, position=2, desc='mask file. Only tracks within mask.')
-    mask_spec = traits.List(traits.Int, desc='Mask specification in voxels and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='voxels')
+    mask_spec = traits.List(traits.Float, desc='Mask specification in mm and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
+        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
 
     inputmodel = traits.Enum('DT_STREAM', 'SD_PROB', 'SD_STREAM',
         argstr='%s', desc='input model type', usedefault=True, position=-3)
@@ -183,7 +183,7 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
         return super(DiffusionTensorStreamlineTrack, self).__init__(command, **inputs)
 
 class ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec(StreamlineTrackInputSpec):
-    maximum_number_of_trials = traits.Int(argstr='-trials %s', units='mm',
+    maximum_number_of_trials = traits.Int(argstr='-trials %s',
         desc="Set the maximum number of sampling trials at each point (only used for probabilistic tracking).")
 
 class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):

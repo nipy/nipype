@@ -205,7 +205,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                            desc='<R coordinate> <A coordinate> <S coordinate>')
     out_datatype = traits.Enum('uchar', 'short', 'int', 'float',
                               argstr='--out_data_type %s',
-                              descr='output data type <uchar|short|int|float>')
+                              desc='output data type <uchar|short|int|float>')
     resample_type = traits.Enum('interpolate', 'weighted', 'nearest', 'sinc', 'cubic',
                                argstr='--resample_type %s',
                                desc='<interpolate|weighted|nearest|sinc|cubic> (default is interpolate)')
@@ -631,6 +631,7 @@ class ReconAll(CommandLine):
     """
 
     _cmd = 'recon-all'
+    _additional_metadata = ['loc', 'altkey']
     input_spec = ReconAllInputSpec
     output_spec = ReconAllIOutputSpec
     _can_resume = True
@@ -1022,18 +1023,18 @@ class SmoothInputSpec(FSTraitedSpec):
     proj_frac = traits.Float(desc='project frac of thickness a long surface normal',
                              xor=['proj_frac_avg'],
                              argstr='--projfrac %s')
-    surface_fwhm = traits.Float(min=0, requires=['reg_file'],
+    surface_fwhm = traits.Range(low=0.0, requires=['reg_file'],
                                 mandatory=True, xor=['num_iters'],
-                                desc='surface FWHM in mm', argstr='--fwhm %d')
-    num_iters = traits.Int(min=1, xor=['surface_fwhm'],
-                           mandatory=True,
+                                desc='surface FWHM in mm', argstr='--fwhm %f')
+    num_iters = traits.Range(low=1, xor=['surface_fwhm'],
+                           mandatory=True, argstr='--niters %d',
                            desc='number of iterations instead of fwhm')
-    vol_fwhm = traits.Float(min=0, argstr='--vol-fwhm %d',
-                            desc='volumesmoothing outside of surface')
+    vol_fwhm = traits.Range(low=0.0, argstr='--vol-fwhm %f',
+                            desc='volume smoothing outside of surface')
 
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_file = File(exist=True, desc='smoothed input volume')
+    smoothed_file = File(exists=True, desc='smoothed input volume')
 
 
 class Smooth(FSCommand):
@@ -1054,7 +1055,7 @@ class Smooth(FSCommand):
     >>> from nipype.interfaces.freesurfer import Smooth
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
+    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
 
     """
 
@@ -1217,12 +1218,12 @@ class RobustRegister(FSCommand):
 
 class FitMSParamsInputSpec(FSTraitedSpec):
 
-    in_files = traits.List(File, exists=True, argstr="%s", position=-2, mandatory=True,
+    in_files = traits.List(File(exists=True), argstr="%s", position=-2, mandatory=True,
                            desc="list of FLASH images (must be in mgh format)")
     tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
     te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
     flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
-    xfm_list = traits.List(File, exists=True,
+    xfm_list = traits.List(File(exists=True),
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s", position=-1, genfile=True,
                               desc="directory to store output in")

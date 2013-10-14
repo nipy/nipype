@@ -32,6 +32,9 @@ def create_files_in_directory():
         img = np.random.random(shape)
         nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(outdir,f))
+    with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
+        fp.write('dummy file')
+    filelist.append('reg.dat')
     return filelist, outdir, cwd
 
 def create_surf_file():
@@ -69,13 +72,14 @@ def test_sample2surf():
     s2s.inputs.source_file = files[0]
     s2s.inputs.reference_file = files[1]
     s2s.inputs.hemi = "lh"
+    s2s.inputs.reg_file = files[2]
     s2s.inputs.sampling_range = .5
     s2s.inputs.sampling_units = "frac"
     s2s.inputs.sampling_method = "point"
 
     # Test a basic command line
     yield assert_equal, s2s.cmdline, ("mri_vol2surf "
-    "--hemi lh --o %s --ref %s --projfrac 0.500 --mov %s"
+    "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
     %(os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
 
     # Test identity

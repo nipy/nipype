@@ -171,7 +171,7 @@ class EstimateModelOutputSpec(TraitedSpec):
     beta_images = OutputMultiPath(File(exists=True), desc='design parameter estimates')
     residual_image = File(exists=True, desc='Mean-squared image of the residuals')
     RPVimage = File(exists=True, desc='Resels per voxel image')
-    spm_mat_file = File(exist=True, desc='Updated SPM mat file')
+    spm_mat_file = File(exists=True, desc='Updated SPM mat file')
 
 
 class EstimateModel(SPMCommand):
@@ -280,7 +280,7 @@ class EstimateContrastOutputSpec(TraitedSpec):
     spmT_images = OutputMultiPath(File(exists=True), desc='stat images from a t-contrast')
     ess_images = OutputMultiPath(File(exists=True), desc='contrast images from an F-contrast')
     spmF_images = OutputMultiPath(File(exists=True), desc='stat images from an F-contrast')
-    spm_mat_file = File(exist=True, desc='Updated SPM mat file')
+    spm_mat_file = File(exists=True, desc='Updated SPM mat file')
 
 
 class EstimateContrast(SPMCommand):

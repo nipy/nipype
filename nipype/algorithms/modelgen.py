@@ -173,16 +173,16 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                 'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
-                                         filecopy=False)
+                                         copyfile=False)
     outlier_files = InputMultiPath(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
-                                filecopy=False)
+                                copyfile=False)
     functional_runs = InputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                    File(exists=True)),
                                      mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",
-            filecopy=False)
+            copyfile=False)
     input_units = traits.Enum('secs', 'scans', mandatory=True,
              desc = "Units of event onsets and durations (secs or scans)" \
                     "Output units are always in secs")

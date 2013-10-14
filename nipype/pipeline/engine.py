@@ -12,10 +12,12 @@ The `Pipeline` class provides core functionality for batch processing.
 
 """
 
-from glob import glob
-import gzip
+from datetime import datetime
+from collections import OrderedDict
 from copy import deepcopy
 import cPickle
+from glob import glob
+import gzip
 import inspect
 import os
 import os.path as op
@@ -27,6 +29,7 @@ from string import Template
 import sys
 from tempfile import mkdtemp
 from warnings import warn
+from hashlib import sha1
 
 import numpy as np
 
@@ -49,7 +52,7 @@ from ..utils.filemanip import (save_json, FileNotFoundError,
                                write_rst_list)
 
 from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, make_output_dir,
+                    export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot,
                     get_print_name, merge_dict, evaluate_connect_function)
 
@@ -126,7 +129,7 @@ def format_node(node, format='python', include_config=False):
 class WorkflowBase(object):
     """Defines common attributes and functions for workflows and nodes."""
 
-    def __init__(self, name, base_dir=None, **kwargs):
+    def __init__(self, name=None, base_dir=None):
         """ Initialize base parameters of a workflow or node
 
         Parameters
@@ -209,7 +212,7 @@ class WorkflowBase(object):
 class Workflow(WorkflowBase):
     """Controls the setup and execution of a pipeline of processes."""
 
-    def __init__(self, name, base_dir=None, *args, **kwargs):
+    def __init__(self, name, base_dir=None):
         """Create a workflow object.
 
         Parameters
@@ -220,7 +223,7 @@ class Workflow(WorkflowBase):
             path to workflow storage
 
         """
-        super(Workflow, self).__init__(name, base_dir, *args, **kwargs)
+        super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
 
@@ -681,6 +684,12 @@ connected.
         if str2bool(self.config['execution']['create_report']):
             self._write_report_info(self.base_dir, self.name, execgraph)
         runner.run(execgraph, updatehash=updatehash, config=self.config)
+        datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
+        if str2bool(self.config['execution']['write_provenance']):
+            write_workflow_prov(execgraph,
+                                os.path.join(self.base_dir,
+                                             'workflow_provenance_%s' % datestr),
+                                format='all')
         return execgraph
 
     # PRIVATE API AND FUNCTIONS
@@ -1090,8 +1099,9 @@ class Node(WorkflowBase):
 
     """
 
-    def __init__(self, interface, name, iterables=None, overwrite=None,
-                 needed_outputs=None, run_without_submitting=False, **kwargs):
+    def __init__(self, interface, name, iterables=None, itersource=None,
+                 synchronize=False, overwrite=None, needed_outputs=None,
+                 run_without_submitting=False, **kwargs):
         """
         Parameters
         ----------
@@ -1103,12 +1113,43 @@ class Node(WorkflowBase):
             node specific name
 
         iterables : generator
-            input field and list to iterate using the pipeline engine
+            Input field and list to iterate using the pipeline engine
             for example to iterate over different frac values in fsl.Bet()
             for a single field the input can be a tuple, otherwise a list
             of tuples
             node.iterables = ('frac',[0.5,0.6,0.7])
             node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+
+            If this node has an itersource, then the iterables values
+            is a dictionary which maps an iterable source field value
+            to the target iterables field values, e.g.:
+            inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
+            node.itersource = ('inputspec', ['frac'])
+            node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
+                                       img2.nii': [0.6, 0.7]})
+
+            If this node's synchronize flag is set, then an alternate
+            form of the iterables is a [fields, values] list, where
+            fields is the list of iterated fields and values is the
+            list of value tuples for the given fields, e.g.:
+            node.synchronize = True
+            node.iterables = [('frac', 'threshold'),
+                              [(0.5, True),
+                               (0.6, False)]]
+
+        itersource: tuple
+            The (name, fields) iterables source which specifies the name
+            of the predecessor iterable node and the input fields to use
+            from that source node. The output field values comprise the
+            key to the iterables parameter value mapping dictionary.
+
+        synchronize: boolean
+            Flag indicating whether iterables are synchronized.
+            If the iterables are synchronized, then this iterable
+            node is expanded once per iteration over all of the
+            iterables values.
+            Otherwise, this iterable node is expanded once per
+            each permutation of the iterables values.
 
         overwrite : Boolean
             Whether to overwrite contents of output directory if it already
@@ -1126,7 +1167,10 @@ class Node(WorkflowBase):
             multiprocessing pool
 
         """
-        super(Node, self).__init__(name, **kwargs)
+        base_dir = None
+        if 'base_dir' in kwargs:
+            base_dir = kwargs['base_dir']
+        super(Node, self).__init__(name, base_dir)
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
@@ -1135,6 +1179,8 @@ class Node(WorkflowBase):
         self.name = name
         self._result = None
         self.iterables = iterables
+        self.synchronize = synchronize
+        self.itersource = itersource
         self.overwrite = overwrite
         self.parameterization = None
         self.run_without_submitting = run_without_submitting
@@ -1177,7 +1223,8 @@ class Node(WorkflowBase):
         if self._hierarchy:
             outputdir = os.path.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
-            outputdir = os.path.join(outputdir, *self.parameterization)
+            param_dirs = [self._parameterization_dir(p) for p in self.parameterization]
+            outputdir = os.path.join(outputdir, *param_dirs)
         return os.path.abspath(os.path.join(outputdir,
                                             self.name))
 
@@ -1339,6 +1386,18 @@ class Node(WorkflowBase):
         return self._result
 
     # Private functions
+    def _parameterization_dir(self, param):
+        """
+        Returns the directory name for the given parameterization string as follows:
+            - If the parameterization is longer than 32 characters, then
+              return the SHA-1 hex digest.
+            - Otherwise, return the parameterization unchanged.
+        """
+        if len(param) > 32:
+            return sha1(param).hexdigest()
+        else:
+            return param
+
     def _get_hashval(self):
         """Return a hash of the input state"""
         if not self._got_inputs:
@@ -1673,6 +1732,231 @@ class Node(WorkflowBase):
         fp.close()
 
 
+class JoinNode(Node):
+    """Wraps interface objects that join inputs into a list.
+
+    Examples
+    --------
+
+    >>> import nipype.pipeline.engine as pe
+    >>> from nipype import Node, JoinNode, Workflow
+    >>> from nipype.interfaces.utility import IdentityInterface
+    >>> from nipype.interfaces import (ants, dcm2nii, fsl)
+    >>> wf = Workflow(name='preprocess')
+    >>> inputspec = Node(IdentityInterface(fields=['image']),
+    ...                     name='inputspec')
+    >>> inputspec.iterables = [('image',
+    ...                        ['img1.nii', 'img2.nii', 'img3.nii'])]
+    >>> img2flt = Node(fsl.ImageMaths(out_data_type='float'),
+    ...                   name='img2flt')
+    >>> wf.connect(inputspec, 'image', img2flt, 'in_file')
+    >>> average = JoinNode(ants.AverageImages(), joinsource='inputspec',
+    ...                       joinfield='images', name='average')
+    >>> wf.connect(img2flt, 'out_file', average, 'images')
+    >>> realign = Node(fsl.FLIRT(), name='realign')
+    >>> wf.connect(img2flt, 'out_file', realign, 'in_file')
+    >>> wf.connect(average, 'output_average_image', realign, 'reference')
+    >>> strip = Node(fsl.BET(), name='strip')
+    >>> wf.connect(realign, 'out_file', strip, 'in_file')
+
+    """
+
+    def __init__(self, interface, name, joinsource, joinfield=None,
+        unique=False, **kwargs):
+        """
+
+        Parameters
+        ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        name : alphanumeric string
+            node specific name
+        joinsource : node name
+            name of the join predecessor iterable node
+        joinfield : string or list of strings
+            name(s) of list input fields that will be aggregated.
+            The default is all of the join node input fields.
+        unique : flag indicating whether to ignore duplicate input values
+
+        See Node docstring for additional keyword arguments.
+        """
+        super(JoinNode, self).__init__(interface, name, **kwargs)
+
+        self.joinsource = joinsource
+        """the join predecessor iterable node"""
+
+        if not joinfield:
+            # default is the interface fields
+            joinfield = self._interface.inputs.copyable_trait_names()
+        elif isinstance(joinfield, str):
+            joinfield = [joinfield]
+        self.joinfield = joinfield
+        """the fields to join"""
+
+        self._inputs = self._override_join_traits(self._interface.inputs,
+                                                  self.joinfield)
+        """the override inputs"""
+
+        self._unique = unique
+        """flag indicating whether to ignore duplicate input values"""
+
+        self._next_slot_index = 0
+        """the joinfield index assigned to an iterated input"""
+
+    @property
+    def joinsource(self):
+        return self._joinsource
+
+    @joinsource.setter
+    def joinsource(self, value):
+        """Set the joinsource property. If the given value is a Node,
+        then the joinsource is set to the node name.
+        """
+        if isinstance(value, Node):
+            value = value.name
+        self._joinsource = value
+
+    @property
+    def inputs(self):
+        """The JoinNode inputs include the join field overrides."""
+        return self._inputs
+
+    def _add_join_item_fields(self):
+        """Add new join item fields assigned to the next iterated
+        input
+
+        This method is intended solely for workflow graph expansion.
+
+        Examples
+        --------
+
+        >>> from nipype.interfaces.utility import IdentityInterface
+        >>> import nipype.pipeline.engine as pe
+        >>> from nipype import Node, JoinNode, Workflow
+        >>> inputspec = Node(IdentityInterface(fields=['image']),
+        ...    name='inputspec'),
+        >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
+        ...    joinsource='inputspec', joinfield='images', name='join')
+        >>> join._add_join_item_fields()
+        {'images': 'imagesJ1'}
+
+        Return the {base field: slot field} dictionary
+        """
+        # create the new join item fields
+        idx = self._next_slot_index
+        newfields = {field: self._add_join_item_field(field, idx)
+            for field in self.joinfield}
+        # increment the join slot index
+        logger.debug("Added the %s join item fields %s." % (self, newfields))
+        self._next_slot_index += 1
+        return newfields
+
+    def _add_join_item_field(self, field, index):
+        """Add new join item fields qualified by the given index
+
+        Return the new field name
+        """
+        # the new field name
+        name = self._join_item_field_name(field, index)
+        # make a copy of the join trait
+        trait = self._inputs.trait(field, False, True)
+        # add the join item trait to the override traits
+        self._inputs.add_trait(name, trait)
+
+        return name
+
+    def _join_item_field_name(self, field, index):
+        """Return the field suffixed by the index + 1"""
+        return "%sJ%d" % (field, index + 1)
+
+    def _override_join_traits(self, basetraits, fields):
+        """Convert the given join fields to accept an input that
+        is a list item rather than a list. Non-join fields
+        delegate to the interface traits.
+
+        Return the override DynamicTraitedSpec
+        """
+        dyntraits = DynamicTraitedSpec()
+        if fields is None:
+            fields = basetraits.copyable_trait_names()
+        else:
+            # validate the fields
+            for field in fields:
+                if not basetraits.trait(field):
+                    raise ValueError("The JoinNode %s does not have a field"
+                                     " named %s" % (self.name, field))
+        for name, trait in basetraits.items():
+            # if a join field has a single inner trait, then the item
+            # trait is that inner trait. Otherwise, the item trait is
+            # a new Any trait.
+            if name in fields and len(trait.inner_traits) == 1:
+                item_trait = trait.inner_traits[0]
+                dyntraits.add_trait(name, item_trait)
+                logger.debug("Converted the join node %s field %s"
+                             " trait type from %s to %s"
+                             % (self, name, trait.trait_type.info(),
+                                item_trait.info()))
+            else:
+                dyntraits.add_trait(name, traits.Any)
+                setattr(dyntraits, name, Undefined)
+        return dyntraits
+
+    def _run_command(self, execute, copyfiles=True):
+        """Collates the join inputs prior to delegating to the superclass."""
+        self._collate_join_field_inputs()
+        return super(JoinNode, self)._run_command(execute, copyfiles)
+
+    def _collate_join_field_inputs(self):
+        """
+        Collects each override join item field into the interface join
+        field input."""
+        for field in self.inputs.copyable_trait_names():
+            if field in self.joinfield:
+                # collate the join field
+                val = self._collate_input_value(field)
+                try:
+                    setattr(self._interface.inputs, field, val)
+                except Exception as e:
+                    raise ValueError(">>JN %s %s %s %s %s: %s" % (self, field, val, self.inputs.copyable_trait_names(), self.joinfield, e))
+            elif hasattr(self._interface.inputs, field):
+                # copy the non-join field
+                val = getattr(self._inputs, field)
+                if isdefined(val):
+                    setattr(self._interface.inputs, field, val)
+        logger.debug("Collated %d inputs into the %s node join fields"
+                     % (self._next_slot_index, self))
+
+    def _collate_input_value(self, field):
+        """
+        Collects the join item field values into a list or set value for
+        the given field, as follows:
+
+        - If the field trait is a Set, then the values are collected into
+        a set.
+
+        - Otherwise, the values are collected into a list which preserves
+        the iterables order. If the ``unique`` flag is set, then duplicate
+        values are removed but the iterables order is preserved.
+        """
+        val = [self._slot_value(field, idx)
+               for idx in range(self._next_slot_index)]
+        basetrait = self._interface.inputs.trait(field)
+        if isinstance(basetrait.trait_type, traits.Set):
+            return set(val)
+        elif self._unique:
+            return list(OrderedDict.fromkeys(val))
+        else:
+            return val
+
+    def _slot_value(self, field, index):
+        slot_field = self._join_item_field_name(field, index)
+        try:
+            return getattr(self._inputs, slot_field)
+        except AttributeError as e:
+            raise AttributeError("The join node %s does not have a slot field %s"
+                         " to hold the %s value at index %d: %s"
+                         % (self, slot_field, field, index, e))
+
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
 
@@ -1826,13 +2110,15 @@ class MapNode(Node):
 
     def _collate_results(self, nodes):
         self._result = InterfaceResult(interface=[], runtime=[],
-                                       provenance=[], outputs=self.outputs)
+                                       provenance=[], inputs=[],
+                                       outputs=self.outputs)
         returncode = []
         for i, node, err in nodes:
             self._result.runtime.insert(i, None)
             if node.result:
                 if hasattr(node.result, 'runtime'):
                     self._result.interface.insert(i, node.result.interface)
+                    self._result.inputs.insert(i, node.result.inputs)
                     self._result.runtime[i] = node.result.runtime
                 if hasattr(node.result, 'provenance'):
                     self._result.provenance.insert(i, node.result.provenance)

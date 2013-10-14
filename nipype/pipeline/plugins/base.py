@@ -17,6 +17,7 @@ from warnings import warn
 import numpy as np
 import scipy.sparse as ssp
 
+
 from ..utils import (nx, dfs_preorder)
 from ..engine import (MapNode, str2bool)
 
@@ -597,3 +598,35 @@ class GraphPluginBase(PluginBase):
         dependencies: dictionary of dependencies based on the toplogical sort
         """
         raise NotImplementedError
+
+
+
+    def _get_result(self, taskid):
+        if taskid not in self._pending:
+            raise Exception('Task %d not found' % taskid)
+        if self._is_pending(taskid):
+            return None
+        node_dir = self._pending[taskid]
+
+
+        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
+                                                              '..'))))
+        logger.debug(os.listdir(node_dir))
+        glob(os.path.join(node_dir, 'result_*.pklz')).pop()
+
+        results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
+        result_data = loadpkl(results_file)
+        result_out = dict(result=None, traceback=None)
+
+        if isinstance(result_data, dict):
+            result_out['result'] = result_data['result']
+            result_out['traceback'] = result_data['traceback']
+            result_out['hostname'] = result_data['hostname']
+            if results_file:
+                crash_file = os.path.join(node_dir, 'crashstore.pklz')
+                os.rename(results_file, crash_file)
+        else:
+            result_out['result'] = result_data
+
+        return result_out
+
