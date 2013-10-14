@@ -13,7 +13,10 @@ The `Pipeline` class provides core functionality for batch processing.
 """
 
 from datetime import datetime
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 from copy import deepcopy
 import cPickle
 from glob import glob
