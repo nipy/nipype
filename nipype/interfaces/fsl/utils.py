@@ -1344,7 +1344,6 @@ class InvWarp(FSLCommand):
 
     _cmd = 'invwarp'
 
-
 class ComplexInputSpec(FSLCommandInputSpec):
     complex_in_file = File(exists=True, argstr="%s", position=2)
     complex_in_file2 = File(exists=True, argstr="%s", position=3)
