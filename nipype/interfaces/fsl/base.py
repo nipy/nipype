@@ -243,9 +243,6 @@ class FSLCommand(CommandLine):
     def _overload_extension(self, value):
         return value + Info.output_type_to_ext(self.inputs.output_type)
 
-    @property
-    def version(self):
-        return Info.version()
 
 
 def check_fsl():
