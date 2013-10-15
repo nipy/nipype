@@ -51,6 +51,7 @@ datasource.inputs.template = '%s/session2/DTI_mx_137/dti.%s'
 datasource.inputs.template_args = dict(dwi=[['subject_id', 'nii.gz']],
                                        bvec=[['subject_id', 'bvec']],
                                        bval=[['subject_id', 'bval']])
+datasource.inputs.sort_filelist = True
 gen_fa.connect(subject_id_infosource, 'subject_id', datasource, 'subject_id')
 
 eddy_correct = create_eddy_correct_pipeline()
@@ -92,6 +93,7 @@ tbss_source.inputs.base_directory = datasink.inputs.base_directory
 tbss_source.inputs.template = '%s/%s_%s.nii'
 tbss_source.inputs.template_args = dict(fa_list=[['FA', subjects_list, 'FA']],
                                         md_list=[['MD', subjects_list, 'MD']])
+tbss_source.inputs.sort_filelist = True
 
 """
 TBSS analysis

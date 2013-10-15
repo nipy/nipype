@@ -78,6 +78,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     datasource.inputs.base_directory = data_dir
     datasource.inputs.field_template = dict(dwi='%s/%s.nii')
     datasource.inputs.template_args = info
+    datasource.inputs.sort_filelist = True
 
     """
     Create a connectivity mapping workflow

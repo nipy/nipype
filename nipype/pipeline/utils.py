@@ -634,8 +634,8 @@ def generate_expanded_graph(graph_in):
             # The itersource iterables is a {field: lookup} dictionary, where the
             # lookup is a {source key: iteration list} dictionary. Look up the
             # current iterable value using the predecessor itersource input values.
-            iter_dict = {field: lookup[key] for field, lookup in inode.iterables
-                         if key in lookup}
+            iter_dict = dict([(field, lookup[key]) for field, lookup in
+                              inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
             iter_items = map(lambda(field, value): (field, lambda: value),
                              iter_dict.iteritems())
@@ -846,7 +846,7 @@ def _transpose_iterables(fields, values):
     Otherwise, the result is a list of (field: value list) pairs.
     """
     if isinstance(values, dict):
-        transposed = {field: defaultdict(list) for field in fields}
+        transposed = dict([(field, defaultdict(list)) for field in fields])
         for key, tuples in values.iteritems():
             for kvals in tuples:
                 for idx, val in enumerate(kvals):

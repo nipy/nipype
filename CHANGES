@@ -34,6 +34,9 @@ Next release
 * ENH: New FSL interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP, fsl.Eddy
 * ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
 
+* ENH: Added simplified outputname generation for command line interfaces.
+* FIX: Cleaned up input and output spec metadata
+
 Release 0.8.0 (May 8, 2013)
 ===========================
 

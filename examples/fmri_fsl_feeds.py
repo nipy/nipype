@@ -474,6 +474,7 @@ datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
 datasource.inputs.base_directory = feeds_data_dir
 datasource.inputs.template = '%s.nii.gz'
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 firstlevel.inputs.preproc.smooth.fwhm = 5
 

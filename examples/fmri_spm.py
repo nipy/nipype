@@ -345,6 +345,7 @@ l2source.inputs.template=os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
+l2source.inputs.sort_filelist = True
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a

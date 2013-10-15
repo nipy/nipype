@@ -1453,19 +1453,21 @@ class CommandLine(BaseInterface):
     def _filename_from_source(self, name):
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
-        if isdefined(retval):
-            if "%s" in retval:
-                if isinstance(trait_spec.name_source, list):
-                    for ns in trait_spec.name_source:
-                        if isdefined(getattr(self.inputs, ns)):
-                            name_source = ns
-                            break
-                else:
-                    name_source = trait_spec.name_source
-                if name_source.endswith(os.path.sep):
-                    name_source = name_source[:-len(os.path.sep)]
-                _, base, _ = split_filename(getattr(self.inputs, name_source))
-                retval = os.path.abspath(retval % base)
+        if not isdefined(retval):
+            if not trait_spec.name_source:
+                return retval
+            name_template = trait_spec.name_template
+            if not name_template:
+                name_template = "%s_generated"
+            if isinstance(trait_spec.name_source, list):
+                for ns in trait_spec.name_source:
+                    if isdefined(getattr(self.inputs, ns)):
+                        name_source = ns
+                        break
+            else:
+                name_source = trait_spec.name_source
+            _, base, _ = split_filename(getattr(self.inputs, name_source))
+            retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval

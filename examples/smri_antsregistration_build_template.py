@@ -110,6 +110,7 @@ datasource.inputs.InitialTemplateInputs=InitialTemplateInputs
 datasource.inputs.ListOfImagesDictionaries=ListOfImagesDictionaries
 datasource.inputs.registrationImageTypes=registrationImageTypes
 datasource.inputs.interpolationMapping=interpolationMapping
+datasource.inputs.sort_filelist = True
 
 """
 5. Template is initialized by a simple average in this simple example,

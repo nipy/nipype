@@ -373,10 +373,10 @@ class EPIDeWarpInputSpec(FSLCommandInputSpec):
                     argstr='--dph %s', mandatory=True)
     exf_file = File(exists=True,
                     desc='example func volume (or use epi)',
-                    argstr='--exf %s', mandatory=False)
+                    argstr='--exf %s')
     epi_file = File(exists=True,
                     desc='EPI volume to unwarp',
-                    argstr='--epi %s', mandatory=False)
+                    argstr='--epi %s')
     tediff = traits.Float(2.46, usedefault=True,
                           desc='difference in B0 field map TEs',
                           argstr='--tediff %s')

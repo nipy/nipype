@@ -254,7 +254,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/s%s_%04d%s.img'
 datasource.inputs.template_args = info
-
+datasource.inputs.sort_filelist = True
 
 
 """

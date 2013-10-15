@@ -154,6 +154,7 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 datasource.inputs.base_directory = data_dir
+datasource.inputs.sort_filelist = True
 
 """
 FreeSurferSource nodes are used to retrieve a number of image

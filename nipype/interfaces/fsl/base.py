@@ -240,9 +240,9 @@ class FSLCommand(CommandLine):
                                 use_ext=False, newpath=cwd)
         return fname
 
-    @property
-    def version(self):
-        return Info.version()
+    def _overload_extension(self, value):
+        return value + Info.output_type_to_ext(self.inputs.output_type)
+
 
 
 def check_fsl():

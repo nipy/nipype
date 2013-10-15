@@ -263,6 +263,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 """We need to create a separate workflow to make the DARTEL template
 """
@@ -274,7 +275,7 @@ datasource_dartel = pe.MapNode(interface=nio.DataGrabber(infields=['subject_id']
 datasource_dartel.inputs.base_directory = data_dir
 datasource_dartel.inputs.template = '%s/%s.nii'
 datasource_dartel.inputs.template_args = dict(struct=[['subject_id','struct']])
-
+datasource_dartel.inputs.sort_filelist = True
 datasource_dartel.inputs.subject_id = subject_list
 
 """Here we make sure that struct files have names corresponding to the subject ids.
@@ -484,6 +485,7 @@ l2source.inputs.template=os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
+l2source.inputs.sort_filelist = True
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a
