@@ -39,7 +39,7 @@ datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = dict(struct=[['subject_id', 'struct']])
 datasource.inputs.subject_id = subject_list
-
+datasource.inputs.sort_filelist = True
 """
 Run recon-all
 """

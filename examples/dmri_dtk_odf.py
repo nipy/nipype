@@ -109,6 +109,7 @@ datasource.inputs.base_directory = os.path.abspath('data')
 
 datasource.inputs.field_template = dict(dwi='%s/%s.nii')
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 
 """

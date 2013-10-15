@@ -123,6 +123,7 @@ datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = dict(func=[['subject_id',
                                               ['f3','f5','f7','f10']]])
 datasource.inputs.subject_id = 's1'
+datasource.inputs.sort_filelist = True
 
 main_workflow.connect(datasource, 'func', preprocessing, 'realign.in_files')
 

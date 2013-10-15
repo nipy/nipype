@@ -104,6 +104,7 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
     l2source.inputs.template_args = dict(CFFfiles=[['group_id']])
     l2source.inputs.template=op.join(output_dir,'%s/cff/*/connectome.cff')
     l2source.inputs.base_directory = data_dir
+    l2source.inputs.sort_filelist = True
 
     l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles']), name='l2inputnode')
     MergeCNetworks = pe.Node(interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
@@ -171,6 +172,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/cff/*/connectome.cff'),
      CSVmatrices=op.join(output_dir,'%s/cmatrices_csv/*/*.csv'), CSVnodal=op.join(output_dir,'%s/nxcsv/*/*nodal*.csv'),
      CSVglobal=op.join(output_dir,'%s/nxcsv/*/*global*.csv'), CSVfibers=op.join(output_dir,'%s/fiber_csv/*/*fibers*.csv'))
+    l2source.inputs.sort_filelist = True
 
     l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles',
     'CSVfibers', 'CSVmatrices', 'CSVnodal', 'CSVglobal', 'network_file']), name='l2inputnode')
@@ -268,6 +270,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles']), name='l3source')
     l3source.inputs.template_args = dict(CFFfiles=[['group_id','group_id']])
     l3source.inputs.template=op.join(output_dir,'%s/%s.cff')
+    l3source.inputs.sort_filelist = True
 
     l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs']), name='l3inputnode')
 
@@ -326,6 +329,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
 
 	l3source.inputs.field_template=dict(CFFfiles=op.join(output_dir,'%s/*.cff'), CSVnodemetrics=op.join(output_dir,'%s/node_csv/*.csv'),
 	CSVglobalmetrics=op.join(output_dir,'%s/global_csv/*.csv'), CSVmatrices=op.join(output_dir,'%s/cmatrices_csv/*/*.csv'))
+    l3source.inputs.sort_filelist = True
 
 	l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVnodemetrics', 'Group_CSVglobalmetrics', 'Group_CSVmatrices']), name='l3inputnode')
 
@@ -410,6 +414,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
         fibmean=op.join(output_dir,'%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir,'%s/fiber_length_std/*/*%s*.mat'))
     l4source_grp1.inputs.base_directory = output_dir
     l4source_grp1.inputs.template_args = l4info
+    l4source_grp1.inputs.sort_filelist = True
 
     l4source_grp2 = l4source_grp1.clone(name='l4source_grp2')
 
