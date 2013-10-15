@@ -1048,7 +1048,7 @@ class ExtractMainComponent(CommandLine):
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.white')
     >>> mcmp.cmdline
-    'mris_extract_main_component lh.white'
+    'mris_extract_main_component lh.white lh.white_maincmp'
 
     """    
 

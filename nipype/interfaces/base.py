@@ -1377,15 +1377,12 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
                                                           runtime.environ))
-        runtime = self._run_command(runtime,output=self.inputs.terminal_output)
+        runtime = run_command(runtime, output=self.inputs.terminal_output)
         if runtime.returncode is None or \
                         runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
-
-    def _run_command(self, runtime, output):
-        return run_command(runtime, output=output)
 
     def _exists_in_path(self, cmd, environ):
         '''

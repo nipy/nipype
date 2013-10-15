@@ -748,7 +748,14 @@ class ReconAll(CommandLine):
         outputs['subjects_dir'] = subjects_dir
         return outputs
 
-    def _resume_cmdline(self):
+    
+    def cmdline(self):
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        if not os.path.isdir(
+            os.path.join(subjects_dir,self.inputs.subject_id,'mri')):
+            return super(ReconAll, self).cmdline
         self._check_mandatory_inputs()
         skip = ['T1_files']
         subjects_dir = self.inputs.subjects_dir
@@ -770,20 +777,10 @@ class ReconAll(CommandLine):
         self.inputs.directive = directive
         allargs = self._parse_inputs(skip=skip)
         allargs.insert(0, self.cmd)
-        return ' '.join(allargs)
+        cmd = ' '.join(allargs)
+        iflogger.info('resume recon-all : %s'%cmd)
+        return cmd
     
-    def _run_command(self, runtime, output):
-        if isdefined(self.inputs.subjects_dir):
-            subjects_dir = self.inputs.subjects_dir
-        else:
-            subjects_dir = self._gen_subjects_dir()
-        if os.path.isdir(os.path.join(subjects_dir,
-                                      self.inputs.subject_id,'mri')):
-            setattr(runtime, 'cmdline', self._resume_cmdline())
-            iflogger.info('resume recon-all : %s'%runtime.cmdline)
-        runtime = run_command(runtime, output=self.inputs.terminal_output)
-        return super(ReconAll,self)._run_command(runtime, output)
-
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
