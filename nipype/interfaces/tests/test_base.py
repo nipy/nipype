@@ -8,6 +8,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                         assert_true, assert_false, with_setup, package_check,
                         skipif)
 import nipype.interfaces.base as nib
+from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
 
@@ -170,6 +171,26 @@ def test_deprecation():
     yield assert_true, not_raised
     yield assert_equal, spec_instance.foo, Undefined
     yield assert_equal, spec_instance.bar, 1
+
+def test_namesource():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+    class spec2(nib.CommandLineInputSpec):
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=2)
+        doo = nib.File(exists=True, argstr="%s", position=1)
+    class TestName(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec2
+    testobj = TestName()
+    testobj.inputs.doo = tmp_infile
+    yield assert_true, '%s_generated' % nme in testobj.cmdline
+    testobj.inputs.moo = "my_%s_template"
+    yield assert_true, 'my_%s_template' % nme in testobj.cmdline
+    os.chdir(pwd)
+    teardown_file(tmpd)
 
 def checknose():
     """check version of nose for known incompatability"""
