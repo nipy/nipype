@@ -1032,8 +1032,8 @@ class ExtractMainComponentInputSpec(CommandLineInputSpec):
         exists=True, mandatory=True, argstr='%s', position=1,
         desc='input surface file')
     out_file = File(
-        '%s_maincmp', usedefault=True,
-        name_source='in_file', argstr='%s', position=2,
+        name_template ='%s.maincmp', name_source='in_file',
+        argstr='%s', position=2, keep_extension = True,
         desc='surface containing main component')
 
 class ExtractMainComponentOutputSpec(TraitedSpec):
@@ -1046,9 +1046,9 @@ class ExtractMainComponent(CommandLine):
     --------
 
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
-    >>> mcmp = ExtractMainComponent(in_file='lh.white')
+    >>> mcmp = ExtractMainComponent(in_file='lh.pial')
     >>> mcmp.cmdline
-    'mris_extract_main_component lh.white lh.white_maincmp'
+    'mris_extract_main_component lh.pial lh.pial.maincmp'
 
     """    
 

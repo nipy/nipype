@@ -626,7 +626,7 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.subjects_dir = '.'
     >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline
-    'recon-all -i structural.nii -all -subjid foo -sd .'
+    'recon-all -all -i structural.nii -subjid foo -sd .'
 
     """
 
@@ -748,7 +748,7 @@ class ReconAll(CommandLine):
         outputs['subjects_dir'] = subjects_dir
         return outputs
 
-    
+    @property
     def cmdline(self):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
