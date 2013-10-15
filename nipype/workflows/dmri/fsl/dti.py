@@ -5,6 +5,8 @@ import nipype.interfaces.utility as util
 import nipype.interfaces.fsl as fsl
 import os
 
+#backwards compatibility
+from epi import create_eddy_correct_pipeline
 
 def transpose(samples_over_fibres):
     import numpy as np
