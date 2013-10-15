@@ -55,8 +55,9 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
 
 
 class SliceTimingOutputSpec(TraitedSpec):
-    timecorrected_files = OutputMultiPath(File(exist=True,
-                                             desc='slice time corrected files'))
+    timecorrected_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
+                                                        File(exists=True)),
+                                          desc='slice time corrected files')
 
 
 class SliceTiming(SPMCommand):
@@ -100,15 +101,11 @@ class SliceTiming(SPMCommand):
 
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
-            run = []
             if isinstance(f, list):
-                for inner_f in filename_to_list(f):
-                    run.append(fname_presuffix(inner_f,
-                                               prefix=self.inputs.out_prefix))
+                run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
             else:
-                realigned_run = fname_presuffix(f,
-                                                prefix=self.inputs.out_prefix)
-            outputs['timecorrected_files'].append(realigned_run)
+                run = fname_presuffix(f, prefix=self.inputs.out_prefix)
+            outputs['timecorrected_files'].append(run)
         return outputs
 
 
