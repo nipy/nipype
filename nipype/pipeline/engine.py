@@ -13,7 +13,10 @@ The `Pipeline` class provides core functionality for batch processing.
 """
 
 from datetime import datetime
-from collections import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 from copy import deepcopy
 import cPickle
 from glob import glob
@@ -1844,8 +1847,8 @@ class JoinNode(Node):
         """
         # create the new join item fields
         idx = self._next_slot_index
-        newfields = {field: self._add_join_item_field(field, idx)
-            for field in self.joinfield}
+        newfields = dict([(field, self._add_join_item_field(field, idx))
+                          for field in self.joinfield])
         # increment the join slot index
         logger.debug("Added the %s join item fields %s." % (self, newfields))
         self._next_slot_index += 1
