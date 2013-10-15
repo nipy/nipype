@@ -61,7 +61,7 @@ from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
-from nipype.interfaces.fsl.utils import EPIDeWarp
+from nipype.interfaces.fsl import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces.utility import Merge, IdentityInterface

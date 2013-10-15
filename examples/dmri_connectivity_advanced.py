@@ -121,6 +121,7 @@ datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 """
 The input node and Freesurfer sources declared here will be the main

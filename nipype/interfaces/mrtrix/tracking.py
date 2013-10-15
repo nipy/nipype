@@ -71,16 +71,16 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
-    seed_file = File(exists=True, argstr='-seed %s', mandatory=False, position=2, desc='seed file')
+    seed_file = File(exists=True, argstr='-seed %s', position=2, desc='seed file')
     seed_spec = traits.List(traits.Float, desc='seed specification in mm and radius (x y z r)', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    include_file = File(exists=True, argstr='-include %s', mandatory=False, position=2, desc='inclusion file')
+    include_file = File(exists=True, argstr='-include %s', position=2, desc='inclusion file')
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    exclude_file = File(exists=True, argstr='-exclude %s', mandatory=False, position=2, desc='exclusion file')
+    exclude_file = File(exists=True, argstr='-exclude %s', position=2, desc='exclusion file')
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    mask_file = File(exists=True, argstr='-exclude %s', mandatory=False, position=2, desc='mask file. Only tracks within mask.')
+    mask_file = File(exists=True, argstr='-exclude %s', position=2, desc='mask file. Only tracks within mask.')
     mask_spec = traits.List(traits.Float, desc='Mask specification in mm and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
 

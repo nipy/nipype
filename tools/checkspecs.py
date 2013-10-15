@@ -178,7 +178,8 @@ class InterfaceChecker(object):
                         'nohash', 'argstr', 'position', 'mandatory',
                         'copyfile', 'usedefault', 'sep', 'hash_files',
                         'deprecated', 'new_name', 'min_ver', 'max_ver',
-                        'name_source', 'keep_extension', 'units']
+                        'name_source', 'name_template', 'keep_extension',
+                        'units']
         in_built = ['type', 'copy', 'parent', 'instance_handler',
                     'comparison_mode', 'array', 'default', 'editor']
         bad_specs = []
@@ -205,6 +206,9 @@ class InterfaceChecker(object):
                     if key not in allowed_keys + classinst._additional_metadata\
                         + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
+                    if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
+                        bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
+
             if not classinst.output_spec:
                 continue
             for traitname, trait in classinst.output_spec().traits(transient=None).items():

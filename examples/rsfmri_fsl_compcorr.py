@@ -64,6 +64,7 @@ datasource.inputs.template = '%s/%s.nii'
 info = dict(func=[['subject_id', ['f3',]]])
 
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 """
 Store significant result-files in a special directory
