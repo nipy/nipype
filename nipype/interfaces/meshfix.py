@@ -28,15 +28,15 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     dont_clean = traits.Bool(argstr='--no-clean', desc="Don't Clean")
 
-    save_as_stl = traits.Bool(xor= ['save_as_vmrl', 'save_as_freesurfer_mesh'], argstr='--stl', desc="Result is saved in stereolithographic format (.stl)")
-    save_as_vmrl = traits.Bool(argstr='--wrl', xor= ['save_as_stl', 'save_as_freesurfer_mesh'], desc="Result is saved in VRML1.0 format (.wrl)")
+    save_as_stl = traits.Bool(xor= ['save_as_vrml', 'save_as_freesurfer_mesh'], argstr='--stl', desc="Result is saved in stereolithographic format (.stl)")
+    save_as_vrml = traits.Bool(argstr='--wrl', xor= ['save_as_stl', 'save_as_freesurfer_mesh'], desc="Result is saved in VRML1.0 format (.wrl)")
     save_as_freesurfer_mesh = traits.Bool(argstr='--fsmesh', xor= ['save_as_vrml', 'save_as_stl'], desc="Result is saved in freesurfer mesh format")
 
     remove_handles = traits.Bool(argstr='--remove-handles', desc="Remove handles")
 
     uniform_remeshing_steps = traits.Int(argstr='-u %d', requires=['uniform_remeshing_vertices'], desc="Number of steps for uniform remeshing of the whole mesh")
 
-    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', requires=['uniform_remeshing_steps'], desc="Constrains the number of vertices." \
+    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', desc="Constrains the number of vertices." \
 	"Must be used with uniform_remeshing_steps")
 
     laplacian_smoothing_steps = traits.Int(argstr='--smooth %d', desc="The number of laplacian smoothing steps to apply")
@@ -68,7 +68,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
     in_file1 = File(exists=True, argstr="%s", position=1, mandatory=True)
     in_file2 = File(exists=True, argstr="%s", position=2)
     output_type = traits.Enum('off', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
-    out_filename = File(genfile=True, argstr="-o %s", desc='The output filename for the fixed mesh file')
+    out_filename = File(genfile=True, argstr="-o %s", position=-1, desc='The output filename for the fixed mesh file')
 
 class MeshFixOutputSpec(TraitedSpec):
     mesh_file = File(exists=True, desc='The output mesh file')
@@ -133,7 +133,7 @@ class MeshFix(CommandLine):
 	if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
 	    self.inputs.output_type = 'stl'
 	    self.inputs.save_as_stl = True
-	if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
-	    self.inputs.output_type = 'vmrl'
-	    self.inputs.save_as_vmrl = True
-	return name + '_fixed.' + self.inputs.output_type
+	if self.inputs.save_as_vrml or self.inputs.output_type == 'vrml':
+	    self.inputs.output_type = 'vrml'
+	    self.inputs.save_as_vrml = True
+	return op.abspath(name + '_fixed.' + self.inputs.output_type)

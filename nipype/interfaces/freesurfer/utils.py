@@ -1158,7 +1158,7 @@ class TransformSurface2Talairach(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
+        outputs['out_file'] = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -1199,7 +1199,7 @@ class FloodfillSurfaceOutputSpec(TraitedSpec):
     This program floodfills the interior of a surface and writes
     the results into a volume of the specified resolution.
     """
-    surface = File(exists=True, desc='Transformed surface file ')
+    out_file = File(exists=True, desc='Filled volume file')
 
 
 class FloodfillSurface(FSCommand):
