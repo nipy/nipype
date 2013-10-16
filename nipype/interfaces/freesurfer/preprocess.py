@@ -25,8 +25,7 @@ from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined,
-                                    run_command)
+                                    CommandLineInputSpec, isdefined)
 
 
 from ... import logging
