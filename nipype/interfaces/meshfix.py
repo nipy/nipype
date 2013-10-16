@@ -34,9 +34,9 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     remove_handles = traits.Bool(argstr='--remove-handles', desc="Remove handles")
 
-    uniform_remeshing_steps = traits.Int(argstr='-u %d', requires=['uniform_remeshing_vertices'], desc="Number of steps for uniform remeshing of the whole mesh")
+    uniform_remeshing_steps = traits.Int(argstr='-u %d', desc="Number of steps for uniform remeshing of the whole mesh")
 
-    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', desc="Constrains the number of vertices." \
+    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', requires=['uniform_remeshing_steps'], desc="Constrains the number of vertices." \
 	"Must be used with uniform_remeshing_steps")
 
     laplacian_smoothing_steps = traits.Int(argstr='--smooth %d', desc="The number of laplacian smoothing steps to apply")
