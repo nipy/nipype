@@ -12,6 +12,7 @@
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
 import os, os.path as op
+from nipype.interfaces.traits_extension import isdefined
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -54,7 +55,9 @@ class Tracks2Prob(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tract_image'] = op.abspath(self._gen_outfilename())
+        outputs['tract_image'] = self.inputs.out_filename
+        if not isdefined(outputs['tract_image']):
+            outputs['tract_image'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
