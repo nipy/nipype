@@ -372,8 +372,11 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     jobtype = traits.Enum('estwrite', 'est', 'write',
                           desc='one of: est, write, estwrite (opt, estwrite)',
                           usedefault=True)
-    apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
-                               desc='files to apply transformation to (opt)', copyfile=True)
+    apply_to_files = InputMultiPath(traits.Either(File(exists=True),
+                                                  traits.List(File(exists=True))),
+                                    field='subj.resample',
+                                    desc='files to apply transformation to (opt)',
+                                    copyfile=True)
     parameter_file = File(field='subj.matname', mandatory=True,
                           xor=['source', 'template'],
                           desc='normalization parameter file*_sn.mat', copyfile=False)
@@ -486,9 +489,13 @@ class Normalize(SPMCommand):
         elif 'write' in self.inputs.jobtype:
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
-                for imgf in filename_to_list(self.inputs.apply_to_files):
-                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
-
+                filelist = filename_to_list(self.inputs.apply_to_files)
+                for f in filelist:
+                    if isinstance(f, list):
+                        run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
+                    else:
+                        run = [fname_presuffix(f, prefix=self.inputs.out_prefix)]
+                    outputs['normalized_files'].extend(run)
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
                 for imgf in filename_to_list(self.inputs.source):
