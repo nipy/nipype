@@ -149,16 +149,18 @@ class RealignInputSpec(SPMCommandInputSpec):
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
-    in_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
+    modified_in_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
                                              File(exists=True)),
-                               desc='Copies of all files passed to in_files.\
-                                     Headers will have been modified to align all\
-                                     images with the first, or optionally to first\
-                                     do that, extract a mean image, and re-align to\
-                                     that mean image.')
+                                        desc='Copies of all files passed to in_files.\
+                                              Headers will have been modified to align all\
+                                              images with the first, or optionally to first\
+                                              do that, extract a mean image, and re-align to\
+                                              that mean image.')
     realigned_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                     File(exists=True)),
-                                      desc='Realigned files')
+                                      desc='If jobtype is write or estwrite, these will be the\
+                                            resliced files. Otherwise, they will be copies of\
+                                            in_files that have had their headers rewritten.')
     realignment_parameters = OutputMultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
@@ -217,8 +219,10 @@ class Realign(SPMCommand):
                                                                      use_ext=False))
             if not isinstance(imgf, list) and func_is_3d(imgf):
                 break
-        if self.inputs.jobtype = "estimate" or self.inputs.jobtype = "estwrite":
-            outputs['in_files'] = self.inputs.in_files
+        if self.inputs.jobtype == "estimate":
+            outputs['realigned_files'] = self.inputs.in_files
+        if self.inputs.jobtype == "estimate" or self.inputs.jobtype == "estwrite":
+            outputs['modified_in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if isinstance(self.inputs.in_files[0], list):
                 first_image = self.inputs.in_files[0][0]
