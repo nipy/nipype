@@ -779,7 +779,7 @@ class ReconAll(CommandLine):
         cmd = ' '.join(allargs)
         iflogger.info('resume recon-all : %s'%cmd)
         return cmd
-    
+
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
