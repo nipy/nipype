@@ -1028,13 +1028,11 @@ class MakeAverageSubject(FSCommand):
         return outputs
 
 class ExtractMainComponentInputSpec(CommandLineInputSpec):
-    in_file = File(
-        exists=True, mandatory=True, argstr='%s', position=1,
-        desc='input surface file')
-    out_file = File(
-        name_template ='%s.maincmp', name_source='in_file',
-        argstr='%s', position=2, keep_extension = True,
-        desc='surface containing main component')
+    in_file = File(exists=True, mandatory=True, argstr='%s', position=1,
+                   desc='input surface file')
+    out_file = File(name_template='%s.maincmp', name_source='in_file',
+                    argstr='%s', position=2,
+                    desc='surface containing main component')
 
 class ExtractMainComponentOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='surface containing main component')
@@ -1048,9 +1046,9 @@ class ExtractMainComponent(CommandLine):
     >>> from nipype.interfaces.freesurfer import ExtractMainComponent
     >>> mcmp = ExtractMainComponent(in_file='lh.pial')
     >>> mcmp.cmdline
-    'mris_extract_main_component lh.pial lh.pial.maincmp'
+    'mris_extract_main_component lh.pial lh.maincmp'
 
-    """    
+    """
 
     _cmd='mris_extract_main_component'
     input_spec=ExtractMainComponentInputSpec
