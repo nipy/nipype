@@ -206,7 +206,6 @@ class Realign(SPMCommand):
         resliced_mean = self.inputs.write_which[1] > 0
         if isdefined(self.inputs.in_files):
             outputs['realignment_parameters'] = []
-            outputs['in_files'] = self.inputs.in_files
         for imgf in self.inputs.in_files:
             if isinstance(imgf, list):
                 tmp_imgf = imgf[0]
@@ -218,6 +217,8 @@ class Realign(SPMCommand):
                                                                      use_ext=False))
             if not isinstance(imgf, list) and func_is_3d(imgf):
                 break
+        if self.inputs.jobtype = "estimate" or self.inputs.jobtype = "estwrite":
+            outputs['in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if isinstance(self.inputs.in_files[0], list):
                 first_image = self.inputs.in_files[0][0]
