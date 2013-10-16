@@ -58,6 +58,8 @@ class Tracks2Prob(CommandLine):
         outputs['tract_image'] = self.inputs.out_filename
         if not isdefined(outputs['tract_image']):
             outputs['tract_image'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['tract_image'] = os.path.abspath(outputs['tract_image'])
         return outputs
 
     def _gen_filename(self, name):
