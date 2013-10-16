@@ -25,7 +25,7 @@ class Info(object):
     """
     __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii',
-              'AFNI': '+orig.BRIK',
+              'AFNI': '',
               'NIFTI_GZ': '.nii.gz'}
 
     @staticmethod
@@ -149,62 +149,73 @@ class AFNIBaseCommand(CommandLine):
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
 
-    def _gen_fname(self, basename, cwd=None, suffix='_afni', change_ext=True, prefix=''):
-        """Generate a filename based on the given parameters.
-
-        The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extensions specified in
-        <instance>inputs.outputtype.
-
-        Parameters
-        ----------
-        basename : str
-            Filename to base the new filename on.
-        cwd : str
-            Path to prefix to the new filename. (default is os.getcwd())
-        suffix : str
-            Suffix to add to the `basename`.  (default is '_fsl')
-        change_ext : bool
-            Flag to change the filename extension to the FSL output type.
-            (default True)
-
-        Returns
-        -------
-        fname : str
-            New filename based on given parameters.
-
-        """
-
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
-            raise ValueError(msg)
-        if cwd is None:
-            cwd = os.getcwd()
-        ext = Info.outputtype_to_ext(self.inputs.outputtype)
-        if change_ext:
-            if suffix:
-                suffix = ''.join((suffix, ext))
-            else:
-                suffix = ext
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd, prefix=prefix)
-        return fname
+#     def _gen_fname(self, basename, cwd=None, suffix='_afni', change_ext=True, prefix=''):
+#         """Generate a filename based on the given parameters.
+# 
+#         The filename will take the form: cwd/basename<suffix><ext>.
+#         If change_ext is True, it will use the extensions specified in
+#         <instance>inputs.outputtype.
+# 
+#         Parameters
+#         ----------
+#         basename : str
+#             Filename to base the new filename on.
+#         cwd : str
+#             Path to prefix to the new filename. (default is os.getcwd())
+#         suffix : str
+#             Suffix to add to the `basename`.  (default is '_fsl')
+#         change_ext : bool
+#             Flag to change the filename extension to the FSL output type.
+#             (default True)
+# 
+#         Returns
+#         -------
+#         fname : str
+#             New filename based on given parameters.
+# 
+#         """
+# 
+#         if basename == '':
+#             msg = 'Unable to generate filename for command %s. ' % self.cmd
+#             msg += 'basename is not set!'
+#             raise ValueError(msg)
+#         if cwd is None:
+#             cwd = os.getcwd()
+#         ext = Info.outputtype_to_ext(self.inputs.outputtype)
+#         if change_ext:
+#             if suffix:
+#                 suffix = ''.join((suffix, ext))
+#             else:
+#                 suffix = ext
+#         fname = fname_presuffix(basename, suffix=suffix,
+#                                 use_ext=False, newpath=cwd, prefix=prefix)
+#         return fname
 
 
 class AFNICommandInputSpec(AFNIBaseCommandInputSpec):
-    out_file = File("%s_afni", desc='output image file name',
-                    argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'],
-                    name_source="in_file", usedefault=True)
+    out_file = File(name_template="%s_afni", desc='output image file name',
+                    argstr='-prefix %s',
+                    name_source=["in_file"])
 
 
 class AFNICommand(AFNIBaseCommand):
     input_spec = AFNICommandInputSpec
-
+    
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
 
+    def _list_outputs(self):
+        outputs = super(AFNICommand, self)._list_outputs()
+        metadata = dict(name_source=lambda t: t is not None)
+        out_names = self.inputs.traits(**metadata).keys()
+        if out_names:
+            for name in out_names:
+                if outputs[name]:
+                    _,_,ext = split_filename(outputs[name])
+                    if ext == "":
+                        outputs[name] = outputs[name] + "+orig.BRIK" 
+        return outputs
 
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',

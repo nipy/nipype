@@ -25,25 +25,13 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class To3DInputSpec(AFNICommandInputSpec):
-    out_file = File("%s", desc='output image file name',
-                    argstr='-prefix %s', name_source=["in_folder", "infolder"],
-                    usedefault=True)
-    in_xor = ["infolder", "in_folder"]
+    out_file = File(name_template="%s", desc='output image file name',
+                    argstr='-prefix %s', name_source=["in_folder"])
     in_folder = Directory(desc='folder with DICOM images to convert',
                           argstr='%s/*.dcm',
                           position=-1,
                           mandatory=True,
-                          exists=True,
-                          xor=in_xor)
-
-    infolder = Directory(desc='folder with DICOM images to convert',
-                         argstr='%s/*.dcm',
-                         position=-1,
-                         mandatory=True,
-                         exists=True,
-                         deprecated='0.8',
-                         new_name="in_folder",
-                         xor=in_xor)
+                          exists=True)
 
     filetype = traits.Enum('spgr', 'fse', 'epan', 'anat', 'ct', 'spct',
                            'pet', 'mra', 'bmap', 'diff',
