@@ -1450,10 +1450,13 @@ class CommandLine(BaseInterface):
     def _filename_from_source(self, name):
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
-        if not isdefined(retval):
+        if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
-            name_template = trait_spec.name_template
+            if isdefined(retval) and "%s" in retval:
+                name_template = retval
+            else:
+                name_template = trait_spec.name_template
             if not name_template:
                 name_template = "%s_generated"
             if isinstance(trait_spec.name_source, list):
