@@ -1663,9 +1663,10 @@ class Randomise(FSLCommand):
 class GLMInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
                    desc='input file name (text matrix or 3D/4D image file)')
-    out_file = File(argstr='-o %s', genfile=True, position=3,
+    out_file = File(name_template="%s_glm.txt", argstr='-o %s', position=3,
                     desc=('filename for GLM parameter estimates'
-                          + ' (GLM betas)'))
+                          + ' (GLM betas)'),
+                    name_source="in_file", keep_extension=True)
     design = File(exists=True, argstr='-d %s', mandatory=True, position=2,
                   desc=('file name of the GLM design matrix (text time'
                         + ' courses for temporal regression or an image'
@@ -1761,7 +1762,7 @@ class GLM(FSLCommand):
     >>> import nipype.interfaces.fsl as fsl
     >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii')
     >>> glm.cmdline
-    'fsl_glm -d maps.nii -i functional.nii -o functional_glm.txt'
+    'fsl_glm -i functional.nii -d maps.nii -o functional_glm.txt'
 
     """
     _cmd = 'fsl_glm'
@@ -1813,7 +1814,3 @@ class GLM(FSLCommand):
 
         return outputs
 
-    def _gen_filename(self, name):
-        if name in ['out_file']:
-            return self._gen_fname(self.inputs.in_file, suffix='_glm')
-        return None
