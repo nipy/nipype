@@ -84,8 +84,8 @@ class MRConvert(CommandLine):
 class DWI2TensorInputSpec(CommandLineInputSpec):
     in_file = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
                              position=-2, desc='Diffusion-weighted images')
-    out_filename = File(genfile=True, argstr='%s', position=-1,
-                        desc='Output tensor filename')
+    out_filename = File(name_template="%s_tensor.mif", name_source="in_file", output_name="tensor",
+                        argstr='%s', posidesc='Output tensor filename', position=-1)
     encoding_file = File(argstr='-grad %s', position= 2,
                          desc=('Encoding file supplied as a 4xN text file with '
                                'each line is in the format [ X Y Z b ], where '
@@ -114,26 +114,14 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
+    >>> dwi2tensor.cmdline
+    'dwi2tensor -grad encoding.txt dwi.mif dwi_tensor.mif'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
 
     _cmd = 'dwi2tensor'
     input_spec=DWI2TensorInputSpec
     output_spec=DWI2TensorOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['tensor'] = op.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file[0])
-        return name + '_tensor.mif'
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
