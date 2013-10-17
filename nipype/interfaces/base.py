@@ -1482,11 +1482,14 @@ class CommandLine(BaseInterface):
 
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
-        if out_names:
+        traits = self.inputs.traits(**metadata)
+        if traits:
             outputs = self.output_spec().get()
-            for name in out_names:
-                outputs[name] = \
+            for name, trait_spec in traits.iteritems():
+                out_name = name
+                if trait_spec.output_name != None:
+                    out_name = trait_spec.output_name
+                outputs[out_name] = \
                     os.path.abspath(self._filename_from_source(name))
             return outputs
 
