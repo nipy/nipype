@@ -299,9 +299,9 @@ class Resample(AFNICommand):
     >>> resample = afni.Resample()
     >>> resample.inputs.in_file = 'functional.nii'
     >>> resample.inputs.orientation= 'RPI'
-    >>> resample.inputs.outputtype = "NIFIT"
+    >>> resample.inputs.outputtype = "NIFTI"
     >>> resample.cmdline
-    '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
+    '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
     >>> res = resample.run() # doctest: +SKIP
 
     """
@@ -531,7 +531,7 @@ class Automask(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
-    '3dAutomask -apply_prefix .../functional_masked.nii -dilate 1 -prefix .../functional_mask.nii functional.nii'
+    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
@@ -548,8 +548,8 @@ class VolregInputSpec(AFNICommandInputSpec):
                    position=-1,
                    mandatory=True,
                    exists=True)
-    out_file = File("%s_volreg", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File(name_template="%s_volreg", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file")
 
     basefile = File(desc='base file for registration',
                     argstr='-base %s',
@@ -597,7 +597,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile .../functional.1D -prefix .../functional_volreg.nii -zpad 4 functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1112,10 +1112,9 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    position=-2,
                    mandatory=True,
                    exists=True)
-    out_file = File("%s_maskave.1D", desc='output image file name',
+    out_file = File(name_template="%s_maskave.1D", desc='output image file name',
                     keep_extension=True,
-                    argstr="> %s", name_source="in_file", usedefault=True,
-                    position=-1)
+                    argstr="> %s", name_source="in_file", position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
                 position=1,
@@ -1141,7 +1140,7 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.mask= 'seed_mask.nii'
     >>> maskave.inputs.quiet= True
     >>> maskave.cmdline #doctest: +ELLIPSIS
-    '3dmaskave -mask seed_mask.nii -quiet functional.nii > .../functional_maskave.1D'
+    '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
     >>> res = maskave.run() # doctest: +SKIP
 
     """
@@ -1480,8 +1479,8 @@ class CalcInputSpec(AFNICommandInputSpec):
                      argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
                      argstr=' -b %s', position=1, exists=True)
-    out_file = File("%s_calc", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file_a", usedefault=True)
+    out_file = File(name_template="%s_calc", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file_a")
     expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
                       mandatory=True)
     start_idx = traits.Int(desc='start index for in_file_a',
@@ -1510,7 +1509,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
     >>> calc.inputs.outputtype = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
-    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii'
+    '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
     """
 
@@ -1543,9 +1542,8 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = File('%s_blur', desc='output to the file', argstr='-prefix %s',
-                    name_source='in_file', position=-1, genfile=True,
-                    usedefault=True)
+    out_file = File(name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
+                    name_source='in_file', position=-1)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1584,7 +1582,7 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
     >>> bim.cmdline #doctest: +ELLIPSIS
-    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix .../functional_blur+orig.BRIK'
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
@@ -1840,8 +1838,8 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         position=-1,
         mandatory=True,
         exists=True)
-    out_file = File("%s.nii", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file", usedefault=True)
+    out_file = File(name_template="%s.nii", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file")
     hash_files = False
 
 class AFNItoNIFTI(AFNICommand):
@@ -1858,7 +1856,7 @@ class AFNItoNIFTI(AFNICommand):
     >>> a2n.inputs.in_file = 'afni_output.3D'
     >>> a2n.inputs.out_file =  'afni_output.nii'
     >>> a2n.cmdline
-    '3dAFNItoNIFTI afni_output.3D'
+    '3dAFNItoNIFTI -prefix afni_output.nii afni_output.3D'
 
     """
 

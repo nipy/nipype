@@ -13,12 +13,6 @@ from ..base import (
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-###################################
-#
-# NEW_AFNI base class
-#
-###################################
-
 
 class Info(object):
     """Handle afni output type and version information.
@@ -117,7 +111,7 @@ class AFNICommand(CommandLine):
 
 
     def __init__(self, **inputs):
-        super(CommandLine, self).__init__(**inputs)
+        super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
 
         if self._outputtype is None:
@@ -150,8 +144,6 @@ class AFNICommand(CommandLine):
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
         
-
-    
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
