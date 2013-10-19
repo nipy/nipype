@@ -1337,7 +1337,7 @@ class Node(WorkflowBase):
                                                               hashed_inputs)
                 cannot_rerun = (str2bool(
                     self.config['execution']['stop_on_first_rerun'])
-                    and (self.overwrite is not None
+                    and not (self.overwrite == None
                          and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
