@@ -1472,23 +1472,6 @@ class CommandLine(BaseInterface):
             if trait_spec.keep_extension and ext:
                 return retval
             return self._overload_extension(retval)
-        elif isdefined(retval):
-            if "%s" in retval:
-                if isinstance(trait_spec.name_source, list):
-                    for ns in trait_spec.name_source:
-                        if isdefined(getattr(self.inputs, ns)):
-                            name_source = ns
-                            break
-                else:
-                    name_source = trait_spec.name_source
-                if name_source.endswith(os.path.sep):
-                    name_source = name_source[:-len(os.path.sep)]
-                _, base, _ = split_filename(getattr(self.inputs, name_source))
-                retval = os.path.abspath(retval % base)
-            _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
-                return retval
-            return self._overload_extension(retval)
         return retval
 
     def _gen_filename(self, name):
