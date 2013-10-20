@@ -701,6 +701,8 @@ connected.
         if workingdir is None:
             workingdir = os.getcwd()
         report_dir = os.path.join(workingdir, name)
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
         shutil.copyfile(os.path.join(os.path.dirname(__file__),
                                      'report_template.html'),
                         os.path.join(report_dir, 'index.html'))

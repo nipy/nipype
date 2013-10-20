@@ -1136,11 +1136,12 @@ def topological_sort(graph, depth_first=True):
     nodes=[]
     groups=[]
     group=0
-    while nodesort:
-        desc = nx.descendants(graph, nodesort[0])
+    G = nx.Graph()
+    G.add_nodes_from(graph.nodes())
+    G.add_edges_from(graph.edges())
+    components = nx.connected_components(G)
+    for desc in components:
         group += 1
-        nodes.append(nodesort.pop(0))
-        groups.append(group)
         indices = []
         for node in desc:
             indices.append(nodesort.index(node))
