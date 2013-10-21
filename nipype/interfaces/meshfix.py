@@ -16,7 +16,6 @@ import os
 import os.path as op
 from nipype.utils.filemanip import split_filename
 
-
 def mask_from_labels_fn(in_file, label_values):
     import os.path as op
     import numpy as np
@@ -294,17 +293,31 @@ def decouple_ventricles_fn(ventricles, white_matter):
         intersections = check_intersecting_fn(white_matter, ventricles)
     return ventricles
 
-def decouple_cerebellum_fn(cerebellum, gray_matter):
+def decouple_input_from_GM_fn(mesh_file, gray_matter):
     from nipype.interfaces.meshfix import (check_intersecting_fn,
                                            cut_outer_fn, decouple_outin_fn, clean_mesh_fn)
 
-    intersections = check_intersecting_fn(gray_matter, cerebellum)
+    intersections = check_intersecting_fn(gray_matter, mesh_file)
     while(intersections):
-        cerebellum = decouple_outin_fn(cerebellum, gray_matter)
-        cerebellum = cut_outer_fn(cerebellum, gray_matter)
-        cerebellum = clean_mesh_fn(cerebellum)
-        intersections = check_intersecting_fn(gray_matter, cerebellum)
-    return cerebellum
+        mesh_file = decouple_outin_fn(mesh_file, gray_matter)
+        mesh_file = cut_outer_fn(mesh_file, gray_matter)
+        mesh_file = clean_mesh_fn(mesh_file)
+        intersections = check_intersecting_fn(gray_matter, mesh_file)
+    return mesh_file
+
+
+def decouple_outout_cutin_fn(outer_mesh, inner_mesh):
+    from nipype.interfaces.meshfix import (check_intersecting_fn,
+                                           cut_inner_fn, decouple_outout_fn, clean_mesh_fn)
+
+    intersections = check_intersecting_fn(outer_mesh, inner_mesh)
+    while(intersections):
+        outer_mesh = decouple_outout_fn(outer_mesh, inner_mesh)
+        outer_mesh = cut_inner_fn(outer_mesh, inner_mesh)
+        outer_mesh = clean_mesh_fn(outer_mesh)
+        intersections = check_intersecting_fn(outer_mesh, inner_mesh)
+    return outer_mesh
+
 
 class MeshFixInputSpec(CommandLineInputSpec):
     number_of_biggest_shells = traits.Int(
