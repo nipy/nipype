@@ -591,17 +591,22 @@ class Resample(FSCommand):
 
 
 class ReconAllInputSpec(CommandLineInputSpec):
-    subject_id = traits.Str("recon_all", argstr='-subjid %s', desc='subject name',
-                            usedefault=True)
+    subject_id = traits.Str("recon_all", argstr='-subjid %s',
+                            desc='subject name', usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
-                            'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
-                            'autorecon3', 'localGI', 'qcache', argstr='-%s',
-                            desc='process directive', usedefault=True,
-                            position=0)
-    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
+                            'autorecon2-wm', 'autorecon2-inflate1',
+                            'autorecon2-perhemi', 'autorecon3', 'localGI',
+                            'qcache', argstr='-%s', desc='process directive',
+                            usedefault=True, position=0)
+    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process',
+                       argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
-    subjects_dir = Directory(exists=True, argstr='-sd %s',
+    T2_file = File(exists=True, argstr="-T2 %s", min_ver='5.3.0',
+                   desc='Use a T2 image to refine the cortical surface')
+    openmp = traits.Int(argstr="-openmp %d",
+                        desc="Number of processors to use in parallel")
+    subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
@@ -742,29 +747,44 @@ class ReconAll(CommandLine):
         outputs = self._outputs().get()
 
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir, hemi=hemi)._list_outputs())
+                                        subjects_dir=subjects_dir,
+                                        hemi=hemi)._list_outputs())
         outputs['subject_id'] = self.inputs.subject_id
         outputs['subjects_dir'] = subjects_dir
         return outputs
 
+    def _is_resuming(self):
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id,
+                                      'mri')):
+            return True
+        return False
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'T1_files':
+            if self._is_resuming():
+                return ''
+        return super(ReconAll, self)._format_arg(name, trait_spec, value)
+
     @property
     def cmdline(self):
+        cmd = super(ReconAll, self).cmdline
+        if not self._is_resuming():
+            return cmd
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        if not os.path.isdir(
-            os.path.join(subjects_dir,self.inputs.subject_id,'mri')):
-            return super(ReconAll, self).cmdline
-        self._check_mandatory_inputs()
-        skip = ['T1_files']
-        subjects_dir = self.inputs.subjects_dir
-        if not isdefined(subjects_dir):
-            subjects_dir = self._gen_subjects_dir()
+        #cmd = cmd.replace(' -all ', ' -make all ')
+        iflogger.info('Overriding recon-all directive')
         flags = []
         directive = 'all'
         for idx, step in enumerate(self._steps):
             step, outfiles = step
-            if all([os.path.exists(os.path.join(subjects_dir,self.inputs.subject_id,f)) for f  in outfiles]):
+            if all([os.path.exists(os.path.join(subjects_dir,
+                                                self.inputs.subject_id,f)) for
+                    f in outfiles]):
                 flags.append('-no%s'%step)
                 if idx > 4:
                     directive = 'autorecon2'
@@ -772,14 +792,14 @@ class ReconAll(CommandLine):
                     directive = 'autorecon3'
             else:
                 flags.append('-%s'%step)
-        self.inputs.args = ' '.join([self.inputs.args] + flags)
-        self.inputs.directive = directive
-        allargs = self._parse_inputs(skip=skip)
-        allargs.insert(0, self.cmd)
-        cmd = ' '.join(allargs)
-        iflogger.info('resume recon-all : %s'%cmd)
+        cmd = cmd.replace(' -%s ' % self.inputs.directive, ' -%s ' % directive)
+        cmd += ' ' + ' '.join(flags)
+        iflogger.info('resume recon-all : %s' % cmd)
         return cmd
 
+    def _run_interface(self, runtime, correct_return_codes=[0]):
+        runtime.returncode = 0
+        return runtime
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
