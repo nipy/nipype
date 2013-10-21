@@ -1512,48 +1512,46 @@ class BETSurfaceInputSpec(FSLCommandInputSpec):
     # will put something on the end
     t1_file = File(exists=True,
                    desc='T1 input file',
-                   argstr='%s', position=1, mandatory=True)
+                   argstr='%s', position=-5, mandatory=True)
     t2_file = File(exists=True,
                    desc='T2 input file', 
-                   argstr='%s', position=2)
+                   argstr='%s', position=-4)
+    meshfile = File(position=-3, argstr='%s', desc="path/name of vtk mesh file")
     t1_to_standard_matrix = File(exists=True,
                    desc='Registration matrix between T1 and standard space', 
                    argstr='%s', position=-2, mandatory=True)
-
-    out_file = File(desc='name of output skull stripped image',
-                    argstr='%s', position=-11, genfile=True, hash_files=False)
-    t1_only = traits.Bool(desc='Extraction with t1 only',
+    out_basename = File(desc='Base output filename',
+                    argstr='%s', position=-1, genfile=True)
+    t1_only = traits.Bool(position=0, desc='Extraction with t1 only',
                           argstr='--t1only')
-    outline = traits.Bool(desc='Generates all surface outlines',
+    outline = traits.Bool(position=2, desc='Generates all surface outlines',
                        argstr="--outline")
-    mask = traits.Bool(desc='Generates binary masks from the meshes',
+    mask = traits.Bool(position=3, desc='Generates binary masks from the meshes',
                        argstr="--mask")
-    skullmask = traits.Bool(desc='Generates skull binary mask',
-                       argstr="--mask")
-    retesellate_mesh = traits.Int(argstr='--increased_precision %d',
+    skullmask = traits.Bool(position=4, ddesc='Generates skull binary mask',
+                       argstr="--skull mask")
+    retesellate_mesh = traits.Int(position=5, argstr='--increased_precision %d',
                         desc="Retessellates the meshes the indicated number of times")
 
 
 class BETSurfaceOutputSpec(TraitedSpec):
-    out_file = File(
-        desc="path/name of skullstripped file (if generated)")
-    mask_file = File(
-        desc="path/name of binary brain mask (if generated)")
-    outline_file = File(
-        desc="path/name of outline file (if generated)")
-    meshfile = File(
-        desc="path/name of vtk mesh file (if generated)")
     inskull_mask_file = File(
         desc="path/name of inskull mask (if generated)")
     inskull_mesh_file = File(
+        desc="path/name of inskull mesh (if generated)")
+    inskull_mesh_outline_file = File(
         desc="path/name of inskull mesh outline (if generated)")
     outskull_mask_file = File(
         desc="path/name of outskull mask (if generated)")
     outskull_mesh_file = File(
+        desc="path/name of outskull mesh file (if generated)")
+    outskull_mesh_outline_file = File(
         desc="path/name of outskull mesh outline (if generated)")
     outskin_mask_file = File(
         desc="path/name of outskin mask (if generated)")
     outskin_mesh_file = File(
+        desc="path/name of outskin mesh file (if generated)")
+    outskin_mesh_outline_file = File(
         desc="path/name of outskin mesh outline (if generated)")
     skull_mask_file = File(
         desc="path/name of skull mask (if generated)")
@@ -1571,9 +1569,11 @@ class BETSurface(FSLCommand):
     --------
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import  example_data
-    >>> btr = fsl.BET()
-    >>> btr.inputs.in_file = example_data('structural.nii')
-    >>> btr.inputs.frac = 0.7
+    >>> btr = fsl.BETSurface()
+    >>> btr.inputs.t1_file = example_data('structural.nii')
+    >>> btr.inputs.t2_file = example_data('t2.nii')
+    >>> btr.inputs.meshfile = example_data('bet_mesh.off')
+    >>> btr.inputs.t1_to_standard_matrix = example_data('t1_to_std.mat')
     >>> res = btr.run() # doctest: +SKIP
 
     """
@@ -1583,59 +1583,57 @@ class BETSurface(FSLCommand):
     output_spec = BETSurfaceOutputSpec
 
     def _run_interface(self, runtime):
-        # The returncode is meaningless in BET.  So check the output
+        # The returncode is meaningless in BETSurface.  So check the output
         # in stderr and if it's set, then update the returncode
         # accordingly.
-        runtime = super(BET, self)._run_interface(runtime)
+        runtime = super(BETSurface, self)._run_interface(runtime)
+
+        if isdefined(self.inputs.t2_file):
+            self.inputs.t1_only = True
+
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
 
-    def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix='_brain')
-        return os.path.abspath(out_file)
-
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self._gen_outfilename()
-        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or
-                (isdefined(self.inputs.surfaces) and self.inputs.surfaces)):
-            outputs['meshfile'] = self._gen_fname(outputs['out_file'],
-                                                  suffix='_mesh.vtk',
-                                                  change_ext=False)
-        if (isdefined(self.inputs.mask) and self.inputs.mask) or \
-                (isdefined(self.inputs.reduce_bias) and
-                 self.inputs.reduce_bias):
-            outputs['mask_file'] = self._gen_fname(outputs['out_file'],
-                                                   suffix='_mask')
+        if isdefined(self.inputs.out_basename):
+            base_name = self.inputs.out_basename
+        else:
+            base_name = self._gen_fname(self.inputs.t1_file,
+                                   suffix='')
+
+        outputs['inskull_mesh_file'] = self._gen_fname(base_name,
+                                                       suffix='_inskull_mesh.off')
+        outputs['outskull_mesh_file'] = self._gen_fname(base_name,
+                                                       suffix='_outskull_mesh.off')
+        outputs['outskin_mesh_file'] = self._gen_fname(base_name,
+                                                       suffix='_outskin_mesh.off')
+
+        if isdefined(self.inputs.mask) and self.inputs.mask:
+            outputs['inskull_mask_file'] = self._gen_fname(base_name,
+                                                           suffix='_inskull_mask.nii.gz')
+            outputs['outskull_mask_file'] = self._gen_fname(base_name,
+                                                           suffix='_outskull_mask.nii.gz')
+            outputs['outskin_mask_file'] = self._gen_fname(base_name,
+                                                           suffix='_outskin_mask.nii.gz')
+
         if isdefined(self.inputs.outline) and self.inputs.outline:
-            outputs['outline_file'] = self._gen_fname(outputs['out_file'],
-                                                      suffix='_overlay')
-        if isdefined(self.inputs.surfaces) and self.inputs.surfaces:
-            outputs['inskull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_inskull_mask')
-            outputs['inskull_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_inskull_mesh')
-            outputs[
-                'outskull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                        suffix='_outskull_mask')
-            outputs[
-                'outskull_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                        suffix='_outskull_mesh')
-            outputs['outskin_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_outskin_mask')
-            outputs['outskin_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_outskin_mesh')
-            outputs['skull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                         suffix='_skull_mask')
-        if isdefined(self.inputs.no_output) and self.inputs.no_output:
-            outputs['out_file'] = Undefined
+            outputs['inskull_mesh_outline_file'] = self._gen_fname(base_name,
+                                                           suffix='_inskull_mesh.nii.gz')
+            outputs['outskull_mesh_outline_file'] = self._gen_fname(base_name,
+                                                           suffix='_outskull_mesh.nii.gz')
+            outputs['outskin_mesh_outline_file'] = self._gen_fname(base_name,
+                                                           suffix='_outskin_mesh.nii.gz')
+        if isdefined(self.inputs.skullmask) and self.inputs.skullmask:
+            outputs['skull_mask_file'] = self._gen_fname(base_name,
+                                                           suffix='_skull_mask.nii.gz')
         return outputs
 
+    def _gen_fname(self, name, suffix):
+        return op.abspath(name + suffix)
+
     def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        return None
+        _, base_name, _ = split_filename(self.inputs.t1_file)
+        self.inputs.out_basename = base_name
+        return base_name
