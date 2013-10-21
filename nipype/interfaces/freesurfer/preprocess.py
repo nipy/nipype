@@ -797,9 +797,6 @@ class ReconAll(CommandLine):
         iflogger.info('resume recon-all : %s' % cmd)
         return cmd
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
-        runtime.returncode = 0
-        return runtime
 
 class BBRegisterInputSpec(FSTraitedSpec):
     subject_id = traits.Str(argstr='--s %s',
