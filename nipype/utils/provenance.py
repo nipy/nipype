@@ -196,9 +196,9 @@ class ProvStore(object):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_id(), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("LoggedInUser")})
+                            {pm.PROV["Role"]: nipype_ns["LoggedInUser"]})
         self.g.wasAssociatedWith(a0, software_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("Software")})
+                            {pm.PROV["Role"]: nipype_ns["Software"]})
         return self.g
 
     def write_provenance(self, filename='provenance', format='turtle'):
