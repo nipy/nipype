@@ -1612,19 +1612,19 @@ class BETSurface(FSLCommand):
 
         if isdefined(self.inputs.mask) and self.inputs.mask:
             outputs['inskull_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_inskull_mask.nii.gz')
+                                                           suffix='_inskull_mask')
             outputs['outskull_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskull_mask.nii.gz')
+                                                           suffix='_outskull_mask')
             outputs['outskin_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskin_mask.nii.gz')
+                                                           suffix='_outskin_mask')
 
         if isdefined(self.inputs.outline) and self.inputs.outline:
             outputs['inskull_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_inskull_mesh.nii.gz')
+                                                           suffix='_inskull_mesh')
             outputs['outskull_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskull_mesh.nii.gz')
+                                                           suffix='_outskull_mesh')
             outputs['outskin_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskin_mesh.nii.gz')
+                                                           suffix='_outskin_mesh')
         if isdefined(self.inputs.skullmask) and self.inputs.skullmask:
             outputs['skull_mask_file'] = self._gen_fname(base_name,
                                                            suffix='_skull_mask.nii.gz')
