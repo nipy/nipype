@@ -193,6 +193,10 @@ hash_files
 
 name_template (optional)
      overrides the default ``_generated`` suffix
+     
+output_name (optional)
+     name of the output (if this is not set same name as the input will be 
+     assumed)
 
 keep_extension (optional - not used)
      if you want the extension from the input to be kept
