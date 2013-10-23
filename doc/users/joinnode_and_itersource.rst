@@ -70,7 +70,7 @@ the *unique* flag, e.g.:
 
 ::
 
-d = pe.JoinNode(interface=D(), joinsource="b", unique=True, name="d")
+  d = pe.JoinNode(interface=D(), joinsource="b", unique=True, name="d")
 
 synchronize
 ===========
