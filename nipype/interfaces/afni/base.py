@@ -98,14 +98,14 @@ class AFNICommandInputSpec(CommandLineInputSpec):
     out_file = File(name_template="%s_afni", desc='output image file name',
                     argstr='-prefix %s',
                     name_source=["in_file"])
-    
+
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
 
 
 class AFNICommand(CommandLine):
-    
+
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
@@ -143,7 +143,7 @@ class AFNICommand(CommandLine):
             cls._outputtype = outputtype
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
-        
+
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
@@ -157,5 +157,5 @@ class AFNICommand(CommandLine):
                 if outputs[name]:
                     _,_,ext = split_filename(outputs[name])
                     if ext == "":
-                        outputs[name] = outputs[name] + "+orig.BRIK" 
+                        outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs

@@ -194,11 +194,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(requires=['moving_image_mask'],
-                            exists=True, desc='')
+    fixed_image_mask = File(argstr='%s', exists=True,
+                            desc='mask used to limit registration region')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(argstr='%s', requires=['fixed_image_mask'],
+    moving_image_mask = File(requires=['fixed_image_mask'],
                              exists=True, desc='')
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
@@ -558,8 +558,12 @@ class Registration(ANTSCommand):
             return '--collapse-linear-transforms-to-fixed-image-header 0'
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'moving_image_mask':
-            return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
+        if opt == 'fixed_image_mask':
+            if isdefined(self.inputs.moving_image_mask):
+                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
+                                               self.inputs.moving_image_mask)
+            else:
+                return '--masks %s' % self.inputs.fixed_image_mask
         elif opt == 'transforms':
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':

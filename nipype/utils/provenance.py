@@ -17,8 +17,9 @@ iflogger = logging.getLogger('interface')
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
+niiri = pm.Namespace("niiri", "http://nidm.nidash.org/iri/")
 
-get_id = lambda: nipype_ns[uuid1().hex]
+get_id = lambda: niiri[uuid1().hex]
 
 def safe_encode(x):
     """Encodes a python value for prov
@@ -66,7 +67,7 @@ def safe_encode(x):
 def write_provenance(results, filename='provenance', format='turtle'):
     ps = ProvStore()
     ps.add_results(results)
-    ps.write_provenance(filename=filename, format=format)
+    return ps.write_provenance(filename=filename, format=format)
 
 class ProvStore(object):
 
@@ -75,6 +76,7 @@ class ProvStore(object):
         self.g.add_namespace(foaf)
         self.g.add_namespace(dcterms)
         self.g.add_namespace(nipype_ns)
+        self.g.add_namespace(niiri)
 
     def add_results(self, results):
         if results.provenance:
@@ -196,9 +198,9 @@ class ProvStore(object):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_id(), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("LoggedInUser")})
+                            {pm.PROV["Role"]: nipype_ns["LoggedInUser"]})
         self.g.wasAssociatedWith(a0, software_agent, None, None,
-                            {pm.PROV["Role"]: safe_encode("Software")})
+                            {pm.PROV["Role"]: nipype_ns["Software"]})
         return self.g
 
     def write_provenance(self, filename='provenance', format='turtle'):

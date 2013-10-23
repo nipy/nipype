@@ -56,7 +56,7 @@ from ..utils.filemanip import (save_json, FileNotFoundError,
 
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
-                    clean_working_directory, format_dot,
+                    clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function)
 
 
@@ -700,58 +700,59 @@ connected.
     def _write_report_info(self, workingdir, name, graph):
         if workingdir is None:
             workingdir = os.getcwd()
-        report_dir = os.path.join(workingdir, name, 'report')
-        if os.path.exists(report_dir):
-            shutil.rmtree(report_dir)
-        os.makedirs(report_dir)
-        fp = open(os.path.join(report_dir, 'index.html'), 'wt')
-        fp.writelines('<html>')
-        with open(os.path.join(os.path.dirname(__file__),
-                               'report_template.html')) as fpt:
-            script = Template(fpt.read())
-        nodes = nx.topological_sort(graph)
-        report_files = []
+        report_dir = os.path.join(workingdir, name)
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                                     'report_template.html'),
+                        os.path.join(report_dir, 'index.html'))
+        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                                     '..', 'external', 'd3.v3.min.js'),
+                        os.path.join(report_dir, 'd3.v3.min.js'))
+        nodes, groups = topological_sort(graph, depth_first=True)
+        graph_file = os.path.join(report_dir, 'graph1.json')
+        json_dict = {'nodes': [], 'links': [], 'groups': [], 'maxN': 0}
         for i, node in enumerate(nodes):
-            report_files.append('result_files[%d] = "%s/result_%s.pklz";'
-                                % (i, os.path.realpath(node.output_dir()),
-                                   node.name))
-            report_files.append('report_files[%d] = "%s/_report/report.rst";' %
-                                (i, os.path.realpath(node.output_dir())))
-        report_files = '\n'.join(report_files)
-        fp.writelines(script.substitute(num_nodes=len(nodes),
-                                        report_files=report_files))
-        fp.writelines('<body><div id="page_container">\n')
-        fp.writelines('<div id="toc">\n')
-        fp.writelines(('<pre>Works only with mozilla/firefox browsers</pre>'
-                       '<br>\n'))
-        script_file = os.path.join(os.path.dirname(sys.argv[0]), sys.argv[0])
-        fp.writelines(('<a href="#" onclick="load(\'%s\',\'content\');return '
-                       'false;">Script</a><br>\n') % script_file)
-        if self.base_dir:
-            graph_file = 'file://' + os.path.join(self.base_dir, self.name,
-                                                  'graph.dot.png')
-            fp.writelines(('<a href="#" onclick="loadimg(\'%s\',\'content\');'
-                           'return false;">Graph - requires write_graph() in '
-                           'script</a><br>\n') % graph_file)
-        fp.writelines('<table>\n')
-        fp.writelines(('<tr><td>Name</td><td>Hierarchy</td><td>Source</td>'
-                       '</tr>\n'))
+            report_file = "%s/_report/report.rst" % \
+                          node.output_dir().replace(report_dir, '')
+            result_file = "%s/result_%s.pklz" % \
+                          (node.output_dir().replace(report_dir, ''),
+                           node.name)
+            json_dict['nodes'].append(dict(name='%d_%s' % (i, node.name),
+                                           report=report_file,
+                                           result=result_file,
+                                           group=groups[i]))
+        maxN = 0
+        for gid in np.unique(groups):
+            procs = [i for i, val in enumerate(groups) if val == gid]
+            N = len(procs)
+            if N > maxN:
+                maxN = N
+            json_dict['groups'].append(dict(procs=procs,
+                                            total=N,
+                                            name='Group_%05d' % gid))
+        json_dict['maxN'] = maxN
+        for u, v in graph.in_edges_iter():
+            json_dict['links'].append(dict(source=nodes.index(u),
+                                           target=nodes.index(v),
+                                           value=1))
+        save_json(graph_file, json_dict)
+        graph_file = os.path.join(report_dir, 'graph.json')
+        template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
+        def getname(u, i):
+            name_parts = u.fullname.split('.')
+            #return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
+            return template % i + name_parts[-1]
+        json_dict = []
         for i, node in enumerate(nodes):
-            report_file = '%s/_report/report.rst' % \
-                          os.path.realpath(node.output_dir())
-            local_file = '%s.rst' % node._id
-            url = ('<tr><td id="td%d"><a href="#" onclick="load(\'%s\','
-                   '\'content\');return false;">%s</a></td>') % (i,
-                                                                 report_file,
-                                                                 node._id)
-            url += '<td>%s</td>' % ('.'.join(node.fullname.split('.')[:-1]))
-            url += '<td>%s</td></tr>\n' % \
-                   ('.'.join(get_print_name(node).split('.')[1:]))
-            fp.writelines(url)
-        fp.writelines('</table></div>')
-        fp.writelines('<div id="content">content</div>')
-        fp.writelines('</div></body></html>')
-        fp.close()
+            imports = []
+            for u, v in graph.in_edges_iter(nbunch=node):
+                imports.append(getname(u, nodes.index(u)))
+            json_dict.append(dict(name=getname(node, i),
+                                  size=1,
+                                  group=groups[i],
+                                  imports=imports))
+        save_json(graph_file, json_dict)
 
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed."""
@@ -1226,8 +1227,12 @@ class Node(WorkflowBase):
         if self._hierarchy:
             outputdir = os.path.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
-            param_dirs = [self._parameterization_dir(p) for p in self.parameterization]
-            outputdir = os.path.join(outputdir, *param_dirs)
+            if not str2bool(self.config['execution']['parameterize_dirs']):
+                param_dirs = [self._parameterization_dir(p) for p in
+                              self.parameterization]
+                outputdir = os.path.join(outputdir, *param_dirs)
+            else:
+                outputdir = os.path.join(outputdir, *self.parameterization)
         return os.path.abspath(os.path.join(outputdir,
                                             self.name))
 
@@ -1259,13 +1264,17 @@ class Node(WorkflowBase):
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
+        if os.path.exists(outdir):
+            logger.debug(os.listdir(outdir))
         hashfiles = glob(os.path.join(outdir, '_0x*.json'))
+        logger.debug(hashfiles)
         if len(hashfiles) > 1:
             logger.info(hashfiles)
             logger.info('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
                 os.unlink(hashfile)
         hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+        logger.debug(hashfile)
         if updatehash and os.path.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
             for file in glob(os.path.join(outdir, '_0x*.json')):
@@ -1292,8 +1301,13 @@ class Node(WorkflowBase):
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
+        if os.path.exists(outdir):
+            logger.debug(os.listdir(outdir))
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
+        logger.debug(('updatehash, overwrite, always_run, hash_exists',
+                      updatehash, self.overwrite, self._interface.always_run,
+                      hash_exists))
         if (not updatehash and (((self.overwrite is None
                                   and self._interface.always_run)
                                  or self.overwrite) or
@@ -1337,7 +1351,7 @@ class Node(WorkflowBase):
                                                               hashed_inputs)
                 cannot_rerun = (str2bool(
                     self.config['execution']['stop_on_first_rerun'])
-                    and not (self.overwrite == None
+                    and not (self.overwrite is None
                          and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "

@@ -1127,3 +1127,26 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
             with open(filename + '.json', 'wt') as fp:
                 pm.json.dump(ps.g, fp, cls=pm.ProvBundle.JSONEncoder)
     return ps.g
+
+def topological_sort(graph, depth_first=True):
+    nodesort = nx.topological_sort(graph)
+    if not depth_first:
+        return nodesort, None
+    logger.debug("Performing depth first search")
+    nodes=[]
+    groups=[]
+    group=0
+    G = nx.Graph()
+    G.add_nodes_from(graph.nodes())
+    G.add_edges_from(graph.edges())
+    components = nx.connected_components(G)
+    for desc in components:
+        group += 1
+        indices = []
+        for node in desc:
+            indices.append(nodesort.index(node))
+        nodes.extend(np.array(nodesort)[np.array(indices)[np.argsort(indices)]].tolist())
+        for node in desc:
+            nodesort.remove(node)
+        groups.extend([group] * len(desc))
+    return nodes, groups

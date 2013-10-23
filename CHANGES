@@ -38,6 +38,16 @@ Next release
 * ENH: Added simplified outputname generation for command line interfaces.
 * FIX: Cleaned up input and output spec metadata
 
+* ENH: Allow ants use a single mask image
+* ENH: Create configuration option for parameterizing directories with hashes
+* ENH: arrange nodes by topological sort with disconnected subgraphs
+* ENH: uses the nidm iri namespace for uuids
+* ENH: remove old reporting webpage (this is a WIP i hope to finish in a day or two)
+
+* FIX: example openfmri script now makes the contrast spec a hashed input
+* FIX: FILMGLS compatibility with FSL 5.0.5
+* FIX: Freesurfer recon-all resume now avoids setting inputs
+
 Release 0.8.0 (May 8, 2013)
 ===========================
 
