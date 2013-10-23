@@ -1,5 +1,5 @@
 from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-				    traits, TraitedSpec, isdefined,
+				    traits, TraitedSpec, isdefined, InputMultiPath,
 				    File)
 import os, os.path as op
 from nipype.utils.filemanip import split_filename
@@ -18,9 +18,11 @@ class GmshInputSpec(CommandLineInputSpec):
 	Mesh options:
 	  -1, -2, -3           Perform 1D, 2D or 3D mesh generation, then exit
 	'''
-	output_type = traits.Enum(argstr='-format %s',
-	        'msh', ['msh', 'msh1', 'msh2', 'unv', 'vrml', 'ply2', 'stl', 'mesh', 'bdf', 'cgns', 'p3d', 'diff', 'med'], usedefault=True,
-	        desc='Select output mesh format (auto (default), msh, msh1, msh2, unv, vrml, ply2, stl, mesh, bdf, cgns, p3d, diff, med, ...)')
+	mesh_generation_dimension = traits.Enum(['1', '2', '3'], argstr='-%s',
+		desc='Perform 1D, 2D or 3D mesh generation, then exit')
+
+	output_type = traits.Enum('msh', ['msh', 'msh1', 'msh2', 'unv', 'vrml', 'ply2', 'stl', 'mesh', 'bdf', 'cgns', 'p3d', 'diff', 'med'], argstr='-format %s',
+		usedefault=True, desc='Select output mesh format (auto (default), msh, msh1, msh2, unv, vrml, ply2, stl, mesh, bdf, cgns, p3d, diff, med, ...)')
 
 	version = traits.Enum(['1', '2'], desc='Select msh file version')
 
@@ -100,9 +102,9 @@ class GmshInputSpec(CommandLineInputSpec):
 	  -option file         Parse option file at startup
 	  -convert files       Convert files into latest binary formats, then exit
 	'''
-	in_files = InputMultiPath(exists=True, argstr="%s", position=-1, mandatory=True)
-	output_type = traits.Enum('off', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
-	out_filename = File(genfile=True, argstr="-o %s", desc='Specify output file name')
+	in_files = InputMultiPath(exists=True, argstr="%s", position=-2, mandatory=True)
+	output_type = traits.Enum('msh', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
+	out_filename = File(genfile=True, argstr="-o %s", position=-1, desc='Specify output file name')
 
 class GmshOutputSpec(TraitedSpec):
     mesh_file = File(exists=True, desc='The output mesh file')
@@ -136,9 +138,9 @@ class Gmsh(CommandLine):
 	    out_types = ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off']
 	    # Make sure that the output filename uses one of the possible file types
 	    if any(ext == out_type.lower() for out_type in out_types):
-		outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
+			outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
 	    else:
-		outputs['mesh_file'] = op.abspath(name + '.' + self.inputs.output_type)
+			outputs['mesh_file'] = op.abspath(name + '.' + self.inputs.output_type)
 	else:
 	    outputs['mesh_file'] = op.abspath(self._gen_outfilename())
 	return outputs
@@ -149,14 +151,5 @@ class Gmsh(CommandLine):
 	else:
 	    return None
     def _gen_outfilename(self):
-	_, name , _ = split_filename(self.inputs.in_file1)
-	if self.inputs.save_as_freesurfer_mesh or self.inputs.output_type == 'fs':
-	    self.inputs.output_type = 'fs'
-	    self.inputs.save_as_freesurfer_mesh = True
-	if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
-	    self.inputs.output_type = 'stl'
-	    self.inputs.save_as_stl = True
-	if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
-	    self.inputs.output_type = 'vmrl'
-	    self.inputs.save_as_vmrl = True
-	return name + '_fixed.' + self.inputs.output_type
+	_, name , _ = split_filename(self.inputs.in_files[0])
+	return name + '_gmsh.' + self.inputs.output_type
