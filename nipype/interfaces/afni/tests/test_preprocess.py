@@ -106,7 +106,7 @@ def test_to3d():
                      filetype=dict(argstr='-%s',),
                      funcparams=dict(argstr='-time:zt %s alt+z2',),
                      ignore_exception=dict(usedefault=True,),
-                     infolder=dict(argstr='%s/*.dcm', mandatory=True,),
+                     in_folder=dict(argstr='%s/*.dcm', mandatory=True,),
                      out_file=dict(argstr='-prefix %s'),
                      outputtype=dict(),
                      skipoutliers=dict(argstr='-skip_outliers',),
