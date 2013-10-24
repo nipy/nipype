@@ -19,6 +19,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 from .base import AFNICommand, AFNICommandInputSpec,\
     AFNICommandOutputSpec
+from nipype.interfaces.base import CommandLineInputSpec
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -149,7 +150,7 @@ class TShift(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
-class RefitInputSpec(AFNICommandInputSpec):
+class RefitInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3drefit',
                    argstr='%s',
                    position=-1,
