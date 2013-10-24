@@ -143,10 +143,15 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
-    keep_ext = traits.Bool(desc="Keep in_file extension, replace non-extension component of name")
+    keep_ext = traits.Bool(desc=("Keep in_file extension, replace "
+                                 "non-extension component of name"))
     format_string = traits.String(mandatory=True,
-                                  desc="Python formatting string for output template")
-    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
+                                  desc=("Python formatting string for output "
+                                        "template"))
+    parse_string = traits.String(desc=("Python regexp parse string to define "
+                                       "replacement inputs"))
+    use_fullpath = traits.Bool(False, use_default=True,
+                               desc="Use full path as input to regex parser")
 
 
 class RenameOutputSpec(TraitedSpec):
@@ -210,7 +215,12 @@ class Rename(IOBase):
     def _rename(self):
         fmt_dict = dict()
         if isdefined(self.inputs.parse_string):
-            m = re.search(self.inputs.parse_string, os.path.split(self.inputs.in_file)[1])
+            if isdefined(self.inputs.use_fullpath) and self.inputs.use_fullpath:
+                m = re.search(self.inputs.parse_string,
+                              self.inputs.in_file)
+            else:
+                m = re.search(self.inputs.parse_string,
+                              os.path.split(self.inputs.in_file)[1])
             if m:
                 fmt_dict.update(m.groupdict())
         for field in self.fmt_fields:
@@ -218,14 +228,16 @@ class Rename(IOBase):
             if isdefined(val):
                 fmt_dict[field] = getattr(self.inputs, field)
         if self.inputs.keep_ext:
-            fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
+            fmt_string = "".join([self.inputs.format_string,
+                                  split_filename(self.inputs.in_file)[2]])
         else:
             fmt_string = self.inputs.format_string
         return fmt_string % fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
-        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
+        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(),
+                                                       self._rename()))
         return runtime
 
     def _list_outputs(self):
