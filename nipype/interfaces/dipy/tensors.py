@@ -13,7 +13,6 @@ import os.path as op
 import nibabel as nb
 import numpy as np
 from nipype.utils.misc import package_check
-import warnings
 
 from ... import logging
 iflogger = logging.getLogger('interface')
@@ -26,7 +25,8 @@ except Exception, e:
 else:
     import dipy.reconst.dti as dti
     from dipy.core.gradients import GradientTable
-    
+    from dipy.reconst.vec_val_sum import vec_val_vect
+
 
 class TensorModeInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
@@ -120,18 +120,16 @@ class TensorMode(BaseInterface):
 class EstimateConductivityInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input 4D diffusion-weighted image file')
-    bvecs = File(exists=True, mandatory=True,
-                 desc='The input b-vector text file')
-    bvals = File(exists=True, mandatory=True,
-                 desc='The input b-value text file')
     use_outlier_correction = traits.Bool(False, usedefault=True,
-        desc='')
+        desc='if True, conductivity eigenvalues are bounded to a \
+        maximum of 0.4 [S/m]')
     volume_normalized_mapping = traits.Bool(False, usedefault=True,
-        desc='')
+        desc='if True, uses volume-normalized mapping from [2]_.')
     sigma_white_matter = traits.Float(0.126, usedefault=True, units = 'NA',
-                desc="Diffusion time")
+                desc="Conductivity for white matter (default: 0.126 [S/m])")
     eigenvalue_scaling_factor = traits.Float(237.5972, usedefault=True, units = 'NA',
-                desc="Diffusion time")
+                desc="scaling factor used by the direct mapping between \
+                    DTI and conductivity tensors")
     out_filename = File(
         genfile=True, desc='The output filename for the conductivity tensor image')
 
@@ -179,8 +177,6 @@ class EstimateConductivity(BaseInterface):
     >>> import nipype.interfaces.dipy as dipy
     >>> conduct = dipy.EstimateConductivity()
     >>> conduct.inputs.in_file = 'diffusion.nii'
-    >>> conduct.inputs.bvecs = 'bvecs'
-    >>> conduct.inputs.bvals = 'bvals'
     >>> conduct.run()                                   # doctest: +SKIP
     """
     input_spec = EstimateConductivityInputSpec
@@ -191,38 +187,39 @@ class EstimateConductivity(BaseInterface):
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         affine = img.get_affine()
+        #if np.nonzero(affine) = 
 
-        # Load the gradient strengths and directions
-        bvals = np.loadtxt(self.inputs.bvals)
-        gradients = np.loadtxt(self.inputs.bvecs).T
+        try:
+            dti_params = dti.eig_from_lo_tri(data)
+        except:
+            dti_params = dti.tensor_eig_from_lo_tri(data)
 
-        # Place in Dipy's preferred format
-        gtab = GradientTable(gradients)
-        gtab.bvals = bvals
+        evals = dti_params[..., :3]
+        evecs = dti_params[..., 3:]
+        evecs = evecs.reshape(np.shape(evecs)[:3] + (3,3))
 
-        # Mask the data so that tensors are not fit for
-        # unnecessary voxels
-        mask = data[..., 0] > 50
+        ### Estimate electrical conductivity
 
-        # Fit the tensors to the data
-        tenmodel = dti.TensorModel(gtab)
-        tenfit = tenmodel.fit(data, mask)
+        evals = abs(self.inputs.eigenvalue_scaling_factor * evals)
 
-        # Estimate electrical conductivity
-        scale_factor = self.inputs.eigenvalue_scaling_factor
-        sigma_white_matter = self.inputs.sigma_white_matter
-        outlier_correction = self.inputs.use_outlier_correction
-        volume_normalized = self.inputs.volume_normalized_mapping
+        if self.inputs.volume_normalized_mapping:
+            # Calculate the cube root of the product of the three eigenvalues (for
+            # normalization)
+            denominator = np.power(
+                (evals[..., 0] * evals[..., 1] * evals[..., 2]), (1 / 3))
+            # Calculate conductivity and normalize the eigenvalues
+            evals = self.inputs.sigma_white_matter * evals / denominator
+            evals[denominator < 0.0001] = self.inputs.sigma_white_matter
 
-        conductivity_data = tenfit.conductivity
+        # Threshold outliers that show unusually high conductivity
+        if self.inputs.use_outlier_correction:
+            evals[evals > 0.4] = 0.4
 
-        #conductivity_data = tenfit.conductivity(scale_factor=scale_factor,
-        #                                        sigma_white_matter=sigma_white_matter,
-        #                                        outlier_correction=outlier_correction,
-        #                                        volume_normalized=volume_normalized)
+        conductivity_quadratic = np.array(vec_val_vect(evecs, evals))
+        conductivity_data = dti.lower_triangular(conductivity_quadratic)
 
         # Write as a 4D Nifti tensor image with the original affine
-        img = nb.Nifti1Image(conductivity_data, affine)
+        img = nb.Nifti1Image(conductivity_data, affine=affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
         iflogger.info('Conductivity tensor image saved as {i}'.format(i=out_file))
