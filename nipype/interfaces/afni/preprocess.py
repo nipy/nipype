@@ -19,7 +19,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 from .base import AFNICommand, AFNICommandInputSpec,\
     AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -171,7 +171,7 @@ class RefitInputSpec(CommandLineInputSpec):
                          argstr='-zorigin %s')
 
 
-class Refit(AFNICommand):
+class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
