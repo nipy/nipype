@@ -19,6 +19,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 from .base import AFNICommand, AFNICommandInputSpec,\
     AFNICommandOutputSpec
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -149,16 +150,13 @@ class TShift(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
-class RefitInputSpec(AFNICommandInputSpec):
+class RefitInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3drefit',
                    argstr='%s',
                    position=-1,
                    mandatory=True,
                    exists=True,
                    copyfile=True)
-
-    out_file = File(name_template="%s_refit", desc='output image file name, should be the same as input',
-                    argstr='%s', name_source="in_file")
 
     deoblique = traits.Bool(desc='replace current transformation' +
                             ' matrix with cardinal matrix',
@@ -173,7 +171,7 @@ class RefitInputSpec(AFNICommandInputSpec):
                          argstr='-zorigin %s')
 
 
-class Refit(AFNICommand):
+class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
@@ -186,9 +184,8 @@ class Refit(AFNICommand):
     >>> refit = afni.Refit()
     >>> refit.inputs.in_file = 'structural.nii'
     >>> refit.inputs.deoblique = True
-    >>> refit.inputs.outputtype = "NIFTI_GZ"
     >>> refit.cmdline
-    '3drefit -deoblique structural_refit.nii.gz structural.nii'
+    '3drefit -deoblique structural.nii'
     >>> res = refit.run() # doctest: +SKIP
 
     """
@@ -196,6 +193,11 @@ class Refit(AFNICommand):
     _cmd = '3drefit'
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
+    
+    def _list_outputs(self):
+        outputs = super(AFNICommand, self)._list_outputs()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        return outputs
 
 
 class WarpInputSpec(AFNICommandInputSpec):
