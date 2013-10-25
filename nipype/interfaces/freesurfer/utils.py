@@ -39,7 +39,7 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
 
     hemi = traits.Enum("lh", "rh", mandatory=True, argstr="--hemi %s",
                        desc="target hemisphere")
-    surface = traits.String(argstr="--surf", desc="target surface (default is white)")
+    surface = traits.String(argstr="--surf %s", desc="target surface (default is white)")
 
     reg_xors = ["reg_file", "reg_header", "mni152reg"]
     reg_file = File(exists=True, argstr="--reg %s", mandatory=True, xor=reg_xors,
@@ -200,7 +200,7 @@ class SampleToSurface(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self._get_outfilename()
+        outputs["out_file"] = os.path.abspath(self._get_outfilename())
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
             outputs["hits_file"] = hitsfile
