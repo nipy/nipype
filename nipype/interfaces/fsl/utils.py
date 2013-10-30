@@ -136,7 +136,7 @@ class MergeInputSpec(FSLCommandInputSpec):
                             mandatory=True)
     tr = traits.Float(position=-1, argstr='%.2f',
                       desc='use to specify TR if dimension is set to tr')
-    merged_file = File(argstr="%s", position=1, genfile=True, hash_files=False)
+    merged_file = File(argstr="%s", position=1, name_source='in_files', name_template='%s_merged', hash_files=False)
 
 
 class MergeOutputSpec(TraitedSpec):
