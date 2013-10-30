@@ -134,7 +134,7 @@ class MergeInputSpec(FSLCommandInputSpec):
     dimension = traits.Enum('t', 'x', 'y', 'z', 'a', 'tr', argstr="-%s", position=0,
                             desc="dimension along which to merge, tr option requires setting tr input",
                             mandatory=True)
-    tr = traits.Float(position=3, argstr='%.2f',
+    tr = traits.Float(position=-1, argstr='%.2f',
                       desc='use to specify TR if dimension is set to tr')
     merged_file = File(argstr="%s", position=1, genfile=True, hash_files=False)
 
