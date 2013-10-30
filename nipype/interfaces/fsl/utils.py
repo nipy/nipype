@@ -145,6 +145,22 @@ class MergeOutputSpec(TraitedSpec):
 
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
+
+    Images can be concatenated across time, x, y, or z dimensions. Across the time (t)
+    dimension the TR is set by default to 1 sec.
+
+    Note: to set the TR to a different value, specify 'tr' for dimension and specify
+    the TR value in seconds for the tr input.
+
+    Examples:
+    --------
+    >>> from nipype.interfaces.fsl import Merge
+    >>> merger = Merge()
+    >>> merger.inputs.in_files = ['001.nii.gz', '002.nii.gz']
+    >>> merger.inputs.dimension = 'tr'
+    >>> merger.inputs.tr = 2.25
+    >>> res = merger.run() #doctest: +SKIP
+
     """
 
     _cmd = 'fslmerge'
