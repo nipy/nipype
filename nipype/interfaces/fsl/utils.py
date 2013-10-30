@@ -131,7 +131,7 @@ class Smooth(FSLCommand):
 class MergeInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr="%s", position=2,
                            mandatory=True)
-    dimension = traits.Enum('t', 'x', 'y', 'z', 'tr', argstr="-%s", position=0,
+    dimension = traits.Enum('t', 'x', 'y', 'z', 'a', 'tr', argstr="-%s", position=0,
                             desc="dimension along which to merge, tr option requires setting tr input",
                             mandatory=True)
     tr = traits.Float(position=3, argstr='%.2f',
