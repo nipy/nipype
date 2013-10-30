@@ -169,7 +169,7 @@ class Merge(FSLCommand):
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
 
-    def _format_arg(self, name, spec, value):
+def _format_arg(self, name, spec, value):
     if name == 'tr':
         if self.inputs.dimension != 'tr':
             raise ValueError('When TR is specified, dimension has to be tr')
