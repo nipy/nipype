@@ -70,16 +70,16 @@ class DTMetricInputSpec(StdOutCommandLineInputSpec):
                       desc='voxel-order data filename')
 
     metric = traits.Enum('fa','md','rd','l1', 'l2', 'l3', 'tr', 'ra', '2dfa','cl','cp','cs',
-                                 argstr='-stat %s', mandatory=True,
-                                 desc=('Specifies the metric to compute. Possible choices are: '
-                                       '"fa", "md", "rd", "l1", "l2", "l3", "tr", "ra", "2dfa", "cl", "cp" or "cs".'))
+                         argstr='-stat %s', mandatory=True,
+                         desc=('Specifies the metric to compute. Possible choices are: '
+                               '"fa", "md", "rd", "l1", "l2", "l3", "tr", "ra", "2dfa", "cl", "cp" or "cs".'))
 
     inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
-                                 argstr='-inputdatatype %s', usedefault=True,
-                                 desc=('Specifies the data type of the input data. '
-                                       'The data type can be any of the following strings: '
-                                       '"char", "short", "int", "long", "float" or "double".'
-                                       'Default is double data type'))
+                                argstr='-inputdatatype %s', usedefault=True,
+                                desc=('Specifies the data type of the input data. '
+                                      'The data type can be any of the following strings: '
+                                      '"char", "short", "int", "long", "float" or "double".'
+                                      'Default is double data type'))
 
     outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
                                  argstr='-outputdatatype %s', usedefault=True,
