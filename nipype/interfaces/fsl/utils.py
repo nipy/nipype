@@ -169,22 +169,6 @@ class Merge(FSLCommand):
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['merged_file'] = self.inputs.merged_file
-        if not isdefined(outputs['merged_file']):
-            outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
-                                                     suffix='_merged')
-        else:
-            outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
-
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'merged_file':
-            return self._list_outputs()[name]
-        return None
-
 
 class ExtractROIInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s",
