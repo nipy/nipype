@@ -81,6 +81,7 @@ def test_merge():
                      dimension=dict(argstr='-%s', mandatory=True,),
                      environ=dict(),
                      in_files=dict(mandatory=True, argstr='%s',),
+                     tr=dict(argstr='%.2f'),
                      merged_file=dict(argstr='%s',),
                      output_type=dict(),
                      )
