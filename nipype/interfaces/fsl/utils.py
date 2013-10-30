@@ -152,15 +152,17 @@ class Merge(FSLCommand):
     Note: to set the TR to a different value, specify 'tr' for dimension and specify
     the TR value in seconds for the tr input.
 
-    Examples:
+    Examples
     --------
     >>> from nipype.interfaces.fsl import Merge
+    >>> from nipype.testing import funcfile
     >>> merger = Merge()
-    >>> merger.inputs.in_files = ['001.nii.gz', '002.nii.gz']
+    >>> merger.inputs.in_files = [funcfile, funcfile]
     >>> merger.inputs.dimension = 'tr'
     >>> merger.inputs.tr = 2.25
-    >>> res = merger.run() #doctest: +SKIP
-
+    >>> merger.inputs.merged_file = "functional_merged.nii.gz"
+    >>> merger.cmdline =='fslmerge -tr %s %s %.2f' % (merger.inputs.merged_file, ' '.join(merger.inputs.in_files), merger.inputs.tr)
+    True
     """
 
     _cmd = 'fslmerge'
