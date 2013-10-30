@@ -31,7 +31,6 @@ install:
     - python setup.py build_ext --inplace
 script:
     - source ~/virtualenv/this/bin/activate
-    - make test
-    - if [ "${COVERAGE}" == "--with-coverage" ]; then make test-coverage; fi
+    - make test-coverage
 after_success:
-    - if [ "${COVERAGE}" == "--with-coverage" ]; then coveralls; fi
+    - coveralls
