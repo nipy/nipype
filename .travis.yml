@@ -1,3 +1,6 @@
+language: python
+env:
+    - COVERAGE=--with-coverage
 python:
     - "2.7"
 before_install:
