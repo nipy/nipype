@@ -58,7 +58,7 @@ test-doc:
 
 test-coverage:
 	rm -rf coverage .coverage
-	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype nipype
+	$(NOSETESTS) -s --with-doctest --with-coverage nipype
 
 test: clean test-code
 
