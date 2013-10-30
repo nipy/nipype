@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = nipype
+include = */nipype/*
+omit =
+    */nipype/externals/*
+    */setup.py
