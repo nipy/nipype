@@ -57,8 +57,8 @@ test-doc:
 	--doctest-fixtures=_fixture doc/
 
 test-coverage:
-	rm -rf coverage .coverage
-	$(NOSETESTS) -s --with-doctest --with-coverage nipype
+	$(NOSETESTS) -s --with-doctest --with-coverage --cover-package=nipype \
+	--config=.coveragerc
 
 test: clean test-code
 

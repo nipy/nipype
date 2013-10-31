@@ -1,36 +1,40 @@
 language: python
-env:
-    - COVERAGE=--with-coverage
 python:
-    - "2.7"
+  - 2.7
+# Setup anaconda
 before_install:
-    - deactivate
-    - sudo rmdir /dev/shm
-    - sudo ln -Tsf /{run,dev}/shm
-    - sudo apt-get update -qq
-    - sudo apt-get install lsb-release
-    - source /etc/lsb-release
-    - echo ${DISTRIB_CODENAME}
-    - wget -O- http://neuro.debian.net/lists/${DISTRIB_CODENAME}.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-    - sudo apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq python-scipy python-nose
-    - sudo apt-get install -qq python-networkx python-traits python-setuptools
-    - sudo apt-get install -qq python-nibabel
-    - sudo apt-get install -qq --no-install-recommends fsl afni
-    - sudo apt-get install -qq fsl-atlases
-    - source /etc/fsl/fsl.sh
-    - virtualenv --system-site-packages ~/virtualenv/this
-    - source ~/virtualenv/this/bin/activate
-    - pip install https://github.com/RDFLib/rdflib/archive/master.zip
-    - pip install https://github.com/satra/prov/archive/enh/rdf.zip
-    - pip install coverage
-    - pip install coveralls
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-2.0.3-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-2.0.3-Linux-x86_64.sh -O miniconda.sh; fi
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/anaconda/bin:$PATH
+  # The next couple lines fix a crash with multiprocessing on Travis
+  - sudo rm -rf /dev/shm
+  - sudo ln -s /run/shm /dev/shm
+  - sudo apt-get update -qq
+  - sudo apt-get install lsb-release
+  - source /etc/lsb-release
+  - echo ${DISTRIB_CODENAME}
+  - wget -O- http://neuro.debian.net/lists/${DISTRIB_CODENAME}.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+  - sudo apt-key adv --recv-keys --keyserver pgp.mit.edu 2649A5A9
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq --no-install-recommends fsl afni
+  - sudo apt-get install -qq fsl-atlases
+  - source /etc/fsl/fsl.sh
+
+# Install packages
 install:
-    - source ~/virtualenv/this/bin/activate
-    - python setup.py build_ext --inplace
+  - conda install --yes pip python=$TRAVIS_PYTHON_VERSION numpy scipy nose traits networkx dateutil
+  - pip install nibabel --use-mirrors
+  - pip install python-coveralls --use-mirrors
+  - pip install nose-cov --use-mirrors
+  - pip install https://github.com/RDFLib/rdflib/archive/master.zip
+  - pip install https://github.com/satra/prov/archive/enh/rdf.zip
+  - python setup.py install
+
+# Run test
 script:
-    - source ~/virtualenv/this/bin/activate
-    - make test-coverage
+  - nosetests --with-doctest --with-cov --cov nipype --cov-config .coveragerc --logging-level=INFO
+
+# Calculate coverage
 after_success:
-    - coveralls
+  - coveralls --config_file .coveragerc

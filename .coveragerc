@@ -3,5 +3,7 @@ branch = True
 source = nipype
 include = */nipype/*
 omit =
-    */nipype/externals/*
+    */nipype/external/*
+    */nipype/workflows/*
+    */nipype/fixes/*
     */setup.py
