@@ -46,11 +46,8 @@ def _get_affine_matrix(params, source):
     """
     if source == 'FSL':
         params = params[[3, 4, 5, 0, 1, 2]]
-    elif source == 'AFNI':
-        params = params[[4, 5, 3, 1, 2, 0]]
-        params[3:] = params[3:] * np.pi / 180.
-    elif source == 'FSFAST':
-        params = params[[5, 6, 4, 2, 3, 1]]
+    elif source in ('AFNI', 'FSFAST'):
+        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
         params[3:] = params[3:] * np.pi / 180.
     if source == 'NIPY':
         # nipy does not store typical euler angles, use nipy to convert
