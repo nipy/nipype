@@ -157,13 +157,14 @@ class Merge(FSLCommand):
     >>> from nipype.interfaces.fsl import Merge
     >>> from nipype.testing import funcfile
     >>> merger = Merge()
-    >>> merger.inputs.in_files = [funcfile, funcfile]
+    >>> merger.inputs.in_files = ['functional.nii', 'functional.nii']
     >>> merger.inputs.dimension = 't'
     >>> merger.inputs.merged_file = "functional_merged.nii.gz"
-    'fslmerge -t functional_merged.nii.gz /path/to/funcfile /path/to/funcfile' 
+    >>> merger.cmdline
+    'fslmerge -t functional_merged.nii.gz functional.nii functional.nii'
     >>> merger.inputs.tr = 2.25
     >>> merger.cmdline 
-    'fslmerge -tr functional_merged.nii.gz /path/to/funcfile /path/to/funcfile 2.25'
+    'fslmerge -tr functional_merged.nii.gz functional.nii functional.nii 2.25'
     """
 
     _cmd = 'fslmerge'
