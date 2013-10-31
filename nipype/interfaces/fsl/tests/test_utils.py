@@ -81,6 +81,7 @@ def test_merge():
                      dimension=dict(argstr='-%s', mandatory=True,),
                      environ=dict(),
                      in_files=dict(mandatory=True, argstr='%s',),
+                     tr=dict(argstr='%.2f'),
                      merged_file=dict(argstr='%s',),
                      output_type=dict(),
                      )
@@ -185,6 +186,43 @@ def test_fslroi():
     # test arguments for opt_map
     # Fslroi class doesn't have a filled opt_map{}
 
+
+@skipif(no_fsl)
+def test_fslmerge():
+    filelist, outdir, cwd = create_files_in_directory()
+
+    merger = fsl.Merge()
+
+    # make sure command gets called
+    yield assert_equal, merger.cmd, 'fslmerge'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, merger.run
+
+    # .inputs based parameters setting
+    merger.inputs.in_files = filelist
+    merger.inputs.merged_file = 'foo_merged.nii'
+    merger.inputs.dimension = 't'
+    merger.inputs.output_type = 'NIFTI'
+    yield assert_equal, merger.cmdline, 'fslmerge -t foo_merged.nii %s' % ' '.join(filelist)
+
+    # verify that providing a tr value updates the dimension to tr
+    merger.inputs.tr = 2.25
+    yield assert_equal, merger.cmdline, 'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
+
+    # .run based parameter setting
+    merger2 = fsl.Merge(in_files=filelist,
+                        merged_file='foo_merged.nii',
+                        dimension='t',
+                        output_type='NIFTI',
+                        tr=2.25)
+
+    yield assert_equal, merger2.cmdline, \
+        'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
+
+    clean_directory(outdir, cwd)
+    # test arguments for opt_map
+    # Fslmerge class doesn't have a filled opt_map{}
 
 # test fslmath
 @skipif(no_fsl)
