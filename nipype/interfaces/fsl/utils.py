@@ -129,13 +129,12 @@ class Smooth(FSLCommand):
 
 
 class MergeInputSpec(FSLCommandInputSpec):
-    in_files = traits.List(File(exists=True), argstr="%s", position=2,
-                           mandatory=True)
-    dimension = traits.Enum('t', 'x', 'y', 'z', 'a', 'tr', argstr="-%s", position=0,
-                            desc="dimension along which to merge, tr option requires setting tr input",
+    in_files = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
+    dimension = traits.Enum('t', 'x', 'y', 'z', 'a', argstr="-%s", position=0,
+                            desc="dimension along which to merge, optionally set tr input when dimension is t",
                             mandatory=True)
     tr = traits.Float(position=-1, argstr='%.2f',
-                      desc='use to specify TR if dimension is set to tr')
+                      desc='use to specify TR in seconds (default is 1.00 sec), overrides dimension and sets it to tr')
     merged_file = File(argstr="%s", position=1, name_source='in_files', name_template='%s_merged', hash_files=False)
 
 
@@ -149,8 +148,9 @@ class Merge(FSLCommand):
     Images can be concatenated across time, x, y, or z dimensions. Across the time (t)
     dimension the TR is set by default to 1 sec.
 
-    Note: to set the TR to a different value, specify 'tr' for dimension and specify
-    the TR value in seconds for the tr input.
+    Note: to set the TR to a different value, specify 't' for dimension and specify
+    the TR value in seconds for the tr input. The dimension will be automatically
+    updated to 'tr'.
 
     Examples
     --------
@@ -158,10 +158,15 @@ class Merge(FSLCommand):
     >>> from nipype.testing import funcfile
     >>> merger = Merge()
     >>> merger.inputs.in_files = [funcfile, funcfile]
-    >>> merger.inputs.dimension = 'tr'
-    >>> merger.inputs.tr = 2.25
+    >>> merger.inputs.dimension = 't'
     >>> merger.inputs.merged_file = "functional_merged.nii.gz"
-    >>> merger.cmdline =='fslmerge -tr %s %s %.2f' % (merger.inputs.merged_file, ' '.join(merger.inputs.in_files), merger.inputs.tr)
+    >>> merger.cmdline =='fslmerge -t %s %s' % (merger.inputs.merged_file,
+    ...                                               ' '.join(merger.inputs.in_files))
+    True
+    >>> merger.inputs.tr = 2.25
+    >>> merger.cmdline =='fslmerge -tr %s %s %.2f' % (merger.inputs.merged_file,
+    ...                                               ' '.join(merger.inputs.in_files),
+    ...                                               merger.inputs.tr)
     True
     """
 
@@ -169,12 +174,16 @@ class Merge(FSLCommand):
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
 
-def _format_arg(self, name, spec, value):
-    if name == 'tr':
-        if self.inputs.dimension != 'tr':
-            raise ValueError('When TR is specified, dimension has to be tr')
-        return spec.argstr % value
-    return super(FSLMerge, self)._format_arg(name, spec, value)
+    def _format_arg(self, name, spec, value):
+        if name == 'tr':
+            if self.inputs.dimension != 't':
+                raise ValueError('When TR is specified, dimension must be t')
+            return spec.argstr % value
+        if name == 'dimension':
+            if isdefined(self.inputs.tr):
+                return '-tr'
+            return spec.argstr % value
+        return super(Merge, self)._format_arg(name, spec, value)
 
 
 class ExtractROIInputSpec(FSLCommandInputSpec):
