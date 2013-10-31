@@ -203,6 +203,7 @@ def test_fslmerge():
     merger.inputs.in_files = filelist
     merger.inputs.merged_file = 'foo_merged.nii'
     merger.inputs.dimension = 't'
+    merger.inputs.output_type = 'NIFTI'
     yield assert_equal, merger.cmdline, 'fslmerge -t foo_merged.nii %s' % ' '.join(filelist)
 
     # verify that providing a tr value updates the dimension to tr
@@ -213,6 +214,7 @@ def test_fslmerge():
     merger2 = fsl.Merge(in_files=filelist,
                         merged_file='foo_merged.nii',
                         dimension='t',
+                        output_type='NIFTI',
                         tr=2.25)
 
     yield assert_equal, merger2.cmdline, \
