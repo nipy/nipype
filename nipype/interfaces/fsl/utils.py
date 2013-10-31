@@ -129,13 +129,17 @@ class Smooth(FSLCommand):
 
 
 class MergeInputSpec(FSLCommandInputSpec):
-    in_files = traits.List(File(exists=True), argstr="%s", position=2, mandatory=True)
+    in_files = traits.List(File(exists=True), argstr="%s", position=2,
+                           mandatory=True)
     dimension = traits.Enum('t', 'x', 'y', 'z', 'a', argstr="-%s", position=0,
-                            desc="dimension along which to merge, optionally set tr input when dimension is t",
+                            desc=("dimension along which to merge, optionally "
+                                  "set tr input when dimension is t"),
                             mandatory=True)
     tr = traits.Float(position=-1, argstr='%.2f',
-                      desc='use to specify TR in seconds (default is 1.00 sec), overrides dimension and sets it to tr')
-    merged_file = File(argstr="%s", position=1, name_source='in_files', name_template='%s_merged', hash_files=False)
+                      desc=('use to specify TR in seconds (default is 1.00 '
+                            'sec), overrides dimension and sets it to tr'))
+    merged_file = File(argstr="%s", position=1, name_source='in_files',
+                       name_template='%s_merged', hash_files=False)
 
 
 class MergeOutputSpec(TraitedSpec):
@@ -145,26 +149,25 @@ class MergeOutputSpec(TraitedSpec):
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
 
-    Images can be concatenated across time, x, y, or z dimensions. Across the time (t)
-    dimension the TR is set by default to 1 sec.
+    Images can be concatenated across time, x, y, or z dimensions. Across the
+    time (t) dimension the TR is set by default to 1 sec.
 
-    Note: to set the TR to a different value, specify 't' for dimension and specify
-    the TR value in seconds for the tr input. The dimension will be automatically
-    updated to 'tr'.
+    Note: to set the TR to a different value, specify 't' for dimension and
+    specify the TR value in seconds for the tr input. The dimension will be
+    automatically updated to 'tr'.
 
     Examples
     --------
     >>> from nipype.interfaces.fsl import Merge
-    >>> from nipype.testing import funcfile
     >>> merger = Merge()
-    >>> merger.inputs.in_files = ['functional.nii', 'functional.nii']
+    >>> merger.inputs.in_files = ['functional2.nii', 'functional3.nii']
     >>> merger.inputs.dimension = 't'
-    >>> merger.inputs.merged_file = "functional_merged.nii.gz"
+    >>> merger.inputs.output_type = 'NIFTI_GZ'
     >>> merger.cmdline
-    'fslmerge -t functional_merged.nii.gz functional.nii functional.nii'
+    'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
     >>> merger.cmdline 
-    'fslmerge -tr functional_merged.nii.gz functional.nii functional.nii 2.25'
+    'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
     """
 
     _cmd = 'fslmerge'
