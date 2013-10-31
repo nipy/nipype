@@ -160,14 +160,10 @@ class Merge(FSLCommand):
     >>> merger.inputs.in_files = [funcfile, funcfile]
     >>> merger.inputs.dimension = 't'
     >>> merger.inputs.merged_file = "functional_merged.nii.gz"
-    >>> merger.cmdline =='fslmerge -t %s %s' % (merger.inputs.merged_file,
-    ...                                               ' '.join(merger.inputs.in_files))
-    True
+    'fslmerge -t functional_merged.nii.gz /path/to/funcfile /path/to/funcfile' 
     >>> merger.inputs.tr = 2.25
-    >>> merger.cmdline =='fslmerge -tr %s %s %.2f' % (merger.inputs.merged_file,
-    ...                                               ' '.join(merger.inputs.in_files),
-    ...                                               merger.inputs.tr)
-    True
+    >>> merger.cmdline 
+    'fslmerge -tr functional_merged.nii.gz /path/to/funcfile /path/to/funcfile 2.25'
     """
 
     _cmd = 'fslmerge'
