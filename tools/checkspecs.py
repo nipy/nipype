@@ -179,7 +179,7 @@ class InterfaceChecker(object):
                         'copyfile', 'usedefault', 'sep', 'hash_files',
                         'deprecated', 'new_name', 'min_ver', 'max_ver',
                         'name_source', 'name_template', 'keep_extension',
-                        'units']
+                        'units', 'output_name']
         in_built = ['type', 'copy', 'parent', 'instance_handler',
                     'comparison_mode', 'array', 'default', 'editor']
         bad_specs = []
