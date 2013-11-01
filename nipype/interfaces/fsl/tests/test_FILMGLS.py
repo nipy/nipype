@@ -1,3 +1,6 @@
+from nipype.testing import assert_equal
+from nipype.interfaces.fsl.model import FILMGLS, FILMGLSInputSpec
+
 def test_filmgls():
     input_map = dict(args = dict(argstr='%s',),
                      autocorr_estimate_only = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-ac',),
@@ -40,8 +43,8 @@ def test_filmgls():
     tukey_window = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='--tukey=%d',),
     use_pava = dict(argstr='--pava',),
     )
-    instance = fsl.FILMGLS()
-    if isinstance(instance.inputs, fsl.FILMGLSInputSpec):
+    instance = FILMGLS()
+    if isinstance(instance.inputs, FILMGLSInputSpec):
         for key, metadata in input_map.items():
             for metakey, value in metadata.items():
                 yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
