@@ -7,7 +7,7 @@ References:
 PROV-DM: http://www.w3.org/TR/prov-dm/
 
 @author: Trung Dong Huynh <trungdong@donggiang.com>
-@copyright: University of Southampton 2012
+@copyright: University of Southampton 2013
 '''
 
 import logging
@@ -231,7 +231,7 @@ def parse_datatype(value, datatype):
         return DATATYPE_PARSERS[datatype](value)
     else:
         #  No parser found for the given data type
-        raise Exception(u'No parser found for the data type <%s>' % str(datatype))
+        raise Exception(u'No parser found for the data type <%s>' % unicode(datatype))
 
 
 # Mappings for XSD datatypes to Python standard types
@@ -252,9 +252,7 @@ def parse_xsd_types(value, datatype):
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = '%s'
-    if isinstance(s, basestring):
-        format_str = u'"""%s"""' if '\n' in s else u'"%s"'
+    format_str = u'"""%s"""' if isinstance(s, basestring) and '\n' in s else u'"%s"'
     return format_str % s
 
 
@@ -264,7 +262,7 @@ def encoding_PROV_N_value(value):
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
     elif isinstance(value, float):
-        return '"%f" %%%% xsd:float' % value
+        return u'"%f" %%%% xsd:float' % value
     else:
         return unicode(value)
 
@@ -287,8 +285,11 @@ class Literal(object):
         self._datatype = datatype
         self._langtag = langtag
 
-    def __str__(self):
+    def __unicode__(self):
         return self.provn_representation()
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
     def __eq__(self, other):
         return self._value == other._value and self._datatype == other._datatype and self._langtag == other._langtag if isinstance(other, Literal) else False
@@ -336,13 +337,16 @@ class Literal(object):
 
 class Identifier(object):
     def __init__(self, uri):
-        self._uri = uri
+        self._uri = unicode(uri)  # Ensure this is a unicode string
 
     def get_uri(self):
         return self._uri
 
-    def __str__(self):
+    def __unicode__(self):
         return self._uri
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
     def __eq__(self, other):
         return self.get_uri() == other.get_uri() if isinstance(other, Identifier) else False
@@ -355,7 +359,7 @@ class Identifier(object):
 
     def json_representation(self):
         return {'$': self._uri, 'type': u'xsd:anyURI'}
-
+    
     def rdf_representation(self):
         return URIRef(self.get_uri())
 
@@ -363,7 +367,7 @@ class QName(Identifier):
     def __init__(self, namespace, localpart):
         self._namespace = namespace
         self._localpart = localpart
-        self._str = ':'.join([namespace._prefix, localpart]) if namespace._prefix else localpart
+        self._str = u':'.join([namespace._prefix, localpart]) if namespace._prefix else localpart
 
     def get_namespace(self):
         return self._namespace
@@ -372,10 +376,13 @@ class QName(Identifier):
         return self._localpart
 
     def get_uri(self):
-        return ''.join([self._namespace._uri, self._localpart])
+        return u''.join([self._namespace._uri, self._localpart])
+
+    def __unicode__(self):
+        return self._str
 
     def __str__(self):
-        return self._str
+        return unicode(self).encode('utf-8')
 
     def provn_representation(self):
         return u"'%s'" % self._str
@@ -443,7 +450,7 @@ class ProvExceptionNotValidAttribute(ProvException):
         self.record_type = record_type
         self.attribute = attribute
         self.attribute_types = attribute_types
-        self.args += (PROV_N_MAP[record_type], str(attribute), attribute_types)
+        self.args += (PROV_N_MAP[record_type], unicode(attribute), attribute_types)
 
 
 class ProvExceptionCannotUnifyAttribute(ProvException):
@@ -504,8 +511,9 @@ class ProvRecord(object):
             self._extra_attributes.add((PROV['type'], type_identifier))
 
     def get_attribute(self, attr_name):
+        attr_name = self._bundle.valid_identifier(attr_name)
         if not self._extra_attributes:
-            return None
+            return []
         results = [value for attr, value in self._extra_attributes if attr == attr_name]
         return results
 
@@ -697,24 +705,27 @@ class ProvRecord(object):
             return False
         return True
 
-    def __str__(self):
+    def __unicode__(self):
         return self.get_provn()
+
+    def __str__(self):
+        return unicode(self).encode('utf-8')
 
     def get_provn(self, _indent_level=0):
         items = []
         if self._identifier:
-            items.append(str(self._identifier))
+            items.append(unicode(self._identifier))
         if self._attributes:
             for (attr, value) in self._attributes.items():
                 if value is None:
-                    items.append('-')
+                    items.append(u'-')
                 else:
                     if isinstance(value, ProvRecord):
                         record_id = value.get_identifier()
-                        items.append(str(record_id))
+                        items.append(unicode(record_id))
                     else:
                         #  Assuming this is a datetime or QName value
-                        items.append(value.isoformat() if isinstance(value, datetime.datetime) else str(value))
+                        items.append(value.isoformat() if isinstance(value, datetime.datetime) else unicode(value))
 
         if self._extra_attributes:
             extra = []
@@ -724,11 +735,11 @@ class ProvRecord(object):
                     provn_represenation = value.provn_representation()
                 except:
                     provn_represenation = encoding_PROV_N_value(value)
-                extra.append('%s=%s' % (str(attr), provn_represenation))
+                extra.append(u'%s=%s' % (unicode(attr), provn_represenation))
             if extra:
-                items.append('[%s]' % ', '.join(extra))
-        prov_n = '%s(%s)' % (PROV_N_MAP[self.get_type()], ', '.join(items))
-        return prov_n if self._asserted else '// ' + prov_n
+                items.append(u'[%s]' % u', '.join(extra))
+        prov_n = u'%s(%s)' % (PROV_N_MAP[self.get_type()], u', '.join(items))
+        return prov_n if self._asserted else u'// ' + prov_n
 
     def rdf(self, graph=None, subj=None):
         if graph is None:
@@ -757,7 +768,7 @@ class ProvRecord(object):
                     obj = RDFLiteral(value)
                 graph.add((subj, pred, obj))
         return graph
-
+        
     def is_asserted(self):
         return self._asserted
 
@@ -772,7 +783,7 @@ class ProvRecord(object):
 class ProvElement(ProvRecord):
     def is_element(self):
         return True
-
+    
     def rdf(self, graph=None):
         if graph is None:
             graph = Graph()
@@ -867,6 +878,12 @@ class ProvActivity(ProvElement):
             self._attributes[PROV_ATTR_STARTTIME] = startTime
         if endTime is not None:
             self._attributes[PROV_ATTR_ENDTIME] = endTime
+
+    def get_startTime(self):
+        return self._attributes[PROV_ATTR_STARTTIME]
+
+    def get_endTime(self):
+        return self._attributes[PROV_ATTR_ENDTIME]
 
 
 class ProvGeneration(ProvRelation):
@@ -1342,7 +1359,7 @@ class NamespaceManager(dict):
             return original_prefix
         count = 1
         while True:
-            new_prefix = '_'.join((original_prefix, str(count)))
+            new_prefix = '_'.join((original_prefix, unicode(count)))
             if new_prefix in self:
                 count += 1
             else:
@@ -1485,7 +1502,7 @@ class ProvBundle(ProvEntity):
 
             rec_type = record.get_type()
             rec_label = PROV_N_MAP[rec_type]
-            identifier = str(real_or_anon_id(record))
+            identifier = unicode(real_or_anon_id(record))
 
             if rec_type == PROV_REC_BUNDLE:
                 #  encoding the sub-bundle
@@ -1496,13 +1513,13 @@ class ProvBundle(ProvEntity):
                     for (attr, value) in record._attributes.items():
                         if isinstance(value, ProvRecord):
                             attr_record_id = real_or_anon_id(value)
-                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = str(attr_record_id)
+                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = unicode(attr_record_id)
                         elif value is not None:
                             #  Assuming this is a datetime value
-                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = value.isoformat() if isinstance(value, datetime.datetime) else str(value)
+                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = value.isoformat() if isinstance(value, datetime.datetime) else unicode(value)
                 if record._extra_attributes:
                     for (attr, value) in record._extra_attributes:
-                        attr_id = str(attr)
+                        attr_id = unicode(attr)
                         value_json = self._encode_json_representation(value)
                         if attr_id in record_json:
                             #  Multi-value attribute
@@ -1534,6 +1551,7 @@ class ProvBundle(ProvEntity):
                          key=lambda tuple_rec: tuple_rec[0])
 
         record_map = {}
+        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, basestring) and value in record_map) else self._decode_json_representation(value)
         #  Create all the records before setting their attributes
         for (record_type, identifier, content) in records:
             if record_type == PROV_REC_BUNDLE:
@@ -1548,26 +1566,34 @@ class ProvBundle(ProvEntity):
                 if hasattr(attributes, 'items'):  # it is a dict
                     #  There is only one element, create a singleton list
                     elements = [attributes]
-                else:  # expect it to be a list
-                    #  There are more than one element
-                    #  TODO: Fix this, we only accept one element (the first one)
-                    elements = [attributes[0]]
+                else:
+                    # expect it to be a list of dictionaries
+                    elements = attributes
 
                 for element in elements:
                     prov_attributes = {}
                     extra_attributes = []
                     #  Splitting PROV attributes and the others
+                    membership_extra_members = None  # this is for the multiple-entity membership hack to come
                     for attr, value in element.items():
                         if attr in PROV_ATTRIBUTES_ID_MAP:
+                            attr_id = PROV_ATTRIBUTES_ID_MAP[attr]
                             if isinstance(value, list):
                                 # Multiple values
                                 if len(value) == 1:
                                     # Only a single value in the list, unpack it
                                     value = value[0]
                                 else:
-                                    logger.error('The prov package does not support multiple-entity membership relations.')
-                                    raise ProvException
-                            prov_attributes[PROV_ATTRIBUTES_ID_MAP[attr]] = record_map[value] if (isinstance(value, (str, unicode)) and value in record_map) else self._decode_json_representation(value)
+                                    if record.get_type() == PROV_REC_MEMBERSHIP and attr_id == PROV_ATTR_ENTITY:
+                                        # This is a membership relation with multiple entities
+                                        # HACK: create multiple membership relations, one for each entity
+                                        membership_extra_members = value[1:]  # Store all the extra entities
+                                        value = value[0]  # Create the first membership relation as normal for the first entity
+                                    else:
+                                        error_msg = 'The prov package does not support PROV attributes having multiple values.'
+                                        logger.error(error_msg)
+                                        raise ProvException(error_msg)
+                            prov_attributes[attr_id] = _parse_attr_value(value)
                         else:
                             attr_id = self.valid_identifier(attr)
                             if isinstance(value, list):
@@ -1576,8 +1602,12 @@ class ProvBundle(ProvEntity):
                             else:
                                 #  add the single-value attribute
                                 extra_attributes.append((attr_id, self._decode_json_representation(value)))
-                    #  TODO: This won't work when there are more than one element
                     record.add_attributes(prov_attributes, extra_attributes)
+                    # HACK: creating extra (unidentified) membership relations
+                    if membership_extra_members:
+                        collection = prov_attributes[PROV_ATTR_COLLECTION]
+                        for member in membership_extra_members:
+                            self.membership(collection, _parse_attr_value(member), None, extra_attributes)
 
     #  Miscellaneous functions
     def is_document(self):
@@ -1626,15 +1656,15 @@ class ProvBundle(ProvEntity):
             # graph should not None here
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
-
+        
         for prefix, namespace in self._namespaces.items():
             graph.bind(prefix, namespace.get_uri())
-
+        
         for record in self._records:
             if record.is_asserted():
                 record.rdf(graph)
         return graph
-
+    
     def get_provjson(self, **kw):
         """Return the `PROV-JSON <http://www.w3.org/Submission/prov-json/>`_ representation for the bundle/document.
 
@@ -1702,11 +1732,11 @@ class ProvBundle(ProvEntity):
                         continue
                     else:
                         logger.debug("Unequal PROV records:")
-                        logger.debug("%s" % str(record_a))
-                        logger.debug("%s" % str(record_b))
+                        logger.debug("%s" % unicode(record_a))
+                        logger.debug("%s" % unicode(record_b))
                         return False
                 else:
-                    logger.debug("Could not find a record with this identifier: %s" % str(record_a._identifier))
+                    logger.debug("Could not find a record with this identifier: %s" % unicode(record_a._identifier))
                     return False
             else:
                 #  Manually look for the record
@@ -1717,7 +1747,7 @@ class ProvBundle(ProvEntity):
                         found = True
                         break
                 if not found:
-                    logger.debug("Could not find this record: %s" % str(record_a))
+                    logger.debug("Could not find this record: %s" % unicode(record_a))
                     return False
         return True
 

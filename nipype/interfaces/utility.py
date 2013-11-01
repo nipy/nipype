@@ -150,7 +150,7 @@ class RenameInputSpec(DynamicTraitedSpec):
                                         "template"))
     parse_string = traits.String(desc=("Python regexp parse string to define "
                                        "replacement inputs"))
-    use_fullpath = traits.Bool(False, use_default=True,
+    use_fullpath = traits.Bool(False, usedefault=True,
                                desc="Use full path as input to regex parser")
 
 
