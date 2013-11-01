@@ -66,7 +66,12 @@ html:
 	@echo "building docs"
 	make -C doc clean html
 
-check-before-commit: trailing-spaces html test
+specs:
+	@echo "Checking specs and autogenerating spec tests"
+	python tools/checkspecs.py
+
+check-before-commit: trailing-spaces html test specs
 	@echo "removed spaces"
 	@echo "built docs"
 	@echo "ran test"
+	@echo "generated spec tests"

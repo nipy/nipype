@@ -7,39 +7,6 @@ from nipype.interfaces.base import Bunch
 import numpy as np
 
 
-def test_artifactdetect():
-    input_map = dict(intersect_mask=dict(),
-                     mask_file=dict(),
-                     mask_threshold=dict(),
-                     mask_type=dict(),
-                     norm_threshold=dict(),
-                     parameter_source=dict(mandatory=True,),
-                     realigned_files=dict(mandatory=True,),
-                     realignment_parameters=dict(),
-                     rotation_threshold=dict(),
-                     translation_threshold=dict(),
-                     use_differences=dict(usedefault=True,),
-                     use_norm=dict(usedefault=True,),
-                     zintensity_threshold=dict(),
-                     )
-    instance = ra.ArtifactDetect()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-def test_stimuluscorrelation():
-    input_map = dict(concatenated_design=dict(mandatory=True,),
-                     intensity_values=dict(mandatory=True,),
-                     realignment_parameters=dict(mandatory=True,),
-                     spm_mat_file=dict(mandatory=True,),
-                     )
-    instance = ra.StimulusCorrelation()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
 def test_ad_init():
     ad = ra.ArtifactDetect(use_differences=[True, False])
     yield assert_true, ad.inputs.use_differences[0]

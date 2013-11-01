@@ -743,32 +743,3 @@ class SpecifySparseModel(SpecifyModel):
             outputs['sparse_png_file'] = os.path.join(os.getcwd(), 'sparse.png')
             outputs['sparse_svg_file'] = os.path.join(os.getcwd(), 'sparse.svg')
         return outputs
-
-'''
-
-Need to figure out how this component will work!!! multiple inheritence is causing a big headache
-
-class SpecifySparseSPMModelInputSpec(SpecifySPMModelInputSpec, SpecifySparseModelInputSpec):
-    pass
-
-class SpecifySparseSPMModel(SpecifySparseModel, SpecifySPMModel):
-    """Combines SPM specific options with sparse options
-    """
-    input_spec = SpecifySparseSPMModelInputSpec
-    output_spec = SpecifySparseModelOutputSpec
-
-    def _generate_design(self, infolist=None):
-        raise Exception('not working yet')
-        if (self.inputs.input_units == 'scans') and (self.inputs.output_units == 'secs'):
-            if isdefined(self.inputs.volumes_in_cluster) and (self.inputs.volumes_in_cluster > 1):
-                raise NotImplementedError("Cannot scale timings if times are scans and acquisition is clustered")
-        if isdefined(self.inputs.subject_info):
-            infolist = self.inputs.subject_info
-        else:
-            infolist = gen_info(self.inputs.event_files)
-        clusterlist = self._generate_clustered_design(infolist)
-        if not isdefined(self.inputs.concatenate_runs):
-            super(SpecifySparseSPMModel, self)._generate_design(infolist=clusterlist)
-        else:
-            self._generate_spm_design(infolist=clusterlist)
-'''
