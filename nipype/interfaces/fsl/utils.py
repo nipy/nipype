@@ -166,7 +166,7 @@ class Merge(FSLCommand):
     >>> merger.cmdline
     'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
     >>> merger.inputs.tr = 2.25
-    >>> merger.cmdline 
+    >>> merger.cmdline
     'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
     """
 

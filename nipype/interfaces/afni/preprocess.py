@@ -193,7 +193,7 @@ class Refit(CommandLine):
     _cmd = '3drefit'
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
-    
+
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)
