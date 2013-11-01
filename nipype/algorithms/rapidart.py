@@ -269,8 +269,6 @@ class ArtifactDetect(BaseInterface):
     output_spec = ArtifactDetectOutputSpec
 
     def __init__(self, **inputs):
-        warn(('Deprecation warning: "bound_by_brainmask" will be set to True'
-              'in release 0.8'))
         super(ArtifactDetect, self).__init__(**inputs)
 
     def _get_output_filenames(self, motionfile, output_dir):
