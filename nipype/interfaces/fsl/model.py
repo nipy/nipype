@@ -597,7 +597,7 @@ threshold=10, results_dir='stats')
 
     _cmd = 'film_gls'
 
-    if LooseVersion(Info.version()) > LooseVersion('5.0.4'):
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
         input_spec = FILMGLSInputSpec505
     else:
         input_spec = FILMGLSInputSpec
