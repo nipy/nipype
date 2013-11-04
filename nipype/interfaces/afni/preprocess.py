@@ -56,6 +56,7 @@ class To3DInputSpec(AFNICommandInputSpec):
 
 
 class To3D(AFNICommand):
+
     """Create a 3D dataset from 2D image files using AFNI to3d command
 
     For complete details, see the `to3d Documentation
@@ -125,6 +126,7 @@ class TShiftInputSpec(AFNICommandInputSpec):
 
 
 class TShift(AFNICommand):
+
     """Shifts voxel time series from input
     so that seperate slices are aligned to the same
     temporal origin
@@ -173,6 +175,7 @@ class RefitInputSpec(CommandLineInputSpec):
 
 
 class Refit(CommandLine):
+
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
@@ -239,6 +242,7 @@ class WarpInputSpec(AFNICommandInputSpec):
 
 
 class Warp(AFNICommand):
+
     """Use 3dWarp for spatially transforming a dataset
 
     For complete details, see the `3dWarp Documentation.
@@ -281,7 +285,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                                 argstr='-rmode %s',
                                 desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
 
-    voxel_size = traits.Tuple(*[traits.Float()]*3,
+    voxel_size = traits.Tuple(*[traits.Float()] * 3,
                               argstr='-dxyz %f %f %f',
                               desc="resample to new dx, dy and dz")
 
@@ -290,6 +294,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
 
 
 class Resample(AFNICommand):
+
     """Resample or reorient an image using AFNI 3dresample command
 
     For complete details, see the `3dresample Documentation.
@@ -333,15 +338,17 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                                     xor=['mask_source'])
 
     mask_source = File(exists=True,
-                        desc="mask for source voxels",
-                        argstr="-mask_source %s",
-                        xor=['mask_only_targets'])
+                       desc="mask for source voxels",
+                       argstr="-mask_source %s",
+                       xor=['mask_only_targets'])
 
-    out_file = File(name_template="%s_similarity_matrix.1D", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+    out_file = File(
+        name_template="%s_similarity_matrix.1D", desc='output image file name',
+        argstr='-prefix %s', name_source="in_file")
 
 
 class AutoTcorrelate(AFNICommand):
+
     """Computes the correlation coefficient between the time series of each
     pair of voxels in the input dataset, and stores the output into a
     new anatomical bucket dataset [scaled to shorts to save memory space].
@@ -389,6 +396,7 @@ class TStatInputSpec(AFNICommandInputSpec):
 
 
 class TStat(AFNICommand):
+
     """Compute voxel-wise statistics using AFNI 3dTstat command
 
     For complete details, see the `3dTstat Documentation.
@@ -425,6 +433,7 @@ class DetrendInputSpec(AFNICommandInputSpec):
 
 
 class Detrend(AFNICommand):
+
     """This program removes components from voxel time series using
     linear least squares
 
@@ -462,6 +471,7 @@ class DespikeInputSpec(AFNICommandInputSpec):
 
 
 class Despike(AFNICommand):
+
     """Removes 'spikes' from the 3D+time input dataset
 
     For complete details, see the `3dDespike Documentation.
@@ -519,6 +529,7 @@ class AutomaskOutputSpec(TraitedSpec):
 
 
 class Automask(AFNICommand):
+
     """Create a brain-only mask of the image using AFNI 3dAutomask command
 
     For complete details, see the `3dAutomask Documentation.
@@ -564,10 +575,11 @@ class VolregInputSpec(AFNICommandInputSpec):
     md1dfile = File(desc='max displacement output file',
                     argstr='-maxdisp1D %s',
                     position=-4)
-    oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
-                     argstr='-1Dfile %s',
-                     name_source="in_file",
-                     keep_extension=True)
+    oned_file = File(
+        name_template='%s.1D', desc='1D movement parameters output file',
+        argstr='-1Dfile %s',
+        name_source="in_file",
+        keep_extension=True)
     verbose = traits.Bool(desc='more detailed description of the process',
                           argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
@@ -583,6 +595,7 @@ class VolregOutputSpec(TraitedSpec):
 
 
 class Volreg(AFNICommand):
+
     """Register input volumes to a base volume using AFNI 3dvolreg command
 
     For complete details, see the `3dvolreg Documentation.
@@ -624,6 +637,7 @@ class MergeInputSpec(AFNICommandInputSpec):
 
 
 class Merge(AFNICommand):
+
     """Merge or edit volumes using AFNI 3dmerge command
 
     For complete details, see the `3dmerge Documentation.
@@ -658,6 +672,7 @@ class CopyInputSpec(AFNICommandInputSpec):
 
 
 class Copy(AFNICommand):
+
     """Copies an image of one type to an image of the same
     or different type using 3dcopy command
 
@@ -699,6 +714,7 @@ class FourierInputSpec(AFNICommandInputSpec):
 
 
 class Fourier(AFNICommand):
+
     """Program to lowpass and/or highpass each voxel time series in a
     dataset, via the FFT
 
@@ -808,6 +824,7 @@ class BandpassInputSpec(AFNICommandInputSpec):
 
 
 class Bandpass(AFNICommand):
+
     """Program to lowpass and/or highpass each voxel time series in a
     dataset, offering more/different options than Fourier
 
@@ -845,6 +862,7 @@ class ZCutUpInputSpec(AFNICommandInputSpec):
 
 
 class ZCutUp(AFNICommand):
+
     """Cut z-slices from a volume using AFNI 3dZcutup command
 
     For complete details, see the `3dZcutup Documentation.
@@ -1043,7 +1061,7 @@ if not given the reference will be the first volume of in_file.""")
     # Non-linear experimental
     _nwarp_types = ['bilinear',
                     'cubic', 'quintic', 'heptic', 'nonic',
-                    'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
+                    'poly3', 'poly5', 'poly7', 'poly9']  # same non-hellenistic
     nwarp = traits.Enum(
         *_nwarp_types, argstr='-nwarp %s',
         desc='Experimental nonlinear warping: bilinear or legendre poly.')
@@ -1064,6 +1082,7 @@ class AllineateOutputSpec(TraitedSpec):
 
 
 class Allineate(AFNICommand):
+
     """Program to align one dataset (the 'source') to a base dataset
 
     For complete details, see the `3dAllineate Documentation.
@@ -1111,9 +1130,10 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    position=-2,
                    mandatory=True,
                    exists=True)
-    out_file = File(name_template="%s_maskave.1D", desc='output image file name',
-                    keep_extension=True,
-                    argstr="> %s", name_source="in_file", position=-1)
+    out_file = File(
+        name_template="%s_maskave.1D", desc='output image file name',
+        keep_extension=True,
+        argstr="> %s", name_source="in_file", position=-1)
     mask = File(desc='matrix to align input file',
                 argstr='-mask %s',
                 position=1,
@@ -1124,6 +1144,7 @@ class MaskaveInputSpec(AFNICommandInputSpec):
 
 
 class Maskave(AFNICommand):
+
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
 
@@ -1155,11 +1176,13 @@ class SkullStripInputSpec(AFNICommandInputSpec):
                    position=1,
                    mandatory=True,
                    exists=True)
-    out_file = File(name_template="%s_skullstrip", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+    out_file = File(
+        name_template="%s_skullstrip", desc='output image file name',
+        argstr='-prefix %s', name_source="in_file")
 
 
 class SkullStrip(AFNICommand):
+
     """A program to extract the brain from surrounding
     tissue from MRI T1-weighted images
 
@@ -1194,6 +1217,7 @@ class TCatInputSpec(AFNICommandInputSpec):
 
 
 class TCat(AFNICommand):
+
     """Concatenate sub-bricks from input datasets into
     one big 3D+time dataset
 
@@ -1237,6 +1261,7 @@ class FimInputSpec(AFNICommandInputSpec):
 
 
 class Fim(AFNICommand):
+
     """Program to calculate the cross-correlation of
     an ideal reference waveform with the measured FMRI
     time series for each voxel
@@ -1285,6 +1310,7 @@ class TCorrelateInputSpec(AFNICommandInputSpec):
 
 
 class TCorrelate(AFNICommand):
+
     """Computes the correlation coefficient between corresponding voxel
     time series in two input 3D+time datasets 'xset' and 'yset'
 
@@ -1332,6 +1358,7 @@ class BrickStatOutputSpec(TraitedSpec):
 
 
 class BrickStat(AFNICommand):
+
     """Compute maximum and/or minimum voxel values of an input dataset
 
     For complete details, see the `3dBrickStat Documentation.
@@ -1400,7 +1427,7 @@ class ROIStatsInputSpec(CommandLineInputSpec):
         position=2)
 
     quiet = traits.Bool(
-        False, usedefault = True,
+        False, usedefault=True,
         desc='execute quietly',
         argstr='-quiet',
         position=1)
@@ -1411,6 +1438,7 @@ class ROIStatsOutputSpec(TraitedSpec):
 
 
 class ROIStats(CommandLine):
+
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
@@ -1440,7 +1468,8 @@ class ROIStats(CommandLine):
         if runtime is None:
             return self.run().outputs
         else:
-            stats = np.array([line.split() for line in runtime.stdout.split('\n')], np.str)
+            stats = np.array([line.split()
+                             for line in runtime.stdout.split('\n')], np.str)
             np.savetxt(of, stats, '"%s"', delimiter=',')
         outputs.stats = of
         return outputs
@@ -1464,6 +1493,7 @@ class CalcInputSpec(AFNICommandInputSpec):
 
 
 class Calc(AFNICommand):
+
     """This program does voxel-by-voxel arithmetic on 3D datasets
 
     For complete details, see the `3dcalc Documentation.
@@ -1513,8 +1543,9 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         position=1,
         mandatory=True,
         exists=True)
-    out_file = File(name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
-                    name_source='in_file', position=-1)
+    out_file = File(
+        name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
+        name_source='in_file', position=-1)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1538,6 +1569,7 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
 
 
 class BlurInMask(AFNICommand):
+
     """ Blurs a dataset spatially inside a mask.  That's all.  Experimental.
 
     For complete details, see the `3dBlurInMask Documentation.
@@ -1633,6 +1665,7 @@ class TCorrMapOutputSpec(TraitedSpec):
 
 
 class TCorrMap(AFNICommand):
+
     """ For each voxel time series, computes the correlation between it
     and all other voxels, and combines this set of values into the
     output dataset(s) in some way.
@@ -1668,6 +1701,7 @@ class TCorrMap(AFNICommand):
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
 
+
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
                    desc='input file')
@@ -1695,6 +1729,7 @@ class AutoboxOuputSpec(TraitedSpec):  # out_file not mandatory
 
 
 class Autobox(AFNICommand):
+
     """ Computes size of a box that fits around the volume.
     Also can be used to crop the volume to that box.
 
@@ -1734,13 +1769,18 @@ class Autobox(AFNICommand):
             return Undefined
         return super(Autobox, self)._gen_filename(name)
 
+
 class RetroicorInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dretroicor',
                    argstr='%s',
                    position=-1,
                    mandatory=True,
                    exists=True)
-    out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
+    out_file = File(
+        desc='output image file name',
+        argstr='-prefix %s',
+        mandatory=True,
+        position=1)
     card = File(desc='1D cardiac data file for cardiac correction',
                 argstr='-card %s',
                 position=-2,
@@ -1749,9 +1789,10 @@ class RetroicorInputSpec(AFNICommandInputSpec):
                 argstr='-resp %s',
                 position=-3,
                 exists=True)
-    threshold = traits.Int(desc='Threshold for detection of R-wave peaks in input (Make sure it is above the background noise level, Try 3/4 or 4/5 times range plus minimum)',
-                           argstr='-threshold %d',
-                           position=-4)
+    threshold = traits.Int(
+        desc='Threshold for detection of R-wave peaks in input (Make sure it is above the background noise level, Try 3/4 or 4/5 times range plus minimum)',
+        argstr='-threshold %d',
+        position=-4)
     order = traits.Int(desc='The order of the correction (2 is typical)',
                        argstr='-order %s',
                        position=-5)
@@ -1767,6 +1808,7 @@ class RetroicorInputSpec(AFNICommandInputSpec):
 
 
 class Retroicor(AFNICommand):
+
     """Performs Retrospective Image Correction for physiological
     motion effects, using a slightly modified version of the
     RETROICOR algorithm
@@ -1804,15 +1846,17 @@ class Retroicor(AFNICommand):
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dAFNItoNIFTI',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
     out_file = File(name_template="%s.nii", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False
 
+
 class AFNItoNIFTI(AFNICommand):
+
     """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
     see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAFNItoNIFTI.html>
@@ -1842,4 +1886,3 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
-
