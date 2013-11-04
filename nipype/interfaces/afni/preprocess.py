@@ -12,6 +12,7 @@ import warnings
 
 import os
 import re
+import numpy as np
 
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
@@ -1380,7 +1381,7 @@ class BrickStat(AFNICommand):
         return outputs
 
 
-class ROIStatsInputSpec(AFNICommandInputSpec):
+class ROIStatsInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3dROIstats',
                    argstr='%s',
                    position=-1,
@@ -1398,16 +1399,18 @@ class ROIStatsInputSpec(AFNICommandInputSpec):
         argstr='-mask_f2short',
         position=2)
 
-    quiet = traits.Bool(desc='execute quietly',
-                        argstr='-quiet',
-                        position=1)
+    quiet = traits.Bool(
+        False, usedefault = True,
+        desc='execute quietly',
+        argstr='-quiet',
+        position=1)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
     stats = File(desc='output', exists=True)
 
 
-class ROIStats(AFNICommand):
+class ROIStats(CommandLine):
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
@@ -1432,34 +1435,14 @@ class ROIStats(AFNICommand):
 
         outputs = self._outputs()
 
-        outfile = os.path.join(os.getcwd(), 'stat_result.json')
+        of = os.path.join(os.getcwd(), 'rois_stats.csv')
 
         if runtime is None:
-            try:
-                stats = load_json(outfile)['stat']
-            except IOError:
-                return self.run().outputs
+            return self.run().outputs
         else:
-            stats = []
-            for line in runtime.stdout.split('\n'):
-                if line:
-                    values = line.split()
-                    if len(values) > 1:
-                        stats.append([float(val) for val in values])
-                    else:
-                        stats.extend([float(val) for val in values])
-
-            if len(stats) == 1:
-                stats = stats[0]
-            of = os.path.join(os.getcwd(), 'TS.1D')
-            f = open(of, 'w')
-
-            for st in stats:
-                f.write(str(st) + '\n')
-            f.close()
-            save_json(outfile, dict(stat=of))
+            stats = np.array([line.split() for line in runtime.stdout.split('\n')], np.str)
+            np.savetxt(of, stats, '"%s"', delimiter=',')
         outputs.stats = of
-
         return outputs
 
 
