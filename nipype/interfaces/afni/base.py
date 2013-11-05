@@ -159,3 +159,7 @@ class AFNICommand(CommandLine):
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
+
+    def _filename_from_source(self, name):
+        return os.path.abspath(super(AFNICommand,self)._filename_from_source(name))
+            
