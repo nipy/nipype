@@ -1809,13 +1809,7 @@ class GLM(FSLCommand):
     output_spec = GLMOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        outputs['out_file'] = self.inputs.out_file
-        # Generate an out_file if one is not provided
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
-            outputs['out_file'] = self._gen_filename('out_file')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        outputs = super(GLM, self)._list_outputs()
 
         if isdefined(self.inputs.out_cope):
             outputs['out_cope'] = os.path.abspath(self.inputs.out_cope)
