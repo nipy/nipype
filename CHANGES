@@ -48,6 +48,8 @@ Next release
 * FIX: FILMGLS compatibility with FSL 5.0.5
 * FIX: Freesurfer recon-all resume now avoids setting inputs
 
+* FIX: File removal from node respects file associations img/hdr/mat, BRIK/HEAD
+
 Release 0.8.0 (May 8, 2013)
 ===========================
 
