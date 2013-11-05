@@ -152,6 +152,7 @@ datasource.inputs.template_args = info = dict(func=[['subject_id',
                                                      ['f3','f5','f7','f10']]],
                                               struct=[['subject_id','struct']])
 datasource.inputs.subject_id = 's1'
+datasource.inputs.sort_filelist = True
 
 main_workflow.connect(datasource, 'func', preprocessing, 'realign.in_files')
 main_workflow.connect(datasource, 'struct', preprocessing,

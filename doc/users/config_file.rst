@@ -114,6 +114,12 @@ Execution
     version information is available. Please notify developers or submit a
     patch.
 
+*parameterize_dirs*
+    If this is set to True, the node's output directory will contain full
+    parameterization of any iterable, otherwise parameterizations over 32
+    characters will be replaced by their hash. (possible values: ``true`` and
+	``false``; default value: ``true``)
+
 Example
 ~~~~~~~
 

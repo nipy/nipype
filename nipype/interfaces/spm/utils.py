@@ -228,7 +228,7 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         desc='SN SPM deformation file',
         xor=['deformation'])
     interpolation = traits.Range(
-        low=0, hign=7, field='interp',
+        low=0, high=7, field='interp',
         desc='degree of b-spline used for interpolation')
 
     bounding_box = traits.List(
@@ -300,7 +300,7 @@ class ResliceToReferenceInput(SPMCommandInputSpec):
         field='comp{1}.id.space',
         desc='File defining target space')
     interpolation = traits.Range(
-        low=0, hign=7, field='interp',
+        low=0, high=7, field='interp',
         desc='degree of b-spline used for interpolation')
 
     bounding_box = traits.List(
@@ -371,7 +371,7 @@ class DicomImportInputSpec(SPMCommandInputSpec):
         field='root',
         usedefault=True,
         desc='directory structure for the output.')
-    output_dir = traits.Str('./',
+    output_dir = traits.Str('./converted_dicom',
         field='outdir',
         usedefault=True,
         desc='output directory.')
@@ -393,7 +393,7 @@ class DicomImportOutputSpec(TraitedSpec):
                                 desc='converted files')
 
 class DicomImport(SPMCommand):
-    """ Uses spm to comvert DICOM files to nii or img+hdr.
+    """ Uses spm to convert DICOM files to nii or img+hdr.
 
     Examples
     --------

@@ -53,12 +53,15 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('file')
 
+from nipype import config
+config.enable_provenance()
+
 from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
-from nipype.interfaces.fsl.utils import EPIDeWarp
+from nipype.interfaces.fsl import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces.utility import Merge, IdentityInterface

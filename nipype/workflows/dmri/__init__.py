@@ -1,1 +1,1 @@
-from . import camino, mrtrix, fsl
+import camino, mrtrix, fsl

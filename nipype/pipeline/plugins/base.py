@@ -17,7 +17,8 @@ from warnings import warn
 import numpy as np
 import scipy.sparse as ssp
 
-from ..utils import (nx, dfs_preorder)
+
+from ..utils import (nx, dfs_preorder, topological_sort)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
@@ -408,11 +409,14 @@ class DistributedPluginBase(PluginBase):
     def _generate_dependency_list(self, graph):
         """ Generates a dependency list for a list of graphs.
         """
-        self.procs = graph.nodes()
+        self.procs, _ = topological_sort(graph)
+        nodes = graph.nodes()
+        indices = [nodes.index(proc) for proc in self.procs]
         try:
             self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
         except:
             self.depidx = nx.to_scipy_sparse_matrix(graph)
+        self.depidx = self.depidx[:, indices][indices, :]
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
         self.proc_done = np.zeros(len(self.procs), dtype=bool)
@@ -597,3 +601,35 @@ class GraphPluginBase(PluginBase):
         dependencies: dictionary of dependencies based on the toplogical sort
         """
         raise NotImplementedError
+
+
+
+    def _get_result(self, taskid):
+        if taskid not in self._pending:
+            raise Exception('Task %d not found' % taskid)
+        if self._is_pending(taskid):
+            return None
+        node_dir = self._pending[taskid]
+
+
+        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
+                                                              '..'))))
+        logger.debug(os.listdir(node_dir))
+        glob(os.path.join(node_dir, 'result_*.pklz')).pop()
+
+        results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
+        result_data = loadpkl(results_file)
+        result_out = dict(result=None, traceback=None)
+
+        if isinstance(result_data, dict):
+            result_out['result'] = result_data['result']
+            result_out['traceback'] = result_data['traceback']
+            result_out['hostname'] = result_data['hostname']
+            if results_file:
+                crash_file = os.path.join(node_dir, 'crashstore.pklz')
+                os.rename(results_file, crash_file)
+        else:
+            result_out['result'] = result_data
+
+        return result_out
+
