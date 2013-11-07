@@ -329,7 +329,7 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                 argstr="-mask %s")
     mask_only_targets = traits.Bool(desc="use mask only on targets voxels",
                                     argstr="-mask_only_targets",
-                                    xor=['mask_source']))
+                                    xor=['mask_source'])
     mask_source = File(exists=True,
                         desc="mask for source voxels",
                         argstr="-mask_source %s",

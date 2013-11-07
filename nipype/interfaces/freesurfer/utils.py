@@ -386,11 +386,11 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     source_file = File(exists=True, argstr='--surfval %s',
                       copyfile=False, mandatory=True,
                       desc='This is the source of the surface values')
-    hemi = traits.Str(argstr='--hemi %s',desc='hemisphere of data')
+    hemi = traits.Str(argstr='--hemi %s', mandatory=True, desc='hemisphere of data')
     transformed_file = File(desc='Output volume', argstr='--outvol %s', genfile=True)
     reg_file = File(exists=True, argstr='--volreg %s',
                     mandatory=True,
-                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)'
+                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)',
                     xor=['subject_id']) 
     template_file = File(exists=True, argstr='--template %s',
                       desc='Output template volume')
@@ -413,11 +413,11 @@ class Surface2VolTransform(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import Surface2VolTransform
     >>> xfm2vol = Surface2VolTransform()
-    >>> xfm2vol.inputs.source_file = 'surface.nii'
-    >>> xfm2vol.inputs.reg_file = 'register.dat'
+    >>> xfm2vol.inputs.source_file = 'lh.cope1.mgz'
+    >>> xfm2vol.inputs.reg_file = 'register.mat'
     >>> xfm2vol.inputs.hemi = 'lh'
-    >>> xfm2vol.cmdline
-    'mri_surf2vol --volreg register.dat --surfval surface.nii --hemi lh'
+    >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
+    >>> res = xfm2vol.run()# doctest: +SKIP
 
     """
 
