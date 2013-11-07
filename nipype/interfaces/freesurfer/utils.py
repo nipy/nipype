@@ -382,6 +382,65 @@ class SurfaceTransform(FSCommand):
             return self._list_outputs()[name]
         return None
 
+class Surface2VolTransformInputSpec(FSTraitedSpec):
+    source_file = File(exists=True, argstr='--surfval %s',
+                      copyfile=False, mandatory=True,
+                      desc='This is the source of the surface values')
+    hemi = traits.Str(argstr='--hemi %s', mandatory=True, desc='hemisphere of data')
+    transformed_file = File(desc='Output volume', argstr='--outvol %s', genfile=True)
+    reg_file = File(exists=True, argstr='--volreg %s',
+                    mandatory=True,
+                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)',
+                    xor=['subject_id']) 
+    template_file = File(exists=True, argstr='--template %s',
+                      desc='Output template volume')
+    mkmask = traits.Bool(desc='make a mask instead of loading surface values', argstr='--mkmask')
+    vertexvol_file = File(desc='Path name of the vertex output volume, which is the same as output volume except that the value of each voxel is the vertex-id that is mapped to that voxel.', argstr='--vtxvol %s', genfile=True)
+    surf_file = File(exists=True, argstr='--surf %s',desc='surfname (default is white)')
+    projfrac_file = traits.Float(exists=True, argstr='--projfrac %s',desc='thickness fraction')
+    subjects_dir = traits.Str(argstr='--sd %s',desc='freesurfer subjects directory defaults to $SUBJECTS_DIR')
+    subject_id = traits.Str(argstr='--identity %s',desc='subject id', xor=['reg_file'])
+
+class Surface2VolTransformOutputSpec(TraitedSpec):
+    transformed_file = File(exists=True, desc='Path to output file if used normally')
+    vertexvol_file = File(desc='vertex map volume path id. Optional')
+
+class Surface2VolTransform(FSCommand):
+    """Use FreeSurfer mri_surf2vol to apply a transform.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import Surface2VolTransform
+    >>> xfm2vol = Surface2VolTransform()
+    >>> xfm2vol.inputs.source_file = 'lh.cope1.mgz'
+    >>> xfm2vol.inputs.reg_file = 'register.mat'
+    >>> xfm2vol.inputs.hemi = 'lh'
+    >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
+    >>> res = xfm2vol.run()# doctest: +SKIP
+
+    """
+
+    _cmd = 'mri_surf2vol'
+    input_spec = Surface2VolTransformInputSpec
+    output_spec = Surface2VolTransformOutputSpec
+
+    def _get_outfile(self):
+        outfile = self.inputs.transformed_file
+        if not isdefined(outfile):
+            outfile = self._gen_fname(self.inputs.source_file,
+                                      suffix='_asVol')
+        return outfile
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['transformed_file'] = self._get_outfile()
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'transformed_file':
+            return self._get_outfile()
+        return None
 
 class ApplyMaskInputSpec(FSTraitedSpec):
 
