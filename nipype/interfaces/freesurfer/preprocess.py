@@ -970,7 +970,6 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
                                      'non-linear morph to resample the input '
                                      'volume. To be used by --m3z.'))
 
-
 class ApplyVolTransformOutputSpec(TraitedSpec):
     transformed_file = File(exists=True, desc='Path to output file if used normally')
 
@@ -1014,65 +1013,6 @@ class ApplyVolTransform(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['transformed_file'] = os.path.abspath(self._get_outfile())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'transformed_file':
-            return self._get_outfile()
-        return None
-
-class Surface2VolTransformInputSpec(FSTraitedSpec):
-    source_file = File(exists=True, argstr='--surfval %s',
-                      copyfile=False, mandatory=True,
-                      desc='This is the source of the surface values')
-    hemi = traits.Str(argstr='--hemi %s',desc='hemisphere of data')
-    transformed_file = File(desc='Output volume', argstr='--outvol %s', genfile=True)
-    reg_file = File(exists=True, argstr='--volreg %s',
-                    mandatory=True,
-                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)') 
-    template_file = File(exists=True, argstr='--template %s',
-                      desc='Output template volume')
-    mkmask = traits.Bool(desc='make a mask instead of loading surfval', argstr='--mkmask')
-    vertexvol_file = File(desc='vertex map volume path id', argstr='--vtxvol %s', genfile=True)
-    surf_file = File(exists=True, argstr='--surf %s',desc='surfname (default is white)')
-    projfrac_file = File(exists=True, argstr='--projfrac %s',desc='thickness fraction')
-    subjects_dir = traits.Str(argstr='--sd %s',desc='freesurfer subjects directory defaults to $SUBJECTS_DIR')
-    identity = traits.Str(argstr='--identity %s',desc='use identity (must supply subject name)')
-
-class Surface2VolTransformOutputSpec(TraitedSpec):
-    transformed_file = File(exists=True, desc='Path to output file if used normally')
-    vertexvol_file = File(desc='vertex map volume path id. Optional')
-
-class Surface2VolTransform(FSCommand):
-    """Use FreeSurfer mri_surf2vol to apply a transform.
-
-    Examples
-    --------
-
-    >>> from nipype.interfaces.freesurfer import Surface2VolTransform
-    >>> xfm2vol = Surface2VolTransform()
-    >>> xfm2vol.inputs.source_file = 'surface.nii'
-    >>> xfm2vol.inputs.reg_file = 'register.dat'
-    >>> xfm2vol.inputs.hemi = 'lh'
-    >>> xfm2vol.cmdline
-    'mri_surf2vol --volreg register.dat --surfval structural.nii --hemi lh'
-
-    """
-
-    _cmd = 'mri_surf2vol'
-    input_spec = Surface2VolTransformInputSpec
-    output_spec = Surface2VolTransformOutputSpec
-
-    def _get_outfile(self):
-        outfile = self.inputs.transformed_file
-        if not isdefined(outfile):
-            outfile = self._gen_fname(self.inputs.source_file,
-                                      suffix='_xfm2vol')
-        return outfile
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['transformed_file'] = self._get_outfile()
         return outputs
 
     def _gen_filename(self, name):
