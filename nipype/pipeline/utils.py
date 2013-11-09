@@ -20,7 +20,7 @@ from socket import gethostname
 import networkx as nx
 
 from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
-                               filename_to_list)
+                               filename_to_list, get_related_files)
 from ..utils.misc import create_function_from_source, str2bool
 from ..interfaces.base import (CommandLine, isdefined, Undefined, Bunch,
                                InterfaceResult)
@@ -1006,6 +1006,10 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
         needed_dirs.extend(filename_to_list(dirs2keep))
     for extra in ['_nipype', '_report']:
         needed_dirs.extend(glob(os.path.join(cwd, extra)))
+    temp = []
+    for filename in needed_files:
+        temp.extend(get_related_files(filename))
+    needed_files = temp
     logger.debug('Needed files: %s' % (';'.join(needed_files)))
     logger.debug('Needed dirs: %s' % (';'.join(needed_dirs)))
     files2remove = []

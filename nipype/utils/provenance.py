@@ -21,6 +21,8 @@ niiri = pm.Namespace("niiri", "http://nidm.nidash.org/iri/")
 
 get_id = lambda: niiri[uuid1().hex]
 
+max_text_len = 1024000
+
 def safe_encode(x):
     """Encodes a python value for prov
     """
@@ -35,7 +37,11 @@ def safe_encode(x):
                     return pm.Literal('file://%s%s' % (getfqdn(), x),
                                       pm.XSD['anyURI'])
             else:
-                return pm.Literal(x, pm.XSD['string'])
+                if len(x) > max_text_len:
+                    return pm.Literal(x[:max_text_len - 13] + ['...Clipped...'],
+                                      pm.XSD['string'])
+                else:
+                    return pm.Literal(x, pm.XSD['string'])
         if isinstance(x, (int,)):
             return pm.Literal(int(x), pm.XSD['integer'])
         if isinstance(x, (float,)):

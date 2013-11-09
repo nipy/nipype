@@ -36,123 +36,6 @@ def clean_directory(outdir, old_wd):
 
 
 @skipif(no_fsl)
-def test_extractroi():
-    input_map = dict(args=dict(argstr='%s',),
-                     environ=dict(),
-                     in_file=dict(mandatory=True, argstr='%s',),
-                     output_type=dict(),
-                     roi_file=dict(argstr='%s',),
-                     t_min=dict(argstr='%d',),
-                     t_size=dict(argstr='%d',),
-                     x_min=dict(argstr='%d',),
-                     x_size=dict(argstr='%d',),
-                     y_min=dict(argstr='%d',),
-                     y_size=dict(argstr='%d',),
-                     z_min=dict(argstr='%d',),
-                     z_size=dict(argstr='%d',),
-                     )
-    instance = fsl.ExtractROI()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-@skipif(no_fsl)
-def test_imagemaths():
-    input_map = dict(args=dict(argstr='%s',),
-                     environ=dict(),
-                     in_file=dict(argstr='%s', mandatory=True,),
-                     in_file2=dict(argstr='%s',),
-                     op_string=dict(argstr='%s',),
-                     out_data_type=dict(argstr='-odt %s',),
-                     out_file=dict(argstr='%s',),
-                     output_type=dict(),
-                     suffix=dict(),
-                     )
-    instance = fsl.ImageMaths()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-@skipif(no_fsl)
-def test_merge():
-    input_map = dict(args=dict(argstr='%s',),
-                     dimension=dict(argstr='-%s', mandatory=True,),
-                     environ=dict(),
-                     in_files=dict(mandatory=True, argstr='%s',),
-                     merged_file=dict(argstr='%s',),
-                     output_type=dict(),
-                     )
-    instance = fsl.Merge()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-@skipif(no_fsl)
-def test_filterregressor():
-    input_map = dict(Out_vnscales=dict(),
-                     args=dict(argstr='%s',),
-                     design_file=dict(mandatory=True,),
-                     environ=dict(),
-                     filter_columns=dict(mandatory=True,),
-                     filter_all=dict(mandatory=True,),
-                     in_file=dict(mandatory=True,),
-                     mask=dict(),
-                     out_file=dict(),
-                     output_type=dict(),
-                     var_norm=dict(),
-                     )
-    instance = fsl.FilterRegressor()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-@skipif(no_fsl)
-def test_smooth():
-    input_map = dict(args=dict(argstr='%s',),
-                     environ=dict(),
-                     fwhm=dict(
-                         argstr='-kernel gauss %f -fmean', mandatory=True,),
-                     in_file=dict(argstr='%s', mandatory=True,),
-                     output_type=dict(),
-                     smoothed_file=dict(argstr='%s',),
-                     )
-    instance = fsl.Smooth()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-@skipif(no_fsl)
-def test_split():
-    input_map = dict(args=dict(argstr='%s',),
-                     dimension=dict(argstr='-%s',),
-                     environ=dict(),
-                     in_file=dict(argstr='%s',),
-                     out_base_name=dict(argstr='%s',),
-                     output_type=dict(),
-                     )
-    instance = fsl.Split()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-def no_fsl():
-    """Checks if FSL is NOT installed
-    used with skipif to skip tests that will
-    fail if FSL is not installed"""
-
-    if fsl.Info().version() == None:
-        return True
-    else:
-        return False
-
-
-@skipif(no_fsl)
 def test_fslroi():
     filelist, outdir, cwd = create_files_in_directory()
 
@@ -185,6 +68,43 @@ def test_fslroi():
     # test arguments for opt_map
     # Fslroi class doesn't have a filled opt_map{}
 
+
+@skipif(no_fsl)
+def test_fslmerge():
+    filelist, outdir, cwd = create_files_in_directory()
+
+    merger = fsl.Merge()
+
+    # make sure command gets called
+    yield assert_equal, merger.cmd, 'fslmerge'
+
+    # test raising error with mandatory args absent
+    yield assert_raises, ValueError, merger.run
+
+    # .inputs based parameters setting
+    merger.inputs.in_files = filelist
+    merger.inputs.merged_file = 'foo_merged.nii'
+    merger.inputs.dimension = 't'
+    merger.inputs.output_type = 'NIFTI'
+    yield assert_equal, merger.cmdline, 'fslmerge -t foo_merged.nii %s' % ' '.join(filelist)
+
+    # verify that providing a tr value updates the dimension to tr
+    merger.inputs.tr = 2.25
+    yield assert_equal, merger.cmdline, 'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
+
+    # .run based parameter setting
+    merger2 = fsl.Merge(in_files=filelist,
+                        merged_file='foo_merged.nii',
+                        dimension='t',
+                        output_type='NIFTI',
+                        tr=2.25)
+
+    yield assert_equal, merger2.cmdline, \
+        'fslmerge -tr foo_merged.nii %s %.2f' % (' '.join(filelist), 2.25)
+
+    clean_directory(outdir, cwd)
+    # test arguments for opt_map
+    # Fslmerge class doesn't have a filled opt_map{}
 
 # test fslmath
 @skipif(no_fsl)
@@ -408,15 +328,3 @@ def test_swapdims():
 
     # Clean up
     clean_directory(testdir, origdir)
-
-
-@skipif(no_fsl)
-def test_invwarp():
-    input_map = dict(environ=dict(),
-                     args=dict(argstr='%s',),
-                     warp=dict(mandatory=True,),
-                     reference=dict(mandatory=True,))
-    instance = fsl.InvWarp()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value

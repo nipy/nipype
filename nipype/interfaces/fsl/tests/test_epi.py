@@ -1,8 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-import tempfile
-import shutil
 
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -11,35 +9,10 @@ import numpy as np
 
 import nibabel as nb
 
-from nose import with_setup
-
 from nipype.testing import ( assert_equal, assert_not_equal,
-                             assert_raises, skipif, example_data)
+                             assert_raises, skipif)
 import nipype.interfaces.fsl.epi as fsl
-from nipype.interfaces.fsl import Info, no_fsl
-from nipype.interfaces.base import Undefined
-
-# nosetests --with-doctest path_to/test_fsl.py
-
-@skipif(no_fsl)
-def test_eddy_correct1():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_file = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='%s',),
-                     output_type = dict(),
-                     ref_num = dict(mandatory=True,argstr='%d',),
-                     )
-    instance = fsl.EddyCorrect()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-
-def skip_epi_tests():
-    """XXX These tests are skipped until we clean up some of this code
-    """
-    return True
+from nipype.interfaces.fsl import no_fsl
 
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
