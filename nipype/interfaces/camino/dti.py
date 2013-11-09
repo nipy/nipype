@@ -8,7 +8,7 @@
 """
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec)
+                                    StdOutCommandLineInputSpec, isdefined)
 from nipype.utils.filemanip import split_filename
 import os
 
@@ -65,7 +65,7 @@ class DTIFit(StdOutCommandLine):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
 
-class DTMetricInputSpec(StdOutCommandLineInputSpec):
+class DTMetricInputSpec(CommandLineInputSpec):
     eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True, 
                       desc='voxel-order data filename')
 
@@ -88,10 +88,19 @@ class DTMetricInputSpec(StdOutCommandLineInputSpec):
                                        '"char", "short", "int", "long", "float" or "double".'
                                        'Default is double data type'))
                                        
+    data_header = File(argstr='-header %s', exists=True,
+                       desc=('A Nifti .nii or .nii.gz file containing the header information. '
+                             'Usually this will be the header of the raw data file from which '
+                             'the diffusion tensors were reconstructed.'))
+                             
+    outputfile = File(argstr='-outputfile %s', genfile=True,
+                      desc=('Output name. Output will be a .nii.gz file if data_header is provided and'
+                            'in voxel order with outputdatatype datatype (default: double) otherwise.'))
+                                       
 class DTMetricOutputSpec(TraitedSpec):
     metric_stats = File(exists=True, desc='Diffusion Tensor statistics of the chosen metric')
 
-class DTMetric(StdOutCommandLine):
+class DTMetric(CommandLine):
     """
     Computes tensor metric statistics based on the eigenvalues l1 >= l2 >= l3
     typically obtained from ComputeEigensystem.
@@ -138,11 +147,24 @@ class DTMetric(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.eigen_data)
-        metric = self.inputs.metric
-        datatype= self.inputs.outputdatatype
-        return name + '_' + metric + '.B' + datatype
+        return self._gen_outputfile()
 
+    def _gen_outputfile(self):
+        outputfile = self.inputs.outputfile
+        if not isdefined(outputfile):
+            outputfile = self._gen_filename('outputfile')
+        return outputfile
+
+    def _gen_filename(self, name):
+        if name == 'outputfile':
+            _, name , _ = split_filename(self.inputs.eigen_data)
+            metric = self.inputs.metric
+            datatype= self.inputs.outputdatatype
+            if isdefined(self.inputs.data_header):
+                filename = name + '_' + metric + '.nii.gz'
+            else:
+                filename = name + '_' + metric + '.B' + datatype
+        return filename
 
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
     def _gen_model_options(): #@NoSelf
