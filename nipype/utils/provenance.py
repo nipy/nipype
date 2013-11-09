@@ -17,7 +17,7 @@ iflogger = logging.getLogger('interface')
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
-niiri = pm.Namespace("niiri", "http://nidm.nidash.org/iri/")
+niiri = pm.Namespace("niiri", "http://iri.nidash.org/")
 
 get_id = lambda: niiri[uuid1().hex]
 
