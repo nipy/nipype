@@ -280,6 +280,10 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                      traits.Tuple(traits.Float(),  # gdf & syn
                                                                   traits.Float(
                                                                   ),
+                                                                  traits.Float()),
+                                                     traits.Tuple(traits.Float(),  # gdf & syn
+                                                                  traits.Float(),
+                                                                  traits.Float(),
                                                                   traits.Float())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
