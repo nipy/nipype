@@ -195,7 +195,7 @@ class Refit(CommandLine):
     output_spec = AFNICommandOutputSpec
 
     def _list_outputs(self):
-        outputs = super(AFNICommand, self)._list_outputs()
+        outputs = super(Refit, self)._list_outputs()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
 
