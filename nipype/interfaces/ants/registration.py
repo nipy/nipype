@@ -281,7 +281,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                                   traits.Float(
                                                                   ),
                                                                   traits.Float()),
-                                                     traits.Tuple(traits.Float(),  # gdf & syn
+                                                     traits.Tuple(traits.Float(),  # BSplineSyn
                                                                   traits.Float(),
                                                                   traits.Float(),
                                                                   traits.Float())))
