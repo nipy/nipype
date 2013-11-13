@@ -42,18 +42,18 @@ def _get_affine_matrix(params, source):
 
     params : np.array (upto 12 long) in native package format
     source : the package that generated the parameters
-             supports SPM, AFNI, FSL, NIPY
+             supports SPM, AFNI, FSFAST, FSL, NIPY
     """
     if source == 'FSL':
         params = params[[3, 4, 5, 0, 1, 2]]
-    elif source == 'AFNI':
-        params = params[[4, 5, 3, 1, 2, 0]]
+    elif source in ('AFNI', 'FSFAST'):
+        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
         params[3:] = params[3:] * np.pi / 180.
     if source == 'NIPY':
         # nipy does not store typical euler angles, use nipy to convert
         from nipy.algorithms.registration import to_matrix44
         return to_matrix44(params)
-    #process for FSL, SPM and AFNI
+    #process for FSL, SPM, AFNI and FSFAST
     rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
                                   [-np.sin(x), np.cos(x)]])
     q = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0])
@@ -76,7 +76,7 @@ def _get_affine_matrix(params, source):
     # Shear
     Sh = np.eye(4)
     Sh[(0, 0, 1), (1, 2, 2)] = params[9:12]
-    if source == 'AFNI':
+    if source in ('AFNI', 'FSFAST'):
         return np.dot(T, np.dot(Ry, np.dot(Rx, np.dot(Rz, np.dot(S, Sh)))))
     return np.dot(T, np.dot(Rx, np.dot(Ry, np.dot(Rz, np.dot(S, Sh)))))
 
@@ -158,7 +158,7 @@ class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
     realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
                             desc=("Names of realignment parameters"
                                   "corresponding to the functional data files"))
-    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "NiPy",
+    parameter_source = traits.Enum("SPM", "FSL", "AFNI", "NiPy", "FSFAST",
                                    desc="Source of movement parameters",
                                    mandatory=True)
     use_differences = traits.ListBool([True, False], minlen=2, maxlen=2,
@@ -266,8 +266,6 @@ class ArtifactDetect(BaseInterface):
     output_spec = ArtifactDetectOutputSpec
 
     def __init__(self, **inputs):
-        warn(('Deprecation warning: "bound_by_brainmask" will be set to True'
-              'in release 0.8'))
         super(ArtifactDetect, self).__init__(**inputs)
 
     def _get_output_filenames(self, motionfile, output_dir):

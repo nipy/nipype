@@ -82,6 +82,7 @@ datasource = pe.Node(interface=util.IdentityInterface(fields=
                     name='InputImages' )
 datasource.inputs.imageList=input_images
 datasource.inputs.passiveImagesDictionariesList=input_passive_images
+datasource.inputs.sort_filelist = True
 
 """
 5. Template is initialized by a simple average

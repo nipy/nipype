@@ -64,6 +64,7 @@ datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 """
 An inputnode is used to pass the data obtained by the data grabber to the actual processing functions

@@ -109,6 +109,7 @@ datasource.inputs.base_directory = os.path.abspath('fsl_course_data/fdt/')
 
 datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz')
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 
 """

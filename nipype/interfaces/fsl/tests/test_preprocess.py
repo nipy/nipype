@@ -204,10 +204,8 @@ def test_flirt():
     flirter.inputs.reference = reffile
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
-    outfile = os.path.join(os.getcwd(),
-                           fsl_name(flirter, '%s_flirt' %fname))
+    outfile = fsl_name(flirter, '%s_flirt' %fname)
     outmat = '%s_flirt.mat' % fname
-    outmat = os.path.join(os.getcwd(), outmat)
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     yield assert_equal, flirter.cmdline, realcmd
@@ -242,12 +240,10 @@ def test_flirt():
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
-        outfile = os.path.join(os.getcwd(),
-                               fsl_name(fsl.FLIRT(),'%s_flirt' % fname))
+        outfile = fsl_name(fsl.FLIRT(),'%s_flirt' % fname)
         outfile = ' '.join(['-out', outfile])
         # Handle autogeneration of outmatrix
         outmatrix = '%s_flirt.mat' % fname
-        outmatrix = os.path.join(os.getcwd(), outmatrix)
         outmatrix = ' '.join(['-omat', outmatrix])
         # Build command line
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
@@ -477,70 +473,3 @@ def test_applywarp():
                           field_file = reffile)
 
     teardown_flirt(tmpdir)
-
-@skipif(no_fsl)
-def test_fugue():
-    input_map = dict(args = dict(argstr='%s',),
-                     asym_se_time = dict(argstr='--asym=%.10f',),
-                     despike_2dfilter = dict(argstr='--despike',),
-                     despike_theshold = dict(argstr='--despikethreshold=%s',),
-                     dwell_time = dict(argstr='--dwell=%.10f',),
-                     dwell_to_asym_ratio = dict(argstr='--dwelltoasym=%.10f',),
-                     environ = dict(usedefault=True,),
-                     fmap_in_file = dict(argstr='--loadfmap=%s',),
-                     fmap_out_file = dict(argstr='--savefmap=%s',),
-                     fourier_order = dict(argstr='--fourier=%d',),
-                     icorr = dict(requires=['shift_in_file'],argstr='--icorr',),
-                     icorr_only = dict(requires=['unwarped_file'],argstr='--icorronly',),
-                     in_file = dict(argstr='--in=%s',),
-                     mask_file = dict(argstr='--mask=%s',),
-                     median_2dfilter = dict(argstr='--median',),
-                     no_extend = dict(argstr='--noextend',),
-                     no_gap_fill = dict(argstr='--nofill',),
-                     nokspace = dict(argstr='--nokspace',),
-                     output_type = dict(),
-                     pava = dict(argstr='--pava',),
-                     phase_conjugate = dict(argstr='--phaseconj',),
-                     phasemap_file = dict(argstr='--phasemap=%s',),
-                     poly_order = dict(argstr='--poly=%d',),
-                     save_unmasked_fmap = dict(requires=['fmap_out_file'],argstr='--unmaskfmap',),
-                     save_unmasked_shift = dict(requires=['shift_out_file'],argstr='--unmaskshift',),
-                     shift_in_file = dict(argstr='--loadshift=%s',),
-                     shift_out_file = dict(argstr='--saveshift=%s',),
-                     smooth2d = dict(argstr='--smooth2=%.2f',),
-                     smooth3d = dict(argstr='--smooth3=%.2f',),
-                     unwarp_direction = dict(argstr='--unwarpdir=%s',),
-                     unwarped_file = dict(argstr='--unwarp=%s',),
-                     )
-    instance = fsl.FUGUE()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_prelude():
-    input_map = dict(args = dict(argstr='%s',),
-                     complex_phase_file = dict(mandatory=True,xor=['magnitude_file', 'phase_file'],argstr='--complex=%s',),
-                     end = dict(argstr='--end=%d',),
-                     environ = dict(usedefault=True,),
-                     label_file = dict(argstr='--labels=%s',),
-                     labelprocess2d = dict(argstr='--labelslices',),
-                     magnitude_file = dict(mandatory=True,xor=['complex_phase_file'],argstr='--abs=%s',),
-                     mask_file = dict(argstr='--mask=%s',),
-                     num_partitions = dict(argstr='--numphasesplit=%d',),
-                     output_type = dict(),
-                     phase_file = dict(mandatory=True,xor=['complex_phase_file'],argstr='--phase=%s',),
-                     process2d = dict(xor=['labelprocess2d'],argstr='--slices',),
-                     process3d = dict(xor=['labelprocess2d', 'process2d'],argstr='--force3D',),
-                     rawphase_file = dict(argstr='--rawphase=%s',),
-                     removeramps = dict(argstr='--removeramps',),
-                     savemask_file = dict(argstr='--savemask=%s',),
-                     start = dict(argstr='--start=%d',),
-                     threshold = dict(argstr='--thresh=%.10f',),
-                     unwrapped_phase_file = dict(argstr='--unwrap=%s',),
-                     )
-    instance = fsl.PRELUDE()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-

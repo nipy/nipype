@@ -9,7 +9,7 @@ import nipype.interfaces.dipy as dipy
 import nipype.algorithms.misc as misc
 import inspect
 import os, os.path as op                      # system functions
-from ..fsl.dti import create_eddy_correct_pipeline
+from ..fsl.epi import create_eddy_correct_pipeline
 from ..connectivity.nx import create_networkx_pipeline, create_cmats_to_csv_pipeline
 from nipype.interfaces.utility import Function
 from ...misc.utils import select_aparc_annot

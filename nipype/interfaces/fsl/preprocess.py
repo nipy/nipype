@@ -251,7 +251,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     mixel_smooth = traits.Range(low=0.0, high=1.0,
                                 desc='spatial smoothness for mixeltype',
                                 argstr='-R %.2f')
-    iters_afterbias = traits.Range(low=1, hight=20,
+    iters_afterbias = traits.Range(low=1, high=20,
                                    desc='number of main-loop iterations '
                                    'after bias-field removal',
                                    argstr='-O %d')
@@ -386,20 +386,19 @@ class FAST(FSLCommand):
 class FLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-in %s', mandatory=True,
                    position=0, desc='input file')
-    # XXX Not clear if position is required for mandatory flirt inputs
-    # since they are prefixed with argstrs.  But doing it to follow
-    # our previous convention and so we can test the generated command
-    # line.
     reference = File(exists=True, argstr='-ref %s', mandatory=True,
                      position=1, desc='reference file')
     out_file = File(argstr='-out %s', desc='registered output file',
-                    genfile=True, position=2, hash_files=False)
+                    name_source=['in_file'], name_template='%s_flirt',
+                    position=2, hash_files=False)
     out_matrix_file = File(argstr='-omat %s',
+                           name_source=['in_file'], keep_extension=True,
+                           name_template='%s_flirt.mat',
                            desc='output affine matrix in 4x4 asciii format',
-                           genfile=True, position=3, hash_files=False)
-
-    out_log = File(desc='output log')
-
+                           position=3, hash_files=False)
+    out_log = File(name_source=['in_file'], keep_extension=True,
+                   requires=['save_log'],
+                   name_template='%s_flirt.log', desc='output log')
     in_matrix_file = File(argstr='-init %s', desc='input 4x4 affine matrix')
     apply_xfm = traits.Bool(argstr='-applyxfm', requires=['in_matrix_file'],
                             desc='apply transformation supplied by in_matrix_file')
@@ -533,43 +532,14 @@ class FLIRT(FSLCommand):
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
     >>> flt.inputs.in_file = example_data('structural.nii')
     >>> flt.inputs.reference = example_data('mni.nii')
-    >>> flt.inputs.out_file = 'moved_subject.nii'
-    >>> flt.inputs.out_matrix_file = 'subject_to_template.mat'
+    >>> flt.cmdline #doctest: +ELLIPSIS
+    'flirt -in .../structural.nii -ref .../mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
     """
     _cmd = 'flirt'
     input_spec = FLIRTInputSpec
     output_spec = FLIRTOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        # Generate an out_file if one is not provided
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix='_flirt')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-
-        outputs['out_matrix_file'] = self.inputs.out_matrix_file
-
-        # Generate an out_matrix file if one is not provided
-        if not isdefined(outputs['out_matrix_file']):
-            outputs['out_matrix_file'] = self._gen_fname(self.inputs.in_file,
-                                                         suffix='_flirt.mat',
-                                                         change_ext=False)
-        outputs['out_matrix_file'] = os.path.abspath(
-            outputs['out_matrix_file'])
-
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
-            outputs['out_log'] = self.inputs.out_log
-            # Generate an out_log file if one is not provided
-            if not isdefined(outputs['out_log']):
-                outputs['out_log'] = self._gen_fname(self.inputs.in_file,
-                                                     suffix='_flirt.log',
-                                                     change_ext=False)
-            outputs['out_log'] = os.path.abspath(outputs['out_log'])
-        return outputs
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = super(FLIRT, self).aggregate_outputs(
@@ -581,20 +551,11 @@ class FLIRT(FSLCommand):
 
     def _parse_inputs(self, skip=None):
         skip = []
-
         if isdefined(self.inputs.save_log) and self.inputs.save_log:
             if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
                 self.inputs.verbose = 1
-
         skip.append('save_log')
-
         return super(FLIRT, self)._parse_inputs(skip=skip)
-
-    def _gen_filename(self, name):
-        if name in ('out_file', 'out_matrix_file'):
-            return self._list_outputs()[name]
-        else:
-            return None
 
 
 class ApplyXfmInputSpec(FLIRTInputSpec):

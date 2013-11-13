@@ -40,7 +40,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                             desc='Switch off desktop mode on unix platforms',
                             nohash=True)
     nosplash = traits.Bool(True, argstr='-nosplash', usedefault=True,
-                           descr='Switch of splash screen',
+                           desc='Switch of splash screen',
                            nohash=True)
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')

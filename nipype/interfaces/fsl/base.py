@@ -29,9 +29,8 @@ from glob import glob
 import os
 import warnings
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
-                                    isdefined)
+from ...utils.filemanip import fname_presuffix
+from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -240,9 +239,9 @@ class FSLCommand(CommandLine):
                                 use_ext=False, newpath=cwd)
         return fname
 
-    @property
-    def version(self):
-        return Info.version()
+    def _overload_extension(self, value):
+        return value + Info.output_type_to_ext(self.inputs.output_type)
+
 
 
 def check_fsl():

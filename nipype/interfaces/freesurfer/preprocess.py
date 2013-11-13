@@ -28,6 +28,9 @@ from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     CommandLineInputSpec, isdefined)
 
 
+from ... import logging
+iflogger = logging.getLogger('interface')
+
 class ParseDICOMDirInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, argstr='--d %s', mandatory=True,
                          desc='path to siemens dicom directory')
@@ -201,7 +204,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                            desc='<R coordinate> <A coordinate> <S coordinate>')
     out_datatype = traits.Enum('uchar', 'short', 'int', 'float',
                               argstr='--out_data_type %s',
-                              descr='output data type <uchar|short|int|float>')
+                              desc='output data type <uchar|short|int|float>')
     resample_type = traits.Enum('interpolate', 'weighted', 'nearest', 'sinc', 'cubic',
                                argstr='--resample_type %s',
                                desc='<interpolate|weighted|nearest|sinc|cubic> (default is interpolate)')
@@ -588,16 +591,22 @@ class Resample(FSCommand):
 
 
 class ReconAllInputSpec(CommandLineInputSpec):
-    subject_id = traits.Str("recon_all", argstr='-subjid %s', desc='subject name',
-                            usedefault=True)
+    subject_id = traits.Str("recon_all", argstr='-subjid %s',
+                            desc='subject name', usedefault=True)
     directive = traits.Enum('all', 'autorecon1', 'autorecon2', 'autorecon2-cp',
-                            'autorecon2-wm', 'autorecon2-inflate1', 'autorecon2-perhemi',
-                            'autorecon3', 'localGI', 'qcache', argstr='-%s',
-                            desc='process directive', usedefault=True)
-    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process', argstr="-hemi %s")
+                            'autorecon2-wm', 'autorecon2-inflate1',
+                            'autorecon2-perhemi', 'autorecon3', 'localGI',
+                            'qcache', argstr='-%s', desc='process directive',
+                            usedefault=True, position=0)
+    hemi = traits.Enum('lh', 'rh', desc='hemisphere to process',
+                       argstr="-hemi %s")
     T1_files = InputMultiPath(File(exists=True), argstr='-i %s...',
                               desc='name of T1 file to process')
-    subjects_dir = Directory(exists=True, argstr='-sd %s',
+    T2_file = File(exists=True, argstr="-T2 %s", min_ver='5.3.0',
+                   desc='Use a T2 image to refine the cortical surface')
+    openmp = traits.Int(argstr="-openmp %d",
+                        desc="Number of processors to use in parallel")
+    subjects_dir = Directory(exists=True, argstr='-sd %s', hash_files=False,
                              desc='path to subjects directory', genfile=True)
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
@@ -621,13 +630,97 @@ class ReconAll(CommandLine):
     >>> reconall.inputs.subjects_dir = '.'
     >>> reconall.inputs.T1_files = 'structural.nii'
     >>> reconall.cmdline
-    'recon-all -i structural.nii -all -subjid foo -sd .'
+    'recon-all -all -i structural.nii -subjid foo -sd .'
 
     """
 
     _cmd = 'recon-all'
+    _additional_metadata = ['loc', 'altkey']
     input_spec = ReconAllInputSpec
     output_spec = ReconAllIOutputSpec
+    _can_resume = True
+
+
+    _steps = [
+        #autorecon1
+        ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
+        ('talairach', ['mri/transforms/talairach.auto.xfm',
+                       'mri/transforms/talairach.xfm']),
+        ('nuintensitycor', ['mri/nu.mgz']),
+        ('normalization', ['mri/T1.mgz']),
+        ('skullstrip',
+         ['mri/transforms/talairach_with_skull.lta',
+          'mri/brainmask.auto.mgz',
+          'mri/brainmask.mgz']),
+        #autorecon2
+        ('gcareg', ['mri/transforms/talairach.lta']),
+        ('canorm', ['mri/norm.mgz']),
+        ('careg', ['mri/transforms/talairach.m3z']),
+        ('careginv', ['mri/transforms/talairach.m3z.inv.x.mgz',
+                      'mri/transforms/talairach.m3z.inv.y.mgz',
+                      'mri/transforms/talairach.m3z.inv.z.mgz']),
+        ('rmneck', ['mri/nu_noneck.mgz']),
+        ('skull-lta', ['mri/transforms/talairach_with_skull_2.lta']),
+        ('calabel',
+         ['mri/aseg.auto_noCCseg.mgz', 'mri/aseg.auto.mgz', 'mri/aseg.mgz']),
+        ('normalization2', ['mri/brain.mgz']),
+        ('maskbfs', ['mri/brain.finalsurfs.mgz']),
+        ('segmentation', ['mri/wm.asegedit.mgz', 'mri/wm.mgz']),
+        ('fill', ['mri/filled.mgz']),
+        ('tessellate', ['surf/lh.orig.nofix', 'surf/rh.orig.nofix']),
+        ('smooth1', ['surf/lh.smoothwm.nofix', 'surf/rh.smoothwm.nofix']),
+        ('inflate1', ['surf/lh.inflated.nofix', 'surf/rh.inflated.nofix']),
+        ('qsphere', ['surf/lh.qsphere.nofix', 'surf/rh.qsphere.nofix']),
+        ('fix', ['surf/lh.orig', 'surf/rh.orig']),
+        ('white',
+         ['surf/lh.white',
+          'surf/rh.white',
+          'surf/lh.curv',
+          'surf/rh.curv',
+          'surf/lh.area',
+          'surf/rh.area',
+          'label/lh.cortex.label',
+          'label/rh.cortex.label']),
+        ('smooth2', ['surf/lh.smoothwm', 'surf/rh.smoothwm']),
+        ('inflate2',
+         ['surf/lh.inflated',
+          'surf/rh.inflated',
+          'surf/lh.sulc',
+          'surf/rh.sulc',
+          'surf/lh.inflated.H',
+          'surf/rh.inflated.H',
+          'surf/lh.inflated.K',
+          'surf/rh.inflated.K']),
+        #autorecon3
+        ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
+        ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
+        ('jacobian_white', ['surf/lh.jacobian_white',
+                            'surf/rh.jacobian_white']),
+        ('avgcurv', ['surf/lh.avg_curv', 'surf/rh.avg_curv']),
+        ('cortparc', ['label/lh.aparc.annot', 'label/rh.aparc.annot']),
+        ('pial',
+         ['surf/lh.pial',
+          'surf/rh.pial',
+          'surf/lh.curv.pial',
+          'surf/rh.curv.pial',
+          'surf/lh.area.pial',
+          'surf/rh.area.pial',
+          'surf/lh.thickness',
+          'surf/rh.thickness']),
+        ('cortparc2', ['label/lh.aparc.a2009s.annot',
+                       'label/rh.aparc.a2009s.annot']),
+        ('parcstats2',
+         ['stats/lh.aparc.a2009s.stats',
+          'stats/rh.aparc.a2009s.stats',
+          'stats/aparc.annot.a2009s.ctab']),
+        ('cortribbon', ['mri/lh.ribbon.mgz', 'mri/rh.ribbon.mgz',
+                        'mri/ribbon.mgz']),
+        ('segstats', ['stats/aseg.stats']),
+        ('aparc2aseg', ['mri/aparc+aseg.mgz', 'mri/aparc.a2009s+aseg.mgz']),
+        ('wmparc', ['mri/wmparc.mgz', 'stats/wmparc.stats']),
+        ('balabels', ['BA.ctab', 'BA.thresh.ctab']),
+        ('label-exvivo-ec', ['label/lh.entorhinal_exvivo.label',
+                             'label/rh.entorhinal_exvivo.label'])]
 
     def _gen_subjects_dir(self):
         return os.getcwd()
@@ -654,10 +747,55 @@ class ReconAll(CommandLine):
         outputs = self._outputs().get()
 
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
-                         subjects_dir=subjects_dir, hemi=hemi)._list_outputs())
+                                        subjects_dir=subjects_dir,
+                                        hemi=hemi)._list_outputs())
         outputs['subject_id'] = self.inputs.subject_id
         outputs['subjects_dir'] = subjects_dir
         return outputs
+
+    def _is_resuming(self):
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        if os.path.isdir(os.path.join(subjects_dir, self.inputs.subject_id,
+                                      'mri')):
+            return True
+        return False
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'T1_files':
+            if self._is_resuming():
+                return ''
+        return super(ReconAll, self)._format_arg(name, trait_spec, value)
+
+    @property
+    def cmdline(self):
+        cmd = super(ReconAll, self).cmdline
+        if not self._is_resuming():
+            return cmd
+        subjects_dir = self.inputs.subjects_dir
+        if not isdefined(subjects_dir):
+            subjects_dir = self._gen_subjects_dir()
+        #cmd = cmd.replace(' -all ', ' -make all ')
+        iflogger.info('Overriding recon-all directive')
+        flags = []
+        directive = 'all'
+        for idx, step in enumerate(self._steps):
+            step, outfiles = step
+            if all([os.path.exists(os.path.join(subjects_dir,
+                                                self.inputs.subject_id,f)) for
+                    f in outfiles]):
+                flags.append('-no%s'%step)
+                if idx > 4:
+                    directive = 'autorecon2'
+                elif idx > 23:
+                    directive = 'autorecon3'
+            else:
+                flags.append('-%s'%step)
+        cmd = cmd.replace(' -%s ' % self.inputs.directive, ' -%s ' % directive)
+        cmd += ' ' + ' '.join(flags)
+        iflogger.info('resume recon-all : %s' % cmd)
+        return cmd
 
 
 class BBRegisterInputSpec(FSTraitedSpec):
@@ -898,18 +1036,18 @@ class SmoothInputSpec(FSTraitedSpec):
     proj_frac = traits.Float(desc='project frac of thickness a long surface normal',
                              xor=['proj_frac_avg'],
                              argstr='--projfrac %s')
-    surface_fwhm = traits.Float(min=0, requires=['reg_file'],
+    surface_fwhm = traits.Range(low=0.0, requires=['reg_file'],
                                 mandatory=True, xor=['num_iters'],
-                                desc='surface FWHM in mm', argstr='--fwhm %d')
-    num_iters = traits.Int(min=1, xor=['surface_fwhm'],
-                           mandatory=True,
+                                desc='surface FWHM in mm', argstr='--fwhm %f')
+    num_iters = traits.Range(low=1, xor=['surface_fwhm'],
+                           mandatory=True, argstr='--niters %d',
                            desc='number of iterations instead of fwhm')
-    vol_fwhm = traits.Float(min=0, argstr='--vol-fwhm %d',
-                            desc='volumesmoothing outside of surface')
+    vol_fwhm = traits.Range(low=0.0, argstr='--vol-fwhm %f',
+                            desc='volume smoothing outside of surface')
 
 
 class SmoothOutputSpec(TraitedSpec):
-    smoothed_file = File(exist=True, desc='smoothed input volume')
+    smoothed_file = File(exists=True, desc='smoothed input volume')
 
 
 class Smooth(FSCommand):
@@ -930,7 +1068,7 @@ class Smooth(FSCommand):
     >>> from nipype.interfaces.freesurfer import Smooth
     >>> smoothvol = Smooth(in_file='functional.nii', smoothed_file = 'foo_out.nii', reg_file='register.dat', surface_fwhm=10, vol_fwhm=6)
     >>> smoothvol.cmdline
-    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10 --vol-fwhm 6'
+    'mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000'
 
     """
 
@@ -1093,12 +1231,12 @@ class RobustRegister(FSCommand):
 
 class FitMSParamsInputSpec(FSTraitedSpec):
 
-    in_files = traits.List(File, exists=True, argstr="%s", position=-2, mandatory=True,
+    in_files = traits.List(File(exists=True), argstr="%s", position=-2, mandatory=True,
                            desc="list of FLASH images (must be in mgh format)")
     tr_list = traits.List(traits.Int, desc="list of TRs of the input files (in msec)")
     te_list = traits.List(traits.Float, desc="list of TEs of the input files (in msec)")
     flip_list = traits.List(traits.Int, desc="list of flip angles of the input files")
-    xfm_list = traits.List(File, exists=True,
+    xfm_list = traits.List(File(exists=True),
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s", position=-1, genfile=True,
                               desc="directory to store output in")

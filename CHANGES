@@ -3,11 +3,52 @@ Next release
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
+       spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
+* ENH: Added support for Simple Linux Utility Resource Management (SLURM)
+* ENHL AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
 
+* ENH: Several new interfaces related to Camino were added:
+        - camino.SFPICOCalibData
+        - camino.Conmat
+        - camino.QBallMX
+        - camino.LinRecon
+        - camino.SFPeaks
+        One outdated interface no longer part of Camino was removed:
+        - camino.Conmap
+        
+* FIX: Several fixes related to Camino interfaces:
+        - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
+        - DTLUTGen would silently round the "step", "snr" and "trace" parameters to integers
+        - PicoPDFs would not accept more than one lookup table
+        - PicoPDFs default pdf did not correspond to Camino default
+        - Track input model names were outdated (and would generate an error)
+        - Track numpds parameter could not be set for deterministic tractography
+        - FA created output files with erroneous extension
+        
 * FIX: Deals properly with 3d files in SPM Realign
+* FIX: SPM with MCR fixed
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
+* API: SPM now defaults to SPM8 or SPM12b job format
+
+* ENH: New FSL interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP, fsl.Eddy
+* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
+
+* ENH: Added simplified outputname generation for command line interfaces.
+* FIX: Cleaned up input and output spec metadata
+
+* ENH: Allow ants use a single mask image
+* ENH: Create configuration option for parameterizing directories with hashes
+* ENH: arrange nodes by topological sort with disconnected subgraphs
+* ENH: uses the nidm iri namespace for uuids
+* ENH: remove old reporting webpage (this is a WIP i hope to finish in a day or two)
+
+* FIX: example openfmri script now makes the contrast spec a hashed input
+* FIX: FILMGLS compatibility with FSL 5.0.5
+* FIX: Freesurfer recon-all resume now avoids setting inputs
+
+* FIX: File removal from node respects file associations img/hdr/mat, BRIK/HEAD
 
 Release 0.8.0 (May 8, 2013)
 ===========================

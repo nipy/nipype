@@ -269,7 +269,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
-
+datasource.inputs.sort_filelist = True
 
 
 """
@@ -439,6 +439,7 @@ l2source.inputs.template=os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
+l2source.inputs.sort_filelist = True
 
 
 """Use :class:`nipype.interfaces.spm.OneSampleTTestDesign` to perform a

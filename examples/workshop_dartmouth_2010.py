@@ -229,22 +229,26 @@ supports almost any file organisation of your data you can imagine.
 
 datasource1 = nio.DataGrabber()
 datasource1.inputs.template = 'data/s1/f3.nii'
+datasource1.inputs.sort_filelist = True
 results = datasource1.run()
 print results.outputs
 
 datasource2 = nio.DataGrabber()
 datasource2.inputs.template = 'data/s*/f*.nii'
+datasource2.inputs.sort_filelist = True
 results = datasource2.run()
 print results.outputs
 
 datasource3 = nio.DataGrabber(infields=['run'])
 datasource3.inputs.template = 'data/s1/f%d.nii'
+datasource3.inputs.sort_filelist = True
 datasource3.inputs.run = [3, 7]
 results = datasource3.run()
 print results.outputs
 
 datasource4 = nio.DataGrabber(infields=['subject_id', 'run'])
 datasource4.inputs.template = 'data/%s/f%d.nii'
+datasource4.inputs.sort_filelist = True
 datasource4.inputs.run = [3, 7]
 datasource4.inputs.subject_id = ['s1', 's3']
 results = datasource4.run()
@@ -267,6 +271,7 @@ datasource = pe.Node(nio.DataGrabber(infields=['subject_id'], outfields=['func',
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template_args = dict(func=[['subject_id','f3']], struct=[['subject_id','struct']])
+datasource.inputs.sort_filelist = True
 
 my_workflow = pe.Workflow(name="my_workflow")
 my_workflow.base_dir = os.path.abspath('.')

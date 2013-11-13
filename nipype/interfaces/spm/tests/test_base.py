@@ -134,6 +134,9 @@ def test_bool():
     dc = TestClass()  # dc = derived_class
     dc.inputs.test_in = True
     out = dc._make_matlab_command(dc._parse_inputs())
+    yield assert_equal, out.find('jobs{1}.spm.jobtype.jobname.testfield = 1;') > 0, 1
+    dc.inputs.use_v8struct = False
+    out = dc._make_matlab_command(dc._parse_inputs())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
 
 def test_make_matlab_command():
@@ -144,6 +147,9 @@ def test_make_matlab_command():
     dc = TestClass()  # dc = derived_class
     filelist, outdir, cwd = create_files_in_directory()
     contents = {'contents': [1, 2, 3, 4]}
+    script = dc._make_matlab_command([contents])
+    yield assert_true, 'jobs{1}.spm.jobtype.jobname.contents(3) = 3;' in script
+    dc.inputs.use_v8struct = False
     script = dc._make_matlab_command([contents])
     yield assert_true, 'jobs{1}.jobtype{1}.jobname{1}.contents(3) = 3;' in script
     clean_directory(outdir, cwd)

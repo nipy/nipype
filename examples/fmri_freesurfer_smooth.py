@@ -418,6 +418,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 
 """
@@ -588,6 +589,7 @@ l2source.inputs.template = '*'
 l2source.inputs.field_template = dict(con='*/contrasts/con_%04d.img',
                                       reg='*/registrations/*.dat')
 l2source.inputs.template_args = dict(con=[['con_id']],reg=[[]])
+l2source.inputs.sort_filelist = True
 
 l2flow.connect(l2inputnode, 'contrasts', l2source, 'con_id')
 
