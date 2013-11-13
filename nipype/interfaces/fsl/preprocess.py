@@ -748,7 +748,6 @@ class FNIRTInputSpec(FSLCommandInputSpec):
     config_file = traits.Either(
         traits.Enum("T1_2_MNI152_2mm", "FA_2_FMRIB58_1mm"), File(exists=True), argstr='--config=%s',
         desc='Name of config file specifying command line arguments')
-
     refmask_file = File(exists=True, argstr='--refmask=%s',
                         desc='name of file with mask in reference space')
     inmask_file = File(exists=True, argstr='--inmask=%s',
