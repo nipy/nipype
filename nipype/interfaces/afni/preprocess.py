@@ -193,11 +193,11 @@ class Refit(CommandLine):
     _cmd = '3drefit'
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
+    outputs = {}
 
     def _list_outputs(self):
-        outputs = super(Refit, self)._list_outputs()
-        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
-        return outputs
+        self.outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        return self.outputs
 
 
 class WarpInputSpec(AFNICommandInputSpec):
