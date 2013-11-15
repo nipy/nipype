@@ -129,8 +129,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                                        'task_id']),
                          name='infosource')
     if subject is None:
-        infosource.iterables = [('subject_id', subjects),
-            ('model_id', [model_id])]
+        infosource.iterables = [('subject_id', subjects[:2]),
+                                ('model_id', [model_id]),
+                                ('task_id', [task_id])]
     else:
         infosource.iterables = [('subject_id',
                                  [subjects[subjects.index(subject)]]),
@@ -150,18 +151,22 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
                                                    'task_id', 'model_id'],
-                                         outfields=['anat', 'bold', 'behav']),
+                                         outfields=['anat', 'bold', 'behav',
+                                                    'contrasts']),
                          name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
     datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
                                 'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
                                 'behav': ('%s/model/model%03d/onsets/task%03d_'
-                                          'run%03d/cond*.txt')}
+                                          'run%03d/cond*.txt'),
+                                'contrasts': ('models/model%03d/'
+                                              'task_contrasts.txt')}
     datasource.inputs.template_args = {'anat': [['subject_id']],
                                        'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
-                                                  'task_id', 'run_id']]}
+                                                  'task_id', 'run_id']],
+                                       'contrasts': [['model_id']]}
     datasource.inputs.sort_filelist = True
 
     """
@@ -192,11 +197,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     Setup a basic set of contrasts, a t-test per condition
     """
 
-    def get_contrasts(base_dir, model_id, task_id, conds):
+    def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
-        import os
-        contrast_file = os.path.join(base_dir, 'models', 'model%03d' % model_id,
-                                     'task_contrasts.txt')
         contrast_def = np.genfromtxt(contrast_file, dtype=object)
         contrasts = []
         for row in contrast_def:
@@ -207,12 +209,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
             contrasts.append(con)
         return contrasts
 
-    contrastgen = pe.Node(niu.Function(input_names=['base_dir', 'model_id',
+    contrastgen = pe.Node(niu.Function(input_names=['contrast_file',
                                                     'task_id', 'conds'],
                                        output_names=['contrasts'],
                                        function=get_contrasts),
                           name='contrastgen')
-    contrastgen.inputs.base_dir = data_dir
 
     art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
                                                  use_norm=True,
@@ -232,7 +233,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(datasource, 'behav', modelspec, 'event_files')
     wf.connect(subjinfo, 'TR', modelfit, 'inputspec.interscan_interval')
     wf.connect(subjinfo, 'conds', contrastgen, 'conds')
-    wf.connect(infosource, 'model_id', contrastgen, 'model_id')
+    wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
     wf.connect(infosource, 'task_id', contrastgen, 'task_id')
     wf.connect(contrastgen, 'contrasts', modelfit, 'inputspec.contrasts')
 

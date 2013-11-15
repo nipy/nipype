@@ -11,8 +11,6 @@ import numpy as np
 
 import nibabel as nb
 
-from nose import with_setup
-
 from nipype.testing import ( assert_equal, assert_not_equal,
                              assert_raises, skipif, example_data)
 import nipype.interfaces.fsl.dti as fsl
@@ -20,146 +18,6 @@ from nipype.interfaces.fsl import Info, no_fsl
 from nipype.interfaces.base import Undefined
 
 # nosetests --with-doctest path_to/test_fsl.py
-
-@skipif(no_fsl)
-def test_bedpostx1():
-    input_map = dict(args = dict(argstr='%s',),
-                     bpx_directory = dict(argstr='%s',),
-                     burn_period = dict(argstr='-b %d',),
-                     bvals = dict(mandatory=True,),
-                     bvecs = dict(mandatory=True,),
-                     dwi = dict(mandatory=True,),
-                     environ = dict(),
-                     fibres = dict(argstr='-n %d',),
-                     jumps = dict(argstr='-j %d',),
-                     mask = dict(mandatory=True,),
-                     output_type = dict(),
-                     sampling = dict(argstr='-s %d',),
-                     weight = dict(argstr='-w %.2f',),
-                     )
-    instance = fsl.BEDPOSTX()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_dtifit1():
-    input_map = dict(args = dict(argstr='%s',),
-                     base_name = dict(argstr='-o %s',),
-                     bvals = dict(argstr='-b %s',mandatory=True,),
-                     bvecs = dict(argstr='-r %s',mandatory=True,),
-                     cni = dict(argstr='-cni %s',),
-                     dwi = dict(argstr='-k %s',mandatory=True,),
-                     environ = dict(),
-                     little_bit = dict(argstr='--littlebit',),
-                     mask = dict(argstr='-m %s',mandatory=True,),
-                     max_x = dict(argstr='-X %d',),
-                     max_y = dict(argstr='-Y %d',),
-                     max_z = dict(argstr='-Z %d',),
-                     min_x = dict(argstr='-x %d',),
-                     min_y = dict(argstr='-y %d',),
-                     min_z = dict(argstr='-z %d',),
-                     output_type = dict(),
-                     save_tensor = dict(argstr='--save_tensor',),
-                     sse = dict(argstr='--sse',),
-                     )
-    instance = fsl.DTIFit()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_findthebiggest():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_files = dict(argstr='%s',mandatory=True,),
-                     out_file = dict(argstr='%s',),
-                     output_type = dict(),
-                     )
-    instance = fsl.FindTheBiggest()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_probtrackx():
-    input_map = dict(args = dict(argstr='%s',),
-                     avoid_mp = dict(argstr='--avoid=%s',),
-                     thsamples = dict(mandatory=True),
-                     phsamples = dict(mandatory=True),
-                     fsamples = dict(mandatory=True),
-                     c_thresh = dict(argstr='--cthr=%.3f',),
-                     correct_path_distribution = dict(argstr='--pd',),
-                     dist_thresh = dict(argstr='--distthresh=%.3f',),
-                     environ = dict(),
-                     fibst = dict(argstr='--fibst=%d',),
-                     force_dir = dict(argstr='--forcedir',),
-                     inv_xfm = dict(argstr='--invxfm=%s',),
-                     loop_check = dict(argstr='--loopcheck',),
-                     mask = dict(argstr='-m %s',mandatory=True,),
-                     mask2 = dict(argstr='--mask2=%s',),
-                     mesh = dict(argstr='--mesh=%s',),
-                     mod_euler = dict(argstr='--modeuler',),
-                     mode = dict(argstr='--mode=%s',),
-                     n_samples = dict(argstr='--nsamples=%d',),
-                     n_steps = dict(argstr='--nsteps=%d',),
-                     network = dict(argstr='--network',),
-                     opd = dict(argstr='--opd',),
-                     os2t = dict(argstr='--os2t',),
-                     out_dir = dict(argstr='--dir=%s',),
-                     output_type = dict(),
-                     rand_fib = dict(argstr='--randfib=%d',),
-                     random_seed = dict(argstr='--rseed',),
-                     s2tastext = dict(argstr='--s2tastext',),
-                     sample_random_points = dict(argstr='--sampvox',),
-                     samples_base_name = dict(argstr='--samples=%s',),
-                     seed = dict(argstr='--seed=%s',mandatory=True,),
-                     seed_ref = dict(argstr='--seedref=%s',),
-                     step_length = dict(argstr='--steplength=%.3f',),
-                     stop_mask = dict(argstr='--stop=%s',),
-                     target_masks = dict(argstr='--targetmasks=%s',),
-                     use_anisotropy = dict(argstr='--usef',),
-                     waypoints = dict(argstr='--waypoints=%s',),
-                     xfm = dict(argstr='--xfm=%s',),
-                     )
-    instance = fsl.ProbTrackX()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_projthresh():
-    input_map = dict(args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_files = dict(argstr='%s',mandatory=True,),
-                     output_type = dict(),
-                     threshold = dict(mandatory=True,argstr='%d',),
-                     )
-    instance = fsl.ProjThresh()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
-
-@skipif(no_fsl)
-def test_vecreg():
-    input_map = dict(affine_mat = dict(argstr='-t %s',),
-                     args = dict(argstr='%s',),
-                     environ = dict(),
-                     in_file = dict(mandatory=True,argstr='-i %s',),
-                     interpolation = dict(argstr='--interp=%s',),
-                     mask = dict(argstr='-m %s',),
-                     out_file = dict(argstr='-o %s',),
-                     output_type = dict(),
-                     ref_mask = dict(argstr='--refmask=%s',),
-                     ref_vol = dict(mandatory=True,argstr='-r %s',),
-                     rotation_mat = dict(argstr='--rotmat=%s',),
-                     rotation_warp = dict(argstr='--rotwarp=%s',),
-                     warp_field = dict(argstr='-w %s',),
-                     )
-    instance = fsl.VecReg()
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
-            yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
 
 
 def skip_dti_tests():
@@ -433,28 +291,6 @@ def test_Randomise_parallel():
                                        **{name: settings[1]})
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
             + settings[0]
-
-
-@skipif(skip_dti_tests)
-def test_Probtrackx():
-    pass
-    # make sure command gets called
-
-
-    # test raising error with mandatory args absent
-
-
-    # .inputs based parameters setting
-
-
-    # .run based parameter setting
-
-
-    # test generation of outfile
-
-
-    # test arguments for opt_map
-
 
 
 # test proj_thresh

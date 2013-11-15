@@ -7,14 +7,12 @@ from copy import deepcopy
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from ...testing import (assert_equal, assert_true,
-                            assert_false)
+from ...testing import (assert_equal, assert_true, assert_false)
 import nipype.pipeline.engine as pe
 import nipype.interfaces.base as nib
 import nipype.interfaces.utility as niu
 from ... import config
-from ..utils import merge_dict
-
+from ..utils import merge_dict, clean_working_directory
 
 def test_identitynode_removal():
 
@@ -45,6 +43,48 @@ def test_identitynode_removal():
     eg = pe.generate_expanded_graph(deepcopy(fg))
     yield assert_equal, len(eg.nodes()), 8
 
+
+def test_clean_working_directory():
+    class OutputSpec(nib.TraitedSpec):
+        files = nib.traits.List(nib.File)
+        others = nib.File()
+    class InputSpec(nib.TraitedSpec):
+        infile = nib.File()
+    outputs = OutputSpec()
+    inputs = InputSpec()
+
+    wd = mkdtemp()
+    filenames = ['file.hdr', 'file.img', 'file.BRIK', 'file.HEAD',
+                 '_0x1234.json', 'foo.txt']
+    outfiles = []
+    for filename in filenames:
+        outfile = os.path.join(wd, filename)
+        with open(outfile, 'wt') as fp:
+            fp.writelines('dummy')
+        outfiles.append(outfile)
+    outputs.files = outfiles[:4:2]
+    outputs.others = outfiles[5]
+    inputs.infile = outfiles[-1]
+    needed_outputs = ['files']
+    config.set_default_config()
+    yield assert_true, os.path.exists(outfiles[5])
+    config.set_default_config()
+    config.set('execution', 'remove_unnecessary_outputs', False)
+    out = clean_working_directory(outputs, wd, inputs, needed_outputs,
+                                  deepcopy(config._sections))
+    yield assert_true, os.path.exists(outfiles[5])
+    yield assert_equal, out.others, outfiles[5]
+    config.set('execution', 'remove_unnecessary_outputs', True)
+    out = clean_working_directory(outputs, wd, inputs, needed_outputs,
+                                  deepcopy(config._sections))
+    yield assert_true, os.path.exists(outfiles[1])
+    yield assert_true, os.path.exists(outfiles[3])
+    yield assert_true, os.path.exists(outfiles[4])
+    yield assert_false, os.path.exists(outfiles[5])
+    yield assert_equal, out.others, nib.Undefined
+    yield assert_equal, len(out.files), 2
+    config.set_default_config()
+    rmtree(wd)
 
 def test_outputs_removal():
 
@@ -140,19 +180,12 @@ def test_outputs_removal_wf():
         file1 = os.path.join(os.getcwd(), 'file1.txt')
         file2 = os.path.join(os.getcwd(), 'file2.txt')
         file3 = os.path.join(os.getcwd(), 'file3.txt')
-        fp = open(file1, 'wt')
-        fp.write('%d' % arg1)
-        fp.close()
-        fp = open(file2, 'wt')
-        fp.write('%d' % arg1)
-        fp.close()
-        fp = open(file3, 'wt')
-        fp.write('%d' % arg1)
-        fp.close()
+        file4 = os.path.join(os.getcwd(), 'subdir', 'file1.txt')
+        files = [file1, file2, file3, file4]
         os.mkdir("subdir")
-        fp = open("subdir/file1.txt", 'wt')
-        fp.write('%d' % arg1)
-        fp.close()
+        for filename in files:
+            with open(filename, 'wt') as fp:
+                fp.write('%d' % arg1)
         return file1, file2, os.path.join(os.getcwd(),"subdir")
 
     def test_function2(in_file, arg):
@@ -161,15 +194,10 @@ def test_outputs_removal_wf():
         file1 = os.path.join(os.getcwd(), 'file1.txt')
         file2 = os.path.join(os.getcwd(), 'file2.txt')
         file3 = os.path.join(os.getcwd(), 'file3.txt')
-        fp = open(file1, 'wt')
-        fp.write('%d' % arg + in_arg)
-        fp.close()
-        fp = open(file2, 'wt')
-        fp.write('%d' % arg + in_arg)
-        fp.close()
-        fp = open(file3, 'wt')
-        fp.write('%d' % arg + in_arg)
-        fp.close()
+        files = [file1, file2, file3]
+        for filename in files:
+            with open(filename, 'wt') as fp:
+                fp.write('%d' % arg + in_arg)
         return file1, file2, 1
 
     def test_function3(arg):
