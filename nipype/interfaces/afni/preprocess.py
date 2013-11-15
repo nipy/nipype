@@ -193,7 +193,6 @@ class Refit(CommandLine):
     _cmd = '3drefit'
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
-    outputs = {}
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -567,8 +566,7 @@ class VolregInputSpec(AFNICommandInputSpec):
     oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
                      argstr='-1Dfile %s',
                      name_source="in_file",
-                     keep_extension=True,
-                     position=-3)
+                     keep_extension=True)
     verbose = traits.Bool(desc='more detailed description of the process',
                           argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
