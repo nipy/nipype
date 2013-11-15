@@ -566,7 +566,8 @@ class VolregInputSpec(AFNICommandInputSpec):
     oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
                      argstr='-1Dfile %s',
                      name_source="in_file",
-                     keep_extension=True)
+                     keep_extension=True,
+                     position=-3)
     verbose = traits.Bool(desc='more detailed description of the process',
                           argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
@@ -1468,9 +1469,11 @@ class CalcInputSpec(AFNICommandInputSpec):
                      argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
                      argstr=' -b %s', position=1, exists=True)
+    in_file_c = File(desc='operand file to 3dcalc',
+                     argstr=' -c %s', position=2, exists=True)
     out_file = File(name_template="%s_calc", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file_a")
-    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
+    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
                       mandatory=True)
     start_idx = traits.Int(desc='start index for in_file_a',
                            requires=['stop_idx'])
