@@ -196,8 +196,9 @@ class Refit(CommandLine):
     outputs = {}
 
     def _list_outputs(self):
-        self.outputs["out_file"] = os.path.abspath(self.inputs.in_file)
-        return self.outputs
+        outputs = self.output_spec().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        return outputs
 
 
 class WarpInputSpec(AFNICommandInputSpec):
