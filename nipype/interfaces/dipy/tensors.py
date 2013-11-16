@@ -187,7 +187,6 @@ class EstimateConductivity(BaseInterface):
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         affine = img.get_affine()
-        #if np.nonzero(affine) = 
 
         try:
             dti_params = dti.eig_from_lo_tri(data)
