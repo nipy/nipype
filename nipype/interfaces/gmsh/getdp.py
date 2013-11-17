@@ -19,7 +19,7 @@ class GetDPInputSpec(CommandLineInputSpec):
 
     solve = traits.String(argstr="-solve %s", desc="Solve (same as -pre 'Resolution' -cal)")
 
-    output_name = traits.String("getdp", argstr="-name %s", usedefault=True, 
+    output_name = traits.String("getdp", argstr="-name %s", usedefault=True,
       desc="Generic file name")
 
     maximum_interpolation_order = traits.Int(argstr='-order %d',
@@ -72,7 +72,7 @@ class GetDP(CommandLine):
         for table_outfilename in self.inputs.out_table_filenames:
             _, name , _ = split_filename(table_outfilename)
             outputs['table_files'] = op.abspath(name + ".txt")
-        
+
         for pos_outfilename in self.inputs.out_pos_filenames:
             _, name , _ = split_filename(pos_outfilename)
             outputs['postprocessing_files'] = op.abspath(name + ".pos")

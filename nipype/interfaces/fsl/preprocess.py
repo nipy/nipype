@@ -17,7 +17,7 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
+from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     isdefined, OutputMultiPath)
@@ -1514,11 +1514,11 @@ class BETSurfaceInputSpec(FSLCommandInputSpec):
                    desc='T1 input file',
                    argstr='%s', position=-5, mandatory=True)
     t2_file = File(exists=True,
-                   desc='T2 input file', 
+                   desc='T2 input file',
                    argstr='%s', position=-4)
     meshfile = File(position=-3, argstr='%s', desc="path/name of vtk mesh file")
     t1_to_standard_matrix = File(exists=True,
-                   desc='Registration matrix between T1 and standard space', 
+                   desc='Registration matrix between T1 and standard space',
                    argstr='%s', position=-2, mandatory=True)
     out_basename = File(desc='Base output filename',
                     argstr='%s', position=-1, genfile=True)
@@ -1597,6 +1597,8 @@ class BETSurface(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        ext = Info.output_type_to_ext(self.inputs.output_type)
+
         if isdefined(self.inputs.out_basename):
             base_name = self.inputs.out_basename
         else:
@@ -1612,19 +1614,19 @@ class BETSurface(FSLCommand):
 
         if isdefined(self.inputs.mask) and self.inputs.mask:
             outputs['inskull_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_inskull_mask')
+                                                           suffix='_inskull_mask' + ext)
             outputs['outskull_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskull_mask')
+                                                           suffix='_outskull_mask' + ext)
             outputs['outskin_mask_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskin_mask')
+                                                           suffix='_outskin_mask' + ext)
 
         if isdefined(self.inputs.outline) and self.inputs.outline:
             outputs['inskull_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_inskull_mesh')
+                                                           suffix='_inskull_mesh' + ext)
             outputs['outskull_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskull_mesh')
+                                                           suffix='_outskull_mesh' + ext)
             outputs['outskin_mesh_outline_file'] = self._gen_fname(base_name,
-                                                           suffix='_outskin_mesh')
+                                                           suffix='_outskin_mesh' + ext)
         if isdefined(self.inputs.skullmask) and self.inputs.skullmask:
             outputs['skull_mask_file'] = self._gen_fname(base_name,
                                                            suffix='_skull_mask.nii.gz')
