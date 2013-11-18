@@ -18,15 +18,16 @@ from shutil import rmtree
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
-from nipype.interfaces.base import (load_template, File, traits, isdefined,
+from nibabel import load
+
+from ... import LooseVersion
+from .base import (FSLCommand, FSLCommandInputSpec, Info)
+from ..base import (load_template, File, traits, isdefined,
                                     TraitedSpec, BaseInterface, Directory,
                                     InputMultiPath, OutputMultiPath,
                                     BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (
-    list_to_filename, filename_to_list, fname_presuffix)
-from nibabel import load
-from nipype.utils.misc import human_order_sorted
+from ...utils.filemanip import (list_to_filename, filename_to_list)
+from ...utils.misc import human_order_sorted
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -473,9 +474,6 @@ class FEATModel(FSLCommand):
         return outputs
 
 
-# interface to fsl command line model fit routines
-# ohinds: 2009-12-28
-
 class FILMGLSInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, position=-3,
                    argstr='%s',
@@ -511,6 +509,43 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     output_pwdata = traits.Bool(argstr='-output_pwdata',
                                 desc='output prewhitened data and average design matrix')
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
+                            desc='directory to store results in')
+
+class FILMGLSInputSpec505(FSLCommandInputSpec):
+    in_file = File(exists=True, mandatory=True, position=-3,
+                   argstr='--in=%s', desc='input data file')
+    design_file = File(exists=True, position=-2,
+                       argstr='--pd=%s', desc='design matrix file')
+    threshold = traits.Range(default=1000., low=0.0, argstr='--thr=%f',
+                             position=-1, usedefault=True, desc='threshold')
+    smooth_autocorr = traits.Bool(argstr='--sa',
+                                  desc='Smooth auto corr estimates')
+    mask_size = traits.Int(argstr='--ms=%d', desc="susan mask size")
+    brightness_threshold = traits.Range(low=0, argstr='--epith=%d',
+                                      desc=('susan brightness threshold, '
+                                            'otherwise it is estimated'))
+    full_data = traits.Bool(argstr='-v', desc='output full data')
+    _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
+                     'multitaper_product', 'use_pava', 'autocorr_noestimate']
+    autocorr_estimate_only = traits.Bool(argstr='--ac', xor=_estimate_xor,
+                                         desc=('perform autocorrelation '
+                                               'estimation only'))
+    fit_armodel = traits.Bool(argstr='--ar', xor=_estimate_xor,
+                              desc=('fits autoregressive model - default is to '
+                                    'use tukey with M=sqrt(numvols)'))
+    tukey_window = traits.Int(argstr='--tukey=%d', xor=_estimate_xor,
+                              desc='tukey window size to estimate autocorr')
+    multitaper_product = traits.Int(argstr='--mt=%d', xor=_estimate_xor,
+                                    desc=('multitapering with slepian tapers '
+                                          'and num is the time-bandwidth '
+                                          'product'))
+    use_pava = traits.Bool(argstr='--pava', desc='estimates autocorr using PAVA')
+    autocorr_noestimate = traits.Bool(argstr='--noest', xor=_estimate_xor,
+                                      desc='do not estimate autocorrs')
+    output_pwdata = traits.Bool(argstr='--outputPWdata',
+                                desc=('output prewhitened data and average '
+                                      'design matrix'))
+    results_dir = Directory('results', argstr='--rn=%s', usedefault=True,
                             desc='directory to store results in')
 
 
@@ -561,7 +596,11 @@ threshold=10, results_dir='stats')
     """
 
     _cmd = 'film_gls'
-    input_spec = FILMGLSInputSpec
+
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
+        input_spec = FILMGLSInputSpec505
+    else:
+        input_spec = FILMGLSInputSpec
     output_spec = FILMGLSOutputSpec
 
     def _get_pe_files(self, cwd):

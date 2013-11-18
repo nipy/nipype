@@ -18,7 +18,7 @@ import numpy as np
 import scipy.sparse as ssp
 
 
-from ..utils import (nx, dfs_preorder)
+from ..utils import (nx, dfs_preorder, topological_sort)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
@@ -409,11 +409,14 @@ class DistributedPluginBase(PluginBase):
     def _generate_dependency_list(self, graph):
         """ Generates a dependency list for a list of graphs.
         """
-        self.procs = graph.nodes()
+        self.procs, _ = topological_sort(graph)
+        nodes = graph.nodes()
+        indices = [nodes.index(proc) for proc in self.procs]
         try:
             self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
         except:
             self.depidx = nx.to_scipy_sparse_matrix(graph)
+        self.depidx = self.depidx[:, indices][indices, :]
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
         self.proc_done = np.zeros(len(self.procs), dtype=bool)

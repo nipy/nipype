@@ -47,6 +47,7 @@ stop_on_first_rerun = false
 use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
+parameterize_dirs = true
 
 [check]
 interval = 1209600

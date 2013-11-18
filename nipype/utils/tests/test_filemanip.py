@@ -9,7 +9,7 @@ from nipype.utils.filemanip import (save_json, load_json, loadflat,
                                     hash_rename, check_forhash,
                                     copyfile, copyfiles,
                                     filename_to_list, list_to_filename,
-                                    cleandir, split_filename)
+                                    split_filename, get_related_files)
 
 import numpy as np
 
@@ -134,23 +134,6 @@ def test_list_to_filename():
     x = list_to_filename(['foo', 'bar'])
     yield assert_equal, x, ['foo', 'bar']
 
-def test_cleandir():
-    filetypes = ['*.nii','*.nii.gz','*.txt','*.img','*.hdr','*.mat','*.json']
-    tmpdir = mkdtemp()
-    def tmpfile(suffix, dir=tmpdir):
-        _, name = mkstemp(suffix=suffix[1:], dir=dir)
-        return name
-
-    fnames = []
-    for ft in filetypes:
-        x = tmpfile(ft)
-        fnames.append(x)
-        yield assert_true, os.path.exists(x)
-
-    cleandir(tmpdir)
-    for fp in fnames:
-        yield assert_false, os.path.exists(fp)
-
 def test_json():
     # Simple roundtrip test of json files, just a sanity check.
     adict = dict(a='one', c='three', b='two')
@@ -177,3 +160,30 @@ def test_loadflat():
     yield assert_true, isinstance(aloaded, dict)
     yield assert_equal, sorted(aloaded.items()), sorted(adict.items())
 
+def test_related_files():
+    file1 = '/path/test.img'
+    file2 = '/path/test.hdr'
+    file3 = '/path/test.BRIK'
+    file4 = '/path/test.HEAD'
+    file5 = '/path/foo.nii'
+
+    spm_files1 = get_related_files(file1)
+    spm_files2 = get_related_files(file2)
+    afni_files1 = get_related_files(file3)
+    afni_files2 = get_related_files(file4)
+    yield assert_equal, len(spm_files1), 3
+    yield assert_equal, len(spm_files2), 3
+    yield assert_equal, len(afni_files1), 2
+    yield assert_equal, len(afni_files2), 2
+    yield assert_equal, len(get_related_files(file5)), 1
+
+    yield assert_true, '/path/test.hdr' in spm_files1
+    yield assert_true, '/path/test.img' in spm_files1
+    yield assert_true, '/path/test.mat' in spm_files1
+    yield assert_true, '/path/test.hdr' in spm_files2
+    yield assert_true, '/path/test.img' in spm_files2
+    yield assert_true, '/path/test.mat' in spm_files2
+    yield assert_true, '/path/test.BRIK' in afni_files1
+    yield assert_true, '/path/test.HEAD' in afni_files1
+    yield assert_true, '/path/test.BRIK' in afni_files2
+    yield assert_true, '/path/test.HEAD' in afni_files2

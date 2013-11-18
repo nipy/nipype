@@ -131,10 +131,15 @@ class Smooth(FSLCommand):
 class MergeInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr="%s", position=2,
                            mandatory=True)
-    dimension = traits.Enum('t', 'x', 'y', 'z', argstr="-%s", position=0,
-                            desc="dimension along which to merge",
+    dimension = traits.Enum('t', 'x', 'y', 'z', 'a', argstr="-%s", position=0,
+                            desc=("dimension along which to merge, optionally "
+                                  "set tr input when dimension is t"),
                             mandatory=True)
-    merged_file = File(argstr="%s", position=1, genfile=True, hash_files=False)
+    tr = traits.Float(position=-1, argstr='%.2f',
+                      desc=('use to specify TR in seconds (default is 1.00 '
+                            'sec), overrides dimension and sets it to tr'))
+    merged_file = File(argstr="%s", position=1, name_source='in_files',
+                       name_template='%s_merged', hash_files=False)
 
 
 class MergeOutputSpec(TraitedSpec):
@@ -143,27 +148,42 @@ class MergeOutputSpec(TraitedSpec):
 
 class Merge(FSLCommand):
     """Use fslmerge to concatenate images
+
+    Images can be concatenated across time, x, y, or z dimensions. Across the
+    time (t) dimension the TR is set by default to 1 sec.
+
+    Note: to set the TR to a different value, specify 't' for dimension and
+    specify the TR value in seconds for the tr input. The dimension will be
+    automatically updated to 'tr'.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.fsl import Merge
+    >>> merger = Merge()
+    >>> merger.inputs.in_files = ['functional2.nii', 'functional3.nii']
+    >>> merger.inputs.dimension = 't'
+    >>> merger.inputs.output_type = 'NIFTI_GZ'
+    >>> merger.cmdline
+    'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
+    >>> merger.inputs.tr = 2.25
+    >>> merger.cmdline
+    'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
     """
 
     _cmd = 'fslmerge'
     input_spec = MergeInputSpec
     output_spec = MergeOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['merged_file'] = self.inputs.merged_file
-        if not isdefined(outputs['merged_file']):
-            outputs['merged_file'] = self._gen_fname(self.inputs.in_files[0],
-                                                     suffix='_merged')
-        else:
-            outputs['merged_file'] = os.path.realpath(self.inputs.merged_file)
-
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'merged_file':
-            return self._list_outputs()[name]
-        return None
+    def _format_arg(self, name, spec, value):
+        if name == 'tr':
+            if self.inputs.dimension != 't':
+                raise ValueError('When TR is specified, dimension must be t')
+            return spec.argstr % value
+        if name == 'dimension':
+            if isdefined(self.inputs.tr):
+                return '-tr'
+            return spec.argstr % value
+        return super(Merge, self)._format_arg(name, spec, value)
 
 
 class ExtractROIInputSpec(FSLCommandInputSpec):

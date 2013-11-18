@@ -1466,7 +1466,10 @@ class CommandLine(BaseInterface):
                         break
             else:
                 name_source = trait_spec.name_source
-            _, base, _ = split_filename(getattr(self.inputs, name_source))
+            source = getattr(self.inputs, name_source)
+            while isinstance(source, list):
+                source = source[0]
+            _, base, _ = split_filename(source)
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
@@ -1482,11 +1485,14 @@ class CommandLine(BaseInterface):
 
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
-        if out_names:
+        traits = self.inputs.traits(**metadata)
+        if traits:
             outputs = self.output_spec().get()
-            for name in out_names:
-                outputs[name] = \
+            for name, trait_spec in traits.iteritems():
+                out_name = name
+                if trait_spec.output_name != None:
+                    out_name = trait_spec.output_name
+                outputs[out_name] = \
                     os.path.abspath(self._filename_from_source(name))
             return outputs
 

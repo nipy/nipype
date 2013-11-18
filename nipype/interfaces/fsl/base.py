@@ -29,9 +29,8 @@ from glob import glob
 import os
 import warnings
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
-                                    isdefined)
+from ...utils.filemanip import fname_presuffix
+from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
