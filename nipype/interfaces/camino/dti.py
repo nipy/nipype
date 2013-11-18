@@ -66,7 +66,7 @@ class DTIFit(StdOutCommandLine):
         return name + '_DT.Bdouble'
 
 class DTMetricInputSpec(CommandLineInputSpec):
-    eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True, 
+    eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True,
                       desc='voxel-order data filename')
 
     metric = traits.Enum('fa','md','rd','l1', 'l2', 'l3', 'tr', 'ra', '2dfa','cl','cp','cs',
@@ -74,29 +74,29 @@ class DTMetricInputSpec(CommandLineInputSpec):
                          desc=('Specifies the metric to compute. Possible choices are: '
                                '"fa", "md", "rd", "l1", "l2", "l3", "tr", "ra", "2dfa", "cl", "cp" or "cs".'))
 
-    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
+    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
                                 argstr='-inputdatatype %s', usedefault=True,
                                 desc=('Specifies the data type of the input data. '
                                       'The data type can be any of the following strings: '
                                       '"char", "short", "int", "long", "float" or "double".'
                                       'Default is double data type'))
 
-    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
+    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
                                  argstr='-outputdatatype %s', usedefault=True,
                                  desc=('Specifies the data type of the output data. '
                                        'The data type can be any of the following strings: '
                                        '"char", "short", "int", "long", "float" or "double".'
                                        'Default is double data type'))
-                                       
+
     data_header = File(argstr='-header %s', exists=True,
                        desc=('A Nifti .nii or .nii.gz file containing the header information. '
                              'Usually this will be the header of the raw data file from which '
                              'the diffusion tensors were reconstructed.'))
-                             
+
     outputfile = File(argstr='-outputfile %s', genfile=True,
                       desc=('Output name. Output will be a .nii.gz file if data_header is provided and'
                             'in voxel order with outputdatatype datatype (default: double) otherwise.'))
-                                       
+
 class DTMetricOutputSpec(TraitedSpec):
     metric_stats = File(exists=True, desc='Diffusion Tensor statistics of the chosen metric')
 
@@ -104,18 +104,18 @@ class DTMetric(CommandLine):
     """
     Computes tensor metric statistics based on the eigenvalues l1 >= l2 >= l3
     typically obtained from ComputeEigensystem.
-    
+
     The full list of statistics is:
-    
+
      <cl> = (l1 - l2) / l1 , a measure of linearity
      <cp> = (l2 - l3) / l1 , a measure of planarity
      <cs> = l3 / l1 , a measure of isotropy
-      with: cl + cp + cs = 1 
-      
+      with: cl + cp + cs = 1
+
      <l1> = first eigenvalue
      <l2> = second eigenvalue
      <l3> = third eigenvalue
-     
+
      <tr> = l1 + l2 + l3
      <md> = tr / 3
      <rd> = (l2 + l3) / 2
@@ -129,7 +129,7 @@ class DTMetric(CommandLine):
     Example
     -------
     Compute the CP planar metric as float data type.
-       
+
     >>> import nipype.interfaces.camino as cam
     >>> dtmetric = cam.DTMetric()
     >>> dtmetric.inputs.eigen_data = 'dteig.Bdouble'
@@ -793,14 +793,14 @@ class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', desc='The maximum number of tensor components in a voxel of the input data.')
 
-    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
+    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
                                  argstr='-inputdatatype %s', usedefault=True,
                                  desc=('Specifies the data type of the input data. '
                                        'The data type can be any of the following strings: '
                                        '"char", "short", "int", "long", "float" or "double".'
                                        'Default is double data type'))
 
-    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',    
+    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
                                  argstr='-outputdatatype %s', usedefault=True,
                                  desc=('Specifies the data type of the output data. '
                                        'The data type can be any of the following strings: '
