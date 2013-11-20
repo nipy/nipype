@@ -1197,7 +1197,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                desc='apply Fourier (sinusoidal) fitting of order N')
     pava = traits.Bool(argstr='--pava',
                        desc='apply monotonic enforcement via PAVA')
-    despike_theshold = traits.Float(argstr='--despikethreshold=%s',
+    despike_threshold = traits.Float(argstr='--despikethreshold=%s',
                                     desc='specify the threshold for de-spiking (default=3.0)')
     unwarp_direction = traits.Enum('x', 'y', 'z', 'x-', 'y-', 'z-',
                                    argstr='--unwarpdir=%s',
