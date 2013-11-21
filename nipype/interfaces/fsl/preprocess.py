@@ -1287,13 +1287,13 @@ class FUGUE(FSLCommand):
                 self.inputs.shift_out_file = self._gen_fname(
                     self.inputs.in_file, suffix='_vsm')
 
-        if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['unwarped_file']
+        if not isdefined(self.inputs.in_file):
+            skip += ['unwarped_file', 'warped_file']
+        elif self.inputs.forward_warping:
             if not isdefined(self.inputs.warped_file):
                 self.inputs.warped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_warped')
-        if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['warped_file']
+        elif not self.inputs.forward_warping:
             if not isdefined(self.inputs.unwarped_file):
                 self.inputs.unwarped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_unwarped')
