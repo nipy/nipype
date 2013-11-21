@@ -9,6 +9,7 @@ class GetDPInputSpec(CommandLineInputSpec):
     mesh_file = File(exists=True, mandatory=True, argstr="-msh %s", desc="Read mesh (in Gmsh .msh format) from file")
 
     adapatation_constraint_file = File(exists=True, argstr="-adapt %s", desc="Read adaptation constraints from file")
+    gmsh_read_file = File(exists=True, argstr="-gmshread %s", desc="Read gmsh data (same as GmshRead in resolution)")
     results_file = File(exists=True, argstr="-res %s", desc="Load processing results from file(s)")
 
     preprocessing_type = traits.String(argstr="-pre %s", desc="Pre-processing")
