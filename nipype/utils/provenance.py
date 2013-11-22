@@ -241,7 +241,7 @@ class ProvStore(object):
                 continue
             in_attr = {pm.PROV["label"]: key,
                        nipype_ns["environment_variable"]: key,
-                       nipype_ns["value"]: safe_encode(val)}
+                       pm.PROV["value"]: safe_encode(val)}
             id = get_attr_id(in_attr)
             self.g.entity(id, in_attr)
             self.g.hadMember(env_collection, id)
@@ -257,7 +257,7 @@ class ProvStore(object):
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_attr = {pm.PROV["label"]: key,
                            nipype_ns["in_port"]: key,
-                           nipype_ns["value"]: safe_encode(val)}
+                           pm.PROV["value"]: safe_encode(val)}
                 id = get_attr_id(in_attr)
                 self.g.entity(id, in_attr)
                 self.g.hadMember(input_collection, id)
@@ -276,7 +276,7 @@ class ProvStore(object):
             for idx, (key, val) in enumerate(sorted(outputs.items())):
                 out_attr = {pm.PROV["label"]: key,
                             nipype_ns["out_port"]: key,
-                            nipype_ns["value"]: safe_encode(val)}
+                            pm.PROV["value"]: safe_encode(val)}
                 id = get_attr_id(out_attr)
                 self.g.entity(id, out_attr)
                 self.g.hadMember(output_collection, id)
