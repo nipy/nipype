@@ -1402,6 +1402,12 @@ class ROIStatsInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(desc='execute quietly',
                         argstr='-quiet',
                         position=1)
+    
+    terminal_output = traits.Enum('allatonce', 
+                                  desc=('Control terminal output:' 
+                                        '`allatonce` - waits till command is '
+                                        'finished to display output'),
+                                  nohash=True, mandatory=True, usedefault=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
