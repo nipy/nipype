@@ -7,6 +7,7 @@
 import cPickle
 from glob import glob
 import gzip
+import hashlib
 from hashlib import md5
 import json
 import os
@@ -144,20 +145,20 @@ def check_forhash(filename):
         return False, None
 
 
-def hash_infile(afile, chunk_len=8192):
-    """ Computes md5 hash of a file"""
-    md5hex = None
+def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
+    """ Computes hash of a file using 'crypto' module"""
+    hex = None
     if os.path.isfile(afile):
-        md5obj = md5()
+        crypto_obj = crypto()
         fp = file(afile, 'rb')
         while True:
             data = fp.read(chunk_len)
             if not data:
                 break
-            md5obj.update(data)
+            crypto_obj.update(data)
         fp.close()
-        md5hex = md5obj.hexdigest()
-    return md5hex
+        hex = crypto_obj.hexdigest()
+    return hex
 
 
 def hash_timestamp(afile):

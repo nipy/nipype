@@ -17,7 +17,7 @@ except ImportError:
     from ..external import provcopy as pm
 
 from .. import get_info
-from .filemanip import (md5, hash_infile)
+from .filemanip import (md5, hashlib, hash_infile)
 from .. import logging
 iflogger = logging.getLogger('interface')
 
@@ -25,7 +25,9 @@ foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
 niiri = pm.Namespace("niiri", "http://iri.nidash.org/")
-
+crypto = pm.Namespace("crypto",
+                      ("http://id.loc.gov/vocabulary/preservation/"
+                       "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
 def get_attr_id(attr, skip=None):
@@ -107,7 +109,7 @@ def safe_encode(x, as_literal=True):
             return value
     try:
         if isinstance(x, (str, unicode)):
-            if os.path.exists(x) and not os.path.isdir(x):
+            if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
                     return value
@@ -171,10 +173,48 @@ def safe_encode(x, as_literal=True):
         return pm.Literal(value, pm.XSD['string'])
 
 
+def prov_encode(graph, value, create_container=True):
+    if isinstance(value, list) and create_container:
+        if len(value) > 1:
+            try:
+                entities = []
+                for item in value:
+                    item_entity = prov_encode(graph, item)
+                    if 'file://' not in item_entity.get_value():
+                        raise ValueError('No file found')
+                    entities.append(item_entity)
+                id = get_id()
+                entity = graph.collection(identifier=id)
+                for item_entity in entities:
+                    graph.hadMember(id, item_entity.get_identifier())
+            except ValueError:
+                entity = prov_encode(graph, value, create_container=False)
+        else:
+            entity = prov_encode(graph, value[0])
+    else:
+        encoded_literal = safe_encode(value)
+        attr = {pm.PROV['value']: encoded_literal}
+        if isinstance(value, basestring) and os.path.exists(value):
+            attr.update({pm.PROV['Location']: encoded_literal})
+            if not os.path.isdir(value):
+                sha512 = hash_infile(value, crypto=hashlib.sha512)
+                attr.update({crypto['sha512']: pm.Literal(sha512,
+                                                          pm.XSD['string'])})
+                id = get_attr_id(attr, skip=[pm.PROV['Location'],
+                                             pm.PROV['value']])
+            else:
+                id = get_attr_id(attr, skip=[pm.PROV['Location']])
+        else:
+            id = get_attr_id(attr)
+        entity = graph.entity(id, attr)
+    return entity
+
+
 def write_provenance(results, filename='provenance', format='turtle'):
     ps = ProvStore()
     ps.add_results(results)
     return ps.write_provenance(filename=filename, format=format)
+
 
 class ProvStore(object):
 
@@ -252,15 +292,14 @@ class ProvStore(object):
             input_collection.add_extra_attributes({pm.PROV['type']:
                                                        nipype_ns['inputs'],
                                                    pm.PROV['label']: "Inputs"})
-            self.g.used(a0, id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_attr = {pm.PROV["label"]: key,
-                           nipype_ns["in_port"]: key,
-                           pm.PROV["value"]: safe_encode(val)}
-                id = get_attr_id(in_attr)
-                self.g.entity(id, in_attr)
-                self.g.hadMember(input_collection, id)
+                in_entity = prov_encode(self.g, val).get_identifier()
+                self.g.hadMember(input_collection, in_entity)
+                used_attr = {pm.PROV["label"]: key,
+                             nipype_ns["in_port"]: key}
+                self.g.used(activity=a0, entity=in_entity,
+                            other_attributes=used_attr)
         # write output entities
         if outputs:
             id = get_id()
@@ -274,12 +313,12 @@ class ProvStore(object):
             self.g.wasGeneratedBy(output_collection, a0)
             # write output entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_attr = {pm.PROV["label"]: key,
-                            nipype_ns["out_port"]: key,
-                            pm.PROV["value"]: safe_encode(val)}
-                id = get_attr_id(out_attr)
-                self.g.entity(id, out_attr)
-                self.g.hadMember(output_collection, id)
+                out_entity = prov_encode(self.g, val).get_identifier()
+                self.g.hadMember(output_collection, out_entity)
+                gen_attr = {pm.PROV["label"]: key,
+                            nipype_ns["out_port"]: key}
+                self.g.generation(out_entity, activity=a0,
+                                  other_attributes=gen_attr)
         # write runtime entities
         id = get_id()
         runtime_collection = self.g.collection(id)
@@ -312,9 +351,8 @@ class ProvStore(object):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["Role"]: nipype_ns["LoggedInUser"]})
-        self.g.wasAssociatedWith(a0, software_agent, None, None,
-                            {pm.PROV["Role"]: nipype_ns["Software"]})
+                            {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
+        self.g.wasAssociatedWith(a0, software_agent)
         return self.g
 
     def write_provenance(self, filename='provenance', format='turtle'):
