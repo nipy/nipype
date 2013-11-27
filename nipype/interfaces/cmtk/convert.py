@@ -23,7 +23,6 @@ try:
     package_check('cfflib')
 except Exception, e:
     have_cfflib = False
-    warnings.warn('cfflib not installed')
 else:
     import cfflib as cf
 
