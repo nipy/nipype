@@ -70,15 +70,20 @@ class GetDP(CommandLine):
       	outputs['results_file'] = op.abspath(self._gen_outfilename())
         outputs['preprocessing_file'] = op.abspath(self._gen_outfilename())
 
+        out_table_files = []
         for table_outfilename in self.inputs.out_table_filenames:
             _, name , _ = split_filename(table_outfilename)
-            outputs['table_files'] = op.abspath(name + ".txt")
+            out_table_files.append(op.abspath(name + ".txt"))
+        outputs['table_files'] = out_table_files
 
+        out_pos_files = []
         for pos_outfilename in self.inputs.out_pos_filenames:
             _, name , _ = split_filename(pos_outfilename)
-            outputs['postprocessing_files'] = op.abspath(name + ".pos")
+            out_pos_files.append(op.abspath(name + ".pos"))
+        outputs['postprocessing_files'] = out_pos_files
+        
       	return outputs
 
     def _gen_outfilename(self, ext="res"):
-      	_, name , _ = split_filename(self.inputs.problem_file)
+      	_, name , _ = split_filename(self.inputs.output_name)
       	return name + '.' + ext
