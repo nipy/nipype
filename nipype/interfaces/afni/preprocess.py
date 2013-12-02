@@ -560,9 +560,9 @@ class VolregInputSpec(AFNICommandInputSpec):
                       ' by \'n\' voxels during rotations',
                       argstr='-zpad %d',
                       position=-5)
-    md1dfile = File(desc='max displacement output file',
-                    argstr='-maxdisp1D %s',
-                    position=-4)
+    md1d_file = File(name_template='%s_md.1D', desc='max displacement output file',
+                    argstr='-maxdisp1D %s', name_source="in_file",
+                    keep_extension=True, position=-4)
     oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
                      argstr='-1Dfile %s',
                      name_source="in_file",
@@ -597,7 +597,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
