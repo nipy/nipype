@@ -31,7 +31,7 @@ crypto = pm.Namespace("crypto",
 get_id = lambda: niiri[uuid1().hex]
 
 def get_attr_id(attr, skip=None):
-    dictwithhash, hashval = get_hashval(attr, skip=None)
+    dictwithhash, hashval = get_hashval(attr, skip=skip)
     return niiri[hashval]
 
 max_text_len = 1024000
@@ -59,10 +59,19 @@ def get_hashval(inputdict, skip=None):
 
     dict_withhash = {}
     dict_nofilename = OrderedDict()
-    for name, val in sorted(inputdict.items()):
-        if skip is not None and name in skip:
+    keys = {}
+    for key in inputdict:
+        if skip is not None and key in skip:
             continue
-        outname = name.get_uri()
+        keys[key.get_uri()] = key
+    for key in sorted(keys):
+        val = inputdict[keys[key]]
+        outname = key
+        try:
+            if isinstance(val, pm.URIRef):
+                val = val.decode()
+        except AttributeError:
+            pass
         if isinstance(val, pm.QName):
             val = val.get_uri()
         if isinstance(val, pm.Literal):
@@ -180,14 +189,19 @@ def prov_encode(graph, value, create_container=True):
                 entities = []
                 for item in value:
                     item_entity = prov_encode(graph, item)
-                    if 'file://' not in item_entity.get_value():
-                        raise ValueError('No file found')
                     entities.append(item_entity)
+                    if isinstance(item, list):
+                        continue
+                    if not isinstance(item_entity.get_value()[0], basestring):
+                        raise ValueError('Not a string literal')
+                    if 'file://' not in item_entity.get_value()[0]:
+                        raise ValueError('No file found')
                 id = get_id()
                 entity = graph.collection(identifier=id)
                 for item_entity in entities:
-                    graph.hadMember(id, item_entity.get_identifier())
-            except ValueError:
+                    graph.hadMember(id, item_entity)
+            except ValueError, e:
+                iflogger.debug(e)
                 entity = prov_encode(graph, value, create_container=False)
         else:
             entity = prov_encode(graph, value[0])
