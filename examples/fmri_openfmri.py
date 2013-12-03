@@ -388,12 +388,16 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
 if __name__ == '__main__':
     import argparse
+    defstr = ' (default %(default)s)'
     parser = argparse.ArgumentParser(prog='fmri_openfmri.py',
                                      description=__doc__)
     parser.add_argument('-d', '--datasetdir', required=True)
-    parser.add_argument('-s', '--subject', default=None)
-    parser.add_argument('-m', '--model', default=1)
-    parser.add_argument('-t', '--task', default=1)
+    parser.add_argument('-s', '--subject', default=None,
+                        help="Subject name (e.g. 'sub001')")
+    parser.add_argument('-m', '--model', default=1,
+                        help="Model index" + defstr)
+    parser.add_argument('-t', '--task', default=1,
+                        help="Task index" + defstr)
     parser.add_argument("-o", "--output_dir", dest="outdir",
                         help="Output directory base")
     parser.add_argument("-w", "--work_dir", dest="work_dir",
