@@ -297,7 +297,6 @@ class FSL2MRTrix(BaseInterface):
 
 
 class GenerateDirectionsInputSpec(CommandLineInputSpec):
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='the text file to write the directions to, as [ az el ] pairs.')
     num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2 , desc='the number of directions to generate.')
 
     power = traits.Float(argstr='-power %s', desc='specify exponent to use for repulsion power law.')
@@ -305,9 +304,11 @@ class GenerateDirectionsInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File("directions.txt", argstr='%s', hash_files=False,
+                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.', usedefault=True)
 
 class GenerateDirectionsOutputSpec(TraitedSpec):
-    directions_file = File(exists=True, desc='directions file')
+    out_file = File(exists=True, desc='directions file')
 
 class GenerateDirections(CommandLine):
     """
@@ -326,30 +327,10 @@ class GenerateDirections(CommandLine):
     input_spec=GenerateDirectionsInputSpec
     output_spec=GenerateDirectionsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['directions_file'] = self.inputs.out_filename
-        if not isdefined(outputs['directions_file']):
-            outputs['directions_file'] = op.abspath(self._gen_outfilename())
-        else:
-            outputs['directions_file'] = op.abspath(outputs['directions_file'])
-        return outputs
-    
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-    def _gen_outfilename(self):
-        return 'directions_%d.txt' % (self.inputs.num_dirs)
-    
     
 class FindShPeaksInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='the input image of SH coefficients.')
-    directions_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the set of directions to use as seeds for the peak finding')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc=' the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn')
-    
+    directions_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the set of directions to use as seeds for the peak finding')    
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
@@ -359,9 +340,11 @@ class FindShPeaksInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+                    desc='the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn', name_source=["in_file"])
     
 class FindShPeaksOutputSpec(TraitedSpec):
-    peak_directions_image = File(exists=True, desc='Peak directions image')
+    out_file = File(exists=True, desc='Peak directions image')
 
 class FindShPeaks(CommandLine):
     """
@@ -382,29 +365,10 @@ class FindShPeaks(CommandLine):
     input_spec=FindShPeaksInputSpec
     output_spec=FindShPeaksOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['peak_directions_image'] = self.inputs.out_filename
-        if not isdefined(outputs['peak_directions_image']):
-            outputs['peak_directions_image'] = op.abspath(self._gen_outfilename())
-        else:
-            outputs['peak_directions_image'] = op.abspath(outputs['peak_directions_image'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_peak_dirs.mif'
 
 
 class Directions2AmplitudeInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='the output amplitudes image')
-    
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')    
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
@@ -413,9 +377,11 @@ class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+                    desc='the output amplitudes image', name_source=["in_file"])
     
 class Directions2AmplitudeOutputSpec(TraitedSpec):
-    amplitudes_image = File(exists=True, desc='amplitudes image')
+    out_file = File(exists=True, desc='amplitudes image')
 
 class Directions2Amplitude(CommandLine):
     """
@@ -433,23 +399,4 @@ class Directions2Amplitude(CommandLine):
     _cmd = 'dir2amp'
     input_spec=Directions2AmplitudeInputSpec
     output_spec=Directions2AmplitudeOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['amplitudes_image'] = self.inputs.out_filename
-        if not isdefined(outputs['amplitudes_image']):
-            outputs['amplitudes_image'] = op.abspath(self._gen_outfilename())
-        else:
-            outputs['amplitudes_image'] = op.abspath(outputs['amplitudes_image'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_amplitudes.mif'
-
 
