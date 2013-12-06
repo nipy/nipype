@@ -560,9 +560,9 @@ class VolregInputSpec(AFNICommandInputSpec):
                       ' by \'n\' voxels during rotations',
                       argstr='-zpad %d',
                       position=-5)
-    md1dfile = File(desc='max displacement output file',
-                    argstr='-maxdisp1D %s',
-                    position=-4)
+    md1d_file = File(name_template='%s_md.1D', desc='max displacement output file',
+                    argstr='-maxdisp1D %s', name_source="in_file",
+                    keep_extension=True, position=-4)
     oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
                      argstr='-1Dfile %s',
                      name_source="in_file",
@@ -597,7 +597,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1309,6 +1309,42 @@ class TCorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class TCorr1DInputSpec(AFNICommandInputSpec):
+    xset = File(desc = 'xset to 3dTcorr1D',
+                  argstr = ' %s',
+                  position = -2,
+                  mandatory = True,
+                  exists = True)
+    y_1d = File(desc = 'y1D from 3dTcorr1D',
+                   argstr = ' %s',
+                   position = -1,
+                   mandatory = True,
+                   exists = True)
+    out_file = File(desc = 'output file from 3dTcorr1D',
+                   argstr = '-prefix %s',
+                   genfile = True)
+    options = traits.Str(desc = 'select options',
+                         argstr = ' %s')
+    suffix = traits.Str(desc="out_file suffix")
+
+
+class TCorr1DOutputSpec(AFNICommandOutputSpec):
+    out_file = File(desc = 'output file containing correlations',
+                    exists = True)
+
+
+class TCorr1D(AFNICommand):
+    """Computes the correlation coefficient between each voxel time series
+in the input 3D+time dataset.
+For complete details, see the `3dTcorr1D Documentation.
+<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+"""
+
+    _cmd = '3dTcorr1D'
+    input_spec = TCorr1DInputSpec
+    output_spec = TCorr1DOutputSpec
+
+
 class BrickStatInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dmaskave',
                    argstr='%s',
@@ -1861,4 +1897,3 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
-
