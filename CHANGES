@@ -17,6 +17,14 @@ Next release
         One outdated interface no longer part of Camino was removed:
         - camino.Conmap
         
+* ENH: 3 new mrtrix interfaces were added:
+        - mrtrix.GenerateDirections
+        - mrtrix.FindShPeaks
+        - mrtrix.Directions2Amplitude
+
+        One outdated interface no longer part of Camino was removed:
+        - camino.Conmap
+        
 * FIX: Several fixes related to Camino interfaces:
         - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
         - DTLUTGen would silently round the "step", "snr" and "trace" parameters to integers
