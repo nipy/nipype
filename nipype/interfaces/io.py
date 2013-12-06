@@ -546,7 +546,7 @@ class DataGrabber(IOBase):
                         outputs[key].append(None)
                     else:
                         if self.inputs.sort_filelist:
-                            filelist = human_order_sorted(outfiles)
+                            outfiles = human_order_sorted(outfiles)
                         outputs[key].append(list_to_filename(outfiles))
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
