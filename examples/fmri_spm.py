@@ -15,6 +15,9 @@ nipype tutorial directory:
 
 Import necessary modules from nipype."""
 
+from nipype import config
+config.enable_provenance()
+
 from nipype import spm, fsl
 
 # In order to use this example with SPM's matlab common runtime
@@ -389,6 +392,4 @@ function needs to be called.
 
 if __name__ == '__main__':
     l1pipeline.run('MultiProc')
-#    l2pipeline.run()
-#    l1pipeline.write_graph()
-
+    l2pipeline.run('MultiProc')

@@ -18,12 +18,14 @@ import warnings
 from ... import logging
 iflogger = logging.getLogger('interface')
 
+have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
+except Exception, e:
+    have_dipy = False
+else:
     import dipy.reconst.dti as dti
     from dipy.core.gradients import GradientTable
-except Exception, e:
-    warnings.warn('dipy not installed')
 
 
 class TensorModeInputSpec(TraitedSpec):

@@ -1116,6 +1116,8 @@ def run_command(runtime, output=None, timeout=0.01):
                              cwd=runtime.cwd,
                              env=runtime.environ)
     result = {}
+    errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+    outfile = os.path.join(runtime.cwd, 'stdout.nipype')
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1152,8 +1154,6 @@ def run_command(runtime, output=None, timeout=0.01):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
         stderr = open(errfile, 'wt')
         stdout = open(outfile, 'wt')
         proc = subprocess.Popen(runtime.cmdline,

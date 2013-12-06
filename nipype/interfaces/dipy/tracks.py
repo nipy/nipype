@@ -10,11 +10,13 @@ import warnings
 from ... import logging
 iflogger = logging.getLogger('interface')
 
+have_dipy = True
 try:
-    package_check('dipy')
-    from dipy.tracking.utils import density_map
+    package_check('dipy', version='0.6.0')
 except Exception, e:
-    warnings.warn('dipy not installed')
+    have_dipy = False
+else:
+    from dipy.tracking.utils import density_map
 
 
 class TrackDensityMapInputSpec(TraitedSpec):
