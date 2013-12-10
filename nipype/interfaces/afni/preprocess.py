@@ -1310,35 +1310,56 @@ class TCorrelate(AFNICommand):
 
 
 class TCorr1DInputSpec(AFNICommandInputSpec):
-    xset = File(desc = 'xset to 3dTcorr1D',
+    xset = File(desc = '3d+time dataset input',
                   argstr = ' %s',
                   position = -2,
                   mandatory = True,
                   exists = True)
-    y_1d = File(desc = 'y1D from 3dTcorr1D',
+    y_1d = File(desc = '1D time series file input',
                    argstr = ' %s',
                    position = -1,
                    mandatory = True,
                    exists = True)
-    out_file = File(desc = 'output file from 3dTcorr1D',
+    out_file = File(desc = 'output filename prefix',
+                   name_template='%s_correlation.nii.gz',
                    argstr = '-prefix %s',
-                   genfile = True)
-    options = traits.Str(desc = 'select options',
-                         argstr = ' %s')
-    suffix = traits.Str(desc="out_file suffix")
+                   name_source = 'xset',
+                   genfile = True,
+                   keep_extension = True)
+    pearson = traits.Bool(desc='Correlation is the normal' +
+                   ' Pearson correlation coefficient',
+                   argstr=' -pearson',
+                   xor=['spearman','quadrant','ktaub'],
+                   position=1)
+    spearman = traits.Bool(desc='Correlation is the' +
+                   ' Spearman (rank) correlation coefficient',
+                   argstr=' -spearman',
+                   xor=['pearson','quadrant','ktaub'],
+                   position=1)
+    quadrant = traits.Bool(desc='Correlation is the' +
+                   ' quadrant correlation coefficient',
+                   argstr=' -quadrant',
+                   xor=['pearson','spearman','ktaub'],
+                   position=1)
+    ktaub = traits.Bool(desc='Correlation is the' +
+                   ' Kendall\'s tau_b correlation coefficient',
+                   argstr=' -ktaub',
+                   xor=['pearson','spearman','quadrant'],
+                   position=1)
 
 
-class TCorr1DOutputSpec(AFNICommandOutputSpec):
+
+class TCorr1DOutputSpec(TraitedSpec):
     out_file = File(desc = 'output file containing correlations',
                     exists = True)
 
 
 class TCorr1D(AFNICommand):
     """Computes the correlation coefficient between each voxel time series
-in the input 3D+time dataset.
-For complete details, see the `3dTcorr1D Documentation.
-<http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
-"""
+    in the input 3D+time dataset.
+    For complete details, see the `3dTcorr1D Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+    """
 
     _cmd = '3dTcorr1D'
     input_spec = TCorr1DInputSpec
@@ -1897,3 +1918,5 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+
+
