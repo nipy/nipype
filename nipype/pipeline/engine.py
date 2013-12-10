@@ -689,10 +689,10 @@ connected.
         runner.run(execgraph, updatehash=updatehash, config=self.config)
         datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         if str2bool(self.config['execution']['write_provenance']):
-            write_workflow_prov(execgraph,
-                                os.path.join(self.base_dir,
-                                             'workflow_provenance_%s' % datestr),
-                                format='all')
+            prov_base = os.path.join(self.base_dir,
+                                     'workflow_provenance_%s' % datestr)
+            logger.info('Provenance file prefix: %s' % prov_base)
+            write_workflow_prov(execgraph, prov_base, format='all')
         return execgraph
 
     # PRIVATE API AND FUNCTIONS

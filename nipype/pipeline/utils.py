@@ -1070,6 +1070,11 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     return result
 
 
+def merge_bundles(g1, g2):
+    for rec in g2.get_records():
+        g1._add_record(rec)
+    return g1
+
 def write_workflow_prov(graph, filename=None, format='turtle'):
     """Write W3C PROV Model JSON file
     """
@@ -1102,12 +1107,12 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                         if isdefined(values):
                             subresult.outputs[key] = values[idx]
                 sub_bundle = ProvStore().add_results(subresult)
-                ps.g.add_bundle(sub_bundle)
+                ps.g = merge_bundles(ps.g, sub_bundle)
                 ps.g.wasGeneratedBy(sub_bundle, process)
         else:
             process.add_extra_attributes({pm.PROV["type"]: nipype_ns["Node"]})
             result_bundle = ProvStore().add_results(result)
-            ps.g.add_bundle(result_bundle)
+            ps.g = merge_bundles(ps.g, result_bundle)
             ps.g.wasGeneratedBy(result_bundle, process)
         processes.append(process)
 
