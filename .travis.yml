@@ -11,7 +11,7 @@ before_install:
   # The next couple lines fix a crash with multiprocessing on Travis
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
-  - sudo bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   - sudo apt-get update -qq
   - sudo apt-get install -qq --no-install-recommends fsl afni
   - sudo apt-get install -qq fsl-atlases
