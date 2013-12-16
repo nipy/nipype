@@ -17,7 +17,6 @@ try:
     package_check('cviewer')
 except Exception, e:
     have_cv = False
-    warnings.warn('ConnectomeViewer not installed')
 else:
     import cviewer.libs.pyconto.groupstatistics.nbs as nbs
 

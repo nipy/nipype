@@ -1116,6 +1116,8 @@ def run_command(runtime, output=None, timeout=0.01):
                              cwd=runtime.cwd,
                              env=runtime.environ)
     result = {}
+    errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+    outfile = os.path.join(runtime.cwd, 'stdout.nipype')
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1152,8 +1154,6 @@ def run_command(runtime, output=None, timeout=0.01):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
         stderr = open(errfile, 'wt')
         stdout = open(outfile, 'wt')
         proc = subprocess.Popen(runtime.cmdline,
@@ -1457,8 +1457,8 @@ class CommandLine(BaseInterface):
                 name_template = retval
             else:
                 name_template = trait_spec.name_template
-            if not name_template:
-                name_template = "%s_generated"
+#            if not name_template:
+#                name_template = "%s_generated"
             if isinstance(trait_spec.name_source, list):
                 for ns in trait_spec.name_source:
                     if isdefined(getattr(self.inputs, ns)):

@@ -8,7 +8,7 @@
 """
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec)
+                                    StdOutCommandLineInputSpec, isdefined)
 from nipype.utils.filemanip import split_filename
 import os
 
@@ -49,7 +49,7 @@ class DTIFit(StdOutCommandLine):
     >>> import nipype.interfaces.camino as cmon
     >>> fit = cmon.DTIFit()
     >>> fit.inputs.scheme_file = 'A.scheme'
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'dtfit'
@@ -64,6 +64,107 @@ class DTIFit(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
+
+class DTMetricInputSpec(CommandLineInputSpec):
+    eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True,
+                      desc='voxel-order data filename')
+
+    metric = traits.Enum('fa','md','rd','l1', 'l2', 'l3', 'tr', 'ra', '2dfa','cl','cp','cs',
+                         argstr='-stat %s', mandatory=True,
+                         desc=('Specifies the metric to compute. Possible choices are: '
+                               '"fa", "md", "rd", "l1", "l2", "l3", "tr", "ra", "2dfa", "cl", "cp" or "cs".'))
+
+    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
+                                argstr='-inputdatatype %s', usedefault=True,
+                                desc=('Specifies the data type of the input data. '
+                                      'The data type can be any of the following strings: '
+                                      '"char", "short", "int", "long", "float" or "double".'
+                                      'Default is double data type'))
+
+    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
+                                 argstr='-outputdatatype %s', usedefault=True,
+                                 desc=('Specifies the data type of the output data. '
+                                       'The data type can be any of the following strings: '
+                                       '"char", "short", "int", "long", "float" or "double".'
+                                       'Default is double data type'))
+
+    data_header = File(argstr='-header %s', exists=True,
+                       desc=('A Nifti .nii or .nii.gz file containing the header information. '
+                             'Usually this will be the header of the raw data file from which '
+                             'the diffusion tensors were reconstructed.'))
+
+    outputfile = File(argstr='-outputfile %s', genfile=True,
+                      desc=('Output name. Output will be a .nii.gz file if data_header is provided and'
+                            'in voxel order with outputdatatype datatype (default: double) otherwise.'))
+
+class DTMetricOutputSpec(TraitedSpec):
+    metric_stats = File(exists=True, desc='Diffusion Tensor statistics of the chosen metric')
+
+class DTMetric(CommandLine):
+    """
+    Computes tensor metric statistics based on the eigenvalues l1 >= l2 >= l3
+    typically obtained from ComputeEigensystem.
+
+    The full list of statistics is:
+
+     <cl> = (l1 - l2) / l1 , a measure of linearity
+     <cp> = (l2 - l3) / l1 , a measure of planarity
+     <cs> = l3 / l1 , a measure of isotropy
+      with: cl + cp + cs = 1
+
+     <l1> = first eigenvalue
+     <l2> = second eigenvalue
+     <l3> = third eigenvalue
+
+     <tr> = l1 + l2 + l3
+     <md> = tr / 3
+     <rd> = (l2 + l3) / 2
+     <fa> = fractional anisotropy. (Basser et al, J Magn Reson B 1996)
+     <ra> = relative anisotropy (Basser et al, J Magn Reson B 1996)
+
+     <2dfa> = 2D FA of the two minor eigenvalues l2 and l3
+      i.e. sqrt( 2 * [(l2 - <l>)^2 + (l3 - <l>)^2] / (l2^2 + l3^2) )
+           with: <l> = (l2 + l3) / 2
+
+    Example
+    -------
+    Compute the CP planar metric as float data type.
+
+    >>> import nipype.interfaces.camino as cam
+    >>> dtmetric = cam.DTMetric()
+    >>> dtmetric.inputs.eigen_data = 'dteig.Bdouble'
+    >>> dtmetric.inputs.metric = 'cp'
+    >>> dtmetric.inputs.outputdatatype = 'float'
+    >>> dtmetric.run()                  # doctest: +SKIP
+    """
+    _cmd = 'dtshape'
+    input_spec=DTMetricInputSpec
+    output_spec=DTMetricOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['metric_stats'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_outfilename(self):
+        return self._gen_outputfile()
+
+    def _gen_outputfile(self):
+        outputfile = self.inputs.outputfile
+        if not isdefined(outputfile):
+            outputfile = self._gen_filename('outputfile')
+        return outputfile
+
+    def _gen_filename(self, name):
+        if name == 'outputfile':
+            _, name , _ = split_filename(self.inputs.eigen_data)
+            metric = self.inputs.metric
+            datatype= self.inputs.outputdatatype
+            if isdefined(self.inputs.data_header):
+                filename = name + '_' + metric + '.nii.gz'
+            else:
+                filename = name + '_' + metric + '.B' + datatype
+        return filename
 
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
     def _gen_model_options(): #@NoSelf
@@ -134,7 +235,7 @@ class ModelFit(StdOutCommandLine):
     >>> fit = cmon.ModelFit()
     >>> fit.model = 'dt'
     >>> fit.inputs.scheme_file = 'A.scheme'
-    >>> fit.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fit.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'modelfit'
@@ -381,7 +482,7 @@ class TrackDT(Track):
 
     >>> import nipype.interfaces.camino as cmon
     >>> track = cmon.TrackDT()
-    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.run()                 # doctest: +SKIP
     """
@@ -447,7 +548,7 @@ class TrackBayesDirac(Track):
 
     >>> import nipype.interfaces.camino as cmon
     >>> track = cmon.TrackBayesDirac()
-    >>> track.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> track.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> track.inputs.seed_file = 'seed_mask.nii'
     >>> track.inputs.scheme_file = 'bvecs.scheme'
     >>> track.run()                  # doctest: +SKIP
@@ -547,7 +648,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> md = cmon.ComputeMeanDiffusivity()
-    >>> md.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> md.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> md.inputs.scheme_file = 'A.scheme'
     >>> md.run()                  # doctest: +SKIP
     """
@@ -606,7 +707,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> fa = cmon.ComputeFractionalAnisotropy()
-    >>> fa.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> fa.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> fa.inputs.scheme_file = 'A.scheme'
     >>> fa.run()                  # doctest: +SKIP
     """
@@ -667,7 +768,7 @@ class ComputeTensorTrace(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> trace = cmon.ComputeTensorTrace()
-    >>> trace.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> trace.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> trace.inputs.scheme_file = 'A.scheme'
     >>> trace.run()                 # doctest: +SKIP
     """
@@ -690,11 +791,21 @@ class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
 
     inputmodel = traits.Enum('dt', 'multitensor', argstr='-inputmodel %s', desc='Specifies the model that the input data contains parameters for. Possible model types are: "dt" (diffusion-tensor data) and "multitensor"')
 
-    maxcomponents = traits.Int(argstr='-maxcomponents %s', desc='The maximum number of tensor components in a voxel of the input data.')
+    maxcomponents = traits.Int(argstr='-maxcomponents %d', desc='The maximum number of tensor components in a voxel of the input data.')
 
-    inputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-inputdatatype %s', desc='Specifies the data type of the input file. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+    inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
+                                 argstr='-inputdatatype %s', usedefault=True,
+                                 desc=('Specifies the data type of the input data. '
+                                       'The data type can be any of the following strings: '
+                                       '"char", "short", "int", "long", "float" or "double".'
+                                       'Default is double data type'))
 
-    outputdatatype = traits.Enum("double", "char", "short", "int", "long", "float", argstr='-outputdatatype %s', desc='Specifies the data type of the output data. The data type can be any of the following strings: "char", "short", "int", "long", "float" or "double".')
+    outputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
+                                 argstr='-outputdatatype %s', usedefault=True,
+                                 desc=('Specifies the data type of the output data. '
+                                       'The data type can be any of the following strings: '
+                                       '"char", "short", "int", "long", "float" or "double".'
+                                       'Default is double data type'))
 
 class ComputeEigensystemOutputSpec(TraitedSpec):
     eigen = File(exists=True, desc='Trace of the diffusion tensor')
@@ -716,7 +827,7 @@ class ComputeEigensystem(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> dteig = cmon.ComputeEigensystem()
-    >>> dteig.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> dteig.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> dteig.run()                  # doctest: +SKIP
     """
     _cmd = 'dteig'
@@ -730,4 +841,5 @@ class ComputeEigensystem(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + "_Eigen.img"     #Need to change to self.inputs.outputdatatype
+        datatype= self.inputs.outputdatatype
+        return name + '_eig.B' + datatype

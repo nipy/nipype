@@ -14,6 +14,7 @@ import logging
 import datetime
 import json
 import re
+import dateutil.parser
 import collections
 from collections import defaultdict
 
@@ -21,7 +22,7 @@ try:
     from rdflib.term import URIRef, BNode
     from rdflib.term import Literal as RDFLiteral
     from rdflib.graph import ConjunctiveGraph, Graph
-    from rdflib.namespace import RDF
+    from rdflib.namespace import RDF, RDFS
 except ImportError:
     pass
 
@@ -179,31 +180,10 @@ _normalise_attributes = lambda attr: (unicode(attr[0]), unicode(attr[1]))
 
 
 #  Datatypes
-_r_xsd_dateTime = re.compile(""" ^
-    (?P<year>-?[0-9]{4}) - (?P<month>[0-9]{2}) - (?P<day>[0-9]{2})
-    T (?P<hour>[0-9]{2}) : (?P<minute>[0-9]{2}) : (?P<second>[0-9]{2})
-    (?P<microsecond>\.[0-9]{1,6})?
-    (?P<tz>
-      Z | (?P<tz_hr>[-+][0-9]{2}) : (?P<tz_min>[0-9]{2})
-    )?
-    $ """, re.X)
-
 attr2rdf = lambda attr: PROV[PROV_ID_ATTRIBUTES_MAP[attr].split('prov:')[1]].rdf_representation()
 
 def _parse_xsd_dateTime(s):
-    """Returns datetime or None."""
-    m = _r_xsd_dateTime.match(s)
-    if m is not None:
-        values = m.groupdict()
-        if values["microsecond"] is None:
-            values["microsecond"] = 0
-        else:
-            values["microsecond"] = values["microsecond"][1:]
-            values["microsecond"] += "0" * (6 - len(values["microsecond"]))
-        values = dict((k, int(v)) for k, v in values.iteritems() if not k.startswith("tz"))
-        return datetime.datetime(**values)
-    else:
-        return None
+    return dateutil.parser.parse(s)
 
 
 def _ensure_datetime(time):
@@ -359,7 +339,7 @@ class Identifier(object):
 
     def json_representation(self):
         return {'$': self._uri, 'type': u'xsd:anyURI'}
-
+    
     def rdf_representation(self):
         return URIRef(self.get_uri())
 
@@ -760,7 +740,12 @@ class ProvRecord(object):
                 graph.add((subj, pred, obj))
         if self._extra_attributes:
             for (attr, value) in self._extra_attributes:
-                pred = attr.rdf_representation() if attr != PROV['type'] else RDF.type
+                if attr == PROV['type']:
+                    pred = RDF.type
+                elif attr == PROV['label']:
+                    pred = RDFS.label
+                else:
+                    pred = attr.rdf_representation()
                 try:
                     # try if there is a RDF representation defined
                     obj = value.rdf_representation()
@@ -768,7 +753,7 @@ class ProvRecord(object):
                     obj = RDFLiteral(value)
                 graph.add((subj, pred, obj))
         return graph
-
+        
     def is_asserted(self):
         return self._asserted
 
@@ -783,7 +768,7 @@ class ProvRecord(object):
 class ProvElement(ProvRecord):
     def is_element(self):
         return True
-
+    
     def rdf(self, graph=None):
         if graph is None:
             graph = Graph()
@@ -825,7 +810,12 @@ class ProvRelation(ProvRecord):
             for (attr, value) in self._extra_attributes:
                 if not value:
                     continue
-                pred = attr.rdf_representation() if attr != PROV['type'] else RDF.type
+                if attr == PROV['type']:
+                    pred = RDF.type
+                elif attr == PROV['label']:
+                    pred = RDFS.label
+                else:
+                    pred = attr.rdf_representation()
                 try:
                     # try if there is a RDF representation defined
                     otherobj = value.rdf_representation()
@@ -1656,15 +1646,15 @@ class ProvBundle(ProvEntity):
             # graph should not None here
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
-
+        
         for prefix, namespace in self._namespaces.items():
             graph.bind(prefix, namespace.get_uri())
-
+        
         for record in self._records:
             if record.is_asserted():
                 record.rdf(graph)
         return graph
-
+    
     def get_provjson(self, **kw):
         """Return the `PROV-JSON <http://www.w3.org/Submission/prov-json/>`_ representation for the bundle/document.
 

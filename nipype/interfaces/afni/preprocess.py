@@ -199,7 +199,7 @@ class Refit(CommandLine):
     output_spec = AFNICommandOutputSpec
 
     def _list_outputs(self):
-        outputs = super(AFNICommand, self)._list_outputs()
+        outputs = self.output_spec().get()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
 
@@ -572,14 +572,13 @@ class VolregInputSpec(AFNICommandInputSpec):
                       ' by \'n\' voxels during rotations',
                       argstr='-zpad %d',
                       position=-5)
-    md1dfile = File(desc='max displacement output file',
-                    argstr='-maxdisp1D %s',
-                    position=-4)
-    oned_file = File(
-        name_template='%s.1D', desc='1D movement parameters output file',
-        argstr='-1Dfile %s',
-        name_source="in_file",
-        keep_extension=True)
+    md1d_file = File(name_template='%s_md.1D', desc='max displacement output file',
+                    argstr='-maxdisp1D %s', name_source="in_file",
+                    keep_extension=True, position=-4)
+    oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
+                     argstr='-1Dfile %s',
+                     name_source="in_file",
+                     keep_extension=True)
     verbose = traits.Bool(desc='more detailed description of the process',
                           argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
@@ -611,7 +610,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1480,9 +1479,11 @@ class CalcInputSpec(AFNICommandInputSpec):
                      argstr='-a %s', position=0, mandatory=True, exists=True)
     in_file_b = File(desc='operand file to 3dcalc',
                      argstr=' -b %s', position=1, exists=True)
+    in_file_c = File(desc='operand file to 3dcalc',
+                     argstr=' -c %s', position=2, exists=True)
     out_file = File(name_template="%s_calc", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file_a")
-    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=2,
+    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
                       mandatory=True)
     start_idx = traits.Int(desc='start index for in_file_a',
                            requires=['stop_idx'])
@@ -1615,7 +1616,7 @@ class TCorrMapInputSpec(AFNICommandInputSpec):
     _thresh_opts = ('absolute_threshold',
                     'var_absolute_threshold',
                     'var_absolute_threshold_normalize')
-    thresholds = traits.List(traits.Int())
+    thresholds = traits.List(traits.Float())
     absolute_threshold = File(
         argstr='-Thresh %f %s', suffix='_thresh',
         name_source="in_file", xor=_thresh_opts)
@@ -1692,7 +1693,7 @@ class TCorrMap(AFNICommand):
 
     def _format_arg(self, name, trait_spec, value):
         if name in self.inputs._thresh_opts:
-            return trait_spec.argstr % self.inputs.thresholds + [value]
+            return trait_spec.argstr % tuple(self.inputs.thresholds + [value])
         elif name in self.inputs._expr_opts:
             return trait_spec.argstr % (self.inputs.expr, value)
         elif name == 'histogram':

@@ -563,7 +563,7 @@ class AnalyzeHeader(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> hdr = cmon.AnalyzeHeader()
-    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> hdr.inputs.scheme_file = 'A.scheme'
     >>> hdr.inputs.data_dims = [256,256,256]
     >>> hdr.inputs.voxel_dims = [1,1,1]

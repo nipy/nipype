@@ -410,13 +410,13 @@ class DistributedPluginBase(PluginBase):
         """ Generates a dependency list for a list of graphs.
         """
         self.procs, _ = topological_sort(graph)
-        nodes = graph.nodes()
-        indices = [nodes.index(proc) for proc in self.procs]
         try:
-            self.depidx = nx.to_scipy_sparse_matrix(graph, format='lil')
+            self.depidx = nx.to_scipy_sparse_matrix(graph,
+                                                    nodelist=self.procs,
+                                                    format='lil')
         except:
-            self.depidx = nx.to_scipy_sparse_matrix(graph)
-        self.depidx = self.depidx[:, indices][indices, :]
+            self.depidx = nx.to_scipy_sparse_matrix(graph,
+                                                    nodelist=self.procs)
         self.refidx = deepcopy(self.depidx)
         self.refidx.astype = np.int
         self.proc_done = np.zeros(len(self.procs), dtype=bool)

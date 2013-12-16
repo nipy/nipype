@@ -5,75 +5,230 @@ import pwd
 from socket import getfqdn
 from uuid import uuid1
 
+import numpy as np
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
+
 try:
     import prov.model as pm
 except ImportError:
     from ..external import provcopy as pm
 
 from .. import get_info
+from .filemanip import (md5, hashlib, hash_infile)
 from .. import logging
 iflogger = logging.getLogger('interface')
 
 foaf = pm.Namespace("foaf", "http://xmlns.com/foaf/0.1/")
 dcterms = pm.Namespace("dcterms", "http://purl.org/dc/terms/")
 nipype_ns = pm.Namespace("nipype", "http://nipy.org/nipype/terms/")
-niiri = pm.Namespace("niiri", "http://nidm.nidash.org/iri/")
-
+niiri = pm.Namespace("niiri", "http://iri.nidash.org/")
+crypto = pm.Namespace("crypto",
+                      ("http://id.loc.gov/vocabulary/preservation/"
+                       "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
+
+def get_attr_id(attr, skip=None):
+    dictwithhash, hashval = get_hashval(attr, skip=skip)
+    return niiri[hashval]
 
 max_text_len = 1024000
 
-def safe_encode(x):
+def get_hashval(inputdict, skip=None):
+    """Return a dictionary of our items with hashes for each file.
+
+    Searches through dictionary items and if an item is a file, it
+    calculates the md5 hash of the file contents and stores the
+    file name and hash value as the new key value.
+
+    However, the overall bunch hash is calculated only on the hash
+    value of a file. The path and name of the file are not used in
+    the overall hash calculation.
+
+    Returns
+    -------
+    dict_withhash : dict
+        Copy of our dictionary with the new file hashes included
+        with each file.
+    hashvalue : str
+        The md5 hash value of the traited spec
+
+    """
+
+    dict_withhash = {}
+    dict_nofilename = OrderedDict()
+    keys = {}
+    for key in inputdict:
+        if skip is not None and key in skip:
+            continue
+        keys[key.get_uri()] = key
+    for key in sorted(keys):
+        val = inputdict[keys[key]]
+        outname = key
+        try:
+            if isinstance(val, pm.URIRef):
+                val = val.decode()
+        except AttributeError:
+            pass
+        if isinstance(val, pm.QName):
+            val = val.get_uri()
+        if isinstance(val, pm.Literal):
+            val = val.get_value()
+        dict_nofilename[outname] = _get_sorteddict(val)
+        dict_withhash[outname] = _get_sorteddict(val, True)
+    return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+
+def _get_sorteddict(object, dictwithhash=False):
+    if isinstance(object, dict):
+        out = OrderedDict()
+        for key, val in sorted(object.items()):
+            if val:
+                out[key] = _get_sorteddict(val, dictwithhash)
+    elif isinstance(object, (list, tuple)):
+        out = []
+        for val in object:
+            if val:
+                out.append(_get_sorteddict(val, dictwithhash))
+        if isinstance(object, tuple):
+            out = tuple(out)
+    else:
+        if isinstance(object, str) and os.path.isfile(object):
+            hash = hash_infile(object)
+            if dictwithhash:
+                out = (object, hash)
+            else:
+                out = hash
+        elif isinstance(object, float):
+            out = '%.10f' % object
+        else:
+            out = object
+    return out
+
+
+def safe_encode(x, as_literal=True):
     """Encodes a python value for prov
     """
     if x is None:
-        return pm.Literal("Unknown", pm.XSD['string'])
+        value = "Unknown"
+        if as_literal:
+            return pm.Literal(value, pm.XSD['string'])
+        else:
+            return value
     try:
         if isinstance(x, (str, unicode)):
             if os.path.exists(x):
+                value = 'file://%s%s' % (getfqdn(), x)
+                if not as_literal:
+                    return value
                 try:
-                    return pm.URIRef('file://%s%s' % (getfqdn(), x))
+                    return pm.URIRef(value)
                 except AttributeError:
-                    return pm.Literal('file://%s%s' % (getfqdn(), x),
-                                      pm.XSD['anyURI'])
+                    return pm.Literal(value, pm.XSD['anyURI'])
             else:
                 if len(x) > max_text_len:
-                    return pm.Literal(x[:max_text_len - 13] + ['...Clipped...'],
-                                      pm.XSD['string'])
+                    value = x[:max_text_len - 13] + ['...Clipped...']
                 else:
-                    return pm.Literal(x, pm.XSD['string'])
+                    value = x
+                if not as_literal:
+                    return value
+                return pm.Literal(value, pm.XSD['string'])
         if isinstance(x, (int,)):
+            if not as_literal:
+                return x
             return pm.Literal(int(x), pm.XSD['integer'])
         if isinstance(x, (float,)):
+            if not as_literal:
+                return x
             return pm.Literal(x, pm.XSD['float'])
         if isinstance(x, dict):
             outdict = {}
             for key, value in x.items():
-                encoded_value = safe_encode(value)
+                encoded_value = safe_encode(value, as_literal=False)
                 if isinstance(encoded_value, (pm.Literal,)):
                     outdict[key] = encoded_value.json_representation()
                 else:
                     outdict[key] = encoded_value
+            if not as_literal:
+                return json.dumps(outdict)
             return pm.Literal(json.dumps(outdict), pm.XSD['string'])
         if isinstance(x, list):
-            outlist = []
-            for value in x:
-                encoded_value = safe_encode(value)
-                if isinstance(encoded_value, (pm.Literal,)):
-                    outlist.append(encoded_value.json_representation())
-                else:
-                    outlist.append(encoded_value)
+            try:
+                nptype = np.array(x).dtype
+                if nptype == np.dtype(object):
+                    raise ValueError('dtype object')
+            except ValueError, e:
+                outlist = []
+                for value in x:
+                    encoded_value = safe_encode(value, as_literal=False)
+                    if isinstance(encoded_value, (pm.Literal,)):
+                        outlist.append(encoded_value.json_representation())
+                    else:
+                        outlist.append(encoded_value)
+            else:
+                outlist = x
+            if not as_literal:
+                return json.dumps(outlist)
             return pm.Literal(json.dumps(outlist), pm.XSD['string'])
+        if not as_literal:
+            return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
     except TypeError, e:
         iflogger.info(e)
-        return pm.Literal("Could not encode: " + str(e), pm.XSD['string'])
+        value = "Could not encode: " + str(e)
+        if not as_literal:
+            return value
+        return pm.Literal(value, pm.XSD['string'])
+
+
+def prov_encode(graph, value, create_container=True):
+    if isinstance(value, list) and create_container:
+        if len(value) > 1:
+            try:
+                entities = []
+                for item in value:
+                    item_entity = prov_encode(graph, item)
+                    entities.append(item_entity)
+                    if isinstance(item, list):
+                        continue
+                    if not isinstance(item_entity.get_value()[0], basestring):
+                        raise ValueError('Not a string literal')
+                    if 'file://' not in item_entity.get_value()[0]:
+                        raise ValueError('No file found')
+                id = get_id()
+                entity = graph.collection(identifier=id)
+                for item_entity in entities:
+                    graph.hadMember(id, item_entity)
+            except ValueError, e:
+                iflogger.debug(e)
+                entity = prov_encode(graph, value, create_container=False)
+        else:
+            entity = prov_encode(graph, value[0])
+    else:
+        encoded_literal = safe_encode(value)
+        attr = {pm.PROV['value']: encoded_literal}
+        if isinstance(value, basestring) and os.path.exists(value):
+            attr.update({pm.PROV['Location']: encoded_literal})
+            if not os.path.isdir(value):
+                sha512 = hash_infile(value, crypto=hashlib.sha512)
+                attr.update({crypto['sha512']: pm.Literal(sha512,
+                                                          pm.XSD['string'])})
+                id = get_attr_id(attr, skip=[pm.PROV['Location'],
+                                             pm.PROV['value']])
+            else:
+                id = get_attr_id(attr, skip=[pm.PROV['Location']])
+        else:
+            id = get_attr_id(attr)
+        entity = graph.entity(id, attr)
+    return entity
 
 
 def write_provenance(results, filename='provenance', format='turtle'):
     ps = ProvStore()
     ps.add_results(results)
     return ps.write_provenance(filename=filename, format=format)
+
 
 class ProvStore(object):
 
@@ -95,14 +250,14 @@ class ProvStore(object):
         interface = results.interface
         inputs = results.inputs
         outputs = results.outputs
-        classname = interface.__class__.__name__
+        classname = interface.__name__
 
-        a0_attrs = {nipype_ns['module']: self.__module__,
+        a0_attrs = {nipype_ns['module']: interface.__module__,
                     nipype_ns["interface"]: classname,
                     pm.PROV["label"]: classname,
                     nipype_ns['duration']: safe_encode(runtime.duration),
                     nipype_ns['working_directory']: safe_encode(runtime.cwd),
-                    nipype_ns['return_code']: runtime.returncode,
+                    nipype_ns['return_code']: safe_encode(runtime.returncode),
                     nipype_ns['platform']: safe_encode(runtime.platform),
                     nipype_ns['version']: safe_encode(runtime.version),
                     }
@@ -131,10 +286,17 @@ class ProvStore(object):
         self.g.used(a0, id)
         # write environment entities
         for idx, (key, val) in enumerate(sorted(runtime.environ.items())):
+            if key not in ['PATH', 'FSLDIR', 'FREESURFER_HOME', 'ANTSPATH',
+                           'CAMINOPATH', 'CLASSPATH', 'LD_LIBRARY_PATH',
+                           'DYLD_LIBRARY_PATH', 'FIX_VERTEX_AREA',
+                           'FSF_OUTPUT_FORMAT', 'FSLCONFDIR', 'FSLOUTPUTTYPE',
+                           'LOGNAME', 'USER',
+                           'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
+                continue
             in_attr = {pm.PROV["label"]: key,
                        nipype_ns["environment_variable"]: key,
-                       nipype_ns["value"]: safe_encode(val)}
-            id = get_id()
+                       pm.PROV["value"]: safe_encode(val)}
+            id = get_attr_id(in_attr)
             self.g.entity(id, in_attr)
             self.g.hadMember(env_collection, id)
         # write input entities
@@ -144,15 +306,14 @@ class ProvStore(object):
             input_collection.add_extra_attributes({pm.PROV['type']:
                                                        nipype_ns['inputs'],
                                                    pm.PROV['label']: "Inputs"})
-            self.g.used(a0, id)
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
-                in_attr = {pm.PROV["label"]: key,
-                           nipype_ns["in_port"]: key,
-                           nipype_ns["value"]: safe_encode(val)}
-                id = get_id()
-                self.g.entity(id, in_attr)
-                self.g.hadMember(input_collection, id)
+                in_entity = prov_encode(self.g, val).get_identifier()
+                self.g.hadMember(input_collection, in_entity)
+                used_attr = {pm.PROV["label"]: key,
+                             nipype_ns["in_port"]: key}
+                self.g.used(activity=a0, entity=in_entity,
+                            other_attributes=used_attr)
         # write output entities
         if outputs:
             id = get_id()
@@ -164,14 +325,14 @@ class ProvStore(object):
                                                     pm.PROV['label']:
                                                         "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
-            # write input entities
+            # write output entities
             for idx, (key, val) in enumerate(sorted(outputs.items())):
-                out_attr = {pm.PROV["label"]: key,
-                            nipype_ns["out_port"]: key,
-                            nipype_ns["value"]: safe_encode(val)}
-                id = get_id()
-                self.g.entity(id, out_attr)
-                self.g.hadMember(output_collection, id)
+                out_entity = prov_encode(self.g, val).get_identifier()
+                self.g.hadMember(output_collection, out_entity)
+                gen_attr = {pm.PROV["label"]: key,
+                            nipype_ns["out_port"]: key}
+                self.g.generation(out_entity, activity=a0,
+                                  other_attributes=gen_attr)
         # write runtime entities
         id = get_id()
         runtime_collection = self.g.collection(id)
@@ -190,23 +351,22 @@ class ProvStore(object):
             id = get_id()
             self.g.entity(get_id(), attr)
             self.g.hadMember(runtime_collection, id)
+
         # create agents
-        user_agent = self.g.agent(get_id(),
-                             {pm.PROV["type"]: pm.PROV["Person"],
-                              pm.PROV["label"]:
-                                  pwd.getpwuid(os.geteuid()).pw_name,
-                              foaf["name"]:
-                               safe_encode(pwd.getpwuid(os.geteuid()).pw_name)})
+        user_attr = {pm.PROV["type"]: pm.PROV["Person"],
+                     pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
+                     foaf["name"]:
+                         safe_encode(pwd.getpwuid(os.geteuid()).pw_name)}
+        user_agent = self.g.agent(get_attr_id(user_attr), user_attr)
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",
                       foaf["name"]: safe_encode("Nipype")}
         for key, value in get_info().items():
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
-        software_agent = self.g.agent(get_id(), agent_attr)
+        software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["Role"]: nipype_ns["LoggedInUser"]})
-        self.g.wasAssociatedWith(a0, software_agent, None, None,
-                            {pm.PROV["Role"]: nipype_ns["Software"]})
+                            {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
+        self.g.wasAssociatedWith(a0, software_agent)
         return self.g
 
     def write_provenance(self, filename='provenance', format='turtle'):
