@@ -194,11 +194,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(requires=['moving_image_mask'],
-                            exists=True, desc='')
+    fixed_image_mask = File(argstr='%s', exists=True,
+                            desc='mask used to limit registration region')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
-    moving_image_mask = File(argstr='%s', requires=['fixed_image_mask'],
+    moving_image_mask = File(requires=['fixed_image_mask'],
                              exists=True, desc='')
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
@@ -233,7 +233,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         requires=['metric_weight'],
         desc='the number of bins in each stage for the MI and Mattes metric, '
         'the radius for other metrics')
-    sampling_strategy_item_trait = traits.Enum("Dense", "Regular", "Random", None)
+    sampling_strategy_item_trait = traits.Enum("None", "Regular", "Random", None)
     sampling_strategy_stage_trait = traits.Either(
         sampling_strategy_item_trait, traits.List(sampling_strategy_item_trait))
     sampling_strategy = traits.List(
@@ -246,8 +246,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         trait=sampling_percentage_stage_trait, requires=['sampling_strategy'],
         desc="the metric sampling percentage(s) to use for each stage")
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
-    use_histogram_matching = traits.List(
-        traits.Bool(argstr='%s'), default=True, usedefault=True)
+    use_histogram_matching = traits.Either(traits.Bool, traits.List(traits.Bool(argstr='%s')),
+        default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
@@ -280,13 +280,17 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                      traits.Tuple(traits.Float(),  # gdf & syn
                                                                   traits.Float(
                                                                   ),
+                                                                  traits.Float()),
+                                                     traits.Tuple(traits.Float(),  # BSplineSyn
+                                                                  traits.Float(),
+                                                                  traits.Float(),
                                                                   traits.Float())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
     sigma_units = traits.List(traits.Enum('mm', 'vox'),
                               requires=['smoothing_sigmas'],
-                              desc="units for smoothing sigmas", mandatory=True)
+                              desc="units for smoothing sigmas")
     shrink_factors = traits.List(traits.List(traits.Int()), mandatory=True)
     convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
     convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
@@ -386,9 +390,9 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, Dense, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, Dense, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
-    DEF_SAMPLING_STRATEGY = 'Dense'
+    DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling stratey argument."""
 
     _cmd = 'antsRegistration'
@@ -486,17 +490,26 @@ class Registration(ANTSCommand):
             for metric in self._formatMetric(ii):
                 retval.append('--metric %s' % metric)
             retval.append('--convergence %s' % self._formatConvergence(ii))
-            retval.append('--smoothing-sigmas %s%s' % (self._antsJoinList(
-                self.inputs.smoothing_sigmas[ii]),
-                          self.inputs.sigma_units[ii]))
+            if isdefined(self.inputs.sigma_units):
+                retval.append('--smoothing-sigmas %s%s' %
+                        (self._antsJoinList(self.inputs.smoothing_sigmas[ii]),
+                         self.inputs.sigma_units[ii]))
+            else:
+                retval.append('--smoothing-sigmas %s' %
+                    self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
             retval.append('--shrink-factors %s' %
                           self._antsJoinList(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
                 retval.append('--use-estimate-learning-rate-once %d' %
                               self.inputs.use_estimate_learning_rate_once[ii])
             if isdefined(self.inputs.use_histogram_matching):
-                retval.append('--use-histogram-matching %d' %
-                              self.inputs.use_histogram_matching[ii])
+                # use_histogram_matching is either a common flag for all transforms
+                # or a list of transform-specific flags
+                if isinstance(self.inputs.use_histogram_matching, bool):
+                    histval = self.inputs.use_histogram_matching
+                else:
+                    histval = self.inputs.use_histogram_matching[ii]
+                retval.append('--use-histogram-matching %d' % histval)
         return " ".join(retval)
 
     def _antsJoinList(self, antsList):
@@ -549,8 +562,12 @@ class Registration(ANTSCommand):
             return '--collapse-linear-transforms-to-fixed-image-header 0'
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'moving_image_mask':
-            return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask, self.inputs.moving_image_mask)
+        if opt == 'fixed_image_mask':
+            if isdefined(self.inputs.moving_image_mask):
+                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
+                                               self.inputs.moving_image_mask)
+            else:
+                return '--masks %s' % self.inputs.fixed_image_mask
         elif opt == 'transforms':
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
@@ -593,7 +610,6 @@ class Registration(ANTSCommand):
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
         self.lowDimensionalTransformMap = {'Rigid': 'Rigid.mat',
-                                           #seems counterontuitive, but his is how ANTS is calling it
                                            'Affine': 'Affine.mat',
                                            'GenericAffine': 'GenericAffine.mat',
                                            'CompositeAffine': 'Affine.mat',

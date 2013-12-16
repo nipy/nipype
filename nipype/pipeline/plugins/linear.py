@@ -6,7 +6,7 @@ import os
 
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
                    str2bool)
-from ..utils import (nx, dfs_preorder)
+from ..utils import (nx, dfs_preorder, topological_sort)
 
 class LinearPlugin(PluginBase):
     """Execute workflow in series
@@ -28,7 +28,8 @@ class LinearPlugin(PluginBase):
         old_wd = os.getcwd()
         notrun = []
         donotrun = []
-        for node in nx.topological_sort(graph):
+        nodes, _  = topological_sort(graph)
+        for node in nodes:
             try:
                 if node in donotrun:
                     continue

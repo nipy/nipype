@@ -33,15 +33,15 @@ http://mindboggle.info/data.html
 
 specifically the 2mm versions of:
 
-- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz>`_
-- `MNI template <http://mindboggle.info/data/templates/ants/OASIS-TRT-20_template_in_MNI152_2mm.nii.gz>`_
+- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz>`_
+- `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
 
 The 2mm version was generated with::
 
    >>> from nipype import freesurfer as fs
    >>> rs = fs.Resample()
-   >>> rs.inputs.in_file = 'OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152.nii.gz'
-   >>> rs.inputs.resampled_file = 'OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152_2mm.nii.gz'
+   >>> rs.inputs.in_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152.nii.gz'
+   >>> rs.inputs.resampled_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz'
    >>> rs.inputs.voxel_size = (2., 2., 2.)
    >>> rs.inputs.args = '-rt nearest -ns 1'
    >>> res = rs.run()
@@ -53,12 +53,15 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('file')
 
+from nipype import config
+config.enable_provenance()
+
 from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
-from nipype.interfaces.fsl.utils import EPIDeWarp
+from nipype.interfaces.fsl import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces.utility import Merge, IdentityInterface
@@ -584,7 +587,7 @@ def create_workflow(files,
     reg.inputs.use_histogram_matching = [False] * 3 + [True]
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.fixed_image = \
-        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+        os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     reg.inputs.num_threads = 4
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
 
@@ -625,7 +628,7 @@ def create_workflow(files,
     sample2mni.inputs.interpolation = 'BSpline'
     sample2mni.inputs.invert_transform_flags = [False, False]
     sample2mni.inputs.reference_image = \
-        os.path.abspath('OASIS-TRT-20_template_to_MNI152_2mm.nii.gz')
+        os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     sample2mni.inputs.terminal_output = 'file'
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
@@ -641,8 +644,8 @@ def create_workflow(files,
     ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] +\
                             range(49, 55) + [58]
     ts2txt.inputs.label_file = \
-        os.path.abspath(('OASIS-TRT-20_DKT31_CMA_jointfusion_labels_in_MNI152'
-                         '_2mm.nii.gz'))
+        os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
+                         '2mm.nii.gz'))
     wf.connect(sample2mni, 'output_image', ts2txt, 'timeseries_file')
 
     # Save the relevant data into an output directory
@@ -699,7 +702,7 @@ Creates the full workflow including getting information from dicom files
 """
 
 
-def create_resting_workflow(args):
+def create_resting_workflow(args, name='resting'):
     TR = args.TR
     slice_times = args.slice_times
     slice_thickness = None
@@ -722,7 +725,8 @@ def create_resting_workflow(args):
                   slice_thickness=slice_thickness,
                   lowpass_freq=args.lowpass_freq,
                   highpass_freq=args.highpass_freq,
-                  sink_directory=os.path.abspath(args.sink))
+                  sink_directory=os.path.abspath(args.sink),
+                  name=name)
     if args.field_maps:
         kwargs.update(**dict(fieldmap_images=args.field_maps,
                              FM_TEdiff=args.TE_diff,

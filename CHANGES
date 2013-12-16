@@ -2,12 +2,54 @@ Next release
 ============
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
-* ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap
+* ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
+       spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
+* ENH: Added support for Simple Linux Utility Resource Management (SLURM)
+* ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
+* ENH: DataGrabber and SelectFiles use human (or natural) sort now
+
+* ENH: Several new interfaces related to Camino were added:
+        - camino.SFPICOCalibData
+        - camino.Conmat
+        - camino.QBallMX
+        - camino.LinRecon
+        - camino.SFPeaks
+        One outdated interface no longer part of Camino was removed:
+        - camino.Conmap
+
+* FIX: Several fixes related to Camino interfaces:
+        - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
+        - DTLUTGen would silently round the "step", "snr" and "trace" parameters to integers
+        - PicoPDFs would not accept more than one lookup table
+        - PicoPDFs default pdf did not correspond to Camino default
+        - Track input model names were outdated (and would generate an error)
+        - Track numpds parameter could not be set for deterministic tractography
+        - FA created output files with erroneous extension
 
 * FIX: Deals properly with 3d files in SPM Realign
+* FIX: SPM with MCR fixed
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
+* API: SPM now defaults to SPM8 or SPM12b job format
+
+* ENH: New FSL interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP, fsl.Eddy
+* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
+
+* ENH: Added simplified outputname generation for command line interfaces.
+* FIX: Cleaned up input and output spec metadata
+
+* ENH: Allow ants use a single mask image
+* ENH: Create configuration option for parameterizing directories with hashes
+* ENH: arrange nodes by topological sort with disconnected subgraphs
+* ENH: uses the nidm iri namespace for uuids
+* ENH: remove old reporting webpage (this is a WIP i hope to finish in a day or two)
+
+* FIX: example openfmri script now makes the contrast spec a hashed input
+* FIX: FILMGLS compatibility with FSL 5.0.5
+* FIX: Freesurfer recon-all resume now avoids setting inputs
+
+* FIX: File removal from node respects file associations img/hdr/mat, BRIK/HEAD
 
 Release 0.8.0 (May 8, 2013)
 ===========================
@@ -36,7 +78,7 @@ Release 0.7.0 (Dec 18, 2012)
 * ENH: New interfaces: ICC, Meshfix, ants.Register, C3dAffineTool, ants.JacobianDeterminant,
        afni.AutoTcorrelate, DcmStack
 * ENH: New workflows: ants template building (both using 'ANTS' and the new 'antsRegistration')
-* ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate), 
+* ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate),
 	  how to set SGE specific options (smri_ants_build_template_new)
 * ENH: added no_flatten option to Merge
 * ENH: added versioning option and checking to traits
@@ -98,11 +140,11 @@ Release 0.5 (Mar 10, 2012)
 * API: IPython plugin now invokes IPython 0.11 or greater
 * API: Canned workflows are now all under a different package structure
 * API: SpecifyModel event_info renamed to event_files
-* API: DataGrabber is always being rerun (unless overwrite is set to False on 
+* API: DataGrabber is always being rerun (unless overwrite is set to False on
 	   Node level)
-* API: "stop_on_first_rerun" does not stop for DataGrabber (unless overwrite is 
+* API: "stop_on_first_rerun" does not stop for DataGrabber (unless overwrite is
 	   set to True on Node level)
-* API: Output prefix can be set for spm nodes (SliceTiming, Realign, Coregister, 
+* API: Output prefix can be set for spm nodes (SliceTiming, Realign, Coregister,
        Normalize, Smooth)
 
 * ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.
@@ -122,7 +164,7 @@ Release 0.5 (Mar 10, 2012)
 * ENH: IdentityNode with iterable expansion takes place after remaining Identity
        Node removal
 * ENH: Crashfile display script added
-* ENH: Added FmriRealign4d node wrapped from nipy 
+* ENH: Added FmriRealign4d node wrapped from nipy
 * ENH: Added TBSS workflows and examples
 * ENH: Support for openfmri data processing
 * ENH: Package version check
@@ -155,8 +197,8 @@ Release 0.4 (Jun 11, 2011)
 
 * API: Timestamp hashing does not use ctime anymore. Please update your hashes by
        running workflows with updatehash=True option
-       NOTE: THIS IS THE DEFAULT CONFIG NOW, so unless you updatehash, workflows will 
-       rerun 
+       NOTE: THIS IS THE DEFAULT CONFIG NOW, so unless you updatehash, workflows will
+       rerun
 * API: Workflow run function no longer supports (inseries, createdirsonly).
        Functions used in connect string must be pickleable
 * API: SPM EstimateContrast: ignore_derivs replaced by use_derivs
@@ -191,7 +233,7 @@ Release 0.4 (Jun 11, 2011)
     - ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
       DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
 * ENH: added support for networx 1.4 and improved iterable expansion
-* ENH: Replaced BEDPOSTX and EddyCurrent with nipype pipelines 
+* ENH: Replaced BEDPOSTX and EddyCurrent with nipype pipelines
 * ENH: Ability to create a hierarchical dot file
 * ENH: Improved debugging information for rerunning nodes
 * ENH: Added 'stop_on_first_rerun' option
@@ -227,7 +269,7 @@ Release 0.3.4 (Jan 12, 2011)
 * ENH: Added SPM node for calculating various threshold statistics
 * ENH: Added distance and dissimilarity measurements
 
-* BF: Diffusion toolkit gets installed 
+* BF: Diffusion toolkit gets installed
 * BF: Changed FNIRT interface to accept flexible lists (rather than 4-tuples)
       on all options specific to different subsampling levels
 
@@ -235,7 +277,7 @@ Release 0.3.3 (Sep 16, 2010)
 ============================
 
 * API: subject_id in ModelSpec is now deprecated
-* API: spm.Threshold 
+* API: spm.Threshold
   - does not need mask, beta, RPV anymore
   - takes only one image (stat_image - mind the name change)
   - works with SPM2 SPM.mat
@@ -250,7 +292,7 @@ Release 0.3.3 (Sep 16, 2010)
 * BF: Traits logic for 'requires' metadata
 * BF: allows workflows to be relocatable
 * BF: nested workflows with connections don't raise connection not found error
-* BF: multiple workflows with identical nodenames and iterables do not create nestsed workflows  
+* BF: multiple workflows with identical nodenames and iterables do not create nestsed workflows
 
 Release 0.3.2 (Aug 03, 2010)
 ============================

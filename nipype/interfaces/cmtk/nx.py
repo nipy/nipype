@@ -29,7 +29,6 @@ try:
     package_check('cmp')
 except Exception, e:
     have_cmp = False
-    warnings.warn('cmp not installed')
 else:
     import cmp
 

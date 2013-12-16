@@ -55,8 +55,9 @@ class SliceTimingInputSpec(SPMCommandInputSpec):
 
 
 class SliceTimingOutputSpec(TraitedSpec):
-    timecorrected_files = OutputMultiPath(File(exist=True,
-                                             desc='slice time corrected files'))
+    timecorrected_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
+                                                        File(exists=True)),
+                                          desc='slice time corrected files')
 
 
 class SliceTiming(SPMCommand):
@@ -100,15 +101,11 @@ class SliceTiming(SPMCommand):
 
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
-            run = []
             if isinstance(f, list):
-                for inner_f in filename_to_list(f):
-                    run.append(fname_presuffix(inner_f,
-                                               prefix=self.inputs.out_prefix))
+                run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
             else:
-                realigned_run = fname_presuffix(f,
-                                                prefix=self.inputs.out_prefix)
-            outputs['timecorrected_files'].append(realigned_run)
+                run = fname_presuffix(f, prefix=self.inputs.out_prefix)
+            outputs['timecorrected_files'].append(run)
         return outputs
 
 
@@ -136,7 +133,7 @@ class RealignInputSpec(SPMCommandInputSpec):
     wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                         field='eoptions.wrap',
                         desc='Check if interpolation should wrap in [x,y,z]')
-    write_which = traits.ListInt([1, 1], field='roptions.which',
+    write_which = traits.ListInt([2, 1], field='roptions.which',
                               minlen=2, maxlen=2, usedefault=True,
                               desc='determines which images to reslice')
     write_interp = traits.Range(low=0, high=7, field='roptions.interp',
@@ -146,15 +143,24 @@ class RealignInputSpec(SPMCommandInputSpec):
                    desc='Check if interpolation should wrap in [x,y,z]')
     write_mask = traits.Bool(field='roptions.mask',
                              desc='True/False mask output image')
-    out_prefix = traits.String('r', field='prefix', usedefault=True,
+    out_prefix = traits.String('r', field='roptions.prefix', usedefault=True,
                                desc='realigned output prefix')
 
 
 class RealignOutputSpec(TraitedSpec):
     mean_image = File(exists=True, desc='Mean image file from the realignment')
+    modified_in_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
+                                             File(exists=True)),
+                                        desc='Copies of all files passed to in_files.\
+                                              Headers will have been modified to align all\
+                                              images with the first, or optionally to first\
+                                              do that, extract a mean image, and re-align to\
+                                              that mean image.')
     realigned_files = OutputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                     File(exists=True)),
-                                      desc='Realigned files')
+                                      desc='If jobtype is write or estwrite, these will be the\
+                                            resliced files. Otherwise, they will be copies of\
+                                            in_files that have had their headers rewritten.')
     realignment_parameters = OutputMultiPath(File(exists=True),
                     desc='Estimated translation and rotation parameters')
 
@@ -213,6 +219,10 @@ class Realign(SPMCommand):
                                                                      use_ext=False))
             if not isinstance(imgf, list) and func_is_3d(imgf):
                 break
+        if self.inputs.jobtype == "estimate":
+            outputs['realigned_files'] = self.inputs.in_files
+        if self.inputs.jobtype == "estimate" or self.inputs.jobtype == "estwrite":
+            outputs['modified_in_files'] = self.inputs.in_files
         if self.inputs.jobtype == "write" or self.inputs.jobtype == "estwrite":
             if isinstance(self.inputs.in_files[0], list):
                 first_image = self.inputs.in_files[0][0]
@@ -264,13 +274,14 @@ class CoregisterInputSpec(SPMCommandInputSpec):
                 'nmi' - Normalised Mutual Information,
                 'ecc' - Entropy Correlation Coefficient,
                 'ncc' - Normalised Cross Correlation""")
-    fwhm = traits.Float(field='eoptions.fwhm',
-                        desc='gaussian smoothing kernel width (mm)')
+    fwhm = traits.List(traits.Float(), minlen=2, maxlen=2,
+                       field='eoptions.fwhm',
+                       desc='gaussian smoothing kernel width (mm)')
     separation = traits.List(traits.Float(), field='eoptions.sep',
                              desc='sampling separation in mm')
     tolerance = traits.List(traits.Float(), field='eoptions.tol',
                         desc='acceptable tolerance for each of 12 params')
-    write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
+    write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int(), minlen=3, maxlen=3,
                              field='roptions.wrap',
@@ -366,8 +377,11 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     jobtype = traits.Enum('estwrite', 'est', 'write',
                           desc='one of: est, write, estwrite (opt, estwrite)',
                           usedefault=True)
-    apply_to_files = InputMultiPath(File(exists=True), field='subj.resample',
-                               desc='files to apply transformation to (opt)', copyfile=True)
+    apply_to_files = InputMultiPath(traits.Either(File(exists=True),
+                                                  traits.List(File(exists=True))),
+                                    field='subj.resample',
+                                    desc='files to apply transformation to (opt)',
+                                    copyfile=True)
     parameter_file = File(field='subj.matname', mandatory=True,
                           xor=['source', 'template'],
                           desc='normalization parameter file*_sn.mat', copyfile=False)
@@ -396,7 +410,7 @@ class NormalizeInputSpec(SPMCommandInputSpec):
     write_voxel_sizes = traits.List(traits.Float(), field='roptions.vox',
                                     minlen=3, maxlen=3,
                                     desc='3-element list (opt)')
-    write_interp = traits.Range(low=0, hign=7, field='roptions.interp',
+    write_interp = traits.Range(low=0, high=7, field='roptions.interp',
                         desc='degree of b-spline used for interpolation')
     write_wrap = traits.List(traits.Int(), field='roptions.wrap',
                         desc=('Check if interpolation should wrap in [x,y,z] '
@@ -480,9 +494,13 @@ class Normalize(SPMCommand):
         elif 'write' in self.inputs.jobtype:
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
-                for imgf in filename_to_list(self.inputs.apply_to_files):
-                    outputs['normalized_files'].append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
-
+                filelist = filename_to_list(self.inputs.apply_to_files)
+                for f in filelist:
+                    if isinstance(f, list):
+                        run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
+                    else:
+                        run = [fname_presuffix(f, prefix=self.inputs.out_prefix)]
+                    outputs['normalized_files'].extend(run)
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
                 for imgf in filename_to_list(self.inputs.source):

@@ -27,6 +27,7 @@ import tempfile
 from warnings import warn
 
 import sqlite3
+from nipype.utils.misc import human_order_sorted
 
 try:
     import pyxnat
@@ -507,7 +508,7 @@ class DataGrabber(IOBase):
                         warn(msg)
                 else:
                     if self.inputs.sort_filelist:
-                        filelist.sort()
+                        filelist = human_order_sorted(filelist)
                     outputs[key] = list_to_filename(filelist)
             for argnum, arglist in enumerate(args):
                 maxlen = 1
@@ -545,7 +546,7 @@ class DataGrabber(IOBase):
                         outputs[key].append(None)
                     else:
                         if self.inputs.sort_filelist:
-                            outfiles.sort()
+                            outfiles = human_order_sorted(outfiles)
                         outputs[key].append(list_to_filename(outfiles))
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
@@ -688,7 +689,7 @@ class SelectFiles(IOBase):
 
             # Possibly sort the list
             if self.inputs.sort_filelist:
-                filelist.sort()
+                filelist = human_order_sorted(filelist)
 
             # Handle whether this must be a list or not
             if field not in force_lists:
@@ -943,6 +944,7 @@ class FreeSurferSource(IOBase):
     input_spec = FSSourceInputSpec
     output_spec = FSSourceOutputSpec
     _always_run = True
+    _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = ''
@@ -1219,26 +1221,21 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     assessor_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'assessor level will be used with specified id'),
-        mandatory=False,
         xor=['reconstruction_id']
     )
 
     reconstruction_id = traits.Str(
         desc=('Option to customize ouputs representation in XNAT - '
               'reconstruction level will be used with specified id'),
-        mandatory=False,
         xor=['assessor_id']
     )
 
-    share = traits.Bool(
+    share = traits.Bool(False,
         desc=('Option to share the subjects from the original project'
               'instead of creating new ones when possible - the created '
-              'experiments are then shared backk to the original project'
+              'experiments are then shared back to the original project'
               ),
-        value=False,
-        usedefault=True,
-        mandatory=False,
-    )
+        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -1272,20 +1269,16 @@ class XNATSink(IOBase):
 
         # if possible share the subject from the original project
         if self.inputs.share:
+            subject_id = self.inputs.subject_id
             result = xnat.select(
                 'xnat:subjectData',
                 ['xnat:subjectData/PROJECT',
                  'xnat:subjectData/SUBJECT_ID']
-            ).where('xnat:subjectData/SUBJECT_ID = %s AND' %
-                                self.inputs.subject_id
-                    )
-
-            subject_id = self.inputs.subject_id
+            ).where('xnat:subjectData/SUBJECT_ID = %s AND' % subject_id)
 
             # subject containing raw data exists on the server
-            if isinstance(result.data[0], dict):
+            if (result.data and isinstance(result.data[0], dict)):
                 result = result.data[0]
-
                 shared = xnat.select('/project/%s/subject/%s' %
                                      (self.inputs.project_id,
                                       self.inputs.subject_id
@@ -1306,42 +1299,19 @@ class XNATSink(IOBase):
 
                     subject.share(str(self.inputs.project_id))
 
-        else:
-            # subject containing raw data does not exist on the server
-            subject_id = '%s_%s' % (
-                quote_id(self.inputs.project_id),
-                quote_id(self.inputs.subject_id)
-            )
-
         # setup XNAT resource
-        uri_template_args = {
-            'project_id': quote_id(self.inputs.project_id),
-            'subject_id': subject_id,
-            'experiment_id': '%s_%s_%s' % (
-                quote_id(self.inputs.project_id),
-                quote_id(self.inputs.subject_id),
-                quote_id(self.inputs.experiment_id)
-            )
-        }
+        uri_template_args = dict(
+            project_id=quote_id(self.inputs.project_id),
+            subject_id=self.inputs.subject_id,
+            experiment_id=quote_id(self.inputs.experiment_id))
 
         if self.inputs.share:
             uri_template_args['original_project'] = result['project']
 
         if self.inputs.assessor_id:
-            uri_template_args['assessor_id'] = (
-                '%s_%s' % (
-                    uri_template_args['experiment_id'],
-                    quote_id(self.inputs.assessor_id)
-                )
-            )
-
+            uri_template_args['assessor_id'] = quote_id(self.inputs.assessor_id)
         elif self.inputs.reconstruction_id:
-            uri_template_args['reconstruction_id'] = (
-                '%s_%s' % (
-                    uri_template_args['experiment_id'],
-                    quote_id(self.inputs.reconstruction_id)
-                )
-            )
+            uri_template_args['reconstruction_id'] = quote_id(self.inputs.reconstruction_id)
 
         # gather outputs and upload them
         for key, files in self.inputs._outputs.items():

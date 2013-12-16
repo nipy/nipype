@@ -9,7 +9,7 @@ available plugins allow local and distributed execution of workflows and
 debugging. Each available plugin is described below.
 
 Current plugins are available for Linear, Multiprocessing, IPython_ distributed
-processing platforms and for direct processing on SGE_, PBS_, HTCondor_, and LSF_. We
+processing platforms and for direct processing on SGE_, PBS_, HTCondor_, LSF_, and SLURM_. We
 anticipate future plugins for the Soma_ workflow.
 
 .. note::
@@ -270,3 +270,5 @@ Optional arguments::
 .. _DAGMan: http://research.cs.wisc.edu/htcondor/dagman/dagman.html
 .. _HTCondor documentation: http://research.cs.wisc.edu/htcondor/manual
 .. _DMTCP: http://dmtcp.sourceforge.net
+.. _SLURM: http://slurm.schedmd.com/
+

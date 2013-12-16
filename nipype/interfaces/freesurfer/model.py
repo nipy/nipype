@@ -154,9 +154,9 @@ class GLMFitInputSpec(FSTraitedSpec):
                              xor=['weighted_ls'])
     weight_sqrt = traits.Bool(argstr='--w-sqrt', desc='sqrt of weights',
                               xor=['weighted_ls'])
-    fwhm = traits.Float(min=0, argstr='--fwhm %f',
+    fwhm = traits.Range(low=0.0, argstr='--fwhm %f',
                         desc='smooth input by fwhm')
-    var_fwhm = traits.Float(min=0, argstr='--var-fwhm %f',
+    var_fwhm = traits.Range(low=0.0, argstr='--var-fwhm %f',
                             desc='smooth variance by fwhm')
     no_mask_smooth = traits.Bool(argstr='--no-mask-smooth',
                                  desc='do not mask when smoothing')
@@ -713,7 +713,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     proj = traits.Tuple(traits.Enum('abs', 'frac'), traits.Float,
                         traits.Float, traits.Float,
                         argstr='--proj %s %f %f %f',
-                        requries=('subject_id', 'hemi'),
+                        requires=('subject_id', 'hemi'),
                         desc='project along surface normal')
     subject_id = traits.Str(argstr='--subject %s',
                            desc='subject id')

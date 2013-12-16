@@ -16,10 +16,11 @@ from ...utils.misc import package_check
 from ...utils.filemanip import split_filename, fname_presuffix
 
 
+have_nipy = True
 try:
     package_check('nipy')
 except Exception, e:
-    warnings.warn('nipy not installed')
+    have_nipy = False
 else:
     import nipy
     from nipy import save_image, load_image
@@ -77,7 +78,7 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(exists=True,
+    in_file = InputMultiPath(File(exists=True),
                              mandatory=True,
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds",
@@ -198,7 +199,7 @@ class FmriRealign4d(BaseInterface):
 
 class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(exists=True,
+    in_file = InputMultiPath(File(exists=True),
                              mandatory=True, min_ver='0.4.0.dev',
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds", requires=['slice_times'])

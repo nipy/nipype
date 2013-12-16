@@ -127,6 +127,8 @@ SciPy_ 0.7 - 0.12
 
 Enthought_ Traits_ 4.0.0 - 4.3.0
 
+Dateutil 1.5 -
+
 .. note::
 
     Full distributions such as pythonxy_ or EPD_ provide the above packages,

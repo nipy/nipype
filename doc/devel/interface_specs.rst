@@ -1,10 +1,18 @@
+.. _interface_specs:
+
 ========================
 Interface Specifications
 ========================
 
 Before you start
 ----------------
-Nipype is a young project maintained by an enthusiastic group of developers. Even though the documentation might be sparse or cryptic at times we strongly encourage you to contact us on the official nipype developers mailing list in case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a mailing list with the nipy community therefore please add ``[nipype]`` to the messsage title).
+
+Nipype is a young project maintained by an enthusiastic group of developers.
+Even though the documentation might be sparse or cryptic at times we strongly
+encourage you to contact us on the official nipype developers mailing list in
+case of any troubles: nipy-devel@neuroimaging.scipy.org (we are sharing a
+mailing list with the nipy community therefore please add ``[nipype]`` to the
+messsage title).
 
 
 Overview
@@ -195,7 +203,10 @@ Common
 	    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
 	    
 ``hash_files``
-	To be used with inputs that are defining output filenames. When this flag is set to false any Nipype will not try to hash any files described by this input. This is useful to avoid rerunning when the specified output file already exists and has changed.
+	To be used with inputs that are defining output filenames. When this flag
+	is set to false any Nipype will not try to hash any files described by this
+	input. This is useful to avoid rerunning when the specified output file
+	already exists and has changed.
 	    
 ``desc``
 	All trait objects have a set of default metadata attributes.  ``desc``
@@ -343,7 +354,19 @@ CommandLine
 	
 ``sep``
 	For List traits the string with witch elements of the list will be joined.
-	
+
+``name_source``
+    Indicates the list of input fields from which the value of the current File
+    output variable will be drawn. This input field must be the name of a File.
+
+``name_template``
+    By default a ``%s_generated`` template is used to create the output
+    filename. This metadata keyword allows overriding the generated name.
+
+``keep_extension``
+     Use this and set it ``True`` if you want the extension from the input to be
+     kept.
+
 SPM
 ^^^
 
@@ -385,32 +408,36 @@ And optionally:
 
 For example this is the class definition for Flirt, minus the docstring::
 
-    class Flirt(NEW_FSLCommand):
+    class FLIRTInputSpec(FSLCommandInputSpec):
+        in_file = File(exists=True, argstr='-in %s', mandatory=True,
+                       position=0, desc='input file')
+        reference = File(exists=True, argstr='-ref %s', mandatory=True,
+                         position=1, desc='reference file')
+        out_file = File(argstr='-out %s', desc='registered output file',
+                        name_source=['in_file'], name_template='%s_flirt',
+                        position=2, hash_files=False)
+        out_matrix_file = File(argstr='-omat %s',
+                               name_source=['in_file'], keep_extension=True,
+                               name_template='%s_flirt.mat',
+                               desc='output affine matrix in 4x4 asciii format',
+                               position=3, hash_files=False)
+        out_log = File(name_source=['in_file'], keep_extension=True,
+                       requires=['save_log'],
+                       name_template='%s_flirt.log', desc='output log')
+        ...
+
+    class FLIRTOutputSpec(TraitedSpec):
+        out_file = File(exists=True,
+                        desc='path/name of registered file (if generated)')
+        out_matrix_file = File(exists=True,
+                               desc='path/name of calculated affine transform '
+                               '(if generated)')
+        out_log = File(desc='path/name of output log (if generated)')
+
+    class Flirt(FSLCommand):
         _cmd = 'flirt'
         input_spec = FlirtInputSpec
         output_spec = FlirtOutputSpec
-
-        def _list_outputs(self):
-            outputs = self.output_spec().get()
-            outputs['outfile'] = self.inputs.outfile
-            # Generate an outfile if one is not provided
-            if not isdefined(outputs['outfile']) and isdefined(self.inputs.infile):
-                outputs['outfile'] = self._gen_fname(self.inputs.infile,
-                                                     suffix = '_flirt')
-            outputs['outmatrix'] = self.inputs.outmatrix
-            # Generate an outmatrix file if one is not provided
-            if not isdefined(outputs['outmatrix']) and \
-                    isdefined(self.inputs.infile):
-                outputs['outmatrix'] = self._gen_fname(self.inputs.infile,
-                                                       suffix = '_flirt.mat',
-                                                       change_ext = False)
-            return outputs
-
-        def _gen_filename(self, name):
-            if name in ('outfile', 'outmatrix'):
-                return self._list_outputs()[name]
-            else:
-                return None
 
 There are two possible output files ``outfile`` and ``outmatrix``,
 both of which can be generated if not specified by the user.

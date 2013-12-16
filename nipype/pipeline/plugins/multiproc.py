@@ -77,7 +77,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self._taskid += 1
         try:
             if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'file'
+                node.inputs.terminal_output = 'allatonce'
         except:
             pass
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,

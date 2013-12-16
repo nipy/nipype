@@ -79,10 +79,13 @@ def test_datagrabber_order():
     file2 = mkstemp(prefix='sub002_L1_R2.q', dir=tempdir)
     file3 = mkstemp(prefix='sub002_L2_R1.q', dir=tempdir)
     file4 = mkstemp(prefix='sub002_L2_R2.q', dir=tempdir)
+    file5 = mkstemp(prefix='sub002_L3_R10.q', dir=tempdir)
+    file6 = mkstemp(prefix='sub002_L3_R2.q', dir=tempdir)
     dg = nio.DataGrabber(infields=['sid'])
     dg.inputs.base_directory = tempdir
-    dg.inputs.template = '%s_L%d_R?.q*'
-    dg.inputs.template_args = {'outfiles': [['sid', 1], ['sid', 2]]}
+    dg.inputs.template = '%s_L%d_R*.q*'
+    dg.inputs.template_args = {'outfiles': [['sid', 1], ['sid', 2],
+                                            ['sid', 3]]}
     dg.inputs.sid = 'sub002'
     dg.inputs.sort_filelist = True
     res = dg.run()
@@ -91,6 +94,8 @@ def test_datagrabber_order():
     yield assert_true, 'sub002_L1_R2' in outfiles[0][1]
     yield assert_true, 'sub002_L2_R1' in outfiles[1][0]
     yield assert_true, 'sub002_L2_R2' in outfiles[1][1]
+    yield assert_true, 'sub002_L3_R2' in outfiles[2][0]
+    yield assert_true, 'sub002_L3_R10' in outfiles[2][1]
     shutil.rmtree(tempdir)
 
 def test_datasink():

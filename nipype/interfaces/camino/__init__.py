@@ -3,10 +3,12 @@
 """Camino top level namespace
 """
 
-from .connectivity import Conmap
+from .connectivity import Conmat
 from .convert import (Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines,
                       TractShredder, DT2NIfTI, NIfTIDT2Camino, AnalyzeHeader)
 from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
                   TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap,
                   ComputeFractionalAnisotropy, ComputeMeanDiffusivity,
-                  ComputeTensorTrace,  ComputeEigensystem)
+                  ComputeTensorTrace,  ComputeEigensystem, DTMetric)
+from .calib import (SFPICOCalibData, SFLUTGen)
+from .odf import (QBallMX, LinRecon, SFPeaks)

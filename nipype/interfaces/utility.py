@@ -46,10 +46,18 @@ class IdentityInterface(IOBase):
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
-            raise Exception('Identity Interface fields must be a non-empty list')
+            raise ValueError('Identity Interface fields must be a non-empty list')
+        # Each input must be in the fields.
+        for in_field in inputs:
+            if in_field not in fields:
+                raise ValueError('Identity Interface input is not in the fields: %s' % in_field)
         self._fields = fields
         self._mandatory_inputs = mandatory_inputs
         add_traits(self.inputs, fields)
+        # Adding any traits wipes out all input values set in superclass initialization,
+        # even it the trait is not in the add_traits argument. The work-around is to reset
+        # the values after adding the traits.
+        self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -135,10 +143,15 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
-    keep_ext = traits.Bool(desc="Keep in_file extension, replace non-extension component of name")
+    keep_ext = traits.Bool(desc=("Keep in_file extension, replace "
+                                 "non-extension component of name"))
     format_string = traits.String(mandatory=True,
-                                  desc="Python formatting string for output template")
-    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
+                                  desc=("Python formatting string for output "
+                                        "template"))
+    parse_string = traits.String(desc=("Python regexp parse string to define "
+                                       "replacement inputs"))
+    use_fullpath = traits.Bool(False, usedefault=True,
+                               desc="Use full path as input to regex parser")
 
 
 class RenameOutputSpec(TraitedSpec):
@@ -202,7 +215,12 @@ class Rename(IOBase):
     def _rename(self):
         fmt_dict = dict()
         if isdefined(self.inputs.parse_string):
-            m = re.search(self.inputs.parse_string, os.path.split(self.inputs.in_file)[1])
+            if isdefined(self.inputs.use_fullpath) and self.inputs.use_fullpath:
+                m = re.search(self.inputs.parse_string,
+                              self.inputs.in_file)
+            else:
+                m = re.search(self.inputs.parse_string,
+                              os.path.split(self.inputs.in_file)[1])
             if m:
                 fmt_dict.update(m.groupdict())
         for field in self.fmt_fields:
@@ -210,14 +228,16 @@ class Rename(IOBase):
             if isdefined(val):
                 fmt_dict[field] = getattr(self.inputs, field)
         if self.inputs.keep_ext:
-            fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
+            fmt_string = "".join([self.inputs.format_string,
+                                  split_filename(self.inputs.in_file)[2]])
         else:
             fmt_string = self.inputs.format_string
         return fmt_string % fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
-        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
+        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(),
+                                                       self._rename()))
         return runtime
 
     def _list_outputs(self):
