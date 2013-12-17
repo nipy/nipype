@@ -158,7 +158,7 @@ class AFNICommand(CommandLine):
         out_names = self.inputs.traits(**metadata).keys()
         if out_names:
             for name in out_names:
-                if outputs[name]:
+                if outputs.has_key(name) and outputs[name]:
                     _,_,ext = split_filename(outputs[name])
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
