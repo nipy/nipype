@@ -1402,16 +1402,16 @@ class ROIStatsInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(desc='execute quietly',
                         argstr='-quiet',
                         position=1)
-    
-    terminal_output = traits.Enum('allatonce', 
-                                  desc=('Control terminal output:' 
+
+    terminal_output = traits.Enum('allatonce',
+                                  desc=('Control terminal output:'
                                         '`allatonce` - waits till command is '
                                         'finished to display output'),
                                   nohash=True, mandatory=True, usedefault=True)
 
 
 class ROIStatsOutputSpec(TraitedSpec):
-    stats =  OutputMultiPath(traits.Float(), desc='output', exists=True)
+    stats =  File(desc='output tab separated values file', exists=True)
 
 
 class ROIStats(CommandLine):
@@ -1436,15 +1436,13 @@ class ROIStats(CommandLine):
     output_spec = ROIStatsOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
-        stats = []
-        for line in runtime.stdout.split('\n'):
-            if line and not line.startswith("File"):
-                values = line.split()
-                stats += [float(val) for val in values[2:]]
-                
-        outputs.stats = stats
+        output_filename = "roi_stats.csv"
+        f = open(output_filename, "w")
+        f.write(runtime.stdout)
+        f.close()
+
+        outputs.stats = os.path.abspath(output_filename)
         return outputs
 
 
