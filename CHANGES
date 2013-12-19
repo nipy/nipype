@@ -3,7 +3,7 @@ Next release
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
-       spm.DicomImport, P2PDistance
+       afni.TCorr1D, spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
 * ENH: Added support for Simple Linux Utility Resource Management (SLURM)
 * ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
