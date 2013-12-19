@@ -1324,7 +1324,6 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
                    name_template='%s_correlation.nii.gz',
                    argstr = '-prefix %s',
                    name_source = 'xset',
-                   genfile = True,
                    keep_extension = True)
     pearson = traits.Bool(desc='Correlation is the normal' +
                    ' Pearson correlation coefficient',
@@ -1359,6 +1358,14 @@ class TCorr1D(AFNICommand):
     in the input 3D+time dataset.
     For complete details, see the `3dTcorr1D Documentation.
     <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+
+    >>> from nipype.interfaces import afni as afni
+    >>> tcorr1D = afni.TCorr1D()
+    >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
+    >>> tcorr1D.inputs.y_1d = 'seed.1D'
+    >>> tcorr1D.cmdline
+    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
+    >>> res = tcorr1D.run() # doctest: +SKIP
     """
 
     _cmd = '3dTcorr1D'
