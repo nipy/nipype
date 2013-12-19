@@ -8,7 +8,6 @@ Next release
 * ENH: Added support for Simple Linux Utility Resource Management (SLURM)
 * ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
 * ENH: DataGrabber and SelectFiles use human (or natural) sort now
-
 * ENH: Several new interfaces related to Camino were added:
         - camino.SFPICOCalibData
         - camino.Conmat
@@ -17,6 +16,10 @@ Next release
         - camino.SFPeaks
         One outdated interface no longer part of Camino was removed:
         - camino.Conmap
+* ENH: Three new mrtrix interfaces were added:
+        - mrtrix.GenerateDirections
+        - mrtrix.FindShPeaks
+        - mrtrix.Directions2Amplitude
 
 * FIX: Several fixes related to Camino interfaces:
         - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
