@@ -1197,7 +1197,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                desc='apply Fourier (sinusoidal) fitting of order N')
     pava = traits.Bool(argstr='--pava',
                        desc='apply monotonic enforcement via PAVA')
-    despike_theshold = traits.Float(argstr='--despikethreshold=%s',
+    despike_threshold = traits.Float(argstr='--despikethreshold=%s',
                                     desc='specify the threshold for de-spiking (default=3.0)')
     unwarp_direction = traits.Enum('x', 'y', 'z', 'x-', 'y-', 'z-',
                                    argstr='--unwarpdir=%s',
@@ -1287,13 +1287,13 @@ class FUGUE(FSLCommand):
                 self.inputs.shift_out_file = self._gen_fname(
                     self.inputs.in_file, suffix='_vsm')
 
-        if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['unwarped_file']
+        if not isdefined(self.inputs.in_file):
+            skip += ['unwarped_file', 'warped_file']
+        elif self.inputs.forward_warping:
             if not isdefined(self.inputs.warped_file):
                 self.inputs.warped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_warped')
-        if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['warped_file']
+        elif not self.inputs.forward_warping:
             if not isdefined(self.inputs.unwarped_file):
                 self.inputs.unwarped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_unwarped')
