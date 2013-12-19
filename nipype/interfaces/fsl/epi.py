@@ -169,7 +169,9 @@ class TOPUP( FSLCommand ):
             skip = []
 
         if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipypetu' )
+            self.inputs.out_base = './nipypetu'
+
+        self.inputs.out_base = os.path.abspath(self.inputs.out_base)
 
         if isdefined( self.inputs.encoding_file ):
             skip.append( 'encoding_direction' )
@@ -238,8 +240,8 @@ class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
     in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='--topup=%s' )
 
     out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
-    method = traits.Enum( ('jac','lsr'), argstr='-m=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
-    interp = traits.Enum( ('trilinear','spline'), argstr='-n=%s', desc='interpolation method' )
+    method = traits.Enum( ('jac','lsr'), argstr='--method=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
+    interp = traits.Enum( ('trilinear','spline'), argstr='--interp=%s', desc='interpolation method' )
     datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d=%s', desc='force output data type' )
 
 
@@ -289,7 +291,9 @@ class ApplyTOPUP( FSLCommand ):
             skip = []
 
         if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipypeatu' )
+            self.inputs.out_base = './nipypeatu'
+
+        self.inputs.out_base = os.path.abspath(self.inputs.out_base)
         return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
 
 
