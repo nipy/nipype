@@ -27,7 +27,7 @@ echo "export PATH=$HOME/anaconda/bin:\\$PATH" >> .bashrc
 
 # install nipype dependencies
 $HOME/anaconda/bin/conda install --yes pip numpy scipy nose traits networkx
-$HOME/anaconda/bin/conda install --yes dateutil ipython-notebook
+$HOME/anaconda/bin/conda install --yes dateutil ipython-notebook matplotlib
 $HOME/anaconda/bin/pip install nibabel --use-mirrors
 $HOME/anaconda/bin/pip install https://github.com/RDFLib/rdflib/archive/master.zip
 $HOME/anaconda/bin/pip install https://github.com/satra/prov/archive/enh/rdf.zip
