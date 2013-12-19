@@ -159,7 +159,7 @@ class StreamlineTrack(CommandLine):
 
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_tracked'
+        return name + '_tracked.tck'
 
 class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
