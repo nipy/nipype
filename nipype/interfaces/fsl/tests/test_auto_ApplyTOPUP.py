@@ -12,7 +12,7 @@ def test_ApplyTOPUP_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    interp=dict(argstr='-n=%s',
+    interp=dict(argstr='--interp=%s',
     ),
     in_files=dict(mandatory=True,
     argstr='%s',
@@ -32,7 +32,7 @@ def test_ApplyTOPUP_inputs():
     out_base=dict(argstr='--out=%s',
     ),
     output_type=dict(),
-    method=dict(argstr='-m=%s',
+    method=dict(argstr='--method=%s',
     ),
     )
     inputs = ApplyTOPUP.input_spec()
