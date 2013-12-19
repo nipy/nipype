@@ -13,15 +13,16 @@ def test_ROIStats_inputs():
     quiet=dict(position=1,
     argstr='-quiet',
     ),
-    terminal_output=dict(nohash=True,
-    mandatory=True,
+    terminal_output=dict(mandatory=True,
+    nohash=True,
+    usedefault=True,
     ),
     environ=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(position=-1,
-    argstr='%s',
     mandatory=True,
+    argstr='%s',
     ),
     mask_f2short=dict(position=2,
     argstr='-mask_f2short',
@@ -33,8 +34,7 @@ def test_ROIStats_inputs():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 def test_ROIStats_outputs():
-    output_map = dict(stats=dict(exists=True,
-    ),
+    output_map = dict(stats=dict(),
     )
     outputs = ROIStats.output_spec()
 
