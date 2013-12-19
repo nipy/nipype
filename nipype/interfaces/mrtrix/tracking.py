@@ -23,7 +23,7 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
         desc='Three comma-separated numbers giving the size of each voxel in mm.')
     colour = traits.Bool(argstr='-colour', position=3, desc="add colour to the output image according to the direction of the tracks.")
     fraction = traits.Bool(argstr='-fraction', position=3, desc="produce an image of the fraction of fibres through each voxel (as a proportion of the total number in the file), rather than the count.")
-    output_datatype = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-datatype %s', position=2,
+    output_datatype = traits.Enum("Bit","Int8", "UInt8","Int16", "UInt16","Int32", "UInt32", "float32", "float64", argstr='-datatype %s', position=2,
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
     resample = traits.Float(argstr='-resample %d', position=3,
         units='mm', desc='resample the tracks at regular intervals using Hermite interpolation. If omitted, the program will select an appropriate interpolation factor automatically.')
