@@ -382,6 +382,55 @@ class SurfaceTransform(FSCommand):
             return self._list_outputs()[name]
         return None
 
+class Surface2VolTransformInputSpec(FSTraitedSpec):
+    source_file = File(exists=True, argstr='--surfval %s',
+                      copyfile=False, mandatory=True,
+                      desc='This is the source of the surface values')
+    hemi = traits.Str(argstr='--hemi %s', mandatory=True, desc='hemisphere of data')
+    transformed_file = File(name_template="%s_asVol.nii", desc='Output volume', argstr='--outvol %s',
+                            name_source=['source_file'], hash_files=False)
+    reg_file = File(exists=True, argstr='--volreg %s',
+                    mandatory=True,
+                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)',
+                    xor=['subject_id'])
+    template_file = File(exists=True, argstr='--template %s',
+                      desc='Output template volume')
+    mkmask = traits.Bool(desc='make a mask instead of loading surface values', argstr='--mkmask')
+    vertexvol_file = File(name_template="%s_asVol_vertex.nii", desc='Path name of the vertex output '
+                          'volume, which is the same as output volume except that the value of each '
+                          'voxel is the vertex-id that is mapped to that voxel.',
+                          argstr='--vtxvol %s', name_source=['source_file'], hash_files=False)
+    surf_name = traits.Str(exists=True, argstr='--surf %s',desc='surfname (default is white)')
+    projfrac = traits.Float(exists=True, argstr='--projfrac %s',desc='thickness fraction')
+    subjects_dir = traits.Str(argstr='--sd %s',desc='freesurfer subjects directory defaults to $SUBJECTS_DIR')
+    subject_id = traits.Str(argstr='--identity %s',desc='subject id', xor=['reg_file'])
+
+class Surface2VolTransformOutputSpec(TraitedSpec):
+    transformed_file = File(exists=True, desc='Path to output file if used normally')
+    vertexvol_file = File(desc='vertex map volume path id. Optional')
+
+class Surface2VolTransform(FSCommand):
+    """Use FreeSurfer mri_surf2vol to apply a transform.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import Surface2VolTransform
+    >>> xfm2vol = Surface2VolTransform()
+    >>> xfm2vol.inputs.source_file = 'lh.cope1.mgz'
+    >>> xfm2vol.inputs.reg_file = 'register.mat'
+    >>> xfm2vol.inputs.hemi = 'lh'
+    >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
+    >>> xfm2vol.inputs.subjects_dir = '.'
+    >>> xfm2vol.cmdline
+    'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
+    >>> res = xfm2vol.run()# doctest: +SKIP
+
+    """
+
+    _cmd = 'mri_surf2vol'
+    input_spec = Surface2VolTransformInputSpec
+    output_spec = Surface2VolTransformOutputSpec
 
 class ApplyMaskInputSpec(FSTraitedSpec):
 
