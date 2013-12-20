@@ -52,7 +52,7 @@ def test_GLM_inputs():
     out_file=dict(name_source='in_file',
     keep_extension=True,
     position=3,
-    name_template='%s_glm.txt',
+    name_template='%s_glm',
     argstr='-o %s',
     ),
     dat_norm=dict(argstr='--dat_norm',

@@ -1799,9 +1799,9 @@ class GLM(FSLCommand):
     Example
     -------
     >>> import nipype.interfaces.fsl as fsl
-    >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii')
+    >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii', output_type='NIFTI')
     >>> glm.cmdline
-    'fsl_glm -i functional.nii -d maps.nii -o functional_glm.txt'
+    'fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii'
 
     """
     _cmd = 'fsl_glm'
