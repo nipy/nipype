@@ -781,12 +781,6 @@ class MS_LDAInputSpec(FSTraitedSpec):
                              desc='pair of class labels to optimize')
     weight_file = traits.File(argstr='-weight %s', mandatory=True,
                         desc='filename for the LDA weights (input or output)')
-    output_synth = traits.File(exists=False, argstr='-synth %s',
-                               mandatory=True,
-                               desc='filename for the synthesized output volume',
-                               deprecated='0.8',
-                               new_name='vol_synth_file',
-                               xor=['vol_synth_file', 'output_synth'])
     vol_synth_file = traits.File(exists=False, argstr='-synth %s',
                                mandatory=True,
                                desc='filename for the synthesized output volume',
