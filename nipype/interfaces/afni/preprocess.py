@@ -140,7 +140,7 @@ class TShift(AFNICommand):
     >>> tshift.inputs.tpattern = 'alt+z'
     >>> tshift.inputs.tzero = 0.0
     >>> tshift.cmdline #doctest:
-    '3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
+    '3dTshift -prefix ./functional_tshift -tpattern alt+z -tzero 0.0 functional.nii'
     >>> res = tshift.run()   # doctest: +SKIP
 
     """
@@ -303,7 +303,7 @@ class Resample(AFNICommand):
     >>> resample.inputs.orientation= 'RPI'
     >>> resample.inputs.outputtype = "NIFTI"
     >>> resample.cmdline
-    '3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii'
+    '3dresample -orient RPI -prefix ./functional_resample.nii -inset functional.nii'
     >>> res = resample.run() # doctest: +SKIP
 
     """
@@ -438,7 +438,7 @@ class Detrend(AFNICommand):
     >>> detrend.inputs.args = '-polort 2'
     >>> detrend.inputs.outputtype = "AFNI"
     >>> detrend.cmdline
-    '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
+    '3dDetrend -polort 2 -prefix ./functional_detrend functional.nii'
     >>> res = detrend.run() # doctest: +SKIP
 
     """
@@ -472,7 +472,7 @@ class Despike(AFNICommand):
     >>> despike = afni.Despike()
     >>> despike.inputs.in_file = 'functional.nii'
     >>> despike.cmdline
-    '3dDespike -prefix functional_despike functional.nii'
+    '3dDespike -prefix ./functional_despike functional.nii'
     >>> res = despike.run() # doctest: +SKIP
 
     """
@@ -531,7 +531,7 @@ class Automask(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
+    '3dAutomask -apply_prefix ./functional_masked.nii -dilate 1 -prefix ./functional_mask.nii functional.nii'
     >>> res = automask.run() # doctest: +SKIP
 
     """
@@ -596,7 +596,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix ./functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1634,7 +1634,7 @@ class BlurInMask(AFNICommand):
     >>> bim.inputs.mask = 'mask.nii'
     >>> bim.inputs.fwhm = 5.0
     >>> bim.cmdline #doctest: +ELLIPSIS
-    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur'
+    '3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix ./functional_blur'
     >>> res = bim.run()   # doctest: +SKIP
 
     """
