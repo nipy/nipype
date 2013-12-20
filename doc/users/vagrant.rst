@@ -4,6 +4,11 @@
 Running Nipype in a VM
 ======================
 
+.. tip::
+
+   Creating the Vagrant VM as described below requires an active internet
+   connection.
+
 Container technologies (Vagrant_, Docker_) allow creating and manipulating
 lighter weight virtual environments. The Nipype_ source now contains a
 Vagrantfile to launch a Vagrant_ VM.
@@ -36,7 +41,8 @@ Now you can install your favorite software using::
   sudo apt-get install fsl afni
 
 Also note that the directory in which you call `vagrant up` will be mounted
-under `/vagrant` inside the virtual machine.
+under `/vagrant` inside the virtual machine. You can also copy the Vagrantfile
+to a different location in order to mount a different directory.
 
 Please read through Vagrant_ documentation on other features. The python
 environment is built using a `miniconda <http://repo.continuum.io/miniconda/>`_
