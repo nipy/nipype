@@ -16,7 +16,6 @@ def test_MS_LDA_inputs():
     ),
     vol_synth_file=dict(mandatory=True,
     argstr='-synth %s',
-    xor=['vol_synth_file', 'output_synth'],
     ),
     shift=dict(argstr='-shift %d',
     ),
