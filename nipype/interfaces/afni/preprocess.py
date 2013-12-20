@@ -1308,6 +1308,70 @@ class TCorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
+class TCorr1DInputSpec(AFNICommandInputSpec):
+    xset = File(desc = '3d+time dataset input',
+                  argstr = ' %s',
+                  position = -2,
+                  mandatory = True,
+                  exists = True)
+    y_1d = File(desc = '1D time series file input',
+                   argstr = ' %s',
+                   position = -1,
+                   mandatory = True,
+                   exists = True)
+    out_file = File(desc = 'output filename prefix',
+                   name_template='%s_correlation.nii.gz',
+                   argstr = '-prefix %s',
+                   name_source = 'xset',
+                   keep_extension = True)
+    pearson = traits.Bool(desc='Correlation is the normal' +
+                   ' Pearson correlation coefficient',
+                   argstr=' -pearson',
+                   xor=['spearman','quadrant','ktaub'],
+                   position=1)
+    spearman = traits.Bool(desc='Correlation is the' +
+                   ' Spearman (rank) correlation coefficient',
+                   argstr=' -spearman',
+                   xor=['pearson','quadrant','ktaub'],
+                   position=1)
+    quadrant = traits.Bool(desc='Correlation is the' +
+                   ' quadrant correlation coefficient',
+                   argstr=' -quadrant',
+                   xor=['pearson','spearman','ktaub'],
+                   position=1)
+    ktaub = traits.Bool(desc='Correlation is the' +
+                   ' Kendall\'s tau_b correlation coefficient',
+                   argstr=' -ktaub',
+                   xor=['pearson','spearman','quadrant'],
+                   position=1)
+
+
+
+class TCorr1DOutputSpec(TraitedSpec):
+    out_file = File(desc = 'output file containing correlations',
+                    exists = True)
+
+
+class TCorr1D(AFNICommand):
+    """Computes the correlation coefficient between each voxel time series
+    in the input 3D+time dataset.
+    For complete details, see the `3dTcorr1D Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html>`_
+
+    >>> from nipype.interfaces import afni as afni
+    >>> tcorr1D = afni.TCorr1D()
+    >>> tcorr1D.inputs.xset= 'u_rc1s1_Template.nii'
+    >>> tcorr1D.inputs.y_1d = 'seed.1D'
+    >>> tcorr1D.cmdline
+    '3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D'
+    >>> res = tcorr1D.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dTcorr1D'
+    input_spec = TCorr1DInputSpec
+    output_spec = TCorr1DOutputSpec
+
+
 class BrickStatInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dmaskave',
                    argstr='%s',
@@ -1860,4 +1924,5 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+
 
