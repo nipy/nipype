@@ -45,16 +45,11 @@ manager.
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on Mac OS X is to install EPD_ and then add
-nibabel and nipype by executing::
+The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
+Canopy_ and then add nibabel and nipype by executing::
 
 	easy_install nibabel
 	easy_install nipype
-
-If you are running a 64 bit version of EPD, you will need to compile
-ETS. Instructions for a 64-bit boot mode are available:
-https://gist.github.com/845545
-
 
 From source
 ~~~~~~~~~~~
@@ -131,7 +126,7 @@ Dateutil 1.5 -
 
 .. note::
 
-    Full distributions such as pythonxy_ or EPD_ provide the above packages,
+    Full distributions such as Anaconda_ or Canopy_ provide the above packages,
     except Nibabel_.
 
 Strong Recommendations

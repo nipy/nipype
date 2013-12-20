@@ -39,6 +39,7 @@ Next release
 * ENH: arrange nodes by topological sort with disconnected subgraphs
 * ENH: uses the nidm iri namespace for uuids
 * ENH: remove old reporting webpage
+* ENH: Added support for Vagrant
 
 * API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
 * API: SPM now defaults to SPM8 or SPM12b job format

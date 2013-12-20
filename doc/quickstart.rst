@@ -11,6 +11,7 @@ Downloading and installing
    :maxdepth: 1
 
    users/install
+   users/vagrant
 
 Beginner's guide
 ================
