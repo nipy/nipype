@@ -146,7 +146,10 @@ class AFNICommand(CommandLine):
 
     def _overload_extension(self, value):
         path, base, _ = split_filename(value)
-        return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
+        new_path = os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
+        #some AFNI commands assume the relative path is relative to the input not the CWD
+        if not os.path.isabs(new_path):
+            return "./" + new_path
 
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
