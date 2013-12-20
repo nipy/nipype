@@ -19,7 +19,8 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from nipype.utils.filemanip import fname_presuffix
 from .base import AFNICommand, AFNICommandInputSpec,\
     AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine
+from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
+    OutputMultiPath
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -1443,7 +1444,7 @@ class BrickStat(AFNICommand):
         return outputs
 
 
-class ROIStatsInputSpec(AFNICommandInputSpec):
+class ROIStatsInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3dROIstats',
                    argstr='%s',
                    position=-1,
@@ -1465,12 +1466,18 @@ class ROIStatsInputSpec(AFNICommandInputSpec):
                         argstr='-quiet',
                         position=1)
 
+    terminal_output = traits.Enum('allatonce',
+                                  desc=('Control terminal output:'
+                                        '`allatonce` - waits till command is '
+                                        'finished to display output'),
+                                  nohash=True, mandatory=True, usedefault=True)
+
 
 class ROIStatsOutputSpec(TraitedSpec):
-    stats = File(desc='output', exists=True)
+    stats =  File(desc='output tab separated values file', exists=True)
 
 
-class ROIStats(AFNICommand):
+class ROIStats(CommandLine):
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
@@ -1492,37 +1499,13 @@ class ROIStats(AFNICommand):
     output_spec = ROIStatsOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
-
         outputs = self._outputs()
+        output_filename = "roi_stats.csv"
+        f = open(output_filename, "w")
+        f.write(runtime.stdout)
+        f.close()
 
-        outfile = os.path.join(os.getcwd(), 'stat_result.json')
-
-        if runtime is None:
-            try:
-                stats = load_json(outfile)['stat']
-            except IOError:
-                return self.run().outputs
-        else:
-            stats = []
-            for line in runtime.stdout.split('\n'):
-                if line:
-                    values = line.split()
-                    if len(values) > 1:
-                        stats.append([float(val) for val in values])
-                    else:
-                        stats.extend([float(val) for val in values])
-
-            if len(stats) == 1:
-                stats = stats[0]
-            of = os.path.join(os.getcwd(), 'TS.1D')
-            f = open(of, 'w')
-
-            for st in stats:
-                f.write(str(st) + '\n')
-            f.close()
-            save_json(outfile, dict(stat=of))
-        outputs.stats = of
-
+        outputs.stats = os.path.abspath(output_filename)
         return outputs
 
 
