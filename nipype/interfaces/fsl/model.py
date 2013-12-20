@@ -1151,7 +1151,7 @@ class MultipleRegressDesign(BaseInterface):
         for cidx in range(npoints):
             mat_txt.append(' '.join(
                 ['%e' % self.inputs.regressors[key][cidx] for key in regs]))
-        mat_txt = '\n'.join(mat_txt)
+        mat_txt = '\n'.join(mat_txt) + '\n'
         # write t-con file
         con_txt = []
         counter = 0
@@ -1175,7 +1175,7 @@ class MultipleRegressDesign(BaseInterface):
                 convals[regs.index(reg)
                         ] = self.inputs.contrasts[idx][3][regidx]
             con_txt.append(' '.join(['%e' % val for val in convals]))
-        con_txt = '\n'.join(con_txt)
+        con_txt = '\n'.join(con_txt) + '\n'
         # write f-con file
         fcon_txt = ''
         if nfcons:
@@ -1190,6 +1190,7 @@ class MultipleRegressDesign(BaseInterface):
                         convals[tconmap[self.inputs.contrasts.index(tcon)]] = 1
                     fcon_txt.append(' '.join(['%d' % val for val in convals]))
                     fcon_txt = '\n'.join(fcon_txt)
+            fcon_txt += '\n'
         # write group file
         grp_txt = ['/NumWaves       1',
                    '/NumPoints      %d' % npoints,
@@ -1200,7 +1201,7 @@ class MultipleRegressDesign(BaseInterface):
                 grp_txt += ['%d' % self.inputs.groups[i]]
             else:
                 grp_txt += ['1']
-        grp_txt = '\n'.join(grp_txt)
+        grp_txt = '\n'.join(grp_txt) + '\n'
 
         txt = {'design.mat': mat_txt,
                'design.con': con_txt,
