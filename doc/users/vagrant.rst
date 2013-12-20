@@ -10,8 +10,8 @@ Running Nipype in a VM
    connection.
 
 Container technologies (Vagrant_, Docker_) allow creating and manipulating
-lighter weight virtual environments. The Nipype_ source now contains a
-Vagrantfile to launch a Vagrant_ VM.
+lightweight virtual environments. The Nipype_ source now contains a Vagrantfile
+to launch a Vagrant_ VM.
 
 Requirements:
 
@@ -42,11 +42,11 @@ Now you can install your favorite software using::
 
 Also note that the directory in which you call `vagrant up` will be mounted
 under `/vagrant` inside the virtual machine. You can also copy the Vagrantfile
-to a different location in order to mount a different directory.
+or modify it in order to mount a different directory/directories.
 
 Please read through Vagrant_ documentation on other features. The python
 environment is built using a `miniconda <http://repo.continuum.io/miniconda/>`_
-distribution. Hence `conda` can be used to do your package management inside the
-VM.
+distribution. Hence `conda` can be used to do your python package management
+inside the VM.
 
 .. include:: ../links_names.txt
