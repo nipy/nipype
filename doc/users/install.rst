@@ -9,10 +9,10 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.8.0: [`zip <https://github.com/nipy/nipype/archive/0.8.zip>`__ `tar.gz
-<https://github.com/nipy/nipype/archive/0.8.tar.gz>`__]
+Release 0.9.0: [`zip <https://github.com/nipy/nipype/archive/0.9.zip>`__ `tar.gz
+<https://github.com/nipy/nipype/archive/0.9.tar.gz>`__]
 
-Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz 
+Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
 
 `Prior downloads <http://github.com/nipy/nipype/tags>`_
@@ -161,7 +161,7 @@ These are the software packages that nipype.interfaces wraps:
 FSL_
   4.1.0 or later
 
-matlab_ 
+matlab_
   2008a or later
 
 SPM_
@@ -169,21 +169,21 @@ SPM_
 
 FreeSurfer_
   FreeSurfer version 4 and higher
-  
+
 AFNI_
   2009_12_31_1431 or later
 
 Slicer_
   3.6 or later
 
-Nipy_ 
+Nipy_
   0.1.2+20110404 or later
 
-Nitime_ 
+Nitime_
   (optional)
-  
+
 Camino_
-  
+
 Camino2Trackvis_
 
 ConnectomeViewer_
