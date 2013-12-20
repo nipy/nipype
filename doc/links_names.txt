@@ -15,6 +15,7 @@
 .. _nibabel: http://nipy.org/nibabel/
 .. _nipype: http://nipy.org/nipype/
 .. _ConnectomeViewer: http://www.connectomeviewer.org/viewer/
+.. _NeuroDebian: http://neuro.debian.net/
 
 .. Documentation tools
 .. _graphviz: http://www.graphviz.org/
@@ -73,6 +74,8 @@
 .. _pythonxy: http://www.pythonxy.com/
 .. _EPD: http://www.enthought.com/products/epd.php
 .. _Traits: http://code.enthought.com/projects/traits/
+.. _Anaconda: https://store.continuum.io/cshop/anaconda/
+.. _Canopy: https://www.enthought.com/products/canopy/
 
 .. Python imaging projects
 .. _PyMVPA: http://www.pymvpa.org
@@ -98,6 +101,9 @@
 .. _xcode: http://developer.apple.com/TOOLS/xcode
 .. _mingw: http://www.mingw.org
 .. _macports: http://www.macports.org/
+.. _Vagrant: http://www.vagrantup.com/
+.. _Docker: http://www.docker.io/
+.. _Virtualbox: https://www.virtualbox.org/
 
 .. Functional imaging labs
 .. _`functional imaging laboratory`: http://www.fil.ion.ucl.ac.uk
