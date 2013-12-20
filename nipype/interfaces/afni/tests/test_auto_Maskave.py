@@ -26,8 +26,9 @@ def test_Maskave_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    in_file=dict(position=-2,
+    in_file=dict(copyfile=False,
     mandatory=True,
+    position=-2,
     argstr='%s',
     ),
     )

@@ -208,7 +208,8 @@ class WarpInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_warp", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -321,7 +322,8 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     polort = traits.Int(
         desc='Remove polynomical trend of order m or -1 for no detrending',
@@ -377,7 +379,8 @@ class TStatInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_tstat", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -419,7 +422,8 @@ class DetrendInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_detrend", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -456,7 +460,8 @@ class DespikeInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_despike", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -490,7 +495,8 @@ class AutomaskInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_mask", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -550,7 +556,8 @@ class VolregInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_volreg", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
 
@@ -614,7 +621,8 @@ class MergeInputSpec(AFNICommandInputSpec):
         File(desc='input file to 3dmerge', exists=True),
         argstr='%s',
         position=-1,
-        mandatory=True)
+        mandatory=True,
+        copyfile=False)
     out_file = File(name_template="%s_merge", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     doall = traits.Bool(desc='apply options to all sub-bricks in dataset',
@@ -653,7 +661,8 @@ class CopyInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-2,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_copy", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
 
@@ -686,7 +695,8 @@ class FourierInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_fourier", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     lowpass = traits.Float(desc='lowpass',
@@ -730,7 +740,8 @@ class BandpassInputSpec(AFNICommandInputSpec):
         argstr='%s',
         position=-1,
         mandatory=True,
-        exists=True)
+        exists=True,
+        copyfile=False)
     out_file = File(
         name_template='%s_bp',
         desc='output file from 3dBandpass',
@@ -838,7 +849,8 @@ class ZCutUpInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_zcupup", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     keep = traits.Str(desc='slice range to keep in output',
@@ -873,7 +885,8 @@ class AllineateInputSpec(AFNICommandInputSpec):
                    argstr='-source %s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     reference = File(
         exists=True,
         argstr='-base %s',
@@ -1111,7 +1124,8 @@ class MaskaveInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-2,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_maskave.1D", desc='output image file name',
                     keep_extension=True,
                     argstr="> %s", name_source="in_file", position=-1)
@@ -1155,7 +1169,8 @@ class SkullStripInputSpec(AFNICommandInputSpec):
                    argstr='-input %s',
                    position=1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_skullstrip", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
 
@@ -1188,7 +1203,8 @@ class TCatInputSpec(AFNICommandInputSpec):
         desc='input file to 3dTcat',
         argstr=' %s',
         position=-1,
-        mandatory=True)
+        mandatory=True,
+        copyfile=False)
     out_file = File(name_template="%s_tcat", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
@@ -1223,7 +1239,8 @@ class FimInputSpec(AFNICommandInputSpec):
                    argstr=' -input %s',
                    position=1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s_fim", desc='output image file name',
                     argstr='-bucket %s', name_source="in_file")
     ideal_file = File(desc='ideal time series file name',
@@ -1269,12 +1286,14 @@ class TCorrelateInputSpec(AFNICommandInputSpec):
                 argstr=' %s',
                 position=-2,
                 mandatory=True,
-                exists=True)
+                exists=True,
+                copyfile=False)
     yset = File(desc='input yset',
                 argstr=' %s',
                 position=-1,
                 mandatory=True,
-                exists=True)
+                exists=True,
+                copyfile=False)
     out_file = File(name_template="%s_tcorr", desc='output image file name',
                     argstr='-prefix %s', name_source="xset")
     pearson = traits.Bool(desc='Correlation is the normal' +
@@ -1316,7 +1335,8 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
                   argstr = ' %s',
                   position = -2,
                   mandatory = True,
-                  exists = True)
+                  exists = True,
+                  copyfile=False)
     y_1d = File(desc = '1D time series file input',
                    argstr = ' %s',
                    position = -1,
@@ -1579,7 +1599,8 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         argstr='-input %s',
         position=1,
         mandatory=True,
-        exists=True)
+        exists=True,
+        copyfile=False)
     out_file = File(name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
                     name_source='in_file', position=-1)
     mask = File(
@@ -1630,7 +1651,7 @@ class BlurInMask(AFNICommand):
 
 
 class TCorrMapInputSpec(AFNICommandInputSpec):
-    in_file = File(exists=True, argstr='-input %s', mandatory=True)
+    in_file = File(exists=True, argstr='-input %s', mandatory=True, copyfile=False)
     seeds = File(exists=True, argstr='-seed %s', xor=('seeds_width'))
     mask = File(exists=True, argstr='-mask %s')
     automask = traits.Bool(argstr='-automask')
@@ -1737,7 +1758,7 @@ class TCorrMap(AFNICommand):
 
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
-                   desc='input file')
+                   desc='input file', copyfile=False)
     padding = traits.Int(
         argstr='-npad %d',
         desc='Number of extra voxels to pad on each side of box')
@@ -1806,7 +1827,8 @@ class RetroicorInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
     out_file = File(desc='output image file name', argstr='-prefix %s', mandatory=True, position=1)
     card = File(desc='1D cardiac data file for cardiac correction',
                 argstr='-card %s',
@@ -1874,7 +1896,8 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         argstr='%s',
         position=-1,
         mandatory=True,
-        exists=True)
+        exists=True,
+        copyfile=False)
     out_file = File(name_template="%s.nii", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False

@@ -18,8 +18,9 @@ def test_Detrend_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    in_file=dict(position=-1,
+    in_file=dict(copyfile=False,
     mandatory=True,
+    position=-1,
     argstr='%s',
     ),
     )
