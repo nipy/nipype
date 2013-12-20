@@ -85,7 +85,8 @@ class TShiftInputSpec(AFNICommandInputSpec):
                    argstr='%s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_tshift", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -268,7 +269,8 @@ class ResampleInputSpec(AFNICommandInputSpec):
                    argstr='-inset %s',
                    position=-1,
                    mandatory=True,
-                   exists=True)
+                   exists=True,
+                   copyfile=False)
 
     out_file = File(name_template="%s_resample", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
