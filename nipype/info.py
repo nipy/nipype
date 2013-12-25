@@ -98,12 +98,11 @@ systems.
 * share your processing workflows with the community
 """
 
-# versions
-NIBABEL_MIN_VERSION = '1.0'
-NETWORKX_MIN_VERSION = '1.0'
-NUMPY_MIN_VERSION = '1.3'
-SCIPY_MIN_VERSION = '0.7'
-TRAITS_MIN_VERSION = '4.0'
+requirements = ['numpy>=1.3', 'scipy>=0.7', 'networkx>=1.0', 'traits>=4.0',
+                'python-dateutil>=1.5', 'nibabel>=1.0', 'nose>=1.0']
+for requirement in requirements:
+    exec "%s_MIN_VERSION = '%s'" % tuple([val.upper().replace('-','_') for val in
+                                          requirement.split('>=')])
 
 NAME                = 'nipype'
 MAINTAINER          = "nipype developers"
@@ -122,6 +121,5 @@ MINOR               = _version_minor
 MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
-REQUIRES            = ["nibabel (>=1.0)", "networkx (>=1.0)", "numpy (>=1.3)",
-                       "scipy (>=0.7)", "traits (>=4.0)"]
+REQUIRES            = requirements
 STATUS              = 'stable'
