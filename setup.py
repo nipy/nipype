@@ -62,7 +62,7 @@ package_check('numpy', INFO_VARS['NUMPY_MIN_VERSION'])
 package_check('scipy', INFO_VARS['SCIPY_MIN_VERSION'])
 package_check('traits', INFO_VARS['TRAITS_MIN_VERSION'])
 package_check('nose', INFO_VARS['NOSE_MIN_VERSION'])
-package_check('python-dateutil', INFO_VARS['PYTHON_DATEUTIL_MIN_VERSION'])
+package_check('dateutil', INFO_VARS['PYTHON_DATEUTIL_MIN_VERSION'])
 
 ################################################################################
 # Import the documentation building classes.
