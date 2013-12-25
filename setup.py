@@ -91,7 +91,6 @@ def main(**extra_args):
           author_email=INFO_VARS['AUTHOR_EMAIL'],
           platforms=INFO_VARS['PLATFORMS'],
           version=INFO_VARS['VERSION'],
-          install_requires=INFO_VARS['REQUIRES'],
           requires=INFO_VARS['REQUIRES'],
           configuration = configuration,
           cmdclass = cmdclass,
