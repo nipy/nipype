@@ -1,7 +1,7 @@
 # coding: utf-8
 """Compatibility tricks for Python 3. Mainly to do with unicode."""
-import __builtin__
 import functools
+import os
 import sys
 import re
 import types
@@ -35,7 +35,7 @@ def cast_bytes(s, encoding=None):
 def _modify_str_or_docstring(str_change_func):
     @functools.wraps(str_change_func)
     def wrapper(func_or_str):
-        if isinstance(func_or_str, basestring):
+        if isinstance(func_or_str, string_types):
             func = None
             doc = func_or_str
         else:
@@ -50,11 +50,33 @@ def _modify_str_or_docstring(str_change_func):
         return doc
     return wrapper
 
+def safe_unicode(e):
+    """unicode(e) with various fallbacks. Used for exceptions, which may not be
+    safe to call unicode() on.
+    """
+    try:
+        return unicode_type(e)
+    except UnicodeError:
+        pass
+
+    try:
+        return str_to_unicode(str(e))
+    except UnicodeError:
+        pass
+
+    try:
+        return str_to_unicode(repr(e))
+    except UnicodeError:
+        pass
+
+    return u'Unrecoverably corrupt evalue'
+
 if sys.version_info[0] >= 3:
     PY3 = True
     
     input = input
     builtin_mod_name = "builtins"
+    import builtins as builtin_mod
     
     str_to_unicode = no_code
     unicode_to_str = no_code
@@ -62,19 +84,26 @@ if sys.version_info[0] >= 3:
     bytes_to_str = decode
     cast_bytes_py2 = no_code
     
+    string_types = (str,)
+    unicode_type = str
+    
     def isidentifier(s, dotted=False):
         if dotted:
             return all(isidentifier(a) for a in s.split("."))
         return s.isidentifier()
     
     open = orig_open
+    xrange = range
+    def iteritems(d): return iter(d.items())
+    def itervalues(d): return iter(d.values())
+    getcwd = os.getcwd
     
     MethodType = types.MethodType
     
     def execfile(fname, glob, loc=None):
         loc = loc if (loc is not None) else glob
         with open(fname, 'rb') as f:
-            exec compile(f.read(), fname, 'exec') in glob, loc
+            exec(compile(f.read(), fname, 'exec'), glob, loc)
     
     # Refactor print statements in doctests.
     _print_statement_re = re.compile(r"\bprint (?P<expr>.*)$", re.MULTILINE)
@@ -103,12 +132,16 @@ else:
     
     input = raw_input
     builtin_mod_name = "__builtin__"
+    import __builtin__ as builtin_mod
     
     str_to_unicode = decode
     unicode_to_str = encode
     str_to_bytes = no_code
     bytes_to_str = no_code
     cast_bytes_py2 = cast_bytes
+    
+    string_types = (str, unicode)
+    unicode_type = unicode
     
     import re
     _name_re = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -138,6 +171,11 @@ else:
         def __exit__(self, etype, value, traceback):
             self.f.close()
     
+    xrange = xrange
+    def iteritems(d): return d.iteritems()
+    def itervalues(d): return d.itervalues()
+    getcwd = os.getcwdu
+
     def MethodType(func, instance):
         return types.MethodType(func, instance, type(instance))
     
@@ -162,18 +200,43 @@ else:
             # The rstrip() is necessary b/c trailing whitespace in files will
             # cause an IndentationError in Python 2.6 (this was fixed in 2.7,
             # but we still support 2.6).  See issue 1027.
-            scripttext = __builtin__.open(fname).read().rstrip() + '\n'
+            scripttext = builtin_mod.open(fname).read().rstrip() + '\n'
             # compile converts unicode filename to str assuming
             # ascii. Let's do the conversion before calling compile
             if isinstance(fname, unicode):
                 filename = unicode_to_str(fname)
             else:
                 filename = fname
-            exec compile(scripttext, filename, 'exec') in glob, loc
+            exec(compile(scripttext, filename, 'exec'), glob, loc)
     else:
         def execfile(fname, *where):
             if isinstance(fname, unicode):
                 filename = fname.encode(sys.getfilesystemencoding())
             else:
                 filename = fname
-            __builtin__.execfile(filename, *where)
+            builtin_mod.execfile(filename, *where)
+
+# Parts below taken from six:
+# Copyright (c) 2010-2013 Benjamin Peterson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    return meta("_NewBase", bases, {})
