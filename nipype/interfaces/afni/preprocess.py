@@ -509,7 +509,7 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     clfrac = traits.Float(desc='sets the clip level fraction' +
                           ' (must be 0.1-0.9). ' +
                           'A small value will tend to make the mask larger [default = 0.5].',
-                          argstr="-dilate %s")
+                          argstr="-clfrac %s")
 
     dilate = traits.Int(desc='dilate the mask outwards',
                         argstr="-dilate %s")

@@ -15,7 +15,7 @@ def test_Automask_inputs():
     ),
     dilate=dict(argstr='-dilate %s',
     ),
-    clfrac=dict(argstr='-dilate %s',
+    clfrac=dict(argstr='-clfrac %s',
     ),
     outputtype=dict(),
     brain_file=dict(name_source='in_file',
