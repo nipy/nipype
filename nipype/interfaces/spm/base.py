@@ -144,7 +144,7 @@ class Info(object):
         if matlab_cmd is None:
             try:
                 matlab_cmd = os.environ['MATLABCMD']
-            except:
+            except KeyError:
                 matlab_cmd = 'matlab -nodesktop -nosplash'
         mlab = MatlabCommand(matlab_cmd=matlab_cmd)
         mlab.inputs.mfile = False
