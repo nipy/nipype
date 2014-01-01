@@ -17,7 +17,7 @@ you can test by calling:
 
 .. testcode::
 
-   spm.SPMCommand().version
+    spm.SPMCommand().version
 
 Information about the MCR version of SPM8 can be found at:
 
