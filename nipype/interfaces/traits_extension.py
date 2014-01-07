@@ -6,10 +6,10 @@ redefined as the release version had dependencies on TraitsUI, which
 we do not want Nipype to depend on.  At least not yet.
 """
 
-from traits.api import File, Directory
+#from traits.api import File, Directory
 
 from ..external import traitlets as traits
-from ..external.traitlets import TraitError
+from ..external.traitlets import TraitError, File, Directory
 from ..external.traitlets import _Undefined, Undefined
 from ..external.traitlets import Dict as TraitDictObject
 from ..external.traitlets import List as TraitListObject
@@ -50,6 +50,7 @@ nipype_version = LooseVersion(__version__)
 
 def _get_sorteddict(object, dictwithhash=False, hash_method=None,
                     hash_files=True):
+    out = None
     if isinstance(object, dict):
         out = {}
         for key, val in sorted(object.items()):

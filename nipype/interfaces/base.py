@@ -838,7 +838,7 @@ class BaseInterface(Interface):
         metadata = dict(copyfile=lambda t: t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
             info.append(dict(key=name,
-                             copy=spec.copyfile))
+                             copy=spec.get_metadata('copyfile')))
         return info
 
     def _check_requires(self, spec, name, value):
