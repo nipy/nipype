@@ -812,7 +812,7 @@ class DataFinder(IOBase):
                               root_path.count(os.sep))
                 #If the max path depth has been reached, clear sub_dirs
                 #and files
-                if not max_depth is not None and curr_depth >= max_depth:
+                if max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
                 #Test the path for the curr_dir and all files
