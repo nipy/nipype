@@ -12,9 +12,8 @@ before_install:
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
   - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq --no-install-recommends fsl afni
-  - sudo apt-get install -qq fsl-atlases
+  - travis_retry sudo apt-get install -qq --no-install-recommends fsl afni
+  - travis_retry sudo apt-get install -qq fsl-atlases
   - source /etc/fsl/fsl.sh
 
 # Install packages
