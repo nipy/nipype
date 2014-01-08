@@ -17,7 +17,7 @@ def human_order_sorted(l):
         return int(text) if text.isdigit() else text
 
     def natural_keys(text):
-        if isinstance(text,tuple):
+        if isinstance(text, tuple):
             text = text[0]
         return [ atoi(c) for c in re.split('(\d+)', text) ]
 

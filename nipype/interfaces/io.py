@@ -831,6 +831,7 @@ class DataFinder(IOBase):
             raise RuntimeError("Regular expression did not match any files!")
         
         #sort all keys acording to out_paths
+        self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
         for key in self.result.keys():
             if key == "out_paths":
                 continue
