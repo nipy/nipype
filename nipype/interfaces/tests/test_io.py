@@ -180,12 +180,14 @@ def test_datafinder_copydir():
     from nipype.interfaces.io import DataFinder
     df = DataFinder()
     df.inputs.root_paths = outdir
-    df.inputs.match_regex = '.txt'
+    df.inputs.match_regex = '.+/(?P<basename>.+).txt'
     result = df.run()
     expected = ["findme.txt", "findmetoo.txt"]
     for path, expected_fname in zip(result.outputs.out_paths, expected):
-	_, fname = os.path.split(path)
-	yield assert_equal, fname, expected_fname
+        _, fname = os.path.split(path)
+        yield assert_equal, fname, expected_fname
+        
+    yield assert_equal, result.outputs.basename, ["findme", "findmetoo"]
 
     shutil.rmtree(outdir)
 
