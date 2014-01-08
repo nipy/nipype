@@ -171,6 +171,24 @@ def test_datasink_copydir():
     shutil.rmtree(outdir)
     shutil.rmtree(pth)
 
+def test_datafinder_copydir():
+    outdir = mkdtemp()
+    open(os.path.join(outdir, "findme.txt"), 'a').close()
+    open(os.path.join(outdir, "dontfindme"), 'a').close()
+    open(os.path.join(outdir, "findmetoo.txt"), 'a').close()
+
+    from nipype.interfaces.io import DataFinder
+    df = DataFinder()
+    df.inputs.root_paths = outdir
+    df.inputs.match_regex = '.txt'
+    result = df.run()
+    expected = ["findme.txt", "findmetoo.txt"]
+    for path, expected_fname in zip(result.outputs.out_paths, expected):
+	_, fname = os.path.split(path)
+	yield assert_equal, fname, expected_fname
+
+    shutil.rmtree(outdir)
+
 
 def test_freesurfersource():
     fss = nio.FreeSurferSource()
