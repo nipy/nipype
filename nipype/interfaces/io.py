@@ -831,12 +831,11 @@ class DataFinder(IOBase):
             raise RuntimeError("Regular expression did not match any files!")
         
         #sort all keys acording to out_paths
-        self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
         for key in self.result.keys():
             if key == "out_paths":
                 continue
             self.result[key] = [x for (_,x) in human_order_sorted(zip(self.result["out_paths"], self.result[key]))]
-            
+        self.result["out_paths"] = human_order_sorted(self.result["out_paths"])    
         return runtime
 
     def _list_outputs(self):
