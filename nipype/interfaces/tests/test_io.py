@@ -171,25 +171,66 @@ def test_datasink_copydir():
     shutil.rmtree(outdir)
     shutil.rmtree(pth)
 
+
 def test_datafinder_copydir():
     outdir = mkdtemp()
     open(os.path.join(outdir, "findme.txt"), 'a').close()
     open(os.path.join(outdir, "dontfindme"), 'a').close()
+    open(os.path.join(outdir, "dontfindmealsotxt"), 'a').close()
     open(os.path.join(outdir, "findmetoo.txt"), 'a').close()
+    open(os.path.join(outdir, "ignoreme.txt"), 'a').close()
+    open(os.path.join(outdir, "alsoignore.txt"), 'a').close()
 
     from nipype.interfaces.io import DataFinder
     df = DataFinder()
     df.inputs.root_paths = outdir
-    df.inputs.match_regex = '.+/(?P<basename>.+).txt'
+    df.inputs.match_regex = '.+/(?P<basename>.+)\.txt'
+    df.inputs.ignore_regexes = ['ignore']
     result = df.run()
     expected = ["findme.txt", "findmetoo.txt"]
     for path, expected_fname in zip(result.outputs.out_paths, expected):
         _, fname = os.path.split(path)
         yield assert_equal, fname, expected_fname
-        
+
     yield assert_equal, result.outputs.basename, ["findme", "findmetoo"]
 
     shutil.rmtree(outdir)
+
+
+def test_datafinder_depth():
+    outdir = mkdtemp()
+    os.makedirs(os.path.join(outdir, '0', '1', '2', '3'))
+
+    from nipype.interfaces.io import DataFinder
+    df = DataFinder()
+    df.inputs.root_paths = os.path.join(outdir, '0')
+    for min_depth in range(4):
+        for max_depth in range(min_depth, 4):
+            df.inputs.min_depth = min_depth
+            df.inputs.max_depth = max_depth
+            result = df.run()
+            expected = [str(x) for x in range(min_depth, max_depth + 1)]
+            for path, exp_fname in zip(result.outputs.out_paths, expected):
+                _, fname = os.path.split(path)
+                yield assert_equal, fname, exp_fname
+
+    shutil.rmtree(outdir)
+
+
+def test_datafinder_unpack():
+    outdir = mkdtemp()
+    single_res = os.path.join(outdir, "findme.txt")
+    open(single_res, 'a').close()
+    open(os.path.join(outdir, "dontfindme"), 'a').close()
+
+    from nipype.interfaces.io import DataFinder
+    df = DataFinder()
+    df.inputs.root_paths = outdir
+    df.inputs.match_regex = '.+/(?P<basename>.+)\.txt'
+    df.inputs.unpack_single = True
+    result = df.run()
+    print result.outputs.out_paths
+    yield assert_equal, result.outputs.out_paths, single_res
 
 
 def test_freesurfersource():
