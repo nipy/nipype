@@ -275,16 +275,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                          'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
     # TODO: transform_parameters currently supports rigid, affine, composite affine, translation, bspline, gaussian displacement field (gdf), and SyN -----ONLY-----!
     transform_parameters = traits.List(traits.Either(traits.Float(),
-                                                     traits.Tuple(
-                                                         traits.Float()),
+                                                     traits.Tuple(traits.Float()),
                                                      traits.Tuple(traits.Float(),  # gdf & syn
-                                                                  traits.Float(
-                                                                  ),
+                                                                  traits.Float(),
                                                                   traits.Float()),
                                                      traits.Tuple(traits.Float(),  # BSplineSyn
-                                                                  traits.Float(),
-                                                                  traits.Float(),
-                                                                  traits.Float())))
+                                                                  traits.Int(),
+                                                                  traits.Int(),
+                                                                  traits.Int())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
