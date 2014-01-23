@@ -209,9 +209,9 @@ class InterfaceChecker(object):
                            'from %s import %s' % (uri, c),
                            'def test_%s_inputs():' % c]
                     input_fields = ''
-                    for traitname, trait in classinst.input_spec().traits(transient=None).items():
+                    for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
-                        for key, value in trait.__dict__.items():
+                        for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
                             if isinstance(value, basestring):
@@ -231,8 +231,8 @@ class InterfaceChecker(object):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n')
 
-            for traitname, trait in classinst.input_spec().traits(transient=None).items():
-                for key in trait.__dict__:
+            for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
+                for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue
                     parent_metadata = []
@@ -251,9 +251,9 @@ class InterfaceChecker(object):
                 with open(testfile, 'at') as fp:
                     cmd = ['def test_%s_outputs():' % c]
                     input_fields = ''
-                    for traitname, trait in classinst.output_spec().traits(transient=None).items():
+                    for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
-                        for key, value in trait.__dict__.items():
+                        for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
                             if isinstance(value, basestring):
@@ -273,8 +273,8 @@ class InterfaceChecker(object):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n')
 
-            for traitname, trait in classinst.output_spec().traits(transient=None).items():
-                for key in trait.__dict__:
+            for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
+                for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue
                     parent_metadata = []
