@@ -827,8 +827,19 @@ class DataFinder(IOBase):
             ):
             for key, vals in self.result.iteritems():
                 self.result[key] = vals[0]
+        else:
+            #sort all keys acording to out_paths
+            for key in self.result.keys():
+                if key == "out_paths":
+                    continue
+                sort_tuples = human_order_sorted(zip(self.result["out_paths"],
+                                                     self.result[key]))
+                self.result[key] = [x for (_, x) in sort_tuples]
+            self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
+
         if not self.result:
             raise RuntimeError("Regular expression did not match any files!")
+
         return runtime
 
     def _list_outputs(self):
