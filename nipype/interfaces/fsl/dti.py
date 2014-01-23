@@ -776,6 +776,7 @@ class DistanceMap(FSLCommand):
 class XFibresInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, argstr="--data=%s", mandatory=True)
     mask = File(exists=True, argstr="--mask=%s", mandatory=True)
+    gradnonlin = File(exists=True, argstr="--gradnonlin=%s")
     bvecs = File(exists=True, argstr="--bvecs=%s", mandatory=True)
     bvals = File(exists=True, argstr="--bvals=%s", mandatory=True)
     logdir = Directory("logdir", argstr="--logdir=%s", usedefault=True)
