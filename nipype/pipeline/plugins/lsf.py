@@ -36,6 +36,8 @@ class LSFPlugin(SGELikeBatchManagerBase):
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
             if  'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
+            if 'bsub_args' in kwargs['plugin_args']:
+                self._bsub_args = kwargs['plugin_args']['bsub_args']
         super(LSFPlugin, self).__init__(template, **kwargs)
 
     def _is_pending(self, taskid):
