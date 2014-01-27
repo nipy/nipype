@@ -80,6 +80,7 @@ coregister.inputs.jobtype = 'estimate'
 
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
+segment.inputs.save_bias_corrected = True
 
 """Uncomment the following line for faster execution
 """
@@ -127,8 +128,8 @@ preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                  (coregister, segment,[('coregistered_source','data')]),
                  (segment, normalize_func, [('transformation_mat','parameter_file')]),
                  (segment, normalize_struc, [('transformation_mat','parameter_file'),
-                                             ('modulated_input_image', 'apply_to_files'),
-                                             (('modulated_input_image', get_vox_dims), 'write_voxel_sizes')]),
+                                             ('bias_corrected_image', 'apply_to_files'),
+                                             (('bias_corrected_image', get_vox_dims), 'write_voxel_sizes')]),
                  (realign, slice_timing, [('realigned_files', 'in_files')]),
                  (slice_timing, normalize_func, [('timecorrected_files', 'apply_to_files'),
                                             (('timecorrected_files', get_vox_dims), 'write_voxel_sizes')]),
