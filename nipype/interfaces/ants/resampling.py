@@ -245,9 +245,9 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     # interpolation_sigma = traits.Float(requires=['interpolation'])
     # interpolation_alpha = traits.Float(requires=['interpolation_sigma'])
     # bspline_order = traits.Int(3, requires=['interpolation'])
-    transforms = traits.List(
+    transforms = InputMultiPath(
         File(exists=True), argstr='%s', mandatory=True, desc=(''))
-    invert_transform_flags = traits.List(traits.Bool())
+    invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(
         0.0, argstr='--default-value %d', usedefault=True)
     print_out_composite_warp_file = traits.Enum(
