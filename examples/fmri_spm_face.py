@@ -327,7 +327,7 @@ slice_timingref.num_slices = num_slices
 slice_timingref.time_repetition = TR
 slice_timingref.time_acquisition = TR - TR/float(num_slices)
 slice_timingref.slice_order = range(num_slices,0,-1)
-slice_timingref.ref_slice = num_slices/2
+slice_timingref.ref_slice = int(num_slices/2)
 
 l1pipeline.inputs.preproc.smooth.fwhm = [8, 8, 8]
 
