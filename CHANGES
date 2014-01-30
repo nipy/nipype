@@ -15,8 +15,6 @@ Release 0.9.0 (December 20, 2013)
 
 * ENH: SelectFiles: a streamlined version of DataGrabber
 * ENH: new tools for defining workflows: JoinNode, synchronize and itersource
-* ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
-       spm.DicomImport, P2PDistance
 * ENH: W3C PROV support with optional RDF export built into Nipype
 * ENH: Added support for Simple Linux Utility Resource Management (SLURM)
 * ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
