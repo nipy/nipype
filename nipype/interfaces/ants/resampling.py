@@ -329,3 +329,74 @@ class ApplyTransforms(ANTSCommand):
         outputs['output_image'] = os.path.abspath(
             self._gen_filename('output_image'))
         return outputs
+
+
+class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
+                            desc=('This option forces the image to be treated '
+                                  'as a specified-dimensional image. If not '
+                                  'specified, antsWarp tries to infer the '
+                                  'dimensionality from the input image.'))
+    input_file = File(argstr='--input %s', mandatory=True,
+                       desc=('image to apply transformation to (generally a '
+                              'coregistered functional)'),
+                       exists=True)
+    output_file = traits.Str(argstr='--output %s',
+                              desc=('output file name'), name_source=['input_file'],
+                              hash_files=False, name_template='%s_transformed.csv')
+    transforms = traits.List(
+        File(exists=True), argstr='%s', mandatory=True, desc=(''))
+    invert_transform_flags = traits.List(traits.Bool())
+
+
+class ApplyTransformsToPointsOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='csv file with transformed coordinates')
+
+
+class ApplyTransformsToPoints(ANTSCommand):
+    """ApplyTransforms, applied to an input image, transforms it according to a
+    reference image and a transform (or a set of transforms).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import ApplyTransforms
+    >>> at = ApplyTransforms()
+    >>> at.inputs.dimension = 3
+    >>> at.inputs.input_image = 'moving1.nii'
+    >>> at.inputs.reference_image = 'fixed1.nii'
+    >>> at.inputs.output_image = 'deformed_moving1.nii'
+    >>> at.inputs.interpolation = 'Linear'
+    >>> at.inputs.default_value = 0
+    >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at.inputs.invert_transform_flags = [False, False]
+    >>> at.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+
+
+    """
+    _cmd = 'antsApplyTransformsToPoints'
+    input_spec = ApplyTransformsToPointsInputSpec
+    output_spec = ApplyTransformsToPointsOutputSpec
+
+
+    def _getTransformFileNames(self):
+        retval = []
+        for ii in range(len(self.inputs.transforms)):
+            if isdefined(self.inputs.invert_transform_flags):
+                if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
+                    invert_code = 1 if self.inputs.invert_transform_flags[
+                        ii] else 0
+                    retval.append("--transform [%s,%d]" %
+                                  (self.inputs.transforms[ii], invert_code))
+                else:
+                    raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
+            else:
+                retval.append("--transform %s" % self.inputs.transforms[ii])
+        return " ".join(retval)
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "transforms":
+            return self._getTransformFileNames()
+        return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
+
