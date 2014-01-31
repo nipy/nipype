@@ -338,15 +338,23 @@ class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
                                   'specified, antsWarp tries to infer the '
                                   'dimensionality from the input image.'))
     input_file = File(argstr='--input %s', mandatory=True,
-                       desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'),
-                       exists=True)
+                      desc=("Currently, the only input supported is a csv file with "
+                            "columns including x,y (2D), x,y,z (3D) or x,y,z,t,label (4D) column headers."
+                            "The points should be defined in physical space."
+                            "If in doubt how to convert coordinates from your files to the space"
+                            "required by antsApplyTransformsToPoints try creating/drawing a simple"
+                            "label volume with only one voxel set to 1 and all others set to 0."
+                            "Write down the voxel coordinates. Then use ImageMaths LabelStats to find"
+                            "out what coordinates for this voxel antsApplyTransformsToPoints is"
+                            "expecting."),
+                      exists=True)
     output_file = traits.Str(argstr='--output %s',
-                              desc=('output file name'), name_source=['input_file'],
-                              hash_files=False, name_template='%s_transformed.csv')
-    transforms = traits.List(
-        File(exists=True), argstr='%s', mandatory=True, desc=(''))
-    invert_transform_flags = traits.List(traits.Bool())
+                             desc=('Name of the output CSV file'), name_source=['input_file'],
+                             hash_files=False, name_template='%s_transformed.csv')
+    transforms = traits.List(File(exists=True), argstr='%s', mandatory=True,
+                             desc=('transforms that will be applied to the points'))
+    invert_transform_flags = traits.List(traits.Bool(),
+                                         desc=('list indicating if a transform should be reversed'))
 
 
 class ApplyTransformsToPointsOutputSpec(TraitedSpec):
@@ -354,24 +362,20 @@ class ApplyTransformsToPointsOutputSpec(TraitedSpec):
 
 
 class ApplyTransformsToPoints(ANTSCommand):
-    """ApplyTransforms, applied to an input image, transforms it according to a
-    reference image and a transform (or a set of transforms).
+    """ApplyTransformsToPoints, applied to an CSV file, transforms coordinates
+    using provided transform (or a set of transforms).
 
     Examples
     --------
 
     >>> from nipype.interfaces.ants import ApplyTransforms
-    >>> at = ApplyTransforms()
+    >>> at = ApplyTransformsToPoints()
     >>> at.inputs.dimension = 3
-    >>> at.inputs.input_image = 'moving1.nii'
-    >>> at.inputs.reference_image = 'fixed1.nii'
-    >>> at.inputs.output_image = 'deformed_moving1.nii'
-    >>> at.inputs.interpolation = 'Linear'
-    >>> at.inputs.default_value = 0
+    >>> at.inputs.input_file = 'moving.csv'
     >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
-    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+    'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
 
 
     """
