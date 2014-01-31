@@ -39,7 +39,7 @@ class Dcm2niiOutputSpec(TraitedSpec):
     bvals = OutputMultiPath(File(exists=True))
 
 class Dcm2nii(CommandLine):
-    """Uses MRICRON's dcm2nii to convert dicom directories or files
+    """Uses MRICRON's dcm2nii to convert dicom files
 
     Examples
     ========
