@@ -46,11 +46,11 @@ class Dcm2nii(CommandLine):
 
     >>> from nipype.interfaces.dcm2nii import Dcm2nii
     >>> converter = Dcm2nii()
-    >>> converter.inputs.source_names = 'functional_1.dcm'
+    >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline #doctest: +ELLIPSIS
-    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm'
+    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm functional_2.dcm'
     >>> converter.run() # doctest: +SKIP
     """
 
