@@ -1,8 +1,9 @@
-Future Release
-==============
+Release 0.9.2 (January 31, 2014)
+===========
 
 * FIX: DataFinder was broken due to a typo
 * FIX: Order of DataFinder outputs was not guaranteed, it's human sorted now
+* ENH: New interfaces: Vnifti2Image, VtoMat
 
 Release 0.9.1 (December 25, 2013)
 ============
