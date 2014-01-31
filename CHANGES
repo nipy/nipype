@@ -1,6 +1,8 @@
 Future Release
 ==============
 
+* ENH: New ANTs interface: ApplyTransformsToPoints
+
 * FIX: DataFinder was broken due to a typo
 * FIX: Order of DataFinder outputs was not guaranteed, it's human sorted now
 
