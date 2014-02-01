@@ -329,3 +329,78 @@ class ApplyTransforms(ANTSCommand):
         outputs['output_image'] = os.path.abspath(
             self._gen_filename('output_image'))
         return outputs
+
+
+class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
+                            desc=('This option forces the image to be treated '
+                                  'as a specified-dimensional image. If not '
+                                  'specified, antsWarp tries to infer the '
+                                  'dimensionality from the input image.'))
+    input_file = File(argstr='--input %s', mandatory=True,
+                      desc=("Currently, the only input supported is a csv file with "
+                            "columns including x,y (2D), x,y,z (3D) or x,y,z,t,label (4D) column headers."
+                            "The points should be defined in physical space."
+                            "If in doubt how to convert coordinates from your files to the space"
+                            "required by antsApplyTransformsToPoints try creating/drawing a simple"
+                            "label volume with only one voxel set to 1 and all others set to 0."
+                            "Write down the voxel coordinates. Then use ImageMaths LabelStats to find"
+                            "out what coordinates for this voxel antsApplyTransformsToPoints is"
+                            "expecting."),
+                      exists=True)
+    output_file = traits.Str(argstr='--output %s',
+                             desc=('Name of the output CSV file'), name_source=['input_file'],
+                             hash_files=False, name_template='%s_transformed.csv')
+    transforms = traits.List(File(exists=True), argstr='%s', mandatory=True,
+                             desc=('transforms that will be applied to the points'))
+    invert_transform_flags = traits.List(traits.Bool(),
+                                         desc=('list indicating if a transform should be reversed'))
+
+
+class ApplyTransformsToPointsOutputSpec(TraitedSpec):
+    output_file = File(exists=True, desc='csv file with transformed coordinates')
+
+
+class ApplyTransformsToPoints(ANTSCommand):
+    """ApplyTransformsToPoints, applied to an CSV file, transforms coordinates
+    using provided transform (or a set of transforms).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import ApplyTransforms
+    >>> at = ApplyTransformsToPoints()
+    >>> at.inputs.dimension = 3
+    >>> at.inputs.input_file = 'moving.csv'
+    >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at.inputs.invert_transform_flags = [False, False]
+    >>> at.cmdline
+    'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+
+
+    """
+    _cmd = 'antsApplyTransformsToPoints'
+    input_spec = ApplyTransformsToPointsInputSpec
+    output_spec = ApplyTransformsToPointsOutputSpec
+
+
+    def _getTransformFileNames(self):
+        retval = []
+        for ii in range(len(self.inputs.transforms)):
+            if isdefined(self.inputs.invert_transform_flags):
+                if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
+                    invert_code = 1 if self.inputs.invert_transform_flags[
+                        ii] else 0
+                    retval.append("--transform [%s,%d]" %
+                                  (self.inputs.transforms[ii], invert_code))
+                else:
+                    raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
+            else:
+                retval.append("--transform %s" % self.inputs.transforms[ii])
+        return " ".join(retval)
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "transforms":
+            return self._getTransformFileNames()
+        return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
+
