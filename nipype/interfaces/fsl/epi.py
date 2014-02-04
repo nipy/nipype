@@ -23,7 +23,7 @@ from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
                                     isdefined, Undefined )
 
 
-from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, FileNotFoundError
+from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
