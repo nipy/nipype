@@ -23,7 +23,7 @@ from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
                                     isdefined, Undefined )
 
 
-from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix
+from nipype.utils.filemanip import load_json, save_json, split_filename, fname_presuffix, FileNotFoundError
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -316,7 +316,8 @@ class EddyInputSpec( FSLCommandInputSpec ):
 
 
     session =  File(exists=True, desc='File containing session indices for all volumes in --imain', argstr='--session=%s' )
-    in_topup =  File(exists=True, desc='Base name for output files from topup', argstr='--topup=%s' )
+    in_topup = traits.Str('topup_basename', desc='Base name for output files from topup',
+                          argstr='--topup=%s', usedefault=False)
     flm =  traits.Enum( ('linear','quadratic','cubic'), desc='First level EC model', argstr='--flm=%s' )
     fwhm = traits.Float( desc='FWHM for conditioning filter when estimating the parameters', argstr='--fwhm=%s' )
     niter = traits.Int( 5, desc='Number of iterations', argstr='--niter=%s' )
@@ -357,6 +358,12 @@ class Eddy( FSLCommand ):
         if skip is None:
             skip = []
 
+        if isdefined(self.inputs.in_topup):
+            if not os.path.isfile(self.inputs.in_topup + '_fieldcoef.nii.gz'):
+                raise FileNotFoundError('File {} not found'.format(self.inputs.in_topup + '_fieldcoef.nii.gz'))
+            if not os.path.isfile(self.inputs.in_topup + '_movpar.txt'):
+                raise FileNotFoundError('File {} not found'.format(self.inputs.in_topup + '_movpar.txt'))
+            
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './eddy_corrected' )
         return super(Eddy, self)._parse_inputs(skip=skip)
@@ -365,7 +372,7 @@ class Eddy( FSLCommand ):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
-        outputs['out_parameter'] = '%s..eddy_parameters' % self.inputs.out_base
+        outputs['out_parameter'] = '%s.eddy_parameters' % self.inputs.out_base
         return outputs
 
 
