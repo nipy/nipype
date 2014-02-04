@@ -316,8 +316,10 @@ class EddyInputSpec( FSLCommandInputSpec ):
 
 
     session =  File(exists=True, desc='File containing session indices for all volumes in --imain', argstr='--session=%s' )
-    in_topup = traits.Str('topup_basename', desc='Base name for output files from topup',
-                          argstr='--topup=%s', usedefault=False)
+    in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", requires=['in_topup_movpar'],
+                              desc='topup file containing the field coefficients')
+    in_topup_movpar = File(exists=True, requires=['in_topup_fieldcoef'],
+                           desc='topup movpar.txt file' )
     flm =  traits.Enum( ('linear','quadratic','cubic'), desc='First level EC model', argstr='--flm=%s' )
     fwhm = traits.Float( desc='FWHM for conditioning filter when estimating the parameters', argstr='--fwhm=%s' )
     niter = traits.Int( 5, desc='Number of iterations', argstr='--niter=%s' )
@@ -354,16 +356,15 @@ class Eddy( FSLCommand ):
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'in_topup_fieldcoef':
+            return spec.argstr % value.split('_fieldcoef')[0]
+        return super(Eddy, self)._format_arg(name, spec, value)
+    
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-
-        if isdefined(self.inputs.in_topup):
-            if not os.path.isfile(self.inputs.in_topup + '_fieldcoef.nii.gz'):
-                raise FileNotFoundError('File {} not found'.format(self.inputs.in_topup + '_fieldcoef.nii.gz'))
-            if not os.path.isfile(self.inputs.in_topup + '_movpar.txt'):
-                raise FileNotFoundError('File {} not found'.format(self.inputs.in_topup + '_movpar.txt'))
-            
+        
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './eddy_corrected' )
         return super(Eddy, self)._parse_inputs(skip=skip)
