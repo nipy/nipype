@@ -53,8 +53,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
                     self._template = open(self._template).read()
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
-            if 'enable_cuda' in kwargs['plugin_args'] and kwargs['plugin_args']['enable_cuda']:
-                self._template = '\n'.join((self._template, 'CUDA_VISIBLE_DEVICES=0'))
         self._pending = {}
         super(SLURMPlugin, self).__init__(self._template, **kwargs)
 
