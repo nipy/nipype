@@ -304,6 +304,9 @@ def grab_xml(module, launcher):
     final_command = " ".join(command_list)
     xmlReturnValue = subprocess.Popen(
         final_command, stdout=subprocess.PIPE, shell=True).communicate()[0]
+    #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
+    if xmlReturnValue.strip().endswith("XML"):
+        xmlReturnValue = xmlReturnValue.strip()[:-3]
     return xml.dom.minidom.parseString(xmlReturnValue)
 #        if ret.runtime.returncode == 0:
 #            return xml.dom.minidom.parseString(ret.runtime.stdout)
