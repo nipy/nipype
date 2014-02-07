@@ -1932,5 +1932,64 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
+        
+class EvalInputSpec(AFNICommandInputSpec):
+    in_file_a = File(desc='input file to 1deval',
+                     argstr='-a %s', position=0, mandatory=True, exists=True)
+    in_file_b = File(desc='operand file to 1deval',
+                     argstr=' -b %s', position=1, exists=True)
+    in_file_c = File(desc='operand file to 1deval',
+                     argstr=' -c %s', position=2, exists=True)
+    out_file = File(name_template="%s_calc", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file_a")
+    out1D = traits.Bool(desc="output in 1D",
+                    argstr='-1D')
+    expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
+                      mandatory=True)
+    start_idx = traits.Int(desc='start index for in_file_a',
+                           requires=['stop_idx'])
+    stop_idx = traits.Int(desc='stop index for in_file_a',
+                          requires=['start_idx'])
+    single_idx = traits.Int(desc='volume index for in_file_a')
+    other = File(desc='other options', argstr='')
+    
+class Eval(AFNICommand):
+    """Evaluates an expression that may include columns of data from one or more text files
 
+    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>
+    
+    Examples
+    ========
+    
+    >>> from nipype.interfaces import afni as afni
+    >>> eval = afni.Eval()
+    >>> eval.inputs.in_file_a = 'data1.1D'
+    >>> eval.inputs.in_file_b = 'data2.1D'
+    >>> eval.inputs.expr='a*b'
+    >>> eval.inputs.out1D = True
+    >>> eval.inputs.out_file =  'data_calc.1D'
+    >>> calc.cmdline #doctest: +SKIP
+    '3deval -a timeseries1.1D  -b timeseries2.1D -expr "a*b" -1D -prefix data_calc.1D'
 
+    """
+
+    _cmd = '1deval'
+    input_spec = EvalInputSpec
+    output_spec = AFNICommandOutputSpec
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'in_file_a':
+            arg = trait_spec.argstr % value
+            if isdefined(self.inputs.start_idx):
+                arg += '[%d..%d]' % (self.inputs.start_idx,
+                                     self.inputs.stop_idx)
+            if isdefined(self.inputs.single_idx):
+                arg += '[%d]' % (self.inputs.single_idx)
+            return arg
+        return super(Eval, self)._format_arg(name, trait_spec, value)
+
+    def _parse_inputs(self, skip=None):
+        """Skip the arguments without argstr metadata
+        """
+        return super(Eval, self)._parse_inputs(
+            skip=('start_idx', 'stop_idx', 'out1D', 'other'))
