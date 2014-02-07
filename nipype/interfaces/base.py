@@ -1301,12 +1301,26 @@ def run_command(runtime, output=None, timeout=0.01):
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
     PIPE = subprocess.PIPE
-    proc = subprocess.Popen(runtime.cmdline,
-                             stdout=PIPE,
-                             stderr=PIPE,
-                             shell=True,
-                             cwd=runtime.cwd,
-                             env=runtime.environ)
+
+    if output == 'file':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stderr = open(errfile, 'wt')
+        stdout = open(outfile, 'wt')
+
+        proc = subprocess.Popen(runtime.cmdline,
+                                stdout=stdout,
+                                stderr=stderr,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
+    else:
+        proc = subprocess.Popen(runtime.cmdline,
+                                 stdout=PIPE,
+                                 stderr=PIPE,
+                                 shell=True,
+                                 cwd=runtime.cwd,
+                                 env=runtime.environ)
     result = {}
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1344,16 +1358,6 @@ def run_command(runtime, output=None, timeout=0.01):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')
-        stdout = open(outfile, 'wt')
-        proc = subprocess.Popen(runtime.cmdline,
-                                stdout=stdout,
-                                stderr=stderr,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=runtime.environ)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
