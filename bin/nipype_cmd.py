@@ -5,7 +5,7 @@
 """
 # stdlib imports
 import os
-from optparse import OptionParser
+import argparse
 import sys
 
 def listClasses(module=None):
@@ -24,10 +24,8 @@ def add_options(parser=None, module=None, function=None):
         interface = getattr(sys.modules[module],function)()
 
         for k,v in interface.inputs.items():
-            parser.add_option("-%s"%k[0], "--%s"%k, dest="IXI%s"%k,
-                              metavar=k,
-                              action='store',type='string',
-                              help="you need help?",default='')
+            parser.add_argument("--%s"%k, dest=k,
+                                help=v.desc)
     return parser, interface
 
 def run_instance(interface, options):
@@ -63,19 +61,21 @@ def get_modfunc(args):
     return module, function
 
 def parse_args():
-    usage = "usage: %prog [options] module function"
-    parser = OptionParser(usage=usage,version="%prog 1.0",
-                          conflict_handler="resolve")
-    parser.add_option("--run", dest="run",
-                      action='store_true',help="Execute",
-                      default=False)
+    parser = argparse.ArgumentParser(description='Nipype interface runner')
+    parser.add_argument("--run", dest="run", help="Execute", default=False)
+    
+#     
+#     usage = "usage: %prog [options] module function"
+#     parser = OptionParser(usage=usage,version="%prog 1.0",
+#                           conflict_handler="resolve")
+    
 
     module, function = get_modfunc(sys.argv[1:])
     parser, interface  = add_options(parser, module, function)
-    (options, args) = parser.parse_args()
-    if options.run and interface:
+    args = parser.parse_args()
+    if args.run and interface:
         #assign inputs
-        run_instance(interface, options)
+        run_instance(interface, args)
     else:
         parser.print_help()
         if module and not function:
