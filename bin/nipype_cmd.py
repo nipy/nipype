@@ -23,7 +23,7 @@ def add_options(parser=None, module=None, function=None):
         __import__(module)
         interface = getattr(sys.modules[module],function)()
 
-        for k,v in interface.inputs.iteritems():
+        for k,v in interface.inputs.items():
             parser.add_option("-%s"%k[0], "--%s"%k, dest="IXI%s"%k,
                               metavar=k,
                               action='store',type='string',
@@ -33,7 +33,7 @@ def add_options(parser=None, module=None, function=None):
 def run_instance(interface, options):
     if interface:
         print "setting function inputs"
-        for k,v in interface.inputs.iteritems():
+        for k,v in interface.inputs.items():
             optionskey = ''.join(('IXI',k))
             if hasattr(options, optionskey):
                 setattr(interface.inputs, k,
