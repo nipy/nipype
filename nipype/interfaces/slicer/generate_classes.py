@@ -144,11 +144,10 @@ def generate_class(module, launcher, strip_module_name_prefix=True):
                      'documentation-url', 'license', 'contributor',
                      'acknowledgements']:
         el = dom.getElementsByTagName(desc_str)
-        if el and el[0].firstChild:
-            class_string += desc_str + ": " + el[
-                0].firstChild.nodeValue + "\n\n"
+        if el and el[0].firstChild and el[0].firstChild.nodeValue.strip():
+            class_string += desc_str + ": " + el[0].firstChild.nodeValue.strip() + "\n\n"
         if desc_str == 'category':
-            category = el[0].firstChild.nodeValue
+            category = el[0].firstChild.nodeValue.strip()
     class_string += "\"\"\""
 
     for paramGroup in dom.getElementsByTagName("parameters"):
