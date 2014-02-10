@@ -16,7 +16,7 @@ class RandomVolInputSpec(CommandLineInputSpec):
     inLambda = traits.Float(desc="Lambda Value for Exponential Distribution", argstr="--inLambda %f")
     inMaximum = traits.Int(desc="Maximum Value", argstr="--inMaximum %d")
     inMinimum = traits.Int(desc="Minimum Value", argstr="--inMinimum %d")
-    inField = traits.Enum(""Uniform"", ""Normal"", ""Exponential"", desc="Field", argstr="--inField %s")
+    inField = traits.Enum("Uniform", "Normal", "Exponential", desc="Field", argstr="--inField %s")
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outRand1 = traits.Either(traits.Bool, File(), hash_files=False, desc="Rand1", argstr="--outRand1 %s")
     outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")

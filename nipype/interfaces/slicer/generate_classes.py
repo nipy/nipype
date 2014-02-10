@@ -217,7 +217,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True):
 
             if param.nodeName.endswith('-enumeration'):
                 type = "traits.Enum"
-                values = ['"%s"' % el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
+                values = ['"%s"' % str(el.firstChild.nodeValue).replace('"', '') for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
