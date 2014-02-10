@@ -370,7 +370,7 @@ def topup_correction( name='topup_correction' ):
     >>> nipype_epicorrect = topup_correction('nipype_topup')
     >>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
-    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
+    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = ['y', 'y-']
     >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
     >>> nipype_epicorrect.run() # doctest: +SKIP
 
@@ -400,7 +400,6 @@ def topup_correction( name='topup_correction' ):
     outputnode = pe.Node( niu.IdentityInterface(
                           fields=['out_fieldcoef',
                                   'out_movpar',
-                                  'out_topup',
                                   'out_enc_file',
                                   'epi_corrected'
                           ]), name='outputnode'

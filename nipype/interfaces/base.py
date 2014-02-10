@@ -1480,13 +1480,13 @@ class CommandLine(BaseInterface):
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval
-            return self._overload_extension(retval)
+            return self._overload_extension(retval, name)
         return retval
 
     def _gen_filename(self, name):
         raise NotImplementedError
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         return value
 
     def _list_outputs(self):

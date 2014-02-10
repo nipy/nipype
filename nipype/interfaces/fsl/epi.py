@@ -124,7 +124,6 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_base = File(desc=('base-name of output files (spline '
                           'coefficients (Hz) and movement parameters)'),
                     name_source=['in_file'], name_template='%s_base',
-                    keep_extension=True,
                     argstr='--out=%s', hash_files=False)
     out_field = File(argstr='--fout=%s', hash_files=False,
                      name_source=['in_file'], name_template='%s_field',
@@ -254,16 +253,38 @@ class TOPUP(FSLCommand):
         np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.3f')
         return out_file
 
-class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='name of 4D file with images', argstr='%s' )
-    encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
-    in_index = traits.List( argstr='%s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
-    in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='--topup=%s' )
+    def _overload_extension(self, value, name=None):
+        if name == 'out_base':
+            return value
+        return super(TOPUP, self)._overload_extension(value, name)
 
-    out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
-    method = traits.Enum( ('jac','lsr'), argstr='--method=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
-    interp = traits.Enum( ('trilinear','spline'), argstr='--interp=%s', desc='interpolation method' )
-    datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d=%s', desc='force output data type' )
+
+class ApplyTOPUPInputSpec(FSLCommandInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True,
+                              desc='name of 4D file with images', argstr='%s')
+    encoding_file = File(exists=True, mandatory=True,
+                         desc='name of text file with PE directions/times',
+                         argstr='--datain=%s')
+    in_index = traits.List(argstr='%s', mandatory=True,
+                           desc=('comma separated list of indicies into '
+                                 '--datain of the input image (to be '
+                                 'corrected)'))
+    in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", copyfile=False,
+                              requires=['in_topup_movpar'],
+                              desc=('topup file containing the field '
+                                    'coefficients'))
+    in_topup_movpar = File(exists=True, requires=['in_topup_fieldcoef'],
+                           copyfile=False, desc='topup movpar.txt file')
+    out_corrected = File(desc='output (warped) image',
+                         name_source=['in_files'], name_template='%s_corrected',
+                         argstr='--out=%s' )
+    method = traits.Enum(('jac','lsr'), argstr='--method=%s',
+                         desc=('use jacobian modulation (jac) or least-squares '
+                               'resampling (lsr)'))
+    interp = traits.Enum(('trilinear','spline'), argstr='--interp=%s',
+                         desc='interpolation method')
+    datatype = traits.Enum(('char', 'short', 'int', 'float', 'double'),
+                           argstr='-d=%s', desc='force output data type')
 
 
 class ApplyTOPUPOutputSpec( TraitedSpec ):
