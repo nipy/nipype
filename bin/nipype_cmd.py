@@ -7,14 +7,17 @@
 import os
 import argparse
 import sys
+import inspect
+from nipype.interfaces.base import Interface
+
 
 def listClasses(module=None):
     if module:
         __import__(module)
         pkg = sys.modules[module]
-        print "Available functions:"
+        print "Available Interfaces:"
         for k,v in pkg.__dict__.items():
-            if 'class' in str(v) and k != '__builtins__':
+            if inspect.isclass(v) and issubclass(v, Interface):
                 print "\t%s"%k
 
 def add_options(parser=None, module=None, function=None):
@@ -44,6 +47,11 @@ def run_instance(interface, options):
 
 
 def parse_args():
+    
+    if len(sys.argv) == 2:
+        listClasses(sys.argv[1])
+        return
+    
     parser = argparse.ArgumentParser(description='Nipype interface runner')
     parser.add_argument("module", type=str, help="Module name")
     parser.add_argument("interface", type=str, help="Interface name")
