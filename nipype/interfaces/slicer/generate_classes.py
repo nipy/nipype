@@ -111,7 +111,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code = generate_class(module, launcher)
+        package, code, module = generate_class(module, launcher)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -126,8 +126,12 @@ def generate_all_classes(modules_list=[], launcher=[]):
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher):
+def generate_class(module, launcher, strip_module_name_prefix=True):
     dom = grab_xml(module, launcher)
+    if strip_module_name_prefix:
+        module_name = module.split(".")[-1]
+    else:
+        module_name = module
     inputTraits = []
     outputTraits = []
     outputs_filenames = {}
@@ -264,11 +268,11 @@ def generate_class(module, launcher):
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(
                     values), parse_params(traitsParams)))
 
-    input_spec_code = "class " + module + "InputSpec(CommandLineInputSpec):\n"
+    input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
         input_spec_code += "    " + trait + "\n"
 
-    output_spec_code = "class " + module + "OutputSpec(TraitedSpec):\n"
+    output_spec_code = "class " + module_name + "OutputSpec(TraitedSpec):\n"
     if not outputTraits:
         output_spec_code += "    pass\n"
     else:
@@ -283,17 +287,17 @@ def generate_class(module, launcher):
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
 
-    template = """class %name%(SEMLikeCommandLine):
+    template = """class %module_name%(SEMLikeCommandLine):
     %class_str%
 
-    input_spec = %name%InputSpec
-    output_spec = %name%OutputSpec
+    input_spec = %module_name%InputSpec
+    output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
 
-    main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
+    main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 
-    return category, input_spec_code + output_spec_code + main_class
+    return category, input_spec_code + output_spec_code + main_class, module_name
 
 
 def grab_xml(module, launcher):

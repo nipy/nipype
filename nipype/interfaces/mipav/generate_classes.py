@@ -1,5 +1,6 @@
 from nipype.interfaces.slicer.generate_classes import generate_all_classes
 
+
 if __name__ == "__main__":
     ## NOTE:  For now either the launcher needs to be found on the default path, or
     ##        every tool in the modules list must be found on the default path

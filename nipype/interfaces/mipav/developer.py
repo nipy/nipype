@@ -6,7 +6,7 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec, SEMLikeCom
 import os
 
 
-class edu.jhu.bme.smile.demo.RandomVolInputSpec(CommandLineInputSpec):
+class RandomVolInputSpec(CommandLineInputSpec):
     maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSize = traits.Int(desc="Size of Volume in X direction", argstr="--inSize %d")
     inSize2 = traits.Int(desc="Size of Volume in Y direction", argstr="--inSize2 %d")
@@ -22,11 +22,11 @@ class edu.jhu.bme.smile.demo.RandomVolInputSpec(CommandLineInputSpec):
     outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
 
 
-class edu.jhu.bme.smile.demo.RandomVolOutputSpec(TraitedSpec):
+class RandomVolOutputSpec(TraitedSpec):
     outRand1 = File(desc="Rand1", exists=True)
 
 
-class edu.jhu.bme.smile.demo.RandomVol(SEMLikeCommandLine):
+class RandomVol(SEMLikeCommandLine):
     """title: Random_Volume_Generator
 
 category: 
@@ -50,7 +50,7 @@ contributor:
 
 """
 
-    input_spec = edu.jhu.bme.smile.demo.RandomVolInputSpec
-    output_spec = edu.jhu.bme.smile.demo.RandomVolOutputSpec
+    input_spec = RandomVolInputSpec
+    output_spec = RandomVolOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.bme.smile.demo.RandomVol "
     _outputs_filenames = {'outRand1':'outRand1.nii'}
