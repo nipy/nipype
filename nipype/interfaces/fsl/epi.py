@@ -214,12 +214,14 @@ class TOPUP(FSLCommand):
 
     def _list_outputs(self):
         outputs = super(TOPUP, self)._list_outputs()
+        del outputs['out_base']
         if isdefined(self.inputs.out_base):
             base = self.inputs.out_base
         else:
             base = split_filename(self.inputs.in_file)[1] + '_base'
-        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoeff')
-        outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar')
+        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef')
+        outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
+                                                ext='.txt')
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
