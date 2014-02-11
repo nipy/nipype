@@ -8,6 +8,8 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=/home/travis/anaconda/bin:$PATH
+  - echo $PATH
+  - ls /home/travis/anaconda/bin/
   # The next couple lines fix a crash with multiprocessing on Travis
   - sudo rm -rf /dev/shm
   - sudo ln -s /run/shm /dev/shm
