@@ -23,7 +23,7 @@ $script = <<SCRIPT
 wget http://repo.continuum.io/miniconda/Miniconda-3.0.0-Linux-x86_64.sh -O miniconda.sh
 chmod +x miniconda.sh
 ./miniconda.sh -b
-echo "export PATH=$HOME/anaconda/bin:\\$PATH" >> .bashrc
+echo "export PATH=$HOME/miniconda/bin:\\$PATH" >> .bashrc
 
 # install nipype dependencies
 $HOME/anaconda/bin/conda update --yes conda
