@@ -20,12 +20,13 @@ $script = <<SCRIPT
 # qconf -aattr queue slots "2, [neuro=3]" main.q
 
 # install anaconda
-wget http://repo.continuum.io/miniconda/Miniconda-2.2.2-Linux-x86_64.sh -O miniconda.sh
+wget http://repo.continuum.io/miniconda/Miniconda-3.0.0-Linux-x86_64.sh -O miniconda.sh
 chmod +x miniconda.sh
 ./miniconda.sh -b
 echo "export PATH=$HOME/anaconda/bin:\\$PATH" >> .bashrc
 
 # install nipype dependencies
+$HOME/anaconda/bin/conda update --yes conda
 $HOME/anaconda/bin/conda install --yes pip numpy scipy nose traits networkx
 $HOME/anaconda/bin/conda install --yes dateutil ipython-notebook matplotlib
 $HOME/anaconda/bin/pip install nibabel --use-mirrors
