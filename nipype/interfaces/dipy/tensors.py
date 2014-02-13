@@ -28,6 +28,64 @@ else:
     from dipy.reconst.vec_val_sum import vec_val_vect
 
 
+_ut_indices = np.array([[0, 1, 2],
+                        [1, 3, 4],
+                        [2, 4, 5]])
+
+
+def from_upper_triangular(D):
+    """ Returns a tensor given the six unique tensor elements
+
+    Given the six unique tensor elments (in the order: Dxx, Dxy, Dxz, Dyy, Dyz,
+    Dzz) returns a 3 by 3 tensor. All elements after the sixth are ignored.
+
+    Parameters
+    -----------
+    D : array_like, (..., >6)
+        Unique elements of the tensors
+
+    Returns
+    --------
+    tensor : ndarray (..., 3, 3)
+        3 by 3 tensors
+
+    """
+    return D[..., _ut_indices]
+
+
+_ut_rows = np.array([0, 0, 0, 1, 1, 2])
+_ut_cols = np.array([0, 1, 2, 1, 2, 2])
+
+
+def upper_triangular(tensor, b0=None):
+    """
+    Returns the six upper triangular values of the tensor and a dummy variable
+    if b0 is not None
+
+    Parameters
+    ----------
+    tensor : array_like (..., 3, 3)
+        a collection of 3, 3 diffusion tensors
+    b0 : float
+        if b0 is not none log(b0) is returned as the dummy variable
+
+    Returns
+    -------
+    D : ndarray
+        If b0 is none, then the shape will be (..., 6) otherwise (..., 7)
+
+    """
+    if tensor.shape[-2:] != (3, 3):
+        raise ValueError("Diffusion tensors should be (..., 3, 3)")
+    if b0 is None:
+        return tensor[..., _ut_rows, _ut_cols]
+    else:
+        D = np.empty(tensor.shape[:-2] + (7,), dtype=tensor.dtype)
+        D[..., 6] = -np.log(b0)
+        D[..., :6] = tensor[..., _ut_rows, _ut_cols]
+        return D
+
+
 class TensorModeInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input 4D diffusion-weighted image file')
@@ -119,7 +177,11 @@ class TensorMode(BaseInterface):
 
 class EstimateConductivityInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
-                   desc='The input 4D diffusion-weighted image file')
+                   desc='The input 4D diffusion-tensor image file')
+    lower_triangular_input = traits.Bool(False, usedefault=True,
+        desc='if True, the input tensor is considered to be stored in lower triangular form.')
+    lower_triangular_output = traits.Bool(True, usedefault=True,
+        desc='if True, the output tensor is stored in lower triangular form.')
     use_outlier_correction = traits.Bool(False, usedefault=True,
         desc='if True, conductivity eigenvalues are bounded to a \
         maximum of 0.4 [S/m]')
@@ -143,7 +205,8 @@ class EstimateConductivity(BaseInterface):
     """
     Estimates electrical conductivity from a set of diffusion-weighted
     images, as well as their associated b-values and b-vectors. Fits
-    the diffusion tensors and calculates conductivity with Dipy.
+    the diffusion tensors and calculates conductivity with Dipy. Saves
+    the conductivity tensors in lower triangular 4D image form.
 
     Tensors are assumed to be in the white matter of a human brain and
     a default conductivity value and eigenvalue scaling factor is included.
@@ -188,14 +251,30 @@ class EstimateConductivity(BaseInterface):
         data = img.get_data()
         affine = img.get_affine()
 
-        try:
-            dti_params = dti.eig_from_lo_tri(data)
-        except:
-            dti_params = dti.tensor_eig_from_lo_tri(data)
+        if self.inputs.lower_triangular_input:
+            try:
+                dti_params = dti.eig_from_lo_tri(data)
+            except:
+                dti_params = dti.tensor_eig_from_lo_tri(data)
+
+        else:
+            data = np.asarray(data)
+            data_flat = data.reshape((-1, data.shape[-1]))
+            dti_params = np.empty((len(data_flat), 4, 3))
+
+            for ii in range(len(data_flat)):
+                tensor = from_upper_triangular(data_flat[ii])
+                evals, evecs = dti.decompose_tensor(tensor)
+                dti_params[ii, 0] = evals
+                dti_params[ii, 1:] = evecs
+
+            dti_params.shape = data.shape[:-1] + (12,)
 
         evals = dti_params[..., :3]
         evecs = dti_params[..., 3:]
+
         evecs = evecs.reshape(np.shape(evecs)[:3] + (3,3))
+
 
         ### Estimate electrical conductivity
 
@@ -215,7 +294,11 @@ class EstimateConductivity(BaseInterface):
             evals[evals > 0.4] = 0.4
 
         conductivity_quadratic = np.array(vec_val_vect(evecs, evals))
-        conductivity_data = dti.lower_triangular(conductivity_quadratic)
+
+        if self.inputs.lower_triangular_output:
+            conductivity_data = dti.lower_triangular(conductivity_quadratic)
+        else:
+            conductivity_data = upper_triangular(conductivity_quadratic)
 
         # Write as a 4D Nifti tensor image with the original affine
         img = nb.Nifti1Image(conductivity_data, affine=affine)
@@ -237,4 +320,4 @@ class EstimateConductivity(BaseInterface):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        return name + '_conductivity.nii'
+        return name + '_conductivity.nii.gz'
