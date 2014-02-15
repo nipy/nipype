@@ -6,6 +6,7 @@
 from copy import deepcopy
 from glob import glob
 import os
+import pickle
 import pwd
 import shutil
 from socket import gethostname
@@ -55,7 +56,7 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = pwd.getpwuid(os.geteuid())[0]
-    crashfile = 'crash-%s-%s-%s.npz' % (timeofcrash,
+    crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
                                         login_name,
                                         name)
     crashdir = node.config['execution']['crashdump_dir']
@@ -66,7 +67,8 @@ def report_crash(node, traceback=None, hostname=None):
     crashfile = os.path.join(crashdir, crashfile)
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
-    np.savez(crashfile, node=node, traceback=traceback)
+    savepkl(crashfile, dict(node=node, traceback=traceback))
+    #np.savez(crashfile, node=node, traceback=traceback)
     return crashfile
 
 
