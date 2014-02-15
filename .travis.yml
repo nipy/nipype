@@ -18,6 +18,7 @@ before_install:
 
 # Install packages
 install:
+  - conda update --yes conda
   - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
   - conda install --yes numpy scipy nose traits networkx dateutil
