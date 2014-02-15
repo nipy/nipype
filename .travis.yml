@@ -21,6 +21,7 @@ install:
   - conda update --yes conda
   - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
   - conda install --yes numpy scipy nose traits networkx dateutil
   - pip install nibabel --use-mirrors
   - pip install python-coveralls --use-mirrors
