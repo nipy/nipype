@@ -205,11 +205,15 @@ class WorkflowBase(object):
 
     def save(self, filename=None):
         if filename is None:
-            filename = 'temp.npz'
-        np.savez(filename, object=self)
+            filename = 'temp.pklz'
+        savepkl(filename, self)
 
     def load(self, filename):
-        return np.load(filename)
+        if '.npz' in filename:
+            DeprecationWarning(('npz files will be deprecated in the next '
+                                'release. you can use numpy to open them.'))
+            return np.load(filename)
+        return loadpkl(filename)
 
 
 class Workflow(WorkflowBase):
