@@ -389,10 +389,10 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'   
     """
     DEF_SAMPLING_STRATEGY = 'None'
-    """The default sampling stratey argument."""
+    """The default sampling strategy argument."""
 
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
@@ -654,10 +654,10 @@ class Registration(ANTSCommand):
                                                            'Initial',
                                                            True)
                 outputs['forward_transforms'].append(forwardFileName)
-                outputs['forward_invert_flags'].append( forwardInverseMode )
+                outputs['forward_invert_flags'].append( False )
                 outputs['reverse_transforms'].insert( 0,
                                                       os.path.abspath(reverseFileName))
-                outputs['reverse_invert_flags'].insert(0, reverseInverseMode)
+                outputs['reverse_invert_flags'].insert(0, True)
                 transformCount += 1
 
             for count in range(len(self.inputs.transforms)):
@@ -688,13 +688,17 @@ class Registration(ANTSCommand):
                 collapse_list.append( 'SyN' )
 
             for transform in collapse_list: 
-                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform)
-                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform, True)
-                outputs['forward_transforms'].append(
-                    os.path.abspath(forwardFileName))
+                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, 
+                                                                            transformCount, 
+                                                                            transform, 
+                                                                            inverse=False)
+                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
+                                                                            transformCount,
+                                                                            transform,
+                                                                            inverse=True)
+                outputs['forward_transforms'].append(os.path.abspath(forwardFileName))
                 outputs['forward_invert_flags'].append(forwardInverseMode)
-                outputs['reverse_transforms'].append(
-                    os.path.abspath(reverseFileName))
+                outputs['reverse_transforms'].append(os.path.abspath(reverseFileName))
                 outputs['reverse_invert_flags'].append(reverseInverseMode)
                 transformCount += 1
         if self.inputs.write_composite_transform:
