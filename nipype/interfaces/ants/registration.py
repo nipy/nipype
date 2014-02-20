@@ -12,6 +12,7 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 import os
 from nipype.interfaces.base import InputMultiPath
 from nipype.interfaces.traits_extension import isdefined
+import numpy as np
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
@@ -397,6 +398,7 @@ class Registration(ANTSCommand):
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
+    _linear_transform_names = np.array( [ 'Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity' ] )
 
     def _formatMetric(self, index):
         """
@@ -644,10 +646,18 @@ class Registration(ANTSCommand):
                 outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
                 transformCount += 1
             elif isdefined(self.inputs.initial_moving_transform_com):
-                #forwardFileName, _ = self._outputFileNames(self.inputs.output_transform_prefix,
-                #                                           transformCount,
-                #                                           'Initial')
-                #outputs['forward_transforms'].append(forwardFileName)
+                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
+                                                           transformCount,
+                                                           'Initial')
+                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
+                                                           transformCount,
+                                                           'Initial',
+                                                           True)
+                outputs['forward_transforms'].append(forwardFileName)
+                outputs['forward_invert_flags'].append( forwardInverseMode )
+                outputs['reverse_transforms'].insert( 0,
+                                                      os.path.abspath(reverseFileName))
+                outputs['reverse_invert_flags'].insert(0, reverseInverseMode)
                 transformCount += 1
 
             for count in range(len(self.inputs.transforms)):
@@ -665,7 +675,19 @@ class Registration(ANTSCommand):
                 transformCount += 1
         else:
             transformCount = 0
-            for transform in ['GenericAffine', 'SyN']:  # Only files returned by collapse_output_transforms
+            isLinear = [ any( self._linear_transform_names==t ) for t in self.inputs.transforms ]
+            collapse_list = []
+
+            if isdefined(self.inputs.initial_moving_transform) or \
+               isdefined(self.inputs.initial_moving_transform_com ):
+               isLinear.insert(0, True)
+
+            if any( isLinear ):  # Only files returned by collapse_output_transforms
+                collapse_list.append( 'GenericAffine' )
+            if not all( isLinear ):
+                collapse_list.append( 'SyN' )
+
+            for transform in collapse_list: 
                 forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform)
                 reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform, True)
                 outputs['forward_transforms'].append(
