@@ -79,8 +79,6 @@ class Dcm2nii(CommandLine):
         return new_runtime
 
     def _parse_stdout(self, stdout):
-        import re
-        import os
         files = []
         reoriented_files = []
         reoriented_and_cropped_files = []
