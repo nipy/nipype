@@ -79,6 +79,8 @@ class Dcm2nii(CommandLine):
         return new_runtime
 
     def _parse_stdout(self, stdout):
+        import re
+        import os
         files = []
         reoriented_files = []
         reoriented_and_cropped_files = []
@@ -104,12 +106,19 @@ class Dcm2nii(CommandLine):
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base,filename + ".bvec"))
                         bvals.append(os.path.join(base,filename + ".bval"))
-                elif re.search('-->(.*)', line):
-                    search = re.search('.*--> (.*)', line)
-                    file = search.groups()[0]
+                elif re.search('.*->(.*)', line):
+                    val = re.search('.*->(.*)', line)
+                    val = val.groups()[0]
+                    if isdefined(self.inputs.output_dir):
+                        output_dir = self.inputs.output_dir
+                    else:
+                        output_dir = self._gen_filename('output_dir')
+                    val = os.path.join(output_dir, val)
+                    file = val
 
                 if file:
-                    files.append(file)
+                    if last_added_file and os.path.exists(file) and not last_added_file in file:
+                        files.append(file)
                     last_added_file = file
                     continue
 
@@ -123,9 +132,6 @@ class Dcm2nii(CommandLine):
                     reoriented_and_cropped_files.append(os.path.join(base, filename))
                     skip = True
                     continue
-
-
-
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 
