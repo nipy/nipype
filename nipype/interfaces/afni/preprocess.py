@@ -1206,7 +1206,7 @@ class TCatInputSpec(AFNICommandInputSpec):
         mandatory=True,
         copyfile=False)
     out_file = File(name_template="%s_tcat", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+                    argstr='-prefix %s', name_source="in_files")
     rlt = traits.Str(desc='options', argstr='-rlt%s', position=1)
 
 
@@ -1993,3 +1993,46 @@ class Eval(AFNICommand):
         """
         return super(Eval, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'out1D', 'other'))
+            
+class MeansInputSpec(AFNICommandInputSpec):
+    in_file_a = File(desc='input file to 3dMean',
+        argstr='%s',
+        position=0,
+        mandatory=True,
+        exists=True)
+    in_file_b = File(desc='another input file to 3dMean',
+        argstr='%s',
+        position=1,
+        exists=True)
+    out_file = File(name_template="%s_mean", desc='output image file name',
+                    argstr='-prefix %s', name_source="in_file_a")
+    scale = traits.Str(desc='scaling of output', argstr='-%sscale')
+    non_zero = traits.Bool(desc='use only non-zero values', argstr='-non_zero')
+    std_dev = traits.Bool(desc='calculate std dev', argstr='-stdev')
+    sqr = traits.Bool(desc='mean square instead of value', argstr='-sqr')
+    summ = traits.Bool(desc='take sum, (not average)', argstr='-sum')
+    count = traits.Bool(desc='compute count of non-zero voxels', argstr='-count')
+    mask_inter = traits.Bool(desc='create intersection mask', argstr='-mask_inter')
+    mask_union = traits.Bool(desc='create union mask', argstr='-mask_union')
+
+class Means(AFNICommand):
+    """Takes the voxel-by-voxel mean of all input datasets using 3dMean
+
+    see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> means = afni.Means()
+    >>> means.inputs.in_file_a = 'dset.nii'
+    >>> means.inputs.in_file_b = 'dset2.nii'
+    >>> means.inputs.out_file =  'output.nii'
+    >>> means.cmdline
+    '3dMean -prefix output.nii dset.nii'
+
+    """
+
+    _cmd = '3dMean'
+    input_spec = MeansInputSpec
+    output_spec = AFNICommandOutputSpec
