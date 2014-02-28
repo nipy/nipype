@@ -1205,3 +1205,91 @@ def calc_moments(timeseries_file, moment):
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
     return np.where(zero, 0, m3 / m2**(moment/2.0))
+
+class AddNoiseInputSpec(TraitedSpec):
+    in_file = File( exists=True, mandatory=True,
+                    desc='input image that will be corrupted with noise')
+
+    in_mask = File( exists=True, desc='input mask, voxels outside this mask\
+                    will be considered background and corrupted with noise\
+                    with Rayleigh distribution' )
+
+    snr = traits.Float( 10.0, desc='desired output SNR in dB', usedefault=True )
+    
+    dist = traits.Enum( 'normal', desc='desired noise distribution, currently\
+                        only gaussian is implemented' )
+    out_file = File( desc='desired output filename' )
+
+class AddNoiseOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='corrupted image')
+
+
+class AddNoise(BaseInterface):
+    """
+    Corrupts with noise the input image
+
+    Example
+    -------
+
+    >>> from nipype.algorithms.misc import AddNoise
+    >>> noise = AddNoise()
+    >>> noise.inputs.in_file = 'T1.nii'
+    >>> noise.inputs.in_mask = 'mask.nii'
+    >>> noise.snr = 30.0
+    >>> noise.run() # doctest: +SKIP
+    """
+    input_spec = AddNoiseInputSpec
+    output_spec = AddNoiseOutputSpec
+
+    def _run_interface(self, runtime):
+        in_image = nb.load( self.inputs.in_file )
+        in_data = in_image.get_data()
+        snr = self.inputs.snr
+
+        if isdefined( self.inputs.in_mask ):
+            in_mask = nb.load( self.inputs.in_mask ).get_data()
+        else:
+            in_mask = np.ones_like( in_data )
+
+        result = self.gen_noise( in_data, mask=in_mask, snr_db=snr )
+        res_im = nb.Nifti1Image( result, in_image.get_affine(), in_image.get_header() )
+        nb.save( res_im, self._gen_output_filename() )
+        return runtime
+
+    def _gen_output_filename( self ):
+        if not isdefined( self.inputs.out_file ):
+            _, base, _ = split_filename( self.inputs.in_file )
+            out_file = os.path.abspath( base + ('_SNR%03.2f' % self.inputs.snr) + '.nii.gz' )
+        else:
+            out_file = self.inputs.out_file
+
+        return out_file
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self._gen_output_filename()
+        return outputs
+
+    def gen_noise( self, image, mask=None, snr_db=10.0 ):
+        """
+        Generates a copy of an image with a certain amount of
+        added gaussian noise (rayleigh for background in mask)
+        """
+        from math import sqrt
+        snr = sqrt( np.power( 10.0, snr_db/10.0 ) )
+        noise = np.random.normal( size=image.shape )
+   
+        if mask is None:
+            mask = np.ones_like( image )
+            
+
+        S = np.mean(image[mask>0])
+
+        if np.any( mask==0 ):
+            S = S - np.mean( image[mask==0] )
+            bg_noise = np.random.rayleigh( size=image.shape )
+            noise[mask==0] = bg_noise[mask==0]
+
+        im_noise = image +  noise * (S/snr)
+        
+        return im_noise
