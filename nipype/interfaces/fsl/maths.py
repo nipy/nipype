@@ -242,11 +242,10 @@ class SpatialFilter(MathsCommand):
 
 class UnaryMathsInput(MathsInput):
 
-    operation = traits.Enum("exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "sqr", "sqrt",
-                            "recip", "abs", "bin", "binv", "fillh", "fillh26", "index", "edge", "nan",
-                             "nanm", "rand", "randn", "range",
+    operation = traits.Enum("exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index",
                             argstr="-%s", position=4, mandatory=True,
                             desc="operation to perform")
+
 
 class UnaryMaths(MathsCommand):
     """Use fslmaths to perorm a variety of mathematical operations on an image.
