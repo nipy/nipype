@@ -199,7 +199,7 @@ class TOPUP(FSLCommand):
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
         >>> topup.cmdline #doctest: +ELLIPSIS
-        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=.../nipypetu'
+        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
         >>> res = topup.run() # doctest: +SKIP
 
     """

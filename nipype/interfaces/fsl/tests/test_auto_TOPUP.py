@@ -40,7 +40,6 @@ def test_TOPUP_inputs():
     ),
     out_base=dict(argstr='--out=%s',
     hash_files=False,
-    keep_extension=True,
     name_source=['in_file'],
     name_template='%s_base',
     ),
