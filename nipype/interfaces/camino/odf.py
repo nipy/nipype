@@ -273,7 +273,7 @@ class MESD(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['recon_data'] = os.path.abspath(self._gen_outfilename())
+        outputs['mesd_data'] = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
