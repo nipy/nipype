@@ -184,7 +184,12 @@ def safe_encode(x, as_literal=True):
 
 def prov_encode(graph, value, create_container=True):
     if isinstance(value, list) and create_container:
-        if len(value) > 1:
+        if len(value) == 0:
+            encoded_literal = safe_encode(value)
+            attr = {pm.PROV['value']: encoded_literal}
+            id = get_attr_id(attr)
+            entity = graph.entity(id, attr)
+        elif len(value) > 1:
             try:
                 entities = []
                 for item in value:

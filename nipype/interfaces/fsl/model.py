@@ -1151,7 +1151,7 @@ class MultipleRegressDesign(BaseInterface):
         for cidx in range(npoints):
             mat_txt.append(' '.join(
                 ['%e' % self.inputs.regressors[key][cidx] for key in regs]))
-        mat_txt = '\n'.join(mat_txt)
+        mat_txt = '\n'.join(mat_txt) + '\n'
         # write t-con file
         con_txt = []
         counter = 0
@@ -1175,7 +1175,7 @@ class MultipleRegressDesign(BaseInterface):
                 convals[regs.index(reg)
                         ] = self.inputs.contrasts[idx][3][regidx]
             con_txt.append(' '.join(['%e' % val for val in convals]))
-        con_txt = '\n'.join(con_txt)
+        con_txt = '\n'.join(con_txt) + '\n'
         # write f-con file
         fcon_txt = ''
         if nfcons:
@@ -1190,6 +1190,7 @@ class MultipleRegressDesign(BaseInterface):
                         convals[tconmap[self.inputs.contrasts.index(tcon)]] = 1
                     fcon_txt.append(' '.join(['%d' % val for val in convals]))
                     fcon_txt = '\n'.join(fcon_txt)
+            fcon_txt += '\n'
         # write group file
         grp_txt = ['/NumWaves       1',
                    '/NumPoints      %d' % npoints,
@@ -1200,7 +1201,7 @@ class MultipleRegressDesign(BaseInterface):
                 grp_txt += ['%d' % self.inputs.groups[i]]
             else:
                 grp_txt += ['1']
-        grp_txt = '\n'.join(grp_txt)
+        grp_txt = '\n'.join(grp_txt) + '\n'
 
         txt = {'design.mat': mat_txt,
                'design.con': con_txt,
@@ -1702,7 +1703,7 @@ class Randomise(FSLCommand):
 class GLMInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,
                    desc='input file name (text matrix or 3D/4D image file)')
-    out_file = File(name_template="%s_glm.txt", argstr='-o %s', position=3,
+    out_file = File(name_template="%s_glm", argstr='-o %s', position=3,
                     desc=('filename for GLM parameter estimates'
                           + ' (GLM betas)'),
                     name_source="in_file", keep_extension=True)
@@ -1799,9 +1800,9 @@ class GLM(FSLCommand):
     Example
     -------
     >>> import nipype.interfaces.fsl as fsl
-    >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii')
+    >>> glm = fsl.GLM(in_file='functional.nii', design='maps.nii', output_type='NIFTI')
     >>> glm.cmdline
-    'fsl_glm -i functional.nii -d maps.nii -o functional_glm.txt'
+    'fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii'
 
     """
     _cmd = 'fsl_glm'
@@ -1809,13 +1810,7 @@ class GLM(FSLCommand):
     output_spec = GLMOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        outputs['out_file'] = self.inputs.out_file
-        # Generate an out_file if one is not provided
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
-            outputs['out_file'] = self._gen_filename('out_file')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        outputs = super(GLM, self)._list_outputs()
 
         if isdefined(self.inputs.out_cope):
             outputs['out_cope'] = os.path.abspath(self.inputs.out_cope)

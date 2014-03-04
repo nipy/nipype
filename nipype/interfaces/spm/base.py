@@ -129,11 +129,17 @@ class Info(object):
 
         Parameters
         ----------
-        matlab_cmd : String specifying default matlab command
-
-            default None, will look for environment variable MATLABCMD
-            and use if found, otherwise falls back on MatlabCommand
-            default of 'matlab -nodesktop -nosplash'
+        matlab_cmd: str
+            Sets the default matlab command. If None, the value of the
+            environment variable SPMMCRCMD will be used if set and use_mcr
+            is True or the environment variable FORCE_SPMMCR is set.
+            If one of FORCE_SPMMCR or SPMMCRCMD is not set, the existence
+            of the environment variable MATLABCMD is checked and its value
+            is used as the matlab command if possible.
+            If none of the above was successful, the fallback value of
+            'matlab -nodesktop -nosplash' will be used.
+        paths : str
+        use_mcr : bool
 
         Returns
         -------
@@ -141,10 +147,17 @@ class Info(object):
 
             returns None of path not found
         """
+        if use_mcr or 'FORCE_SPMMCR' in os.environ:
+            use_mcr = True
+            if matlab_cmd is None:
+                try:
+                    matlab_cmd = os.environ['SPMMCRCMD']
+                except KeyError:
+                    pass
         if matlab_cmd is None:
             try:
                 matlab_cmd = os.environ['MATLABCMD']
-            except:
+            except KeyError:
                 matlab_cmd = 'matlab -nodesktop -nosplash'
         mlab = MatlabCommand(matlab_cmd=matlab_cmd)
         mlab.inputs.mfile = False
@@ -224,6 +237,7 @@ class SPMCommand(BaseInterface):
                                                               'mfile',
                                                               'paths',
                                                               'use_mcr'])
+        self._find_mlab_cmd_defaults()
         self._check_mlab_inputs()
         self._matlab_cmd_update()
 
@@ -232,6 +246,17 @@ class SPMCommand(BaseInterface):
         cls._matlab_cmd = matlab_cmd
         cls._paths = paths
         cls._use_mcr = use_mcr
+
+    def _find_mlab_cmd_defaults(self):
+        # check if the user has set environment variables to enforce
+        # the standalone (MCR) version of SPM
+        if self._use_mcr or 'FORCE_SPMMCR' in os.environ:
+            self._use_mcr = True
+            if self._matlab_cmd is None:
+                try:
+                    self._matlab_cmd = os.environ['SPMMCRCMD']
+                except KeyError:
+                    pass
 
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,

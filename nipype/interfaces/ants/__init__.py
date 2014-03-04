@@ -7,7 +7,7 @@
 from .registration import ANTS, Registration
 
 # Resampling Programs
-from resampling import ApplyTransforms, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
+from .resampling import ApplyTransforms, ApplyTransformsToPoints, WarpImageMultiTransform, WarpTimeSeriesImageMultiTransform
 
 
 # Segmentation Programs

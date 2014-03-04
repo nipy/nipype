@@ -73,7 +73,11 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        outputs['spherical_harmonics_image'] = self.inputs.out_filename
+        if not isdefined(outputs['spherical_harmonics_image']):
+            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
         return outputs
 
     def _gen_filename(self, name):
@@ -148,7 +152,11 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        outputs['spherical_harmonics_image'] = self.inputs.out_filename
+        if not isdefined(outputs['spherical_harmonics_image']):
+            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
         return outputs
 
     def _gen_filename(self, name):
@@ -194,7 +202,11 @@ class EstimateResponseForSH(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['response'] = op.abspath(self._gen_outfilename())
+        outputs['response'] = self.inputs.out_filename
+        if not isdefined(outputs['response']):
+            outputs['response'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['response'] = op.abspath(outputs['response'])
         return outputs
 
     def _gen_filename(self, name):
@@ -282,3 +294,109 @@ class FSL2MRTrix(BaseInterface):
         _, bvec , _ = split_filename(self.inputs.bvec_file)
         _, bval , _ = split_filename(self.inputs.bval_file)
         return bvec + '_' + bval + '.txt'
+
+
+class GenerateDirectionsInputSpec(CommandLineInputSpec):
+    num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2 , desc='the number of directions to generate.')
+
+    power = traits.Float(argstr='-power %s', desc='specify exponent to use for repulsion power law.')
+    niter = traits.Int(argstr='-niter %s', desc='specify the maximum number of iterations to perform.')
+    display_info = traits.Bool(argstr='-info', desc='Display information messages.')
+    quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
+    display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File("directions.txt", argstr='%s', hash_files=False,
+                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.', usedefault=True)
+
+class GenerateDirectionsOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='directions file')
+
+class GenerateDirections(CommandLine):
+    """
+    generate a set of directions evenly distributed over a hemisphere.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> gendir = mrt.GenerateDirections()
+    >>> gendir.inputs.num_dirs = 300
+    >>> gendir.run()                                          # doctest: +SKIP
+    """
+
+    _cmd = 'gendir'
+    input_spec=GenerateDirectionsInputSpec
+    output_spec=GenerateDirectionsOutputSpec
+
+    
+class FindShPeaksInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='the input image of SH coefficients.')
+    directions_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the set of directions to use as seeds for the peak finding')    
+    peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
+    num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
+    peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
+                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option ' \
+                                  ' phi: the azimuthal angle of the direction (in degrees). theta: the elevation angle of the direction (in degrees, from the vertical z-axis)')
+    peak_threshold = traits.Float(argstr='-threshold %s', desc='only peak amplitudes greater than the threshold will be considered')
+    display_info = traits.Bool(argstr='-info', desc='Display information messages.')
+    quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
+    display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+                    desc='the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn', name_source=["in_file"])
+    
+class FindShPeaksOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Peak directions image')
+
+class FindShPeaks(CommandLine):
+    """
+    identify the orientations of the N largest peaks of a SH profile
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> shpeaks = mrt.FindShPeaks()
+    >>> shpeaks.inputs.in_file = 'csd.mif'
+    >>> shpeaks.inputs.directions_file = 'dirs.txt'
+    >>> shpeaks.inputs.num_peaks = 2
+    >>> shpeaks.run()                                          # doctest: +SKIP
+    """
+
+    _cmd = 'find_SH_peaks'
+    input_spec=FindShPeaksInputSpec
+    output_spec=FindShPeaksOutputSpec
+
+
+
+class Directions2AmplitudeInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')    
+    peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
+    num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
+    peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
+                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option ' \
+                                  ' phi: the azimuthal angle of the direction (in degrees). theta: the elevation angle of the direction (in degrees, from the vertical z-axis)')
+    display_info = traits.Bool(argstr='-info', desc='Display information messages.')
+    quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
+    display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
+    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+                    desc='the output amplitudes image', name_source=["in_file"])
+    
+class Directions2AmplitudeOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='amplitudes image')
+
+class Directions2Amplitude(CommandLine):
+    """
+    convert directions image to amplitudes
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> amplitudes = mrt.Directions2Amplitude()
+    >>> amplitudes.inputs.in_file = 'peak_directions.mif'
+    >>> amplitudes.run()                                          # doctest: +SKIP
+    """
+
+    _cmd = 'dir2amp'
+    input_spec=Directions2AmplitudeInputSpec
+    output_spec=Directions2AmplitudeOutputSpec
+

@@ -206,8 +206,8 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         default=False, requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
 
-    initial_moving_transform_com = traits.Bool(argstr='%s',
-                    default=False, xor=['initial_moving_transform'],
+    initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
+                    default=0, xor=['initial_moving_transform'],
                     desc="Use center of mass for moving transform")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
         "Mattes")
@@ -275,16 +275,14 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                          'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
     # TODO: transform_parameters currently supports rigid, affine, composite affine, translation, bspline, gaussian displacement field (gdf), and SyN -----ONLY-----!
     transform_parameters = traits.List(traits.Either(traits.Float(),
-                                                     traits.Tuple(
-                                                         traits.Float()),
+                                                     traits.Tuple(traits.Float()),
                                                      traits.Tuple(traits.Float(),  # gdf & syn
-                                                                  traits.Float(
-                                                                  ),
+                                                                  traits.Float(),
                                                                   traits.Float()),
                                                      traits.Tuple(traits.Float(),  # BSplineSyn
-                                                                  traits.Float(),
-                                                                  traits.Float(),
-                                                                  traits.Float())))
+                                                                  traits.Int(),
+                                                                  traits.Int(),
+                                                                  traits.Int())))
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)

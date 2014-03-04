@@ -9,10 +9,10 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.8.0: [`zip <https://github.com/nipy/nipype/archive/0.8.zip>`__ `tar.gz
-<https://github.com/nipy/nipype/archive/0.8.tar.gz>`__]
+Release 0.9.2: [`zip <https://github.com/nipy/nipype/archive/0.9.2.zip>`__ `tar.gz
+<https://github.com/nipy/nipype/archive/0.9.1.tar.gz>`__]
 
-Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz 
+Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]
 
 `Prior downloads <http://github.com/nipy/nipype/tags>`_
@@ -45,16 +45,11 @@ manager.
 Mac OS X
 ~~~~~~~~
 
-The easiest way to get nipype running on Mac OS X is to install EPD_ and then add
-nibabel and nipype by executing::
+The easiest way to get nipype running on Mac OS X is to install Anaconda_ or
+Canopy_ and then add nibabel and nipype by executing::
 
 	easy_install nibabel
 	easy_install nipype
-
-If you are running a 64 bit version of EPD, you will need to compile
-ETS. Instructions for a 64-bit boot mode are available:
-https://gist.github.com/845545
-
 
 From source
 ~~~~~~~~~~~
@@ -131,7 +126,7 @@ Dateutil 1.5 -
 
 .. note::
 
-    Full distributions such as pythonxy_ or EPD_ provide the above packages,
+    Full distributions such as Anaconda_ or Canopy_ provide the above packages,
     except Nibabel_.
 
 Strong Recommendations
@@ -161,7 +156,7 @@ These are the software packages that nipype.interfaces wraps:
 FSL_
   4.1.0 or later
 
-matlab_ 
+matlab_
   2008a or later
 
 SPM_
@@ -169,21 +164,21 @@ SPM_
 
 FreeSurfer_
   FreeSurfer version 4 and higher
-  
+
 AFNI_
   2009_12_31_1431 or later
 
 Slicer_
   3.6 or later
 
-Nipy_ 
+Nipy_
   0.1.2+20110404 or later
 
-Nitime_ 
+Nitime_
   (optional)
-  
+
 Camino_
-  
+
 Camino2Trackvis_
 
 ConnectomeViewer_
