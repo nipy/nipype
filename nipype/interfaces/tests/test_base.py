@@ -182,13 +182,14 @@ def test_namesource():
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%d",position=3)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
         input_spec = spec2
     testobj = TestName()
     testobj.inputs.doo = tmp_infile
+    testobj.inputs.goo = 99
     yield assert_true, '%s_generated' % nme in testobj.cmdline
     testobj.inputs.moo = "my_%s_template"
     yield assert_true, 'my_%s_template' % nme in testobj.cmdline
