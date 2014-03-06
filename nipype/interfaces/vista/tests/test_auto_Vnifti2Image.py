@@ -6,7 +6,6 @@ def test_Vnifti2Image_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     attributes=dict(argstr='-attr %s',
-    mandatory=False,
     position=2,
     ),
     environ=dict(nohash=True,
