@@ -127,7 +127,8 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-initdirection %s', minlen=2, maxlen=2, units='voxels')
-    out_file = File(argstr='%s', position= -1, genfile=True, desc='output data file')
+    out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck', 
+                    output_name='tracked.tck', desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
@@ -156,20 +157,6 @@ class StreamlineTrack(CommandLine):
     input_spec = StreamlineTrackInputSpec
     output_spec = StreamlineTrackOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['tracked'] = op.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_tracked.tck'
 
 class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
