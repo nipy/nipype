@@ -423,10 +423,11 @@ def topup_correction( name='topup_correction' ):
                      ,(combin,        merged, [('out', 'in_files')] )
                      ,(merged,         topup, [('merged_file','in_file')])
                      ,(inputnode,      topup, [('encoding_direction','encoding_direction'),('readout_times','readout_times') ])
-                     ,(topup,     applytopup, [('out_topup','in_topup'),('out_enc_file','encoding_file')])
+                     ,(topup,     applytopup, [('out_fieldcoef','in_topup_fieldcoef'),('out_movpar','in_topup_movpar'),
+                                               ('out_enc_file','encoding_file')])
                      ,(combin2,   applytopup, [('out','in_files')] )
                      ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar'),
-                                               ('out_topup','out_topup'),('out_enc_file','out_enc_file') ])
+                                               ('out_enc_file','out_enc_file') ])
                      ,(applytopup,outputnode, [('out_corrected','epi_corrected')])
                      ])
 
