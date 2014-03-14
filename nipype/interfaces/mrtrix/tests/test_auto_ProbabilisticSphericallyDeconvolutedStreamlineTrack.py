@@ -92,7 +92,7 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     step_size=dict(argstr='-step %s',
     units='mm',
     ),
-    stop=dict(argstr='-gzip',
+    stop=dict(argstr='-stop',
     ),
     terminal_output=dict(mandatory=True,
     nohash=True,
