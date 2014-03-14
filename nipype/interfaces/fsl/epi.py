@@ -264,11 +264,11 @@ class TOPUP(FSLCommand):
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
                               desc='name of 4D file with images',
-                              argstr='--imain=%s...', sep=',')
+                              argstr='--imain=%s', sep=',')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
-    in_index = traits.List(traits.Int, argstr='--inindex=%d...', sep=',',
+    in_index = traits.List(traits.Int, argstr='--inindex=%s', sep=',',
                            mandatory=True,
                            desc=('comma separated list of indicies into '
                                  '--datain of the input image (to be '
@@ -313,7 +313,7 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
         >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
         >>> applytopup.cmdline #doctest: +ELLIPSIS
-        'applytopup --datain=topup_encoding.txt --imain=epi.nii,--imain=epi_rev.nii --inindex=1,--inindex=2 --topup=topup --out=epi_corrected.nii.gz'
+        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
