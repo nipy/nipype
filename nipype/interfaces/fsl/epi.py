@@ -263,11 +263,13 @@ class TOPUP(FSLCommand):
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='name of 4D file with images', argstr='%s')
+                              desc='name of 4D file with images',
+                              argstr='--imain=%s...', sep=',')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
-    in_index = traits.List(argstr='%s', mandatory=True,
+    in_index = traits.List(traits.Int, argstr='--inindex=%d...', sep=',',
+                           mandatory=True,
                            desc=('comma separated list of indicies into '
                                  '--datain of the input image (to be '
                                  'corrected)'))
@@ -290,7 +292,9 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
 
 
 class ApplyTOPUPOutputSpec( TraitedSpec ):
-    out_corrected = File( exists=True, desc='name of 4D image file with unwarped images' )
+    out_corrected = File( exists=True, desc=('name of 4D image file with '
+                                             'unwarped images'))
+
 
 class ApplyTOPUP( FSLCommand ):
     """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions.
@@ -306,9 +310,10 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
-        >>> applytopup.inputs.in_topup = "my_topup_results"
+        >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
+        >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
         >>> applytopup.cmdline #doctest: +ELLIPSIS
-        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=my_topup_results --out=.../nipypeatu'
+        'applytopup --datain=topup_encoding.txt --imain=epi.nii,--imain=epi_rev.nii --inindex=1,--inindex=2 --topup=topup --out=epi_corrected.nii.gz'
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -317,35 +322,9 @@ class ApplyTOPUP( FSLCommand ):
     output_spec = ApplyTOPUPOutputSpec
 
     def _format_arg(self, name, spec, value):
-        # first do what should be done in general
-        formated = super(ApplyTOPUP, self)._format_arg(name, spec, value)
-        if name == 'in_files' or name == 'in_index':
-            if name == 'in_files':
-                formated = '--imain='
-            else:
-                formated = '--inindex='
-
-            formated = formated + "%s" % value[0]
-            for fname in value[1:]:
-                formated = formated + ",%s" % fname
-        return formated
-
-    def _parse_inputs( self, skip=None ):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = './nipypeatu'
-
-        self.inputs.out_base = os.path.abspath(self.inputs.out_base)
-        return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
-
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
-        return outputs
-
+        if name == 'in_topup_fieldcoef':
+            return spec.argstr % value.split('_fieldcoef')[0]
+        return super(ApplyTOPUP, self)._format_arg(name, spec, value)
 
 
 class EddyInputSpec( FSLCommandInputSpec ):
