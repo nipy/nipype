@@ -99,7 +99,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     inputmodel = traits.Enum('DT_STREAM', 'SD_PROB', 'SD_STREAM',
         argstr='%s', desc='input model type', usedefault=True, position=-3)
 
-    stop = traits.Bool(argstr='-gzip', desc="stop track as soon as it enters any of the include regions.")
+    stop = traits.Bool(argstr='-stop', desc="stop track as soon as it enters any of the include regions.")
     do_not_precompute = traits.Bool(argstr='-noprecomputed', desc="Turns off precomputation of the legendre polynomial values. Warning: this will slow down the algorithm by a factor of approximately 4.")
     unidirectional = traits.Bool(argstr='-unidirectional', desc="Track from the seed point in one direction only (default is to track in both directions).")
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
