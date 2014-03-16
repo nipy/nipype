@@ -780,7 +780,6 @@ class BaseInterface(Interface):
 
         manhelpstr = ['', '\t[Mandatory]']
         mandatory_items = inputs.traits(mandatory=True)
-        print mandatory_items
         for name, spec in sorted(mandatory_items.items()):
             manhelpstr += cls._get_trait_desc(inputs, name, spec)
 
