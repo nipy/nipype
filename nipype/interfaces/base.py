@@ -785,7 +785,7 @@ class BaseInterface(Interface):
 
         opthelpstr = ['', '\t[Optional]']
         for name, spec in sorted(inputs.traits(transient=None).items()):
-            if spec in mandatory_items:
+            if name in mandatory_items:
                 continue
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
 
