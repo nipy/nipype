@@ -263,24 +263,30 @@ class ProcStreamlines(StdOutCommandLine):
     input_spec=ProcStreamlinesInputSpec
     output_spec=ProcStreamlinesOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'outputroot':
+            newval = self._get_actual_ouputroot(value)
+            arg = '-outputroot ' + newval
+            return arg
+        return super(ProcStreamlines, self)._format_arg(name, spec, value)
+
     def _run_interface(self, runtime):
         outputroot = self.inputs.outputroot
         if isdefined(outputroot):
-            outputroot = os.path.join('procstream_outfiles', outputroot)
-            base, filename, ext = split_filename(outputroot)
+            actual_outputroot = self._get_actual_ouputroot(outputroot)
+            base, filename, ext = split_filename(actual_outputroot)
             if not os.path.exists(base):
                 os.makedirs(base)
-            self.inputs.outputroot = outputroot
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
-            self.outputroot_files = self._get_ouputroot_files(outputroot)
+            self.outputroot_files = glob.glob(os.path.join(os.getcwd(),actual_outputroot+'*'))
             return new_runtime
         else:
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
             return new_runtime
 
-    def _get_ouputroot_files(self, outputroot):
-        outputroot_files = glob.glob(os.path.join(os.getcwd(),outputroot+'*'))
-        return outputroot_files
+    def _get_actual_ouputroot(self, outputroot):
+        actual_outputroot = os.path.join('procstream_outfiles', outputroot)
+        return actual_outputroot
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
