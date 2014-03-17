@@ -271,7 +271,7 @@ class ProcStreamlines(StdOutCommandLine):
     def _run_interface(self, runtime):
         outputroot = self.inputs.outputroot
         if isdefined(outputroot):
-            actual_outputroot = self._get_actual_ouputroot(outputroot)
+            actual_outputroot = self._get_actual_outputroot(outputroot)
             base, filename, ext = split_filename(actual_outputroot)
             if not os.path.exists(base):
                 os.makedirs(base)
@@ -282,7 +282,7 @@ class ProcStreamlines(StdOutCommandLine):
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
             return new_runtime
 
-    def _get_actual_ouputroot(self, outputroot):
+    def _get_actual_outputroot(self, outputroot):
         actual_outputroot = os.path.join('procstream_outfiles', outputroot)
         return actual_outputroot
 
