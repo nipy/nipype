@@ -265,9 +265,7 @@ class ProcStreamlines(StdOutCommandLine):
 
     def _format_arg(self, name, spec, value):
         if name == 'outputroot':
-            newval = self._get_actual_ouputroot(value)
-            arg = '-outputroot ' + newval
-            return arg
+            return spec.argstr % self._get_actual_outputroot(value)
         return super(ProcStreamlines, self)._format_arg(name, spec, value)
 
     def _run_interface(self, runtime):
