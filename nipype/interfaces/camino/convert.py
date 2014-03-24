@@ -7,10 +7,12 @@
 
 """
 import os
+import glob
 
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec, isdefined)
+                                    OutputMultiPath, StdOutCommandLineInputSpec,
+                                    isdefined)
 from nipype.utils.filemanip import split_filename
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
@@ -226,16 +228,21 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     outputtracts = traits.Bool(argstr='-outputtracts', desc="Output streamlines in raw binary format.")
 
     outputroot = File(exists=False, argstr='-outputroot %s',
-                    desc='root directory for output')
+                    desc='Prepended onto all output file names.')
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
-    outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)")
-    outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)")
-    outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)")
-    outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile")
+    outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)",
+                           requires=['outputroot','seedfile'])
+    outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)",
+                           requires=['outputroot','seedfile'])
+    outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)",
+                            requires=['outputroot','seedfile'])
+    outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile",
+                            requires=['outputroot','targetfile','seedfile'])
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
     proc = File(exists=True, desc='Processed Streamlines')
+    outputroot_files = OutputMultiPath(File(exists=True))
 
 class ProcStreamlines(StdOutCommandLine):
     """
@@ -256,9 +263,33 @@ class ProcStreamlines(StdOutCommandLine):
     input_spec=ProcStreamlinesInputSpec
     output_spec=ProcStreamlinesOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'outputroot':
+            return spec.argstr % self._get_actual_outputroot(value)
+        return super(ProcStreamlines, self)._format_arg(name, spec, value)
+
+    def _run_interface(self, runtime):
+        outputroot = self.inputs.outputroot
+        if isdefined(outputroot):
+            actual_outputroot = self._get_actual_outputroot(outputroot)
+            base, filename, ext = split_filename(actual_outputroot)
+            if not os.path.exists(base):
+                os.makedirs(base)
+            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            self.outputroot_files = glob.glob(os.path.join(os.getcwd(),actual_outputroot+'*'))
+            return new_runtime
+        else:
+            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            return new_runtime
+
+    def _get_actual_outputroot(self, outputroot):
+        actual_outputroot = os.path.join('procstream_outfiles', outputroot)
+        return actual_outputroot
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['proc'] = os.path.abspath(self._gen_outfilename())
+        outputs['outputroot_files'] = self.outputroot_files
         return outputs
 
     def _gen_outfilename(self):
