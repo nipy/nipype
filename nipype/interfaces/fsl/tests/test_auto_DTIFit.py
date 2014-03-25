@@ -17,7 +17,7 @@ def test_DTIFit_inputs():
     mandatory=True,
     position=3,
     ),
-    cni=dict(argstr='--cni=%s',
+    cni=dict(argstr='-cni %s',
     ),
     dwi=dict(argstr='-k %s',
     mandatory=True,
