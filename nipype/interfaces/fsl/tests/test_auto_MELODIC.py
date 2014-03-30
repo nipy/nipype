@@ -32,6 +32,7 @@ def test_MELODIC_inputs():
     in_files=dict(argstr='-i %s',
     mandatory=True,
     position=0,
+    sep=',',
     ),
     log_power=dict(argstr='--logPower',
     ),

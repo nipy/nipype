@@ -29,6 +29,8 @@ def test_XFibres_inputs():
     ),
     fudge=dict(argstr='--fudge=%d',
     ),
+    gradnonlin=dict(argstr='--gradnonlin=%s',
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
