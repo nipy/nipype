@@ -122,6 +122,7 @@ MINOR               = _version_minor
 MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
-REQUIRES            = ["nibabel (>=1.0)", "networkx (>=1.0)", "numpy (>=1.3)",
-                       "scipy (>=0.7)", "traits (>=4.0)"]
+REQUIRES            = ["nibabel>=1.0", "networkx>=1.0", "numpy>=1.3",
+                       "python-dateutil>1.0", "scipy>=0.7", "traits>=4.0",
+                       "nose>=1.0"]
 STATUS              = 'stable'
