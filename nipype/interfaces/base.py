@@ -731,6 +731,7 @@ class BaseInterface(Interface):
         desc = spec.desc
         xor = spec.xor
         requires = spec.requires
+        argstr = spec.argstr
 
         manhelpstr = ['\t%s' % name]
 
@@ -750,6 +751,17 @@ class BaseInterface(Interface):
             for line in desc.split('\n'):
                 line = re.sub("\s+", " ", line)
                 manhelpstr += wrap(line, 70,
+                                   initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+
+        if argstr:
+            pos = spec.position
+            if pos is not None:
+                manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
+                                   initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+            else:
+                manhelpstr += wrap('flag: %s' % argstr, 70,
                                    initial_indent='\t\t',
                                    subsequent_indent='\t\t')
 
