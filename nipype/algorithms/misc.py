@@ -1147,6 +1147,142 @@ class AddCSVColumn(BaseInterface):
         return outputs
 
 
+class AddCSVRowInputSpec(TraitedSpec):
+    in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
+    cols = traits.Int(desc='Number of columns')
+    field_headings = traits.List(traits.Str(), mandatory=True,
+                                 desc='Heading list of available field to be added.')
+
+    float_trait = traits.Float( 0.0, argstr='%.5f' )
+    int_trait = traits.Int( 0, argstr='%d' )
+    str_trait = traits.Str( '', argstr='"%s"')
+    row_trait = traits.Either( int_trait, float_trait, str_trait )
+    new_fields = traits.List( row_trait, mandatory=True, desc='List of new values in row')
+
+class AddCSVRowOutputSpec(TraitedSpec):
+    csv_file = File(desc='Output CSV file containing rows ')
+
+
+class AddCSVRow(BaseInterface):
+    """
+    Short interface to add an extra row to a text file
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> addrow = misc.AddCSVRow()
+    >>> addrow.inputs.in_file = 'degree.csv'
+    >>> addrow.inputs.field_headings = [ 'id', 'group', 'age', 'degree' ]
+    >>> addrow.inputs.new_fields = [ 'S400', 'male', '25', '10.5' ]
+    >>> addrow.run() # doctest: +SKIP
+    """
+    input_spec = AddCSVRowInputSpec
+    output_spec = AddCSVRowOutputSpec
+
+    def _run_interface(self, runtime):
+        cols = 0
+        headings = []
+
+        if not isdefined( self.inputs.cols ) and not isdefined( self.inputs.field_headings ):
+            iflogger.error( 'Either number of cols or field headings is required' )
+
+        if isdefined( self.inputs.cols ) and isdefined( self.inputs.field_headings ):
+            if( len( self.inputs.field_headings ) != self.inputs.cols ):
+                iflogger.error( 'Number of cols and length of field headings list should match' )
+            else:
+                cols = self.inputs.cols
+                headings = self.inputs.field_headings
+
+        if isdefined( self.inputs.cols ) and not isdefined( self.inputs.field_headings ):
+            cols = self.inputs.cols
+            iflogger.warn( 'No column headers were set.')
+
+        if not isdefined( self.inputs.cols ) and isdefined( self.inputs.field_headings ):
+            cols = len( self.inputs.field_headings )
+
+        if cols == 0:
+            iflogger.error( 'Number of cols and length of field headings must be > 0' )
+
+        if len( self.inputs.new_fields ) != cols:
+            iflogger.error( 'Wrong length of fields, does not match number of cols' )
+
+        with open(self.inputs.in_file, 'r+') as in_file:
+            lines = in_file.readlines()
+
+            if len(headings)>0 and (len(lines) == 0 or lines[0] == ''):
+                hdr = [ '"%s"' % h for h in self.inputs.field_headings ]
+                hdrstr = ",".join(hdr)
+                lines.insert( 0, hdrstr )
+
+            print self.inputs.new_fields.items()
+
+            metadata = dict(argstr=lambda t: t is not None)
+            for name, spec in sorted(self.inputs.traits(**metadata).items()):
+                print name
+                value = getattr(self.inputs, name)
+                if not value is None:
+                    print value
+                #arg = self._format_row( name, spec, value )
+
+
+
+            #newrow = ",".join( self.inputs.new_fields )
+            #lines.append( newrow )
+            #in_file.writelines( lines )
+
+        return runtime
+
+
+
+    def _format_row(self, name, trait_spec, value):
+        """A helper function for _run_interface
+        """
+        argstr = trait_spec.argstr
+        iflogger.debug('%s_%s' % (name, str(value)))
+        if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
+            if value:
+                # Boolean options have no format string. Just append options
+                # if True.
+                return argstr
+            else:
+                return None
+        # traits.Either turns into traits.TraitCompound and does not have any
+        # inner_traits
+        elif trait_spec.is_trait_type(traits.List) \
+            or (trait_spec.is_trait_type(traits.TraitCompound)
+                and isinstance(value, list)):
+            # This is a bit simple-minded at present, and should be
+            # construed as the default. If more sophisticated behavior
+            # is needed, it can be accomplished with metadata (e.g.
+            # format string for list member str'ification, specifying
+            # the separator, etc.)
+
+            # Depending on whether we stick with traitlets, and whether or
+            # not we beef up traitlets.List, we may want to put some
+            # type-checking code here as well
+            sep = trait_spec.sep
+            if sep is None:
+                sep = ' '
+            if argstr.endswith('...'):
+
+                # repeatable option
+                # --id %d... will expand to
+                # --id 1 --id 2 --id 3 etc.,.
+                argstr = argstr.replace('...', '')
+                return sep.join([argstr % elt for elt in value])
+            else:
+                return argstr % sep.join(str(elt) for elt in value)
+        else:
+            # Append options using format string.
+            return argstr % value
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['csv_file'] = self.inputs.in_file
+        return outputs
+
+
 class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(
         exists=True, mandatory=True,
