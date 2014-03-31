@@ -104,6 +104,8 @@ NETWORKX_MIN_VERSION = '1.0'
 NUMPY_MIN_VERSION = '1.3'
 SCIPY_MIN_VERSION = '0.7'
 TRAITS_MIN_VERSION = '4.0'
+DATEUTIL_MIN_VERSION = '1.0'
+NOSE_MIN_VERSION = '1.0'
 
 NAME                = 'nipype'
 MAINTAINER          = "nipype developers"
