@@ -308,7 +308,7 @@ except ImportError:
 ################################################################################
 
 def main(**extra_args):
-
+    from numpy.distutils.core import setup
     setup(name=INFO_VARS['NAME'],
           maintainer=INFO_VARS['MAINTAINER'],
           maintainer_email=INFO_VARS['MAINTAINER_EMAIL'],
