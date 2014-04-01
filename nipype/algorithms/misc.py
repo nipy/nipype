@@ -1153,8 +1153,8 @@ class AddCSVRowInputSpec(TraitedSpec):
     field_headings = traits.List(traits.Str(), mandatory=True,
                                  desc='Heading list of available field to be added.')
     new_fields = traits.List( traits.Any(), mandatory=True, desc='List of new values in row', separator=',')
-    col_width = traits.Int( 7, mandatory=True, usedefault=True, desc='column width' )
-    float_dec = traits.Int( 4, mandatory=True, usedefault=True, desc='decimals' ) 
+    col_width = traits.Int( 9, mandatory=True, usedefault=True, desc='column width' )
+    float_dec = traits.Int( 6, mandatory=True, usedefault=True, desc='decimals' )
 
 class AddCSVRowOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing rows ')
@@ -1176,10 +1176,13 @@ class AddCSVRow(BaseInterface):
     """
     input_spec = AddCSVRowInputSpec
     output_spec = AddCSVRowOutputSpec
+    _hdrstr = None
 
     def _run_interface(self, runtime):
         cols = 0
         headings = []
+        col_width = self.inputs.col_width
+        float_dec = self.inputs.float_dec
 
         if not isdefined( self.inputs.cols ) and not isdefined( self.inputs.field_headings ):
             iflogger.error( 'Either number of cols or field headings is required' )
@@ -1205,42 +1208,45 @@ class AddCSVRow(BaseInterface):
         if len( self.inputs.new_fields ) != cols:
             iflogger.error( 'Wrong length of fields, does not match number of cols' )
 
-        col_width = self.inputs.col_width
-        float_dec = self.inputs.float_dec
+        if len(headings)>0:
+            argstr = '{:>%d}' % col_width
+            hdr = [ argstr.format( '"' + h + '"') for h in self.inputs.field_headings ]
+            self._hdrstr = ",".join(hdr) + '\n'
 
-        with open(self.inputs.in_file, 'a+') as in_file:
-            lines = in_file.readlines()
-            
+
+        if op.exists( self.inputs.in_file ):
+            with open(self.inputs.in_file, 'a+') as in_file:
+                lines = in_file.readlines()
+
             if len(lines)>0 and lines[0]=='\n':
                 lines.pop()
 
-            print len(lines)
-
             if (len(headings)>0) and (len(lines)==0):
-                hdr = [ '"%s"' % h for h in self.inputs.field_headings ]
-                hdrstr = ",".join(hdr)
-                lines = [ hdrstr+'\n' ]
-            
-            if not lines[-1] or lines[-1]=='\n':
-                lines.pop()
+                lines.insert(0, self._hdrstr )
+                in_file.write( "".join(lines) )
+        else:
+            with open(self.inputs.in_file, 'w+') as in_file:
+                in_file.write( self._hdrstr )
 
-            row_data = []
-            metadata = dict(separator=lambda t: t is not None)
-            for name, spec in sorted(self.inputs.traits(**metadata).items()):
-                values = getattr(self.inputs, name)
 
-                for v in values:
-                    argstr = '{:>%d}' % col_width
-                    if type(v)=='float':
-                        argstr = '{:>%d.%df}' % ( col_width, float_dec )
+        row_data = []
+        metadata = dict(separator=lambda t: t is not None)
+        for name, spec in sorted(self.inputs.traits(**metadata).items()):
+            values = getattr(self.inputs, name)
+            for v in values:
+                argstr = '{:>%d}' % col_width
+                if type(v) is float:
+                    argstr = '{:>%d.%df}' % ( col_width, float_dec )
+                if type(v) is str:
+                    v = '"' + v + '"'
+                row_data.append( argstr.format(v) )
+        newrow = ",".join( row_data ) + '\n'
 
-                    row_data.append( argstr.format(v) )
-
-            newrow = ",".join( row_data )
-            lines.append( newrow+'\n' )
-
-            print "".join( lines )
-            in_file.write( "".join(lines) )
+        with open(self.inputs.in_file, 'r+') as in_file:
+            in_file.seek(-2, 2)
+            if in_file.read(2) == '\n\n':
+                in_file.seek(-1, 1)
+            in_file.write( newrow )
 
         return runtime
 
