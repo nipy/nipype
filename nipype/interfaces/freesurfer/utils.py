@@ -1137,7 +1137,7 @@ class TransformSurface2TalairachOutputSpec(TraitedSpec):
     """
     This program transforms surface positions using 'mris_transform'
     """
-    surface = File(exists=True, desc='Transformed surface file ')
+    out_file = File(exists=True, desc='Transformed surface file ')
 
 
 class TransformSurface2Talairach(FSCommand):

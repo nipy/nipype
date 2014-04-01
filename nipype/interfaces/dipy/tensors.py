@@ -204,9 +204,9 @@ class EstimateConductivity(BaseInterface):
 
     """
     Estimates electrical conductivity from a set of diffusion-weighted
-    images, as well as their associated b-values and b-vectors. Fits
-    the diffusion tensors and calculates conductivity with Dipy. Saves
-    the conductivity tensors in lower triangular 4D image form.
+    images, as well as their associated b-values and b-vectors. Calculates
+    conductivity with Dipy. Saves the conductivity tensors in lower
+    triangular 4D image form.
 
     Tensors are assumed to be in the white matter of a human brain and
     a default conductivity value and eigenvalue scaling factor is included.
