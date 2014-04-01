@@ -1152,12 +1152,9 @@ class AddCSVRowInputSpec(TraitedSpec):
     cols = traits.Int(desc='Number of columns')
     field_headings = traits.List(traits.Str(), mandatory=True,
                                  desc='Heading list of available field to be added.')
-
-    float_trait = traits.Float( 0.0, argstr='%.5f' )
-    int_trait = traits.Int( 0, argstr='%d' )
-    str_trait = traits.Str( '', argstr='"%s"')
-    row_trait = traits.Either( int_trait, float_trait, str_trait )
-    new_fields = traits.List( row_trait, mandatory=True, desc='List of new values in row')
+    new_fields = traits.List( traits.Any(), mandatory=True, desc='List of new values in row', separator=',')
+    col_width = traits.Int( 7, mandatory=True, usedefault=True, desc='column width' )
+    float_dec = traits.Int( 4, mandatory=True, usedefault=True, desc='decimals' ) 
 
 class AddCSVRowOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing rows ')
@@ -1200,6 +1197,7 @@ class AddCSVRow(BaseInterface):
 
         if not isdefined( self.inputs.cols ) and isdefined( self.inputs.field_headings ):
             cols = len( self.inputs.field_headings )
+            headings = self.inputs.field_headings
 
         if cols == 0:
             iflogger.error( 'Number of cols and length of field headings must be > 0' )
@@ -1207,29 +1205,42 @@ class AddCSVRow(BaseInterface):
         if len( self.inputs.new_fields ) != cols:
             iflogger.error( 'Wrong length of fields, does not match number of cols' )
 
-        with open(self.inputs.in_file, 'r+') as in_file:
-            lines = in_file.readlines()
+        col_width = self.inputs.col_width
+        float_dec = self.inputs.float_dec
 
-            if len(headings)>0 and (len(lines) == 0 or lines[0] == ''):
+        with open(self.inputs.in_file, 'a+') as in_file:
+            lines = in_file.readlines()
+            
+            if len(lines)>0 and lines[0]=='\n':
+                lines.pop()
+
+            print len(lines)
+
+            if (len(headings)>0) and (len(lines)==0):
                 hdr = [ '"%s"' % h for h in self.inputs.field_headings ]
                 hdrstr = ",".join(hdr)
-                lines.insert( 0, hdrstr )
+                lines = [ hdrstr+'\n' ]
+            
+            if not lines[-1] or lines[-1]=='\n':
+                lines.pop()
 
-            print self.inputs.new_fields.items()
-
-            metadata = dict(argstr=lambda t: t is not None)
+            row_data = []
+            metadata = dict(separator=lambda t: t is not None)
             for name, spec in sorted(self.inputs.traits(**metadata).items()):
-                print name
-                value = getattr(self.inputs, name)
-                if not value is None:
-                    print value
-                #arg = self._format_row( name, spec, value )
+                values = getattr(self.inputs, name)
 
+                for v in values:
+                    argstr = '{:>%d}' % col_width
+                    if type(v)=='float':
+                        argstr = '{:>%d.%df}' % ( col_width, float_dec )
 
+                    row_data.append( argstr.format(v) )
 
-            #newrow = ",".join( self.inputs.new_fields )
-            #lines.append( newrow )
-            #in_file.writelines( lines )
+            newrow = ",".join( row_data )
+            lines.append( newrow+'\n' )
+
+            print "".join( lines )
+            in_file.write( "".join(lines) )
 
         return runtime
 
