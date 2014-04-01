@@ -187,7 +187,7 @@ class EstimateConductivityInputSpec(TraitedSpec):
         maximum of 0.4 [S/m]')
     volume_normalized_mapping = traits.Bool(False, usedefault=True,
         desc='if True, uses volume-normalized mapping from [2]_.')
-    sigma_white_matter = traits.Float(0.126, usedefault=True, units = 'NA',
+    sigma_white_matter = traits.Float(0.126, usedefault=True, units = 'S/m',
                 desc="Conductivity for white matter (default: 0.126 [S/m])")
     eigenvalue_scaling_factor = traits.Float(237.5972, usedefault=True, units = 'NA',
                 desc="scaling factor used by the direct mapping between \
