@@ -1221,7 +1221,7 @@ class FloodfillSurface(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
+        outputs['out_file'] = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
