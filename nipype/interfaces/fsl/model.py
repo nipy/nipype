@@ -1272,7 +1272,8 @@ class SMM(FSLCommand):
 class MELODICInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True), argstr="-i %s", mandatory=True, position=0,
-        desc="input file names (either single file name or a list)")
+        desc="input file names (either single file name or a list)",
+        sep=",")
     out_dir = Directory(
         argstr="-o %s", desc="output directory name", genfile=True)
     mask = File(exists=True, argstr="-m %s",
