@@ -100,8 +100,8 @@ class GmshInputSpec(CommandLineInputSpec):
         argstr='-new', desc="Create new model before merge next file")
     merge_next = traits.Bool(argstr='-merge', desc="Merge next files")
 
-    in_files = InputMultiPath(
-        exists=True, argstr="%s", position=-2, mandatory=True)
+    in_files = InputMultiPath(File(exists=True), argstr="%s",
+        position=-2, mandatory=True)
     output_type = traits.Enum(
         'msh', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
     out_filename = File(genfile=True, argstr="-o %s",

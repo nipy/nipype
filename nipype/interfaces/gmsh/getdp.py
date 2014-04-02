@@ -58,7 +58,8 @@ class GetDP(CommandLine):
 
     >>> from nipype.interfaces.getdp import GetDP
     >>> solve = GetDP()
-    >>> solve.inputs.in_file = 'eeg_forward.pro'
+    >>> solve.inputs.problem_file = 'eeg_forward.pro'
+    >>> solve.inputs.mesh_file = 'mesh.msh'
     >>> solve.run()                                    # doctest: +SKIP
     """
     _cmd = 'getdp'
@@ -81,7 +82,7 @@ class GetDP(CommandLine):
             _, name , _ = split_filename(pos_outfilename)
             out_pos_files.append(op.abspath(name + ".pos"))
         outputs['postprocessing_files'] = out_pos_files
-        
+
       	return outputs
 
     def _gen_outfilename(self, ext="res"):
