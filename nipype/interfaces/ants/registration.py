@@ -636,16 +636,17 @@ class Registration(ANTSCommand):
         outputs['reverse_invert_flags'] = []
 
         # invert_initial_moving_transform should be always defined, even if there's no initial transform
-        if not isdefined( self.inputs.invert_initial_moving_transform ):
-            self.inputs.invert_initial_moving_transform = False
+        invert_initial_moving_transform = False
+        if isdefined( self.inputs.invert_initial_moving_transform ):
+            invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
 
         if not self.inputs.collapse_output_transforms:
             transformCount = 0
             if isdefined(self.inputs.initial_moving_transform):
                 outputs['forward_transforms'].append(self.inputs.initial_moving_transform)
-                outputs['forward_invert_flags'].append(self.inputs.invert_initial_moving_transform)
+                outputs['forward_invert_flags'].append(invert_initial_moving_transform)
                 outputs['reverse_transforms'].insert(0, self.inputs.initial_moving_transform)
-                outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
+                outputs['reverse_invert_flags'].insert(0, not invert_initial_moving_transform)  # Prepend
                 transformCount += 1
             elif isdefined(self.inputs.initial_moving_transform_com):
                 forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
@@ -689,10 +690,10 @@ class Registration(ANTSCommand):
             if not all( isLinear ):
                 collapse_list.append( 'SyN' )
 
-            for transform in collapse_list: 
-                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, 
-                                                                            transformCount, 
-                                                                            transform, 
+            for transform in collapse_list:
+                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
+                                                                            transformCount,
+                                                                            transform,
                                                                             inverse=False)
                 reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix,
                                                                             transformCount,
