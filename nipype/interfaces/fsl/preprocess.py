@@ -1396,7 +1396,7 @@ class PRELUDE(FSLCommand):
 
 
 class FIRSTInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-2,
+    in_file = File(exists=True, mandatory=True, position=-2, copyfile=False,
                   argstr='-i %s',
                   desc='input data file')
     out_file = File('segmented', usedefault=True, mandatory=True, position=-1,
@@ -1496,12 +1496,12 @@ class FIRST(FSLCommand):
             vtks = list()
             for struct in structures:
                 vtk = prefix + '-' + struct + '_first.vtk'
-            vtks.append(op.abspath(vtk))
+                vtks.append(op.abspath(vtk))
             return vtks
         if name == 'bvars':
             bvars = list()
             for struct in structures:
                 bvar = prefix + '-' + struct + '_first.bvars'
-            bvars.append(op.abspath(bvar))
+                bvars.append(op.abspath(bvar))
             return bvars
         return None

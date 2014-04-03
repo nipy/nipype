@@ -46,7 +46,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     save_tensor = traits.Bool(desc='save the elements of the tensor',
                         argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
-    cni = File(exists=True, desc='input counfound regressors', argstr='-cni %s')
+    cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
     little_bit = traits.Bool(desc='only process small area of brain',
                              argstr='--littlebit')
 
