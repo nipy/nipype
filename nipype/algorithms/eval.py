@@ -455,7 +455,9 @@ class ErrorMap(BaseInterface):
             msk = nb.load( self.inputs.mask ).get_data()
 
             if ( mapshape != msk.shape ):
-                raise RuntimeError( "Mask should match volume shape")
+                raise RuntimeError( "Mask should match volume shape, \
+                                    mask is %s and volume is %s" %
+                                    ( list(msk.shape), list(mapshape) ) )
 
             mskvector = msk.reshape(-1)
             refvector = refvector * mskvector[:,np.newaxis]
