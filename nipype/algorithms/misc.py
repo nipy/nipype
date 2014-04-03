@@ -1206,7 +1206,9 @@ class AddCSVRow(BaseInterface):
             iflogger.error( 'Number of cols and length of field headings must be > 0' )
 
         if len( self.inputs.new_fields ) != cols:
-            iflogger.error( 'Wrong length of fields, does not match number of cols' )
+            iflogger.warn( 'Wrong length of fields (%d), does not match number of \
+                           cols (%d)' % (len(self.inputs.new_fields), cols ) )
+            cols = len( self.inputs.new_fields )
 
         if len(headings)>0:
             argstr = '{:>%d}' % col_width
