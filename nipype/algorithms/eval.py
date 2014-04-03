@@ -406,6 +406,7 @@ class ErrorMapInputSpec( BaseInterfaceInputSpec ):
                    desc="Reference image. Requires the same dimensions as in_tst.")
     in_tst = File(exists=True, mandatory=True,
                    desc="Test image. Requires the same dimensions as in_ref.")
+    mask = File(exists=True, desc="calculate overlap only within this mask.")
     method = traits.Enum( "squared_diff", "eucl",
                           desc='',
                           usedefault=True )
@@ -439,6 +440,7 @@ class ErrorMap(BaseInterface):
 
         assert( ref_data.ndim == tst_data.ndim )
 
+
         if ( ref_data.ndim == 4 ):
             comps = ref_data.shape[-1]
             mapshape = ref_data.shape[:-1]
@@ -448,6 +450,16 @@ class ErrorMap(BaseInterface):
             mapshape = ref_data.shape
             refvector = ref_data.reshape(-1)
             tstvector = tst_data.reshape(-1)
+
+        if isdefined( self.inputs.mask ):
+            msk = nb.load( self.inputs.mask ).get_data()
+
+            if ( mapshape != msk.shape ):
+                raise RuntimeError( "Mask should match volume shape")
+
+            mskvector = msk.reshape(-1)
+            refvector = refvector * mskvector[:,np.newaxis]
+            tstvector = tstvector * mskvector[:,np.newaxis]
 
         diffvector = (tstvector-refvector)**2
         if ( ref_data.ndim > 1 ):
