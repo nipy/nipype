@@ -104,6 +104,8 @@ NETWORKX_MIN_VERSION = '1.0'
 NUMPY_MIN_VERSION = '1.3'
 SCIPY_MIN_VERSION = '0.7'
 TRAITS_MIN_VERSION = '4.0'
+DATEUTIL_MIN_VERSION = '1.0'
+NOSE_MIN_VERSION = '1.0'
 
 NAME                = 'nipype'
 MAINTAINER          = "nipype developers"
@@ -122,6 +124,7 @@ MINOR               = _version_minor
 MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
-REQUIRES            = ["nibabel (>=1.0)", "networkx (>=1.0)", "numpy (>=1.3)",
-                       "scipy (>=0.7)", "traits (>=4.0)"]
+REQUIRES            = ["nibabel>=1.0", "networkx>=1.0", "numpy>=1.3",
+                       "python-dateutil>1.0", "scipy>=0.7", "traits>=4.0",
+                       "nose>=1.0"]
 STATUS              = 'stable'
