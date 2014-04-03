@@ -435,8 +435,8 @@ class ErrorMap(BaseInterface):
 
     def _run_interface( self, runtime ):
         nii_ref = nb.load( self.inputs.in_ref )
-        ref_data = nii_ref.get_data()
-        tst_data = nb.load( self.inputs.in_tst ).get_data()
+        ref_data = np.squeeze( nii_ref.get_data() )
+        tst_data = np.squeeze( nb.load( self.inputs.in_tst ).get_data() )
 
         assert( ref_data.ndim == tst_data.ndim )
 
@@ -456,7 +456,7 @@ class ErrorMap(BaseInterface):
 
             if ( mapshape != msk.shape ):
                 raise RuntimeError( "Mask should match volume shape, \
-                                    mask is %s and volume is %s" %
+                                    mask is %s and volumes are %s" %
                                     ( list(msk.shape), list(mapshape) ) )
 
             mskvector = msk.reshape(-1)
