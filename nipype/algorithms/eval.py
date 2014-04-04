@@ -481,7 +481,7 @@ class ErrorMap(BaseInterface):
             fname,ext = op.splitext( op.basename( self.inputs.in_tst ) )
             if ext=='.gz':
                 fname,ext2 = op.splitext( fname )
-                ext = ext + ext2
+                ext = ext2 + ext
             self._out_file = op.abspath( fname + "_errmap" + ext )
         else:
             self._out_file = self.inputs.out_map
