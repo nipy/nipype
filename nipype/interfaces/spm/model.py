@@ -238,9 +238,9 @@ class GetTotalsModelOutputSpec(TraitedSpec):
     total_volume = traits.Float()
 
 class GetTotals(SPMCommand):
-    """Use Ged Ridgway's get_totals to estimate the volume of matter in masked area of image
+    """Uses Ged Ridgway's get_totals.m -based script to estimate the volume of matter in masked area of image
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=71
+    http://www0.cs.ucl.ac.uk/staff/g.ridgway/vbm/get_totals.m
 
     Examples
     --------
@@ -249,6 +249,7 @@ class GetTotals(SPMCommand):
     >>> gett.inputs.in_mask = 'coreg_ec_l.nii'
     >>> gett.run() # doctest: +SKIP
     """
+
     input_spec = GetTotalsModelInputSpec
     output_spec = GetTotalsModelOutputSpec
 
