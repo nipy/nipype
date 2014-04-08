@@ -230,7 +230,7 @@ class BEDPOSTX(FSLCommand):
         return outputs
 
 
-class ProbTrackXInputSpec(FSLCommandInputSpec):
+class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     thsamples = InputMultiPath(File(exists=True), mandatory=True)
     phsamples = InputMultiPath(File(exists=True), mandatory=True)
     fsamples = InputMultiPath(File(exists=True), mandatory=True)
@@ -243,21 +243,13 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
                          desc='seed volume(s), or voxel(s)' +
                          'or freesurfer label file',
                          argstr='--seed=%s', mandatory=True)
-    mode = traits.Enum("simple", "two_mask_symm", "seedmask",
-                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), '
-                            + 'twomask_symm (two bet binary masks) ',
-                       argstr='--mode=%s', genfile=True)
     target_masks = InputMultiPath(File(exits=True), desc='list of target masks - ' +
                        'required for seeds_to_targets classification', argstr='--targetmasks=%s')
-    mask2 = File(exists=True, desc='second bet binary mask (in diffusion space) in twomask_symm mode',
-                 argstr='--mask2=%s')
     waypoints = File(exists=True, desc='waypoint mask or ascii list of waypoint masks - ' +
                      'only keep paths going through ALL the masks', argstr='--waypoints=%s')
     network = traits.Bool(desc='activate network mode - only keep paths going through ' +
                           'at least one seed mask (required if multiple seed masks)',
                           argstr='--network')
-    mesh = File(exists=True, desc='Freesurfer-type surface descriptor (in ascii format)',
-                argstr='--mesh=%s')
     seed_ref = File(exists=True, desc='reference vol to define seed space in ' +
                    'simple mode - diffusion space assumed if absent',
                    argstr='--seedref=%s')
@@ -307,6 +299,15 @@ class ProbTrackXInputSpec(FSLCommandInputSpec):
                           "Level 2 is required to output particle files.",
                           argstr="--verbose=%d")
 
+class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
+    mode = traits.Enum("simple", "two_mask_symm", "seedmask",
+                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), '
+                            + 'twomask_symm (two bet binary masks) ',
+                       argstr='--mode=%s', genfile=True)
+    mask2 = File(exists=True, desc='second bet binary mask (in diffusion space) in twomask_symm mode',
+                 argstr='--mask2=%s')
+    mesh = File(exists=True, desc='Freesurfer-type surface descriptor (in ascii format)',
+                argstr='--mesh=%s')
 
 class ProbTrackXOutputSpec(TraitedSpec):
     log = File(exists=True, desc='path/name of a text record of the command that was run')
@@ -319,7 +320,6 @@ class ProbTrackXOutputSpec(TraitedSpec):
     particle_files = traits.List(File(exists=True), desc='Files describing ' +
                                  'all of the tract samples. Generated only if ' +
                                  'verbose is set to 2')
-
 
 class ProbTrackX(FSLCommand):
     """ Use FSL  probtrackx for tractography on bedpostx results
@@ -434,6 +434,78 @@ class ProbTrackX(FSLCommand):
                 return "simple"
             else:
                 return "seedmask"
+
+class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
+    simple = traits.Bool(desc='rack from a list of voxels (seed must be a ASCII list of coordinates)',
+                         usedefault=False, argstr='--simple')
+    fopd = File(exists=True, desc='Other mask for binning tract distribution',
+                argstr='--fopd=%s')
+    waycond = traits.Enum("OR", "AND", argstr='--waycond=%s',
+                          desc='Waypoint condition. Either "AND" (default) or "OR"')
+    wayorder = traits.Bool(desc='Reject streamlines that do not hit waypoints in given order. ' +
+                            'Only valid if waycond=AND', argstr='--wayorder')
+    onewaycondition = traits.Bool(desc='Apply waypoint conditions to each half tract separately',
+                                  argstr='--onewaycondition')
+    omatrix1 = traits.Bool(desc='Output matrix1 - SeedToSeed Connectivity',
+                           argstr='--omatrix1')
+    distthresh1 = traits.Float(argstr='--distthresh1=%.3f',
+                               desc='Discards samples (in matrix1) shorter than this threshold ' +
+                                '(in mm - default=0)')
+    omatrix2 = traits.Bool(desc='Output matrix2 - SeedToLowResMask', argstr='--omatrix2', requires=['target2'])
+    target2 = File(exists=True, desc='Low resolution binary brain mask for storing ' +
+                    'connectivity distribution in matrix2 mode', argstr='--target2=%s')
+    omatrix3 = traits.Bool(desc='Output matrix3 (NxN connectivity matrix)', argstr='--omatrix3',
+                           requires=['target3', 'lrtarget3'])
+    target3 = File(exists=True, desc='Mask used for NxN connectivity matrix ' +
+                    '(or Nxn if lrtarget3 is set)', argstr='--target3=%s')
+    lrtarget3 = File(exists=True, desc='Column-space mask used for Nxn connectivity matrix',
+                     argstr='--lrtarget3=%s')
+    distthresh3 = traits.Float(argstr='--distthresh3=%.3f',
+                               desc='Discards samples (in matrix3) shorter than this threshold ' +
+                                '(in mm - default=0)')
+    omatrix4 = traits.Bool(desc='Output matrix4 - DtiMaskToSeed (special Oxford Sparse Format)',
+                           argstr='--omatrix4')
+    colmask4 = File(exists=True, desc='Mask for columns of matrix4 (default=seed mask)',
+                     argstr='--colmask4=%s')
+    target4 = File(exists=True, desc='Brain mask in DTI space', argstr='--target4=%s')
+    meshspace = traits.Enum("caret", "freesurfer", "first", "vox", argstr='--meshspace=%s',
+                            desc='Mesh reference space - either "caret" (default) or ' +
+                             '"freesurfer" or "first" or "vox"')
+
+
+class ProbTrackX2OutputSpec(ProbTrackXOutputSpec):
+    network_matrix = File(exists=True, desc='the network matrix generated by --omatrix1 option')
+    matrix1_dot = File(exists=True, desc='Output matrix1.dot - SeedToSeed Connectivity')
+    lookup_tractspace = File(exists=True, desc='lookup_tractspace generated by --omatrix2 option')
+    matrix2_dot = File(exists=True, desc='Output matrix2.dot - SeedToLowResMask')
+    matrix3_dot = File(exists=True, desc='Output matrix3 - NxN connectivity matrix')
+
+
+class ProbTrackX2(ProbTrackX):
+    _cmd = 'probtrackx2'
+    input_spec = ProbTrackX2InputSpec
+    output_spec = ProbTrackX2OutputSpec
+
+    def _list_outputs(self):
+        outputs = super(ProbTrackX2, self)._list_outputs()
+
+        if not isdefined(self.inputs.out_dir):
+            out_dir = os.getcwd()
+        else:
+            out_dir = self.inputs.out_dir
+
+        if isdefined(self.inputs.omatrix1):
+            outputs['network_matrix'] = os.path.abspath(os.path.join(out_dir, 'fdt_network_matrix'))
+            outputs['matrix1_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix1.dot'))
+
+        if isdefined(self.inputs.omatrix2):
+            outputs['lookup_tractspace'] = \
+              os.path.abspath(os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
+            outputs['matrix2_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix2.dot'))
+
+        if isdefined(self.inputs.omatrix3):
+            outputs['matrix3_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix3.dot'))
+        return outputs
 
 
 class VecRegInputSpec(FSLCommandInputSpec):
