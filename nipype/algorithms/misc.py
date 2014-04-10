@@ -1168,6 +1168,7 @@ class AddCSVRowOutputSpec(TraitedSpec):
 class AddCSVRow(BaseInterface):
     """
     Short interface to add an extra row to a text file
+    Requires pandas - http://pandas.pydata.org/
 
     Example
     -------
