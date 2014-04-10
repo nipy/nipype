@@ -1201,7 +1201,11 @@ class AddCSVRow(BaseInterface):
             self._always_run = True
 
     def _run_interface(self, runtime):
-        import pandas as pd
+        try:
+            import pandas as pd
+        except ImportError:
+            raise ImportError('This interface requires pandas (http://pandas.pydata.org/) to run.')
+
 
         input_dict = {}
 
