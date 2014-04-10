@@ -30,7 +30,8 @@ from .. import logging
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
-                               BaseInterfaceInputSpec, isdefined)
+                               BaseInterfaceInputSpec, isdefined,
+                               DynamicTraitedSpec )
 from ..utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
@@ -1147,18 +1148,22 @@ class AddCSVColumn(BaseInterface):
         return outputs
 
 
-class AddCSVRowInputSpec(TraitedSpec):
+class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
-    cols = traits.Int(desc='Number of columns')
-    field_headings = traits.List(traits.Str(), mandatory=True,
-                                 desc='Heading list of available field to be added.')
-    new_fields = traits.List( traits.Any(), mandatory=True, desc='List of new values in row', separator=',')
-    col_width = traits.Int( 9, mandatory=True, usedefault=True, desc='column width' )
-    float_dec = traits.Int( 6, mandatory=True, usedefault=True, desc='decimals' )
+    _outputs = traits.Dict( traits.Any, value={}, usedefault=True )
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(AddCSVRowInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(AddCSVRowInputSpec, self).__setattr__(key, value)
 
 class AddCSVRowOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing rows ')
-
 
 class AddCSVRow(BaseInterface):
     """
@@ -1169,132 +1174,54 @@ class AddCSVRow(BaseInterface):
 
     >>> import nipype.algorithms.misc as misc
     >>> addrow = misc.AddCSVRow()
-    >>> addrow.inputs.in_file = 'degree.csv'
-    >>> addrow.inputs.field_headings = [ 'id', 'group', 'age', 'degree' ]
-    >>> addrow.inputs.new_fields = [ 'S400', 'male', '25', '10.5' ]
+    >>> addrow.inputs.in_file = 'scores.csv'
+    >>> addrow.inputs.si = 0.74
+    >>> addrow.inputs.di = 0.93
+    >>> addrow.subject_id = 'S400'
+    >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
     """
     input_spec = AddCSVRowInputSpec
     output_spec = AddCSVRowOutputSpec
-    _hdrstr = None
+
+    def __init__(self, infields=None, force_run=True, **kwargs):
+        super(AddCSVRow, self).__init__(**kwargs)
+        undefined_traits = {}
+        self._infields = infields
+
+        if infields:
+            for key in infields:
+                self.inputs.add_trait( key, traits.Any )
+                self.inputs._outputs[key] = Undefined
+                undefined_traits[key] = Undefined
+        self.inputs.trait_set( trait_change_notify=False, **undefined_traits )
+
+        if force_run:
+            self._always_run = True
 
     def _run_interface(self, runtime):
-        cols = 0
-        headings = []
-        col_width = self.inputs.col_width
-        float_dec = self.inputs.float_dec
+        import pandas as pd
 
-        if not isdefined( self.inputs.cols ) and not isdefined( self.inputs.field_headings ):
-            iflogger.error( 'Either number of cols or field headings is required' )
+        input_dict = {}
 
-        if isdefined( self.inputs.cols ) and isdefined( self.inputs.field_headings ):
-            if( len( self.inputs.field_headings ) != self.inputs.cols ):
-                iflogger.error( 'Number of cols and length of field headings list should match' )
+        for key, val in self.inputs._outputs.items():
+            # expand lists to several columns
+            if isinstance(val, list):
+                for i,v in enumerate(val):
+                    input_dict['%s_%d' % (key,i)]=v
             else:
-                cols = self.inputs.cols
-                headings = self.inputs.field_headings
+                input_dict[key] = val
 
-        if isdefined( self.inputs.cols ) and not isdefined( self.inputs.field_headings ):
-            cols = self.inputs.cols
-            iflogger.warn( 'No column headers were set.')
+        df = pd.DataFrame([input_dict])
 
-        if not isdefined( self.inputs.cols ) and isdefined( self.inputs.field_headings ):
-            cols = len( self.inputs.field_headings )
-            headings = self.inputs.field_headings
+        if op.exists(self.inputs.in_file):
+            formerdf = pd.read_csv(self.inputs.in_file, index_col=0)
+            df = pd.concat( [formerdf, df], ignore_index=True )
 
-        if cols == 0:
-            iflogger.error( 'Number of cols and length of field headings must be > 0' )
-
-        if len( self.inputs.new_fields ) != cols:
-            iflogger.warn( 'Wrong length of fields (%d), does not match number of \
-                           cols (%d)' % (len(self.inputs.new_fields), cols ) )
-            cols = len( self.inputs.new_fields )
-
-        if len(headings)>0:
-            argstr = '{:>%d}' % col_width
-            hdr = [ argstr.format( '"' + h + '"') for h in self.inputs.field_headings ]
-            self._hdrstr = ",".join(hdr) + '\n'
-
-
-        if op.exists( self.inputs.in_file ):
-            with open(self.inputs.in_file, 'a+') as in_file:
-                lines = in_file.readlines()
-
-            if len(lines)>0 and lines[0]=='\n':
-                lines.pop()
-
-            if (len(headings)>0) and (len(lines)==0):
-                lines.insert(0, self._hdrstr )
-                in_file.write( "".join(lines) )
-        else:
-            with open(self.inputs.in_file, 'w+') as in_file:
-                in_file.write( self._hdrstr )
-
-
-        row_data = []
-        metadata = dict(separator=lambda t: t is not None)
-        for name, spec in sorted(self.inputs.traits(**metadata).items()):
-            values = getattr(self.inputs, name)
-            for v in values:
-                argstr = '{:>%d}' % col_width
-                if type(v) is float:
-                    argstr = '{:>%d.%df}' % ( col_width, float_dec )
-                if type(v) is str:
-                    v = '"' + v + '"'
-                row_data.append( argstr.format(v) )
-        newrow = ",".join( row_data ) + '\n'
-
-        with open(self.inputs.in_file, 'r+') as in_file:
-            in_file.seek(-2, 2)
-            if in_file.read(2) == '\n\n':
-                in_file.seek(-1, 1)
-            in_file.write( newrow )
+        with open(self.inputs.in_file, 'w') as f:
+            df.to_csv(f)
 
         return runtime
-
-
-
-    def _format_row(self, name, trait_spec, value):
-        """A helper function for _run_interface
-        """
-        argstr = trait_spec.argstr
-        iflogger.debug('%s_%s' % (name, str(value)))
-        if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
-            if value:
-                # Boolean options have no format string. Just append options
-                # if True.
-                return argstr
-            else:
-                return None
-        # traits.Either turns into traits.TraitCompound and does not have any
-        # inner_traits
-        elif trait_spec.is_trait_type(traits.List) \
-            or (trait_spec.is_trait_type(traits.TraitCompound)
-                and isinstance(value, list)):
-            # This is a bit simple-minded at present, and should be
-            # construed as the default. If more sophisticated behavior
-            # is needed, it can be accomplished with metadata (e.g.
-            # format string for list member str'ification, specifying
-            # the separator, etc.)
-
-            # Depending on whether we stick with traitlets, and whether or
-            # not we beef up traitlets.List, we may want to put some
-            # type-checking code here as well
-            sep = trait_spec.sep
-            if sep is None:
-                sep = ' '
-            if argstr.endswith('...'):
-
-                # repeatable option
-                # --id %d... will expand to
-                # --id 1 --id 2 --id 3 etc.,.
-                argstr = argstr.replace('...', '')
-                return sep.join([argstr % elt for elt in value])
-            else:
-                return argstr % sep.join(str(elt) for elt in value)
-        else:
-            # Append options using format string.
-            return argstr % value
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
