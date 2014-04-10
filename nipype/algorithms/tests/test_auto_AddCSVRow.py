@@ -3,19 +3,12 @@ from nipype.testing import assert_equal
 from nipype.algorithms.misc import AddCSVRow
 
 def test_AddCSVRow_inputs():
-    input_map = dict(col_width=dict(mandatory=True,
-    usedefault=True,
+    input_map = dict(_outputs=dict(usedefault=True,
     ),
-    cols=dict(),
-    field_headings=dict(mandatory=True,
-    ),
-    float_dec=dict(mandatory=True,
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(mandatory=True,
-    ),
-    new_fields=dict(mandatory=True,
-    separator=',',
     ),
     )
     inputs = AddCSVRow.input_spec()
