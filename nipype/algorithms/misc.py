@@ -1233,6 +1233,12 @@ class AddCSVRow(BaseInterface):
         outputs['csv_file'] = self.inputs.in_file
         return outputs
 
+    def _outputs(self):
+        return self._add_output_traits(super(AddCSVRow, self)._outputs())
+
+    def _add_output_traits(self, base):
+        return base
+
 
 class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(
