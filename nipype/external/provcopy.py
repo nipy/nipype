@@ -770,7 +770,9 @@ class ProvRecord(object):
                     obj = RDFLiteral(value)
                 if attr == PROV['location']:
                     pred = PROV['atLocation'].rdf_representation()
-                    if isinstance(value, URIRef):
+                    if isinstance(value, (URIRef, QName)):
+                        if isinstance(value, QName):
+                            value = URIRef(value.get_uri())
                         graph.add((subj, pred, value))
                         graph.add((value, RDF.type,
                                    PROV['Location'].rdf_representation()))
