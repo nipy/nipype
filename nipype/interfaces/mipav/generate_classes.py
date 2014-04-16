@@ -105,22 +105,26 @@ if __name__ == "__main__":
     
     modules_from_chris = ['edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010',
                          #'edu.jhu.ece.iacl.plugins.registration.MedicAlgorithmFLIRT', XML not well formed
-                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient',
+                         #'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient', # not well formed "<file collection: semi-colon delimited list>"
                          'edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator',
                          'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation',
-                         'de.mpg.cbs.jist.modules.JistModuleFilterStacking',
+                         #'de.mpg.cbs.jist.modules.JistModuleFilterStacking', not found
                          'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
-                         'de.mpg.cbs.jist.modules.JistModuleTubularVolumeFilter',
+                         #'de.mpg.cbs.jist.modules.JistModuleTubularVolumeFilter', # not found
                          #'de.mpg.cbs.jist.modules.JistModuleMgdmMultiSegmentation',
-                         'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization',
+                         #'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization', # not found
                          #'de.mpg.cbs.jist.modules.JistModuleCopyData', XML not well formed
-                         'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization',
-                         'de.mpg.cbs.jist.tools.JistToolsExtractBrainRegion',
-                         #'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask', XML not well formed
+                         #'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization',
+                         #'de.mpg.cbs.jist.tools.JistToolsExtractBrainRegion',
+                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',# XML not well formed
                          #'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE',
                          'de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation']
     
-    modules_list = list(set(modules_list).union(set(modules_from_chris)))
+    modules_from_julia = ['de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking',
+                          'edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010']
+    
+    #modules_list = list(set(modules_list).union(set(modules_from_chris)))
+    modules_list = modules_from_julia
 
     ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
     generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run" ])
