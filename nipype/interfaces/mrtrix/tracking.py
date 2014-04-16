@@ -75,24 +75,31 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
-
-    seed_file = File(exists=True, argstr='-seed %s', position=2, desc='seed file')
+    
+    seed_xor = ['seed_file', 'seed_spec']
+    seed_file = File(exists=True, argstr='-seed %s', desc='seed file', xor = seed_xor)
     seed_spec = traits.List(traits.Float, desc='seed specification in mm and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    include_file = File(exists=True, argstr='-include %s', position=2, desc='inclusion file')
+        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm', xor = seed_xor)
+    
+    include_xor = ['include_file', 'include_spec']
+    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    exclude_file = File(exists=True, argstr='-exclude %s', position=2, desc='exclusion file')
+        argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
+    
+    exclude_xor = ['exclude_file', 'exclude_spec']
+    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
-    mask_file = File(exists=True, argstr='-exclude %s', position=2, desc='mask file. Only tracks within mask.')
+        argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor = exclude_xor)
+    
+    mask_xor = ['mask_file', 'mask_spec']
+    mask_file = File(exists=True, argstr='-mask %s', desc='mask file. Only tracks within mask.', xor = mask_xor)
     mask_spec = traits.List(traits.Float, desc='Mask specification in mm and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
-        argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm')
+        argstr='-mask %s', minlen=4, maxlen=4, sep=',', units='mm', xor = mask_xor)
 
     inputmodel = traits.Enum('DT_STREAM', 'SD_PROB', 'SD_STREAM',
         argstr='%s', desc='input model type', usedefault=True, position=-3)
 
-    stop = traits.Bool(argstr='-gzip', desc="stop track as soon as it enters any of the include regions.")
+    stop = traits.Bool(argstr='-stop', desc="stop track as soon as it enters any of the include regions.")
     do_not_precompute = traits.Bool(argstr='-noprecomputed', desc="Turns off precomputation of the legendre polynomial values. Warning: this will slow down the algorithm by a factor of approximately 4.")
     unidirectional = traits.Bool(argstr='-unidirectional', desc="Track from the seed point in one direction only (default is to track in both directions).")
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
@@ -120,7 +127,8 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-initdirection %s', minlen=2, maxlen=2, units='voxels')
-    out_file = File(argstr='%s', position= -1, genfile=True, desc='output data file')
+    out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck', 
+                    output_name='tracked.tck', desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
@@ -140,26 +148,15 @@ class StreamlineTrack(CommandLine):
     >>> strack.inputs.inputmodel = 'SD_PROB'
     >>> strack.inputs.in_file = 'data.Bfloat'
     >>> strack.inputs.seed_file = 'seed_mask.nii'
+    >>> strack.inputs.mask_file = 'mask.nii'
+    >>> strack.cmdline
+    'streamtrack -mask mask.nii -seed seed_mask.nii SD_PROB data.Bfloat data_tracked.tck'
     >>> strack.run()                                    # doctest: +SKIP
     """
     _cmd = 'streamtrack'
     input_spec = StreamlineTrackInputSpec
     output_spec = StreamlineTrackOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['tracked'] = op.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_tracked.tck'
 
 class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
