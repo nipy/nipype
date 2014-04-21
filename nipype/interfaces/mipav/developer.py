@@ -7,7 +7,7 @@ import os
 
 
 class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="-xDefaultMem %d")
     inInput = File(desc="Input volume to be skullstripped.", exists=True, argstr="--inInput %s")
     inAtlas = File(desc="SPECTRE atlas description file. A text file enumerating atlas files and landmarks.", exists=True, argstr="--inAtlas %s")
     inInitial = traits.Int(desc="Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.", argstr="--inInitial %d")
