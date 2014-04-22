@@ -367,7 +367,7 @@ class AutoTcorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
-    def _overload_extension(self, value, name=None):
+    def _overload_extension(self, value):
         path, base, ext = split_filename(value)
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
@@ -560,7 +560,6 @@ class VolregInputSpec(AFNICommandInputSpec):
                    copyfile=False)
     out_file = File(name_template="%s_volreg", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
-
     basefile = File(desc='base file for registration',
                     argstr='-base %s',
                     position=-6,
@@ -582,12 +581,18 @@ class VolregInputSpec(AFNICommandInputSpec):
                             argstr='-tshift 0')
     copyorigin = traits.Bool(desc='copy base file origin coords to output',
                              argstr='-twodup')
+    oned_matrix_save = File(name_template='%s.aff12.1D',
+                            desc='Save the matrix transformation',
+                            argstr='-1Dmatrix_save %s',
+                            keep_extension=True,
+                            name_source="in_file")
 
 
 class VolregOutputSpec(TraitedSpec):
     out_file = File(desc='registered file', exists=True)
     md1d_file = File(desc='max displacement info file', exists=True)
     oned_file = File(desc='movement parameters info file', exists=True)
+    oned_matrix_save = File(desc='matrix transformation from base to input', exists=True)
 
 
 class Volreg(AFNICommand):
@@ -1924,7 +1929,7 @@ class AFNItoNIFTI(AFNICommand):
     input_spec = AFNItoNIFTIInputSpec
     output_spec = AFNICommandOutputSpec
 
-    def _overload_extension(self, value, name=None):
+    def _overload_extension(self, value):
         path, base, ext = split_filename(value)
         if ext.lower() not in [".1d", ".nii.gz", ".1D"]:
             ext = ext + ".nii"
