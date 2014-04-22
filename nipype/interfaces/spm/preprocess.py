@@ -1084,6 +1084,8 @@ class CreateWarpedInputSpec(SPMCommandInputSpec):
                               field='crt_warped.K')
     interp = traits.Range(low=0, high=7, field='crt_warped.interp',
                           desc='degree of b-spline used for interpolation')
+    modulate = traits.Bool(field='crt_warped.jactransf',
+                           desc="Modulate images")
 
 
 class CreateWarpedOutputSpec(TraitedSpec):
@@ -1127,8 +1129,12 @@ class CreateWarped(SPMCommand):
         outputs['warped_files'] = []
         for filename in self.inputs.image_files:
             pth, base, ext = split_filename(filename)
-            outputs['warped_files'].append(os.path.realpath('w%s%s' % (base,
-                                                                       ext)))
+            if isdefined(self.inputs.modulate) and self.inputs.modulate:
+                outputs['warped_files'].append(os.path.realpath('mw%s%s' % (base,
+                                                                            ext)))
+            else:
+                outputs['warped_files'].append(os.path.realpath('w%s%s' % (base,
+                                                                           ext)))
         return outputs
 
 

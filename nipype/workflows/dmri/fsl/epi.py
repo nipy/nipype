@@ -370,7 +370,7 @@ def topup_correction( name='topup_correction' ):
     >>> nipype_epicorrect = topup_correction('nipype_topup')
     >>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
     >>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
-    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
+    >>> nipype_epicorrect.inputs.inputnode.encoding_direction = ['y', 'y-']
     >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
     >>> nipype_epicorrect.run() # doctest: +SKIP
 
@@ -400,7 +400,6 @@ def topup_correction( name='topup_correction' ):
     outputnode = pe.Node( niu.IdentityInterface(
                           fields=['out_fieldcoef',
                                   'out_movpar',
-                                  'out_topup',
                                   'out_enc_file',
                                   'epi_corrected'
                           ]), name='outputnode'
@@ -424,10 +423,11 @@ def topup_correction( name='topup_correction' ):
                      ,(combin,        merged, [('out', 'in_files')] )
                      ,(merged,         topup, [('merged_file','in_file')])
                      ,(inputnode,      topup, [('encoding_direction','encoding_direction'),('readout_times','readout_times') ])
-                     ,(topup,     applytopup, [('out_topup','in_topup'),('out_enc_file','encoding_file')])
+                     ,(topup,     applytopup, [('out_fieldcoef','in_topup_fieldcoef'),('out_movpar','in_topup_movpar'),
+                                               ('out_enc_file','encoding_file')])
                      ,(combin2,   applytopup, [('out','in_files')] )
                      ,(topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar'),
-                                               ('out_topup','out_topup'),('out_enc_file','out_enc_file') ])
+                                               ('out_enc_file','out_enc_file') ])
                      ,(applytopup,outputnode, [('out_corrected','epi_corrected')])
                      ])
 
