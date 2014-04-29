@@ -1,23 +1,18 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The fsl module provides classes for interfacing with the `FSL
-<http://www.fmrib.ox.ac.uk/fsl/index.html>`_ command line tools.  This
-was written to work with FSL version 4.1.4.
+"""The niftyreg module provides classes for interfacing with `niftyreg
+<http://sourceforge.net/projects/niftyreg/>`_ command line tools. The 
+interfaces were written to work with niftyreg version 1.4
 
-These are the base tools for working with FSL.
-Preprocessing tools are found in fsl/preprocess.py
-Model tools are found in fsl/model.py
-DTI tools are found in fsl/dti.py
+These are the base tools for working with niftyreg.
 
-XXX Make this doc current!
+Registration tools are found in niftyreg/reg.py
+Every other tool is found in niftyreg/regutils.py
 
 Currently these tools are supported:
 
-* BET v2.1: brain extraction
-* FAST v4.1: segmentation and bias correction
-* FLIRT v5.5: linear registration
-* MCFLIRT: motion correction
-* FNIRT v1.0: non-linear warp
+* reg_aladin: Global image registration
+* reg_f3d: Non-rigid registration
 
 Examples
 --------
