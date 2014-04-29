@@ -558,6 +558,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         fp = open(batchscriptfile, 'wt')
         fp.writelines(batchscript)
         fp.close()
+        os.chmod(batchscriptfile, 0744)
         return self._submit_batchtask(batchscriptfile, node)
 
     def _report_crash(self, node, result=None):
