@@ -50,7 +50,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline #doctest: +ELLIPSIS
-    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm functional_2.dcm'
+    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm'
     >>> converter.run() # doctest: +SKIP
     """
 
