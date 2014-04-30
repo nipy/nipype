@@ -45,6 +45,7 @@ def test_Dcm2nii_inputs():
     position=5,
     ),
     source_names=dict(argstr='%s',
+    copyfile=False,
     mandatory=True,
     position=10,
     ),
