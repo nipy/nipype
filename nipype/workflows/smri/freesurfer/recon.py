@@ -2,7 +2,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.utility as niu
 
-def create_skullstripped_recon_flow(name):
+def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.
     FreeSurfer failes to perform skullstrippig on some volumes (especially
     MP2RAGE). This can be avoided by doing skullstripping before runnig recon-all
@@ -69,7 +69,7 @@ def create_skullstripped_recon_flow(name):
     
     outputnode = pe.Node(niu.IdentityInterface(fields=['subject_id',
                                                       'subjects_dir']),
-                        name='inputspec')
+                        name='outputspec')
     
     wf.connect(autorecon_resume, "subjects_dir", outputnode, "subjects_dir")
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
