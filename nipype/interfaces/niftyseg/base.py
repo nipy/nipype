@@ -113,8 +113,7 @@ class Info(object):
         try:
             return os.environ['NIFTYSEGOUTPUTTYPE']
         except KeyError:
-            warnings.warn(('NIFTYSEG environment variables not set. setting output '
-                           'type to NIFTI'))
+            warnings.warn(('NIFTYSEG environment variables not set. setting output type to NIFTI'))
             return 'NIFTI'
 
     @staticmethod
