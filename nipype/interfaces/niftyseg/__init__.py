@@ -7,6 +7,5 @@ Top-level namespace for niftyseg.
 """
 
 from .base import (NIFTYSEGCommand, Info, check_niftyseg, no_niftyseg, no_niftyseg_course_data)
-from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
-                    IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
-                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+from .maths import ( UnaryMaths, BinaryMaths)
+from .stats import ( UnaryStats, BinaryStats)
