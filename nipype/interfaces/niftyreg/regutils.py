@@ -69,12 +69,10 @@ class RegResample(CommandLine):
 
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
-        # first do what should be done in general
-        formated = super(RegResample, self)._format_arg(name, spec, value)
         if name == 'inter_val':
-            formated = spec.argstr%{"NN":0, "LIN":1, "CUB":2}[value]
-
-        return formated
+            return spec.argstr%{"NN":0, "LIN":1, "CUB":2}[value]
+        else:
+            return super(RegResample, self)._format_arg(name, spec, value)
 
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
