@@ -488,16 +488,17 @@ class ProbTrackX2(ProbTrackX):
     --------
 
     >>> from nipype.interfaces import fsl
-    >>> pbx2 = fsl.ProbTrackX2 seed='data.bedpostX/seed_source.nii.gz', \
-    thsamples=['data.bedpostX/merged_th1samples.nii.gz'], \
-    fsamples=['data.bedpostX/merged_f1samples.nii.gz'], \ 
-    phsamples=['data.bedpostX/merged_ph1samples.nii.gz'], \ 
-    mask='data.bedpostX/nodif_brain_mask.nii.gz', \
-    out_dir='.',
-    n_samples=3, \
-    n_steps=10)
+    >>> pbx2 = fsl.ProbTrackX2()
+    >>> pbx2.inputs.seed = 'seed_source.nii.gz'
+    >>> pbx2.inputs.thsamples = 'merged_th1samples.nii.gz'
+    >>> pbx2.inputs.fsamples = 'merged_f1samples.nii.gz'
+    >>> pbx2.inputs.phsamples = 'merged_ph1samples.nii.gz'
+    >>> pbx2.inputs.mask = 'nodif_brain_mask.nii.gz'
+    >>> pbx2.inputs.out_dir = '.'
+    >>> pbx2.inputs.n_samples = 3
+    >>> pbx2.inputs.n_steps = 10
     >>> pbx2.cmdline
-    'probtrackx2 --forcedir -m data.bedpostX/nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=data.bedpostX/seed_source.nii.gz'
+    'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
     input_spec = ProbTrackX2InputSpec
