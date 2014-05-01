@@ -9,3 +9,4 @@ Top-level namespace for niftyseg.
 from .base import (NIFTYSEGCommand, Info, check_niftyseg, no_niftyseg, no_niftyseg_course_data)
 from .maths import ( UnaryMaths, BinaryMaths)
 from .stats import ( UnaryStats, BinaryStats)
+from .gif import ( Gif )
