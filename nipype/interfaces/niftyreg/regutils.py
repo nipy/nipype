@@ -23,6 +23,20 @@ from nibabel import load
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+# A custom trait class for positive integers
+class PositiveInt (traits.BaseInt):
+
+    # Define the default value
+    default_value = 1
+    # Describe the trait type
+    info_text = 'A positive integer'
+
+    def validate ( self, object, name, value ):
+        value = super(OddInt, self).validate(object, name, value)
+        if (value >= 0) == 1:
+            return value
+        self.error( object, name, value )
+
 
 #-----------------------------------------------------------
 # reg_resample wrapper interface
@@ -136,3 +150,92 @@ class RegJacobian(CommandLine):
             outputs['jac_log_file'] = os.path.abspath(self.inputs.jac_log_file)        
 
         return outputs
+
+
+#-----------------------------------------------------------
+# reg_aladin wrapper interface
+#-----------------------------------------------------------
+# Input spec
+class RegAladinInputSpec(NiftyRegCommandInputSpec):
+    # Input reference file
+    ref_file = File(exists=True, desc='The input reference/target image',
+                   argstr='-ref %s', mandatory=True)
+    # Input floating file
+    flo_file = File(exists=True, desc='The input floating/source image',
+                   argstr='-flo %s', mandatory=True)
+    # Affine output matrix file
+    aff_file = File(desc='The output affine matrix file', argstr='-aff %s')
+    # No symmetric flag
+    nosym_val = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
+    # Rigid only registration
+    rig_only_val = traits.Bool(argstr='-rigOnly', desc='Do only a rigid registration')
+    # Directly optimise affine flag
+    aff_direct_val = traits.Bool(argstr='-affDirect', desc='Directly optimise the affine parameters')
+    # Input affine
+    in_aff_file = File(exists=True, desc='The input affine transformation',
+                   argstr='-inaff %s')
+    # Input reference mask
+    rmask_file = File(exists=True, desc='The input reference mask',
+                   argstr='-rmask %s')
+    # Input floating mask
+    fmask_file = File(exists=True, desc='The input floating mask',
+                   argstr='-fmask %s')
+    # Result image path
+    result_file = File(desc='The affine transformed floating image',
+                   argstr='-res %s')
+    # Maximum number of iterations
+    maxit_val = PositiveInt(desc='Maximum number of iterations', argstr='-maxit %d')
+    # Multiresolution levels
+    ln_val = PositiveInt(desc='Number of resolution levels to create', argstr='-ln %d')
+    # Number of resolution levels to process
+    lp_val = PositiveInt(desc='Number of resolution levels to perform', argstr='-lp %d')
+    # Smoothing to apply on reference image
+    smoo_r_val = traits.Float(desc='Amount of smoothing to apply to reference image',
+                    argstr='-smooR %f')
+    # Smoothing to apply on floating image
+    smoo_f_val = traits.Float(desc='Amount of smoothing to apply to floating image',
+                    argstr='-smooF %f')
+    # Use nifti header to initialise transformation
+    nac_val = traits.Bool(desc='Use nifti header to initialise transformaiton',
+                argstr='-nac')
+    # Percent of blocks that are considered active.
+    v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-%v %d')
+    # Percent of inlier blocks
+    i_val = PositiveInt(desc='Percent of inlier blocks', argstr='-%i %d')
+    # Verbosity off?
+    verbosity_off_val = traits.Bool(argstr='-voff', desc='Turn off verbose output')
+    # Lower threshold on reference image
+    ref_low_val = traits.Float(desc='Lower threshold value on reference image',
+                    argstr='-refLowThr %f')
+    # Upper threshold on reference image
+    ref_up_val = traits.Float(desc='Upper threshold value on reference image',
+                    argstr='-refUpThr %f')
+    # Lower threshold on floating image
+    flo_low_val = traits.Float(desc='Lower threshold value on floating image',
+                    argstr='-floLowThr %f')
+    # Upper threshold on floating image
+    flo_up_val = traits.Float(desc='Upper threshold value on floating image',
+                    argstr='-floUpThr %f')
+
+
+# Output spec
+class RegAladinOutputSpec(TraitedSpec):
+    aff_file = File(desc='The output affine file')
+    result_file = File(desc='The output transformed image')
+
+# Main interface class
+class RegAladin(CommandLine):
+    _cmd = 'reg_aladin'
+    input_spec = RegAladinInputSpec
+    output_spec = RegAladinOutputSpec
+
+    # Returns a dictionary containing names of generated files that are expected 
+    # after package completes execution
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.aff_file) and self.inputs.aff_file:
+            outputs['aff_file'] = os.path.abspath(self.inputs.aff_file)
+
+        if isdefined(self.inputs.result_file) and self.inputs.result_file:
+            outputs['result_file'] = os.path.abspath(self.inputs.result_file)
