@@ -84,7 +84,7 @@ class BinaryStatsInput(StatsInput):
     operation = traits.Enum("p", "d",
                             mandatory=True, argstr="-%s", position=4,
                             desc="operation to perform")
-    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=5, xor=["operand_file"],
+    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=5,
                                  desc="value to perform operation with")
 
 
