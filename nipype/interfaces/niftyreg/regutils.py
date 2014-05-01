@@ -23,7 +23,10 @@ from nibabel import load
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-interpolation_vals = traits.Enum(0, 1, 2)
+
+#-----------------------------------------------------------
+# reg_resample wrapper interface
+#-----------------------------------------------------------
 
 # Input spec
 class RegResampleInputSpec(NiftyRegCommandInputSpec):
@@ -86,7 +89,52 @@ class RegResample(CommandLine):
 
         return outputs
 
+#-----------------------------------------------------------
+# reg_jacobian wrapper interface
+#-----------------------------------------------------------
+# Input spec
+class RegJacobianInputSpec(NiftyRegCommandInputSpec):
+    # Input transformation file
+    trans_file = File(exists=True, desc='The input non-rigid transformation',
+                   argstr='-trans %s', mandatory=True)
+    # Input jacobian determinat file path
+    jac_det_file = File(desc='The output jacobian determinant file name',
+                   argstr='-jac %s')
+    # Input jacobian matrix file name
+    jac_mat_file = File(desc='The output jacobian matrix file name',
+                   argstr='-jacM %s')
+    # Input log of jacobian determinant file name
+    jac_log_file = File(desc='The output log of jacobian determinant file name',
+                   argstr='-jacL %s')
+    # Reference file name
+    ref_file_name = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
+                    argstr='-ref %s')
 
 
-
+# Output spec
+class RegJacobianOutputSpec(TraitedSpec):
+    jac_det_file = File(desc='The output jacobian determinant file')
+    jac_mat_file = File(desc='The output filename of jacobian matrix')
+    jac_log_file = File(desc='The output filename of the log of jacobian determinant')
                    
+# Main interface class
+class RegJacobian(CommandLine):
+    _cmd = 'reg_jacobian'
+    input_spec = RegJacobianInputSpec
+    output_spec = RegJacobianOutputSpec
+
+    # Returns a dictionary containing names of generated files that are expected 
+    # after package completes execution
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        
+        if isdefined(self.inputs.jac_det_file) and self.inputs.jac_det_file:
+            outputs['jac_det_file'] = os.path.abspath(self.inputs.jac_det_file)
+
+        if isdefined(self.inputs.jac_mat_file) and self.inputs.jac_mat_file:
+            outputs['jac_mat_file'] = os.path.abspath(self.inputs.jac_mat_file)
+
+        if isdefined(self.inputs.jac_log_file) and self.inputs.jac_log_file:
+            outputs['jac_log_file'] = os.path.abspath(self.inputs.jac_log_file)        
+
+        return outputs
