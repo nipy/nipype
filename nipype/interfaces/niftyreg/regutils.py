@@ -44,7 +44,7 @@ class PositiveInt (traits.BaseInt):
 
 # Input spec
 class RegResampleInputSpec(NiftyRegCommandInputSpec):
-	# Input reference file
+    # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
                    argstr='-ref %s', mandatory=True)
     # Input floating file
@@ -72,8 +72,8 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
 
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
-	res_file = File(desc='The output filename of the transformed image')
-	blank_file = File(desc='The output filename of resampled blank grid (if generated)')
+    res_file = File(desc='The output filename of the transformed image')
+    blank_file = File(desc='The output filename of resampled blank grid (if generated)')
 
 # Resampler class
 class RegResample(CommandLine):
@@ -93,7 +93,7 @@ class RegResample(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         
-    	if isdefined(self.inputs.res_file) and self.inputs.res_file:
+        if isdefined(self.inputs.res_file) and self.inputs.res_file:
             outputs['res_file'] = os.path.abspath(self.inputs.res_file)
 
         if isdefined(self.inputs.blank_file) and self.inputs.blank_file:
@@ -151,6 +151,34 @@ class RegJacobian(CommandLine):
 
         return outputs
 
+#-----------------------------------------------------------
+# reg_tools wrapper interface
+#-----------------------------------------------------------
+# Input spec
+class RegToolsInputSpec(NiftyRegCommandInputSpec):
+    # Input image file
+    in_file = File(exists=True, desc='The input image file path',
+                   argstr='-in %s', mandatory=True)
+    # Output file path
+    out_file = File(desc='The output file name', argstr='-out %s')
+
+# Output spec    
+class RegToolsOutputSpec(TraitedSpec):
+    out_file = File(desc='The output file')
+
+# Main interface class
+class RegTools(CommandLine):
+    _cmd = 'reg_tools'
+    input_spec = RegToolsInputSpec
+    output_spec = RegToolsOutputSpec
+
+    # Returns a dictionary containing names of generated files that are expected 
+    # after package completes execution
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        if isdefined(self.inputs.out_file) and self.inputs.out_file:
+                outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
 #-----------------------------------------------------------
 # reg_aladin wrapper interface
