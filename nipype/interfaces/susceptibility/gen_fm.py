@@ -6,22 +6,48 @@
 """
 import os
 import numpy as np
-
+from from nipype.interfaces.base import traits
+from traits.api import Enum, HasTraits, Str
 from nipype.interfaces.susceptibility.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec
 from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
                                     isdefined)
 
-#gen_fm -p $fmUnwrap -m $fmBetMask -etd $epiparams->{ETD} "."-rot $epiparams->{ROT} -ped $epiparams->{PED} "	"-defo $fmDef -fmo $fmFm";
-class MathsInput(NIFTYSEGCommandInputSpec):
+# A custom trait class for positive float values
+class PositiveFloat (traits.BaseFloat):
+    # Define the default value
+    default_value = 1.0
+    # Describe the trait type
+    info_text = 'A positive float'
     
-    in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
-                desc="image to operate on")
+    def validate ( self, object, name, value ):
+        value = super(OddInt, self).validate(object, name, value)
+        if (value >= 0.0) == 1:
+            return value
+        self.error( object, name, value )
+
+
+
+#gen_fm -p $fmUnwrap -m $fmBetMask -etd $epiparams->{ETD} "."-rot $epiparams->{ROT} -ped $epiparams->{PED} "	"-defo $fmDef -fmo $fmFm";
+class GenFmInput(NIFTYSEGCommandInputSpec):
+    
+    in_file = File(position=2, argstr="-p", exists=True, mandatory=True,
+                desc="Unwrapped field map image")
+    in_etd  = PositiveFloat(position=2, argstr="-etd", mandatory=True, desc="Echo time difference")
+    in_rot =  PositiveFloat(position=2, argstr="-rot", mandatory=True, desc="Read out time (taking into account any acceleration factors)")
+    _directions = ["x", "-x", "y", "-y", "z", "-z"]
+    in_ped = traits.Enum(*_directions, position=-3, argstr="-ped", desc="phase encoding direction of the EPI sequence", mandatory=True)
+    
+    out_field = File(genfile=True, position=-2, argstr="-defo", desc="output deformation field", hash_files=False, mandatory=True)
+    
+    out_fm = File(genfile=True, position=-2, argstr="-fmo", desc="field map output file", hash_files=False, exists=True, mandatory=True)
+                        
     out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write", hash_files=False)
     _dtypes = ["float", "char", "int", "short", "double", "input"]
     output_datatype = traits.Enum(*_dtypes,
                                   position=-3, argstr="-odt %s",
                                   desc="datatype to use for output (default uses input type)")
-    
+
+
 class MathsOutput(TraitedSpec):
 
     out_file = File(exists=True, desc="image written after calculations")
