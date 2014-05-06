@@ -124,7 +124,7 @@ class Info(object):
         return os.path.join(stdpath, img_name)
 
 
-class NIFTYSEGCommandInputSpec(CommandLineInputSpec):
+class SusceptibilityCommandInputSpec(CommandLineInputSpec):
     """
         Base Input Specification for all NIFTYSEG Commands
         
@@ -136,15 +136,14 @@ class NIFTYSEGCommandInputSpec(CommandLineInputSpec):
         niftyseg.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
         """
     output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
-                              desc='NIFTYSEG output type')
+                              desc='Susceptibility output type')
 
 
-class NIFTYSEGCommand(CommandLine):
-    """Base support for NIFTYSEG commands.
-        
-        """
+class SusceptibilityCommand(CommandLine):
+    """Base support for Susceptibility commands.
+    """
     
-    input_spec = NIFTYSEGCommandInputSpec
+    input_spec = SusceptibilityCommandInputSpec
     _output_type = None
     
     def __init__(self, **inputs):
