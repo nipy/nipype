@@ -68,7 +68,7 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
     # Padding value
     pad_val = traits.Int(desc = 'Padding value', argstr="-pad %d")
     # Verbosity off?
-    verbosity_off_val = traits.Bool(argstr='-voff', desc='Turn off verbose output')
+    verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
@@ -161,6 +161,45 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
                    argstr='-in %s', mandatory=True)
     # Output file path
     out_file = File(desc='The output file name', argstr='-out %s')
+    # Make the output image isotropic
+    iso_flag = traits.Bool(argstr='-iso', desc='Make output image isotropic')
+    # Set scale, slope to 0 and 1.
+    noscl_flag = traits.Bool(argstr='-noscl', desc='Set scale, slope to 0 and 1')
+    # Values outside the mask are set to NaN
+    mask_file = File(exists=True, desc='Values outside the mask are set to NaN',
+                   argstr='-nan %s')
+    # Threshold the input image
+    thr_val = traits.Float(desc='Binarise the input image with the given threshold', 
+                argstr='-thr %f')
+    # Binarise the input image
+    bin_flag = traits.Bool(argstr='-bin', desc='Binarise the input image')
+    # Compute the mean RMS between the two images
+    rms_val = File(exists=True, desc='Compute the mean RMS between the images',
+                argstr='-rms %s')
+    # Perform division by image or value
+    div_val = traits.Either(traits.Float, File(exists=True), 
+                desc='Divide the input by image or value', argstr='-div %s')
+    # Perform multiplication by image or value
+    mul_val = traits.Either(traits.Float, File(exists=True), 
+                desc='Multiply the input by image or value', argstr='-mul %s')
+    # Perform addition by image or value
+    add_val = traits.Either(traits.Float, File(exists=True), 
+                desc='Add to the input image or value', argstr='-add %s')
+    # Perform subtraction by image or value
+    sub_val = traits.Either(traits.Float, File(exists=True), 
+                desc='Add to the input image or value', argstr='-sub %s')
+    # Downsample the image by a factor of 2.
+    down_flag = traits.Bool(desc='Downsample the image by a factor of 2', argstr='-down')
+    # Smoothing using spline kernel
+    smo_s_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                    desc = 'Smooth the input image using a cubic spline kernel',
+                    argstr='-smoS %f %f %f')
+    # Smoothing using Gaussian kernel
+    smo_g_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                    desc = 'Smooth the input image using a Gaussian kernel',
+                    argstr='-smoG %f %f %f')
+
+
 
 # Output spec    
 class RegToolsOutputSpec(TraitedSpec):
@@ -194,11 +233,11 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     # Affine output matrix file
     aff_file = File(desc='The output affine matrix file', argstr='-aff %s')
     # No symmetric flag
-    nosym_val = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
+    nosym_flag = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
     # Rigid only registration
-    rig_only_val = traits.Bool(argstr='-rigOnly', desc='Do only a rigid registration')
+    rig_only_flag = traits.Bool(argstr='-rigOnly', desc='Do only a rigid registration')
     # Directly optimise affine flag
-    aff_direct_val = traits.Bool(argstr='-affDirect', desc='Directly optimise the affine parameters')
+    aff_direct_flag = traits.Bool(argstr='-affDirect', desc='Directly optimise the affine parameters')
     # Input affine
     in_aff_file = File(exists=True, desc='The input affine transformation',
                    argstr='-inaff %s')
@@ -224,14 +263,14 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     smoo_f_val = traits.Float(desc='Amount of smoothing to apply to floating image',
                     argstr='-smooF %f')
     # Use nifti header to initialise transformation
-    nac_val = traits.Bool(desc='Use nifti header to initialise transformaiton',
+    nac_flag = traits.Bool(desc='Use nifti header to initialise transformaiton',
                 argstr='-nac')
     # Percent of blocks that are considered active.
     v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-%v %d')
     # Percent of inlier blocks
     i_val = PositiveInt(desc='Percent of inlier blocks', argstr='-%i %d')
     # Verbosity off?
-    verbosity_off_val = traits.Bool(argstr='-voff', desc='Turn off verbose output')
+    verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
     # Lower threshold on reference image
     ref_low_val = traits.Float(desc='Lower threshold value on reference image',
                     argstr='-refLowThr %f')
