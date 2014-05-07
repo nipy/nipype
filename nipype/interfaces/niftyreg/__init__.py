@@ -8,4 +8,4 @@ Top-level namespace for niftyreg.
 
 from .base import (Info)
 from .regutils import (RegResample, RegJacobian, RegAladin,
-    RegTools)
+    RegTools, RegF3D)
