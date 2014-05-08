@@ -233,6 +233,29 @@ class RegTools(CommandLine):
                 outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
 #-----------------------------------------------------------
+# reg_measure wrapper interface
+#-----------------------------------------------------------
+class RegMeasureInputSpec(NiftyRegCommandInputSpec):
+    ref_file = File(exists=True, desc='The input reference/target image',
+                   argstr='-ref %s', mandatory=True)
+    flo_file = File(exists=True, desc='The input floating/source image',
+                   argstr='-flo %s', mandatory=True)
+
+    ncc_flag = traits.Bool(argstr='-ncc', desc='Compute NCC')
+    lncc_flag = traits.Bool(argstr='-lncc', desc='Compute LNCC')
+    nmi_flag = traits.Bool(argstr='-nmi', desc='Compute NMI')
+    ssd_flag = traits.Bool(argstr='-ssd', desc='Compute SSD')
+
+class RegMeasureOutputSpec(TraitedSpec):
+    pass
+
+class RegMeasure(CommandLine):
+    _cmd = 'reg_measure'
+    input_spec = RegMeasureInputSpec
+    output_spec = RegMeasureOutputSpec 
+
+
+#-----------------------------------------------------------
 # reg_aladin wrapper interface
 #-----------------------------------------------------------
 # Input spec
