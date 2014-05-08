@@ -101,7 +101,7 @@ if __name__ == '__main__':
             f.close()
 
 
-def generate_all_classes(modules_list=[], launcher=[]):
+def generate_all_classes(modules_list=[], launcher=[], redirect_x = False):
     """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
         launcher containtains the command line prefix wrapper arugments needed to prepare
         a proper environment for each of the modules.
@@ -111,7 +111,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code, module = generate_class(module, launcher)
+        package, code, module = generate_class(module, launcher, redirect_x = redirect_x)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -126,7 +126,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher, strip_module_name_prefix=True):
+def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x = False):
     dom = grab_xml(module, launcher)
     if strip_module_name_prefix:
         module_name = module.split(".")[-1]
@@ -293,6 +293,8 @@ def generate_class(module, launcher, strip_module_name_prefix=True):
     output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
+    template += "    _redirect_x = True\n"
+    
 
     main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 

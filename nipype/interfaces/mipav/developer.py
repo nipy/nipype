@@ -7,7 +7,7 @@ import os
 
 
 class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="-xDefaultMem %d")
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInput = File(desc="Input volume to be skullstripped.", exists=True, argstr="--inInput %s")
     inAtlas = File(desc="SPECTRE atlas description file. A text file enumerating atlas files and landmarks.", exists=True, argstr="--inAtlas %s")
     inInitial = traits.Int(desc="Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.", argstr="--inInitial %d")
@@ -93,6 +93,7 @@ Hanlin Wan (hanlinwan@gmail.com)
     output_spec = MedicAlgorithmSPECTRE2010OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 "
     _outputs_filenames = {'outd0':'outd0.nii','outOriginal':'outOriginal.nii','outMask':'outMask.nii','outSplitHalves':'outSplitHalves.nii','outMidsagittal':'outMidsagittal.nii','outPrior':'outPrior.nii','outFANTASM':'outFANTASM.nii','outSegmentation':'outSegmentation.nii','outStripped':'outStripped.nii'}
+    _redirect_x = True
 
 
 class JistIntensityMp2rageMaskingInputSpec(CommandLineInputSpec):
@@ -133,3 +134,4 @@ version: 3.0.RC
     output_spec = JistIntensityMp2rageMaskingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking "
     _outputs_filenames = {'outSignal2':'outSignal2.nii','outSignal':'outSignal.nii','outMasked2':'outMasked2.nii','outMasked':'outMasked.nii'}
+    _redirect_x = True
