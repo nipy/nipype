@@ -254,6 +254,32 @@ class RegMeasure(CommandLine):
     input_spec = RegMeasureInputSpec
     output_spec = RegMeasureOutputSpec 
 
+#-----------------------------------------------------------
+# reg_average wrapper interface
+#-----------------------------------------------------------
+class RegAverageInputSpec(NiftyRegCommandInputSpec):
+    out_file = File(mandatory=True, position=0, desc='Output file name',
+        argstr='%s')
+
+    avg_val = traits.List(traits.Str, argstr='-avg %s', sep=' ',
+        minlen=2, desc='Averaging of images/affine transformations')
+
+    demean_1_val = traits.List(traits.Str, argstr='-demean1 %s', sep=' ',
+        desc='Demean 1')
+
+    demean_2_val = traits.List(traits.Str, argstr='-demean2 %s', sep=' ',
+        desc='Demean 2')
+
+    demean_3_val = traits.List(traits.Str, argstr='-demean3 %s', sep=' ',
+        desc='Demean 3')
+
+class RegAverageOutputSpec(TraitedSpec):
+    out_file = File(desc='Output file name')
+
+class RegAverage(CommandLine):
+    _cmd = 'reg_average'
+    input_spec = RegAverageInputSpec
+    output_spec = RegAverageOutputSpec
 
 #-----------------------------------------------------------
 # reg_aladin wrapper interface
