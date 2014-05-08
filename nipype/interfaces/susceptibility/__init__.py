@@ -6,4 +6,4 @@ Top-level namespace for susceptibility distortion correction tools.
 """
 
 from .base import (Info)
-from .susceptibility_tools import ( GenFm, PhaseUnwrap, ScalePm )
+from .susceptibility_tools import ( GenFm, PhaseUnwrap, PmScale )
