@@ -261,7 +261,7 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
     out_file = File(mandatory=True, position=0, desc='Output file name',
         argstr='%s')
 
-    avg_val = traits.List(traits.Str, argstr='-avg %s', sep=' ',
+    in_files = traits.List(traits.Str, argstr='-avg %s', sep=' ',
         minlen=2, desc='Averaging of images/affine transformations')
 
     demean_1_val = traits.List(traits.Str, argstr='-demean1 %s', sep=' ',
