@@ -6,7 +6,3 @@ Package contains interfaces for using existing functionality in other packages
 Requires Packages to be installed
 """
 __docformat__ = 'restructuredtext'
-
-from io import DataGrabber, DataSink, SelectFiles
-from utility import IdentityInterface, Rename, Function, Select, Merge
-import fsl, spm, freesurfer, afni, ants, slicer, dipy, nipy, mrtrix, camino
