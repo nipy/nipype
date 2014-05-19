@@ -1570,7 +1570,7 @@ class SSHDataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                             desc='If set SSH commands will be logged to the given file')
 
 
-class SSHDataGrabber(IOBase):
+class SSHDataGrabber(Datagrabber):
     """ Datagrabber module that downloads the file list and optionally
         the files from a SSH server. The SSH operation must not need
         user and password so an SSH agent must be active in where this
@@ -1647,45 +1647,12 @@ class SSHDataGrabber(IOBase):
         if not outfields:
             outfields = ['outfiles']
         super(SSHDataGrabber, self).__init__(**kwargs)
-        undefined_traits = {}
-        # used for mandatory inputs check
-        self._infields = infields
-        self._outfields = outfields
-        if infields:
-            for key in infields:
-                self.inputs.add_trait(key, traits.Any)
-                undefined_traits[key] = Undefined
-        # add ability to insert field specific templates
-        self.inputs.add_trait('field_template',
-                              traits.Dict(traits.Enum(outfields),
-                                          desc="arguments that fit into template"))
-        undefined_traits['field_template'] = Undefined
-        if not isdefined(self.inputs.template_args):
-            self.inputs.template_args = {}
-        for key in outfields:
-            if not key in self.inputs.template_args:
-                if infields:
-                    self.inputs.template_args[key] = [infields]
-                else:
-                    self.inputs.template_args[key] = []
-
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
-
         if (
             self.inputs.template_expression == 'regexp' and
             self.inputs.template[-1] != '$'
         ):
             self.inputs.template += '$'
 
-
-
-    def _add_output_traits(self, base):
-        """
-
-        Using traits.Any instead out OutputMultiPath till add_trait bug
-        is fixed.
-        """
-        return add_traits(base, self.inputs.template_args.keys())
 
     def _list_outputs(self):
         if len(self.inputs.ssh_log_to_file) > 0:
@@ -1708,8 +1675,6 @@ class SSHDataGrabber(IOBase):
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
-            #template = os.path.join(
-            #    os.path.abspath(self.inputs.base_directory), template)
             if not args:
                 client = self._get_ssh_client()
                 sftp = client.open_sftp()
