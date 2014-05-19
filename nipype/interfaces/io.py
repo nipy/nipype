@@ -1766,11 +1766,14 @@ class SSHDataGrabber(DataGrabber):
         config = paramiko.SSHConfig()
         config.parse(open(os.path.expanduser('~/.ssh/config')))
         host = config.lookup(self.inputs.hostname)
-        proxy = paramiko.ProxyCommand(
-            subprocess.check_output(
-                [os.environ['SHELL'], '-c', 'echo %s' % host['proxycommand']]
-            ).strip()
-        )
+        if 'proxycommand' in host:
+            proxy = paramiko.ProxyCommand(
+                subprocess.check_output(
+                    [os.environ['SHELL'], '-c', 'echo %s' % host['proxycommand']]
+                ).strip()
+            )
+        else:
+            proxy = None
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
