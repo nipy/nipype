@@ -1570,11 +1570,11 @@ class SSHDataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                             desc='If set SSH commands will be logged to the given file')
 
 
-class SSHDataGrabber(Datagrabber):
-    """ Datagrabber module that downloads the file list and optionally
-        the files from a SSH server. The SSH operation must not need
-        user and password so an SSH agent must be active in where this
-        module is being run.
+class SSHDataGrabber(DataGrabber):
+    """ Extension of DataGrabber module that downloads the file list and
+        optionally the files from a SSH server. The SSH operation must
+        not need user and password so an SSH agent must be active in
+        where this module is being run.
 
 
         .. attention::
