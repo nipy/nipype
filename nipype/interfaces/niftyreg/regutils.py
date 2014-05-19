@@ -261,17 +261,20 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
     out_file = File(mandatory=True, position=0, desc='Output file name',
         argstr='%s')
 
-    in_files = traits.List(traits.Str, argstr='-avg %s', sep=' ',
-        minlen=2, desc='Averaging of images/affine transformations')
+    # If only images/transformation files are passed, do a straight average
+    # of all the files in the string (shoudl this be a list of files?)
+    in_files = traits.List(traits.Str, position = 1, argstr='-avg %s', sep=' ',
+        minlen=2, desc='Averaging of images/affine transformations', xor=['reg_average_type'])
 
-    demean_1_val = traits.List(traits.Str, argstr='-demean1 %s', sep=' ',
-        desc='Demean 1')
+    # To tidy up the interface to reg_average, have an xor over the
+    # different demeaning types with the reference file adjacent
+    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['demean_type'])
+    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'])
+    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'])
+    # If we do not have a list of files beginning with avg, must be a demean
+    demean_files = traits.List(traits.Str, position =2, argstr=' %s ', sep=' ',
+        desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
 
-    demean_2_val = traits.List(traits.Str, argstr='-demean2 %s', sep=' ',
-        desc='Demean 2')
-
-    demean_3_val = traits.List(traits.Str, argstr='-demean3 %s', sep=' ',
-        desc='Demean 3')
 
 class RegAverageOutputSpec(TraitedSpec):
     out_file = File(desc='Output file name')
@@ -351,6 +354,7 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
 class RegAladinOutputSpec(TraitedSpec):
     aff_file = File(desc='The output affine file')
     result_file = File(desc='The output transformed image')
+    avg_output = traits.String(desc='Output string in the format for reg_average')
 
 # Main interface class
 class RegAladin(CommandLine):
@@ -368,6 +372,10 @@ class RegAladin(CommandLine):
 
         if isdefined(self.inputs.result_file) and self.inputs.result_file:
             outputs['result_file'] = os.path.abspath(self.inputs.result_file)
+          
+        # Make a list of the linear transformation file and the input image
+        if isdefined(self.inputs.aff_file) and self.inputs.aff_file:
+            outputs['avg_output'] = [os.path.abspath(self.inputs.aff_file), os.path.abspath(self.inputs.flo_file)]
 
 #-----------------------------------------------------------
 # reg_transform wrapper interface
