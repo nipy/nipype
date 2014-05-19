@@ -1547,25 +1547,15 @@ class MySQLSink(IOBase):
         c.close()
         return None
 
-class SSHDataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     hostname = traits.Str(mandatory=True,
                                desc='Server hostname.')
     download_files = traits.Bool(True, usedefault=True,
                                     desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
                                desc='Path to the base directory consisting of subject data.')
-    raise_on_empty = traits.Bool(True, usedefault=True,
-                                 desc='Generate exception if list is empty for a given field')
-    sort_filelist = traits.Bool(mandatory=True,
-                                desc='Sort the filelist that matches the template')
-    template = traits.Str(mandatory=True,
-                          desc='Layout used to get files. relative to base directory if defined')
-    template_args = traits.Dict(key_trait=traits.Str,
-                                value_trait=traits.List(traits.List),
-                                desc='Information to plug into template')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
                             desc='Use either fnmatch or regexp to express templates')
-
     ssh_log_to_file = traits.Str('', usedefault=True,
                             desc='If set SSH commands will be logged to the given file')
 
@@ -1629,7 +1619,7 @@ class SSHDataGrabber(DataGrabber):
     """
     input_spec = SSHDataGrabberInputSpec
     output_spec = DynamicTraitedSpec
-    _always_run = True
+    _always_run = False
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -1644,6 +1634,13 @@ class SSHDataGrabber(DataGrabber):
         See class examples for usage
 
         """
+        try:
+            paramiko
+        except NameError:
+            raise ImportError(
+                "The library parmiko needs to be installed"
+                " for this module to run."
+            )
         if not outfields:
             outfields = ['outfiles']
         super(SSHDataGrabber, self).__init__(**kwargs)
