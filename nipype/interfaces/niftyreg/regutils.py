@@ -391,8 +391,8 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
         desc='Compute displacement field from transformation', argstr='-disp %s %s')
     flow_val = traits.Tuple(File(exists=True), File, 
         desc='Compute flow field from spline SVF', argstr='-flow %s %s')
-    comp_val = traits.Tuple(File, File, File,
-        desc='compose two transformations', argstr='-comp %s %s %s')
+    comp_val = traits.Tuple(File, File,
+        desc='compose two transformations', argstr='-comp %s %s')
     upd_s_form_val = traits.Tuple(File(exists=True), File(exists=True), File,
         desc='Update s-form using the affine transformation', argstr='-updSform %s %s %s')
     inv_aff_val = traits.Tuple(File(exists=True), File,
@@ -411,13 +411,119 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
         desc='Convert a FLIRT affine transformation to niftyreg affine transformation',
         argstr='-flirtAff2NR %s %s %s %s')
 
+    out_file = File(genfile=True, position=-1, argstr="%s", desc="transformation file to write")
+
 class RegTransformOutputSpec(TraitedSpec):
-    pass
+
+    out_file = File(desc = "Output File (transformation in any format)", exists = True)
 
 class RegTransform(CommandLine):
+    
+    """
+    
+    * * OPTIONS * *
+    
+    -v Print the subversion revision number
+    
+    -ref <filename>
+    Filename of the reference image
+    The Reference image has to be specified when a cubic B-Spline parametrised control point grid is used*.
+    -ref2 <filename>
+    Filename of the second reference image to be used when dealing with composition
+    
+    -def <filename1> <filename2>
+    Take a transformation of any recognised type* and compute the corresponding deformation field
+    filename1 - Input transformation file name
+    filename2 - Output deformation field file name
+    
+    -disp <filename1> <filename2>
+    Take a transformation of any recognised type* and compute the corresponding displacement field
+    filename1 - Input transformation file name
+    filename2 - Output displacement field file name
+    
+    -flow <filename1> <filename2>
+    Take a spline parametrised SVF and compute the corresponding flow field
+    filename1 - Input transformation file name
+    filename2 - Output flow field file name
+    
+    -comp <filename1> <filename2> <filename3>
+    Compose two transformations of any recognised type* and returns a deformation field.
+    Trans3(x) = Trans2(Trans1(x)).
+    filename1 - Input transformation 1 file name (associated with -ref if required)
+    filename2 - Input transformation 2 file name (associated with -ref2 if required)
+    filename3 - Output deformation field file name
+    
+    -updSform <filename1> <filename2> <filename3>
+    Update the sform of an image using an affine transformation.
+    Filename1 - Image to be updated
+    Filename2 - Affine transformation defined as Affine x Reference = Floating
+    Filename3 - Updated image.
+    
+    -invAff <filename1> <filename2>
+    Invert an affine matrix.
+    filename1 - Input affine transformation file name
+    filename2 - Output inverted affine transformation file name
+    
+    -invNrr <filename1> <filename2> <filename3>
+    Invert a non-rigid transformation and save the result as a deformation field.
+    filename1 - Input transformation file name
+    filename2 - Input floating (source) image where the inverted transformation is defined
+    filename3 - Output inverted transformation file name
+    Note that the cubic b-spline grid parametrisations can not be inverted without approximation,
+    as a result, they are converted into deformation fields before inversion.
+    
+    -half <filename1> <filename2>
+    The input transformation is halfed and stored using the same transformation type.
+    filename1 - Input transformation file name
+    filename2 - Output transformation file name
+    
+    -makeAff <rx> <ry> <rz> <tx> <ty> <tz> <sx> <sy> <sz> <shx> <shy> <shz> <outputFilename>
+    Create an affine transformation matrix
+    
+    -aff2rig <filename1> <filename2>
+    Extract the rigid component from an affine transformation matrix
+    filename1 - Input transformation file name
+    filename2 - Output transformation file name
+    
+    -flirtAff2NR <filename1> <filename2> <filename3> <filename4>
+    Convert a flirt (FSL) affine transformation to a NiftyReg affine transformation
+    filename1 - Input FLIRT (FSL) affine transformation file name
+    filename2 - Image used as a reference (-ref arg in FLIRT)
+    filename3 - Image used as a floating (-in arg in FLIRT)
+    filename4 - Output affine transformation file name
+    
+    * The supported transformation types are:
+    - cubic B-Spline parametrised grid (reference image is required)
+    - a dense deformation field
+    - a dense displacement field
+    - a cubic B-Spline parametrised stationary velocity field (reference image is required)
+    - a stationary velocity deformation field
+    - a stationary velocity displacement field
+    - an affine matrix
+    
+    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    
+    """
+    
     _cmd = 'reg_transform'
     input_spec = RegTransformInputSpec
     output_spec = RegTransformOutputSpec
+    
+    _suffix = 'reg_transform'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = self.inputs.out_file
+        if not isdefined(self.inputs.out_file):
+            outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+            outputs["out_file"] = os.path.abspath(outputs["out_file"])
+            
+        return outputs
+            
+    def _gen_filename(self, name):
+        if name == "out_file":
+            return self._list_outputs()["out_file"]
+        return None
 
 #-----------------------------------------------------------
 # reg_f3d wrapper interface
