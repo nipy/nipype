@@ -30,20 +30,29 @@ class PositiveFloat (traits.BaseFloat):
 
 class PmScaleInput(SusceptibilityToolsCommandInputSpec):
     in_pm = File(argstr="-i %s", exists=True, mandatory=True, desc="Original phase image")
-    out_pm = File(genfile = True,argstr="-o %s", exists=False, mandatory=True, desc="Scaled phase image")
+    out_pm = File(genfile = True,argstr="-o %s", exists=False, desc="Scaled phase image")
 
 class PmScaleOutput(TraitedSpec):
-    out_pm = File(exists=False, desc="Scaled phase image written after calculations")
+    out_pm = File(exists=True, desc="Scaled phase image written after calculations")
 
 class PmScale(SusceptibilityToolsCommand):
     _cmd = "pm_scale"
     input_spec = PmScaleInput
     output_spec = PmScaleOutput
     
+    def _gen_filename(self, name):
+        if name == 'out_pm':
+            return self._gen_fname(self.inputs.in_pm,
+                                       suffix='_scaled')
+        return None
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if isdefined(self.inputs.out_pm) and self.inputs.out_pm:
-            outputs["out_pm"] = self.inputs.out_pm
+        if isdefined(self.inputs.out_pm): 
+            outputs['out_pm'] = self.inputs.out_pm
+        else:
+            outputs['out_pm'] = self._gen_filename('out_pm')
+        
         return outputs
 
 
@@ -52,7 +61,7 @@ class PhaseUnwrapInput(SusceptibilityToolsCommandInputSpec):
     in_fm = File(argstr="-p %s", exists=True, mandatory=True, desc="Scaled field map image")
     in_mask = File(argstr="-m %s", exists=True, mandatory=True, desc="Mask of fieldmap image")
     in_mag = File(argstr="-a %s", exists=True, mandatory=True, desc="Fieldmap magnitude image")
-    out_fm = File(genfile = True, argstr="-o %s", exists=False, mandatory=True, desc="Unwrapped  field map image")
+    out_fm = File(genfile = True, argstr="-o %s", exists=False, desc="Unwrapped  field map image")
 
 class PhaseUnwrapOutput(TraitedSpec):
     out_fm = File(exists=True, desc="Unrwapped phase image written after calculation")
@@ -63,12 +72,19 @@ class PhaseUnwrap(SusceptibilityToolsCommand):
     input_spec = PhaseUnwrapInput
     output_spec = PhaseUnwrapOutput
     
+    def _gen_filename(self, name):
+        if name == 'out_fm':
+            return self._gen_fname(self.inputs.in_fm,
+                                       suffix='_unwrapped')
+        return None
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
         
-        # If the output field is defined with non-zero value, it's an output
-        if isdefined(self.inputs.out_fm) and self.inputs.out_fm:
-            outputs["out_fm"] = os.path.abspath(self.inputs.out_fm)
+        if isdefined(self.inputs.out_fm): 
+            outputs['out_fm'] = self.inputs.out_fm
+        else:
+            outputs['out_fm'] = self._gen_filename('out_fm')
         
         return outputs
 
@@ -92,10 +108,10 @@ class GenFmInput(SusceptibilityToolsCommandInputSpec):
     in_ped = traits.Enum(*_directions, argstr="-ped %s", desc="phase encoding direction of the EPI sequence", mandatory=True)
     
     # Output the deformation field
-    out_field = File(genfile=True, argstr="-defo %s", desc="output deformation field", hash_files=False, mandatory=True, exists=False)
+    out_field = File(genfile=True, argstr="-defo %s", desc="output deformation field", hash_files=False, exists=False)
     
     #Output the final field map image
-    out_fm = File(genfile=True, argstr="-fmo %s", desc="field map output file", hash_files=False, exists=False, mandatory=True)
+    out_fm = File(genfile=True, argstr="-fmo %s", desc="field map output file", hash_files=False, exists=False)
 
 
 class GenFmOutput(TraitedSpec):
@@ -108,15 +124,31 @@ class GenFm(SusceptibilityToolsCommand):
     input_spec = GenFmInput
     output_spec = GenFmOutput
 
+    def _gen_filename(self, name):
+        if name == 'out_field':
+            return self._gen_fname(self.inputs.in_ufm,
+                                       suffix='_field')
+                                       
+        if name == 'out_fm':
+            return self._gen_fname(self.inputs.in_ufm,
+                                       suffix='_out_fm')
+        return None
+        
     # Returns a dictionary containing names of generated files that are expected
     # after gen_fm completes execution
     def _list_outputs(self):
         outputs = self.output_spec().get()
         # If the output field is defined with non-zero value, it's an output
-        if isdefined(self.inputs.out_field) and self.inputs.out_field:
-            outputs["out_field"] = os.path.abspath(self.inputs.out_field)
-        if isdefined(self.inputs.out_fm) and self.inputs.out_fm:
-            outputs["out_fm"] = self.inputs.out_fm
+        if isdefined(self.inputs.out_fm): 
+            outputs['out_fm'] = self.inputs.out_fm
+        else:
+            outputs['out_fm'] = self._gen_filename('out_fm')
+        
+        if isdefined(self.inputs.out_field): 
+            outputs['out_field'] = self.inputs.out_field
+        else:
+            outputs['out_field'] = self._gen_filename('out_field')
+            
         return outputs
 
 
