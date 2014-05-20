@@ -11,12 +11,14 @@ import warnings
 
 from nipype.interfaces.niftyreg.base import NiftyRegCommandInputSpec
 
-from nipype.interfaces.base import (CommandLine, TraitedSpec, File, 
+from nipype.interfaces.base import (TraitedSpec, File, 
                                     InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     isdefined, OutputMultiPath)
                                     
-from nipype.utils.filemanip import split_filename
+from nipype.utils.filemanip import split_filename, fname_presuffix
+
+from nipype.interfaces.fsl.base import FSLCommand as NiftyRegCommand
 
 from nibabel import load
 
@@ -89,7 +91,7 @@ class RegResampleOutputSpec(TraitedSpec):
     blank_file = File(desc='The output filename of resampled blank grid (if generated)')
 
 # Resampler class
-class RegResample(CommandLine):
+class RegResample(NiftyRegCommand):
     _cmd = 'reg_resample'
     input_spec = RegResampleInputSpec
     output_spec = RegResampleOutputSpec
@@ -143,7 +145,7 @@ class RegJacobianOutputSpec(TraitedSpec):
     jac_log_file = File(desc='The output filename of the log of jacobian determinant')
                    
 # Main interface class
-class RegJacobian(CommandLine):
+class RegJacobian(NiftyRegCommand):
     _cmd = 'reg_jacobian'
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
@@ -219,7 +221,7 @@ class RegToolsOutputSpec(TraitedSpec):
     out_file = File(desc='The output file')
 
 # Main interface class
-class RegTools(CommandLine):
+class RegTools(NiftyRegCommand):
     _cmd = 'reg_tools'
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
@@ -249,7 +251,7 @@ class RegMeasureInputSpec(NiftyRegCommandInputSpec):
 class RegMeasureOutputSpec(TraitedSpec):
     pass
 
-class RegMeasure(CommandLine):
+class RegMeasure(NiftyRegCommand):
     _cmd = 'reg_measure'
     input_spec = RegMeasureInputSpec
     output_spec = RegMeasureOutputSpec 
@@ -258,8 +260,7 @@ class RegMeasure(CommandLine):
 # reg_average wrapper interface
 #-----------------------------------------------------------
 class RegAverageInputSpec(NiftyRegCommandInputSpec):
-    out_file = File(mandatory=True, position=0, desc='Output file name',
-        argstr='%s')
+    out_file = File(position=0, desc='Output file name', argstr='%s', genfile=True)
 
     # If only images/transformation files are passed, do a straight average
     # of all the files in the string (shoudl this be a list of files?)
@@ -272,17 +273,32 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
     demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'])
     demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'])
     # If we do not have a list of files beginning with avg, must be a demean
-    demean_files = traits.List(traits.Str, position =2, argstr=' %s ', sep=' ',
+    demean_files = traits.List(traits.Str, position =-1, argstr=' %s ', sep=' ',
         desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
 
 
 class RegAverageOutputSpec(TraitedSpec):
     out_file = File(desc='Output file name')
 
-class RegAverage(CommandLine):
+class RegAverage(NiftyRegCommand):
     _cmd = 'reg_average'
     input_spec = RegAverageInputSpec
     output_spec = RegAverageOutputSpec
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname('average_output' , ext='.nii.gz')
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = self.inputs.out_file
+        else:
+            outputs['out_file'] = self._gen_filename('out_file')
+        
+        return outputs
 
 #-----------------------------------------------------------
 # reg_aladin wrapper interface
@@ -296,7 +312,7 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     flo_file = File(exists=True, desc='The input floating/source image',
                    argstr='-flo %s', mandatory=True)
     # Affine output matrix file
-    aff_file = File(desc='The output affine matrix file', argstr='-aff %s')
+    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', genfile=True)
     # No symmetric flag
     nosym_flag = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
     # Rigid only registration
@@ -357,26 +373,36 @@ class RegAladinOutputSpec(TraitedSpec):
     avg_output = traits.String(desc='Output string in the format for reg_average')
 
 # Main interface class
-class RegAladin(CommandLine):
+class RegAladin(NiftyRegCommand):
     _cmd = 'reg_aladin'
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
+    def _gen_filename(self, name):
+        if name == 'aff_file':
+            return self._gen_fname(self.inputs.flo_file,
+                                       suffix='_aff', ext='.txt')
+        return None
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
     def _list_outputs(self):
         outputs = self.output_spec().get()
+        
+        if isdefined(self.inputs.aff_file):
+            outputs['aff_file'] = self.inputs.aff_file
+        else:
+            outputs['aff_file'] = self._gen_filename('aff_file')
+            
+        if isdefined(self.inputs.result_file):
+            outputs['result_file'] = self.inputs.result_file
+        else:
+            outputs['result_file'] = 'res'#self._gen_fname(self.inputs.flo_file, suffix='_res')
 
-        if isdefined(self.inputs.aff_file) and self.inputs.aff_file:
-            outputs['aff_file'] = os.path.abspath(self.inputs.aff_file)
-
-        if isdefined(self.inputs.result_file) and self.inputs.result_file:
-            outputs['result_file'] = os.path.abspath(self.inputs.result_file)
-          
         # Make a list of the linear transformation file and the input image
-        if isdefined(self.inputs.aff_file) and self.inputs.aff_file:
-            outputs['avg_output'] = [os.path.abspath(self.inputs.aff_file), os.path.abspath(self.inputs.flo_file)]
-
+        #if isdefined(outputs['aff_file']) :
+        outputs['avg_output'] = os.path.abspath(outputs['aff_file']) + ' ' + os.path.abspath(self.inputs.flo_file)
+        return outputs
+        
 #-----------------------------------------------------------
 # reg_transform wrapper interface
 #-----------------------------------------------------------
@@ -417,7 +443,7 @@ class RegTransformOutputSpec(TraitedSpec):
 
     out_file = File(desc = "Output File (transformation in any format)", exists = True)
 
-class RegTransform(CommandLine):
+class RegTransform(NiftyRegCommand):
     
     """
     
@@ -504,7 +530,6 @@ class RegTransform(CommandLine):
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     
     """
-    
     _cmd = 'reg_transform'
     input_spec = RegTransformInputSpec
     output_spec = RegTransformOutputSpec
@@ -650,7 +675,7 @@ class RegF3dOutputSpec(TraitedSpec):
     res_file = File(desc='The output resampled image')
 
 # Main interface class
-class RegF3D(CommandLine):
+class RegF3D(NiftyRegCommand):
     _cmd = 'reg_f3d'
     input_spec = RegF3DInputSpec
     output_spec = RegF3dOutputSpec
