@@ -73,7 +73,7 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
                    argstr='-trans %s', mandatory=False)
     # Output file name
     res_file = File(desc='The output filename of the transformed image',
-                   argstr='-res %s', mandatory=False)
+                    argstr='-res %s', genfile = True)
     # Deformaed grid file name
     blank_file = File(desc='The output filename of resampled blank grid',
                    argstr='-blank %s', mandatory=False)
@@ -87,7 +87,7 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
 
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
-    res_file = File(desc='The output filename of the transformed image')
+    res_file = File(desc='The output filename of the transformed image', exists = True)
     blank_file = File(desc='The output filename of resampled blank grid (if generated)')
 
 # Resampler class
@@ -95,6 +95,8 @@ class RegResample(NiftyRegCommand):
     _cmd = 'reg_resample'
     input_spec = RegResampleInputSpec
     output_spec = RegResampleOutputSpec
+    
+    _suffix = '_reg_resample'
 
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
@@ -102,6 +104,13 @@ class RegResample(NiftyRegCommand):
             return spec.argstr%{"NN":0, "LIN":1, "CUB":2}[value]
         else:
             return super(RegResample, self)._format_arg(name, spec, value)
+        
+
+    def _gen_filename(self, name):
+        if name == 'res_file':
+            return self._gen_fname(self.inputs.ref_file,
+                                   suffix=self._suffix)
+        return None
 
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
@@ -110,12 +119,14 @@ class RegResample(NiftyRegCommand):
         
         if isdefined(self.inputs.res_file) and self.inputs.res_file:
             outputs['res_file'] = os.path.abspath(self.inputs.res_file)
+        else:
+            outputs['res_file'] = self._gen_filename('res_file')
 
         if isdefined(self.inputs.blank_file) and self.inputs.blank_file:
             outputs['blank_file'] = os.path.abspath(self.inputs.blank_file)
 
         return outputs
-
+    
 #-----------------------------------------------------------
 # reg_jacobian wrapper interface
 #-----------------------------------------------------------
@@ -312,7 +323,7 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     flo_file = File(exists=True, desc='The input floating/source image',
                    argstr='-flo %s', mandatory=True)
     # Affine output matrix file
-    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', genfile=True)
+    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', genfile=True, hash_files=False)
     # No symmetric flag
     nosym_flag = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
     # Rigid only registration
@@ -578,19 +589,22 @@ class RegTransform(NiftyRegCommand):
     
     _suffix = 'reg_transform'
 
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.comp_input,
+                                   suffix=self._suffix)
+        return None
+    
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = self.inputs.out_file
             outputs["out_file"] = os.path.abspath(outputs["out_file"])
+        else:
+            outputs['out_file'] = self._gen_filename('out_file')
             
         return outputs
-            
-    def _gen_filename(self, name):
-        if name == "out_file":
-            return self._list_outputs()["out_file"]
-        return None
 
 #-----------------------------------------------------------
 # reg_f3d wrapper interface
