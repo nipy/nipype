@@ -1651,9 +1651,12 @@ class SSHDataGrabber(DataGrabber):
             )
         if not outfields:
             outfields = ['outfiles']
+        kwargs = kwargs.copy()
+        kwargs['infields'] = infields
+        kwargs['outfields'] = outfields
         super(SSHDataGrabber, self).__init__(**kwargs)
         if (
-            None in (self.inputs.username or self.inputs.password)
+            None in (self.inputs.username, self.inputs.password)
         ):
             raise ValueError(
                 "either both username and password "
