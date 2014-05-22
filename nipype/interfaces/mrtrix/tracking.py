@@ -14,6 +14,71 @@ from nipype.utils.filemanip import split_filename
 import os, os.path as op
 from nipype.interfaces.traits_extension import isdefined
 
+class FilterTracksInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+        desc='input tracks to be filtered')
+    include_xor = ['include_file', 'include_spec']
+    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
+    include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
+        argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
+    
+    exclude_xor = ['exclude_file', 'exclude_spec']
+    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
+    exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
+        argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor = exclude_xor)
+
+    minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
+        desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
+
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filtered track filename')
+    no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
+    invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" /
+                "otherwise have been included are now excluded and vice-versa.")
+
+
+    quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
+    debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
+
+class FilterTracksOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output image of the major eigenvectors of the diffusion tensor image.')
+
+class FilterTracks(CommandLine):
+    """
+    Use regions-of-interest to select a sub-set of tracks
+    from a given track file.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix as mrt
+    >>> filt = mrt.FilterTracks()
+    >>> filt.inputs.in_file = 'tracks.tck'
+    >>> filt.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'filter_tracks'
+    input_spec=FilterTracksInputSpec
+    output_spec=FilterTracksOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_filename':
+            return self._gen_outfilename()
+        else:
+            return None
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + '_filt.tck'
+
+
 class Tracks2ProbInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
         desc='tract file')
