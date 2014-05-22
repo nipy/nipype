@@ -1550,6 +1550,10 @@ class MySQLSink(IOBase):
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     hostname = traits.Str(mandatory=True,
                                desc='Server hostname.')
+    username = traits.Str(mandatory=False,
+                                desc='Server username.')
+    password = traits.Password(mandatory=False,
+                                desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
                                     desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
@@ -1576,8 +1580,10 @@ class SSHDataGrabber(DataGrabber):
 
         >>> from nipype.interfaces.io import SSHDataGrabber
         >>> dg = SSHDataGrabber()
-        >>> dg.inputs.hostname = 'myhost.com'
-        >>> dg.inputs.base_directory = '/main_folder/my_remote_dir'
+        >>> dg.inputs.hostname = 'test.rebex.net'
+        >>> dg.inputs.user = 'demo'
+        >>> dg.inputs.password = 'password'
+        >>> dg.inputs.base_directory = 'pub/example'
 
         Pick all files from the base directory
 
@@ -1586,15 +1592,17 @@ class SSHDataGrabber(DataGrabber):
         Pick all files starting with "s" and a number from current directory
 
         >>> dg.inputs.template_expression = 'regexp'
-        >>> dg.inputs.template = 's[0-9].*'
+        >>> dg.inputs.template = 'pop[0-9].*'
 
         Same thing but with dynamically created fields
 
         >>> dg = SSHDataGrabber(infields=['arg1','arg2'])
-        >>> dg.inputs.hostname = 'myhost.com'
-        >>> dg.inputs.base_directory = '~/my_remote_dir'
-        >>> dg.inputs.template = '%s/%s.nii'
-        >>> dg.inputs.arg1 = 'foo'
+        >>> dg.inputs.hostname = 'test.rebex.net'
+        >>> dg.inputs.user = 'demo'
+        >>> dg.inputs.password = 'password'
+        >>> dg.inputs.base_directory = 'pub'
+        >>> dg.inputs.template = '%s/%s.txt'
+        >>> dg.inputs.arg1 = 'example'
         >>> dg.inputs.arg2 = 'foo'
 
         however this latter form can be used with iterables and iterfield in a
@@ -1637,13 +1645,21 @@ class SSHDataGrabber(DataGrabber):
         try:
             paramiko
         except NameError:
-            raise ImportError(
+            warn(
                 "The library parmiko needs to be installed"
                 " for this module to run."
             )
         if not outfields:
             outfields = ['outfiles']
         super(SSHDataGrabber, self).__init__(**kwargs)
+        if (
+            None in (self.inputs.username or self.inputs.password)
+        ):
+            raise ValueError(
+                "either both username and password "
+                "are provided or none of them"
+            )
+
         if (
             self.inputs.template_expression == 'regexp' and
             self.inputs.template[-1] != '$'
@@ -1652,6 +1668,14 @@ class SSHDataGrabber(DataGrabber):
 
 
     def _list_outputs(self):
+        try:
+            paramiko
+        except NameError:
+            raise ImportError(
+                "The library parmiko needs to be installed"
+                " for this module to run."
+            )
+
         if len(self.inputs.ssh_log_to_file) > 0:
             paramiko.util.log_to_file(self.inputs.ssh_log_to_file)
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
