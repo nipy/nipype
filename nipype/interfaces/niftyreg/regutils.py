@@ -388,7 +388,6 @@ class RegAladin(NiftyRegCommand):
     _cmd = 'reg_aladin'
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
-
     def _gen_filename(self, name):
         if name == 'aff_file':
             return self._gen_fname(self.inputs.flo_file,
@@ -618,9 +617,9 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     flo_file = File(exists=True, desc='The input floating/source image',
                    argstr='-flo %s', mandatory=True)
     # Output CPP file
-    cpp_file = File(desc='The output CPP file', argstr='-cpp %s')
+    cpp_file = File(desc='The output CPP file', argstr='-cpp %s', genfile=True)
     # Output image file
-    res_file = File(desc='The output resampled image', argstr='-res %s')
+    res_file = File(desc='The output resampled image', argstr='-res %s', genfile=True)
     
     # Reference mask
     rmask_file = File(exists=True, desc='Reference image mask', argstr='-rmask %s')
@@ -726,7 +725,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
 
 
 # Output spec
-class RegF3dOutputSpec(TraitedSpec):
+class RegF3DOutputSpec(TraitedSpec):
     cpp_file = File(desc='The output CPP file')
     res_file = File(desc='The output resampled image')
 
@@ -734,4 +733,27 @@ class RegF3dOutputSpec(TraitedSpec):
 class RegF3D(NiftyRegCommand):
     _cmd = 'reg_f3d'
     input_spec = RegF3DInputSpec
-    output_spec = RegF3dOutputSpec
+    output_spec = RegF3DOutputSpec
+        
+    def _gen_filename(self, name):
+        if name == 'res_file':
+            return self._gen_fname(self.inputs.comp_input,
+                                   suffix='res')
+        if name == 'cpp_file':
+            return self._gen_fname(self.inputs.comp_input,
+                                   suffix='cpp')
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        # If defined, with some value
+        if isdefined(self.inputs.res_file) and self.inputs.res_file:
+            outputs["res_file"] = os.path.abspath(self.inputs.res_file)
+        else:
+            outputs['res_file'] = self._gen_filename('res_file')
+            
+        if isdefined(self.inputs.cpp_file) and self.inputs.cpp_file:
+            outputs["cpp_file"] = os.path.abspath(self.inputs.cpp_file)
+        else:
+            outputs['cpp_file'] = self._gen_filename('cpp_file')
+            
