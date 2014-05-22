@@ -2,6 +2,9 @@ Next Release
 ============
 
 * ENH: New ANTs interface: ApplyTransformsToPoints
+* ENH: New evaluation algorithms. Now Distance, Overlap, and FuzzyOverlap
+       are found in nipype.algorithms.eval instead of misc
+* ENH: New evaluation algorithm: ErrorMap (a voxel-wise diff map).
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 
 Release 0.9.2 (January 31, 2014)

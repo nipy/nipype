@@ -28,6 +28,10 @@ import scipy.stats as stats
 
 from .. import logging
 
+from .. import warnings
+warnings.warn('Evaluation interfaces (Distance, Overlap, FuzzyOverlap) 
+               have been moved to nipype.algorithms.eval' )
+
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined)
