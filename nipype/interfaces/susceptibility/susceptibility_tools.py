@@ -90,6 +90,9 @@ class PhaseUnwrap(SusceptibilityToolsCommand):
 
 #gen_fm -p $fmUnwrap -m $fmBetMask -etd $epiparams->{ETD} "."-rot $epiparams->{ROT} -ped $epiparams->{PED} "	"-defo $fmDef -fmo $fmFm";
 class GenFmInput(SusceptibilityToolsCommandInputSpec):
+    #Input the EPI image
+    in_epi = File(argstr="-e %s", exists=True, mandatory=True,
+                desc="EPI image")
     #Input the unwrapped field map image
     in_ufm = File(argstr="-p %s", exists=True, mandatory=True,
                 desc="Unwrapped field map image")
