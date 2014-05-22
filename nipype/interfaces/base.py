@@ -1488,9 +1488,9 @@ class CommandLine(BaseInterface):
             while isinstance(source, list):
                 source = source[0]
             #special treatment for files
-            if isinstance(source, str) and os.path.exists(source):
+            try:
                 _, base, _ = split_filename(source)
-            else:
+            except AttributeError:
                 base = source
             retval = name_template % base
             _, _, ext = split_filename(retval)
