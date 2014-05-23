@@ -280,18 +280,26 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
-    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['demean_type'])
-    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'])
-    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'])
+    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['demean_type'], desc='Average images and demean average image that have affine transformations to a common space')
+    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'], desc='Average images and demean average image that have non-rigid transformations to a common space' )
+    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
     # If we do not have a list of files beginning with avg, must be a demean
     demean_files = traits.List(traits.Str, position =-1, argstr=' %s ', sep=' ',
         desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
 
 
 class RegAverageOutputSpec(TraitedSpec):
-    out_file = File(desc='Output file name')
+    out_file = File(exists=True, desc='Output file name')
 
 class RegAverage(NiftyRegCommand):
+    """ Use RegAverage to average a set of transformations, images or both.
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import niftyreg
+    >>> reg_average = niftyreg.RegAverage()
+    """
     _cmd = 'reg_average'
     input_spec = RegAverageInputSpec
     output_spec = RegAverageOutputSpec
@@ -385,6 +393,16 @@ class RegAladinOutputSpec(TraitedSpec):
 
 # Main interface class
 class RegAladin(NiftyRegCommand):
+    """ Use RegAladin to perform linear (rigid or affine) image registration.
+    
+    Examples
+    --------
+    
+    >>> from nipype.interfaces import niftyreg
+    >>> reg_average = niftyreg.RegAladin()
+    >>> reg_average.inputs.flo_image = "floating_image.nii.gz"
+    >>> reg_average.inputs.ref_image = "reference_image.nii.gz"
+    """
     _cmd = 'reg_aladin'
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
@@ -408,6 +426,9 @@ class RegAladin(NiftyRegCommand):
         if name == 'aff_file':
             return self._gen_fname(self.inputs.flo_file,
                                        suffix='_aff', ext='.txt')
+        if name == 'result_file':
+            return self._gen_fname(self.inputs.flo_file,
+                                       suffix='_res')
         return None
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
@@ -422,7 +443,7 @@ class RegAladin(NiftyRegCommand):
         if isdefined(self.inputs.result_file):
             outputs['result_file'] = self.inputs.result_file
         else:
-            outputs['result_file'] = 'res'#self._gen_fname(self.inputs.flo_file, suffix='_res')
+            outputs['result_file'] = self._gen_filename('result_file')
 
         # Make a list of the linear transformation file and the input image
         #if isdefined(outputs['aff_file']) :
