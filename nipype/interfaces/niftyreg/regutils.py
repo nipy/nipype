@@ -428,7 +428,7 @@ class RegAladin(NiftyRegCommand):
                                        suffix='_aff', ext='.txt')
         if name == 'result_file':
             return self._gen_fname(self.inputs.flo_file,
-                                       suffix='_res')
+                                       suffix='_res', ext='.nii.gz')
         return None
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
