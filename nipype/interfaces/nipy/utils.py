@@ -27,8 +27,8 @@ from ..base import (TraitedSpec, BaseInterface, traits,
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
 
-    volume1 = File(exists=True, desc="3D volume", mandatory=True)
-    volume2 = File(exists=True, desc="3D volume", mandatory=True)
+    volume1 = File(exists=True, desc="3D/4D volume", mandatory=True)
+    volume2 = File(exists=True, desc="3D/4D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
     metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
@@ -44,8 +44,7 @@ histogram as an input and return a float.""", usedefault=True)
 
 
 class SimilarityOutputSpec(TraitedSpec):
-
-    similarity = traits.Float(desc="Similarity between volume 1 and 2")
+    similarity = traits.List( traits.Float(desc="Similarity between volume 1 and 2, frame by frame"))
 
 
 class Similarity(BaseInterface):
@@ -73,6 +72,18 @@ class Similarity(BaseInterface):
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)
 
+        dims = vol1_nii.get_data().ndim
+
+        if dims==3 or dims==2:
+            vols1 = [ vol1_nii ]
+            vols2 = [ vol2_nii ]
+        if dims==4:
+            vols1 = nb.four_to_three( vol1_nii )
+            vols2 = nb.four_to_three( vol2_nii )
+
+        if dims<2 or dims>4:
+            raise RuntimeError( 'Image dimensions not supported (detected %dD file)' % dims )
+
         if isdefined(self.inputs.mask1):
             mask1 = nb.load(self.inputs.mask1).get_data() == 1
         else:
@@ -83,12 +94,15 @@ class Similarity(BaseInterface):
         else:
             mask2 = None
 
-        histreg = HistogramRegistration(from_img = vol1_nii,
-                                        to_img = vol2_nii,
-                                        similarity=self.inputs.metric,
-                                        from_mask = mask1,
-                                        to_mask = mask2)
-        self._similarity = histreg.eval(Affine())
+        self._similarity = []
+
+        for ts1,ts2 in zip( vols1, vols2 ):
+            histreg = HistogramRegistration(from_img = ts1,
+                                            to_img = ts2,
+                                            similarity=self.inputs.metric,
+                                            from_mask = mask1,
+                                            to_mask = mask2)
+            self._similarity.append( histreg.eval(Affine()) )
 
         return runtime
 
