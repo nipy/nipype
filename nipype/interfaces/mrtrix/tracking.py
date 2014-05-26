@@ -21,7 +21,7 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
         argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
-    
+
     exclude_xor = ['exclude_file', 'exclude_spec']
     exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
