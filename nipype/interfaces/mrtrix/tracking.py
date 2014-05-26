@@ -32,7 +32,7 @@ class FilterTracksInputSpec(CommandLineInputSpec):
 
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filtered track filename')
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
-    invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" /
+    invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" \
                 "otherwise have been included are now excluded and vice-versa.")
 
 
@@ -40,12 +40,12 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
 class FilterTracksOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc='the output image of the major eigenvectors of the diffusion tensor image.')
+    out_file = File(exists=True, desc='the output filtered tracks')
 
 class FilterTracks(CommandLine):
     """
-    Use regions-of-interest to select a sub-set of tracks
-    from a given track file.
+    Use regions-of-interest to select a subset of tracks
+    from a given MRtrix track file.
 
     Example
     -------
@@ -62,11 +62,7 @@ class FilterTracks(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_filename
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = op.abspath(self._gen_outfilename())
-        else:
-            outputs['out_file'] = op.abspath(outputs['out_file'])
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -74,9 +70,14 @@ class FilterTracks(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
-        return name + '_filt.tck'
+        if isdefined(self.inputs.out_filename):
+            path, name , _ = split_filename(self.inputs.out_filename)
+            return op.join(path, name + '.tck')
+        else:
+            _, name , _ = split_filename(self.inputs.in_file)
+            return op.abspath(name + '_filt.tck')
 
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):
