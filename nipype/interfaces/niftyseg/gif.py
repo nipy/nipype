@@ -6,28 +6,40 @@
 """
 import os
 import numpy as np
+from nibabel import load
+import os.path as op
+import warnings
 
 from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, InputMultiPath,
                                     isdefined)
 
-class GifInput(NIFTYSEGCommandInputSpec):
+
+warn = warnings.warn
+warnings.filterwarnings('always', category=UserWarning)
+
+
+class GifInputSpec(NIFTYSEGCommandInputSpec):
     
-    in_file = File(position=2, argstr="-in %s", exists=True, mandatory=True,
+    in_file = File(argstr="-in %s", exists=True, mandatory=True,
                 desc="Input target image filename")
     
-    database_file = File(position=3, argstr="-db %s", exists=True, mandatory=True,
+    database_file = File(argstr="-db %s", exists=True, mandatory=True,
                 desc="Path to database <XML> file")    
 
-    cpp_dir = Directory(exists=True, mandatory=True, position=4, argstr="-cpp %s", 
+    cpp_dir = Directory(exists=True, mandatory=True, argstr="-cpp %s", 
                         desc="Folder to read/store cpp files.")
 
-    mask_file = File(exists=True, mandatory=False, position=5, argstr="-mask %s", 
+    mask_file = File(exists=True, mandatory=False, argstr="-mask %s", 
                      desc="Mask over the input image [default: none]")
 
-    out_dir = Directory(exists=True, mandatory=False, position=6, argstr="-out %s", 
+    out_dir = Directory(exists=True, mandatory=False, argstr="-out %s", 
                         desc="Output folder [default: ./]")
     
+
+class GifOutputSpec(NIFTYSEGCommandOutputSpec):
+    out_dir = Directory(exists=True, desc="Output folder [default: ./]")
+
 class Gif(NIFTYSEGCommand):
 
 
@@ -62,9 +74,22 @@ class Gif(NIFTYSEGCommand):
     """
 
     _cmd = "seg_GIF"
+    _suffix = "_seg_GIF"
+    input_spec = GifInputSpec  
+    output_spec = GifOutputSpec
 
-    input_spec = GifInput    
+    def _gen_filename(self, name):
+        if name == 'out_dir':
+            return self._gen_fname(self.inputs.out_dir,
+                                   suffix=self._suffix)
+        return None
 
     def _list_outputs(self):
         self._suffix = "_" + self._cmd
-        return super(Gif, self)._list_outputs()
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_dir) and self.inputs.out_dir:
+            outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
+        else:
+            outputs['out_dir'] = self._gen_filename('out_dir')
+        return outputs
+        
