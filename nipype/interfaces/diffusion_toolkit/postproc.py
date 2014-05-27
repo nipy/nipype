@@ -13,7 +13,7 @@ import os
 __docformat__ = 'restructuredtext'
 
 from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-    CommandLineInputSpec)
+    InputMultiPath, CommandLineInputSpec)
 
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(exists=True, desc="file containing tracks to be filtered", position=0, argstr="%s", mandatory=True)
@@ -32,4 +32,23 @@ class SplineFilter(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['smoothed_track_file'] = os.path.abspath(self.inputs.output_file)
+        return outputs
+
+
+class TrackMergeInputSpec(CommandLineInputSpec):
+    track_files = InputMultiPath(File(exists=True), desc="file containing tracks to be filtered", position=0, argstr="%s...", mandatory=True)
+    output_file = File("merged_tracks.trk", desc="target file for merged tracks", position=-1, argstr="%s", usedefault=True)
+
+class TrackMergeOutputSpec(TraitedSpec):
+    track_file = File(exists=True)
+
+class TrackMerge(CommandLine):
+    input_spec=TrackMergeInputSpec
+    output_spec=TrackMergeOutputSpec
+
+    _cmd = "track_merge"
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['track_file'] = os.path.abspath(self.inputs.output_file)
         return outputs
