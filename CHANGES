@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: New misc algorithm: NormalizeMaps
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 
