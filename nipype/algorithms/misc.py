@@ -1166,9 +1166,18 @@ class AddCSVRowOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing rows ')
 
 class AddCSVRow(BaseInterface):
-    """
-    Short interface to add an extra row to a text file
+    """Simple interface to add an extra row to a csv file
+
+    .. warning::
+
+    This interface is not thread-safe in multi-proc mode when
+    writing the output file.
+
+
+    .. note::
+
     Requires pandas - http://pandas.pydata.org/
+
 
     Example
     -------
@@ -1186,6 +1195,7 @@ class AddCSVRow(BaseInterface):
     output_spec = AddCSVRowOutputSpec
 
     def __init__(self, infields=None, force_run=True, **kwargs):
+        warnings.warn('AddCSVRow is not thread-safe in multi-processor execution')
         super(AddCSVRow, self).__init__(**kwargs)
         undefined_traits = {}
         self._infields = infields
