@@ -28,10 +28,9 @@ import scipy.stats as stats
 
 from .. import logging
 
-from .. import warnings
-warnings.warn('Evaluation interfaces (Distance, Overlap, FuzzyOverlap) 
-               have been moved to nipype.algorithms.eval' )
+import warnings
 
+import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined)
@@ -842,3 +841,20 @@ def calc_moments(timeseries_file, moment):
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
     return np.where(zero, 0, m3 / m2**(moment/2.0))
+
+# Deprecated interfaces ---------------------------------------------------------
+class Distance( nam.Distance ):
+    def __init__(self, **inputs):
+        super(nam.Distance, self).__init__(**inputs)
+        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
+
+class Overlap( nam.Overlap ):
+    def __init__(self, **inputs):
+        super(nam.Overlap, self).__init__(**inputs)
+        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
+
+
+class FuzzyOverlap( nam.FuzzyOverlap ):
+    def __init__(self, **inputs):
+        super(nam.FuzzyOverlap, self).__init__(**inputs)
+        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
