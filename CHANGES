@@ -1,6 +1,8 @@
 Next Release
 ============
 
+* ENH: nipy.utils.Similarity has been deprecated by algorithms.metrics.Similarity
+       which is an extension of the former to allow 4D images.
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
        are found in nipype.algorithms.metrics instead of misc
