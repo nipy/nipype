@@ -1207,32 +1207,34 @@ def calc_moments(timeseries_file, moment):
     return np.where(zero, 0, m3 / m2**(moment/2.0))
 
 
-class NormalizeMapsInputSpec(TraitedSpec):
+class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                     desc='The tpms to be normalized') )
     in_mask = File(exists=True, mandatory=False,
                     desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
-class NormalizeMapsOutputSpec(TraitedSpec):
+class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc="normalized maps")
 
 
-class NormalizeMaps(BaseInterface):
+class NormalizeProbabilityMapSet(BaseInterface):
     """ Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
+
+    .. note:: Please recall this is not a spatial normalization algorithm
 
     Example
     -------
 
     >>> import nipype.algorithms.misc as misc
-    >>> normalize = misc.NormalizeMaps()
+    >>> normalize = misc.NormalizeProbabilityMapSet()
     >>> normalize.inputs.in_files = [ 'csf.nii', 'wm.nii', 'gm.nii' ]
     >>> normalize.inputs.in_mask = [ 'brain.nii' ]
     >>> normalize.run() # doctest: +SKIP
     """
-    input_spec = NormalizeMapsInputSpec
-    output_spec = NormalizeMapsOutputSpec
+    input_spec = NormalizeProbabilityMapSetInputSpec
+    output_spec = NormalizeProbabilityMapSetOutputSpec
 
     def _run_interface(self, runtime):
         mask = None
