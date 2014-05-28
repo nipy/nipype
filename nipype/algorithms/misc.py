@@ -1195,6 +1195,7 @@ class AddCSVRow(BaseInterface):
     output_spec = AddCSVRowOutputSpec
 
     def __init__(self, infields=None, force_run=True, **kwargs):
+        import warnings
         warnings.warn('AddCSVRow is not thread-safe in multi-processor execution')
         super(AddCSVRow, self).__init__(**kwargs)
         undefined_traits = {}
