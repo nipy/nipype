@@ -6,12 +6,14 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-05-28 17:57:20
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-05-28 18:55:27
+# @Last Modified time: 2014-05-29 13:23:56
 
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
+from nipype.testing import (assert_equal,assert_raises,
+                            assert_almost_equal,example_data )
 
 import numpy as np
 import nibabel as nb
@@ -22,7 +24,7 @@ from nipype.algorithms.misc import normalize_tpms
 def test_normalize_tpms():
     tempdir = mkdtemp()
 
-    in_mask = os.path.join(nit.basedir, 'data' , 'tpms_msk.nii.gz' )
+    in_mask = example_data('tpms_msk.nii.gz' )
     mskdata = nb.load( in_mask ).get_data()
     mskdata[mskdata>0.0] = 1.0
 
@@ -31,7 +33,7 @@ def test_normalize_tpms():
     out_files = []
 
     for i in range(3):
-        mapname = os.path.join(nit.basedir, 'data' , 'tpm_%02d.nii.gz' % i)
+        mapname = example_data('tpm_%02d.nii.gz' % i)
         filename =  os.path.join(tempdir, 'modtpm_%02d.nii.gz' % i )
         out_files.append(os.path.join(tempdir, 'normtpm_%02d.nii.gz' % i ))
 
