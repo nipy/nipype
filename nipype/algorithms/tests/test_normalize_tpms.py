@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-05-28 17:57:20
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-05-29 13:23:56
+# @Last Modified time: 2014-05-29 13:43:09
 
 import os
 from shutil import rmtree
@@ -55,6 +55,6 @@ def test_normalize_tpms():
         yield assert_equal, np.all( normdata[mskdata==0]==0 ), True
         yield assert_equal, np.allclose( normdata, mapdata[i] ), True
 
-    yield assert_equal, np.allclose( sumdata, mskdata ), True
+    yield assert_equal, np.allclose(sumdata[sumdata>0.0], 1.0 ), True
 
     rmtree(tempdir)

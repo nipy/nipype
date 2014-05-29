@@ -1229,8 +1229,8 @@ class NormalizeProbabilityMapSet(BaseInterface):
 
     >>> import nipype.algorithms.misc as misc
     >>> normalize = misc.NormalizeProbabilityMapSet()
-    >>> normalize.inputs.in_files = [ 'csf.nii', 'wm.nii', 'gm.nii' ]
-    >>> normalize.inputs.in_mask = [ 'brain.nii' ]
+    >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', 'tpm_02.nii.gz' ]
+    >>> normalize.inputs.in_mask = [ 'tpms_msk.nii.gz' ]
     >>> normalize.run() # doctest: +SKIP
     """
     input_spec = NormalizeProbabilityMapSetInputSpec
