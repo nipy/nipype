@@ -27,7 +27,7 @@ install:
   - pip install python-coveralls --use-mirrors
   - pip install nose-cov --use-mirrors
   - pip install https://github.com/RDFLib/rdflib/archive/master.zip
-  - pip install https://github.com/satra/prov/archive/enh/rdf.zip
+  - pip install https://github.com/trungdong/prov/archive/rdf.zip
   - python setup.py install
 
 # Run test
