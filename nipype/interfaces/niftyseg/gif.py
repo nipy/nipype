@@ -37,8 +37,11 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
                         desc="Output folder [default: ./]")
     
 
-class GifOutputSpec(NIFTYSEGCommandOutputSpec):
-    out_dir = Directory(exists=True, desc="Output folder [default: ./]")
+class GifOutputSpec(TraitedSpec):
+    out_dir   = Directory(exists=True, desc="Output folder [default: ./]")
+    out_parc  = File(exists=False, genfile=True, desc='Parcellation file')
+    out_geo   = File(exists=False, genfile=True, desc='Geodesic distance file')
+    out_prior = File(exists=False, genfile=True, desc='Prior file')
 
 class Gif(NIFTYSEGCommand):
 
@@ -78,18 +81,35 @@ class Gif(NIFTYSEGCommand):
     input_spec = GifInputSpec  
     output_spec = GifOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'out_dir':
-            return self._gen_fname(self.inputs.out_dir,
-                                   suffix=self._suffix)
+    def _gen_outputbasename(self, outputdir):
+        bname = os.path.basename(self.inputs.in_file)
+        if bname.endswith('.nii.gz'):
+            bname = bname[:-7]
+        if bname.endswith('.nii'):
+            bname = bname[:-4]
+        return os.path.join(outputdir, bname)
+        
+    def _gen_filename(self, name, outputdir):
+        if name == 'out_parc':
+            return self._gen_outputbasename(outputdir) + '_labels_Parcelation.nii.gz'
+        if name == 'out_geo':
+            return self._gen_outputbasename(outputdir) + '_labels_geo.nii.gz'
+        if name == 'out_prior':
+            return self._gen_outputbasename(outputdir) + '_labels_prior.nii.gz'
         return None
 
     def _list_outputs(self):
-        self._suffix = "_" + self._cmd
+        """Execute this module.
+        """
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_dir) and self.inputs.out_dir:
             outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
         else:
-            outputs['out_dir'] = self._gen_filename('out_dir')
+            outputs['out_dir'] = os.getcwd()        
+        
+        outputs['out_parc']  = self._gen_filename('out_parc', outputs['out_dir'])
+        outputs['out_geo']   = self._gen_filename('out_geo', outputs['out_dir'])
+        outputs['out_prior'] = self._gen_filename('out_prior', outputs['out_dir'])
+
         return outputs
         
