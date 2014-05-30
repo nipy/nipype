@@ -20,6 +20,8 @@ from nipype.utils.filemanip import split_filename, fname_presuffix
 
 from nipype.interfaces.fsl.base import FSLCommand as NiftyRegCommand
 
+from nipype.interfaces.niftyreg.base import Info
+
 from nibabel import load
 
 warn = warnings.warn
@@ -454,72 +456,79 @@ class RegAladin(NiftyRegCommand):
 # reg_transform wrapper interface
 #-----------------------------------------------------------
 class RegTransformInputSpec(NiftyRegCommandInputSpec):
+
     ref1_file = File(exists=True, desc='The input reference/target image',
                    argstr='-ref %s')
     ref2_file = File(exists=True, 
                      desc='The input second reference/target image',
                      argstr='-ref2 %s')
 
-    def_input = traits.Tuple(File(exists=True), File, 
-                             desc='Compute deformation field from transformation', 
-                             argstr='-def %s %s', 
-                             xor = ['disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    def_input = File(exists=True, 
+                     desc='Compute deformation field from transformation', 
+                     argstr='-def %s', 
+                     xor = ['disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    disp_input = traits.Tuple(File(exists=True), File, 
-                              desc='Compute displacement field from transformation', 
-                              argstr='-disp %s %s',
-                              xor = ['def_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    disp_input = File(exists=True, 
+                      desc='Compute displacement field from transformation', 
+                      argstr='-disp %s',
+                      xor = ['def_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    flow_input = traits.Tuple(File(exists=True), File, 
-                              desc='Compute flow field from spline SVF', 
-                              argstr='-flow %s %s',
-                              xor = ['def_input', 'disp_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    flow_input = File(exists=True, 
+                      desc='Compute flow field from spline SVF', 
+                      argstr='-flow %s',
+                      xor = ['def_input', 'disp_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     comp_input = File(exists = True,
                       desc='compose two transformations', 
                       argstr='-comp %s',
                       xor = ['def_input', 'disp_input', 'flow_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
-    comp_input2 = File(exists = True, 
+
+    comp_input2 = File(exists = True,
                        desc='compose two transformations', 
                        argstr='%s',
                        position = -2,
                        require = ['comp_input'])
 
-    upd_s_form_input = traits.Tuple(File(exists=True), File(exists=True), File,
-                                    desc='Update s-form using the affine transformation', 
-                                    argstr='-updSform %s %s %s',
-                                    xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    upd_s_form_input = File(exists=True,
+                            desc='Update s-form using the affine transformation', 
+                            argstr='-updSform %s',
+                            xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    upd_s_form_input2 = File(exists=True,
+                             desc='Update s-form using the affine transformation', 
+                             argstr='%s',
+                             position = -2,
+                             require = ['upd_s_form_input'])
 
-    inv_aff_input = traits.Tuple(File(exists=True), File,
-                                 desc='Invert an affine transformation', 
-                                 argstr='-invAff %s %s',
-                                 xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    inv_aff_input = File(exists=True,
+                         desc='Invert an affine transformation', 
+                         argstr='-invAff %s',
+                         xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    inv_nrr_input = traits.Tuple(File(exists=True), File(exists=True), File,
+    inv_nrr_input = traits.Tuple(File(exists=True), File(exists=True),
                                  desc='Invert a non-linear transformation', 
-                                 argstr='-invNrr %s %s %s',
+                                 argstr='-invNrr %s %s',
                                  xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    half_input = traits.Tuple(File(exists=True), File,
-                              desc='Half way to the input transformation', 
-                              argstr='-half %s %s',
-                              xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+    half_input = File(exists=True,
+                      desc='Half way to the input transformation', 
+                      argstr='-half %s',
+                      xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     make_aff_input = traits.Tuple(traits.Float, traits.Float, traits.Float, traits.Float,
                                   traits.Float, traits.Float, traits.Float, traits.Float, traits.Float, traits.Float,
-                                  traits.Float, traits.Float, File, 
+                                  traits.Float, traits.Float, 
                                   desc = 'Make an affine transformation matrix',
-                                  argstr='-makeAff %f %f %f %f %f %f %f %f %f %f %f %f %s',
+                                  argstr='-makeAff %f %f %f %f %f %f %f %f %f %f %f %f',
                                   xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    aff_2_rig_input = traits.Tuple(File(exists=True), File, 
-                                   desc='Extract the rigid component from affine transformation', 
-                                   argstr='-aff2rig %s %s',
-                                   xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'flirt_2_nr_input'])
+    aff_2_rig_input = File(exists=True, 
+                           desc='Extract the rigid component from affine transformation', 
+                           argstr='-aff2rig %s',
+                           xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'flirt_2_nr_input'])
 
-    flirt_2_nr_input = traits.Tuple(File(exists=True), File(exists=True), File(exists=True), File,
+    flirt_2_nr_input = traits.Tuple(File(exists=True), File(exists=True), File(exists=True),
                                     desc='Convert a FLIRT affine transformation to niftyreg affine transformation',
-                                    argstr='-flirtAff2NR %s %s %s %s',
+                                    argstr='-flirtAff2NR %s %s %s',
                                     xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input'])
 
 
@@ -625,10 +634,9 @@ class RegTransform(NiftyRegCommand):
     
     _suffix = 'reg_transform'
 
-
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.comp_input,
+            return self._gen_fname(self.inputs.upd_s_form_input,
                                    suffix=self._suffix)
         return None
     
@@ -760,7 +768,8 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     # verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
-
+    output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
+                              desc='NiftyReg output type')
 # Output spec
 class RegF3DOutputSpec(TraitedSpec):
     cpp_file = File(desc='The output CPP file')
@@ -789,11 +798,11 @@ class RegF3D(NiftyRegCommand):
         
     def _gen_filename(self, name):
         if name == 'res_file':
-            return self._gen_fname(self.inputs.comp_input,
+            return self._gen_fname(self.inputs.ref_file,
                                    suffix='res')
         if name == 'cpp_file':
-            return self._gen_fname(self.inputs.comp_input,
-                                   suffix='cpp')
+            return self._gen_fname(self.inputs.ref_file,
+                                   suffix='ref')
         return None
     
     def _list_outputs(self):
@@ -808,4 +817,6 @@ class RegF3D(NiftyRegCommand):
             outputs["cpp_file"] = os.path.abspath(self.inputs.cpp_file)
         else:
             outputs['cpp_file'] = self._gen_filename('cpp_file')
+
+        return outputs
             
