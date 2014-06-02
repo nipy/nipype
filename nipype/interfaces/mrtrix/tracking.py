@@ -128,7 +128,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-initdirection %s', minlen=2, maxlen=2, units='voxels')
     out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck', 
-                    output_name='tracked.tck', desc='output data file')
+                    output_name='tracked', desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')

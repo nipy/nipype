@@ -343,7 +343,7 @@ class ImageMaths(FSLCommand):
     Examples
     --------
 
-    >>> from nipype import fsl
+    >>> from nipype.interfaces import fsl
     >>> from nipype.testing import anatfile
     >>> maths = fsl.ImageMaths(in_file=anatfile, op_string= '-add 5',
     ...                        out_file='foo_maths.nii')
