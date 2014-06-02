@@ -846,15 +846,21 @@ def calc_moments(timeseries_file, moment):
 class Distance( nam.Distance ):
     def __init__(self, **inputs):
         super(nam.Distance, self).__init__(**inputs)
-        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
+        warnings.warn(("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Distance"),
+                      DeprecationWarning)
 
 class Overlap( nam.Overlap ):
     def __init__(self, **inputs):
         super(nam.Overlap, self).__init__(**inputs)
-        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
+        warnings.warn(("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Overlap"),
+                      DeprecationWarning)
 
 
 class FuzzyOverlap( nam.FuzzyOverlap ):
     def __init__(self, **inputs):
         super(nam.FuzzyOverlap, self).__init__(**inputs)
-        warnings.warn("This interface has been moved from misc to metrics", DeprecationWarning)
+        warnings.warn(("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.FuzzyOverlap"),
+                      DeprecationWarning)
