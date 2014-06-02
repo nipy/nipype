@@ -529,7 +529,7 @@ class Similarity(BaseInterface):
 
     Example
     -------
-    >>> from nipype.interfaces.nipy.utils import Similarity
+    >>> from nipype.algorithms.metrics import Similarity
     >>> similarity = Similarity()
     >>> similarity.inputs.volume1 = 'rc1s1.nii'
     >>> similarity.inputs.volume2 = 'rc1s2.nii'

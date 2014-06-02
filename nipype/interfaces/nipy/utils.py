@@ -26,7 +26,6 @@ from ..base import (TraitedSpec, BaseInterface, traits,
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
-
     volume1 = File(exists=True, desc="3D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
@@ -44,7 +43,6 @@ histogram as an input and return a float.""", usedefault=True)
 
 
 class SimilarityOutputSpec(TraitedSpec):
-
     similarity = traits.Float(desc="Similarity between volume 1 and 2")
 
 
@@ -72,7 +70,7 @@ class Similarity(BaseInterface):
         warnings.warn(("This interface is deprecated since 0.10.0."
                       " Please use nipype.algorithms.metrics.Similarity"),
                       DeprecationWarning)
-        super(BaseInterface,self).__init__(**inputs)
+        super(Similarity,self).__init__(**inputs)
 
     def _run_interface(self, runtime):
 
