@@ -632,12 +632,21 @@ class RegTransform(NiftyRegCommand):
     input_spec = RegTransformInputSpec
     output_spec = RegTransformOutputSpec
     
-    _suffix = 'reg_transform'
+    _suffix = '_reg_transform'
+
+    def _find_input(self):
+        inputs = [self.inputs.def_input, self.inputs.disp_input, self.inputs.flow_input, self.inputs.comp_input, self.inputs.upd_s_form_input, self.inputs.inv_aff_input, self.inputs.inv_nrr_input, self.inputs.half_input, self.inputs.make_aff_input, self.inputs.aff_2_rig_input, self.inputs.flirt_2_nr_input]
+        for entry in inputs:
+            if isdefined(entry):
+                return entry
+        return None
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.upd_s_form_input,
-                                   suffix=self._suffix)
+            input_to_use = self._find_input()
+            return self._gen_fname(input_to_use,
+                                   suffix=self._suffix 
+                                   )
         return None
     
     def _list_outputs(self):
