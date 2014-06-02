@@ -68,6 +68,12 @@ class Similarity(BaseInterface):
     input_spec = SimilarityInputSpec
     output_spec = SimilarityOutputSpec
 
+    def __init__(self, **inputs):
+        warnings.warn(("This interface is deprecated since 0.10.0."
+                      " Please use nipype.algorithms.metrics.Similarity"),
+                      DeprecationWarning)
+        super(BaseInterface,self).__init__(**inputs)
+
     def _run_interface(self, runtime):
 
         vol1_nii = nb.load(self.inputs.volume1)
