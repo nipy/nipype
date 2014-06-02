@@ -28,6 +28,7 @@ import itertools
 import scipy.stats as stats
 
 from .. import logging
+from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
@@ -69,9 +70,8 @@ class DistanceOutputSpec(TraitedSpec):
 
 
 class Distance(BaseInterface):
-    '''
-    Calculates distance between two volumes.
-    '''
+    """Calculates distance between two volumes.
+    """
     input_spec = DistanceInputSpec
     output_spec = DistanceOutputSpec
 
@@ -232,8 +232,7 @@ class OverlapOutputSpec(TraitedSpec):
 
 
 class Overlap(BaseInterface):
-    """
-    Calculates various overlap measures between two maps.
+    """Calculates various overlap measures between two maps.
 
     Example
     -------
@@ -313,7 +312,7 @@ class FuzzyOverlapOutputSpec(TraitedSpec):
 
 
 class FuzzyOverlap(BaseInterface):
-    """ Calculates various overlap measures between two maps, using the fuzzy
+    """Calculates various overlap measures between two maps, using the fuzzy
     definition proposed in: Crum et al., Generalized Overlap Measures for
     Evaluation and Validation in Medical Image Analysis, IEEE Trans. Med.
     Ima. 25(11),pp 1451-1461, Nov. 2006.
@@ -524,8 +523,9 @@ class Similarity(BaseInterface):
     the same coordinate system, same space within that coordinate system and
     with the same voxel dimensions.
 
-    .. note:: This interface is an extension of nipype.interfaces.nipy.utils.Similarity
-              to support 4D files.
+    .. note:: This interface is an extension of
+              :py:class:`nipype.interfaces.nipy.utils.Similarity` to support 4D files.
+              Requires :py:mod:`nipy`
 
     Example
     -------
@@ -541,8 +541,22 @@ class Similarity(BaseInterface):
 
     input_spec = SimilarityInputSpec
     output_spec = SimilarityOutputSpec
+    _have_nipy = True
+
+    def __init__(self, **inputs):
+        try:
+            package_check('nipy')
+        except Exception, e:
+            self._have_nipy = False
+        super(Similarity,self).__init__(**inputs)
+
 
     def _run_interface(self, runtime):
+        if not self._have_nipy:
+            raise RuntimeError('nipy is not installed')
+
+        from nipy.algorithms.registration.histogram_registration import HistogramRegistration
+        from nipy.algorithms.registration.affine import Affine
 
         vol1_nii = nb.load(self.inputs.volume1)
         vol2_nii = nb.load(self.inputs.volume2)

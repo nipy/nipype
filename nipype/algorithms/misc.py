@@ -64,10 +64,10 @@ class PickAtlasOutputSpec(TraitedSpec):
 
 
 class PickAtlas(BaseInterface):
-    '''
-    Returns ROI masks given an atlas and a list of labels. Supports dilation
+    """Returns ROI masks given an atlas and a list of labels. Supports dilation
     and left right masking (assuming the atlas is properly aligned).
-    '''
+    """
+
     input_spec = PickAtlasInputSpec
     output_spec = PickAtlasOutputSpec
 
@@ -132,6 +132,8 @@ class SimpleThresholdOutputSpec(TraitedSpec):
 
 
 class SimpleThreshold(BaseInterface):
+    """Applies a threshold to input volumes
+    """
     input_spec = SimpleThresholdInputSpec
     output_spec = SimpleThresholdOutputSpec
 
@@ -182,10 +184,9 @@ class ModifyAffineOutputSpec(TraitedSpec):
 
 
 class ModifyAffine(BaseInterface):
-    '''
-    Left multiplies the affine matrix with a specified values. Saves the volume
+    """Left multiplies the affine matrix with a specified values. Saves the volume
     as a nifti file.
-    '''
+    """
     input_spec = ModifyAffineInputSpec
     output_spec = ModifyAffineOutputSpec
 
@@ -225,6 +226,8 @@ class CreateNiftiOutputSpec(TraitedSpec):
 
 
 class CreateNifti(BaseInterface):
+    """Creates a nifti volume
+    """
     input_spec = CreateNiftiInputSpec
     output_spec = CreateNiftiOutputSpec
 
@@ -344,8 +347,7 @@ class GunzipOutputSpec(TraitedSpec):
 
 
 class Gunzip(BaseInterface):
-    """
-
+    """Gunzip wrapper
     """
     input_spec = GunzipInputSpec
     output_spec = GunzipOutputSpec
@@ -409,8 +411,7 @@ class Matlab2CSVOutputSpec(TraitedSpec):
 
 
 class Matlab2CSV(BaseInterface):
-    """
-    Simple interface to save the components of a MATLAB .mat file as a text
+    """Simple interface to save the components of a MATLAB .mat file as a text
     file with comma-separated values (CSVs).
 
     CSV files are easily loaded in R, for use in statistical processing.
@@ -602,8 +603,7 @@ class MergeCSVFilesOutputSpec(TraitedSpec):
 
 
 class MergeCSVFiles(BaseInterface):
-    """
-    This interface is designed to facilitate data loading in the R environment.
+    """This interface is designed to facilitate data loading in the R environment.
     It takes input CSV files and merges them into a single CSV file.
     If provided, it will also incorporate column heading names into the
     resulting CSV file.
@@ -738,8 +738,7 @@ class AddCSVColumnOutputSpec(TraitedSpec):
 
 
 class AddCSVColumn(BaseInterface):
-    """
-    Short interface to add an extra column and field to a text file
+    """Short interface to add an extra column and field to a text file
 
     Example
     -------
@@ -799,8 +798,7 @@ class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
 
 
 class CalculateNormalizedMoments(BaseInterface):
-    """
-    Calculates moments of timeseries.
+    """Calculates moments of timeseries.
 
     Example
     -------
@@ -827,8 +825,7 @@ class CalculateNormalizedMoments(BaseInterface):
 
 
 def calc_moments(timeseries_file, moment):
-    """
-    Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
+    """Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
     (list of values; one per timeseries).
 
     Keyword arguments:
@@ -844,6 +841,11 @@ def calc_moments(timeseries_file, moment):
 
 # Deprecated interfaces ---------------------------------------------------------
 class Distance( nam.Distance ):
+    """Calculates distance between two volumes.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.Distance` instead.
+    """
     def __init__(self, **inputs):
         super(nam.Distance, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
@@ -851,6 +853,11 @@ class Distance( nam.Distance ):
                       DeprecationWarning)
 
 class Overlap( nam.Overlap ):
+    """Calculates various overlap measures between two maps.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.Overlap` instead.
+    """
     def __init__(self, **inputs):
         super(nam.Overlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
@@ -859,6 +866,12 @@ class Overlap( nam.Overlap ):
 
 
 class FuzzyOverlap( nam.FuzzyOverlap ):
+    """Calculates various overlap measures between two maps, using a fuzzy
+    definition.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.FuzzyOverlap` instead.
+    """
     def __init__(self, **inputs):
         super(nam.FuzzyOverlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"

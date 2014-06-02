@@ -51,6 +51,9 @@ class Similarity(BaseInterface):
     the same coordinate system, same space within that coordinate system and
     with the same voxel dimensions.
 
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.Similarity` instead.
+
     Example
     -------
     >>> from nipype.interfaces.nipy.utils import Similarity
