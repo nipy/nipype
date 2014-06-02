@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: New elastix interface
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 
