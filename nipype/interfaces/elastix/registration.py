@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-02 14:09:50
+# @Last Modified time: 2014-06-02 15:22:47
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -67,7 +67,7 @@ class Registration(CommandLine):
     >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.parameters = ['elastix.txt']
     >>> reg.cmdline
-    'elastix -f fixed1.nii -m moving1.nii -p elastix.txt -out ./'
+    'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
     """
 
     _cmd = 'elastix'
