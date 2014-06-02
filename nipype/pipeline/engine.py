@@ -1099,7 +1099,8 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> from nipype import Node, spm
+    >>> from nipype import Node
+    >>> from nipype.interfaces import spm
     >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
@@ -1984,7 +1985,8 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> from nipype import MapNode, fsl
+    >>> from nipype import MapNode
+    >>> from nipype.interfaces import fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
     ...                           'functional2.nii',

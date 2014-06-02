@@ -1,10 +1,12 @@
 Next Release
 ============
 
+* API: Interfaces to external packages are no longer available in the top-level ``nipype`` namespace, and must be imported directly (e.g. ``from nipype.interfaces import fsl``).
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
        are found in nipype.algorithms.metrics instead of misc
 * ENH: New interface in algorithms.metrics: ErrorMap (a voxel-wise diff map).
+* ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 
 Release 0.9.2 (January 31, 2014)

@@ -156,7 +156,7 @@ def motion_regressors(motion_params, order=2, derivatives=2):
 
 
 def build_filter1(motion_params, comp_norm, outliers):
-    """Builds a regressor set comprisong motion parameters, composite norm and
+    """Builds a regressor set comparison motion parameters, composite norm and
     outliers
 
     The outliers are added as a single time point column for each outlier
@@ -364,7 +364,7 @@ def create_workflow(files,
     fssource.inputs.subject_id = subject_id
     fssource.inputs.subjects_dir = os.environ['SUBJECTS_DIR']
 
-    # Extract wm+csf, brain masks by eroding freesurfer lables and then
+    # Extract wm+csf, brain masks by eroding freesurfer labels and then
     # transform the masks into the space of the median
     wmcsf = Node(freesurfer.Binarize(), name='wmcsfmask')
     mask = wmcsf.clone('anatmask')

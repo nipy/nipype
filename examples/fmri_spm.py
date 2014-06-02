@@ -18,7 +18,7 @@ Import necessary modules from nipype."""
 from nipype import config
 config.enable_provenance()
 
-from nipype import spm, fsl
+from nipype.interfaces import spm, fsl
 
 # In order to use this example with SPM's matlab common runtime
 # matlab_cmd = ('/Users/satra/Downloads/spm8/run_spm8.sh '

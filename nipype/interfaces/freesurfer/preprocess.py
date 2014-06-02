@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provides interfaces to various commands provided by freeusrfer
+"""Provides interfaces to various commands provided by FreeSurfer
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -649,8 +649,7 @@ class ReconAll(CommandLine):
         ('nuintensitycor', ['mri/nu.mgz']),
         ('normalization', ['mri/T1.mgz']),
         ('skullstrip',
-         ['mri/transforms/talairach_with_skull.lta',
-          'mri/brainmask.auto.mgz',
+         ['mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
         #autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),

@@ -214,15 +214,15 @@ def prov_encode(graph, value, create_container=True):
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
         if isinstance(value, basestring) and os.path.exists(value):
-            attr.update({pm.PROV['Location']: encoded_literal})
+            attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)
                 attr.update({crypto['sha512']: pm.Literal(sha512,
                                                           pm.XSD['string'])})
-                id = get_attr_id(attr, skip=[pm.PROV['Location'],
+                id = get_attr_id(attr, skip=[pm.PROV['location'],
                                              pm.PROV['value']])
             else:
-                id = get_attr_id(attr, skip=[pm.PROV['Location']])
+                id = get_attr_id(attr, skip=[pm.PROV['location']])
         else:
             id = get_attr_id(attr)
         entity = graph.entity(id, attr)
