@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-03 14:17:08
+# @Last Modified time: 2014-06-03 15:30:38
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -162,6 +162,43 @@ class ApplyWarp(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['out_file'] = op.join(out_dir,'result.nii.gz')
+        outputs['warped_file'] = op.join(out_dir,'result.nii.gz')
         return outputs
 
+
+class AnalyzeWarpInputSpec(ElastixBaseInputSpec):
+    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
+                          desc='transform-parameter file, only 1')
+
+
+class AnalyzeWarpOutputSpec(TraitedSpec):
+    disp_field = File(exists=True, desc='displacements field')
+    jacdet_map = File(exists=True, desc='det(Jacobian) map')
+    jacmat_map = File(exists=True, desc='Jacobian matrix map')
+
+class AnalyzeWarp(CommandLine):
+    """Use `transformix` to get details from the input transform (generate
+    the corresponding deformation field, generate the determinant of the
+    Jacobian map or the Jacobian map itself)
+
+    Example::
+
+    >>> from nipype.interfaces.elastix import ApplyWarp
+    >>> reg = ApplyWarp()
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
+    """
+
+    _cmd = 'transformix -def all -jac all -jacmat all'
+    input_spec = AnalyzeWarpInputSpec
+    output_spec = AnalyzeWarpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = op.abspath(self.inputs.output_path)
+        outputs['disp_field'] = op.join(out_dir,'deformationField.nii.gz')
+        outputs['jacdet_map'] = op.join(out_dir,'spatialJacobian.nii.gz')
+        outputs['jacmat_map'] = op.join(out_dir,'fullSpatialJacobian.nii.gz')
+        return outputs
