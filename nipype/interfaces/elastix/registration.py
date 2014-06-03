@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-02 15:22:47
+# @Last Modified time: 2014-06-03 14:17:08
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -22,18 +22,17 @@ from ..base import (CommandLine, CommandLineInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
 
 
+from base import ElastixBaseInputSpec
+
 from ... import logging
 logger = logging.getLogger('interface')
 
 
-class RegistrationInputSpec(CommandLineInputSpec):
+class RegistrationInputSpec(ElastixBaseInputSpec):
     fixed_image = File(exists=True, mandatory=True, argstr='-f %s',
            desc='fixed image')
     moving_image = File(exists=True, mandatory=True, argstr='-m %s',
            desc='moving image')
-
-    output_path = traits.Directory('./', exists=True, mandatory=True, usedefault=True,
-                              argstr='-out %s', desc='output directory')
 
     parameters = InputMultiPath(File(exists=True), mandatory=True, argstr='-p %s...',
                                 desc='parameter file, elastix handles 1 or more -p')
@@ -42,15 +41,13 @@ class RegistrationInputSpec(CommandLineInputSpec):
     moving_mask = File(exists=True, argstr='-mMask %s', desc='mask for moving image')
     initial_transform = File(exists=True, argstr='-t0 %s',
                              desc='parameter file for initial transform')
-    num_threads = traits.Int(1, argstr='-threads %01d',
-                             desc='set the maximum number of threads of elastix')
 
 
 class RegistrationOutputSpec(TraitedSpec):
     transform = InputMultiPath(File(exists=True), desc='output transform')
     warped_file = File(desc='input moving image warped to fixed image')
-    warped_files = InputMultiPath(File(), desc=('input moving image warped to'
-                                  ' fixed image at each level'))
+    warped_files = InputMultiPath(File(exists=False),
+                                  desc=('input moving image warped to fixed image at each level'))
     warped_files_flags = traits.List(traits.Bool(False),
                                     desc='flag indicating if warped image was generated')
 
@@ -131,3 +128,40 @@ class Registration(CommandLine):
                 return float(val)
             except ValueError:
                 return val
+
+class ApplyWarpInputSpec(ElastixBaseInputSpec):
+    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
+                          desc='transform-parameter file, only 1')
+
+    moving_image = File(exists=True, argstr='-in %s', mandatory=True,
+                        desc='input image to deform')
+
+
+
+class ApplyWarpOutputSpec(TraitedSpec):
+    warped_file = File(desc='input moving image warped to fixed image')
+
+class ApplyWarp(CommandLine):
+    """Use `transformix` to apply a transform on an input image.
+    The transform is specified in the transform-parameter file.
+
+    Example::
+
+    >>> from nipype.interfaces.elastix import ApplyWarp
+    >>> reg = ApplyWarp()
+    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
+    """
+
+    _cmd = 'transformix'
+    input_spec = ApplyWarpInputSpec
+    output_spec = ApplyWarpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = op.abspath(self.inputs.output_path)
+        outputs['out_file'] = op.join(out_dir,'result.nii.gz')
+        return outputs
+
