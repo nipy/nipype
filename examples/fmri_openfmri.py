@@ -200,6 +200,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
         contrast_def = np.genfromtxt(contrast_file, dtype=object)
+        if len(contrast_def.shape) == 1:
+            contrast_def = [contrast_def]
         contrasts = []
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
@@ -258,6 +260,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
 
     def sort_copes(files):
+        from nipype.utils.filemanip import filename_to_list
+        files = filename_to_list(files)
         numelements = len(files[0])
         outfiles = []
         for i in range(numelements):
@@ -267,6 +271,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         return outfiles
 
     def num_copes(files):
+        from nipype.utils.filemanip import filename_to_list
+        files = filename_to_list(files)
         return len(files)
 
     pickfirst = lambda x: x[0]
