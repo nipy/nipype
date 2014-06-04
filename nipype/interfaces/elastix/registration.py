@@ -183,8 +183,8 @@ class AnalyzeWarp(CommandLine):
 
     Example::
 
-    >>> from nipype.interfaces.elastix import ApplyWarp
-    >>> reg = ApplyWarp()
+    >>> from nipype.interfaces.elastix import AnalyzeWarp
+    >>> reg = AnalyzeWarp()
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
