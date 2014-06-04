@@ -185,7 +185,6 @@ class AnalyzeWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import ApplyWarp
     >>> reg = ApplyWarp()
-    >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
