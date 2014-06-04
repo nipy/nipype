@@ -645,8 +645,7 @@ class RegTransform(NiftyRegCommand):
         if name == 'out_file':
             input_to_use = self._find_input()
             return self._gen_fname(input_to_use,
-                                   suffix=self._suffix 
-                                   )
+                                   suffix=self._suffix)
         return None
     
     def _list_outputs(self):
@@ -744,7 +743,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
         desc='Number of bins in the histogram for reference image for given time point',
         argstr='-fbn %d %d')
 
-    lncc_val = PositiveFloat(desc='SD of the Gaussian for computing LNCC', argstr='--lncc %f')
+    lncc_val = traits.Float(desc='SD of the Gaussian for computing LNCC', argstr='--lncc %f')
     lncc2_val = traits.Tuple(PositiveInt, PositiveFloat, 
         desc='SD of the Gaussian for computing LNCC for a given time point', argstr='-lncc %d %f')
     
