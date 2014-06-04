@@ -1086,6 +1086,92 @@ connected.
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
 
+class GraftWorkflow(Workflow):
+    """
+    A workflow ready to insert several internal workflows that share an
+    interface.
+    """
+    def __init__(self, name, input_fields=[], output_fields=[], base_dir=None):
+        """Create a workflow object.
+
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+
+        """
+        from nipype.interfaces.utility import IdentityInterface
+
+        super(GraftWorkflow, self).__init__(name, base_dir)
+        self._children = dict()
+
+        if isinstance(input_fields, str):
+            input_fields = [ input_fields ]
+
+        if isinstance(output_fields, str):
+            output_fields = [ output_fields ]
+
+        self._input_fields = input_fields
+        self._output_fields = output_fields
+        self._connection_list = []
+        self._inputnode = Node(IdentityInterface(fields=input_fields), name='inputnode')
+        self._outputnode = Node(IdentityInterface(fields=output_fields), name='outputnode')
+        self._mergenodes = []
+        self._consolidated = False
+
+    def insert(self, workflow):
+        if workflow.name in self._children.keys():
+            logger.debug('Trying to add an existing workflow to GraftWorkflow')
+            return False
+
+        # Check that interfaces are satisfied
+        inputnames = workflow.inputs.inputnode.trait_names()
+
+        for key in self._input_fields:
+            if not key in inputnames:
+                raise Exception('Input \'%s\' is not present in GraftWorkflow' % key )
+
+            logger.debug('Connecting %s to inputnode.%s' % (key,key) )
+            self.connect([ ( self._inputnode, workflow, [ ('%s' % key, 'inputnode.%s' % key) ] ) ])
+
+        outputnames = workflow.outputs.outputnode.trait_names()
+
+        for key in self._output_fields:
+            if not key in outputnames:
+                raise Exception('Output \'%s\' is not present in GraftWorkflow' % key )
+            self._connection_list.append( (workflow, 'outputnode.%s' % key, self._outputnode, key) )
+
+        # Add to dictionary
+        self._children[workflow.name] = workflow
+
+        logger.debug('Added %s to GraftWorkflow' % workflow.name)
+
+    def _consolidate(self):
+        from nipype.interfaces.utility import Merge
+
+        if not self._consolidated:
+            nchildren = len(self._children)
+
+            for key in self._output_fields:
+                merge = Node(Merge(nchildren, no_flatten=True), name='merge_%s' % key )
+                self.connect( merge, 'out', self._outputnode, key )
+
+                for i,(name,workflow) in enumerate(self._children.iteritems()):
+                    self.connect(workflow, 'outputnode.%s' % key,
+                                 merge, 'in%01d' % (i+1) )
+            self._consolidated = True
+
+
+    def write_graph(self, *args, **kwargs):
+        self._consolidate()
+        return super(GraftWorkflow,self).write_graph(*args, **kwargs)
+
+    def run(self, *args, **kwargs):
+        self._consolidate()
+        return super(GraftWorkflow,self).run(*args, **kwargs)
+
 
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline
