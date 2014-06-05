@@ -649,8 +649,7 @@ class ReconAll(CommandLine):
         ('nuintensitycor', ['mri/nu.mgz']),
         ('normalization', ['mri/T1.mgz']),
         ('skullstrip',
-         ['mri/transforms/talairach_with_skull.lta',
-          'mri/brainmask.auto.mgz',
+         ['mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
         #autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),
