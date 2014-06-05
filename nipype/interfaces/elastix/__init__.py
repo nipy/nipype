@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:07
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-03 15:21:55
+# @Last Modified time: 2014-06-05 11:55:07
 """Top-level namespace for elastix."""
 
-from registration import Registration, ApplyWarp, AnalyzeWarp
+from registration import Registration, ApplyWarp, AnalyzeWarp, PointsWarp

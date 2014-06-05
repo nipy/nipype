@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-03 15:30:38
+# @Last Modified time: 2014-06-05 12:00:08
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -200,4 +200,43 @@ class AnalyzeWarp(CommandLine):
         outputs['disp_field'] = op.join(out_dir,'deformationField.nii.gz')
         outputs['jacdet_map'] = op.join(out_dir,'spatialJacobian.nii.gz')
         outputs['jacmat_map'] = op.join(out_dir,'fullSpatialJacobian.nii.gz')
+        return outputs
+
+
+class PointsWarpInputSpec(ElastixBaseInputSpec):
+    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
+                          desc='transform-parameter file, only 1')
+    points_file = File(exists=True, argstr='-def %s', mandatory=True,
+                       desc='input points (accepts .vtk triangular meshes).')
+
+
+
+class PointsWarpOutputSpec(TraitedSpec):
+    warped_file = File(desc='input points displaced in fixed image domain')
+
+class PointsWarp(CommandLine):
+    """Use `transformix` to apply a transform on an input point set.
+    The transform is specified in the transform-parameter file.
+
+    Example::
+
+    >>> from nipype.interfaces.elastix import PointsWarp
+    >>> reg = PointsWarp()
+    >>> reg.inputs.moving_image = 'surf.vtk'
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
+    >>> reg.cmdline
+    'transformix -def surf.vtk -out ./ -tp TransformParameters.0.txt'
+    """
+
+    _cmd = 'transformix'
+    input_spec = PointsWarpInputSpec
+    output_spec = PointsWarpOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = op.abspath(self.inputs.output_path)
+
+        fname, ext = op.splitext(op.basename(self.inputs.points_file))
+
+        outputs['warped_file'] = op.join(out_dir,'outputpoints%s' % ext)
         return outputs
