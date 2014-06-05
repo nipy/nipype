@@ -282,6 +282,8 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
+    avg_tran_ref_file = File(position = 1, argstr=' -avg_tran %s', xor=['demean_type'], 
+                             desc='All input images are resampled into the space of <reference image> and averaged. A cubic spline interpolation scheme is used for resampling')
     demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['demean_type'], desc='Average images and demean average image that have affine transformations to a common space')
     demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'], desc='Average images and demean average image that have non-rigid transformations to a common space' )
     demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')

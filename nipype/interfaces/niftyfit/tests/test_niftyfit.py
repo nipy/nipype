@@ -12,7 +12,7 @@ parser.add_argument('-bval', '--bval', help='Bvalue file', required=True)
 parser.add_argument('-bvec', '--bvec', help='Bvec file', required = True)
 parser.add_argument('-m', '--mask', help='Mask image', required=False)
 parser.add_argument('-p', '--prior', help='Prior file', required=False)
-parser.add_argument('-gn', help='Use Gauss-Newton', required=False)
+parser.add_argument('-gn', help='Use Gauss-Newton', required=False, action='store_true', default=False)
 parser.add_argument('-op','--outputdir', help='Output Directory', required=False)
 
 
