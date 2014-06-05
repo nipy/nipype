@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-05 13:33:11
+# @Last Modified time: 2014-06-05 13:49:36
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -204,10 +204,10 @@ class AnalyzeWarp(CommandLine):
 
 
 class PointsWarpInputSpec(ElastixBaseInputSpec):
-    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
-                          desc='transform-parameter file, only 1')
     points_file = File(exists=True, argstr='-def %s', mandatory=True,
                        desc='input points (accepts .vtk triangular meshes).')
+    transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
+                          desc='transform-parameter file, only 1')
 
 
 
@@ -225,7 +225,7 @@ class PointsWarp(CommandLine):
     >>> reg.inputs.points_file = 'surf1.vtk'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
-    'transformix -def surf.vtk -out ./ -tp TransformParameters.0.txt'
+    'transformix -out ./ -def surf.vtk -tp TransformParameters.0.txt'
     """
 
     _cmd = 'transformix'
