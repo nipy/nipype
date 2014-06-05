@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-05 12:00:08
+# @Last Modified time: 2014-06-05 12:38:37
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
@@ -222,7 +222,7 @@ class PointsWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import PointsWarp
     >>> reg = PointsWarp()
-    >>> reg.inputs.moving_image = 'surf.vtk'
+    >>> reg.inputs.points_file = 'surf.vtk'
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -def surf.vtk -out ./ -tp TransformParameters.0.txt'
