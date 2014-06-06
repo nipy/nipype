@@ -31,7 +31,7 @@ $HOME/miniconda/bin/conda install --yes pip numpy scipy nose traits networkx
 $HOME/miniconda/bin/conda install --yes dateutil ipython-notebook matplotlib
 $HOME/miniconda/bin/pip install nibabel --use-mirrors
 $HOME/miniconda/bin/pip install https://github.com/RDFLib/rdflib/archive/master.zip
-$HOME/miniconda/bin/pip install https://github.com/satra/prov/archive/enh/rdf.zip
+$HOME/miniconda/bin/pip install https://github.com/trungdong/prov/archive/rdf.zip
 $HOME/miniconda/bin/pip install https://github.com/nipy/nipype/archive/master.zip
 SCRIPT
 
