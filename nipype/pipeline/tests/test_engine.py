@@ -10,8 +10,7 @@ from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false)
+from nipype.testing import (assert_raises, assert_equal, assert_true, assert_false)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
 from nipype import logging
