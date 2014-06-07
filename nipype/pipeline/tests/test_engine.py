@@ -630,8 +630,7 @@ def test_serial_input():
                               'crashdump_dir': wd}
     
     # test output of num_subnodes method when serial is default (False)
-    num_subnodes_default = n1.num_subnodes()
-    yield assert_equal, num_subnodes_default, len(n1.inputs.in1)
+    yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
     
     # test running the workflow on default conditions
     error_raised = False
@@ -644,8 +643,7 @@ def test_serial_input():
     
     # test output of num_subnodes method when serial is True
     n1._serial=True
-    num_subnodes_serial = n1.num_subnodes()
-    yield assert_equal, num_subnodes_serial, 1
+    yield assert_equal, n1.num_subnodes(), 1
     
     # test running the workflow on serial conditions
     error_raised = False

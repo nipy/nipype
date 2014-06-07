@@ -2009,7 +2009,8 @@ class MapNode(Node):
             paired (i.e. it does not compute a combinatorial product).
         name : alphanumeric string
             node specific name
-
+        serial : boolean
+            flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
         See Node docstring for additional keyword arguments.
         """
 
