@@ -676,6 +676,9 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     # Output image file
     res_file = File(desc='The output resampled image', argstr='-res %s', genfile=True)
     
+    # Input Affine file
+    aff_file = File(exists=True, desc='The input affine transformation file', argstr='-aff %s')
+    
     # Reference mask
     rmask_file = File(exists=True, desc='Reference image mask', argstr='-rmask %s')
     
