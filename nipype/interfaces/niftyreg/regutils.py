@@ -411,6 +411,7 @@ class RegAladin(NiftyRegCommand):
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
+    '''
     # To facilitate easy passing of arguments, build an option to pass hashed
     # options in the __innit__.
     def __init__(self, options_hash = None ):
@@ -424,7 +425,7 @@ class RegAladin(NiftyRegCommand):
                 if options_hash.has_key(key):
                     if isdefined(options_hash[key]):
                         orig_hash[key] = options_hash[key]
-            self.inputs.set(**orig_hash)
+            self.inputs.set(**orig_hash) '''
     
     def _gen_filename(self, name):
         if name == 'aff_file':
@@ -803,6 +804,7 @@ class RegF3D(NiftyRegCommand):
     input_spec = RegF3DInputSpec
     output_spec = RegF3DOutputSpec
     
+    '''
     # To facilitate easy passing of arguments, build an option to pass hashed
     # options in the __innit__.
     def __init__(self, options_hash = None ):
@@ -816,7 +818,7 @@ class RegF3D(NiftyRegCommand):
                 if options_hash.has_key(key):
                     if isdefined(options_hash[key]):
                         orig_hash[key] = options_hash[key]
-            self.inputs.set(**orig_hash)
+            self.inputs.set(**orig_hash) '''
         
     def _gen_filename(self, name):
         if name == 'res_file':
