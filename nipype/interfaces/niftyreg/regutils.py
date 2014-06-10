@@ -15,7 +15,7 @@ from nipype.interfaces.base import (TraitedSpec, File,
                                     InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     isdefined, OutputMultiPath)
-                                    
+
 from nipype.utils.filemanip import split_filename, fname_presuffix
 
 from nipype.interfaces.fsl.base import FSLCommand as NiftyRegCommand
@@ -39,7 +39,7 @@ class PositiveInt (traits.BaseInt):
         value = super(PositiveInt, self).validate(object, name, value)
         if (value >= 0) == 1:
             return value
-        self.error( object, name, value )
+            self.error( object, name, value )
 
 # A custom trait class for positive floats
 class PositiveFloat (traits.BaseFloat):
@@ -53,7 +53,7 @@ class PositiveFloat (traits.BaseFloat):
         value = super(PositiveFloat, self).validate(object, name, value)
         if (value >= 0) == 1:
             return value
-        self.error( object, name, value )
+            self.error( object, name, value )
 
 #-----------------------------------------------------------
 # reg_resample wrapper interface
@@ -63,25 +63,25 @@ class PositiveFloat (traits.BaseFloat):
 class RegResampleInputSpec(NiftyRegCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
-                   argstr='-ref %s', mandatory=True)
+                    argstr='-ref %s', mandatory=True)
     # Input floating file
     flo_file = File(exists=True, desc='The input floating/source image',
-                   argstr='-flo %s', mandatory=True)
+                    argstr='-flo %s', mandatory=True)
     # Input affine transformation
     aff_file = File(exists=True, desc='The input affine transformation',
-                   argstr='-aff %s', mandatory=False)
+                    argstr='-aff %s', mandatory=False)
     # Input deformation field
     trans_file = File(exists=True, desc='The input CPP transformation file',
-                   argstr='-trans %s', mandatory=False)
+                      argstr='-trans %s', mandatory=False)
     # Output file name
     res_file = File(desc='The output filename of the transformed image',
-                    argstr='-res %s', genfile = True)
+                    argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
     # Deformaed grid file name
     blank_file = File(desc='The output filename of resampled blank grid',
-                   argstr='-blank %s', mandatory=False)
+                      argstr='-blank %s', name_source = ['flo_file'], name_template = '%s_blank')
     # Interpolation type
     inter_val = traits.Enum("NN", "LIN", "CUB", desc = 'Interpolation type',
-                             argstr="-inter %d")
+                            argstr="-inter %d")
     # Padding value
     pad_val = traits.Int(desc = 'Padding value', argstr="-pad %d")
     # Verbosity off?
@@ -89,7 +89,7 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
 
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
-    res_file = File(desc='The output filename of the transformed image', exists = True)
+    res_file = File(desc='The output filename of the transformed image')
     blank_file = File(desc='The output filename of resampled blank grid (if generated)')
 
 # Resampler class
@@ -105,29 +105,8 @@ class RegResample(NiftyRegCommand):
         if name == 'inter_val':
             return spec.argstr%{"NN":0, "LIN":1, "CUB":2}[value]
         else:
-            return super(RegResample, self)._format_arg(name, spec, value)
-        
+            return super(RegResample, self)._format_arg(name, spec, value)        
 
-    def _gen_filename(self, name):
-        if name == 'res_file':
-            return self._gen_fname(self.inputs.ref_file,
-                                   suffix=self._suffix)
-        return None
-
-    # Returns a dictionary containing names of generated files that are expected 
-    # after package completes execution
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        
-        if isdefined(self.inputs.res_file) and self.inputs.res_file:
-            outputs['res_file'] = os.path.abspath(self.inputs.res_file)
-        else:
-            outputs['res_file'] = self._gen_filename('res_file')
-
-        if isdefined(self.inputs.blank_file) and self.inputs.blank_file:
-            outputs['blank_file'] = os.path.abspath(self.inputs.blank_file)
-
-        return outputs
     
 #-----------------------------------------------------------
 # reg_jacobian wrapper interface
@@ -136,19 +115,19 @@ class RegResample(NiftyRegCommand):
 class RegJacobianInputSpec(NiftyRegCommandInputSpec):
     # Input transformation file
     trans_file = File(exists=True, desc='The input non-rigid transformation',
-                   argstr='-trans %s', mandatory=True)
+                      argstr='-trans %s', mandatory=True)
     # Input jacobian determinat file path
     jac_det_file = File(desc='The output jacobian determinant file name',
-                   argstr='-jac %s',  name_source=['trans_file'], name_template='%s_jac_det')
+                        argstr='-jac %s',  name_source=['trans_file'], name_template='%s_jac_det')
     # Input jacobian matrix file name
     jac_mat_file = File(desc='The output jacobian matrix file name',
-                   argstr='-jacM %s',name_source=['trans_file'], name_template='%s_jac_mat')
+                        argstr='-jacM %s',name_source=['trans_file'], name_template='%s_jac_mat')
     # Input log of jacobian determinant file name
     jac_log_file = File(desc='The output log of jacobian determinant file name',
-                   argstr='-jacL %s', name_source=['trans_file'], name_template='%s_jac_log_det')
+                        argstr='-jacL %s', name_source=['trans_file'], name_template='%s_jac_log_det')
     # Reference file name
     ref_file_name = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
-                    argstr='-ref %s')
+                         argstr='-ref %s')
 
 
 # Output spec
@@ -156,7 +135,7 @@ class RegJacobianOutputSpec(TraitedSpec):
     jac_det_file = File(desc='The output jacobian determinant file')
     jac_mat_file = File(desc='The output filename of jacobian matrix')
     jac_log_file = File(desc='The output filename of the log of jacobian determinant')
-                   
+    
 # Main interface class
 class RegJacobian(NiftyRegCommand):
     _cmd = 'reg_jacobian'
@@ -164,21 +143,6 @@ class RegJacobian(NiftyRegCommand):
     output_spec = RegJacobianOutputSpec
     _suffix = '_jacobian_'
     
-    # If we use name_source and name_template, then we don't necessarily need to use list_outputs
-    '''def _list_outputs(self):
-        outputs = self.output_spec().get()
-        
-        #if isdefined(self.inputs.jac_det_file) and self.inputs.jac_det_file:
-        #    outputs['jac_det_file'] = os.path.abspath(self.inputs.jac_det_file)
-
-        if isdefined(self.inputs.jac_mat_file) and self.inputs.jac_mat_file:
-            outputs['jac_mat_file'] = os.path.abspath(self.inputs.jac_mat_file)
-
-        if isdefined(self.inputs.jac_log_file) and self.inputs.jac_log_file:
-            outputs['jac_log_file'] = os.path.abspath(self.inputs.jac_log_file)        
-
-        return outputs
-    '''
 #-----------------------------------------------------------
 # reg_tools wrapper interface
 #-----------------------------------------------------------
@@ -188,50 +152,50 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
     in_file = File(exists=True, desc='The input image file path',
                    argstr='-in %s', mandatory=True)
     # Output file path
-    out_file = File(desc='The output file name', argstr='-out %s')
+    out_file = File(desc='The output file name', argstr='-out %s', name_source = ['in_file'], name_template = '%s_out')
     # Make the output image isotropic
     iso_flag = traits.Bool(argstr='-iso', desc='Make output image isotropic')
     # Set scale, slope to 0 and 1.
     noscl_flag = traits.Bool(argstr='-noscl', desc='Set scale, slope to 0 and 1')
     # Values outside the mask are set to NaN
     mask_file = File(exists=True, desc='Values outside the mask are set to NaN',
-                   argstr='-nan %s')
+                     argstr='-nan %s')
     # Threshold the input image
     thr_val = traits.Float(desc='Binarise the input image with the given threshold', 
-                argstr='-thr %f')
+                           argstr='-thr %f')
     # Binarise the input image
     bin_flag = traits.Bool(argstr='-bin', desc='Binarise the input image')
     # Compute the mean RMS between the two images
     rms_val = File(exists=True, desc='Compute the mean RMS between the images',
-                argstr='-rms %s')
+                   argstr='-rms %s')
     # Perform division by image or value
     div_val = traits.Either(traits.Float, File(exists=True), 
-                desc='Divide the input by image or value', argstr='-div %s')
+                            desc='Divide the input by image or value', argstr='-div %s')
     # Perform multiplication by image or value
     mul_val = traits.Either(traits.Float, File(exists=True), 
-                desc='Multiply the input by image or value', argstr='-mul %s')
+                            desc='Multiply the input by image or value', argstr='-mul %s')
     # Perform addition by image or value
     add_val = traits.Either(traits.Float, File(exists=True), 
-                desc='Add to the input image or value', argstr='-add %s')
+                            desc='Add to the input image or value', argstr='-add %s')
     # Perform subtraction by image or value
     sub_val = traits.Either(traits.Float, File(exists=True), 
-                desc='Add to the input image or value', argstr='-sub %s')
+                            desc='Add to the input image or value', argstr='-sub %s')
     # Downsample the image by a factor of 2.
     down_flag = traits.Bool(desc='Downsample the image by a factor of 2', argstr='-down')
     # Smoothing using spline kernel
     smo_s_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                    desc = 'Smooth the input image using a cubic spline kernel',
-                    argstr='-smoS %f %f %f')
+                             desc = 'Smooth the input image using a cubic spline kernel',
+                             argstr='-smoS %f %f %f')
     # Smoothing using Gaussian kernel
     smo_g_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                    desc = 'Smooth the input image using a Gaussian kernel',
-                    argstr='-smoG %f %f %f')
+                             desc = 'Smooth the input image using a Gaussian kernel',
+                             argstr='-smoG %f %f %f')
 
 
 
 # Output spec    
 class RegToolsOutputSpec(TraitedSpec):
-    out_file = File(desc='The output file')
+    out_file = File(desc='The output file', exists = True)
 
 # Main interface class
 class RegTools(NiftyRegCommand):
@@ -239,22 +203,15 @@ class RegTools(NiftyRegCommand):
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
 
-    # Returns a dictionary containing names of generated files that are expected 
-    # after package completes execution
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.out_file) and self.inputs.out_file:
-                outputs['out_file'] = os.path.abspath(self.inputs.out_file)
 
 #-----------------------------------------------------------
 # reg_measure wrapper interface
 #-----------------------------------------------------------
 class RegMeasureInputSpec(NiftyRegCommandInputSpec):
     ref_file = File(exists=True, desc='The input reference/target image',
-                   argstr='-ref %s', mandatory=True)
+                    argstr='-ref %s', mandatory=True)
     flo_file = File(exists=True, desc='The input floating/source image',
-                   argstr='-flo %s', mandatory=True)
+                    argstr='-flo %s', mandatory=True)
 
     ncc_flag = traits.Bool(argstr='-ncc', desc='Compute NCC')
     lncc_flag = traits.Bool(argstr='-lncc', desc='Compute LNCC')
@@ -273,12 +230,13 @@ class RegMeasure(NiftyRegCommand):
 # reg_average wrapper interface
 #-----------------------------------------------------------
 class RegAverageInputSpec(NiftyRegCommandInputSpec):
+
     out_file = File(position=0, desc='Output file name', argstr='%s', genfile=True)
 
     # If only images/transformation files are passed, do a straight average
     # of all the files in the string (shoudl this be a list of files?)
     in_files = traits.List(traits.Str, position = 1, argstr='-avg %s', sep=' ',
-        minlen=2, desc='Averaging of images/affine transformations', xor=['reg_average_type'])
+                           minlen=2, desc='Averaging of images/affine transformations', xor=['reg_average_type'])
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
@@ -289,7 +247,7 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
     demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
     # If we do not have a list of files beginning with avg, must be a demean
     demean_files = traits.List(traits.Str, position =-1, argstr=' %s ', sep=' ',
-        desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
+                               desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
 
 
 class RegAverageOutputSpec(TraitedSpec):
@@ -312,7 +270,7 @@ class RegAverage(NiftyRegCommand):
         if name == 'out_file':
             return self._gen_fname('average_output' , ext='.nii.gz')
         return None
-    
+            
     def _list_outputs(self):
         outputs = self.output_spec().get()
         
@@ -320,7 +278,7 @@ class RegAverage(NiftyRegCommand):
             outputs['out_file'] = self.inputs.out_file
         else:
             outputs['out_file'] = self._gen_filename('out_file')
-        
+            
         return outputs
 
 #-----------------------------------------------------------
@@ -330,12 +288,12 @@ class RegAverage(NiftyRegCommand):
 class RegAladinInputSpec(NiftyRegCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
-                   argstr='-ref %s', mandatory=True)
+                    argstr='-ref %s', mandatory=True)
     # Input floating file
     flo_file = File(exists=True, desc='The input floating/source image',
-                   argstr='-flo %s', mandatory=True)
+                    argstr='-flo %s', mandatory=True)
     # Affine output matrix file
-    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', genfile=True, hash_files=False)
+    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', name_source = ['flo_file'], name_template = '%s_aff')
     # No symmetric flag
     nosym_flag = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
     # Rigid only registration
@@ -344,16 +302,16 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     aff_direct_flag = traits.Bool(argstr='-affDirect', desc='Directly optimise the affine parameters')
     # Input affine
     in_aff_file = File(exists=True, desc='The input affine transformation',
-                   argstr='-inaff %s')
+                       argstr='-inaff %s')
     # Input reference mask
     rmask_file = File(exists=True, desc='The input reference mask',
-                   argstr='-rmask %s')
+                      argstr='-rmask %s')
     # Input floating mask
     fmask_file = File(exists=True, desc='The input floating mask',
-                   argstr='-fmask %s')
+                      argstr='-fmask %s')
     # Result image path
-    result_file = File(desc='The affine transformed floating image',
-                   argstr='-res %s')
+    res_file = File(desc='The affine transformed floating image',
+                    argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
     # Maximum number of iterations
     maxit_val = PositiveInt(desc='Maximum number of iterations', argstr='-maxit %d')
     # Multiresolution levels
@@ -362,13 +320,13 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     lp_val = PositiveInt(desc='Number of resolution levels to perform', argstr='-lp %d')
     # Smoothing to apply on reference image
     smoo_r_val = traits.Float(desc='Amount of smoothing to apply to reference image',
-                    argstr='-smooR %f')
+                              argstr='-smooR %f')
     # Smoothing to apply on floating image
     smoo_f_val = traits.Float(desc='Amount of smoothing to apply to floating image',
-                    argstr='-smooF %f')
+                              argstr='-smooF %f')
     # Use nifti header to initialise transformation
     nac_flag = traits.Bool(desc='Use nifti header to initialise transformaiton',
-                argstr='-nac')
+                           argstr='-nac')
     # Percent of blocks that are considered active.
     v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-%v %d')
     # Percent of inlier blocks
@@ -377,22 +335,21 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
     # Lower threshold on reference image
     ref_low_val = traits.Float(desc='Lower threshold value on reference image',
-                    argstr='-refLowThr %f')
+                               argstr='-refLowThr %f')
     # Upper threshold on reference image
     ref_up_val = traits.Float(desc='Upper threshold value on reference image',
-                    argstr='-refUpThr %f')
+                              argstr='-refUpThr %f')
     # Lower threshold on floating image
     flo_low_val = traits.Float(desc='Lower threshold value on floating image',
-                    argstr='-floLowThr %f')
+                               argstr='-floLowThr %f')
     # Upper threshold on floating image
     flo_up_val = traits.Float(desc='Upper threshold value on floating image',
-                    argstr='-floUpThr %f')
-
+                              argstr='-floUpThr %f')
 
 # Output spec
 class RegAladinOutputSpec(TraitedSpec):
     aff_file = File(desc='The output affine file')
-    result_file = File(desc='The output transformed image')
+    res_file = File(desc='The output transformed image')
     avg_output = traits.String(desc='Output string in the format for reg_average')
 
 # Main interface class
@@ -411,47 +368,11 @@ class RegAladin(NiftyRegCommand):
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
-    '''
-    # To facilitate easy passing of arguments, build an option to pass hashed
-    # options in the __innit__.
-    def __init__(self, options_hash = None ):
-        # Run the super constructor
-        super(NiftyRegCommand, self).__init__()
-        
-        if options_hash is not None:
-            # Modify only keys that exist in the original hash
-            orig_hash = self.inputs.get()
-            for key in orig_hash.keys():
-                if options_hash.has_key(key):
-                    if isdefined(options_hash[key]):
-                        orig_hash[key] = options_hash[key]
-            self.inputs.set(**orig_hash) '''
-    
-    def _gen_filename(self, name):
-        if name == 'aff_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                       suffix='_aff', ext='.txt')
-        if name == 'result_file':
-            return self._gen_fname(self.inputs.flo_file,
-                                       suffix='_res', ext='.nii.gz')
-        return None
     # Returns a dictionary containing names of generated files that are expected 
     # after package completes execution
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        
-        if isdefined(self.inputs.aff_file):
-            outputs['aff_file'] = self.inputs.aff_file
-        else:
-            outputs['aff_file'] = self._gen_filename('aff_file')
-            
-        if isdefined(self.inputs.result_file):
-            outputs['result_file'] = self.inputs.result_file
-        else:
-            outputs['result_file'] = self._gen_filename('result_file')
-
+        outputs = super(RegAladin, self)._list_outputs()
         # Make a list of the linear transformation file and the input image
-        #if isdefined(outputs['aff_file']) :
         outputs['avg_output'] = os.path.abspath(outputs['aff_file']) + ' ' + os.path.abspath(self.inputs.flo_file)
         return outputs
         
@@ -461,7 +382,7 @@ class RegAladin(NiftyRegCommand):
 class RegTransformInputSpec(NiftyRegCommandInputSpec):
 
     ref1_file = File(exists=True, desc='The input reference/target image',
-                   argstr='-ref %s')
+                     argstr='-ref %s')
     ref2_file = File(exists=True, 
                      desc='The input second reference/target image',
                      argstr='-ref2 %s')
@@ -650,12 +571,12 @@ class RegTransform(NiftyRegCommand):
             input_to_use = self._find_input()
             if isdefined(self.inputs.inv_aff_input):
                 return self._gen_fname(input_to_use,
-                                   suffix=self._suffix, change_ext=False, ext='.txt')
+                                       suffix=self._suffix, change_ext=False, ext='.txt')
             else:
                 return self._gen_fname(input_to_use,
-                                   suffix=self._suffix)
+                                       suffix=self._suffix)
         return None
-    
+                
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
@@ -673,14 +594,14 @@ class RegTransform(NiftyRegCommand):
 class RegF3DInputSpec(NiftyRegCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
-                   argstr='-ref %s', mandatory=True)
+                    argstr='-ref %s', mandatory=True)
     # Input floating file
     flo_file = File(exists=True, desc='The input floating/source image',
-                   argstr='-flo %s', mandatory=True)
+                    argstr='-flo %s', mandatory=True)
     # Output CPP file
-    cpp_file = File(desc='The output CPP file', argstr='-cpp %s', genfile=True)
+    cpp_file = File(desc='The output CPP file', argstr='-cpp %s', name_source = ['flo_file'], name_template = '%s_cpp')
     # Output image file
-    res_file = File(desc='The output resampled image', argstr='-res %s', genfile=True)
+    res_file = File(desc='The output resampled image', argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
     
     # Input Affine file
     aff_file = File(exists=True, desc='The input affine transformation file', argstr='-aff %s')
@@ -690,41 +611,41 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     
     # Smoothing kernel for reference
     ref_smooth_val = PositiveFloat(desc='Smoothing kernel width for reference image',
-                    argstr='-smooR %f')
+                                   argstr='-smooR %f')
     # Smoothing kernel for floating
     flo_smooth_val = PositiveFloat(desc='Smoothing kernel width for floating image',
-                    argstr='-smooF %f')
+                                   argstr='-smooF %f')
     
     # Lower threshold for reference image
     rlwth_thr_val = traits.Float(desc='Lower threshold for reference image',
-                    argstr='--rLwTh %f')
+                                 argstr='--rLwTh %f')
     # Upper threshold for reference image
     rupth_thr_val = traits.Float(desc='Upper threshold for reference image',
-                    argstr='--rUpTh %f')
+                                 argstr='--rUpTh %f')
     # Lower threshold for reference image
     flwth_thr_val = traits.Float(desc='Lower threshold for floating image',
-                    argstr='--fLwTh %f')
+                                 argstr='--fLwTh %f')
     # Upper threshold for reference image
     fupth_thr_val = traits.Float(desc='Upper threshold for floating image',
-                    argstr='--fUpTh %f')
+                                 argstr='--fUpTh %f')
 
 
     # Lower threshold for reference image
     rlwth2_thr_val = traits.Tuple(PositiveInt, traits.Float, 
-                        desc='Lower threshold for reference image at the specified time point',
-                        argstr='-rLwTh %d %f')
+                                  desc='Lower threshold for reference image at the specified time point',
+                                  argstr='-rLwTh %d %f')
     # Upper threshold for reference image
     rupth2_thr_val = traits.Tuple(PositiveInt, traits.Float, 
-                        desc='Upper threshold for reference image at the specified time point',
-                        argstr='-rUpTh %d %f')
+                                  desc='Upper threshold for reference image at the specified time point',
+                                  argstr='-rUpTh %d %f')
     # Lower threshold for reference image
     flwth2_thr_val = traits.Tuple(PositiveInt, traits.Float, 
-                        desc='Lower threshold for floating image at the specified time point',
-                        argstr='-fLwTh %d %f')
+                                  desc='Lower threshold for floating image at the specified time point',
+                                  argstr='-fLwTh %d %f')
     # Upper threshold for reference image
     fupth2_thr_val = traits.Tuple(PositiveInt, traits.Float, 
-                        desc='Upper threshold for floating image at the specified time point',
-                        argstr='-fUpTh %d %f')
+                                  desc='Upper threshold for floating image at the specified time point',
+                                  argstr='-fUpTh %d %f')
 
     # Final grid spacing along the 3 axes
     sx_val = PositiveFloat(desc='Final grid spacing along the x axes', argstr='-sx %f')
@@ -734,36 +655,36 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     # Regularisation options
     be_val = traits.Float(desc='Bending energy value', argstr='-be %f')
     le_val = traits.Tuple(traits.Float, traits.Float, desc='Linear elasticity penalty term',
-                        argstr='-le %f %f')
+                          argstr='-le %f %f')
     l2_val = traits.Float(desc='L2 norm of displacement penalty value', argstr='-l2 %f')
     jl_val = traits.Float(desc='Log of jacobian of deformation penalty value', argstr='-jl %f')
     no_app_jl_flag = traits.Bool(argstr='-noAppJL', 
-                desc='Do not approximate the log of jacobian penalty at control points only')
+                                 desc='Do not approximate the log of jacobian penalty at control points only')
 
     # Similarity measure options
     nmi_flag = traits.Bool(argstr='--nmi', desc='use NMI even when other options are specified')
     rbn_val = PositiveInt(desc='Number of bins in the histogram for reference image',
-                    argstr='--rbn %d')
+                          argstr='--rbn %d')
     fbn_val = PositiveInt(desc='Number of bins in the histogram for reference image',
-                    argstr='--fbn %d')
+                          argstr='--fbn %d')
     rbn2_val = traits.Tuple(PositiveInt, PositiveInt,
-        desc='Number of bins in the histogram for reference image for given time point',
-        argstr='-rbn %d %d')
+                            desc='Number of bins in the histogram for reference image for given time point',
+                            argstr='-rbn %d %d')
 
     fbn2_val = traits.Tuple(PositiveInt, PositiveInt, 
-        desc='Number of bins in the histogram for reference image for given time point',
-        argstr='-fbn %d %d')
+                            desc='Number of bins in the histogram for reference image for given time point',
+                            argstr='-fbn %d %d')
 
     lncc_val = traits.Float(desc='SD of the Gaussian for computing LNCC', argstr='--lncc %f')
     lncc2_val = traits.Tuple(PositiveInt, PositiveFloat, 
-        desc='SD of the Gaussian for computing LNCC for a given time point', argstr='-lncc %d %f')
+                             desc='SD of the Gaussian for computing LNCC for a given time point', argstr='-lncc %d %f')
     
     ssd_flag = traits.Bool(desc='Use SSD as the similarity measure', argstr='--ssd')
     ssd2_flag = PositiveInt(desc='Use SSD as the similarity measure for a given time point', 
-        argstr='-ssd %d')
+                            argstr='-ssd %d')
     kld_flag = traits.Bool(desc='Use KL divergence as the similarity measure', argstr='--kld')
     kld2_flag = PositiveInt(desc='Use KL divergence as the similarity measure for a given time point', 
-        argstr='-kld %d')
+                            argstr='-kld %d')
     amc_flag = traits.Bool(desc='Use additive NMI', argstr='-amc')
     
     nox_flag = traits.Bool(desc='Dont optimise in x direction', argstr='-nox')
@@ -777,7 +698,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     nopy_flag = traits.Bool(desc='Do not use the multiresolution approach', argstr='-nopy')
     noconj_flag = traits.Bool(desc='Use simple GD optimization', argstr='-noConj')
     pert_val = PositiveInt(desc='Add perturbation steps after each optimization step', 
-                    argstr='-pert %d')
+                           argstr='-pert %d')
 
     # F3d2 options
     vel_flag = traits.Bool(desc='Use velocity field integration', argstr='-vel')
@@ -785,7 +706,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
 
     # Other options
     smooth_grad_val = PositiveFloat(desc='Kernel width for smoothing the metric gradient',
-                        argstr='-smoothGrad %f')
+                                    argstr='-smoothGrad %f')
     # Padding value
     pad_val = traits.Float(desc = 'Padding value', argstr="-pad %f")
     # verbosity off
@@ -793,11 +714,12 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
 
     output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
                               desc='NiftyReg output type')
+
 # Output spec
 class RegF3DOutputSpec(TraitedSpec):
     cpp_file = File(desc='The output CPP file')
     res_file = File(desc='The output resampled image')
-    invcpp_file = File(exists=False, genfile=True, desc='The output inv CPP file')
+    invcpp_file = File(genfile=True, desc='The output inv CPP file')
 
 # Main interface class
 class RegF3D(NiftyRegCommand):
@@ -805,22 +727,6 @@ class RegF3D(NiftyRegCommand):
     input_spec = RegF3DInputSpec
     output_spec = RegF3DOutputSpec
     
-    '''
-    # To facilitate easy passing of arguments, build an option to pass hashed
-    # options in the __innit__.
-    def __init__(self, options_hash = None ):
-        # Run the super constructor
-        super(NiftyRegCommand, self).__init__()
-        
-        if options_hash is not None:
-            # Modify only keys that exist in the original hash
-            orig_hash = self.inputs.get()
-            for key in orig_hash.keys():
-                if options_hash.has_key(key):
-                    if isdefined(options_hash[key]):
-                        orig_hash[key] = options_hash[key]
-            self.inputs.set(**orig_hash) '''
-        
     def _get_filename_without_extension(self, in_file):
         ret = in_file
         if ret.endswith('.nii.gz'):
@@ -829,31 +735,9 @@ class RegF3D(NiftyRegCommand):
             ret = ret[:-4]
         return ret
 
-    def _gen_filename(self, name):
-        if name == 'res_file':
-            return self._gen_fname(self.inputs.ref_file,
-                                   suffix='_res')
-        if name == 'cpp_file':
-            return self._gen_fname(self.inputs.ref_file,
-                                   suffix='_cpp')
-        return None
-    
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        # If defined, with some value
-        if isdefined(self.inputs.res_file) and self.inputs.res_file:
-            outputs["res_file"] = os.path.abspath(self.inputs.res_file)
-        else:
-            outputs['res_file'] = self._gen_filename('res_file')
-            
-        if isdefined(self.inputs.cpp_file) and self.inputs.cpp_file:
-            outputs["cpp_file"] = os.path.abspath(self.inputs.cpp_file)
-        else:
-            outputs['cpp_file'] = self._gen_filename('cpp_file')
-        
+        outputs = super(RegF3D, self)._list_outputs()
         basename = self._get_filename_without_extension(outputs['cpp_file'])
         outputs['invcpp_file'] = basename + '_backward.nii.gz'
-
-
         return outputs
-            
+        
