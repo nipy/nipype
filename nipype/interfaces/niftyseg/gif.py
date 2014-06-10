@@ -91,7 +91,7 @@ class Gif(NIFTYSEGCommand):
         
     def _gen_filename(self, name, outputdir):
         if name == 'out_parc':
-            return self._gen_outputbasename(outputdir) + '_labels_Parcelation.nii.gz'
+            return self._gen_outputbasename(outputdir) + '_labels_Parcellation.nii.gz'
         if name == 'out_geo':
             return self._gen_outputbasename(outputdir) + '_labels_geo.nii.gz'
         if name == 'out_prior':
