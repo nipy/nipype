@@ -139,13 +139,13 @@ class RegJacobianInputSpec(NiftyRegCommandInputSpec):
                    argstr='-trans %s', mandatory=True)
     # Input jacobian determinat file path
     jac_det_file = File(desc='The output jacobian determinant file name',
-                   argstr='-jac %s')
+                   argstr='-jac %s',  name_source=['trans_file'], name_template='%s_jac_det')
     # Input jacobian matrix file name
     jac_mat_file = File(desc='The output jacobian matrix file name',
-                   argstr='-jacM %s')
+                   argstr='-jacM %s',name_source=['trans_file'], name_template='%s_jac_mat')
     # Input log of jacobian determinant file name
     jac_log_file = File(desc='The output log of jacobian determinant file name',
-                   argstr='-jacL %s')
+                   argstr='-jacL %s', name_source=['trans_file'], name_template='%s_jac_log_det')
     # Reference file name
     ref_file_name = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
                     argstr='-ref %s')
@@ -162,14 +162,14 @@ class RegJacobian(NiftyRegCommand):
     _cmd = 'reg_jacobian'
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
-
-    # Returns a dictionary containing names of generated files that are expected 
-    # after package completes execution
-    def _list_outputs(self):
+    _suffix = '_jacobian_'
+    
+    # If we use name_source and name_template, then we don't necessarily need to use list_outputs
+    '''def _list_outputs(self):
         outputs = self.output_spec().get()
         
-        if isdefined(self.inputs.jac_det_file) and self.inputs.jac_det_file:
-            outputs['jac_det_file'] = os.path.abspath(self.inputs.jac_det_file)
+        #if isdefined(self.inputs.jac_det_file) and self.inputs.jac_det_file:
+        #    outputs['jac_det_file'] = os.path.abspath(self.inputs.jac_det_file)
 
         if isdefined(self.inputs.jac_mat_file) and self.inputs.jac_mat_file:
             outputs['jac_mat_file'] = os.path.abspath(self.inputs.jac_mat_file)
@@ -178,7 +178,7 @@ class RegJacobian(NiftyRegCommand):
             outputs['jac_log_file'] = os.path.abspath(self.inputs.jac_log_file)        
 
         return outputs
-
+    '''
 #-----------------------------------------------------------
 # reg_tools wrapper interface
 #-----------------------------------------------------------
@@ -483,6 +483,7 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
     comp_input = File(exists = True,
                       desc='compose two transformations', 
                       argstr='-comp %s',
+                      position = -3,
                       xor = ['def_input', 'disp_input', 'flow_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     comp_input2 = File(exists = True,
@@ -646,7 +647,11 @@ class RegTransform(NiftyRegCommand):
     def _gen_filename(self, name):
         if name == 'out_file':
             input_to_use = self._find_input()
-            return self._gen_fname(input_to_use,
+            if isdefined(self.inputs.inv_aff_input):
+                return self._gen_fname(input_to_use,
+                                   suffix=self._suffix, change_ext=False, ext='.txt')
+            else:
+                return self._gen_fname(input_to_use,
                                    suffix=self._suffix)
         return None
     
@@ -759,6 +764,10 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     kld2_flag = PositiveInt(desc='Use KL divergence as the similarity measure for a given time point', 
         argstr='-kld %d')
     amc_flag = traits.Bool(desc='Use additive NMI', argstr='-amc')
+    
+    nox_flag = traits.Bool(desc='Dont optimise in x direction', argstr='-nox')
+    noy_flag = traits.Bool(desc='Dont optimise in y direction', argstr='-noy')
+    noz_flag = traits.Bool(desc='Dont optimise in z direction', argstr='-noz')
 
     # Optimization options
     maxit_val = PositiveInt(desc='Maximum number of iterations per level', argstr='-maxit %d')
