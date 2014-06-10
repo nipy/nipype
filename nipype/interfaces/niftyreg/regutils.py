@@ -797,6 +797,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
 class RegF3DOutputSpec(TraitedSpec):
     cpp_file = File(desc='The output CPP file')
     res_file = File(desc='The output resampled image')
+    invcpp_file = File(exists=False, genfile=True, desc='The output inv CPP file')
 
 # Main interface class
 class RegF3D(NiftyRegCommand):
@@ -820,13 +821,21 @@ class RegF3D(NiftyRegCommand):
                         orig_hash[key] = options_hash[key]
             self.inputs.set(**orig_hash) '''
         
+    def _get_filename_without_extension(self, in_file):
+        ret = in_file
+        if ret.endswith('.nii.gz'):
+            ret = ret[:-7]
+        if ret.endswith('.nii'):
+            ret = ret[:-4]
+        return ret
+
     def _gen_filename(self, name):
         if name == 'res_file':
             return self._gen_fname(self.inputs.ref_file,
-                                   suffix='res')
+                                   suffix='_res')
         if name == 'cpp_file':
             return self._gen_fname(self.inputs.ref_file,
-                                   suffix='ref')
+                                   suffix='_cpp')
         return None
     
     def _list_outputs(self):
@@ -841,6 +850,10 @@ class RegF3D(NiftyRegCommand):
             outputs["cpp_file"] = os.path.abspath(self.inputs.cpp_file)
         else:
             outputs['cpp_file'] = self._gen_filename('cpp_file')
+        
+        basename = self._get_filename_without_extension(outputs['cpp_file'])
+        outputs['invcpp_file'] = basename + '_backward.nii.gz'
+
 
         return outputs
             
