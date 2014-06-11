@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* FIX: FSL FUGUE interface was adding a wrong parameter when applying forward warpings.
 * API: Interfaces to external packages are no longer available in the top-level ``nipype`` namespace, and must be imported directly (e.g. ``from nipype.interfaces import fsl``).
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
