@@ -62,7 +62,7 @@ def test_FUGUE_inputs():
     requires=['fmap_out_file'],
     ),
     save_unmasked_shift=dict(argstr='--unmaskshift',
-    requires=['shift_out_file'],
+    requires=['save_shift'],
     ),
     shift_in_file=dict(argstr='--loadshift=%s',
     ),
