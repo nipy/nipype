@@ -13,21 +13,21 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
 
 class StatsInput(NIFTYSEGCommandInputSpec):
     
-    in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
-                desc="image to operate on")
-    mask_file = File(exists=True, mandatory=False, position=-2, argstr="-m %s", desc="statistics within the masked area")
+    in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
+                desc='image to operate on')
+    mask_file = File(exists=True, mandatory=False, position=-2, argstr='-m %s', desc='statistics within the masked area')
     
 class StatsCommand(NIFTYSEGCommand):
 
-    _cmd = "seg_stats"
+    _cmd = 'seg_stats'
     input_spec = StatsInput
     
 class UnaryStatsInput(StatsInput):
 
-    operation = traits.Enum("r", "R", "a", "s", "v", "vl", "V", 
-                            "n", "N", "x", "X", "c", "B",
-                            argstr="-%s", position=4, mandatory=True,
-                            desc="operation to perform")
+    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'V', 
+                            'n', 'N', 'x', 'X', 'c', 'B',
+                            argstr='-%s', position=4, mandatory=True,
+                            desc='operation to perform')
 
 
 class UnaryStats(StatsCommand):
@@ -75,17 +75,17 @@ class UnaryStats(StatsCommand):
     input_spec = UnaryStatsInput
 
     def _list_outputs(self):
-        self._suffix = "_" + self.inputs.operation
+        self._suffix = '_' + self.inputs.operation
         return super(UnaryStats, self)._list_outputs()
 
 
 class BinaryStatsInput(StatsInput):
 
-    operation = traits.Enum("p", "d",
-                            mandatory=True, argstr="-%s", position=4,
-                            desc="operation to perform")
-    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=5,
-                                 desc="value to perform operation with")
+    operation = traits.Enum('p', 'd',
+                            mandatory=True, argstr='-%s', position=4,
+                            desc='operation to perform')
+    operand_value = traits.Float(argstr='%.8f', mandatory=True, position=5,
+                                 desc='value to perform operation with')
 
 
 class BinaryStats(StatsCommand):
