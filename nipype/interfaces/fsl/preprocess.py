@@ -1243,13 +1243,13 @@ class FUGUE(FSLCommand):
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
-    >>> fugue.forward_warping = True
+    >>> fugue.inputs.forward_warping = True
     >>> fugue.inputs.in_file = 'epi.nii'
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
-    >>> fugue.shift_in_file = 'image.nii'  # Previously computed with fugue as well
-    >>> fugue.unwarp_direction = 'y'
+    >>> fugue.inputs.shift_in_file = 'image.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.cmdline
-    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=image.nii --unwarpdir=y --warp=.../epi_warped.nii'
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=image.nii --unwarpdir=y --warp=.../epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
     """
