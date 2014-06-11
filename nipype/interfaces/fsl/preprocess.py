@@ -1248,7 +1248,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'image.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
-    >>> fugue.cmdline
+    >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=image.nii --unwarpdir=y --warp=.../epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
