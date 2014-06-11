@@ -13,47 +13,48 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
 
 class MathsInput(NIFTYSEGCommandInputSpec):
     
-    in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
-                desc="image to operate on")
-    out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write", hash_files=False)
-    _dtypes = ["float", "char", "int", "short", "double", "input"]
+    in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
+                desc='image to operate on')
+    out_file = File(genfile=True, position=-2, argstr='%s', desc='image to write')
+
+    _dtypes = ['float', 'char', 'int', 'short', 'double', 'input']
     output_datatype = traits.Enum(*_dtypes,
-                                  position=-3, argstr="-odt %s",
-                                  desc="datatype to use for output (default uses input type)")
+                                  position=-3, argstr='-odt %s',
+                                  desc='datatype to use for output (default uses input type)')
     
 class MathsOutput(TraitedSpec):
 
-    out_file = File(exists=True, desc="image written after calculations")
+    out_file = File(exists=True, desc='image written after calculations')
 
 class MathsCommand(NIFTYSEGCommand):
 
-    _cmd = "seg_maths"
+    _cmd = 'seg_maths'
     input_spec = MathsInput
     output_spec = MathsOutput
-    _suffix = "_maths"
+    _suffix = '_maths'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self.inputs.out_file
+        outputs['out_file'] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
-        outputs["out_file"] = os.path.abspath(outputs["out_file"])
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
-        if name == "out_file":
-            return self._list_outputs()["out_file"]
+        if name == 'out_file':
+            return self._list_outputs()['out_file']
         return None
 
 class UnaryMathsInput(MathsInput):
 
-    operation = traits.Enum("exp", "log", "recip", "sqrt", "abs", "bin", 
-                            "lconcomp", "fill", "euc", 
-                            "tpmax", "tmean", "tmin", "tmax",
-                            "splitlab",
-                            "subsamp2", "lcl", "range",
-                            argstr="-%s", position=4, mandatory=True,
-                            desc="operation to perform")
+    operation = traits.Enum('exp', 'log', 'recip', 'sqrt', 'abs', 'bin', 
+                            'lconcomp', 'fill', 'euc', 
+                            'tpmax', 'tmean', 'tmin', 'tmax',
+                            'splitlab',
+                            'subsamp2', 'lcl', 'range',
+                            argstr='-%s', position=4, mandatory=True,
+                            desc='operation to perform')
 
 
 class UnaryMaths(MathsCommand):
@@ -109,23 +110,23 @@ class UnaryMaths(MathsCommand):
     input_spec = UnaryMathsInput
 
     def _list_outputs(self):
-        self._suffix = "_" + self.inputs.operation
+        self._suffix = '_' + self.inputs.operation
         return super(UnaryMaths, self)._list_outputs()
 
 
 class BinaryMathsInput(MathsInput):
 
-    operation = traits.Enum("add", "sub", "mul", "div", "pow", "thr", "uthr", "smo",
-                            "dil", "ero",
-                            "geo",
-                            "tp",
-                            "llsnorm", "hdr_copy",
-                            mandatory=True, argstr="-%s", position=4,
-                            desc="operation to perform")
-    operand_file = File(exists=True, argstr="%s", mandatory=True, position=5, xor=["operand_value"],
-                        desc="second image to perform operation with")
-    operand_value = traits.Float(argstr="%.8f", mandatory=True, position=5, xor=["operand_file"],
-                                 desc="value to perform operation with")
+    operation = traits.Enum('add', 'sub', 'mul', 'div', 'pow', 'thr', 'uthr', 'smo',
+                            'dil', 'ero',
+                            'geo',
+                            'tp',
+                            'llsnorm', 'hdr_copy',
+                            mandatory=True, argstr='-%s', position=4,
+                            desc='operation to perform')
+    operand_file = File(exists=True, argstr='%s', mandatory=True, position=5, xor=['operand_value'],
+                        desc='second image to perform operation with')
+    operand_value = traits.Float(argstr='%.8f', mandatory=True, position=5, xor=['operand_file'],
+                                 desc='value to perform operation with')
 
 
 class BinaryMaths(MathsCommand):
