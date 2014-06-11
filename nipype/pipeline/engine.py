@@ -443,17 +443,11 @@ connected.
             else:
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
-        if graph2use == 'hierarchical' or graph2use == 'colored':
+        if graph2use in ['hierarchical', 'colored']:
             dotfilename = os.path.join(base_dir, dotfilename)
-            if graph2use == 'colored':
-                self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                                colored=True,
-                                                simple_form=simple_form)
-
-            else:
-                self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                                colored=False,
-                                                simple_form=simple_form)
+            self.write_hierarchical_dotfile(dotfilename=dotfilename,
+                                            colored=graph2use == "colored",
+                                            simple_form=simple_form)
             format_dot(dotfilename, format=format)
         else:
             graph = self._graph
