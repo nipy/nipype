@@ -80,10 +80,10 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
     blank_file = File(desc='The output filename of resampled blank grid',
                       argstr='-blank %s', name_source = ['flo_file'], name_template = '%s_blank')
     # Interpolation type
-    inter_val = traits.Enum("NN", "LIN", "CUB", desc = 'Interpolation type',
-                            argstr="-inter %d")
+    inter_val = traits.Enum('NN', 'LIN', 'CUB', desc = 'Interpolation type',
+                            argstr='-inter %d')
     # Padding value
-    pad_val = traits.Int(desc = 'Padding value', argstr="-pad %d")
+    pad_val = traits.Int(desc = 'Padding value', argstr='-pad %d')
     # Verbosity off?
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
@@ -97,13 +97,11 @@ class RegResample(NiftyRegCommand):
     _cmd = 'reg_resample'
     input_spec = RegResampleInputSpec
     output_spec = RegResampleOutputSpec
-    
-    _suffix = '_reg_resample'
 
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
         if name == 'inter_val':
-            return spec.argstr%{"NN":0, "LIN":1, "CUB":2}[value]
+            return spec.argstr%{'NN':0, 'LIN':1, 'CUB':2}[value]
         else:
             return super(RegResample, self)._format_arg(name, spec, value)        
 
@@ -113,6 +111,9 @@ class RegResample(NiftyRegCommand):
 #-----------------------------------------------------------
 # Input spec
 class RegJacobianInputSpec(NiftyRegCommandInputSpec):
+    # Reference file name
+    ref_file = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
+                    argstr='-ref %s')
     # Input transformation file
     trans_file = File(exists=True, desc='The input non-rigid transformation',
                       argstr='-trans %s', mandatory=True)
@@ -125,10 +126,6 @@ class RegJacobianInputSpec(NiftyRegCommandInputSpec):
     # Input log of jacobian determinant file name
     jac_log_file = File(desc='The output log of jacobian determinant file name',
                         argstr='-jacL %s', name_source=['trans_file'], name_template='%s_jac_log_det')
-    # Reference file name
-    ref_file_name = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
-                         argstr='-ref %s')
-
 
 # Output spec
 class RegJacobianOutputSpec(TraitedSpec):
@@ -191,8 +188,6 @@ class RegToolsInputSpec(NiftyRegCommandInputSpec):
                              desc = 'Smooth the input image using a Gaussian kernel',
                              argstr='-smoG %f %f %f')
 
-
-
 # Output spec    
 class RegToolsOutputSpec(TraitedSpec):
     out_file = File(desc='The output file', exists = True)
@@ -203,7 +198,6 @@ class RegTools(NiftyRegCommand):
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
 
-
 #-----------------------------------------------------------
 # reg_measure wrapper interface
 #-----------------------------------------------------------
@@ -212,7 +206,6 @@ class RegMeasureInputSpec(NiftyRegCommandInputSpec):
                     argstr='-ref %s', mandatory=True)
     flo_file = File(exists=True, desc='The input floating/source image',
                     argstr='-flo %s', mandatory=True)
-
     ncc_flag = traits.Bool(argstr='-ncc', desc='Compute NCC')
     lncc_flag = traits.Bool(argstr='-lncc', desc='Compute LNCC')
     nmi_flag = traits.Bool(argstr='-nmi', desc='Compute NMI')
@@ -261,6 +254,8 @@ class RegAverage(NiftyRegCommand):
     
     >>> from nipype.interfaces import niftyreg
     >>> reg_average = niftyreg.RegAverage()
+    >>> 
+
     """
     _cmd = 'reg_average'
     input_spec = RegAverageInputSpec
@@ -293,7 +288,7 @@ class RegAladinInputSpec(NiftyRegCommandInputSpec):
     flo_file = File(exists=True, desc='The input floating/source image',
                     argstr='-flo %s', mandatory=True)
     # Affine output matrix file
-    aff_file = File(desc='The output affine matrix file', argstr='-aff %s', name_source = ['flo_file'], name_template = '%s_aff')
+    aff_file = File(genfile = True, desc='The output affine matrix file', argstr='-aff %s')
     # No symmetric flag
     nosym_flag = traits.Bool(argstr='-noSym', desc='Turn off symmetric registration')
     # Rigid only registration
@@ -360,18 +355,28 @@ class RegAladin(NiftyRegCommand):
     --------
     
     >>> from nipype.interfaces import niftyreg
-    >>> reg_average = niftyreg.RegAladin()
-    >>> reg_average.inputs.flo_image = "floating_image.nii.gz"
-    >>> reg_average.inputs.ref_image = "reference_image.nii.gz"
+    >>> aladin = niftyreg.RegAladin()
+    >>> aladin.inputs.flo_image = "floating_image.nii.gz"
+    >>> aladin.inputs.ref_image = "reference_image.nii.gz"
     """
     _cmd = 'reg_aladin'
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
-    # Returns a dictionary containing names of generated files that are expected 
-    # after package completes execution
+    def _gen_filename(self, name):
+        if name == 'aff_file':
+            return self._gen_fname(self.inputs.flo_file,
+                                   suffix='_aff', change_ext=True, ext='.txt')
+        return None
+
     def _list_outputs(self):
         outputs = super(RegAladin, self)._list_outputs()
+        
+        if isdefined(self.inputs.aff_file):
+            outputs['aff_file'] = self.inputs.aff_file
+        else:
+            outputs['aff_file'] = self._gen_filename('aff_file')
+        
         # Make a list of the linear transformation file and the input image
         outputs['avg_output'] = os.path.abspath(outputs['aff_file']) + ' ' + os.path.abspath(self.inputs.flo_file)
         return outputs
@@ -459,12 +464,12 @@ class RegTransformInputSpec(NiftyRegCommandInputSpec):
 
     out_file = File(genfile=True, 
                     position=-1, 
-                    argstr="%s", 
-                    desc="transformation file to write")
+                    argstr='%s', 
+                    desc='transformation file to write')
 
 class RegTransformOutputSpec(TraitedSpec):
 
-    out_file = File(desc = "Output File (transformation in any format)", exists = True)
+    out_file = File(desc = 'Output File (transformation in any format)', exists = True)
 
 class RegTransform(NiftyRegCommand):
     
@@ -580,8 +585,8 @@ class RegTransform(NiftyRegCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
-            outputs["out_file"] = self.inputs.out_file
-            outputs["out_file"] = os.path.abspath(outputs["out_file"])
+            outputs['out_file'] = self.inputs.out_file
+            outputs['out_file'] = os.path.abspath(outputs['out_file'])
         else:
             outputs['out_file'] = self._gen_filename('out_file')
             
@@ -628,7 +633,6 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     # Upper threshold for reference image
     fupth_thr_val = traits.Float(desc='Upper threshold for floating image',
                                  argstr='--fUpTh %f')
-
 
     # Lower threshold for reference image
     rlwth2_thr_val = traits.Tuple(PositiveInt, traits.Float, 
@@ -708,7 +712,7 @@ class RegF3DInputSpec(NiftyRegCommandInputSpec):
     smooth_grad_val = PositiveFloat(desc='Kernel width for smoothing the metric gradient',
                                     argstr='-smoothGrad %f')
     # Padding value
-    pad_val = traits.Float(desc = 'Padding value', argstr="-pad %f")
+    pad_val = traits.Float(desc = 'Padding value', argstr='-pad %f')
     # verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
@@ -727,8 +731,8 @@ class RegF3D(NiftyRegCommand):
     input_spec = RegF3DInputSpec
     output_spec = RegF3DOutputSpec
     
-    def _get_filename_without_extension(self, in_file):
-        ret = in_file
+    def _get_basename_without_extension(self, in_file):
+        ret = os.path.basename(in_file)
         if ret.endswith('.nii.gz'):
             ret = ret[:-7]
         if ret.endswith('.nii'):
@@ -737,7 +741,7 @@ class RegF3D(NiftyRegCommand):
 
     def _list_outputs(self):
         outputs = super(RegF3D, self)._list_outputs()
-        basename = self._get_filename_without_extension(outputs['cpp_file'])
-        outputs['invcpp_file'] = basename + '_backward.nii.gz'
+        basename = self._get_basename_without_extension (outputs['cpp_file'])
+        outputs['invcpp_file'] = os.path.abspath (basename + '_backward.nii.gz')
         return outputs
         
