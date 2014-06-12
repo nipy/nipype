@@ -1148,6 +1148,9 @@ class GraftWorkflow(Workflow):
 
         logger.debug('Added %s to GraftWorkflow' % workflow.name)
 
+    def get_graft_names(self):
+        return self._children.keys()
+
     def _consolidate(self):
         from nipype.interfaces.utility import Merge
 
