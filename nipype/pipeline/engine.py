@@ -1121,7 +1121,10 @@ class GraftWorkflow(Workflow):
         self._mergenodes = []
         self._consolidated = False
 
-    def insert(self, workflow):
+    def insert(self, workflow, consolidate=False):
+        if self._consolidated:
+            raise RuntimeError('The workflow is already consolidated')
+
         if workflow.name in self._children.keys():
             logger.debug('Trying to add an existing workflow to GraftWorkflow')
             return False
@@ -1148,6 +1151,9 @@ class GraftWorkflow(Workflow):
 
         logger.debug('Added %s to GraftWorkflow' % workflow.name)
 
+        if consolidate:
+            self._consolidate()
+
     def get_graft_names(self):
         return self._children.keys()
 
@@ -1165,6 +1171,7 @@ class GraftWorkflow(Workflow):
                     self.connect(workflow, 'outputnode.%s' % key,
                                  merge, 'in%01d' % (i+1) )
             self._consolidated = True
+            logger.debug('GraftWorkflow is now consolidated')
 
 
     def write_graph(self, *args, **kwargs):
