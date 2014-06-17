@@ -6,12 +6,10 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-05 14:41:30
-"""The :py:mod:`nipype.interfaces.elastix` provides the interface to
-the elastix registration software.
-
-.. note:: http://elastix.isi.uu.nl/
-
+# @Last Modified time: 2014-06-17 10:19:23
+"""
+Interfaces to perform image registrations and to apply the resulting
+displacement maps to images and points.
 
 """
 

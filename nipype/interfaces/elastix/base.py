@@ -6,7 +6,14 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-03 13:42:46
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-03 13:43:50
+# @Last Modified time: 2014-06-17 10:17:43
+"""The :py:mod:`nipype.interfaces.elastix` provides the interface to
+the elastix registration software.
+
+.. note:: http://elastix.isi.uu.nl/
+
+
+"""
 
 from ..base import (CommandLine, CommandLineInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
