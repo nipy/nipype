@@ -1616,7 +1616,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                                'subjects functional (EPI) data onto an undistorted space (i.e. a space '
                                'that corresponds to his/her true anatomy).'))
 
-    shift_direction = traits.Enum('-y','y','x','-x','z','-z',
+    shift_direction = traits.Enum('y-','y','x','x-','z','z-',
                                   argstr="--shiftdir=%s", requires=['shift_in_file'],
                                   desc=('Indicates the direction that the distortions from '
                                         '--shiftmap goes. It depends on the direction and '
