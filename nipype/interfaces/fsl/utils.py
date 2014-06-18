@@ -1531,7 +1531,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.out_format = 'spline'
     >>> warputils.inputs.warp_resolution = (10,10,10)
     >>> warputils.cmdline # doctest: +ELLIPSIS
-    'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=.../warpfield_coeffs.nii.gz'
+    'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
@@ -1652,7 +1652,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
     >>> warputils.cmdline # doctest: +ELLIPSIS
-    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=.../T1_concatwarps.nii.gz'
+    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarps.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
