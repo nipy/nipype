@@ -1488,7 +1488,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                               desc=('Alternative (to --warpres) specifikation of the resolution of '
                                     'the output spline-field.'))
 
-    out_file = File(genfile=True, hash_files=False, argstr='--out=%s',
+    out_file = File(argstr='--out=%s', position=-1, name_source = ['in_file'], output_name='out_file',
                     desc=('Name of output file. The format of the output depends on what other '
                           'parameters are set. The default format is a (4D) field-file. If the '
                           '--outformat is set to spline the format will be a (4D) file of spline '
@@ -1531,7 +1531,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.out_format = 'spline'
     >>> warputils.inputs.warp_resolution = (10,10,10)
     >>> warputils.cmdline # doctest: +ELLIPSIS
-    'fnirtfileutils --in=warpfield.nii --out=.../warpfield_coeffs.nii.gz --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000'
+    'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=.../warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
@@ -1544,49 +1544,29 @@ class WarpUtils(FSLCommand):
         if skip is None:
             skip = []
 
-        if self.inputs.write_jacobian:
-            if not isdefined(self.inputs.out_jacobian):
-                self.inputs.out_jacobian = self._gen_fname(self.inputs.in_file,
-                                                           suffix='_jac')
-        skip+=['write_jacobian']
-        return super(WarpUtils, self)._parse_inputs(skip=skip)
-
-
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-
         suffix = 'field'
-
         if isdefined(self.inputs.out_format) and self.inputs.out_format=='spline':
             suffix = 'coeffs'
 
+        trait_spec = self.inputs.trait('out_file')
+        trait_spec.name_template = "%s_" + suffix
 
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                  suffix='_'+suffix)
+        if self.inputs.write_jacobian:
+            if not isdefined(self.inputs.out_jacobian):
+                trait_spec = self.inputs.trait('out_jacobian')
+                trait_spec.name_source = ['in_file']
+                trait_spec.name_template = '%s_jac'
 
-        if isdefined(self.inputs.out_jacobian):
-            outputs['out_jacobian'] = os.path.abspath(self.inputs.out_jacobian)
-
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-
-        return None
-
-
+        skip+=['write_jacobian']
+        return super(WarpUtils, self)._parse_inputs(skip=skip)
 
 
 class ConvertWarpInputSpec(FSLCommandInputSpec):
     reference = File(exists=True, argstr='--ref=%s', mandatory=True, position=1,
                      desc=('Name of a file in target space of the full transform.'))
 
-    out_file = File(genfile=True, hash_files=False, argstr='--out=%s', position=-1,
+    out_file = File(argstr='--out=%s', position=-1, name_source=['reference'],
+                    name_template='%s_concatwarp', output_name='out_file',
                     desc=('Name of output file, containing warps that are the combination of all '
                           'those given as arguments. The format of this will be a field-file (rather '
                           'than spline coefficients) with any affine components included.'))
@@ -1678,22 +1658,4 @@ class ConvertWarp(FSLCommand):
 
     input_spec = ConvertWarpInputSpec
     output_spec = ConvertWarpOutputSpec
-
     _cmd = 'convertwarp'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.reference,
-                                                  suffix='_concatwarps')
-
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-
-        return None
