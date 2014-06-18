@@ -1451,3 +1451,130 @@ class Complex(FSLCommand):
             outputs['magnitude_out_file'] = self._get_output('magnitude_out_file')
             outputs['phase_out_file'] = self._get_output('phase_out_file')
         return outputs
+
+
+
+class WarpUtilsInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, argstr='--in=%s', mandatory=True,
+                   desc=('Name of file containing warp-coefficients/fields. This '
+                         'would typically be the output from the --cout switch of '
+                         'fnirt (but can also use fields, like the output from '
+                         '--fout).'))
+    reference = File(exists=True, argstr='--ref=%s', mandatory=True,
+                     desc=('Name of a file in target space. Note that the '
+                           'target space is now different from the target '
+                           'space that was used to create the --warp file. It '
+                           'would typically be the file that was specified '
+                           'with the --in argument when running fnirt.'))
+
+    out_format = traits.Either('field', 'spline', argstr='--outformat=%s',
+                               desc=('Specifies the output format. If set to field (default) '
+                                     'the output will be a (4D) field-file. If set to spline '
+                                     'the format will be a (4D) file of spline coefficients.'))
+
+    warp_resolution = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                                   argstr='--warpres=%0.4f,%0.4f,%0.4f',
+                                   desc=('Specifes the resolution/knot-spacing of the splines pertaining to '
+                                         'the coefficients in the --out file. This parameter is only relevant '
+                                         'if --outformat is set to spline. It should be noted that if the '
+                                         '--in file has a higher resolution, the resulting coefficents will '
+                                         'pertain to the closest (in a least-squares sense) file in the space '
+                                         'of fields with the --warpres resolution. It should also be noted '
+                                         'that the resolution will always be an integer multiple of the voxel '
+                                         'size.'))
+
+    knot_space = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                              argstr='--knotspace=%d,%d,%d',
+                              desc=('Alternative (to --warpres) specifikation of the resolution of '
+                                    'the output spline-field.'))
+
+    out_file = File(genfile=True, hash_files=False, argstr='--out=%s',
+                    desc=('Name of output file. The format of the output depends on what other '
+                          'parameters are set. The default format is a (4D) field-file. If the '
+                          '--outformat is set to spline the format will be a (4D) file of spline '
+                          'coefficients.'))
+
+    write_jacobian = traits.Bool(False, mandatory=True, usedefault=True,
+                                 desc='Switch on --jac flag with automatically generated filename')
+
+    out_jacobian = File(argstr='--jac=%s',
+                        desc=('Specifies that a (3D) file of Jacobian determinants corresponding '
+                              'to --in should be produced and written to filename.'))
+
+    with_affine = traits.Bool(False, argstr='--withaff',
+                              desc=('Specifies that the affine transform (i.e. that which was '
+                                    'specified for the --aff parameter in fnirt) should be '
+                                     'included as displacements in the --out file. That can be '
+                                     'useful for interfacing with software that cannot decode '
+                                     'FSL/fnirt coefficient-files (where the affine transform is '
+                                     'stored separately from the displacements).'))
+
+class WarpUtilsOutputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc=('Name of output file, containing the warp as field or coefficients.'))
+    out_jacobian = File(exists=True,
+                        desc=('Name of output file, containing the map of the determinant of '
+                              'the Jacobian'))
+
+
+class WarpUtils(FSLCommand):
+    """Use FSL `fnirtfileutils <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
+    to convert field->coefficients, coefficients->field, coefficients->other_coefficients etc
+
+
+    Examples::
+
+    >>> from nipype.interfaces.fsl import WarpUtils
+    >>> warputils = WarpUtils()
+    >>> warputils.inputs.in_file = "warpfield.nii"
+    >>> warputils.inputs.reference = "T1.nii"
+    >>> warputils.inputs.out_format = 'spline'
+    >>> warputils.inputs.warp_resolution = (10,10,10)
+    >>> warputils.cmdline # doctest: +ELLIPSIS
+    'fnirtfileutils --in=warpfield.nii --out=.../warpfield_coeffs.nii.gz --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000'
+    >>> res = invwarp.run() # doctest: +SKIP
+    """
+
+    input_spec = WarpUtilsInputSpec
+    output_spec = WarpUtilsOutputSpec
+
+    _cmd = 'fnirtfileutils'
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if self.inputs.write_jacobian:
+            if not isdefined(self.inputs.out_jacobian):
+                self.inputs.out_jacobian = self._gen_fname(self.inputs.in_file,
+                                                           suffix='_jac')
+        skip+=['write_jacobian']
+        return super(WarpUtils, self)._parse_inputs(skip=skip)
+
+
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+
+        suffix = 'field'
+
+        if isdefined(self.inputs.out_format) and self.inputs.out_format=='spline':
+            suffix = 'coeffs'
+
+
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+                                                  suffix='_'+suffix)
+
+        if isdefined(self.inputs.out_jacobian):
+            outputs['out_jacobian'] = os.path.abspath(self.inputs.out_jacobian)
+
+        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+
+        return None
