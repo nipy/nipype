@@ -252,7 +252,7 @@ class TOPUP(FSLCommand):
             line = [float(val[0] == encdir[0]) * direction
                     for val in ['x', 'y', 'z']] + [durations[idx]]
             lines.append(line)
-        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.3f')
+        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
         return out_file
 
     def _overload_extension(self, value, name=None):
@@ -408,11 +408,11 @@ class Eddy( FSLCommand ):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
         return super(Eddy, self)._format_arg(name, spec, value)
-    
+
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
-        
+
         if not isdefined(self.inputs.out_base ):
             self.inputs.out_base = os.path.abspath( './eddy_corrected' )
         return super(Eddy, self)._parse_inputs(skip=skip)
