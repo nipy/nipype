@@ -1583,10 +1583,10 @@ class WarpUtils(FSLCommand):
 
 
 class ConvertWarpInputSpec(FSLCommandInputSpec):
-    reference = File(exists=True, argstr='--ref=%s', mandatory=True,
+    reference = File(exists=True, argstr='--ref=%s', mandatory=True, position=1,
                      desc=('Name of a file in target space of the full transform.'))
 
-    out_file = File(genfile=True, hash_files=False, argstr='--out=%s',
+    out_file = File(genfile=True, hash_files=False, argstr='--out=%s', position=-1,
                     desc=('Name of output file, containing warps that are the combination of all '
                           'those given as arguments. The format of this will be a field-file (rather '
                           'than spline coefficients) with any affine components included.'))
@@ -1672,7 +1672,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
     >>> warputils.cmdline # doctest: +ELLIPSIS
-    'convertwarp --out=.../T1_concatwarps.nii.gz --ref=T1.nii --rel --warp1=warpfield.nii'
+    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=.../T1_concatwarps.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
