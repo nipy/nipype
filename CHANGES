@@ -1,7 +1,7 @@
 Next Release
 ============
 
-* ENH: Added new interface (fsl.utils.WarpUtils) to fnirtfileutils
+* ENH: Added new interfaces (fsl.utils.WarpUtils, ConvertWarp) to fnirtfileutils and convertwarp
 * API: Interfaces to external packages are no longer available in the top-level ``nipype`` namespace, and must be imported directly (e.g. ``from nipype.interfaces import fsl``).
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
