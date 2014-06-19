@@ -1652,7 +1652,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
     >>> warputils.cmdline # doctest: +ELLIPSIS
-    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarps.nii.gz'
+    'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
