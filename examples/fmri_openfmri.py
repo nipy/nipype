@@ -351,7 +351,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         'mean'))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
         'affine'))
-        
+
         for i in range(len(conds)):
             subs.append(('_flameo%d/cope1.' % i, 'cope%02d.' % (i + 1)))
             subs.append(('_flameo%d/varcope1.' % i, 'varcope%02d.' % (i + 1)))
@@ -392,7 +392,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(registration, 'outputspec.transformed_mean', datasink, 'mean.mni')
     wf.connect(registration, 'outputspec.func2anat_transform', datasink, 'xfm.mean2anat')
     wf.connect(registration, 'outputspec.anat2target_transform', datasink, 'xfm.anat2target')
-    
+
     """
     Set processing parameters
     """
