@@ -29,6 +29,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('niftyseg')
     config.add_subpackage('susceptibility')
     config.add_subpackage('niftyfit')
+    config.add_subpackage('ttk')
 
     config.add_data_dir('script_templates')
     config.add_data_dir('tests')
