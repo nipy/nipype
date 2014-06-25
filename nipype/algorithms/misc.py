@@ -26,13 +26,13 @@ import scipy.io as sio
 import itertools
 import scipy.stats as stats
 
-from .. import logging
+from nipype import logging
 
-from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
+from nipype.interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
                                DynamicTraitedSpec )
-from ..utils.filemanip import fname_presuffix, split_filename
+from nipype.utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 
@@ -1168,15 +1168,12 @@ class AddCSVRowOutputSpec(TraitedSpec):
 class AddCSVRow(BaseInterface):
     """Simple interface to add an extra row to a csv file
 
-    .. warning::
+    .. note:: Requires `pandas <http://pandas.pydata.org/>`_
 
-    This interface is not thread-safe in multi-proc mode when
-    writing the output file.
-
-
-    .. note::
-
-    Requires pandas - http://pandas.pydata.org/
+    .. warning:: Multi-platform thread-safe execution is possible with
+        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please recall that (1)
+        this module is alpha software; and (2) it should be installed for thread-safe writing.
+        If lockfile is not installed, then the interface is not thread-safe.
 
 
     Example
@@ -1193,10 +1190,10 @@ class AddCSVRow(BaseInterface):
     """
     input_spec = AddCSVRowInputSpec
     output_spec = AddCSVRowOutputSpec
+    _have_lock = False
+    _lock = None
 
     def __init__(self, infields=None, force_run=True, **kwargs):
-        import warnings
-        warnings.warn('AddCSVRow is not thread-safe in multi-processor execution')
         super(AddCSVRow, self).__init__(**kwargs)
         undefined_traits = {}
         self._infields = infields
@@ -1217,6 +1214,15 @@ class AddCSVRow(BaseInterface):
         except ImportError:
             raise ImportError('This interface requires pandas (http://pandas.pydata.org/) to run.')
 
+        try:
+            import lockfile as pl
+            self._have_lock = True
+        except ImportError:
+            import warnings
+            warnings.warn(('Python module lockfile was not found: AddCSVRow will not be thread-safe '
+                          'in multi-processor execution'))
+
+
 
         input_dict = {}
 
@@ -1230,12 +1236,21 @@ class AddCSVRow(BaseInterface):
 
         df = pd.DataFrame([input_dict])
 
+        if self._have_lock:
+            self._lock = pl.FileLock(self.inputs.in_file)
+
+            # Acquire lock
+            self._lock.acquire()
+
         if op.exists(self.inputs.in_file):
             formerdf = pd.read_csv(self.inputs.in_file, index_col=0)
             df = pd.concat( [formerdf, df], ignore_index=True )
 
         with open(self.inputs.in_file, 'w') as f:
             df.to_csv(f)
+
+        if self._have_lock:
+            self._lock.release()
 
         return runtime
 
