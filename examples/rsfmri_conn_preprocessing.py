@@ -294,21 +294,21 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
         path, name, ext = split_filename(filename)
         out_file = os.path.join(os.getcwd(), name + '_bp' + ext)
         img = nb.load(filename)
-        data = img.get_data()
         timepoints = img.shape[-1]
         F = np.zeros((timepoints))
         lowidx = timepoints/2 + 1
         if lowpass_freq > 0:
-            lowidx = np.round(lowpass_freq/fs*timepoints)
+            lowidx = np.round(lowpass_freq / fs * timepoints)
         highidx = 0
         if highpass_freq > 0:
-            highidx = np.round(highpass_freq/fs*timepoints)
+            highidx = np.round(highpass_freq / fs * timepoints)
         F[highidx:lowidx] = 1
-        F = ((F + F[::-1])>0).astype(int)
+        F = ((F + F[::-1]) > 0).astype(int)
+        data = img.get_data()
         if np.all(F == 1):
             filtered_data = data
         else:
-            filtered_data = np.real(sp.signal.ifft(sp.signal.fft(data)*F))
+            filtered_data = np.real(sp.signal.ifft(sp.signal.fft(data) * F))
         img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
                                  img.get_header())
         img_out.to_filename(out_file)
@@ -602,7 +602,6 @@ def create_workflow(files,
     wf.connect(createfilter2, 'out_files', filter3, 'design')
     wf.connect(masktransform, 'transformed_file', filter3, 'mask')
 
-    # TODO: STOPPED HERE
     # Bandpass filter the data
     bandpass1 = Node(Function(input_names=['files', 'lowpass_freq',
                                            'highpass_freq', 'fs'],
