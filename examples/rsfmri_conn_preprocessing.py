@@ -819,7 +819,7 @@ def create_workflow(files,
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    #datasink.inputs.substitutions = [('_target_subject_', '')]
+    datasink.inputs.substitutions = [('_target_subject_', '')]
     #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
@@ -864,7 +864,7 @@ def create_workflow(files,
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
-    #datasink2.inputs.substitutions = [('_target_subject_', '')]
+    datasink2.inputs.substitutions = [('_target_subject_', '')]
     #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
