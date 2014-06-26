@@ -16,6 +16,8 @@ from exceptions import NotImplementedError
 from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
+from nipype.interfaces.fsl.base import FSLCommand as NIFTYFITCommand
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -37,7 +39,7 @@ class Info(object):
 
     @staticmethod
     def version():
-        """Check for niftyreg version on system
+        """Check for niftyfit version on system
 
         Parameters
         ----------
@@ -70,13 +72,13 @@ class Info(object):
         try:
             return cls.ftypes[output_type]
         except KeyError:
-            msg = 'Invalid NiftyRegOutputType: ', output_type
+            msg = 'Invalid NiftyFitOutputType: ', output_type
             raise KeyError(msg)
 
 
-class NiftyFitCommandInputSpec(CommandLineInputSpec):
+class NIFTYFITCommandInputSpec(CommandLineInputSpec):
     """
-    Base Input Specification for all NiftyReg Commands
+    Base Input Specification for all NiftyFit Commands
 
     All command support specifying the output type dynamically
     via output_type.
@@ -85,6 +87,6 @@ class NiftyFitCommandInputSpec(CommandLineInputSpec):
                               desc='NiftyFit output type')
 
 def no_niftyfit():
-    """Checks if niftyreg is NOT installed
+    """Checks if niftyfit is NOT installed
     """
     raise NotImplementedError("Waiting for version fix")

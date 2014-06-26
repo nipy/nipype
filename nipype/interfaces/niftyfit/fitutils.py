@@ -5,12 +5,9 @@
 
 import warnings
 
-from nipype.interfaces.niftyfit.base import NiftyFitCommandInputSpec
+from nipype.interfaces.niftyfit.base import NIFTYFITCommandInputSpec, NIFTYFITCommand
 
 from nipype.interfaces.base import (TraitedSpec, File, traits)
-
-from nipype.interfaces.fsl.base import FSLCommand as NiftyFitCommand
-
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -20,7 +17,7 @@ warnings.filterwarnings('always', category=UserWarning)
 #-----------------------------------------------------------
 
 # Input spec
-class FitDwiInputSpec(NiftyFitCommandInputSpec):
+class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     # Input options
     source_file = File(exists=True, desc='The source image containing the dwi data',
                    argstr='-source %s', mandatory=True)
@@ -94,7 +91,7 @@ class FitDwiOutputSpec(TraitedSpec):
 # FitDwi function
 # TODO: Add functionality to selectivitly generate outputs images, as currently all possible
 # images will be generated
-class FitDwi(NiftyFitCommand):
+class FitDwi(NIFTYFITCommand):
     """ Use NiftyFit to perform diffusion model fitting.
     
     Examples

@@ -25,6 +25,8 @@ from exceptions import NotImplementedError
 from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
+from nipype.interfaces.fsl.base import FSLCommand as SUSCEPTIBILITYTOOLSCommand
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -82,9 +84,9 @@ class Info(object):
             msg = 'Invalid SusceptibilityToolsOutputType: ', output_type
             raise KeyError(msg)
 
-class SusceptibilityToolsCommandInputSpec(CommandLineInputSpec):
+class SUSCEPTIBILITYTOOLSCommandInputSpec(CommandLineInputSpec):
     """
-        Base Input Specification for all NiftyReg Commands
+        Base Input Specification for all susceptibility_tools Commands
         
         All command support specifying the output type dynamically
         via output_type.
@@ -93,6 +95,6 @@ class SusceptibilityToolsCommandInputSpec(CommandLineInputSpec):
                               desc='SusceptibilityTools output type')
 
 def no_susceptibility_tools():
-    """Checks if niftyreg is NOT installed
+    """Checks if susceptibility_tools is NOT installed
         """
     raise NotImplementedError("Waiting for version fix")
