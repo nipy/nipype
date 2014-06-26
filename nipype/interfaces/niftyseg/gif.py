@@ -10,8 +10,7 @@ from nibabel import load
 import os.path as op
 import warnings
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec
-from nipype.interfaces.fsl.base import FSLCommand as NIFTYSEGCommand
+from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, InputMultiPath,
                                     isdefined)
 
@@ -84,10 +83,8 @@ class Gif(NIFTYSEGCommand):
 
     def _get_basename_without_extension(self, in_file):
         ret = os.path.basename(in_file)
-        if ret.endswith('.nii.gz'):
-            ret = ret[:-7]
-        if ret.endswith('.nii'):
-            ret = ret[:-4]
+        ret = ret.replace('.nii.gz', '')
+        ret = ret.replace('.nii', '')
         return ret
         
     def _list_outputs(self):

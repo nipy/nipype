@@ -9,7 +9,7 @@ import os
 import os.path as op
 import warnings
 
-from nipype.interfaces.niftyreg.base import NiftyRegCommandInputSpec
+from nipype.interfaces.niftyreg.base import NIFTYREGCommand, NIFTYREGCommandInputSpec
 
 from nipype.interfaces.base import (TraitedSpec, File, 
                                     InputMultiPath,
@@ -17,8 +17,6 @@ from nipype.interfaces.base import (TraitedSpec, File,
                                     isdefined, OutputMultiPath)
 
 from nipype.utils.filemanip import split_filename, fname_presuffix
-
-from nipype.interfaces.fsl.base import FSLCommand as NiftyRegCommand
 
 from nipype.interfaces.niftyreg.base import Info
 
@@ -60,7 +58,7 @@ class PositiveFloat (traits.BaseFloat):
 #-----------------------------------------------------------
 
 # Input spec
-class RegResampleInputSpec(NiftyRegCommandInputSpec):
+class RegResampleInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
                     argstr='-ref %s', mandatory=True)
@@ -78,7 +76,7 @@ class RegResampleInputSpec(NiftyRegCommandInputSpec):
                     argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
     # Deformaed grid file name
     blank_file = File(desc='The output filename of resampled blank grid',
-                      argstr='-blank %s', name_source = ['flo_file'], name_template = '%s_blank')
+                      argstr='-blank %s')
     # Interpolation type
     inter_val = traits.Enum('NN', 'LIN', 'CUB', desc = 'Interpolation type',
                             argstr='-inter %d')
@@ -93,7 +91,7 @@ class RegResampleOutputSpec(TraitedSpec):
     blank_file = File(desc='The output filename of resampled blank grid (if generated)')
 
 # Resampler class
-class RegResample(NiftyRegCommand):
+class RegResample(NIFTYREGCommand):
     _cmd = 'reg_resample'
     input_spec = RegResampleInputSpec
     output_spec = RegResampleOutputSpec
@@ -110,7 +108,7 @@ class RegResample(NiftyRegCommand):
 # reg_jacobian wrapper interface
 #-----------------------------------------------------------
 # Input spec
-class RegJacobianInputSpec(NiftyRegCommandInputSpec):
+class RegJacobianInputSpec(NIFTYREGCommandInputSpec):
     # Reference file name
     ref_file = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
                     argstr='-ref %s')
@@ -134,7 +132,7 @@ class RegJacobianOutputSpec(TraitedSpec):
     jac_log_file = File(desc='The output filename of the log of jacobian determinant')
     
 # Main interface class
-class RegJacobian(NiftyRegCommand):
+class RegJacobian(NIFTYREGCommand):
     _cmd = 'reg_jacobian'
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
@@ -144,7 +142,7 @@ class RegJacobian(NiftyRegCommand):
 # reg_tools wrapper interface
 #-----------------------------------------------------------
 # Input spec
-class RegToolsInputSpec(NiftyRegCommandInputSpec):
+class RegToolsInputSpec(NIFTYREGCommandInputSpec):
     # Input image file
     in_file = File(exists=True, desc='The input image file path',
                    argstr='-in %s', mandatory=True)
@@ -193,7 +191,7 @@ class RegToolsOutputSpec(TraitedSpec):
     out_file = File(desc='The output file', exists = True)
 
 # Main interface class
-class RegTools(NiftyRegCommand):
+class RegTools(NIFTYREGCommand):
     _cmd = 'reg_tools'
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
@@ -201,7 +199,7 @@ class RegTools(NiftyRegCommand):
 #-----------------------------------------------------------
 # reg_measure wrapper interface
 #-----------------------------------------------------------
-class RegMeasureInputSpec(NiftyRegCommandInputSpec):
+class RegMeasureInputSpec(NIFTYREGCommandInputSpec):
     ref_file = File(exists=True, desc='The input reference/target image',
                     argstr='-ref %s', mandatory=True)
     flo_file = File(exists=True, desc='The input floating/source image',
@@ -214,7 +212,7 @@ class RegMeasureInputSpec(NiftyRegCommandInputSpec):
 class RegMeasureOutputSpec(TraitedSpec):
     pass
 
-class RegMeasure(NiftyRegCommand):
+class RegMeasure(NIFTYREGCommand):
     _cmd = 'reg_measure'
     input_spec = RegMeasureInputSpec
     output_spec = RegMeasureOutputSpec 
@@ -222,7 +220,7 @@ class RegMeasure(NiftyRegCommand):
 #-----------------------------------------------------------
 # reg_average wrapper interface
 #-----------------------------------------------------------
-class RegAverageInputSpec(NiftyRegCommandInputSpec):
+class RegAverageInputSpec(NIFTYREGCommandInputSpec):
 
     out_file = File(position=0, desc='Output file name', argstr='%s', genfile=True)
 
@@ -246,7 +244,7 @@ class RegAverageInputSpec(NiftyRegCommandInputSpec):
 class RegAverageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output file name')
 
-class RegAverage(NiftyRegCommand):
+class RegAverage(NIFTYREGCommand):
     """ Use RegAverage to average a set of transformations, images or both.
     
     Examples
@@ -280,7 +278,7 @@ class RegAverage(NiftyRegCommand):
 # reg_aladin wrapper interface
 #-----------------------------------------------------------
 # Input spec
-class RegAladinInputSpec(NiftyRegCommandInputSpec):
+class RegAladinInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
                     argstr='-ref %s', mandatory=True)
@@ -348,7 +346,7 @@ class RegAladinOutputSpec(TraitedSpec):
     avg_output = traits.String(desc='Output string in the format for reg_average')
 
 # Main interface class
-class RegAladin(NiftyRegCommand):
+class RegAladin(NIFTYREGCommand):
     """ Use RegAladin to perform linear (rigid or affine) image registration.
     
     Examples
@@ -384,7 +382,7 @@ class RegAladin(NiftyRegCommand):
 #-----------------------------------------------------------
 # reg_transform wrapper interface
 #-----------------------------------------------------------
-class RegTransformInputSpec(NiftyRegCommandInputSpec):
+class RegTransformInputSpec(NIFTYREGCommandInputSpec):
 
     ref1_file = File(exists=True, desc='The input reference/target image',
                      argstr='-ref %s')
@@ -471,7 +469,7 @@ class RegTransformOutputSpec(TraitedSpec):
 
     out_file = File(desc = 'Output File (transformation in any format)', exists = True)
 
-class RegTransform(NiftyRegCommand):
+class RegTransform(NIFTYREGCommand):
     
     """
     
@@ -596,7 +594,7 @@ class RegTransform(NiftyRegCommand):
 # reg_f3d wrapper interface
 #-----------------------------------------------------------
 # Input spec
-class RegF3DInputSpec(NiftyRegCommandInputSpec):
+class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
                     argstr='-ref %s', mandatory=True)
@@ -726,17 +724,15 @@ class RegF3DOutputSpec(TraitedSpec):
     invcpp_file = File(genfile=True, desc='The output inv CPP file')
 
 # Main interface class
-class RegF3D(NiftyRegCommand):
+class RegF3D(NIFTYREGCommand):
     _cmd = 'reg_f3d'
     input_spec = RegF3DInputSpec
     output_spec = RegF3DOutputSpec
     
     def _get_basename_without_extension(self, in_file):
         ret = os.path.basename(in_file)
-        if ret.endswith('.nii.gz'):
-            ret = ret[:-7]
-        if ret.endswith('.nii'):
-            ret = ret[:-4]
+        ret = ret.replace('.nii.gz', '')
+        ret = ret.replace('.nii', '')
         return ret
 
     def _list_outputs(self):

@@ -27,6 +27,8 @@ from exceptions import NotImplementedError
 from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
+from nipype.interfaces.fsl.base import FSLCommand as NIFTYREGCommand
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -85,7 +87,7 @@ class Info(object):
             raise KeyError(msg)
 
 
-class NiftyRegCommandInputSpec(CommandLineInputSpec):
+class NIFTYREGCommandInputSpec(CommandLineInputSpec):
     """
     Base Input Specification for all NiftyReg Commands
 

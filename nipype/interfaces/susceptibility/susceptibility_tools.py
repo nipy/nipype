@@ -8,9 +8,9 @@ import os
 import numpy as np
 from nipype.interfaces.base import traits
 from traits.api import Enum, HasTraits, Str
-from nipype.interfaces.niftyseg.base import  NIFTYSEGCommandInputSpec as SusceptibilityToolsCommandInputSpec
-#from nipype.interfaces.niftyseg.base import NIFTYSEGCommand as SusceptibilityToolsCommand
-from nipype.interfaces.fsl.base import FSLCommand as SusceptibilityToolsCommand
+
+from nipype.interfaces.susceptibility.base import SUSCEPTIBILITYTOOLSCommand, SUSCEPTIBILITYTOOLSCommandInputSpec
+
 from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
                                     isdefined)
 
@@ -28,14 +28,14 @@ class PositiveFloat (traits.BaseFloat):
         self.error( object, name, value )
 
 
-class PmScaleInput(SusceptibilityToolsCommandInputSpec):
+class PmScaleInput(SUSCEPTIBILITYTOOLSCommandInputSpec):
     in_pm = File(argstr="-i %s", exists=True, mandatory=True, desc="Original phase image")
     out_pm = File(genfile = True,argstr="-o %s", exists=False, desc="Scaled phase image")
 
 class PmScaleOutput(TraitedSpec):
     out_pm = File(exists=True, desc="Scaled phase image written after calculations")
 
-class PmScale(SusceptibilityToolsCommand):
+class PmScale(SUSCEPTIBILITYTOOLSCommand):
     _cmd = "pm_scale"
     input_spec = PmScaleInput
     output_spec = PmScaleOutput
@@ -57,7 +57,7 @@ class PmScale(SusceptibilityToolsCommand):
 
 
 #phase_unwrap -p $fmScale -m $fmBetMask -a $fmMag -o $fmUnwrap
-class PhaseUnwrapInput(SusceptibilityToolsCommandInputSpec):
+class PhaseUnwrapInput(SUSCEPTIBILITYTOOLSCommandInputSpec):
     in_fm = File(argstr="-p %s", exists=True, mandatory=True, desc="Scaled field map image")
     in_mask = File(argstr="-m %s", exists=True, mandatory=True, desc="Mask of fieldmap image")
     in_mag = File(argstr="-a %s", exists=True, mandatory=True, desc="Fieldmap magnitude image")
@@ -66,7 +66,7 @@ class PhaseUnwrapInput(SusceptibilityToolsCommandInputSpec):
 class PhaseUnwrapOutput(TraitedSpec):
     out_fm = File(exists=True, desc="Unrwapped phase image written after calculation")
 
-class PhaseUnwrap(SusceptibilityToolsCommand):
+class PhaseUnwrap(SUSCEPTIBILITYTOOLSCommand):
     
     _cmd = "phase_unwrap"
     input_spec = PhaseUnwrapInput
@@ -89,7 +89,7 @@ class PhaseUnwrap(SusceptibilityToolsCommand):
         return outputs
 
 #gen_fm -p $fmUnwrap -m $fmBetMask -etd $epiparams->{ETD} "."-rot $epiparams->{ROT} -ped $epiparams->{PED} "	"-defo $fmDef -fmo $fmFm";
-class GenFmInput(SusceptibilityToolsCommandInputSpec):
+class GenFmInput(SUSCEPTIBILITYTOOLSCommandInputSpec):
     #Input the EPI image
     in_epi = File(argstr="-e %s", exists=True, mandatory=True,
                 desc="EPI image")
@@ -122,7 +122,7 @@ class GenFmOutput(TraitedSpec):
     out_fm = File(exists=True, desc="field map output file")
 
 
-class GenFm(SusceptibilityToolsCommand):
+class GenFm(SUSCEPTIBILITYTOOLSCommand):
     _cmd = "gen_fm"
     input_spec = GenFmInput
     output_spec = GenFmOutput
