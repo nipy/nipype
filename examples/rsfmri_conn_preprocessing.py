@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 """
 ================================================================
@@ -53,7 +54,7 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
-from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
+from nipype.interfaces import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
@@ -267,7 +268,8 @@ def extract_subrois(timeseries_file, label_file, indices):
     data = img.get_data()
     roiimg = nb.load(label_file)
     rois = roiimg.get_data()
-    out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
+    path, name, ext = split_filename(timeseries_file)
+    out_ts_file = os.path.join(os.getcwd(), name + 'subcortical_timeseries.txt')
     with open(out_ts_file, 'wt') as fp:
         for fsindex in indices:
             ijk = np.nonzero(rois == fsindex)
@@ -308,7 +310,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
         if np.all(F == 1):
             filtered_data = data
         else:
-            filtered_data = np.real(sp.signal.ifft(sp.signal.fft(data) * F))
+            filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
         img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
                                  img.get_header())
         img_out.to_filename(out_file)
@@ -325,7 +327,8 @@ def combine_hemi(left, right):
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))
     all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
                                               rh_data.squeeze()))))
-    filename = 'combined_surf.txt'
+    path, name, ext = split_filename(left)
+    filename = name + '_combined_surf.txt'
     np.savetxt(filename, all_data,
                fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
@@ -539,7 +542,7 @@ def create_workflow(files,
                             iterfield=['realigned_file', 'extra_regressors'],
                             name='makecompcorrfilter')
     createfilter2.inputs.num_components = num_components
-    wf.connect(filter1, 'out_files', createfilter2, 'extra_regressors')
+    wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
     wf.connect(wmcsftransform, 'transformed_file', createfilter2, 'mask_file')
 
@@ -595,8 +598,12 @@ def create_workflow(files,
         wf.connect(realign, 'out_file', smooth, 'in_file')
 
     # Filter noise components from smoothed data
-    filter3 = filter2.clone(name='filter_noise_smooth')
-    filter3.inputs.out_res_name='timeseries_smooth_cleaned.nii.gz'
+    filter3 = MapNode(fsl.GLM(out_res_name='timeseries_smooth_cleaned.nii.gz',
+                              out_f_name='F.nii.gz',
+                              out_pf_name='pF.nii.gz',
+                              demean=True),
+                      iterfield=['in_file', 'design'],
+                      name='filter_noise_smooth')
 
     wf.connect(smooth, 'out_file', filter3, 'in_file')
     wf.connect(createfilter2, 'out_files', filter3, 'design')
@@ -609,6 +616,7 @@ def create_workflow(files,
                               function=bandpass_filter,
                               imports=imports),
                      name='bandpass_unsmooth')
+    bandpass1.inputs.fs = 1./TR
 
     if highpass_freq < 0:
             bandpass1.inputs.highpass_freq = -1
@@ -618,19 +626,21 @@ def create_workflow(files,
             bandpass1.inputs.lowpass_freq = -1
     else:
             bandpass1.inputs.lowpass_freq = lowpass_freq
-    bandpass2 = bandpass1.clone(name='bandpass_smooth')
-
     wf.connect(filter2, 'out_res', bandpass1, 'files')
+
+    bandpass2 = bandpass1.clone(name='bandpass_smooth')
     wf.connect(filter3, 'out_res', bandpass2, 'files')
 
     def merge_files(in1, in2):
-        return filename_to_list(in1).extend(filename_to_list(in2))
+        out_files = filename_to_list(in1)
+        out_files.extend(filename_to_list(in2))
+        return out_files
 
     bandpass = Node(Function(input_names=['in1', 'in2'],
                               output_names=['out_file'],
                               function=merge_files,
                               imports=imports),
-                     name='bandpass_unsmooth')
+                     name='bandpass_merge')
     wf.connect(bandpass1, 'out_files', bandpass, 'in1')
     wf.connect(bandpass2, 'out_files', bandpass, 'in2')
 
@@ -645,9 +655,9 @@ def create_workflow(files,
                aparctransform, 'target_file')
 
     # Sample the average time series in aparc ROIs
-    sampleaparc = MapNode(freesurfer.SegStats(avgwf_txt_file=True,
-                                              default_color_table=True),
-                          iterfield=['in_file'],
+    sampleaparc = MapNode(freesurfer.SegStats(default_color_table=True),
+                          iterfield=['in_file', 'summary_file', 
+                                     'avgwf_txt_file'],
                           name='aparc_ts')
     sampleaparc.inputs.segment_id = ([8] + range(10, 14) + [17, 18, 26, 47] +
                                      range(49, 55) + [58] + range(1001, 1036) +
@@ -656,6 +666,22 @@ def create_workflow(files,
     wf.connect(aparctransform, 'transformed_file',
                sampleaparc, 'segmentation_file')
     wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
+    
+    def get_names(files, suffix):
+        """Generate appropriate names for output files
+        """
+        from nipype.utils.filemanip import (split_filename, filename_to_list,
+                                            list_to_filename)
+        out_names = []
+        for filename in files:
+            _, name, _ = split_filename(filename)
+            out_names.append(name + suffix)
+        return list_to_filename(out_names)
+    
+    wf.connect(bandpass, ('out_file', get_names, '_avgwf.txt'), 
+               sampleaparc, 'avgwf_txt_file')
+    wf.connect(bandpass, ('out_file', get_names, '_summary.stats'), 
+               sampleaparc, 'summary_file')
 
     # Sample the time series onto the surface of the target surface. Performs
     # sampling into left and right hemisphere
@@ -745,9 +771,7 @@ def create_workflow(files,
     wf.connect(maskT1, 'out_file', reg, 'moving_image')
 
     # Convert the BBRegister transformation to ANTS ITK format
-    convert2itk = MapNode(C3dAffineTool(),
-                          iterfield=['transform_file', 'source_file'],
-                          name='convert2itk')
+    convert2itk = Node(C3dAffineTool(), name='convert2itk')
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     wf.connect(register, 'out_fsl_file', convert2itk, 'transform_file')
@@ -759,13 +783,13 @@ def create_workflow(files,
 
     # Concatenate the affine and ants transforms into a list
     pickfirst = lambda x: x[0]
-    merge = MapNode(Merge(2), iterfield=['in2'], name='mergexfm')
+    merge = Node(Merge(2), name='mergexfm')
     wf.connect(convert2itk, 'itk_transform', merge, 'in2')
     wf.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
 
     # Apply the combined transform to the time series file
     sample2mni = MapNode(ants.ApplyTransforms(),
-                         iterfield=['input_image', 'transforms'],
+                         iterfield=['input_image'],
                          name='sample2mni')
     sample2mni.inputs.input_image_type = 3
     sample2mni.inputs.interpolation = 'BSpline'
@@ -795,8 +819,8 @@ def create_workflow(files,
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    datasink.inputs.substitutions = [('_target_subject_', '')]
-    datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    #datasink.inputs.substitutions = [('_target_subject_', '')]
+    #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr')
@@ -840,8 +864,8 @@ def create_workflow(files,
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
-    datasink2.inputs.substitutions = [('_target_subject_', '')]
-    datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    #datasink2.inputs.substitutions = [('_target_subject_', '')]
+    #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf
