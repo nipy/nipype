@@ -5,6 +5,7 @@ Next Release
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
 * ENH: New data grabbing interface that works over SSH connections, SSHDataGrabber
+* ENH: New color mode for write_graph
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 
 Release 0.9.2 (January 31, 2014)
