@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-17 10:17:07
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-17 13:15:54
+# @Last Modified time: 2014-06-27 10:25:36
 """
 Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
@@ -121,9 +121,9 @@ class EditTransform(BaseInterface):
             dirs = ' '.join(['%0.4f' % f for f in affine[0:3,0:3].reshape(-1)])
             orig = ' '.join(['%0.4f' % f for f in affine[0:3,3].reshape(-1)])
 
-            p = re.compile((self._pattern % 'Direction').decode('string-escape'))
-            rep = '(\g<entry>%s\g<3>' % dirs
-            contents = p.sub(rep, contents)
+            #p = re.compile((self._pattern % 'Direction').decode('string-escape'))
+            #rep = '(\g<entry>%s\g<3>' % dirs
+            #contents = p.sub(rep, contents)
 
             p = re.compile((self._pattern % 'Origin').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % orig
