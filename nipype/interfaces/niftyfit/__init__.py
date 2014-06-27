@@ -6,4 +6,4 @@ Top-level namespace for niftyfit
 """
 
 from .base import (Info)
-from .fitutils import (FitDwi)
+from .fitutils import (FitDwi, DwiTool)
