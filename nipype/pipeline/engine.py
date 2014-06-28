@@ -713,7 +713,10 @@ connected.
                                      'report_template.html'),
                         os.path.join(report_dir, 'index.html'))
         shutil.copyfile(os.path.join(os.path.dirname(__file__),
-                                     '..', 'external', 'd3..min.js'),
+                                     'report_template2.html'),
+                        os.path.join(report_dir, 'index2.html'))
+        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                                     '..', 'external', 'd3.min.js'),
                         os.path.join(report_dir, 'd3.min.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = os.path.join(report_dir, 'graph1.json')
