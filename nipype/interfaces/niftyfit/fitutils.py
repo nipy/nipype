@@ -32,37 +32,62 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
-                      argstr='-mcmap %s', name_source=['source_file'], name_template='%s_mcmap')     
-    error_file = File(desc='Filename of parameter error maps', argstr='-error %s',
-                      name_source=['source_file'], name_template='%s_error')
-    res_file = File(desc='Filename of model residual map', argstr='-res %s',
-                    name_source=['source_file'], name_template='%s_res')
-    syn_file = File(desc='Filename of synthetic image', argstr='-syn %s', 
-                    name_source=['source_file'], name_template='%s_syn')
-    mdmap_file = File(desc='Filename of MD map/ADC', argstr='-mdmap %s',
-                      name_source=['source_file'], name_template='%s_mdmap')
-    famap_file = File(desc='Filename of FA map', argstr='-famap %s', 
-                      name_source=['source_file'], name_template='%s_famap')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]', argstr='-v1map %s',
-                      name_source=['source_file'], name_template='%s_v1map')
-    rgbmap_file = File(desc='Filename of colour FA map', argstr='-rgbmap %s',
-                       name_source=['source_file'], name_template='%s_rgbmap', requires=['dti_flag'])
-    tenmap_file = File(desc='Filename of tensor map', argstr='-tenmap %s',
-                        name_source=['source_file'], name_template='%s_tenmap', requires=['dti_flag'])
+                      argstr='-mcmap %s')     
+    error_file = File(desc='Filename of parameter error maps', 
+                      argstr='-error %s')
+    res_file = File(desc='Filename of model residual map', 
+                    argstr='-res %s')
+    syn_file = File(desc='Filename of synthetic image', 
+                    argstr='-syn %s', 
+                    name_source=['source_file'], 
+                    name_template='%s_syn')
+    mdmap_file = File(desc='Filename of MD map/ADC', 
+                      argstr='-mdmap %s',
+                      name_source=['source_file'], 
+                      name_template='%s_mdmap')
+    famap_file = File(desc='Filename of FA map',
+                      argstr='-famap %s', 
+                      name_source=['source_file'],
+                      name_template='%s_famap')
+    v1map_file = File(desc='Filename of PDD map [x,y,z]',
+                      argstr='-v1map %s',
+                      name_source=['source_file'],
+                      name_template='%s_v1map')
+    rgbmap_file = File(desc='Filename of colour FA map',
+                       argstr='-rgbmap %s',
+                       name_source=['source_file'],
+                       name_template='%s_rgbmap', 
+                       requires=['dti_flag'])
+    tenmap_file = File(desc='Filename of tensor map', 
+                       argstr='-tenmap %s',
+                       name_source=['source_file'], 
+                       name_template='%s_tenmap', 
+                       requires=['dti_flag'])
     
     
     # Methods options
+    
     mono_flag = traits.Bool(desc='Fit single exponential to non-directional data [default with no b-vectors]',
-                            argstr='-mono',xor=['method_type'])
+                            argstr='-mono',
+                            xor=['ivim_flag', 'dti_flag', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     ivim_flag =traits.Bool(desc='Fit IVIM model to non-directional data.',
-                           argstr='-ivim ',xor=['method_type'])
+                           argstr='-ivim ',
+                           xor=['mono_flag', 'dti_flag', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     dti_flag = traits.Bool(desc='Fit the tensor model [default with b-vectors].',
-                           argstr='-dti ', xor=['method_type'])
-    ball_flag = traits.Bool(desc='Fit the ball and stick model.', argstr='-ball ', xor=['method_type'])
+                           argstr='-dti ',
+                           xor=['mono_flag', 'ivim_flag', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
+    ball_flag = traits.Bool(desc='Fit the ball and stick model.', 
+                            argstr='-ball ',
+                            xor=['mono_flag', 'ivim_flag', 'dti_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     ballv_flag = traits.Bool(desc='Fit the ball and stick model with optimised PDD.',
-                             argstr='-ballv ', xor=['method_type'])
-    nod_flag = traits.Bool(desc='Fit the NODDI model', argstr='-nod ', xor=['method_type'])
-    nodv_flag = traits.Bool(desc='Fit the NODDI model with optimised PDD', argstr='-nodv ', xor=['method_type'])
+                             argstr='-ballv ', 
+                             xor=['mono_flag', 'ivim_flag', 'dti_flag', 'ball_flag', 'nod_flag', 'nodv_flag'])
+    nod_flag = traits.Bool(desc='Fit the NODDI model', 
+                           argstr='-nod ', 
+                           xor=['mono_flag', 'ivim_flag', 'dti_flag', 'ball_flag', 'ballv_flag', 'nodv_flag'])
+    nodv_flag = traits.Bool(desc='Fit the NODDI model with optimised PDD', 
+                            argstr='-nodv ', 
+                            xor=['mono_flag', 'ivim_flag', 'dti_flag', 'ball_flag', 'ballv_flag', 'nod_flag'])
     
     
     # Experimental options
@@ -128,34 +153,55 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
-                      argstr='-mcmap %s', name_source=['source_file'], name_template='%s_mcmap')     
-    syn_file = File(desc='Filename of synthetic image', argstr='-syn %s', 
-                    name_source=['source_file'], name_template='%s_syn')
-    mdmap_file = File(desc='Filename of MD map/ADC', argstr='-mdmap %s',
-                      name_source=['source_file'], name_template='%s_mdmap')
-    famap_file = File(desc='Filename of FA map', argstr='-famap %s', 
-                      name_source=['source_file'], name_template='%s_famap')
-    v1map_file = File(desc='Filename of PDD map [x,y,z]', argstr='-v1map %s',
-                      name_source=['source_file'], name_template='%s_v1map')
-    rgbmap_file = File(desc='Filename of colour FA map', argstr='-rgbmap %s',
-                       name_source=['source_file'], name_template='%s_rgbmap', requires=['dti_flag'])
+                      argstr='-mcmap %s')     
+    syn_file = File(desc='Filename of synthetic image', 
+                    argstr='-syn %s', 
+                    name_source=['source_file'], 
+                    name_template='%s_syn')
+    mdmap_file = File(desc='Filename of MD map/ADC', 
+                      argstr='-mdmap %s',
+                      name_source=['source_file'], 
+                      name_template='%s_mdmap')
+    famap_file = File(desc='Filename of FA map', 
+                      argstr='-famap %s', 
+                      name_source=['source_file'], 
+                      name_template='%s_famap')
+    v1map_file = File(desc='Filename of PDD map [x,y,z]', 
+                      argstr='-v1map %s',
+                      name_source=['source_file'], 
+                      name_template='%s_v1map')
+    rgbmap_file = File(desc='Filename of colour FA map', 
+                       argstr='-rgbmap %s',
+                       name_source=['source_file'], 
+                       name_template='%s_rgbmap', 
+                       requires=['dti_flag'])
     
     
     # Methods options
     mono_flag = traits.Bool(desc='Input is a single exponential to non-directional data [default with no b-vectors]',
-                            argstr='-mono',xor=['method_type'])
-    ivim_flag =traits.Bool(desc='Inputs is an IVIM model to non-directional data.',
-                           argstr='-ivim ',xor=['method_type'])
+                            argstr='-mono',
+                            xor=['ivim_flag', 'dti_flag', 'dti_flag2', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
+    ivim_flag = traits.Bool(desc='Inputs is an IVIM model to non-directional data.',
+                            argstr='-ivim ',
+                            xor=['mono_flag', 'dti_flag', 'dti_flag2', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     dti_flag = traits.Bool(desc='Input is a tensor model diag/off-diag.',
-                           argstr='-dti ', xor=['method_type'])
+                           argstr='-dti ', 
+                           xor=['mono_flag', 'ivim_flag', 'dti_flag2', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     dti_flag2 = traits.Bool(desc='Input is a tensor model lower triangular',
-                           argstr='-dti2 ', xor=['method_type'])
-    ball_flag = traits.Bool(desc='Input is a ball and stick model.', argstr='-ball ', xor=['method_type'])
+                            argstr='-dti2 ', 
+                            xor=['mono_flag', 'ivim_flag', 'dti_flag', 'ball_flag', 'ballv_flag', 'nod_flag', 'nodv_flag'])
+    ball_flag = traits.Bool(desc='Input is a ball and stick model.', 
+                            argstr='-ball ', 
+                            xor=['mono_flag', 'ivim_flag', 'dti_flag', 'dti_flag2', 'ballv_flag', 'nod_flag', 'nodv_flag'])
     ballv_flag = traits.Bool(desc='Input is a ball and stick model with optimised PDD.',
-                             argstr='-ballv ', xor=['method_type'])
-    nod_flag = traits.Bool(desc='Input is a NODDI model', argstr='-nod ', xor=['method_type'])
-    nodv_flag = traits.Bool(desc='Input is a NODDI model with optimised PDD', argstr='-nodv ', xor=['method_type'])
-    
+                             argstr='-ballv ', 
+                             xor=['mono_flag', 'ivim_flag', 'dti_flag', 'dti_flag2', 'ball_flag', 'nod_flag', 'nodv_flag'])
+    nod_flag = traits.Bool(desc='Input is a NODDI model', 
+                           argstr='-nod ', 
+                           xor=['mono_flag', 'ivim_flag', 'dti_flag', 'dti_flag2', 'ball_flag', 'ballv_flag', 'nodv_flag'])
+    nodv_flag = traits.Bool(desc='Input is a NODDI model with optimised PDD', 
+                            argstr='-nodv ', 
+                            xor=['mono_flag', 'ivim_flag', 'dti_flag', 'dti_flag2', 'ball_flag', 'ballv_flag', 'nod_flag'])
     
     # Experimental options
     slice_no = traits.Int(desc='Fit to single slice number', argstr='-slice %i')
