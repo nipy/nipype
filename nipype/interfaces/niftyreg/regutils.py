@@ -226,8 +226,8 @@ class RegAverageInputSpec(NIFTYREGCommandInputSpec):
 
     # If only images/transformation files are passed, do a straight average
     # of all the files in the string (shoudl this be a list of files?)
-    in_files = traits.List(traits.Str, position = 1, argstr='-avg %s', sep=' ',
-                           minlen=2, desc='Averaging of images/affine transformations', xor=['reg_average_type'])
+    in_files = InputMultiPath(position = 1, argstr='-avg %s', sep=' ',
+                              desc='Averaging of images/affine transformations', xor=['reg_average_type'])
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
@@ -384,13 +384,15 @@ class RegAladin(NIFTYREGCommand):
 #-----------------------------------------------------------
 class RegTransformInputSpec(NIFTYREGCommandInputSpec):
 
-    ref1_file = File(exists=True, desc='The input reference/target image',
-                     argstr='-ref %s',
-                     position=0)
+    ref1_file = File(exists=True, 
+                     desc='The input reference/target image',
+                     argstr='-ref %s', 
+                     position = 0)
     ref2_file = File(exists=True, 
                      desc='The input second reference/target image',
                      argstr='-ref2 %s',
-                     position=0)
+                     position = 1,
+                     require = ['ref1_file'])
 
     def_input = File(exists=True, 
                      desc='Compute deformation field from transformation', 
