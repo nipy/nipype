@@ -1252,7 +1252,8 @@ class NormalizeProbabilityMapSet(BaseInterface):
 
 
 def normalize_tpms( in_files, in_mask=None, out_files=[] ):
-    """ Returns the input tissue probability maps (tpms, aka volume fractions)
+    """
+    Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
     """
     import nibabel as nib
@@ -1261,17 +1262,17 @@ def normalize_tpms( in_files, in_mask=None, out_files=[] ):
 
     in_files = np.atleast_1d( in_files ).tolist()
 
-    if len( out_files )!=len(in_files):
+    if len(out_files)!=len(in_files):
         for i,finname in enumerate( in_files ):
             fname,fext = op.splitext( op.basename( finname ) )
             if fext == '.gz':
                 fname,fext2 = op.splitext( fname )
                 fext = fext2 + fext
 
-            out_file = op.abspath( fname+'_norm'+fext )
-            out_files+= [ out_file ]
+            out_file = op.abspath(fname+'_norm'+('_%02d' % i)+fext)
+            out_files+= [out_file]
 
-    imgs = [ nib.load(fim) for fim in in_files ]
+    imgs = [nib.load(fim) for fim in in_files]
 
     if len(in_files)==1:
         img_data = imgs[0].get_data()
