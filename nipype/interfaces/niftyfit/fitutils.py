@@ -116,7 +116,7 @@ class FitDwi(NIFTYFITCommand):
 # Input spec
 class DwiToolInputSpec(NIFTYFITCommandInputSpec):
     # Input options
-    source_file = File(exists=True, desc='The source image containing the dwi data',
+    source_file = File(exists=True, desc='The source image containing the fitted model',
                    argstr='-source %s', mandatory=True)
     bval_file = File(exists=True, desc='The file containing the bvalues of the source DWI',
                    argstr='-bval %s', mandatory=True)
@@ -124,6 +124,7 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
                    argstr='-bvec %s', mandatory=True)
     mask_file = File(exists=True, desc='The image mask',
                    argstr='-mask %s', mandatory=False)
+    b0_file = File(exists=True, desc='The B0 image corresponding to the', argstr='-b0 %s', mandatory=True)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
