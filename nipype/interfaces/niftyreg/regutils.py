@@ -39,20 +39,6 @@ class PositiveInt (traits.BaseInt):
             return value
             self.error( object, name, value )
 
-# A custom trait class for positive floats
-class PositiveFloat (traits.BaseFloat):
-
-    # Define the default value
-    default_value = 0
-    # Describe the trait type
-    info_text = 'A positive float'
-
-    def validate ( self, object, name, value ):
-        value = super(PositiveFloat, self).validate(object, name, value)
-        if (value >= 0) == 1:
-            return value
-            self.error( object, name, value )
-
 #-----------------------------------------------------------
 # reg_resample wrapper interface
 #-----------------------------------------------------------
@@ -617,10 +603,10 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     rmask_file = File(exists=True, desc='Reference image mask', argstr='-rmask %s')
     
     # Smoothing kernel for reference
-    ref_smooth_val = PositiveFloat(desc='Smoothing kernel width for reference image',
+    ref_smooth_val = traits.Float(desc='Smoothing kernel width for reference image',
                                    argstr='-smooR %f')
     # Smoothing kernel for floating
-    flo_smooth_val = PositiveFloat(desc='Smoothing kernel width for floating image',
+    flo_smooth_val = traits.Float(desc='Smoothing kernel width for floating image',
                                    argstr='-smooF %f')
     
     # Lower threshold for reference image
@@ -654,9 +640,9 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
                                   argstr='-fUpTh %d %f')
 
     # Final grid spacing along the 3 axes
-    sx_val = PositiveFloat(desc='Final grid spacing along the x axes', argstr='-sx %f')
-    sy_val = PositiveFloat(desc='Final grid spacing along the y axes', argstr='-sy %f')
-    sz_val = PositiveFloat(desc='Final grid spacing along the z axes', argstr='-sz %f')
+    sx_val = traits.Float(desc='Final grid spacing along the x axes', argstr='-sx %f')
+    sy_val = traits.Float(desc='Final grid spacing along the y axes', argstr='-sy %f')
+    sz_val = traits.Float(desc='Final grid spacing along the z axes', argstr='-sz %f')
 
     # Regularisation options
     be_val = traits.Float(desc='Bending energy value', argstr='-be %f')
@@ -682,7 +668,7 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
                             argstr='-fbn %d %d')
 
     lncc_val = traits.Float(desc='SD of the Gaussian for computing LNCC', argstr='--lncc %f')
-    lncc2_val = traits.Tuple(PositiveInt, PositiveFloat, 
+    lncc2_val = traits.Tuple(PositiveInt, traits.Float, 
                              desc='SD of the Gaussian for computing LNCC for a given time point', argstr='-lncc %d %f')
     
     ssd_flag = traits.Bool(desc='Use SSD as the similarity measure', argstr='--ssd')
@@ -711,7 +697,7 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     fmask_file = File(exists=True, desc='Floating image mask', argstr='-fmask %s')
 
     # Other options
-    smooth_grad_val = PositiveFloat(desc='Kernel width for smoothing the metric gradient',
+    smooth_grad_val = traits.Float(desc='Kernel width for smoothing the metric gradient',
                                     argstr='-smoothGrad %f')
     # Padding value
     pad_val = traits.Float(desc = 'Padding value', argstr='-pad %f')
