@@ -58,10 +58,15 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                        name_source=['source_file'],
                        name_template='%s_rgbmap', 
                        requires=['dti_flag'])
-    tenmap_file = File(desc='Filename of tensor map', 
-                       argstr='-tenmap %s',
+    #tenmap_file = File(desc='Filename of tensor map', 
+    #                   argstr='-tenmap %s',
+    #                   name_source=['source_file'], 
+    #                   name_template='%s_tenmap', 
+    #                   requires=['dti_flag'])
+    tenmap_file = File(desc='Filename of tensor map in lower triangular format', 
+                       argstr='-tenmap2 %s',
                        name_source=['source_file'], 
-                       name_template='%s_tenmap', 
+                       name_template='%s_tenmap2', 
                        requires=['dti_flag'])
     
     
