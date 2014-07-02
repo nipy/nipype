@@ -5,18 +5,10 @@
     that can be performed with the niftyseggif (seg_gif) command-line program.
 """
 import os
-import numpy as np
-from nibabel import load
-import os.path as op
-import warnings
 
 from nipype.interfaces.ttk.base import TTKCommandInputSpec, TTKCommand
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, OutputMultiPath,
                                     isdefined)
-
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 class Tensor2DwiInputSpec(TTKCommandInputSpec):
     
@@ -49,7 +41,6 @@ class Tensor2DwiOutputSpec(TraitedSpec):
 
 class Tensor2Dwi(TTKCommand):
 
-
     """
 
     """
@@ -58,7 +49,6 @@ class Tensor2Dwi(TTKCommand):
     _suffix = '_dwi_'
     input_spec = Tensor2DwiInputSpec  
     output_spec = Tensor2DwiOutputSpec
-
 
     def _get_basename_without_extension(self, in_file):
         ret = os.path.basename(in_file)
