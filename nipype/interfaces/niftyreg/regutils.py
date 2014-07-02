@@ -71,6 +71,9 @@ class RegResampleInputSpec(NIFTYREGCommandInputSpec):
     # Verbosity off?
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
+    tensor_flag = traits.Bool(desc='Resample Tensor Map', 
+                              argstr='-tensor ')
+
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
     res_file = File(desc='The output filename of the transformed image')
