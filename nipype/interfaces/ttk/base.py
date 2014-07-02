@@ -18,9 +18,10 @@ import warnings
 from ...utils.filemanip import fname_presuffix
 from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
 
+from nipype.interfaces.fsl.base import FSLCommand as TTKCommand
+
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
-
 
 class Info(object):
     """Handle ttk output type and version information.
@@ -133,108 +134,6 @@ class TTKCommandInputSpec(CommandLineInputSpec):
     """
     output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='TTK output type')
-
-
-class TTKCommand(CommandLine):
-    """Base support for TTK commands.
-
-    """
-
-    input_spec = TTKCommandInputSpec
-    _output_type = None
-
-    def __init__(self, **inputs):
-        super(TTKCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._output_update, 'output_type')
-
-        if self._output_type is None:
-            self._output_type = Info.output_type()
-
-        if not isdefined(self.inputs.output_type):
-            self.inputs.output_type = self._output_type
-        else:
-            self._output_update()
-
-    def _output_update(self):
-        self._output_type = self.inputs.output_type
-        self.inputs.environ.update({'TTKOUTPUTTYPE': self.inputs.output_type})
-
-    @classmethod
-    def set_default_output_type(cls, output_type):
-        """Set the default output type for TTK classes.
-
-        This method is used to set the default output type for all ttk
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.output_type.
-        """
-
-        if output_type in Info.ftypes:
-            cls._output_type = output_type
-        else:
-            raise AttributeError('Invalid TTK output_type: %s' % output_type)
-
-    @property
-    def version(self):
-        return Info.version()
-
-    def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
-                   ext=None):
-        """Generate a filename based on the given parameters.
-
-        The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extentions specified in
-        <instance>intputs.output_type.
-
-        Parameters
-        ----------
-        basename : str
-            Filename to base the new filename on.
-        cwd : str
-            Path to prefix to the new filename. (default is os.getcwd())
-        suffix : str
-            Suffix to add to the `basename`.  (defaults is '' )
-        change_ext : bool
-            Flag to change the filename extension to the TTK output type.
-            (default True)
-
-        Returns
-        -------
-        fname : str
-            New filename based on given parameters.
-
-        """
-
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
-            raise ValueError(msg)
-        if cwd is None:
-            cwd = os.getcwd()
-        if ext is None:
-            ext = Info.output_type_to_ext(self.inputs.output_type)
-        if change_ext:
-            if suffix:
-                suffix = ''.join((suffix, ext))
-            else:
-                suffix = ext
-        if suffix is None:
-            suffix = ''
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd)
-        return fname
-
-    def _overload_extension(self, value, name=None):
-        return value + Info.output_type_to_ext(self.inputs.output_type)
-
-
-
-def check_ttk():
-    ver = Info.version()
-    if ver:
-        return 0
-    else:
-        return 1
 
 
 def no_ttk():

@@ -6,8 +6,6 @@
 Top-level namespace for ttk.
 """
 
-from .base import (TTKCommand, Info, check_ttk, no_ttk)
+from .base import (TTKCommand, Info, no_ttk)
 from .ttk import ( Tensor2Dwi)
-#from .stats import ( )
-#from .utils import ( )
-#from .convert import ( )
+from .utils import ( TensorLog)
