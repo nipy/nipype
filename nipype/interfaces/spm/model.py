@@ -332,9 +332,9 @@ class EstimateContrast(SPMCommand):
             script += "condnames=names;\n"
         else:
             if self.inputs.use_derivs:
-                script += "pat = 'Sn\([0-9*]\) (.*)';\n"
+                script += "pat = 'Sn\([0-9]*\) (.*)';\n"
             else:
-                script += "pat = 'Sn\([0-9*]\) (.*)\*bf\(1\)|Sn\([0-9*]\) .*\*bf\([2-9]\)|Sn\([0-9*]\) (.*)';\n"
+                script += "pat = 'Sn\([0-9]*\) (.*)\*bf\(1\)|Sn\([0-9]*\) .*\*bf\([2-9]\)|Sn\([0-9]*\) (.*)';\n"
             script += "t = regexp(names,pat,'tokens');\n"
             # get sessidx for columns
             script += "pat1 = 'Sn\(([0-9].*)\)\s.*';\n"

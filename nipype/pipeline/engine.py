@@ -205,11 +205,15 @@ class WorkflowBase(object):
 
     def save(self, filename=None):
         if filename is None:
-            filename = 'temp.npz'
-        np.savez(filename, object=self)
+            filename = 'temp.pklz'
+        savepkl(filename, self)
 
     def load(self, filename):
-        return np.load(filename)
+        if '.npz' in filename:
+            DeprecationWarning(('npz files will be deprecated in the next '
+                                'release. you can use numpy to open them.'))
+            return np.load(filename)
+        return loadpkl(filename)
 
 
 class Workflow(WorkflowBase):
@@ -1095,7 +1099,8 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> from nipype import Node, spm
+    >>> from nipype import Node
+    >>> from nipype.interfaces import spm
     >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
@@ -1980,7 +1985,8 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> from nipype import MapNode, fsl
+    >>> from nipype import MapNode
+    >>> from nipype.interfaces import fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
     ...                           'functional2.nii',

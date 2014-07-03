@@ -103,45 +103,88 @@ class PrepareFieldmap(FSLCommand):
         return runtime
 
 
-
-class TOPUPInputSpec( FSLCommandInputSpec ):
-    in_file = File( exists=True, mandatory=True, desc='name of 4D file with images', argstr='--imain=%s' )
-    encoding_file = File( exists=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
-    encoding_direction = traits.Enum( 'y','x','z','x-','y-','z-', desc='encoding direction for automatic generation of encoding_file' )
-    readout_times = traits.List(traits.Float, desc='readout times (dwell times by # phase-encode steps minus 1)' )
-    out_base = File( desc='base-name of output files (spline coefficients (Hz) and movement parameters)', argstr='--out=%s' )
-    out_field = File( argstr='--fout=%s', desc='name of image file with field (Hz)' )
-    out_corrected = File( argstr='--iout=%s', desc='name of 4D image file with unwarped images' )
-    out_logfile = File( argstr='--logout=%s', desc='name of log-file' )
-    warp_res = traits.Float( 10.0, argstr='--warpres=%f', desc='(approximate) resolution (in mm) of warp basis for the different sub-sampling levels' )
-    subsamp = traits.Int( 1, argstr='--subsamp=%d', desc='sub-sampling scheme, default 1' )
-    fwhm = traits.Float( 8.0, argstr='--fwhm=%f', desc='FWHM (in mm) of gaussian smoothing kernel' )
-    config = traits.String('b02b0.cnf', desc='Name of config file specifying command line arguments', argstr='--config=%s', usedefault=True )
-    max_iter = traits.Int( 5, argstr='--miter=%d', desc='max # of non-linear iterations')
-    # @oesteban: I don't know how to implement these 3 parameters, AFAIK there's no documentation.
+class TOPUPInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='name of 4D file with images', argstr='--imain=%s')
+    encoding_file = File(exists=True, mandatory=True,
+                         xor=['encoding_direction'],
+                         desc='name of text file with PE directions/times',
+                         argstr='--datain=%s')
+    encoding_direction = traits.List(traits.Enum('y','x','z','x-','y-','z-'),
+                                     mandatory=True, xor=['encoding_file'],
+                                     requires=['readout_times'],
+                                     argstr='--datain=%s',
+                                     desc=('encoding direction for automatic '
+                                           'generation of encoding_file'))
+    readout_times = InputMultiPath(traits.Float,
+                                   requires=['encoding_direction'],
+                                   xor=['encoding_file'], mandatory=True,
+                                   desc=('readout times (dwell times by # '
+                                         'phase-encode steps minus 1)'))
+    out_base = File(desc=('base-name of output files (spline '
+                          'coefficients (Hz) and movement parameters)'),
+                    name_source=['in_file'], name_template='%s_base',
+                    argstr='--out=%s', hash_files=False)
+    out_field = File(argstr='--fout=%s', hash_files=False,
+                     name_source=['in_file'], name_template='%s_field',
+                     desc='name of image file with field (Hz)')
+    out_corrected = File(argstr='--iout=%s', hash_files=False,
+                         name_source=['in_file'], name_template='%s_corrected',
+                         desc='name of 4D image file with unwarped images')
+    out_logfile = File(argstr='--logout=%s', desc='name of log-file',
+                       name_source=['in_file'], name_template='%s_topup.log',
+                       keep_extension=True, hash_files=False)
+    warp_res = traits.Float(10.0, argstr='--warpres=%f',
+                            desc=('(approximate) resolution (in mm) of warp '
+                                  'basis for the different sub-sampling levels'))
+    subsamp = traits.Int(1, argstr='--subsamp=%d',
+                         desc='sub-sampling scheme')
+    fwhm = traits.Float(8.0, argstr='--fwhm=%f',
+                        desc='FWHM (in mm) of gaussian smoothing kernel')
+    config = traits.String('b02b0.cnf', argstr='--config=%s', usedefault=True,
+                           desc=('Name of config file specifying command line '
+                                 'arguments'))
+    max_iter = traits.Int(5, argstr='--miter=%d',
+                          desc='max # of non-linear iterations')
+    # @oesteban: I don't know how to implement these 3 parameters, AFAIK there's
+    # no documentation.
     #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
     #ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
     #regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
-    estmov = traits.Enum( 1, 0, desc='estimate movements if set', argstr='--estmov=%d' )
-    minmet = traits.Enum( 0, 1, desc='Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate Gradient', argstr='--minmet=%d' )
-    splineorder = traits.Int( 3, argstr='--splineorder=%d', desc='order of spline, 2->Qadratic spline, 3->Cubic spline' )
-    numprec = traits.Enum( 'double', 'float', argstr='--numprec=%s', desc='Precision for representing Hessian, double or float.' )
-    interp = traits.Enum( 'spline', 'linear' , argstr='--interp=%s', desc='Image interpolation model, linear or spline.' )
-    scale = traits.Enum( 0, 1, argstr='--scale=%d', desc='If set (=1), the images are individually scaled to a common mean' )
-    regrid = traits.Enum( 1, 0, argstr='--regrid=%d', desc='If set (=1), the calculations are done in a different grid' )
+    estmov = traits.Enum(1, 0,
+                         desc='estimate movements if set', argstr='--estmov=%d')
+    minmet = traits.Enum(0, 1, argstr='--minmet=%d',
+                         desc=('Minimisation method 0=Levenberg-Marquardt, '
+                               '1=Scaled Conjugate Gradient'))
+    splineorder = traits.Int(3, argstr='--splineorder=%d',
+                             desc=('order of spline, 2->Qadratic spline, '
+                                   '3->Cubic spline'))
+    numprec = traits.Enum('double', 'float', argstr='--numprec=%s',
+                          desc=('Precision for representing Hessian, double '
+                                'or float.'))
+    interp = traits.Enum('spline', 'linear', argstr='--interp=%s',
+                         desc='Image interpolation model, linear or spline.')
+    scale = traits.Enum(0, 1, argstr='--scale=%d',
+                        desc=('If set (=1), the images are individually scaled '
+                              'to a common mean'))
+    regrid = traits.Enum(1, 0, argstr='--regrid=%d',
+                         desc=('If set (=1), the calculations are done in a '
+                               'different grid'))
 
-class TOPUPOutputSpec( TraitedSpec ):
-    out_fieldcoef = File( exists=True, desc='file containing the field coefficients' )
-    out_movpar = File( exists=True, desc='movpar.txt output file' )
 
-    out_enc_file= File( desc='encoding directions file output for applytopup' )
-    out_topup = File( desc='basename for the <out_base>_fieldcoef.nii.gz and <out_base>_movpar.txt files' )
-    out_field = File( desc='name of image file with field (Hz)' )
-    out_corrected = File( desc='name of 4D image file with unwarped images' )
-    out_logfile = File( desc='name of log-file' )
+class TOPUPOutputSpec(TraitedSpec):
+    out_fieldcoef = File(exists=True,
+                         desc='file containing the field coefficients')
+    out_movpar = File(exists=True, desc='movpar.txt output file')
+    out_enc_file = File(desc='encoding directions file output for applytopup')
+    out_field = File(desc='name of image file with field (Hz)')
+    out_corrected = File(desc='name of 4D image file with unwarped images')
+    out_logfile = File(desc='name of log-file')
 
-class TOPUP( FSLCommand ):
-    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions
+
+class TOPUP(FSLCommand):
+    """ Interface for FSL topup, a tool for estimating and correcting
+        susceptibility induced distortions
         Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP
         Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
 
@@ -156,7 +199,7 @@ class TOPUP( FSLCommand ):
         >>> topup.inputs.in_file = "b0_b0rev.nii"
         >>> topup.inputs.encoding_file = "topup_encoding.txt"
         >>> topup.cmdline #doctest: +ELLIPSIS
-        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=.../nipypetu'
+        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
         >>> res = topup.run() # doctest: +SKIP
 
     """
@@ -164,87 +207,94 @@ class TOPUP( FSLCommand ):
     input_spec = TOPUPInputSpec
     output_spec = TOPUPOutputSpec
 
-    def _parse_inputs( self, skip=None ):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipypetu' )
-
-        if isdefined( self.inputs.encoding_file ):
-            skip.append( 'encoding_direction' )
-            skip.append( 'readout_times' )
-        else:
-            encdir = 'y'
-            enctimes = None
-
-            if isdefined( self.inputs.encoding_direction ):
-                encdir = self.inputs.encoding_direction
-
-            if isdefined( self.inputs.readout_times ):
-                enctimes = self.inputs.readout_times
-
-            self.inputs.encoding_file = self._generate_encfile( encdir, enctimes )
-
-        return super(TOPUP, self)._parse_inputs(skip=skip)
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'encoding_direction':
+            return trait_spec.argstr % self._generate_encfile()
+        return super(TOPUP, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_topup'] = self.inputs.out_base
-        outputs['out_fieldcoef'] = '%s_%s.nii.gz' % (self.inputs.out_base, 'fieldcoef' )
-        outputs['out_movpar'] = '%s_%s.txt' % (self.inputs.out_base, 'movpar' )
-        outputs['out_enc_file'] = self.inputs.encoding_file
-
-        if isdefined( self.inputs.out_field ):
-            outputs['out_field'] = self.inputs.out_field
+        outputs = super(TOPUP, self)._list_outputs()
+        del outputs['out_base']
+        if isdefined(self.inputs.out_base):
+            base = self.inputs.out_base
         else:
-            outputs['out_field'] = Undefined
+            base = split_filename(self.inputs.in_file)[1] + '_base'
+        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef')
+        outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
+                                                ext='.txt')
 
-        if isdefined( self.inputs.out_corrected ):
-            outputs['out_corrected'] = self.inputs.out_corrected
-        else:
-            outputs['out_corrected'] = Undefined
-
-        if isdefined( self.inputs.out_logfile ):
-            outputs['out_logfile'] = self.inputs.out_logfile
-        else:
-            outputs['out_logfile'] = Undefined
+        if isdefined(self.inputs.encoding_direction):
+            outputs['out_enc_file'] = self._get_encfilename()
         return outputs
 
-    def _generate_encfile( self, encdir, enctime=None ):
-        out_file = '%s_encfile.txt' % self.inputs.out_base
-        direction = 1.0
-        if len(encdir)==2 and encdir[1]=='-':
-            direction = -1.0
-
-        if enctime is None:
-            enctime=[ 1.0, 1.0 ]
-
-        file1 = [  float(val[0]==encdir[0]) * direction   for val in [ 'x', 'y', 'z' ] ]
-        file2 = [  float(val[0]==encdir[0]) * direction * -1.0  for val in [ 'x', 'y', 'z' ] ]
-
-        file1.append( enctime[0] )
-        file2.append( enctime[1] )
-
-
-        np.savetxt( out_file, np.array( [ file1, file2 ] ), fmt='%.2f' )
-
+    def _get_encfilename(self):
+        out_file = os.path.join(os.getcwd(),
+                                ('%s_encfile.txt' %
+                                split_filename(self.inputs.in_file)[1]))
         return out_file
 
-class ApplyTOPUPInputSpec( FSLCommandInputSpec ):
-    in_files = InputMultiPath(File(exists=True), mandatory=True, desc='name of 4D file with images', argstr='%s' )
-    encoding_file = File( exists=True, mandatory=True, desc='name of text file with PE directions/times', argstr='--datain=%s' )
-    in_index = traits.List( argstr='%s', mandatory=True, desc='comma separated list of indicies into --datain of the input image (to be corrected)' )
-    in_topup = File( mandatory=True, desc='basename of field/movements (from topup)', argstr='--topup=%s' )
+    def _generate_encfile(self):
+        """Generate a topup compatible encoding file based on given directions
+        """
+        out_file = self._get_encfilename()
+        durations = self.inputs.readout_times
+        if len(self.inputs.encoding_direction) != len(durations):
+            if len(self.inputs.readout_times) != 1:
+                raise ValueError(('Readout time must be a float or match length'
+                                  ' of encoding directions'))
+            durations = durations * len(self.inputs.encoding_direction)
 
-    out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
-    method = traits.Enum( ('jac','lsr'), argstr='-m=%s', desc='use jacobian modulation (jac) or least-squares resampling (lsr)' )
-    interp = traits.Enum( ('trilinear','spline'), argstr='-n=%s', desc='interpolation method' )
-    datatype = traits.Enum( ('char', 'short', 'int', 'float', 'double' ), argstr='-d=%s', desc='force output data type' )
+        lines = []
+        for idx, encdir in enumerate(self.inputs.encoding_direction):
+            direction = 1.0
+            if encdir.endswith('-'):
+                direction = -1.0
+            line = [float(val[0] == encdir[0]) * direction
+                    for val in ['x', 'y', 'z']] + [durations[idx]]
+            lines.append(line)
+        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
+        return out_file
+
+    def _overload_extension(self, value, name=None):
+        if name == 'out_base':
+            return value
+        return super(TOPUP, self)._overload_extension(value, name)
+
+
+class ApplyTOPUPInputSpec(FSLCommandInputSpec):
+    in_files = InputMultiPath(File(exists=True), mandatory=True,
+                              desc='name of 4D file with images',
+                              argstr='--imain=%s', sep=',')
+    encoding_file = File(exists=True, mandatory=True,
+                         desc='name of text file with PE directions/times',
+                         argstr='--datain=%s')
+    in_index = traits.List(traits.Int, argstr='--inindex=%s', sep=',',
+                           mandatory=True,
+                           desc=('comma separated list of indicies into '
+                                 '--datain of the input image (to be '
+                                 'corrected)'))
+    in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", copyfile=False,
+                              requires=['in_topup_movpar'],
+                              desc=('topup file containing the field '
+                                    'coefficients'))
+    in_topup_movpar = File(exists=True, requires=['in_topup_fieldcoef'],
+                           copyfile=False, desc='topup movpar.txt file')
+    out_corrected = File(desc='output (warped) image',
+                         name_source=['in_files'], name_template='%s_corrected',
+                         argstr='--out=%s' )
+    method = traits.Enum(('jac','lsr'), argstr='--method=%s',
+                         desc=('use jacobian modulation (jac) or least-squares '
+                               'resampling (lsr)'))
+    interp = traits.Enum(('trilinear','spline'), argstr='--interp=%s',
+                         desc='interpolation method')
+    datatype = traits.Enum(('char', 'short', 'int', 'float', 'double'),
+                           argstr='-d=%s', desc='force output data type')
 
 
 class ApplyTOPUPOutputSpec( TraitedSpec ):
-    out_corrected = File( exists=True, desc='name of 4D image file with unwarped images' )
+    out_corrected = File( exists=True, desc=('name of 4D image file with '
+                                             'unwarped images'))
+
 
 class ApplyTOPUP( FSLCommand ):
     """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions.
@@ -260,9 +310,10 @@ class ApplyTOPUP( FSLCommand ):
         >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
         >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
         >>> applytopup.inputs.in_index = [ 1,2 ]
-        >>> applytopup.inputs.in_topup = "my_topup_results"
+        >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
+        >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
         >>> applytopup.cmdline #doctest: +ELLIPSIS
-        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=my_topup_results --out=.../nipypeatu'
+        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
         >>> res = applytopup.run() # doctest: +SKIP
 
     """
@@ -271,62 +322,66 @@ class ApplyTOPUP( FSLCommand ):
     output_spec = ApplyTOPUPOutputSpec
 
     def _format_arg(self, name, spec, value):
-        # first do what should be done in general
-        formated = super(ApplyTOPUP, self)._format_arg(name, spec, value)
-        if name == 'in_files' or name == 'in_index':
-            if name == 'in_files':
-                formated = '--imain='
-            else:
-                formated = '--inindex='
-
-            formated = formated + "%s" % value[0]
-            for fname in value[1:]:
-                formated = formated + ",%s" % fname
-        return formated
-
-    def _parse_inputs( self, skip=None ):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.out_base ):
-            self.inputs.out_base = os.path.abspath( './nipypeatu' )
-        return super(ApplyTOPUP, self)._parse_inputs(skip=skip)
-
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
-        return outputs
-
+        if name == 'in_topup_fieldcoef':
+            return spec.argstr % value.split('_fieldcoef')[0]
+        return super(ApplyTOPUP, self)._format_arg(name, spec, value)
 
 
 class EddyInputSpec( FSLCommandInputSpec ):
-    in_file =  File(exists=True, mandatory=True, desc='File containing all the images to estimate distortions for', argstr='--imain=%s' )
-    in_mask =  File(exists=True, mandatory=True, desc='Mask to indicate brain', argstr='--mask=%s' )
-    in_index = File(exists=True, mandatory=True, desc='File containing indices for all volumes in --imain into --acqp and --topup', argstr='--index=%s' )
-    in_acqp =  File(exists=True, mandatory=True, desc='File containing acquisition parameters', argstr='--acqp=%s' )
-    in_bvec =  File(exists=True, mandatory=True, desc='File containing the b-vectors for all volumes in --imain', argstr='--bvecs=%s' )
-    in_bval =  File(exists=True, mandatory=True, desc='File containing the b-values for all volumes in --imain', argstr='--bvals=%s' )
+    in_file =  File(exists=True, mandatory=True,
+                    desc=('File containing all the images to estimate '
+                          'distortions for'), argstr='--imain=%s')
+    in_mask =  File(exists=True, mandatory=True,
+                    desc='Mask to indicate brain', argstr='--mask=%s')
+    in_index = File(exists=True, mandatory=True,
+                    desc=('File containing indices for all volumes in --imain '
+                          'into --acqp and --topup'), argstr='--index=%s')
+    in_acqp =  File(exists=True, mandatory=True,
+                    desc='File containing acquisition parameters',
+                    argstr='--acqp=%s' )
+    in_bvec =  File(exists=True, mandatory=True,
+                    desc=('File containing the b-vectors for all volumes in '
+                          '--imain'), argstr='--bvecs=%s')
+    in_bval =  File(exists=True, mandatory=True,
+                    desc=('File containing the b-values for all volumes in '
+                          '--imain'), argstr='--bvals=%s')
+    out_base = File( desc='basename for output (warped) image',
+                     argstr='--out=%s' )
+    session =  File(exists=True,
+                    desc=('File containing session indices for all volumes in '
+                          '--imain'), argstr='--session=%s')
+    in_topup_fieldcoef = File(exists=True, argstr="--topup=%s", copyfile=False,
+                              requires=['in_topup_movpar'],
+                              desc=('topup file containing the field '
+                                    'coefficients'))
+    in_topup_movpar = File(exists=True, requires=['in_topup_fieldcoef'],
+                           copyfile=False, desc='topup movpar.txt file')
+    flm =  traits.Enum(('linear','quadratic','cubic'),
+                        desc='First level EC model', argstr='--flm=%s' )
+    fwhm = traits.Float(desc=('FWHM for conditioning filter when estimating '
+                              'the parameters'), argstr='--fwhm=%s')
+    niter = traits.Int( 5, desc='Number of iterations', argstr='--niter=%s')
+    method = traits.Enum(('jac','lsr'), argstr='--resamp=%s',
+                         desc=('Final resampling method (jacobian/least '
+                               'squeares)'))
+    repol = traits.Bool( False, desc='Detect and replace outlier slices',
+                         argstr='--repol' )
 
-    out_base = File( desc='basename for output (warped) image', argstr='--out=%s' )
-
-
-    session =  File(exists=True, desc='File containing session indices for all volumes in --imain', argstr='--session=%s' )
-    in_topup =  File(exists=True, desc='Base name for output files from topup', argstr='--topup=%s' )
-    flm =  traits.Enum( ('linear','quadratic','cubic'), desc='First level EC model', argstr='--flm=%s' )
-    fwhm = traits.Float( desc='FWHM for conditioning filter when estimating the parameters', argstr='--fwhm=%s' )
-    niter = traits.Int( 5, desc='Number of iterations', argstr='--niter=%s' )
-    method = traits.Enum( ('jac','lsr'), argstr='--resamp=%s', desc='Final resampling method (jacobian/least squeares)' )
-    repol = traits.Bool( False, desc='Detect and replace outlier slices', argstr='--repol' )
 
 class EddyOutputSpec( TraitedSpec ):
-    out_corrected = File( exists=True, desc='4D image file containing all the corrected volumes' )
-    out_parameter = File( exists=True, desc='text file with parameters definining the field and movement for each scan')
+    out_corrected = File(exists=True,
+                        desc=('4D image file containing all the corrected '
+                              'volumes'))
+    out_parameter = File(exists=True,
+                         desc=('text file with parameters definining the field '
+                               'and movement for each scan'))
 
 class Eddy( FSLCommand ):
-    """ Interface for FSL eddy, a tool for estimating and correcting eddy currents induced distortions.
-        `User guide <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide>`_ and
-        `more info regarding acqp file <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file>`_.
+    """ Interface for FSL eddy, a tool for estimating and correcting eddy
+        currents induced distortions. `User guide
+        <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide>`_ and
+        `more info regarding acqp file
+        <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file>`_.
 
         Examples
         --------
@@ -349,6 +404,11 @@ class Eddy( FSLCommand ):
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'in_topup_fieldcoef':
+            return spec.argstr % value.split('_fieldcoef')[0]
+        return super(Eddy, self)._format_arg(name, spec, value)
+
     def _parse_inputs( self, skip=None ):
         if skip is None:
             skip = []
@@ -361,7 +421,7 @@ class Eddy( FSLCommand ):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
-        outputs['out_parameter'] = '%s..eddy_parameters' % self.inputs.out_base
+        outputs['out_parameter'] = '%s.eddy_parameters' % self.inputs.out_base
         return outputs
 
 

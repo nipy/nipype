@@ -678,8 +678,17 @@ class MCFLIRT(FSLCommand):
                                                       '_variance.ext', cwd=cwd)
             outputs['std_img'] = self._gen_fname(outputs['out_file'] +
                                                  '_sigma.ext', cwd=cwd)
+
+        # The mean image created if -stats option is specified ('meanvol')
+        # is missing the top and bottom slices. Therefore we only expose the
+        # mean image created by -meanvol option ('mean_reg') which isn't
+        # corrupted.
+        # Note that the same problem holds for the std and variance image.
+
+        if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
             outputs['mean_img'] = self._gen_fname(outputs['out_file'] +
-                                                  '_meanvol.ext', cwd=cwd)
+                                                  '_mean_reg.ext', cwd=cwd)
+
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
@@ -1197,7 +1206,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                desc='apply Fourier (sinusoidal) fitting of order N')
     pava = traits.Bool(argstr='--pava',
                        desc='apply monotonic enforcement via PAVA')
-    despike_theshold = traits.Float(argstr='--despikethreshold=%s',
+    despike_threshold = traits.Float(argstr='--despikethreshold=%s',
                                     desc='specify the threshold for de-spiking (default=3.0)')
     unwarp_direction = traits.Enum('x', 'y', 'z', 'x-', 'y-', 'z-',
                                    argstr='--unwarpdir=%s',
@@ -1287,13 +1296,13 @@ class FUGUE(FSLCommand):
                 self.inputs.shift_out_file = self._gen_fname(
                     self.inputs.in_file, suffix='_vsm')
 
-        if self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['unwarped_file']
+        if not isdefined(self.inputs.in_file):
+            skip += ['unwarped_file', 'warped_file']
+        elif self.inputs.forward_warping:
             if not isdefined(self.inputs.warped_file):
                 self.inputs.warped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_warped')
-        if not self.inputs.forward_warping or not isdefined(self.inputs.in_file):
-            skip += ['warped_file']
+        elif not self.inputs.forward_warping:
             if not isdefined(self.inputs.unwarped_file):
                 self.inputs.unwarped_file = self._gen_fname(
                     self.inputs.in_file, suffix='_unwarped')
@@ -1387,7 +1396,7 @@ class PRELUDE(FSLCommand):
 
 
 class FIRSTInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-2,
+    in_file = File(exists=True, mandatory=True, position=-2, copyfile=False,
                   argstr='-i %s',
                   desc='input data file')
     out_file = File('segmented', usedefault=True, mandatory=True, position=-1,
@@ -1487,12 +1496,12 @@ class FIRST(FSLCommand):
             vtks = list()
             for struct in structures:
                 vtk = prefix + '-' + struct + '_first.vtk'
-            vtks.append(op.abspath(vtk))
+                vtks.append(op.abspath(vtk))
             return vtks
         if name == 'bvars':
             bvars = list()
             for struct in structures:
                 bvar = prefix + '-' + struct + '_first.bvars'
-            bvars.append(op.abspath(bvar))
+                bvars.append(op.abspath(bvar))
             return bvars
         return None

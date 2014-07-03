@@ -731,6 +731,7 @@ class BaseInterface(Interface):
         desc = spec.desc
         xor = spec.xor
         requires = spec.requires
+        argstr = spec.argstr
 
         manhelpstr = ['\t%s' % name]
 
@@ -750,6 +751,17 @@ class BaseInterface(Interface):
             for line in desc.split('\n'):
                 line = re.sub("\s+", " ", line)
                 manhelpstr += wrap(line, 70,
+                                   initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+
+        if argstr:
+            pos = spec.position
+            if pos is not None:
+                manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
+                                   initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+            else:
+                manhelpstr += wrap('flag: %s' % argstr, 70,
                                    initial_indent='\t\t',
                                    subsequent_indent='\t\t')
 
@@ -785,7 +797,7 @@ class BaseInterface(Interface):
 
         opthelpstr = ['', '\t[Optional]']
         for name, spec in sorted(inputs.traits(transient=None).items()):
-            if spec in mandatory_items:
+            if name in mandatory_items:
                 continue
             opthelpstr += cls._get_trait_desc(inputs, name, spec)
 
@@ -1109,12 +1121,26 @@ def run_command(runtime, output=None, timeout=0.01):
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
     PIPE = subprocess.PIPE
-    proc = subprocess.Popen(runtime.cmdline,
-                             stdout=PIPE,
-                             stderr=PIPE,
-                             shell=True,
-                             cwd=runtime.cwd,
-                             env=runtime.environ)
+
+    if output == 'file':
+        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
+        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        stderr = open(errfile, 'wt')
+        stdout = open(outfile, 'wt')
+
+        proc = subprocess.Popen(runtime.cmdline,
+                                stdout=stdout,
+                                stderr=stderr,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
+    else:
+        proc = subprocess.Popen(runtime.cmdline,
+                                 stdout=PIPE,
+                                 stderr=PIPE,
+                                 shell=True,
+                                 cwd=runtime.cwd,
+                                 env=runtime.environ)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1154,14 +1180,6 @@ def run_command(runtime, output=None, timeout=0.01):
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        stderr = open(errfile, 'wt')
-        stdout = open(outfile, 'wt')
-        proc = subprocess.Popen(runtime.cmdline,
-                                stdout=stdout,
-                                stderr=stderr,
-                                shell=True,
-                                cwd=runtime.cwd,
-                                env=runtime.environ)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1469,18 +1487,22 @@ class CommandLine(BaseInterface):
             source = getattr(self.inputs, name_source)
             while isinstance(source, list):
                 source = source[0]
-            _, base, _ = split_filename(source)
+            #special treatment for files
+            try:
+                _, base, _ = split_filename(source)
+            except AttributeError:
+                base = source
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval
-            return self._overload_extension(retval)
+            return self._overload_extension(retval, name)
         return retval
 
     def _gen_filename(self, name):
         raise NotImplementedError
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         return value
 
     def _list_outputs(self):

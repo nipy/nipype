@@ -103,5 +103,5 @@ There are interfaces to some GNU code but these are entirely optional.
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2009-2013, NIPY Developers
+Copyright (c) 2009-2014, NIPY Developers
 All rights reserved.

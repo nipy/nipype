@@ -11,6 +11,7 @@
    :maxdepth: 2
 
    install
+   vagrant
 
    interface_tutorial
    caching_tutorial
