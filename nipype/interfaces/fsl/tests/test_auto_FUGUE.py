@@ -79,7 +79,6 @@ def test_FUGUE_inputs():
     unwarp_direction=dict(argstr='--unwarpdir=%s',
     ),
     unwarped_file=dict(argstr='--unwarp=%s',
-    genfile=True,
     hash_files=False,
     ),
     warped_file=dict(argstr='--warp=%s',

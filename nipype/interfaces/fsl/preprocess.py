@@ -1159,9 +1159,8 @@ class SUSAN(FSLCommand):
 class FUGUEInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
                    desc='filename of input volume')
-    unwarped_file = File(
-        argstr='--unwarp=%s', genfile=True,
-        desc='apply unwarping and save as filename', hash_files=False)
+    unwarped_file = File(argstr='--unwarp=%s', desc='apply unwarping and save as filename',
+                         hash_files=False)
     forward_warping = traits.Bool(
         False, usedefault=True,
         desc='apply forward warping instead of unwarping')
@@ -1242,7 +1241,16 @@ class FUGUE(FSLCommand):
     Examples
     --------
 
-    Please insert examples for use of this command
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.forward_warping = True
+    >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.shift_in_file = 'image.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=image.nii --unwarpdir=y --warp=.../epi_warped.nii.gz'
+    >>> fugue.run() #doctest: +SKIP
 
     """
 
@@ -1257,10 +1265,14 @@ class FUGUE(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        if self.inputs.forward_warping:
+
+        if isdefined(self.inputs.forward_warping) and self.inputs.forward_warping:
             out_field = 'warped_file'
+            self.inputs.unwarped_file = Undefined
+            outputs.pop('unwarped_file')
         else:
             out_field = 'unwarped_file'
+            outputs.pop('warped_file')
 
         out_file = getattr(self.inputs, out_field)
         if not isdefined(out_file):
@@ -1279,10 +1291,11 @@ class FUGUE(FSLCommand):
         return outputs
 
     def _gen_filename(self, name):
-        if name == 'unwarped_file' and not self.inputs.forward_warping:
-            return self._list_outputs()['unwarped_file']
-        if name == 'warped_file' and self.inputs.forward_warping:
-            return self._list_outputs()['warped_file']
+        is_fwd = isdefined(self.inputs.forward_warping) and self.inputs.forward_warping
+
+        if (is_fwd and name=='warped_file') or (not is_fwd and name=='unwarped_file'):
+            return self._list_outputs()[name]
+
         return None
 
     def _parse_inputs(self, skip=None):
