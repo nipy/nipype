@@ -27,3 +27,5 @@ from .dti import (BEDPOSTX, DTIFit, ProbTrackX, VecReg, ProjThresh,
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+
+from .possum import (B0Calc)
