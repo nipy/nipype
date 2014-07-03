@@ -49,7 +49,7 @@ class MathsCommand(NIFTYSEGCommand):
 class UnaryMathsInput(MathsInput):
 
     operation = traits.Enum('exp', 'log', 'recip', 'sqrt', 'abs', 'bin', 
-                            'lconcomp', 'fill', 'euc', 
+                            'otsu', 'lconcomp', 'fill', 'euc', 
                             'tpmax', 'tmean', 'tmin', 'tmax',
                             'splitlab',
                             'subsamp2', 'lcl', 'range',
@@ -83,6 +83,7 @@ class UnaryMaths(MathsCommand):
 	-recip 			Reciprocal (1/I) of the image.
 	-abs 			Absolute value of the image.
 	-bin 			Binarise the image.
+      -otsu 			Otsu thresholding of the current image.
 
 	* * Operations binary 3-D images * *
 	-lconcomp		Take the largest connected component
@@ -117,7 +118,7 @@ class UnaryMaths(MathsCommand):
 class BinaryMathsInput(MathsInput):
 
     operation = traits.Enum('add', 'sub', 'mul', 'div', 'pow', 'thr', 'uthr', 'smo',
-                            'dil', 'ero',
+                            'equal', 'dil', 'ero',
                             'geo',
                             'tp',
                             'llsnorm', 'hdr_copy',
