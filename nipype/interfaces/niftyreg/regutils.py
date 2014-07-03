@@ -310,9 +310,9 @@ class RegAladinInputSpec(NIFTYREGCommandInputSpec):
     nac_flag = traits.Bool(desc='Use nifti header to initialise transformaiton',
                            argstr='-nac')
     # Percent of blocks that are considered active.
-    v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-%v %d')
+    v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-pv %d')
     # Percent of inlier blocks
-    i_val = PositiveInt(desc='Percent of inlier blocks', argstr='-%i %d')
+    i_val = PositiveInt(desc='Percent of inlier blocks', argstr='-pi %d')
     # Verbosity off?
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
     # Lower threshold on reference image
