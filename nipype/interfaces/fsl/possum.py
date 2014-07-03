@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-07-03 15:27:53
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-07-03 16:26:09
+# @Last Modified time: 2014-07-03 17:05:47
 """
 The possum module provides classes for interfacing with `POSSUM
 <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/POSSUM>`_ command line tools.
@@ -48,11 +48,15 @@ class B0CalcInputSpec(FSLCommandInputSpec):
                           '(per mm)'))
 
     x_b0 = traits.Float(0.0, argstr='--b0x=%0.2f', desc=('Value for zeroth-order b0 field '
-                        '(x-component), in Tesla'))
+                        '(x-component), in Tesla'), xor=['xyz_b0'])
     y_b0 = traits.Float(0.0, argstr='--b0y=%0.2f', desc=('Value for zeroth-order b0 field '
-                        '(y-component), in Tesla'))
+                        '(y-component), in Tesla'), xor=['xyz_b0'])
     z_b0 = traits.Float(1.0, argstr='--b0=%0.2f', desc=('Value for zeroth-order b0 field '
-                        '(z-component), in Tesla'))
+                        '(z-component), in Tesla'), xor=['xyz_b0'])
+
+    xyz_b0 = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                      argstr='--b0x=%0.2f --b0y=%0.2f --b0=%0.2f', xor=['x_b0','y_b0','z_b0'],
+                      desc='Zeroth-order B0 field in Tesla')
 
     delta = traits.Float(-9.45e-6, argstr='-d %e', desc='Delta value (chi_tissue - chi_air)')
     chi_air = traits.Float(4.0e-7, argstr='--chi0=%e', desc='susceptibility of air')
