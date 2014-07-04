@@ -1235,9 +1235,22 @@ class FUGUEOutputSpec(TraitedSpec):
 
 
 class FUGUE(FSLCommand):
-    """Use FSL FUGUE to unwarp epi's with fieldmaps
+    """
+    `FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_ is, most generally, a set of tools for
+    EPI distortion correction.
 
-    Example (unwarping an input image, the shift map is known) ::
+    Distortions may be corrected for
+        1. improving registration with non-distorted images (e.g. structurals), or
+        2. dealing with motion-dependent changes.
+
+    FUGUE is designed to deal only with the first case - improving registration.
+
+
+    Examples
+    --------
+
+
+    Unwarping an input image (shift map is known) ::
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1246,11 +1259,11 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=.../epi_unwarped.nii.gz'
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
 
-    Example (warping an input image, shift map is known) ::
+    Warping an input image (shift map is known) ::
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1260,21 +1273,21 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=.../epi_warped.nii.gz'
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
 
 
-    Example (computing the vsm, unwrapped phase map is known) ::
+    Computing the vsm (unwrapped phase map is known) ::
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
     >>> fugue.inputs.phasemap_in_file = 'epi_phasediff.nii'
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
-    >>> fugue.inputs.dwell_to_asym_ratio = 0.77e-3 / 2.46e-3
+    >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --dwelltoasym=0.7000000000 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=.../epi_phasediff_vsm.nii.gz --unwarpdir=y'
+    'fugue --dwelltoasym=0.3130081301 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 
 
