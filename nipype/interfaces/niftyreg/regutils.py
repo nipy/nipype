@@ -216,18 +216,18 @@ class RegAverageInputSpec(NIFTYREGCommandInputSpec):
     # If only images/transformation files are passed, do a straight average
     # of all the files in the string (shoudl this be a list of files?)
     in_files = InputMultiPath(position = 1, argstr='-avg %s', sep=' ',
-                              desc='Averaging of images/affine transformations', xor=['reg_average_type'])
+                              desc='Averaging of images/affine transformations', xor=['demean_files'])
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
-    avg_tran_ref_file = File(position = 1, argstr=' -avg_tran %s', xor=['demean_type'], 
+    avg_tran_ref_file = File(position = 1, argstr=' -avg_tran %s', xor=['demean1_ref_file','demean2_ref_file','demean3_ref_file'], 
                              desc='All input images are resampled into the space of <reference image> and averaged. A cubic spline interpolation scheme is used for resampling')
-    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['demean_type'], desc='Average images and demean average image that have affine transformations to a common space')
-    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['demean_type'], desc='Average images and demean average image that have non-rigid transformations to a common space' )
-    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['demean_type'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
+    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['avg_tran_ref_file','demean2_ref_file','demean3_ref_file'], desc='Average images and demean average image that have affine transformations to a common space')
+    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['avg_tran_ref_file','demean1_ref_file','demean3_ref_file'], desc='Average images and demean average image that have non-rigid transformations to a common space' )
+    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['avg_tran_ref_file','demean1_ref_file','demean2_ref_file'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
     # If we do not have a list of files beginning with avg, must be a demean
     demean_files = traits.List(traits.Str, position =-1, argstr=' %s ', sep=' ',
-                               desc='transformation files and floating image pairs/triplets to the reference space', xor=['reg_average_type'])
+                               desc='transformation files and floating image pairs/triplets to the reference space', xor=['in_file'])
 
 
 class RegAverageOutputSpec(TraitedSpec):
