@@ -7,7 +7,7 @@ import warnings
 
 from nipype.interfaces.niftyfit.base import NIFTYFITCommandInputSpec, NIFTYFITCommand
 
-from nipype.interfaces.base import (TraitedSpec, File, traits)
+from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -149,12 +149,12 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
     source_file = File(exists=True, desc='The source image containing the fitted model',
                    argstr='-source %s', mandatory=True)
     bval_file = File(exists=True, desc='The file containing the bvalues of the source DWI',
-                   argstr='-bval %s', mandatory=True)
+                   argstr='-bval %s', mandatory=False)
     bvec_file = File(exists=True, desc='The file containing the bvectors of the source DWI',
-                   argstr='-bvec %s', mandatory=True)
+                   argstr='-bvec %s', mandatory=False)
     mask_file = File(exists=True, desc='The image mask',
                    argstr='-mask %s', mandatory=False)
-    b0_file = File(exists=True, desc='The B0 image corresponding to the', argstr='-b0 %s', mandatory=True)
+    b0_file = File(exists=True, desc='The B0 image corresponding to the', argstr='-b0 %s', mandatory=False)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
@@ -179,6 +179,11 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
                        argstr='-rgbmap %s',
                        name_source=['source_file'], 
                        name_template='%s_rgbmap', 
+                       requires=['dti_flag'])
+    logdti_file = File(desc='Filename of output logdti map', 
+                       argstr='-logdti2 %s',
+                       name_source=['source_file'], 
+                       name_template='%s_logdti2', 
                        requires=['dti_flag'])
     
     
@@ -222,7 +227,7 @@ class DwiToolOutputSpec(TraitedSpec):
     famap_file = File(desc='Filename of FA map')
     v1map_file = File(desc='Filename of PDD map [x,y,z]')
     rgbmap_file = File(desc='Filename of colour FA map')
- 
+    logdti_file = File(desc='Filename of output logdti map')
 
 # DwiTool command
 class DwiTool(NIFTYFITCommand):
@@ -243,5 +248,13 @@ class DwiTool(NIFTYFITCommand):
     _cmd = 'dwi_tool'
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
+    
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'syn_file':
+            if (isdefined(self.inputs.bvec_file) == False) or (isdefined(self.inputs.b0_file) == False):
+                return ""
+            else:
+                return trait_spec.argstr % value
+        return super(DwiTool, self)._format_arg(name, trait_spec, value)
     
     _suffix = '_dwi_tool'
