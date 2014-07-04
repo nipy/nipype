@@ -1287,7 +1287,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
     >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --dwelltoasym=0.3130081301 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
+    'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
 
 
