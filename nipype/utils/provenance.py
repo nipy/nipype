@@ -286,7 +286,7 @@ class ProvStore(object):
         id = get_id()
         env_collection = self.g.collection(id)
         env_collection.add_extra_attributes({pm.PROV['type']:
-                                                 nipype_ns['environment'],
+                                                 nipype_ns['Environment'],
                                              pm.PROV['label']: "Environment"})
         self.g.used(a0, id)
         # write environment entities
@@ -309,7 +309,7 @@ class ProvStore(object):
             id = get_id()
             input_collection = self.g.collection(id)
             input_collection.add_extra_attributes({pm.PROV['type']:
-                                                       nipype_ns['inputs'],
+                                                       nipype_ns['Inputs'],
                                                    pm.PROV['label']: "Inputs"})
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
@@ -326,7 +326,7 @@ class ProvStore(object):
             if not isinstance(outputs, dict):
                 outputs = outputs.get_traitsfree()
             output_collection.add_extra_attributes({pm.PROV['type']:
-                                                        nipype_ns['outputs'],
+                                                        nipype_ns['Outputs'],
                                                     pm.PROV['label']:
                                                         "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
@@ -342,7 +342,7 @@ class ProvStore(object):
         id = get_id()
         runtime_collection = self.g.collection(id)
         runtime_collection.add_extra_attributes({pm.PROV['type']:
-                                                     nipype_ns['runtime'],
+                                                     nipype_ns['Runtime'],
                                                  pm.PROV['label']:
                                                      "RuntimeInfo"})
         self.g.wasGeneratedBy(runtime_collection, a0)
