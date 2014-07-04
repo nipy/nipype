@@ -261,8 +261,8 @@ class ProvStore(object):
                     nipype_ns["interface"]: classname,
                     pm.PROV["label"]: classname,
                     nipype_ns['duration']: safe_encode(runtime.duration),
-                    nipype_ns['working_directory']: safe_encode(runtime.cwd),
-                    nipype_ns['return_code']: safe_encode(runtime.returncode),
+                    nipype_ns['workingDirectory']: safe_encode(runtime.cwd),
+                    nipype_ns['returnCode']: safe_encode(runtime.returncode),
                     nipype_ns['platform']: safe_encode(runtime.platform),
                     nipype_ns['version']: safe_encode(runtime.version),
                     }
@@ -274,7 +274,7 @@ class ProvStore(object):
 
         try:
             a0_attrs.update({nipype_ns['command']: safe_encode(runtime.cmdline)})
-            a0_attrs.update({nipype_ns['command_path']:
+            a0_attrs.update({nipype_ns['commandPath']:
                                  safe_encode(runtime.command_path)})
             a0_attrs.update({nipype_ns['dependencies']:
                                  safe_encode(runtime.dependencies)})
@@ -299,7 +299,7 @@ class ProvStore(object):
                            'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
                 continue
             in_attr = {pm.PROV["label"]: key,
-                       nipype_ns["environment_variable"]: key,
+                       nipype_ns["environmentVariable"]: key,
                        pm.PROV["value"]: safe_encode(val)}
             id = get_attr_id(in_attr)
             self.g.entity(id, in_attr)
@@ -316,7 +316,7 @@ class ProvStore(object):
                 in_entity = prov_encode(self.g, val).get_identifier()
                 self.g.hadMember(input_collection, in_entity)
                 used_attr = {pm.PROV["label"]: key,
-                             nipype_ns["in_port"]: key}
+                             nipype_ns["inPort"]: key}
                 self.g.used(activity=a0, entity=in_entity,
                             other_attributes=used_attr)
         # write output entities
@@ -335,7 +335,7 @@ class ProvStore(object):
                 out_entity = prov_encode(self.g, val).get_identifier()
                 self.g.hadMember(output_collection, out_entity)
                 gen_attr = {pm.PROV["label"]: key,
-                            nipype_ns["out_port"]: key}
+                            nipype_ns["outPort"]: key}
                 self.g.generation(out_entity, activity=a0,
                                   other_attributes=gen_attr)
         # write runtime entities
