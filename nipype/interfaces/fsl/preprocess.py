@@ -1170,7 +1170,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     warped_file = File(argstr='--warp=%s', desc='apply forward warping and save as filename',
                        xor=['unwarped_file'], requires=['in_file'])
 
-    forward_warping = traits.Bool(False, usedefault=True, mandatory=True, requires=['in_file'],
+    forward_warping = traits.Bool(False, usedefault=True,
                                   desc='apply forward warping instead of unwarping')
 
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1267,8 +1267,8 @@ class FUGUE(FSLCommand):
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
-    >>> fugue.inputs.forward_warping = True
     >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.forward_warping = True
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
