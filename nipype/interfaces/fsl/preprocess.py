@@ -1166,11 +1166,11 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
                         desc='filename for loading fieldmap (rad/s)')
     unwarped_file = File(argstr='--unwarp=%s', desc='apply unwarping and save as filename',
-                         xor=['warped_file'])
+                         xor=['warped_file'], requires=['in_file'])
     warped_file = File(argstr='--warp=%s', desc='apply forward warping and save as filename',
-                       xor=['unwarped_file'])
+                       xor=['unwarped_file'], requires=['in_file'])
 
-    forward_warping = traits.Bool(False, usedefault=True, mandatory=True,
+    forward_warping = traits.Bool(False, usedefault=True, mandatory=True, requires=['in_file'],
                                   desc='apply forward warping instead of unwarping')
 
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
@@ -1315,13 +1315,13 @@ class FUGUE(FSLCommand):
                 skip += ['unwarped_file']
                 trait_spec = self.inputs.trait('warped_file')
                 trait_spec.name_template = "%s_warped"
-                trait_spec.name_source = ['in_file']
+                trait_spec.name_source = 'in_file'
                 trait_spec.output_name = 'warped_file'
             else:
                 skip += ['warped_file']
                 trait_spec = self.inputs.trait('unwarped_file')
                 trait_spec.name_template = "%s_unwarped"
-                trait_spec.name_source = ['in_file']
+                trait_spec.name_source = 'in_file'
                 trait_spec.output_name = 'unwarped_file'
 
         # Handle shift output
@@ -1339,11 +1339,11 @@ class FUGUE(FSLCommand):
                 trait_spec.name_template = '%s_vsm'
 
             if input_fmap:
-                trait_spec.name_source = ['fmap_in_file']
+                trait_spec.name_source = 'fmap_in_file'
             elif input_phase:
-                trait_spec.name_source = ['phasemap_in_file']
+                trait_spec.name_source = 'phasemap_in_file'
             else:
-                trait_spec.name_source = ['shift_in_file']
+                trait_spec.name_source = 'shift_in_file'
 
         # Handle fieldmap output
         fmap_save_masked = isdefined(self.inputs.save_fmap) and self.inputs.save_shift
@@ -1360,11 +1360,11 @@ class FUGUE(FSLCommand):
                 trait_spec.name_template = '%s_fieldmap'
 
             if input_vsm:
-                trait_spec.name_source = ['shift_in_file']
+                trait_spec.name_source = 'shift_in_file'
             elif input_phase:
-                trait_spec.name_source = ['phasemap_in_file']
+                trait_spec.name_source = 'phasemap_in_file'
             else:
-                trait_spec.name_source = ['fmap_in_file']
+                trait_spec.name_source = 'fmap_in_file'
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
