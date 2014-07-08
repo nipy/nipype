@@ -1819,7 +1819,7 @@ class JSONFileGrabber(IOBase):
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
-    >>> res = jsonSource.run() # doctest: +SKIP
+    >>> res = jsonSource.run()
     >>> print res.outputs.param1
     'exampleStr'
     >>> print res.outputs.param2
