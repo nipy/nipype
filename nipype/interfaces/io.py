@@ -1803,3 +1803,45 @@ class SSHDataGrabber(DataGrabber):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(host['hostname'], username=host['user'], sock=proxy)
         return client
+
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='JSON source file')
+
+class JSONFileGrabber(IOBase):
+    """
+    Datagrabber module that loads a json file and generates an output for every
+    first-level object
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.io import JSONFileGrabber
+    >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
+    >>> res = jsonSource.run() # doctest: +SKIP
+    >>> print res.outputs.param1
+    'exampleStr'
+    >>> print res.outputs.param2
+    4
+
+    """
+    input_spec = JSONFileGrabberInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+
+    def _list_outputs(self):
+        import json
+
+        with open(self.inputs.in_file, 'r') as f:
+            data = json.load(f)
+
+        if not isinstance(data, dict):
+            raise RuntimeError('JSON input has no dictionary structure')
+
+        outputs = {}
+        for key, value in data.iteritems():
+            outputs[key] = value
+
+        return outputs
