@@ -1821,7 +1821,7 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> print res.outputs.param1
-    'exampleStr'
+    exampleStr
     >>> print res.outputs.param2
     4
 
