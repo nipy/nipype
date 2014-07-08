@@ -1380,8 +1380,6 @@ class FUGUE(FSLCommand):
             else:
                 skip += ['save_fmap', 'save_unmasked_fmap', 'fmap_out_file']
 
-        print skip
-
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
 
