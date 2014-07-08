@@ -1327,56 +1327,60 @@ class FUGUE(FSLCommand):
                 trait_spec.output_name = 'unwarped_file'
 
         # Handle shift output
-        vsm_save_masked = (isdefined(self.inputs.save_shift) and self.inputs.save_shift)
-        vsm_save_unmasked = (isdefined(self.inputs.save_unmasked_shift) and
-                             self.inputs.save_unmasked_shift)
+        if not isdefined(self.inputs.shift_out_file):
+            vsm_save_masked = (isdefined(self.inputs.save_shift) and self.inputs.save_shift)
+            vsm_save_unmasked = (isdefined(self.inputs.save_unmasked_shift) and
+                                 self.inputs.save_unmasked_shift)
 
-        if ((vsm_save_masked or vsm_save_unmasked) and
-            not isdefined(self.inputs.shift_out_file)):
-            trait_spec = self.inputs.trait('shift_out_file')
+            if (vsm_save_masked or vsm_save_unmasked):
+                trait_spec = self.inputs.trait('shift_out_file')
+                trait_spec.output_name = 'shift_out_file'
 
-            if input_fmap:
-                trait_spec.name_source = 'fmap_in_file'
-            elif input_phase:
-                trait_spec.name_source = 'phasemap_in_file'
-            elif input_vsm:
-                trait_spec.name_source = 'shift_in_file'
+                if input_fmap:
+                    trait_spec.name_source = 'fmap_in_file'
+                elif input_phase:
+                    trait_spec.name_source = 'phasemap_in_file'
+                elif input_vsm:
+                    trait_spec.name_source = 'shift_in_file'
+                else:
+                    raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                       'fmap_in_file must be set.'))
+
+                if vsm_save_unmasked:
+                    trait_spec.name_template = '%s_vsm_unmasked'
+                else:
+                    trait_spec.name_template = '%s_vsm'
             else:
-                raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                   'fmap_in_file must be set.'))
-
-            trait_spec.output_name = 'shift_out_file'
-
-            if vsm_save_unmasked:
-                trait_spec.name_template = '%s_vsm_unmasked'
-            else:
-                trait_spec.name_template = '%s_vsm'
+                skip += ['save_shift', 'save_unmasked_shift', 'shift_out_file']
 
         # Handle fieldmap output
-        fmap_save_masked = isdefined(self.inputs.save_fmap) and self.inputs.save_shift
-        fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
-                              self.inputs.save_unmasked_fmap)
+        if not isdefined(self.inputs.fmap_out_file):
+            fmap_save_masked = (isdefined(self.inputs.save_fmap) and self.inputs.save_fmap)
+            fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
+                                 self.inputs.save_unmasked_fmap)
 
-        if ((fmap_save_masked or fmap_save_unmasked) and
-            not isdefined(self.inputs.fmap_out_file)):
-            trait_spec = self.inputs.trait('fmap_out_file')
+            if (fmap_save_masked or fmap_save_unmasked):
+                trait_spec = self.inputs.trait('fmap_out_file')
+                trait_spec.output_name = 'fmap_out_file'
 
-            if input_vsm:
-                trait_spec.name_source = 'shift_in_file'
-            elif input_phase:
-                trait_spec.name_source = 'phasemap_in_file'
-            elif input_fmap:
-                trait_spec.name_source = 'fmap_in_file'
+                if input_vsm:
+                    trait_spec.name_source = 'shift_in_file'
+                elif input_phase:
+                    trait_spec.name_source = 'phasemap_in_file'
+                elif input_fmap:
+                    trait_spec.name_source = 'fmap_in_file'
+                else:
+                    raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                       'fmap_in_file must be set.'))
+
+                if fmap_save_unmasked:
+                    trait_spec.name_template = '%s_fieldmap_unmasked'
+                else:
+                    trait_spec.name_template = '%s_fieldmap'
             else:
-                raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                   'fmap_in_file must be set.'))
+                skip += ['save_fmap', 'save_unmasked_fmap', 'fmap_out_file']
 
-            trait_spec.output_name = 'fmap_out_file'
-
-            if fmap_save_unmasked:
-                trait_spec.name_template = '%s_fieldmap_unmasked'
-            else:
-                trait_spec.name_template = '%s_fieldmap'
+        print skip
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
