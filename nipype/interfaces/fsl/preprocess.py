@@ -1213,13 +1213,15 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     nokspace = traits.Bool(False, argstr='--nokspace', desc='do not use k-space forward warping')
 
     # Special outputs: shift (voxel shift map, vsm)
-    save_shift = traits.Bool(False, desc='write pixel shift volume')
+    save_shift = traits.Bool(False, xor=['save_unmasked_shift'],
+                             desc='write pixel shift volume')
     shift_out_file = File(argstr='--saveshift=%s', desc='filename for saving pixel shift volume')
     save_unmasked_shift = traits.Bool(argstr='--unmaskshift', xor=['save_shift'],
                                       desc='saves the unmasked shiftmap when using --saveshift')
 
     # Special outputs: fieldmap (fmap)
-    save_fmap = traits.Bool(False, desc='write field map volume')
+    save_fmap = traits.Bool(False, xor=['save_unmasked_fmap'],
+                            desc='write field map volume')
     fmap_out_file = File(argstr='--savefmap=%s', desc='filename for saving fieldmap (rad/s)')
     save_unmasked_fmap = traits.Bool(False, argstr='--unmaskfmap', xor=['save_fmap'],
                                      desc='saves the unmasked fieldmap when using --savefmap')
@@ -1325,12 +1327,24 @@ class FUGUE(FSLCommand):
                 trait_spec.output_name = 'unwarped_file'
 
         # Handle shift output
-        vsm_save_masked = isdefined(self.inputs.save_shift) and self.inputs.save_shift
-        vsm_save_unmasked = isdefined(self.inputs.save_unmasked_shift) \
-                            and self.inputs.save_unmasked_shift
+        vsm_save_masked = (isdefined(self.inputs.save_shift) and self.inputs.save_shift)
+        vsm_save_unmasked = (isdefined(self.inputs.save_unmasked_shift) and
+                             self.inputs.save_unmasked_shift)
 
-        if (vsm_save_masked or vsm_save_unmasked) and not isdefined(self.inputs.shift_out_file):
+        if ((vsm_save_masked or vsm_save_unmasked) and
+            not isdefined(self.inputs.shift_out_file)):
             trait_spec = self.inputs.trait('shift_out_file')
+
+            if input_fmap:
+                trait_spec.name_source = 'fmap_in_file'
+            elif input_phase:
+                trait_spec.name_source = 'phasemap_in_file'
+            elif input_vsm:
+                trait_spec.name_source = 'shift_in_file'
+            else:
+                raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                   'fmap_in_file must be set.'))
+
             trait_spec.output_name = 'shift_out_file'
 
             if vsm_save_unmasked:
@@ -1338,33 +1352,31 @@ class FUGUE(FSLCommand):
             else:
                 trait_spec.name_template = '%s_vsm'
 
-            if input_fmap:
-                trait_spec.name_source = 'fmap_in_file'
-            elif input_phase:
-                trait_spec.name_source = 'phasemap_in_file'
-            else:
-                trait_spec.name_source = 'shift_in_file'
-
         # Handle fieldmap output
         fmap_save_masked = isdefined(self.inputs.save_fmap) and self.inputs.save_shift
-        fmap_save_unmasked = isdefined(self.inputs.save_unmasked_fmap) and \
-                             self.inputs.save_unmasked_fmap
+        fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
+                              self.inputs.save_unmasked_fmap)
 
-        if (fmap_save_masked or fmap_save_unmasked) and not isdefined(self.inputs.fmap_out_file):
+        if ((fmap_save_masked or fmap_save_unmasked) and
+            not isdefined(self.inputs.fmap_out_file)):
             trait_spec = self.inputs.trait('fmap_out_file')
+
+            if input_vsm:
+                trait_spec.name_source = 'shift_in_file'
+            elif input_phase:
+                trait_spec.name_source = 'phasemap_in_file'
+            elif input_fmap:
+                trait_spec.name_source = 'fmap_in_file'
+            else:
+                raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                   'fmap_in_file must be set.'))
+
             trait_spec.output_name = 'fmap_out_file'
 
             if fmap_save_unmasked:
                 trait_spec.name_template = '%s_fieldmap_unmasked'
             else:
                 trait_spec.name_template = '%s_fieldmap'
-
-            if input_vsm:
-                trait_spec.name_source = 'shift_in_file'
-            elif input_phase:
-                trait_spec.name_source = 'phasemap_in_file'
-            else:
-                trait_spec.name_source = 'fmap_in_file'
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
