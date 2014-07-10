@@ -381,7 +381,7 @@ class RegTransformInputSpec(NIFTYREGCommandInputSpec):
                      desc='The input second reference/target image',
                      argstr='-ref2 %s',
                      position = 1,
-                     require = ['ref1_file'])
+                     requires = ['ref1_file'])
 
     def_input = File(exists=True, 
                      desc='Compute deformation field from transformation', 
@@ -408,7 +408,7 @@ class RegTransformInputSpec(NIFTYREGCommandInputSpec):
                        desc='compose two transformations', 
                        argstr='%s',
                        position = -2,
-                       require = ['comp_input'])
+                       requires = ['comp_input'])
 
     upd_s_form_input = File(exists=True,
                             desc='Update s-form using the affine transformation', 
@@ -418,7 +418,7 @@ class RegTransformInputSpec(NIFTYREGCommandInputSpec):
                              desc='Update s-form using the affine transformation', 
                              argstr='%s',
                              position = -2,
-                             require = ['upd_s_form_input'])
+                             requires = ['upd_s_form_input'])
 
     inv_aff_input = File(exists=True,
                          desc='Invert an affine transformation', 
