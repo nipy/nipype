@@ -384,7 +384,7 @@ class FuzzyOverlap(BaseInterface):
             diff+= w* ch
 
         nb.save(nb.Nifti1Image(diff, nb.load( self.inputs.in_ref[0]).get_affine(),
-                nb.load( self.inputs.in_ref[0]).get_header()), self.inputs.out_file )
+                nb.load(self.inputs.in_ref[0]).get_header()), self.inputs.out_file)
 
 
         return runtime
@@ -400,20 +400,20 @@ class FuzzyOverlap(BaseInterface):
         return outputs
 
 
-class ErrorMapInputSpec( BaseInterfaceInputSpec ):
+class ErrorMapInputSpec(BaseInterfaceInputSpec):
     in_ref = File(exists=True, mandatory=True,
                    desc="Reference image. Requires the same dimensions as in_tst.")
     in_tst = File(exists=True, mandatory=True,
                    desc="Test image. Requires the same dimensions as in_ref.")
     mask = File(exists=True, desc="calculate overlap only within this mask.")
-    method = traits.Enum( "squared_diff", "eucl",
-                          desc='',
-                          usedefault=True )
-    out_map = File( desc="Name for the output file" )
+    metric = traits.Enum("sqeuclidean", "euclidean",
+                         desc='error map metric (as implemented in scipy cdist)',
+                         usedefault=True, mandatory=True)
+    out_map = File(desc="Name for the output file")
+
 
 class ErrorMapOutputSpec(TraitedSpec):
-    out_map = File(exists=True, desc="resulting error map" )
-
+    out_map = File(exists=True, desc="resulting error map")
 
 
 class ErrorMap(BaseInterface):
@@ -429,75 +429,79 @@ class ErrorMap(BaseInterface):
     """
     input_spec = ErrorMapInputSpec
     output_spec = ErrorMapOutputSpec
-    _out_file = ""
+    _out_file = ''
 
+    def _run_interface(self, runtime):
+        from scipy.spatial.distance import cdist, pdist
+        nii_ref = nb.load(self.inputs.in_ref)
+        ref_data = np.squeeze(nii_ref.get_data())
+        tst_data = np.squeeze(nb.load(self.inputs.in_tst).get_data())
+        assert(ref_data.ndim == tst_data.ndim)
 
-    def _run_interface( self, runtime ):
-        nii_ref = nb.load( self.inputs.in_ref )
-        ref_data = np.squeeze( nii_ref.get_data() )
-        tst_data = np.squeeze( nb.load( self.inputs.in_tst ).get_data() )
+        comps = 1
+        mapshape = ref_data.shape
 
-        assert( ref_data.ndim == tst_data.ndim )
-
-
-        if ( ref_data.ndim == 4 ):
+        if (ref_data.ndim == 4):
             comps = ref_data.shape[-1]
             mapshape = ref_data.shape[:-1]
-            refvector = np.reshape( ref_data, (-1,comps))
-            tstvector = np.reshape( tst_data, (-1,comps))
-        else:
-            mapshape = ref_data.shape
-            refvector = ref_data.reshape(-1)
-            tstvector = tst_data.reshape(-1)
 
-        if isdefined( self.inputs.mask ):
+        if isdefined(self.inputs.mask):
             msk = nb.load( self.inputs.mask ).get_data()
+            if (mapshape != msk.shape):
+                raise RuntimeError("Mask should match volume shape, \
+                                   mask is %s and volumes are %s" %
+                                   (list(msk.shape), list(mapshape)))
+        else:
+            msk = np.ones(shape=mapshape)
 
-            if ( mapshape != msk.shape ):
-                raise RuntimeError( "Mask should match volume shape, \
-                                    mask is %s and volumes are %s" %
-                                    ( list(msk.shape), list(mapshape) ) )
+        mskvector = msk.reshape(-1)
+        msk_idxs = np.where(mskvector==1)
+        refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
+        tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
+        diffvector = (refvector-tstvector)
 
-            mskvector = msk.reshape(-1)
-            refvector = refvector * mskvector[:,np.newaxis]
-            tstvector = tstvector * mskvector[:,np.newaxis]
+        if self.inputs.metric == 'sqeuclidean':
+            errvector = diffvector**2
+        elif self.inputs.metric == 'euclidean':
+            X = np.hstack((refvector, tstvector))
+            errvector = np.linalg.norm(X, axis=1)
 
-        diffvector = (tstvector-refvector)**2
-        if ( ref_data.ndim > 1 ):
-            diffvector = np.sum( diffvector, axis=1 )
+        if (comps > 1):
+            errvector = np.sum(errvector, axis=1)
+        else:
+            errvector = np.squeeze(errvector)
 
-        diffmap = diffvector.reshape( mapshape )
+        errvectorexp = np.zeros_like(mskvector)
+        errvectorexp[msk_idxs] = errvector
+
+        errmap = errvectorexp.reshape(mapshape)
 
         hdr = nii_ref.get_header().copy()
-        hdr.set_data_dtype( np.float32 )
+        hdr.set_data_dtype(np.float32)
         hdr['data_type'] = 16
-        hdr.set_data_shape( diffmap.shape )
+        hdr.set_data_shape(mapshape)
 
-        niimap = nb.Nifti1Image( diffmap.astype( np.float32 ),
-                                 nii_ref.get_affine(), hdr )
-
-        if not isdefined( self.inputs.out_map ):
-            fname,ext = op.splitext( op.basename( self.inputs.in_tst ) )
+        if not isdefined(self.inputs.out_map):
+            fname,ext = op.splitext(op.basename(self.inputs.in_tst))
             if ext=='.gz':
-                fname,ext2 = op.splitext( fname )
+                fname,ext2 = op.splitext(fname)
                 ext = ext2 + ext
-            self._out_file = op.abspath( fname + "_errmap" + ext )
+            self._out_file = op.abspath(fname + "_errmap" + ext)
         else:
             self._out_file = self.inputs.out_map
 
-        nb.save( niimap, self._out_file )
+        nb.Nifti1Image(errmap.astype(np.float32), nii_ref.get_affine(),
+                       hdr).to_filename(self._out_file)
 
         return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_map'] = self._out_file
-
         return outputs
 
 
 class SimilarityInputSpec(BaseInterfaceInputSpec):
-
     volume1 = File(exists=True, desc="3D/4D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D/4D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")
