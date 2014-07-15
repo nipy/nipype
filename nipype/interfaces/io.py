@@ -1845,3 +1845,55 @@ class JSONFileGrabber(IOBase):
             outputs[key] = value
 
         return outputs
+
+
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    out_file = File(desc='JSON sink file')
+
+
+class JSONFileSinkOutputSpec(TraitedSpec):
+    out_file = File(desc='JSON sink file')
+
+
+class JSONFileSink(IOBase):
+    """ Very simple frontend for storing values into a JSON file.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        Examples
+        --------
+
+        >>> jsonsink = JSONFileSink(input_names=['subject_id', 'some_measurement'])
+        >>> jsonsink.inputs.subject_id = 's1'
+        >>> jsonsink.inputs.some_measurement = 11.4
+        >>> jsonsink.run() # doctest: +SKIP
+
+    """
+    input_spec = JSONFileSinkInputSpec
+    output_spec = JSONFileSinkOutputSpec
+
+    def __init__(self, input_names, **inputs):
+        super(JSONFileSink, self).__init__(**inputs)
+        self._input_names = filename_to_list(input_names)
+        add_traits(self.inputs, [name for name in self._input_names])
+
+    def _list_outputs(self):
+        import json
+        import os.path as op
+        if not isdefined(self.inputs.out_file):
+            out_file = op.abspath('datasink.json')
+        else:
+            out_file = self.inputs.out_file
+
+        out_dict = dict()
+        for name in self._input_names:
+            out_dict[name] = getattr(self.inputs, name)
+
+        with open(out_file, 'w') as f:
+            json.dump(out_dict, f)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = out_file
+        return outputs
