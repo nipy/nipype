@@ -308,32 +308,38 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
     registration.inputs.inputspec.config_file = 'T1_2_MNI152_2mm'
 
-    def merge_files(copes, varcopes):
+    def merge_files(copes, varcopes, zstats):
         out_files = []
         splits = []
         out_files.extend(copes)
         splits.append(len(copes))
         out_files.extend(varcopes)
         splits.append(len(varcopes))
+        out_files.extend(zstats)
+        splits.append(len(zstats))
         return out_files, splits
 
-    mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes'],
+    mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                  'zstats'],
                                    output_names=['out_files', 'splits'],
                                    function=merge_files),
                       name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
                                  [('copes', 'copes'),
                                   ('varcopes', 'varcopes'),
+                                  ('zstats', 'zstats'),
                                   ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):
         copes = in_files[:splits[1]]
-        varcopes = in_files[splits[1]:]
-        return copes, varcopes
+        varcopes = in_files[splits[1]:splits[2]]
+        zstats = in_files[splits[2]:]
+        return copes, varcopes, zstats
 
     splitfunc = pe.Node(niu.Function(input_names=['in_files', 'splits'],
-                                     output_names=['copes', 'varcopes'],
+                                     output_names=['copes', 'varcopes',
+                                                   'zstats'],
                                      function=split_files),
                       name='split_files')
     wf.connect(mergefunc, 'splits', splitfunc, 'splits')
@@ -390,6 +396,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect([(splitfunc, datasink,
                  [('copes', 'copes.mni'),
                   ('varcopes', 'varcopes.mni'),
+                  ('zstats', 'zstats.mni'),
                   ])])
     wf.connect(registration, 'outputspec.transformed_mean', datasink, 'mean.mni')
     wf.connect(registration, 'outputspec.func2anat_transform', datasink, 'xfm.mean2anat')
