@@ -1162,9 +1162,9 @@ def create_reg_workflow(name='registration'):
     """
 
     anat2target_affine = pe.Node(fsl.FLIRT(), name='anat2target_linear')
-    anat2target.inputs.searchr_x = [-180, 180]
-    anat2target.inputs.searchr_y = [-180, 180]
-    anat2target.inputs.searchr_z = [-180, 180]
+    anat2target_affine.inputs.searchr_x = [-180, 180]
+    anat2target_affine.inputs.searchr_y = [-180, 180]
+    anat2target_affine.inputs.searchr_z = [-180, 180]
     register.connect(stripper, 'out_file', anat2target_affine, 'in_file')
     register.connect(inputnode, 'target_image_brain', anat2target_affine, 'reference')
 
