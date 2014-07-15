@@ -370,7 +370,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                          'cope%02d.' % (i + 1)))
             subs.append(('_warpall%d/varcope1_warp.' % (len(conds) + i),
                          'varcope%02d.' % (i + 1)))
-            subs.append(('_warpall%d/zstat1_warp.' % i,
+            subs.append(('_warpall%d/zstat1_warp.' % (2 * len(conds) + i),
                          'zstat%02d.' % (i + 1)))
         return subs
 
