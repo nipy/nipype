@@ -355,7 +355,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         subs = [('_subject_id_%s_' % subject_id, '')]
         subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
-        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp_warp',
+        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
         'mean'))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
         'affine'))
@@ -366,10 +366,12 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
             subs.append(('_flameo%d/zstat1.' % i, 'zstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/tstat1.' % i, 'tstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/res4d.' % i, 'res4d%02d.' % (i + 1)))
-            subs.append(('_warpall%d/cope1_warp_warp.' % i,
+            subs.append(('_warpall%d/cope1_warp.' % i,
                          'cope%02d.' % (i + 1)))
-            subs.append(('_warpall%d/varcope1_warp_warp.' % (len(conds) + i),
+            subs.append(('_warpall%d/varcope1_warp.' % (len(conds) + i),
                          'varcope%02d.' % (i + 1)))
+            subs.append(('_warpall%d/zstat1_warp.' % i,
+                         'zstat%02d.' % (i + 1)))
         return subs
 
     subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds',
