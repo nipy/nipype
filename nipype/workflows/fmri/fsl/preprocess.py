@@ -1104,7 +1104,8 @@ def create_reg_workflow(name='registration'):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['source_files',
                                                                  'mean_image',
                                                                  'anatomical_image',
-                                                                 'target_image']),
+                                                                 'target_image',
+                                                                 'target_image_brain']),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['func2anat_transform',
                                                               'anat2target_transform',
@@ -1161,8 +1162,11 @@ def create_reg_workflow(name='registration'):
     """
 
     anat2target_affine = pe.Node(fsl.FLIRT(), name='anat2target_linear')
-    register.connect(inputnode, 'anatomical_image', anat2target_affine, 'in_file')
-    register.connect(inputnode, 'target_image', anat2target_affine, 'reference')
+    anat2target.inputs.searchr_x = [-180, 180]
+    anat2target.inputs.searchr_y = [-180, 180]
+    anat2target.inputs.searchr_z = [-180, 180]
+    register.connect(stripper, 'out_file', anat2target_affine, 'in_file')
+    register.connect(inputnode, 'target_image_brain', anat2target_affine, 'reference')
 
     """
     Calculate nonlinear transform from anatomical to target

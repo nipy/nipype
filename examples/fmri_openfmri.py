@@ -305,6 +305,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
     wf.connect(datasource, 'anat', registration, 'inputspec.anatomical_image')
     registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
+    registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
 
     def merge_files(copes, varcopes):
         out_files = []
