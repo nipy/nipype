@@ -1179,7 +1179,6 @@ def create_reg_workflow(name='registration'):
     anat2target_nonlinear.inputs.fieldcoeff_file=True
     register.connect(anat2target_affine, 'out_matrix_file',
                      anat2target_nonlinear, 'affine_file')
-    anat2target_nonlinear.inputs.warp_resolution = (8, 8, 8)
     register.connect(inputnode, 'anatomical_image',
                      anat2target_nonlinear, 'in_file')
     register.connect(inputnode, 'config_file',
