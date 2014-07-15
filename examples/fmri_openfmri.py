@@ -332,9 +332,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):
-        copes = in_files[:splits[1]]
-        varcopes = in_files[splits[1]:splits[2]]
-        zstats = in_files[splits[2]:]
+        copes = in_files[:splits[0]]
+        varcopes = in_files[splits[0]:(splits[0] + splits[1])]
+        zstats = in_files[(splits[0] + splits[1]):]
         return copes, varcopes, zstats
 
     splitfunc = pe.Node(niu.Function(input_names=['in_files', 'splits'],
