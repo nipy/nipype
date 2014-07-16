@@ -37,14 +37,19 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
                 copyfile=False)
     out_file = File(name_template="%s_vectors", 
                 desc='output sum of weighted linear support vectors file name',
-                argstr='-bucket %s', 
+                argstr='-bucket %s',
+                suffix='_bucket', 
                 name_source="in_file")
-    model = traits.Str(name_template="%s_model",
-                desc='modname is the basename for the brik containing the SVM model',
-                argstr='-model %s')    
-    alphas = traits.Str(name_template="%s_alphas", 
+    model = File(name_template="%s_model",
+                desc='basename for the brik containing the SVM model',
+                argstr='-model %s',
+                suffix='_model', 
+                name_source="in_file")    
+    alphas = File(name_template="%s_alphas", 
                 desc='output alphas file name',
-                argstr='-alpha %s')
+                argstr='-alpha %s',
+                suffix='_alphas',
+                name_source="in_file")
     mask = File(desc='byte-format brik file used to mask voxels in the analysis',
                 argstr='-mask %s',
                 position=-1,
@@ -65,6 +70,11 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
     w_out = traits.Bool(desc='output sum of weighted linear support vectors',
                 argstr='-wout')
     options = traits.Str(desc='additional options for SVM-light', argstr='%s')
+                
+class SVMTrainOutputSpec(TraitedSpec):
+    out_file = File(desc='sum of weighted linear support vectors file name')
+    model = File(desc='brik containing the SVM model file name')
+    alphas = File(desc='output alphas file name')
                 
 class SVMTrain(AFNICommand):
     """Temporally predictive modeling with the support vector machine
@@ -89,7 +99,11 @@ class SVMTrain(AFNICommand):
 
     _cmd = '3dsvm'
     input_spec = SVMTrainInputSpec
-    output_spec = AFNICommandOutputSpec
+    output_spec = SVMTrainOutputSpec
+    _additional_metadata = ['suffix']
+
+    def _format_arg(self, name, trait_spec, value):
+        return super(SVMTrain, self)._format_arg(name, trait_spec, value)
 
 class SVMTestInputSpec(AFNICommandInputSpec):
     #testing options
