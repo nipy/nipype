@@ -720,6 +720,7 @@ class RegF3DOutputSpec(TraitedSpec):
     cpp_file = File(desc='The output CPP file')
     res_file = File(desc='The output resampled image')
     invcpp_file = File(genfile=True, desc='The output inv CPP file')
+    avg_output = traits.String(desc='Output string in the format for reg_average')
 
 # Main interface class
 class RegF3D(NIFTYREGCommand):
@@ -737,5 +738,9 @@ class RegF3D(NIFTYREGCommand):
         outputs = super(RegF3D, self)._list_outputs()
         basename = self._get_basename_without_extension (outputs['cpp_file'])
         outputs['invcpp_file'] = os.path.abspath (basename + '_backward.nii.gz')
+
+        # Make a list of the linear transformation file and the input image
+        outputs['avg_output'] = os.path.abspath(outputs['cpp_file']) + ' ' + os.path.abspath(self.inputs.flo_file)
+
         return outputs
         
