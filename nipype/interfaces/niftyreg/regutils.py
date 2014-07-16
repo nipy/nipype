@@ -604,6 +604,8 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     
     # Input Affine file
     aff_file = File(exists=True, desc='The input affine transformation file', argstr='-aff %s')
+    # Input cpp file
+    incpp_file = File(exists=True, desc='The input cpp transformation file', argstr='-incpp %s')
     
     # Reference mask
     rmask_file = File(exists=True, desc='Reference image mask', argstr='-rmask %s')
