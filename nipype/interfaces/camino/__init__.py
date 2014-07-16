@@ -13,3 +13,4 @@ from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
                   ComputeTensorTrace,  ComputeEigensystem, DTMetric)
 from .calib import (SFPICOCalibData, SFLUTGen)
 from .odf import (QBallMX, LinRecon, SFPeaks, MESD)
+from .utils import ImageStats
