@@ -365,7 +365,7 @@ class AutoTcorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         path, base, ext = split_filename(value)
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
