@@ -1768,13 +1768,13 @@ class XNATSource(IOBase):
                     key in self.inputs.field_template:
                 template = self.inputs.field_template[key]
             if not args:
-                file_objects = xnat.select(template).get('obj')
+                file_objects = xnat.select(template).files().get('obj')
                 if file_objects == []:
                     raise IOError('Template %s returned no files'
                                   % template
                                   )
                 outputs[key] = list_to_filename(
-                    [str(file_object.get())
+                    [str(file_object.get_copy(cache_dir + file_object.id()))
                      for file_object in file_objects
                      if file_object.exists()
                      ])
@@ -1803,7 +1803,7 @@ class XNATSource(IOBase):
                             argtuple.append(arg)
                     if argtuple:
                         target = template % tuple(argtuple)
-                        file_objects = xnat.select(target).get('obj')
+                        file_objects = xnat.select(target).files().get('obj')
 
                         if file_objects == []:
                             raise IOError('Template %s '
@@ -1811,13 +1811,13 @@ class XNATSource(IOBase):
                                           )
 
                         outfiles = list_to_filename(
-                            [str(file_object.get())
+                            [str(file_object.get_copy(cache_dir + file_object.id()))
                              for file_object in file_objects
                              if file_object.exists()
                              ]
                         )
                     else:
-                        file_objects = xnat.select(template).get('obj')
+                        file_objects = xnat.select(template).files().get('obj')
 
                         if file_objects == []:
                             raise IOError('Template %s '
@@ -1825,7 +1825,7 @@ class XNATSource(IOBase):
                                           )
 
                         outfiles = list_to_filename(
-                            [str(file_object.get())
+                            [str(file_object.get_copy(cache_dir + file_object.id()))
                              for file_object in file_objects
                              if file_object.exists()
                              ]
