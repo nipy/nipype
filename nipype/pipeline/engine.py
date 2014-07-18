@@ -1086,6 +1086,132 @@ connected.
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
 
+
+class InterfacedWorkflow(Workflow):
+    """
+    A workflow that automatically generates the input and output nodes to avoid
+    repetitive inputnode.* and outputnode.* connections.
+    """
+
+    @property
+    def input_names(self):
+        return self._input_names
+
+    @property
+    def output_names(self):
+        return self._output_names
+
+    def __init__(self, name, base_dir=None, input_names=[], output_names=[]):
+        from nipype.interfaces.utility import IdentityInterface
+        super(InterfacedWorkflow, self).__init__(name, base_dir)
+
+        if isinstance(input_names, str):
+            input_names = [ input_names ]
+
+        if isinstance(output_names, str):
+            output_names = [ output_names ]
+
+        self._input_names = input_names
+        self._output_names = output_names
+
+        self._inputnode = Node(IdentityInterface(fields=input_names), name='inputnode')
+        self._outputnode = Node(IdentityInterface(fields=output_names), name='outputnode')
+
+    def connect(self, *args, **kwargs):
+        """
+        Extends the connect method to accept void nodes for inputs and outputs.
+
+        Parameters
+        ----------
+
+        args : same as superclass
+
+        """
+        if len(args) == 1:
+            connection_list = args[0]
+        elif len(args) == 4:
+            connection_list = [(args[0], args[2], [(args[1], args[3])])]
+        else:
+            raise Exception('unknown set of parameters to connect function')
+
+        fixed_conns = []
+
+        for i,conn in enumerate(connection_list):
+            if conn[0] is None:
+                fixed_conns.append((self._inputnode, conn[1], conn[2]))
+                for c in conn[2]:
+                    logger.debug(('Automatically detected input %s will be connected to '
+                                  '%s') % c)
+
+            elif conn[1] is None:
+                fixed_conns.append((conn[0], self._outputnode, conn[2]))
+                for c in conn[2]:
+                    logger.debug(('Automatically detected output %s will be connected to '
+                                  '%s') % c)
+            else:
+                fixed_conns.append(conn)
+
+        super(InterfacedWorkflow, self).connect(fixed_conns, **kwargs)
+
+    def _get_inputs(self):
+        """
+        Returns the inputs of a workflow
+
+        This function does not return any input ports that are already
+        connected, nor internal input ports
+        """
+        inputdict = TraitedSpec()
+        node = self._inputnode
+
+        taken_inputs = []
+        for _, _, d in self._graph.in_edges_iter(nbunch=node,
+                                                 data=True):
+            for cd in d['connect']:
+                taken_inputs.append(cd[1])
+
+        for key, trait in node.inputs.items():
+            if key not in taken_inputs:
+                inputdict.add_trait(key, traits.Trait(trait, node=node))
+                value = getattr(node.inputs, key)
+                setattr(inputdict, key, value)
+
+        inputdict.on_trait_change(self._set_input)
+        return inputdict
+
+    def _get_outputs(self):
+        """
+        Returns all possible output ports of the output node that are not
+        already connected
+        """
+        outputdict = TraitedSpec()
+        node = self._outputnode
+
+        if node.outputs:
+            for key, _ in node.outputs.items():
+                outputdict.add_trait(key, traits.Any(node=node))
+                setattr(outputdict, key, None)
+        return outputdict
+
+class AutoconnectWorkflow(Workflow):
+    """
+    A workflow composed by InterfacedWorkflows that automatically connects
+    inputs to outputs
+    """
+
+    def connect(wfprev, wfnext):
+        if (not isinstance(wfprev, InterfacedWorkflow) or
+            not isinstance(wfnext, InterfacedWorkflow)):
+            raise RuntimeError('Connecting workflows are not Interfaced')
+        if wfprev.outputs.names() != wfnext.inputs.names():
+            raise RuntimeError('Interface missmatch between workflows')
+
+        # TODO: yes, to do
+        connection_list = []
+        for key in wfprev.outputs.names():
+            connection_list.append((None, None, [])
+
+
+
 class GraftWorkflow(Workflow):
     """
     A workflow ready to insert several internal workflows that share an
@@ -1136,7 +1262,7 @@ class GraftWorkflow(Workflow):
             if not key in inputnames:
                 raise Exception('Input \'%s\' is not present in GraftWorkflow' % key )
 
-            logger.debug('Connecting %s to inputnode.%s' % (key,key) )
+            logger.debug('Graft: connecting %s to inputnode.%s' % (key,key) )
             self.connect([ ( self._inputnode, workflow, [ ('%s' % key, 'inputnode.%s' % key) ] ) ])
 
         outputnames = workflow.outputs.outputnode.trait_names()
@@ -1145,6 +1271,7 @@ class GraftWorkflow(Workflow):
             if not key in outputnames:
                 raise Exception('Output \'%s\' is not present in GraftWorkflow' % key )
             self._connection_list.append( (workflow, 'outputnode.%s' % key, self._outputnode, key) )
+            logger.debug('Graft: connecting %s to %s' % (key,self._outputnode) )
 
         # Add to dictionary
         self._children[workflow.name] = workflow
