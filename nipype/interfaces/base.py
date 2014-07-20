@@ -1487,7 +1487,11 @@ class CommandLine(BaseInterface):
             source = getattr(self.inputs, name_source)
             while isinstance(source, list):
                 source = source[0]
-            _, base, _ = split_filename(source)
+            #special treatment for files
+            try:
+                _, base, _ = split_filename(source)
+            except AttributeError:
+                base = source
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:

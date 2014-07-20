@@ -35,9 +35,9 @@ def test_apply_transform():
     applymat.inputs.in_file = moving
     applymat.inputs.mat = mat
     scrpt = applymat._make_matlab_command(None)
-    expected = 'img_space = spm_get_space(infile);'
+    expected = '[p n e v] = spm_fileparts(V.fname);'
     assert_equal( expected in scrpt, True)
-    expected = 'spm_get_space(infile, M * img_space);'
+    expected = 'V.mat = transform.M * V.mat;'
     assert_equal(expected in scrpt, True)
 
 def test_reslice():
