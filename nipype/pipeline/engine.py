@@ -1168,12 +1168,19 @@ class InterfacedWorkflow(Workflow):
                                            'present in destination node') % n)
                 ports = [(srcpref+k, dstpref+k) for k in srcnames]
             else:
-                ports = conn[2]
+                ports = []
+                for c in conn[2]:
+                    srcport = c[0]
+                    dstport = c[1]
+                    if len(srcpref) > 0 and not srcpref in srcport:
+                        srcport = srcpref + srcport
 
-            print ports
+                    if len(dstpref) > 0 and not dstpref in dstport:
+                        dstport = dstpref + dstport
+
+                    ports.append((srcport, dstport))
 
             connection_list.append((srcnode, dstnode, ports))
-
         super(InterfacedWorkflow, self).connect(connection_list, **kwargs)
 
     def _get_inputs(self):
