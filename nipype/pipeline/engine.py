@@ -808,9 +808,9 @@ connected.
         """Checks if a parameter is available as an input or output
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist:
@@ -824,9 +824,9 @@ connected.
         output parameter
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist[:-1]:
@@ -840,6 +840,9 @@ connected.
         return self._has_attr(parameter, subtype='in')
 
     def _get_inputs(self):
+        return self._get_all_inputs()
+
+    def _get_all_inputs(self):
         """Returns the inputs of a workflow
 
         This function does not return any input ports that are already
@@ -849,7 +852,7 @@ connected.
         for node in self._graph.nodes():
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(inputdict, node.name, node.inputs)
+                setattr(inputdict, node.name, node._get_all_inputs())
             else:
                 taken_inputs = []
                 for _, _, d in self._graph.in_edges_iter(nbunch=node,
@@ -869,13 +872,16 @@ connected.
         return inputdict
 
     def _get_outputs(self):
+        return self._get_all_outputs()
+
+    def _get_all_outputs(self):
         """Returns all possible output ports that are not already connected
         """
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(outputdict, node.name, node.outputs)
+                setattr(outputdict, node.name, node._get_all_outputs())
             elif node.outputs:
                 outputs = TraitedSpec()
                 for key, _ in node.outputs.items():
@@ -1128,30 +1134,47 @@ class InterfacedWorkflow(Workflow):
 
         """
         if len(args) == 1:
-            connection_list = args[0]
+            conns = args[0]
         elif len(args) == 4:
-            connection_list = [(args[0], args[2], [(args[1], args[3])])]
+            conns = [(args[0], args[2], [(args[1], args[3])])]
         else:
             raise Exception('unknown set of parameters to connect function')
 
-        fixed_conns = []
+        connection_list = []
+        for conn in conns:
+            srcnode = conn[0]
+            dstnode = conn[1]
+            srcpref = ''
+            dstpref = ''
 
-        for i,conn in enumerate(connection_list):
-            if conn[0] is None:
-                fixed_conns.append((self._inputnode, conn[1], conn[2]))
-                for c in conn[2]:
-                    logger.debug(('Automatically detected input %s will be connected to '
-                                  '%s') % c)
+            if srcnode is None:
+                srcnode = self._inputnode
 
-            elif conn[1] is None:
-                fixed_conns.append((conn[0], self._outputnode, conn[2]))
-                for c in conn[2]:
-                    logger.debug(('Automatically detected output %s will be connected to '
-                                  '%s') % c)
+            if isinstance(srcnode, InterfacedWorkflow):
+                srcpref = 'outputnode.'
+
+            if dstnode is None:
+                dstnode = self._outputnode
+
+            if isinstance(dstnode, InterfacedWorkflow):
+                dstpref = 'inputnode.'
+
+            if len(conn) == 2:
+                srcnames = srcnode.outputs.copyable_trait_names()
+                dstnames = dstnode.inputs.copyable_trait_names()
+                for n in srcnames:
+                    if n not in dstnames:
+                        raise RuntimeError(('Interface missmatch between workflows, %s port is not '
+                                           'present in destination node') % n)
+                ports = [(srcpref+k, dstpref+k) for k in srcnames]
             else:
-                fixed_conns.append(conn)
+                ports = conn[2]
 
-        super(InterfacedWorkflow, self).connect(fixed_conns, **kwargs)
+            print ports
+
+            connection_list.append((srcnode, dstnode, ports))
+
+        super(InterfacedWorkflow, self).connect(connection_list, **kwargs)
 
     def _get_inputs(self):
         """
@@ -1191,25 +1214,6 @@ class InterfacedWorkflow(Workflow):
                 outputdict.add_trait(key, traits.Any(node=node))
                 setattr(outputdict, key, None)
         return outputdict
-
-class AutoconnectWorkflow(Workflow):
-    """
-    A workflow composed by InterfacedWorkflows that automatically connects
-    inputs to outputs
-    """
-
-    def connect(wfprev, wfnext):
-        if (not isinstance(wfprev, InterfacedWorkflow) or
-            not isinstance(wfnext, InterfacedWorkflow)):
-            raise RuntimeError('Connecting workflows are not Interfaced')
-        if wfprev.outputs.names() != wfnext.inputs.names():
-            raise RuntimeError('Interface missmatch between workflows')
-
-        # TODO: yes, to do
-        connection_list = []
-        for key in wfprev.outputs.names():
-            connection_list.append((None, None, [])
-
 
 
 class GraftWorkflow(Workflow):
@@ -1525,7 +1529,7 @@ class Node(WorkflowBase):
         else:
             self.config = merge_dict(deepcopy(config._sections), self.config)
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
@@ -1646,7 +1650,7 @@ class Node(WorkflowBase):
     def _get_hashval(self):
         """Return a hash of the input state"""
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
@@ -1677,8 +1681,10 @@ class Node(WorkflowBase):
             else:
                 logger.critical('Unable to open the file in write mode: %s' %
                                 hashfile)
-
     def _get_inputs(self):
+        return self._get_all_inputs()
+
+    def _get_all_inputs(self):
         """Retrieve inputs from pointers to results file
 
         This mechanism can be easily extended/replaced to retrieve data from
@@ -2285,7 +2291,7 @@ class MapNode(Node):
     def _get_hashval(self):
         """ Compute hash including iterfield lists."""
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
@@ -2422,7 +2428,7 @@ class MapNode(Node):
 
     def get_subnodes(self):
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         self.write_report(report_type='preexec', cwd=self.output_dir())
@@ -2430,17 +2436,20 @@ class MapNode(Node):
 
     def num_subnodes(self):
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
+        return self._get_all_inputs()
+
+    def _get_all_inputs(self):
         old_inputs = self._inputs.get()
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.set(**old_inputs)
-        super(MapNode, self)._get_inputs()
+        super(MapNode, self)._get_all_inputs()
 
     def _check_iterfield(self):
         """Checks iterfield
