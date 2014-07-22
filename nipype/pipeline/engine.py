@@ -1477,9 +1477,9 @@ class Node(WorkflowBase):
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('Node: setting nodelevel(%s) input %s = %s' % (str(self),
+                                                                    parameter,
+                                                                    str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -2040,13 +2040,13 @@ class InputMultiNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('InputMultiNode: setting nodelevel(%s) input %s = %s' % (str(self),
+                                                                              parameter,
+                                                                              str(val)))
         self._set_multinode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_multinode_input(self, object, name, newvalue):
-        logger.debug('setting mapnode(%s) input: %s -> %s' % (str(self),
+        logger.debug('setting multinode(%s) input: %s -> %s' % (str(self),
                                                               name,
                                                               str(newvalue)))
         if name in self.fields:
@@ -2243,13 +2243,16 @@ class InputMultiNode(Node):
         This is primarily intended for serial execution of mapnode. A parallel
         execution requires creation of new nodes that can be spawned
         """
+
         old_cwd = os.getcwd()
         cwd = self.output_dir()
         os.chdir(cwd)
         self._check_iterfield()
+        logger.debug('InputMultiNode.execute=%s' % execute)
         if execute:
             nitems = len(filename_to_list(getattr(self.inputs,
                                                   self.fields[0])))
+            logger.debug('found %d items to iterate' % nitems)
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
             # map-reduce formulation
             self._collate_results(self._node_runner(self._make_nodes(cwd),
@@ -2561,9 +2564,9 @@ class MapNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('MapNode: setting nodelevel(%s) input %s = %s' % (str(self),
+                                                                       parameter,
+                                                                       str(val)))
         self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_mapnode_input(self, object, name, newvalue):
