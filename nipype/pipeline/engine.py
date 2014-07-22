@@ -1259,7 +1259,8 @@ class GraftWorkflow(InterfacedWorkflow):
     _children = dict()
     _outnodes = dict()
 
-    def __init__(self, name, base_dir=None, fields_from=None, input_names=[], output_names=[]):
+    def __init__(self, name, base_dir=None, fields_from=None,
+                 input_names=[], output_names=[]):
         """
         Initializes the workflow from an existing InterfacedWorkflow
         """
@@ -1267,23 +1268,27 @@ class GraftWorkflow(InterfacedWorkflow):
         fields_undefined = ((input_names is None) or (output_names is None))
         wf_undefined = (fields_from is None)
         if wf_undefined and fields_undefined:
-            raise ValueError(('An existing InterfacedWorkflow or the input/output_names are '
-                             'required to initialize the GraftWorkflow'))
+            raise ValueError(('An existing InterfacedWorkflow or the in/output'
+                             ' names are required to initialize the '
+                             'GraftWorkflow'))
         if not wf_undefined:
             if not isinstance(fields_from, InterfacedWorkflow):
-                raise TypeError('Reference workflow is not an InterfacedWorkflow.')
+                raise TypeError('Workflow is not an InterfacedWorkflow.')
             input_names = fields_from.input_names
             output_names = fields_from.output_names
         if (((input_names is None) or (not input_names)) and
-            ((output_names is None) or (not output_names))):
-            raise ValueError(('A GraftWorkflow cannot be initialized without specifying either a '
-                             'fields_from workflow or i/o names lists'))
+           ((output_names is None) or (not output_names))):
+            raise ValueError(('A GraftWorkflow cannot be initialized without '
+                             'specifying either a fields_from workflow or i/o'
+                             ' names lists'))
 
         super(GraftWorkflow, self).__init__(name=name, base_dir=base_dir,
                                             input_names=input_names,
                                             output_names=output_names)
 
-        self._outputnode = InputMultiNode(IdentityInterface(fields=output_names), name='outputnode')
+        self._outputnode = InputMultiNode(IdentityInterface(
+                                          fields=output_names),
+                                          name='outputnode')
 
     def insert(self, workflow):
         """
@@ -1292,33 +1297,34 @@ class GraftWorkflow(InterfacedWorkflow):
         from nipype.interfaces.utility import IdentityInterface
 
         if not isinstance(workflow, InterfacedWorkflow):
-            raise TypeError('Only InterfacedWorkflows can be inserted in a GraftWorkflow.')
+            raise TypeError(('Only InterfacedWorkflows can be inserted in '
+                            'a GraftWorkflow.'))
 
         ckey = workflow.name
         cid = len(self._children)
 
         if ckey in self._children.keys():
-            raise RuntimeError('Trying to add an existing workflow to GraftWorkflow')
+            raise RuntimeError(('Trying to add an existing workflow to '
+                               'GraftWorkflow'))
 
         self._children[ckey] = workflow
-        self._outnodes[ckey] = Node(IdentityInterface(fields=self.output_names),
+        self._outnodes[ckey] = Node(IdentityInterface(
+                                    fields=self.output_names),
                                     name='out%02d' % cid)
-
 
         # Check that interfaces are satisfied
         if ((workflow.input_names != self.input_names) or
-            (workflow.output_names != self.output_names)):
+           (workflow.output_names != self.output_names)):
             raise RuntimeError('Workflow does not meet the general interface')
 
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
                      (self._outnodes[ckey], 'out')])
 
-
     def write_graph(self, *args, **kwargs):
-        return super(GraftWorkflow,self).write_graph(*args, **kwargs)
+        return super(GraftWorkflow, self).write_graph(*args, **kwargs)
 
     def run(self, *args, **kwargs):
-        return super(GraftWorkflow,self).run(*args, **kwargs)
+        return super(GraftWorkflow, self).run(*args, **kwargs)
 
 
 class Node(WorkflowBase):
