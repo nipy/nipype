@@ -1102,8 +1102,8 @@ connected.
 class InterfacedWorkflow(Workflow):
     """
     A workflow that automatically generates the input and output nodes to avoid
-    repetitive inputnode.* and outputnode.* connections and allow for fast pipeline
-    chaining.
+    repetitive inputnode.* and outputnode.* connections and allow for agile
+    pipeline chaining.
     """
 
     @property
@@ -1129,22 +1129,26 @@ class InterfacedWorkflow(Workflow):
         super(InterfacedWorkflow, self).__init__(name, base_dir)
 
         if isinstance(input_names, str):
-            input_names = [ input_names ]
+            input_names = [input_names]
 
         if input_names is None or not input_names:
-            raise ValueError('InterfacedWorkflow input_names must be a non-empty list')
+            raise ValueError(('InterfacedWorkflow input_names must be a '
+                             'non-empty list'))
 
         if isinstance(output_names, str):
-            output_names = [ output_names ]
+            output_names = [output_names]
 
         if output_names is None or not output_names:
-            raise ValueError('InterfacedWorkflow output_names must be a non-empty list')
+            raise ValueError(('InterfacedWorkflow output_names must be a '
+                             'non-empty list'))
 
         self._input_names = input_names
         self._output_names = output_names
 
-        self._inputnode = Node(IdentityInterface(fields=input_names), name='inputnode')
-        self._outputnode = Node(IdentityInterface(fields=output_names), name='outputnode')
+        self._inputnode = Node(IdentityInterface(fields=input_names),
+                               name='inputnode')
+        self._outputnode = Node(IdentityInterface(fields=output_names),
+                                name='outputnode')
 
     def connect(self, *args, **kwargs):
         """
@@ -1189,7 +1193,8 @@ class InterfacedWorkflow(Workflow):
                 dstnames = dstnode.inputs.copyable_trait_names()
                 for n in srcnames:
                     if n not in dstnames:
-                        raise RuntimeError(('Interface missmatch between workflows, %s port is not '
+                        raise RuntimeError(('Interface missmatch between '
+                                           'workflows, %s port is not '
                                            'present in destination node') % n)
                 ports = [(srcpref+k, dstpref+k) for k in srcnames]
             else:
@@ -1255,6 +1260,26 @@ class GraftWorkflow(InterfacedWorkflow):
     i/o interfaces, and are run on the same input data.
     This workflow produces as many outputs as inserted subworkflows, and
     an outputnode with all the outputs merged.
+
+    Example
+    -------
+    >>> import nipype.pipeline.engine as npe
+    >>> import nipype.interfaces.utility as niu
+    >>> from nipype.algorithms.metrics import ErrorMap
+    >>> from nipype.interfaces.utility import IdentityInterface
+    >>> wf1 = npe.InterfacedWorkflow(name='testname1', input_names=['in_ref',
+    >>>                              'in_tst', 'mask'],
+    >>>                              output_names=['out_map'])
+    >>> errormap = npe.Node(ErrorMap(), name='internalnode')
+    >>> wf1.connect([ ('in', errormap), (errormap, 'out') ])
+    >>> wf2 = wf1.clone(name='testname2')
+    >>> wf = npe.GraftWorkflow(name='graft', fields_from=wf1)
+    >>> wf.insert(wf1)
+    >>> wf.insert(wf2)
+    >>> wf.inputs.in_ref = 'reference.nii'
+    >>> wf.inputs.in_tst = 'test.nii'
+    >>> wf.write_graph(format='pdf') # doctest: +SKIP
+    >>> wf.run() # doctest: +SKIP
     """
     _children = dict()
     _outnodes = dict()
@@ -1286,10 +1311,6 @@ class GraftWorkflow(InterfacedWorkflow):
                                             input_names=input_names,
                                             output_names=output_names)
 
-        self._outputnode = InputMultiNode(IdentityInterface(
-                                          fields=output_names),
-                                          name='outputnode')
-
     def insert(self, workflow):
         """
         Inserts an InterfacedWorkflow into the workflow
@@ -1320,11 +1341,14 @@ class GraftWorkflow(InterfacedWorkflow):
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
                      (self._outnodes[ckey], 'out')])
 
-    def write_graph(self, *args, **kwargs):
-        return super(GraftWorkflow, self).write_graph(*args, **kwargs)
+    #def write_graph(self, *args, **kwargs):
+    #    return super(GraftWorkflow, self).write_graph(*args, **kwargs)
 
     def run(self, *args, **kwargs):
-        return super(GraftWorkflow, self).run(*args, **kwargs)
+        logger.debug('Starting GraftWorkflow %s' % self)
+        runtime = super(GraftWorkflow, self).run(*args, **kwargs)
+        logger.debug('Ending GraftWorkflow %s' % self)
+        return runtime
 
 
 class Node(WorkflowBase):
@@ -1694,6 +1718,7 @@ class Node(WorkflowBase):
             else:
                 logger.critical('Unable to open the file in write mode: %s' %
                                 hashfile)
+
     def _get_inputs(self):
         return self._get_all_inputs()
 
@@ -1999,6 +2024,16 @@ class Node(WorkflowBase):
 class InputMultiNode(Node):
     """
     Wraps interface objects that join nodes into lists of inputs
+
+    Examples
+    --------
+
+    >>> from nipype import InputMultiNode
+    >>> from nipype.interfaces.fsl import Threshold
+    >>> realign = InputMultiNode(spm.Realign(), 'realign')
+    >>> realign.inputs.in_files = 'functional.nii'
+    >>> realign.inputs.register_to_mean = True
+    >>> realign.run() # doctest: +SKIP
     """
     def __init__(self, interface, name, **kwargs):
         """
@@ -2046,15 +2081,13 @@ class InputMultiNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('InputMultiNode: setting nodelevel(%s) input %s = %s' % (str(self),
-                                                                              parameter,
-                                                                              str(val)))
+        logger.debug(('InputMultiNode: setting nodelevel(%s) input '
+                     '%s = %s') % (str(self), parameter, str(val)))
         self._set_multinode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_multinode_input(self, object, name, newvalue):
-        logger.debug('setting multinode(%s) input: %s -> %s' % (str(self),
-                                                              name,
-                                                              str(newvalue)))
+        logger.debug(('setting multinode(%s) input: %s ->'
+                     ' %s') % (str(self), name, str(newvalue)))
         if name in self.fields:
             setattr(self._inputs, name, newvalue)
         else:
@@ -2503,6 +2536,7 @@ class JoinNode(Node):
             raise AttributeError("The join node %s does not have a slot field %s"
                          " to hold the %s value at index %d: %s"
                          % (self, slot_field, field, index, e))
+
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
