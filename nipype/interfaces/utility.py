@@ -489,13 +489,16 @@ class CollateInterface(IOBase):
 
     >>> from nipype.interfaces.utility import CollateInterface
     >>> coll = CollateInterface(fields=['file','miscdata'])
-    >>> coll.inputs.src1_file = 'scores.csv'
-    >>> coll.inputs.src2_file = 'scores2.csv'
+    >>> coll.inputs.src1_file = 'exfile1.csv'
+    >>> coll.inputs.src2_file = 'exfile2.csv'
     >>> coll.inputs.src1_miscdata = 1.0
     >>> coll.inputs.src2_miscdata = 2.0
-    >>> coll.run() # doctest: +SKIP
+    >>> res = coll.run()
+    >>> print res.outputs.file
+    ['exfile1.csv', 'exfile2.csv']
+    >>> print res.outputs.miscdata
+    [1.0, 2.0]
     """
-
     input_spec = CollateInterfaceInputSpec
     output_spec = DynamicTraitedSpec
 
