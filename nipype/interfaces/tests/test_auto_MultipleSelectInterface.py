@@ -3,10 +3,7 @@ from nipype.testing import assert_equal
 from nipype.interfaces.utility import MultipleSelectInterface
 
 def test_MultipleSelectInterface_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    index=dict(mandatory=True,
+    input_map = dict(index=dict(mandatory=True,
     ),
     )
     inputs = MultipleSelectInterface.input_spec()
