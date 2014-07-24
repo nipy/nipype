@@ -553,7 +553,7 @@ class CollateInterface(IOBase):
         return outputs
 
 
-class MultipleSelectInputSpec(BaseInterfaceInputSpec, DynamicTraitedSpec):
+class MultipleSelectInputSpec(DynamicTraitedSpec):
     index = InputMultiPath(traits.Int, mandatory=True,
                            desc='0-based indices of values to choose')
 
