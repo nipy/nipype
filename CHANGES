@@ -5,6 +5,7 @@ Next Release
        ``nipype`` namespace, and must be imported directly (e.g.
        ``from nipype.interfaces import fsl``).
 * ENH: New FSL interface: ProbTrackX2
+* ENH: New misc algorithm: NormalizeProbabilityMapSet
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
        are found in nipype.algorithms.metrics instead of misc

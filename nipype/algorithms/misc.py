@@ -839,6 +839,110 @@ def calc_moments(timeseries_file, moment):
     zero = (m2 == 0)
     return np.where(zero, 0, m3 / m2**(moment/2.0))
 
+
+class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
+    in_files = InputMultiPath(File(exists=True, mandatory=True,
+                    desc='The tpms to be normalized') )
+    in_mask = File(exists=True, mandatory=False,
+                    desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
+
+class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc="normalized maps")
+
+
+class NormalizeProbabilityMapSet(BaseInterface):
+    """ Returns the input tissue probability maps (tpms, aka volume fractions)
+    normalized to sum up 1.0 at each voxel within the mask.
+
+    .. note:: Please recall this is not a spatial normalization algorithm
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> normalize = misc.NormalizeProbabilityMapSet()
+    >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', 'tpm_02.nii.gz' ]
+    >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
+    >>> normalize.run() # doctest: +SKIP
+    """
+    input_spec = NormalizeProbabilityMapSetInputSpec
+    output_spec = NormalizeProbabilityMapSetOutputSpec
+
+    def _run_interface(self, runtime):
+        mask = None
+
+        if isdefined( self.inputs.in_mask ):
+            mask = self.inputs.in_mask
+
+        self._out_filenames = normalize_tpms( self.inputs.in_files, mask )
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_files'] = self._out_filenames
+        return outputs
+
+
+def normalize_tpms( in_files, in_mask=None, out_files=[] ):
+    """
+    Returns the input tissue probability maps (tpms, aka volume fractions)
+    normalized to sum up 1.0 at each voxel within the mask.
+    """
+    import nibabel as nib
+    import numpy as np
+    import os.path as op
+
+    in_files = np.atleast_1d( in_files ).tolist()
+
+    if len(out_files)!=len(in_files):
+        for i,finname in enumerate( in_files ):
+            fname,fext = op.splitext( op.basename( finname ) )
+            if fext == '.gz':
+                fname,fext2 = op.splitext( fname )
+                fext = fext2 + fext
+
+            out_file = op.abspath(fname+'_norm'+('_%02d' % i)+fext)
+            out_files+= [out_file]
+
+    imgs = [nib.load(fim) for fim in in_files]
+
+    if len(in_files)==1:
+        img_data = imgs[0].get_data()
+        img_data[img_data>0.0] = 1.0
+        hdr = imgs[0].get_header().copy()
+        hdr['data_type']= 16
+        hdr.set_data_dtype( 'float32' )
+        nib.save( nib.Nifti1Image( img_data.astype(np.float32), imgs[0].get_affine(), hdr ), out_files[0] )
+        return out_files[0]
+
+    img_data = np.array( [ im.get_data() for im in imgs ] ).astype( 'f32' )
+    #img_data[img_data>1.0] = 1.0
+    img_data[img_data<0.0] = 0.0
+    weights = np.sum( img_data, axis=0 )
+
+    msk = np.ones_like( imgs[0].get_data() )
+    msk[ weights<= 0 ] = 0
+
+    if not in_mask is None:
+        msk = nib.load( in_mask ).get_data()
+        msk[ msk<=0 ] = 0
+        msk[ msk>0 ] = 1
+
+    msk = np.ma.masked_equal( msk, 0 )
+
+
+    for i,out_file in enumerate( out_files ):
+        data = np.ma.masked_equal( img_data[i], 0 )
+        probmap = data / weights
+        hdr = imgs[i].get_header().copy()
+        hdr['data_type']= 16
+        hdr.set_data_dtype( 'float32' )
+        nib.save( nib.Nifti1Image( probmap.astype(np.float32), imgs[i].get_affine(), hdr ), out_file )
+
+    return out_files
+
+
 # Deprecated interfaces ---------------------------------------------------------
 class Distance( nam.Distance ):
     """Calculates distance between two volumes.
@@ -877,3 +981,4 @@ class FuzzyOverlap( nam.FuzzyOverlap ):
         warnings.warn(("This interface has been deprecated since 0.10.0,"
                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)
+
