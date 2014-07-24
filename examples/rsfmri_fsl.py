@@ -6,12 +6,12 @@
 rsfMRI: FSL - CSF regressed
 ===========================
 
-A pipeline example that uses intergrates several interfaces to
+A pipeline example that intergrates several interfaces to
 perform a first and second level analysis on a two-subject data
 set.
 
 
-1. Tell python where to find the appropriate functions.
+1. Tell Python where to find the appropriate functions.
 """
 
 import numpy as np

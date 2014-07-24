@@ -75,7 +75,7 @@ def test_SphericallyDeconvolutedStreamlineTrack_inputs():
     out_file=dict(argstr='%s',
     name_source=['in_file'],
     name_template='%s_tracked.tck',
-    output_name='tracked.tck',
+    output_name='tracked',
     position=-1,
     ),
     seed_file=dict(argstr='-seed %s',

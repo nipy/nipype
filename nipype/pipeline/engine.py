@@ -505,10 +505,14 @@ connected.
         Parameters
         ----------
 
-        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
+        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec', 'colored'
             orig - creates a top level graph without expanding internal
             workflow nodes;
             flat - expands workflow nodes recursively;
+            hierarchical - expands workflow nodes recursively with a
+            notion on hierarchy; 
+            colored - expands workflow nodes recursively with a
+            notion on hierarchy in color;
             exec - expands workflows to depict iterables
 
         format: 'png', 'svg'
@@ -519,7 +523,7 @@ connected.
             False.
 
         """
-        graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
+        graphtypes = ['orig', 'flat', 'hierarchical', 'exec', 'colored']
         if graph2use not in graphtypes:
             raise ValueError('Unknown graph2use keyword. Must be one of: ' +
                              str(graphtypes))
@@ -532,10 +536,10 @@ connected.
             else:
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
-        if graph2use == 'hierarchical':
+        if graph2use in ['hierarchical', 'colored']:
             dotfilename = os.path.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                            colored=False,
+                                            colored=graph2use == "colored",
                                             simple_form=simple_form)
             format_dot(dotfilename, format=format)
         else:
@@ -547,11 +551,9 @@ connected.
             export_graph(graph, base_dir, dotfilename=dotfilename,
                          format=format, simple_form=simple_form)
 
-    def write_hierarchical_dotfile(self, dotfilename=None, colored=True,
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=False,
                                    simple_form=True):
         dotlist = ['digraph %s{' % self.name]
-        if colored:
-            dotlist.append('  ' + 'colorscheme=pastel28;')
         dotlist.append(self._get_dot(prefix='  ', colored=colored,
                                      simple_form=simple_form))
         dotlist.append('}')
@@ -1007,18 +1009,18 @@ connected.
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None, colored=True,
-                 simple_form=True):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=False,
+                 simple_form=True, level=0):
         """Create a dot file with connection info
         """
         if prefix is None:
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        level = (len(prefix) / 2) + 1
+        colorset = ['#FFFFC8','#0000FF','#B4B4FF','#E6E6FF','#FF0000',
+                    '#FFB4B4','#FFE6E6','#00A300','#B4FFB4','#E6FFE6']
+
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
-        if colored:
-            dotlist.append('%scolor=%d;' % (prefix, level))
         for node in nx.topological_sort(self._graph):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.', '_')
@@ -1027,24 +1029,35 @@ connected.
                 if not simple_form:
                     node_class_name = '.'.join(node_class_name.split('.')[1:])
                 if hasattr(node, 'iterables') and node.iterables:
-                    dotlist.append(('%s[label="%s", style=filled, colorscheme'
-                                    '=greys7 color=2];') % (nodename,
+                    dotlist.append(('%s[label="%s", shape=box3d,'
+                                    'style=filled, color=black, colorscheme'
+                                    '=greys7 fillcolor=2];') % (nodename,
                                                             node_class_name))
                 else:
-                    dotlist.append('%s[label="%s"];' % (nodename,
-                                                        node_class_name))
+                    if colored:
+                        dotlist.append(('%s[label="%s", style=filled,'
+                                        ' fillcolor="%s"];')
+                                        % (nodename,node_class_name,
+                                           colorset[level]))
+                    else:
+                        dotlist.append(('%s[label="%s"];')
+                                        % (nodename,node_class_name))
+
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.', '_')
                 dotlist.append('subgraph cluster_%s {' % nodename)
                 if colored:
+                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level+1]))
                     dotlist.append(prefix + prefix + 'style=filled;')
+                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level+2]))
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy + [self.name],
                                              colored=colored,
-                                             simple_form=simple_form))
+                                             simple_form=simple_form, level=level+3))
                 dotlist.append('}')
+                if level==6:level=2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:
@@ -1099,7 +1112,8 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> from nipype import Node, spm
+    >>> from nipype import Node
+    >>> from nipype.interfaces import spm
     >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
@@ -1984,7 +1998,8 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> from nipype import MapNode, fsl
+    >>> from nipype import MapNode
+    >>> from nipype.interfaces import fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
     ...                           'functional2.nii',

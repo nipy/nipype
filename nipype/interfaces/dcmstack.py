@@ -1,4 +1,4 @@
-"""Provides interfaces to various commands provided by freeusrfer
+"""Provides interfaces to various commands provided by FreeSurfer
 
    Change directory to provide relative paths for doctests
    >>> import os

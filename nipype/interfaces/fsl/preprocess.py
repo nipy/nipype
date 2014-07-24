@@ -678,17 +678,17 @@ class MCFLIRT(FSLCommand):
                                                       '_variance.ext', cwd=cwd)
             outputs['std_img'] = self._gen_fname(outputs['out_file'] +
                                                  '_sigma.ext', cwd=cwd)
-                                                  
+
         # The mean image created if -stats option is specified ('meanvol')
-        # is missing the top and bottom slices. Therefore we only expose the 
-        # mean image created by -meanvol option ('mean_reg') which isn't 
+        # is missing the top and bottom slices. Therefore we only expose the
+        # mean image created by -meanvol option ('mean_reg') which isn't
         # corrupted.
         # Note that the same problem holds for the std and variance image.
-                                                  
+
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
             outputs['mean_img'] = self._gen_fname(outputs['out_file'] +
                                                   '_mean_reg.ext', cwd=cwd)
-                                                  
+
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
