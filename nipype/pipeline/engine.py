@@ -1271,9 +1271,9 @@ class GraftWorkflow(InterfacedWorkflow):
     >>> wf = npe.GraftWorkflow(name='graft', fields_from=wf1)
     >>> wf.insert(wf1)
     >>> wf.insert(wf2)
-    >>> wf.inputs.in_file = 'reference.nii'
-    >>> wf.inputs.thres = 1.0
-    >>> wf.write_graph(format='pdf') # doctest: +SKIP
+    >>> wf.inputs.in_file = 'structural.nii'
+    >>> wf.inputs.thresh = 1.0
+    >>> wf.run() # doctest: +SKIP
     """
     _children = dict()
     _outnodes = dict()
