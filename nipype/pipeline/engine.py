@@ -1261,21 +1261,19 @@ class GraftWorkflow(InterfacedWorkflow):
     -------
     >>> import nipype.pipeline.engine as npe
     >>> import nipype.interfaces.utility as niu
-    >>> from nipype.algorithms.metrics import ErrorMap
+    >>> from nipype.interfaces.fsl import Threshold
     >>> from nipype.interfaces.utility import IdentityInterface
-    >>> wf1 = npe.InterfacedWorkflow(name='testname1', input_names=['in_ref',
-    >>>                              'in_tst', 'mask'],
-    >>>                              output_names=['out_map'])
-    >>> errormap = npe.Node(ErrorMap(), name='internalnode')
-    >>> wf1.connect([ ('in', errormap), (errormap, 'out') ])
+    >>> wf1 = npe.InterfacedWorkflow(name='testname1', input_names=['in_file', \
+                                     'thresh'], output_names=['out_file'])
+    >>> node = npe.Node(Threshold(), name='internalnode')
+    >>> wf1.connect([ ('in', node), (node, 'out') ])
     >>> wf2 = wf1.clone(name='testname2')
     >>> wf = npe.GraftWorkflow(name='graft', fields_from=wf1)
     >>> wf.insert(wf1)
     >>> wf.insert(wf2)
-    >>> wf.inputs.in_ref = 'reference.nii'
-    >>> wf.inputs.in_tst = 'test.nii'
+    >>> wf.inputs.in_file = 'reference.nii'
+    >>> wf.inputs.thres = 1.0
     >>> wf.write_graph(format='pdf') # doctest: +SKIP
-    >>> wf.run() # doctest: +SKIP
     """
     _children = dict()
     _outnodes = dict()

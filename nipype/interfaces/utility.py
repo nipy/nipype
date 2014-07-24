@@ -480,7 +480,7 @@ class CollateInterfaceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 class CollateInterface(IOBase):
     """
-    A simple interface to multiplex inputs through a unique output set.
+    A simple interface to multiplex inputs through a unique output node.
     Channel is defined by the prefix of the fields. In order to avoid
     inconsistencies, output fields should be defined forehand at initialization..
 
