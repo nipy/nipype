@@ -152,12 +152,6 @@ class WorkflowBase(object):
         # for compatibility with node expansion using iterables
         self._id = self.name
         self._hierarchy = None
-        # this allows to connect several nodes to an InputMultiNode
-        self._multinput = False
-
-    @property
-    def multinput(self):
-        return self._multinput
 
     @property
     def inputs(self):
@@ -196,6 +190,8 @@ class WorkflowBase(object):
         return hasattr(self.outputs, parameter)
 
     def _check_inputs(self, parameter):
+        if hasattr(self.inputs,'_outputs'):
+            return True
         return hasattr(self.inputs, parameter)
 
     def _verify_name(self, name):
@@ -349,11 +345,11 @@ class Workflow(WorkflowBase):
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if (not destnode.multinput and (dest in connected_ports[destnode])):
-                    raise Exception("""
-Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
-connected.
-""" % (srcnode, source, destnode, dest, dest, destnode))
+                if (dest in connected_ports[destnode]):
+                    msg = ('Trying to connect %s:%s to %s:%s but input \'%s\' of '
+                           'node \'%s\' is already connected.') % (srcnode, source,
+                           destnode, dest, dest, destnode)
+                    raise Exception(msg)
                 if not (hasattr(destnode, '_interface') and
                         '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
@@ -1289,7 +1285,7 @@ class GraftWorkflow(InterfacedWorkflow):
         """
         Initializes the workflow from an existing InterfacedWorkflow
         """
-        from nipype.interfaces.utility import IdentityInterface
+        from nipype.interfaces.utility import IdentityInterface, CollateInterface
         fields_undefined = ((input_names is None) or (output_names is None))
         wf_undefined = (fields_from is None)
         if wf_undefined and fields_undefined:
@@ -1310,6 +1306,7 @@ class GraftWorkflow(InterfacedWorkflow):
         super(GraftWorkflow, self).__init__(name=name, base_dir=base_dir,
                                             input_names=input_names,
                                             output_names=output_names)
+        self._outputnode = Node(CollateInterface(fields=output_names), name='outputnode')
 
     def insert(self, workflow):
         """
@@ -1328,10 +1325,10 @@ class GraftWorkflow(InterfacedWorkflow):
             raise RuntimeError(('Trying to add an existing workflow to '
                                'GraftWorkflow'))
 
+        childname = 'out%02d' % cid
         self._children[ckey] = workflow
-        self._outnodes[ckey] = Node(IdentityInterface(
-                                    fields=self.output_names),
-                                    name='out%02d' % cid)
+        self._outnodes[ckey] = Node(IdentityInterface(fields=self.output_names),
+                                    name=childname)
 
         # Check that interfaces are satisfied
         if ((workflow.input_names != self.input_names) or
@@ -1339,16 +1336,8 @@ class GraftWorkflow(InterfacedWorkflow):
             raise RuntimeError('Workflow does not meet the general interface')
 
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
-                     (self._outnodes[ckey], 'out')])
-
-    #def write_graph(self, *args, **kwargs):
-    #    return super(GraftWorkflow, self).write_graph(*args, **kwargs)
-
-    def run(self, *args, **kwargs):
-        logger.debug('Starting GraftWorkflow %s' % self)
-        runtime = super(GraftWorkflow, self).run(*args, **kwargs)
-        logger.debug('Ending GraftWorkflow %s' % self)
-        return runtime
+                     (self._outnodes[ckey], 'out',
+                      [(key, '%s_%s' % (childname, key)) for key in self.output_names])])
 
 
 class Node(WorkflowBase):
@@ -1728,9 +1717,9 @@ class Node(WorkflowBase):
         This mechanism can be easily extended/replaced to retrieve data from
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
-        logger.debug('Setting node inputs')
+        logger.debug('Setting node %s inputs' % self.name)
         for key, info in self.input_source.items():
-            logger.debug('input: %s' % key)
+            logger.debug('input: %s, info: %s' % (key, str(info)))
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
             results = loadpkl(results_file)
@@ -2019,297 +2008,6 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_header('Environment', level=2))
                 fp.writelines(write_rst_dict(self.result.runtime.environ))
         fp.close()
-
-
-class InputMultiNode(Node):
-    """
-    Wraps interface objects that join nodes into lists of inputs
-
-    Examples
-    --------
-
-    >>> from nipype import InputMultiNode
-    >>> from nipype.interfaces.fsl import Threshold
-    >>> realign = InputMultiNode(spm.Realign(), 'realign')
-    >>> realign.inputs.in_files = 'functional.nii'
-    >>> realign.inputs.register_to_mean = True
-    >>> realign.run() # doctest: +SKIP
-    """
-    def __init__(self, interface, name, **kwargs):
-        """
-
-        Parameters
-        ----------
-        interface : interface object
-            node specific interface (fsl.Bet(), spm.Coregister())
-        name : alphanumeric string
-            node specific name
-
-        See Node docstring for additional keyword arguments.
-        """
-
-        super(InputMultiNode, self).__init__(interface, name, **kwargs)
-        self._multinput = True
-        self.fields = self._interface.inputs.copyable_trait_names()
-        self._inputs = self._override_append_traits(self._interface.inputs,
-                                                    self.fields)
-        self._inputs.on_trait_change(self._set_multinode_input)
-        self._got_inputs = False
-
-    def _override_append_traits(self, basetraits, fields=None, nitems=None):
-        """
-        Convert specific fields of a trait to accept multiple inputs
-        """
-        output = DynamicTraitedSpec()
-        if fields is None:
-            fields = basetraits.copyable_trait_names()
-        for name, spec in basetraits.items():
-            if name in fields and ((nitems is None) or (nitems > 1)):
-                logger.debug('adding multipath trait: %s' % name)
-                output.add_trait(name, InputMultiPath(spec.trait_type))
-            else:
-                output.add_trait(name, traits.Trait(spec))
-            setattr(output, name, Undefined)
-            value = getattr(basetraits, name)
-            if isdefined(value):
-                setattr(output, name, value)
-            value = getattr(output, name)
-        return output
-
-    def set_input(self, parameter, val):
-        """ Set interface input value or nodewrapper attribute
-
-        Priority goes to interface.
-        """
-        logger.debug(('InputMultiNode: setting nodelevel(%s) input '
-                     '%s = %s') % (str(self), parameter, str(val)))
-        self._set_multinode_input(self.inputs, parameter, deepcopy(val))
-
-    def _set_multinode_input(self, object, name, newvalue):
-        logger.debug(('setting multinode(%s) input: %s ->'
-                     ' %s') % (str(self), name, str(newvalue)))
-        if name in self.fields:
-            setattr(self._inputs, name, newvalue)
-        else:
-            setattr(self._interface.inputs, name, newvalue)
-
-    def _get_hashval(self):
-        """ Compute hash including iterfield lists."""
-        if not self._got_inputs:
-            self._get_all_inputs()
-            self._got_inputs = True
-        self._check_iterfield()
-        hashinputs = deepcopy(self._interface.inputs)
-        for name in self.fields:
-            hashinputs.remove_trait(name)
-            hashinputs.add_trait(
-                name,
-                InputMultiPath(
-                    self._interface.inputs.traits()[name].trait_type))
-            logger.debug('setting hashinput %s-> %s' %
-                         (name, getattr(self._inputs, name)))
-            setattr(hashinputs, name, getattr(self._inputs, name))
-        hashed_inputs, hashvalue = hashinputs.get_hashval(
-            hash_method=self.config['execution']['hash_method'])
-        rm_extra = self.config['execution']['remove_unnecessary_outputs']
-        if str2bool(rm_extra) and self.needed_outputs:
-            hashobject = md5()
-            hashobject.update(hashvalue)
-            sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
-            hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
-        return hashed_inputs, hashvalue
-
-    @property
-    def inputs(self):
-        return self._inputs
-
-    @property
-    def outputs(self):
-        if self._interface._outputs():
-            return Bunch(self._interface._outputs().get())
-        else:
-            return None
-
-    def _make_nodes(self, cwd=None):
-        if cwd is None:
-            cwd = self.output_dir()
-        nitems = len(filename_to_list(getattr(self.inputs, self.fields[0])))
-        for i in range(nitems):
-            nodename = '_' + self.name + str(i)
-            node = Node(deepcopy(self._interface), name=nodename)
-            node.overwrite = self.overwrite
-            node.run_without_submitting = self.run_without_submitting
-            node.plugin_args = self.plugin_args
-            node._interface.inputs.set(
-                **deepcopy(self._interface.inputs.get()))
-            for field in self.fields:
-                fieldvals = filename_to_list(getattr(self.inputs, field))
-                logger.debug('setting input %d %s %s' % (i, field,
-                                                         fieldvals[i]))
-                setattr(node.inputs, field,
-                        fieldvals[i])
-            node.config = self.config
-            node.base_dir = os.path.join(cwd, 'mapflow')
-            yield i, node
-
-    def _node_runner(self, nodes, updatehash=False):
-        for i, node in nodes:
-            err = None
-            try:
-                node.run(updatehash=updatehash)
-            except Exception, err:
-                if str2bool(self.config['execution']['stop_on_first_crash']):
-                    self._result = node.result
-                    raise
-            yield i, node, err
-
-    def _collate_results(self, nodes):
-        self._result = InterfaceResult(interface=[], runtime=[],
-                                       provenance=[], inputs=[],
-                                       outputs=self.outputs)
-        returncode = []
-        for i, node, err in nodes:
-            self._result.runtime.insert(i, None)
-            if node.result:
-                if hasattr(node.result, 'runtime'):
-                    self._result.interface.insert(i, node.result.interface)
-                    self._result.inputs.insert(i, node.result.inputs)
-                    self._result.runtime[i] = node.result.runtime
-                if hasattr(node.result, 'provenance'):
-                    self._result.provenance.insert(i, node.result.provenance)
-            returncode.insert(i, err)
-            if self.outputs:
-                for key, _ in self.outputs.items():
-                    rm_extra = (self.config['execution']
-                                ['remove_unnecessary_outputs'])
-                    if str2bool(rm_extra) and self.needed_outputs:
-                        if key not in self.needed_outputs:
-                            continue
-                    values = getattr(self._result.outputs, key)
-                    if not isdefined(values):
-                        values = []
-                    if node.result.outputs:
-                        values.insert(i, node.result.outputs.get()[key])
-                    else:
-                        values.insert(i, None)
-                    defined_vals = [isdefined(val) for val in values]
-                    if any(defined_vals) and self._result.outputs:
-                        setattr(self._result.outputs, key, values)
-        if returncode and any([code is not None for code in returncode]):
-            msg = []
-            for i, code in enumerate(returncode):
-                if code is not None:
-                    msg += ['Subnode %d failed' % i]
-                    msg += ['Error:', str(code)]
-            raise Exception('Subnodes of node: %s failed:\n%s' %
-                            (self.name, '\n'.join(msg)))
-
-    def write_report(self, report_type=None, cwd=None):
-        if not str2bool(self.config['execution']['create_report']):
-            return
-        if report_type == 'preexec':
-            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-        if report_type == 'postexec':
-            super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-            report_dir = os.path.join(cwd, '_report')
-            report_file = os.path.join(report_dir, 'report.rst')
-            fp = open(report_file, 'at')
-            fp.writelines(write_rst_header('Subnode reports', level=1))
-            nitems = len(filename_to_list(
-                getattr(self.inputs, self.fields[0])))
-            subnode_report_files = []
-            for i in range(nitems):
-                nodename = '_' + self.name + str(i)
-                subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
-                                               os.path.join(cwd,
-                                                            'mapflow',
-                                                            nodename,
-                                                            '_report',
-                                                            'report.rst'))
-            fp.writelines(write_rst_list(subnode_report_files))
-            fp.close()
-
-    def get_subnodes(self):
-        if not self._got_inputs:
-            self._get_all_inputs()
-            self._got_inputs = True
-        self._check_iterfield()
-        self.write_report(report_type='preexec', cwd=self.output_dir())
-        return [node for _, node in self._make_nodes()]
-
-    def num_subnodes(self):
-        if not self._got_inputs:
-            self._get_all_inputs()
-            self._got_inputs = True
-        self._check_iterfield()
-        return len(filename_to_list(getattr(self.inputs, self.fields[0])))
-
-    def _get_inputs(self):
-        return self._get_all_inputs()
-
-    def _get_all_inputs(self):
-        old_inputs = self._inputs.get()
-        self._inputs = self._create_dynamic_traits(self._interface.inputs,
-                                                   fields=self.fields)
-        self._inputs.set(**old_inputs)
-        super(MapNode, self)._get_all_inputs()
-
-    def _check_iterfield(self):
-        """Checks iterfield
-
-        * iterfield must be in inputs
-        * number of elements must match across iterfield
-        """
-        for iterfield in self.fields:
-            if not isdefined(getattr(self.inputs, iterfield)):
-                raise ValueError(("Input %s was not set but it is listed "
-                                  "in iterfields.") % iterfield)
-        if len(self.fields) > 1:
-            first_len = len(filename_to_list(getattr(self.inputs,
-                                                     self.fields[0])))
-            for iterfield in self.fields[1:]:
-                if first_len != len(filename_to_list(getattr(self.inputs,
-                                                             iterfield))):
-                    raise ValueError(("All iterfields of a MapNode have to "
-                                      "have the same length. %s") %
-                                     str(self.inputs))
-
-    def _run_interface(self, execute=True, updatehash=False):
-        """Run the mapnode interface
-
-        This is primarily intended for serial execution of mapnode. A parallel
-        execution requires creation of new nodes that can be spawned
-        """
-
-        old_cwd = os.getcwd()
-        cwd = self.output_dir()
-        os.chdir(cwd)
-        self._check_iterfield()
-        logger.debug('InputMultiNode.execute=%s' % execute)
-        if execute:
-            nitems = len(filename_to_list(getattr(self.inputs,
-                                                  self.fields[0])))
-            logger.debug('found %d items to iterate' % nitems)
-            nodenames = ['_' + self.name + str(i) for i in range(nitems)]
-            # map-reduce formulation
-            self._collate_results(self._node_runner(self._make_nodes(cwd),
-                                                    updatehash=updatehash))
-            self._save_results(self._result, cwd)
-            # remove any node directories no longer required
-            dirs2remove = []
-            for path in glob(os.path.join(cwd, 'mapflow', '*')):
-                if os.path.isdir(path):
-                    if path.split(os.path.sep)[-1] not in nodenames:
-                        dirs2remove.append(path)
-            for path in dirs2remove:
-                shutil.rmtree(path)
-        else:
-            self._result = self._load_results(cwd)
-        os.chdir(old_cwd)
-
-
 
 
 class JoinNode(Node):

@@ -464,3 +464,87 @@ class AssertEqual(BaseInterface):
         assert_equal(data1, data2)
 
         return runtime
+
+class CollateInterfaceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(CollateInterfaceInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(CollateInterfaceInputSpec, self).__setattr__(key, value)
+
+class CollateInterface(IOBase):
+    """
+    A simple interface to multiplex inputs through a unique output set.
+    Channel is defined by the prefix of the fields. In order to avoid
+    inconsistencies, output fields should be defined forehand at initialization..
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.utility import CollateInterface
+    >>> coll = CollateInterface(fields=['file','miscdata'])
+    >>> coll.inputs.src1_file = 'scores.csv'
+    >>> coll.inputs.src2_file = 'scores2.csv'
+    >>> coll.inputs.src1_miscdata = 1.0
+    >>> coll.inputs.src2_miscdata = 2.0
+    >>> coll.run() # doctest: +SKIP
+    """
+
+    input_spec = CollateInterfaceInputSpec
+    output_spec = DynamicTraitedSpec
+
+    def __init__(self, fields=None, fill_missing=False, **kwargs):
+        super(CollateInterface, self).__init__(**kwargs)
+
+        if fields is None or not fields:
+            raise ValueError('CollateInterface fields must be a non-empty list')
+        # Each input must be in the fields.
+        self._fields = fields
+        self._fill_missing = fill_missing
+
+    def _add_output_traits(self, base):
+        undefined_traits = {}
+        for key in self._fields:
+            base.add_trait(key, traits.Any)
+            undefined_traits[key] = Undefined
+        base.trait_set(trait_change_notify=False, **undefined_traits)
+        return base
+
+    def _list_outputs(self):
+        #manual mandatory inputs check
+        valuedict = dict( (key, {}) for key in self._fields)
+        nodekeys = []
+
+        for inputkey, inputval in self.inputs._outputs.items():
+            for key in self._fields:
+                if inputkey.endswith(key):
+                    nodekey = inputkey[::-1].replace(key[::-1], '', 1)[::-1]
+                    nodekeys.append(nodekey)
+
+                    if nodekey in valuedict[key].keys():
+                        msg = ('Trying to add field from existing node')
+                        raise ValueError(msg)
+                    valuedict[key][nodekey] = inputval
+
+        nodekeys = sorted(set(nodekeys))
+        outputs = self._outputs().get()
+        for key in self._fields:
+            outputs[key] = []
+            for nk in nodekeys:
+
+                if nk in valuedict[key]:
+                    val = valuedict[key][nk]
+                else:
+                    if self._fill_missing:
+                        val = None
+                    else:
+                        raise RuntimeError('Input missing for field to collate.')
+                outputs[key].append(val)
+
+        return outputs
