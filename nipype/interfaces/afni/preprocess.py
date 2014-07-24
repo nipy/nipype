@@ -609,7 +609,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
