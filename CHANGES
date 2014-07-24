@@ -15,6 +15,7 @@ Next Release
 * ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
 * ENH: New data grabbing interface that works over SSH connections, SSHDataGrabber
 * ENH: New color mode for write_graph
+* ENH: You can now force MapNodes to be run serially
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 * FIX: FNIRT registration pathway and associated OpenFMRI example script
 
