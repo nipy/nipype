@@ -2008,7 +2008,7 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, iterfield, name, **kwargs):
+    def __init__(self, interface, iterfield, name, serial=False, **kwargs):
         """
 
         Parameters
@@ -2022,9 +2022,12 @@ class MapNode(Node):
             paired (i.e. it does not compute a combinatorial product).
         name : alphanumeric string
             node specific name
-
+        serial : boolean
+            flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
         See Node docstring for additional keyword arguments.
         """
+
+
         super(MapNode, self).__init__(interface, name, **kwargs)
         if isinstance(iterfield, str):
             iterfield = [iterfield]
@@ -2033,6 +2036,8 @@ class MapNode(Node):
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
         self._got_inputs = False
+        
+        self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
@@ -2223,7 +2228,10 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+        if self._serial :
+            return 1
+        else:
+            return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
         old_inputs = self._inputs.get()
