@@ -1,9 +1,10 @@
 Next Release
 ============
 
-* API: Interfaces to external packages are no longer available in the top-level ``nipype`` namespace, and must be imported directly (e.g. ``from nipype.interfaces import fsl``).
-* ENH: nipy.utils.Similarity has been deprecated by algorithms.metrics.Similarity
-       which is an extension of the former to allow 4D images.
+* API: Interfaces to external packages are no longer available in the top-level
+       ``nipype`` namespace, and must be imported directly (e.g.
+       ``from nipype.interfaces import fsl``).
+* ENH: New FSL interface: ProbTrackX2
 * ENH: New ANTs interface: ApplyTransformsToPoints
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
        are found in nipype.algorithms.metrics instead of misc
@@ -33,7 +34,8 @@ Release 0.9.0 (December 20, 2013)
 * ENH: new tools for defining workflows: JoinNode, synchronize and itersource
 * ENH: W3C PROV support with optional RDF export built into Nipype
 * ENH: Added support for Simple Linux Utility Resource Management (SLURM)
-* ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
+* ENH: AFNI interfaces refactor, prefix, suffix are replaced by
+       "flexible_%s_templates"
 * ENH: New SPM interfaces:
 		- spm.ResliceToReference,
 		- spm.DicomImport
