@@ -1275,14 +1275,14 @@ class GraftWorkflow(InterfacedWorkflow):
     >>> wf.inputs.thresh = 1.0
     >>> wf.run() # doctest: +SKIP
     """
-    _children = dict()
-    _outnodes = dict()
 
     def __init__(self, name, base_dir=None, fields_from=None,
                  input_names=[], output_names=[]):
         """
         Initializes the workflow from an existing InterfacedWorkflow
         """
+        _children = dict()
+        _outnodes = dict()
         from nipype.interfaces.utility import IdentityInterface, CollateInterface
         fields_undefined = ((input_names is None) or (output_names is None))
         wf_undefined = (fields_from is None)
