@@ -1282,6 +1282,7 @@ class GraftWorkflow(InterfacedWorkflow):
         Initializes the workflow from an existing InterfacedWorkflow
         """
         self._children = dict()
+        self._cids = dict()
         self._outnodes = dict()
         from nipype.interfaces.utility import IdentityInterface, CollateInterface
         fields_undefined = ((input_names is None) or (output_names is None))
@@ -1306,6 +1307,9 @@ class GraftWorkflow(InterfacedWorkflow):
                                             output_names=output_names)
         self._outputnode = Node(CollateInterface(fields=output_names), name='outputnode')
 
+    def get_cid(self, name):
+        return self.cids[name]
+
     def insert(self, workflow):
         """
         Inserts an InterfacedWorkflow into the workflow
@@ -1325,6 +1329,7 @@ class GraftWorkflow(InterfacedWorkflow):
 
         childname = 'out%02d' % cid
         self._children[ckey] = workflow
+        self._cids[ckey] = cid
         self._outnodes[ckey] = Node(IdentityInterface(fields=self.output_names),
                                     name=childname)
 
@@ -1336,7 +1341,6 @@ class GraftWorkflow(InterfacedWorkflow):
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
                      (self._outnodes[ckey], 'out',
                       [(key, '%s_%s' % (childname, key)) for key in self.output_names])])
-        return cid
 
 
 class Node(WorkflowBase):
