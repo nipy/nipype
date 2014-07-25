@@ -301,7 +301,7 @@ try:
     from build_docs import cmdclass
 except ImportError:
     """ Pass by the doc build gracefully if sphinx is not installed """
-    print "Sphinx is not installed, docs cannot be built"
+    print("Sphinx is not installed, docs cannot be built")
     cmdclass = {}
 
 
