@@ -190,7 +190,7 @@ class WorkflowBase(object):
         return hasattr(self.outputs, parameter)
 
     def _check_inputs(self, parameter):
-        if hasattr(self.inputs,'_outputs'):
+        if isinstance(self.inputs, DynamicTraitedSpec):
             return True
         return hasattr(self.inputs, parameter)
 
