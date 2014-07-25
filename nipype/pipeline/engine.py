@@ -1308,7 +1308,7 @@ class GraftWorkflow(InterfacedWorkflow):
         self._outputnode = Node(CollateInterface(fields=output_names), name='outputnode')
 
     def get_cid(self, name):
-        return self.cids[name]
+        return self._cids[name]
 
     def insert(self, workflow):
         """
@@ -1341,6 +1341,7 @@ class GraftWorkflow(InterfacedWorkflow):
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
                      (self._outnodes[ckey], 'out',
                       [(key, '%s_%s' % (childname, key)) for key in self.output_names])])
+        return cid
 
 
 class Node(WorkflowBase):
