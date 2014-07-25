@@ -1336,6 +1336,7 @@ class GraftWorkflow(InterfacedWorkflow):
         self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
                      (self._outnodes[ckey], 'out',
                       [(key, '%s_%s' % (childname, key)) for key in self.output_names])])
+        return cid
 
 
 class Node(WorkflowBase):
