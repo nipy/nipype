@@ -254,7 +254,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
             desc=('Tissue probability priors corresponding to areas defined by'
             'template image: orders as followes: '
             '1-CSF 2-Cortical GM 3-WM 4-Deep GM'),
-            mandatory=True, copyfile=False)
+            mandatory=True)
     out_prefix = traits.Str('antsCT_', argstr='-o %s', usedefault=True,
                              desc=('Prefix that is prepended to all output'
                                    ' files (default = antsCT_)'))
