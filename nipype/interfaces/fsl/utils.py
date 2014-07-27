@@ -1629,7 +1629,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                                 'coordinates in the next space.'))
 
     out_abswarp = traits.Bool(argstr='--absout', xor=['out_relwarp'],
-                          desc=('If set it indicates that the warps in --out should be absolut, i.e. '
+                          desc=('If set it indicates that the warps in --out should be absolute, i.e. '
                                 'the values in --out are displacements from the coordinates in --ref.'))
 
     out_relwarp = traits.Bool(argstr='--relout', xor=['out_abswarp'],
