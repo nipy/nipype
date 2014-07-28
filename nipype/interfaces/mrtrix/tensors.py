@@ -304,8 +304,8 @@ class GenerateDirectionsInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-    out_file = File("directions.txt", argstr='%s', hash_files=False,
-                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.', usedefault=True)
+    out_file = File(name_source=['num_dirs'], name_template='directions_%d.txt', argstr='%s', hash_files=False,
+                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.')
 
 class GenerateDirectionsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='directions file')
@@ -327,10 +327,10 @@ class GenerateDirections(CommandLine):
     input_spec=GenerateDirectionsInputSpec
     output_spec=GenerateDirectionsOutputSpec
 
-    
+
 class FindShPeaksInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='the input image of SH coefficients.')
-    directions_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the set of directions to use as seeds for the peak finding')    
+    directions_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the set of directions to use as seeds for the peak finding')
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
@@ -342,7 +342,7 @@ class FindShPeaksInputSpec(CommandLineInputSpec):
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
                     desc='the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn', name_source=["in_file"])
-    
+
 class FindShPeaksOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Peak directions image')
 
@@ -368,7 +368,7 @@ class FindShPeaks(CommandLine):
 
 
 class Directions2AmplitudeInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')    
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
@@ -379,7 +379,7 @@ class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
                     desc='the output amplitudes image', name_source=["in_file"])
-    
+
 class Directions2AmplitudeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='amplitudes image')
 

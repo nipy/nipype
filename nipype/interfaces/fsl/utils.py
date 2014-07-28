@@ -594,7 +594,7 @@ class OverlayInputSpec(FSLCommandInputSpec):
     background_image = File(exists=True, position=4, mandatory=True,
                             argstr='%s', desc='image to use as background')
     _xor_inputs = ('auto_thresh_bg', 'full_bg_range', 'bg_thresh')
-    auto_thresh_bg = traits.Bool(desc=('automatically threhsold the background '
+    auto_thresh_bg = traits.Bool(desc=('automatically threshold the background '
                                        'image'),
                                  argstr='-a', position=5,
                                  xor=_xor_inputs, mandatory=True)
@@ -705,10 +705,10 @@ class SlicerInputSpec(FSLCommandInputSpec):
     threshold_edges = traits.Float(position=6, argstr='-e %.3f',
                                    desc='use threshold for edges')
     dither_edges = traits.Bool(position=7, argstr='-t',
-                               desc=('produce semi-transparaent (dithered) '
+                               desc=('produce semi-transparent (dithered) '
                                      'edges'))
     nearest_neighbour = traits.Bool(position=8, argstr='-n',
-                                    desc=('use nearest neighbour interpolation '
+                                    desc=('use nearest neighbor interpolation '
                                           'for output'))
     show_orientation = traits.Bool(position=9, argstr='%s', usedefault=True,
                                    default_value=True,
@@ -722,7 +722,7 @@ class SlicerInputSpec(FSLCommandInputSpec):
     slice_number = traits.Int(position=11, argstr='-%d',
                               desc='slice number to save in picture')
     middle_slices = traits.Bool(position=10, argstr='-a', xor=_xor_options,
-                                desc=('output picture of mid-sagital, axial, '
+                                desc=('output picture of mid-sagittal, axial, '
                                       'and coronal slices'))
     all_axial = traits.Bool(position=10, argstr='-A', xor=_xor_options,
                             requires=['image_width'],
@@ -1291,7 +1291,7 @@ class InvWarpInputSpec(FSLCommandInputSpec):
                        desc=('Determines how many iterations of the '
                              'gradient-descent search that should be run.'))
     regularise = traits.Float(argstr='--regularise=%f',
-                              desc='Regularisation strength (deafult=1.0).')
+                              desc='Regularization strength (deafult=1.0).')
     noconstraint = traits.Bool(argstr='--noconstraint',
                                desc='Do not apply Jacobian constraint')
     jacobian_min = traits.Float(argstr='--jmin=%f',
@@ -1474,18 +1474,19 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
 
     warp_resolution = traits.Tuple(traits.Float, traits.Float, traits.Float,
                                    argstr='--warpres=%0.4f,%0.4f,%0.4f',
-                                   desc=('Specifes the resolution/knot-spacing of the splines pertaining to '
-                                         'the coefficients in the --out file. This parameter is only relevant '
-                                         'if --outformat is set to spline. It should be noted that if the '
-                                         '--in file has a higher resolution, the resulting coefficents will '
-                                         'pertain to the closest (in a least-squares sense) file in the space '
-                                         'of fields with the --warpres resolution. It should also be noted '
-                                         'that the resolution will always be an integer multiple of the voxel '
+                                   desc=('Specifies the resolution/knot-spacing of the splines pertaining '
+                                         'to the coefficients in the --out file. This parameter is only '
+                                         'relevant if --outformat is set to spline. It should be noted '
+                                         'that if the --in file has a higher resolution, the resulting '
+                                         'coefficients will pertain to the closest (in a least-squares'
+                                         ' sense) file in the space of fields with the --warpres'
+                                         ' resolution. It should also be noted that the resolution '
+                                         'will always be an integer multiple of the voxel '
                                          'size.'))
 
     knot_space = traits.Tuple(traits.Int, traits.Int, traits.Int,
                               argstr='--knotspace=%d,%d,%d',
-                              desc=('Alternative (to --warpres) specifikation of the resolution of '
+                              desc=('Alternative (to --warpres) specification of the resolution of '
                                     'the output spline-field.'))
 
     out_file = File(argstr='--out=%s', position=-1, name_source = ['in_file'], output_name='out_file',
@@ -1575,11 +1576,11 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                   desc='filename for pre-transform (affine matrix)')
 
     warp1 = File(exists=True, argstr='--warp1=%s',
-                 desc=('Name of file containing inital warp-fields/coefficients (follows premat). This could e.g. be a '
+                 desc=('Name of file containing initial warp-fields/coefficients (follows premat). This could e.g. be a '
                        'fnirt-transform from a subjects structural scan to an average of a group '
                        'of subjects.'))
-    
-    midmat=File(exists=True, argstr="--midmat=%s", 
+
+    midmat=File(exists=True, argstr="--midmat=%s",
                 desc="Name of file containing mid-warp-affine transform")
 
     warp2 = File(exists=True, argstr='--warp2=%s',
