@@ -1575,23 +1575,26 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                   desc='filename for pre-transform (affine matrix)')
 
     warp1 = File(exists=True, argstr='--warp1=%s',
-                 desc=('Name of file containing warp-fields/coefficients. This could e.g. be a '
+                 desc=('Name of file containing inital warp-fields/coefficients (follows premat). This could e.g. be a '
                        'fnirt-transform from a subjects structural scan to an average of a group '
                        'of subjects.'))
+    
+    midmat=File(exists=True, argstr="--midmat=%s", 
+                desc="Name of file containing mid-warp-affine transform")
 
     warp2 = File(exists=True, argstr='--warp2=%s',
-                 desc=('Name of file containing warp-fields/coefficients. This could e.g. be a '
+                 desc=('Name of file containing secondary warp-fields/coefficients (after warp1/midmat but before postmat). This could e.g. be a '
                        'fnirt-transform from the average of a group of subjects to some standard '
                        'space (e.g. MNI152).'))
 
     postmat = File(exists=True, argstr='--postmat=%s',
-                   desc=('Name of file containing an affine transform. It could e.g. be an affine '
+                   desc=('Name of file containing an affine transform (applied last). It could e.g. be an affine '
                          'transform that maps the MNI152-space into a better approximation to the '
                          'Talairach-space (if indeed there is one).'))
 
     shift_in_file = File(exists=True, argstr='--shiftmap=%s',
                          desc=('Name of file containing a "shiftmap", a non-linear transform with '
-                               'displacements only in one direction. This would typically be a '
+                               'displacements only in one direction (applied first, before premat). This would typically be a '
                                'fieldmap that has been pre-processed using fugue that maps a '
                                'subjects functional (EPI) data onto an undistorted space (i.e. a space '
                                'that corresponds to his/her true anatomy).'))
@@ -1626,12 +1629,12 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                                 'coordinates in the next space.'))
 
     out_abswarp = traits.Bool(argstr='--absout', xor=['out_relwarp'],
-                          desc=('If set it indicates that the warps in --out should be relative, i.e. '
-                                'the vaulues in --out are displacements from the coordinates in --ref.'))
+                          desc=('If set it indicates that the warps in --out should be absolute, i.e. '
+                                'the values in --out are displacements from the coordinates in --ref.'))
 
     out_relwarp = traits.Bool(argstr='--relout', xor=['out_abswarp'],
                           desc=('If set it indicates that the warps in --out should be relative, i.e. '
-                                'the vaulues in --out are displacements from the coordinates in --ref.'))
+                                'the values in --out are displacements from the coordinates in --ref.'))
 
 
 class ConvertWarpOutputSpec(TraitedSpec):
