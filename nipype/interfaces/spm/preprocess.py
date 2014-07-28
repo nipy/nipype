@@ -666,7 +666,7 @@ class NewSegmentInputSpec(SPMCommandInputSpec):
             - tissue probability map (4D), 1-based index to frame
             - number of gaussians
             - which maps to save [Native, DARTEL] - a tuple of two boolean values
-            - which maps to save [Modulated, Unmodualted] - a tuple of two boolean values""",
+            - which maps to save [Unmodulated, Modulated] - a tuple of two boolean values""",
             field='tissue')
     affine_regularization = traits.Enum('mni', 'eastern', 'subj', 'none', field='warp.affreg',
                       desc='mni, eastern, subj, none ')

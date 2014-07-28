@@ -1104,7 +1104,9 @@ def create_reg_workflow(name='registration'):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=['source_files',
                                                                  'mean_image',
                                                                  'anatomical_image',
-                                                                 'target_image']),
+                                                                 'target_image',
+                                                                 'target_image_brain',
+                                                                 'config_file']),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['func2anat_transform',
                                                               'anat2target_transform',
@@ -1154,15 +1156,20 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'mean_image', mean2anatbbr, 'in_file')
     register.connect(binarize, 'out_file', mean2anatbbr, 'wm_seg')
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
-    register.connect(mean2anat, 'out_matrix_file', mean2anatbbr, 'in_matrix_file')
+    register.connect(mean2anat, 'out_matrix_file',
+                     mean2anatbbr, 'in_matrix_file')
 
     """
     Calculate affine transform from anatomical to target
     """
 
     anat2target_affine = pe.Node(fsl.FLIRT(), name='anat2target_linear')
-    register.connect(inputnode, 'anatomical_image', anat2target_affine, 'in_file')
-    register.connect(inputnode, 'target_image', anat2target_affine, 'reference')
+    anat2target_affine.inputs.searchr_x = [-180, 180]
+    anat2target_affine.inputs.searchr_y = [-180, 180]
+    anat2target_affine.inputs.searchr_z = [-180, 180]
+    register.connect(stripper, 'out_file', anat2target_affine, 'in_file')
+    register.connect(inputnode, 'target_image_brain',
+                     anat2target_affine, 'reference')
 
     """
     Calculate nonlinear transform from anatomical to target
@@ -1172,8 +1179,10 @@ def create_reg_workflow(name='registration'):
     anat2target_nonlinear.inputs.fieldcoeff_file=True
     register.connect(anat2target_affine, 'out_matrix_file',
                      anat2target_nonlinear, 'affine_file')
-    anat2target_nonlinear.inputs.warp_resolution = (8, 8, 8)
-    register.connect(inputnode, 'anatomical_image', anat2target_nonlinear, 'in_file')
+    register.connect(inputnode, 'anatomical_image',
+                     anat2target_nonlinear, 'in_file')
+    register.connect(inputnode, 'config_file',
+                     anat2target_nonlinear, 'config_file')
     register.connect(inputnode, 'target_image',
                      anat2target_nonlinear, 'ref_file')
 
@@ -1181,13 +1190,9 @@ def create_reg_workflow(name='registration'):
     Transform the mean image. First to anatomical and then to target
     """
 
-    warp2anat = pe.Node(fsl.ApplyWarp(interp='spline'), name='warp2anat')
-    register.connect(inputnode, 'mean_image', warp2anat, 'in_file')
-    register.connect(inputnode, 'anatomical_image', warp2anat, 'ref_file')
-    register.connect(mean2anatbbr, 'out_matrix_file', warp2anat, 'premat')
-
-    warpmean = warp2anat.clone(name='warpmean')
-    register.connect(warp2anat, 'out_file', warpmean, 'in_file')
+    warpmean = pe.Node(fsl.ApplyWarp(interp='spline'), name='warpmean')
+    register.connect(inputnode, 'mean_image', warpmean, 'in_file')
+    register.connect(mean2anatbbr, 'out_matrix_file', warpmean, 'premat')
     register.connect(inputnode, 'target_image', warpmean, 'ref_file')
     register.connect(anat2target_nonlinear, 'fieldcoeff_file',
                      warpmean, 'field_file')
@@ -1196,15 +1201,11 @@ def create_reg_workflow(name='registration'):
     Transform the remaining images. First to anatomical and then to target
     """
 
-    warpall2anat = pe.MapNode(fsl.ApplyWarp(interp='spline'),
-                              iterfield=['in_file'],
-                              name='warpall2anat')
-    register.connect(inputnode, 'source_files', warpall2anat, 'in_file')
-    register.connect(inputnode, 'anatomical_image', warpall2anat, 'ref_file')
-    register.connect(mean2anatbbr, 'out_matrix_file', warpall2anat, 'premat')
-
-    warpall = warpall2anat.clone(name='warpall')
-    register.connect(warpall2anat, 'out_file', warpall, 'in_file')
+    warpall = pe.MapNode(fsl.ApplyWarp(interp='spline'),
+                         iterfield=['in_file'],
+                         name='warpall')
+    register.connect(inputnode, 'source_files', warpall, 'in_file')
+    register.connect(mean2anatbbr, 'out_matrix_file', warpall, 'premat')
     register.connect(inputnode, 'target_image', warpall, 'ref_file')
     register.connect(anat2target_nonlinear, 'fieldcoeff_file',
                      warpall, 'field_file')

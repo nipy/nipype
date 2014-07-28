@@ -65,8 +65,8 @@ class SGEGraphPlugin(GraphPluginBase):
                 if idx in dependencies:
                     values = ' '
                     for jobid in dependencies[idx]:
-                        values += 'job%05d,' % jobid
-                    if 'job' in values:
+                        values += '${job%05d},' % jobid
+                    if values != ' ': # i.e. if some jobs were added to dependency list
                         values = values.rstrip(',')
                         deps = '-hold_jid%s' % values
                 jobname = 'job%05d' % (idx)
@@ -79,7 +79,7 @@ class SGEGraphPlugin(GraphPluginBase):
                 if self._qsub_args.count('-o ') == 0:
                         stdoutFile = '-o {outFile}'.format(
                             outFile=batchscriptoutfile)
-                full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript})\n'.format(
+                full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk \'{{print $3}}\')\n'.format(
                     jobNm=jobname,
                     outFileOption=stdoutFile,
                     errFileOption=stderrFile,

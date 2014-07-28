@@ -11,7 +11,7 @@ from .resampling import ApplyTransforms, ApplyTransformsToPoints, WarpImageMulti
 
 
 # Segmentation Programs
-from .segmentation import Atropos, N4BiasFieldCorrection
+from .segmentation import Atropos, LaplacianThickness, N4BiasFieldCorrection
 
 # Utility Programs
 from .utils import AverageAffineTransform, AverageImages, MultiplyImages, JacobianDeterminant
