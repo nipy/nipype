@@ -346,7 +346,7 @@ class Identifier(object):
 
     def json_representation(self):
         return {'$': self._uri, 'type': u'xsd:anyURI'}
-    
+
     def rdf_representation(self):
         return URIRef(self.get_uri())
 
@@ -787,7 +787,7 @@ class ProvRecord(object):
                     pred = attr.rdf_representation()
                 graph.add((subj, pred, obj))
         return graph
-        
+
     def is_asserted(self):
         return self._asserted
 
@@ -802,7 +802,7 @@ class ProvRecord(object):
 class ProvElement(ProvRecord):
     def is_element(self):
         return True
-    
+
     def rdf(self, graph=None):
         if graph is None:
             graph = Graph()
@@ -1673,15 +1673,15 @@ class ProvBundle(ProvEntity):
             # graph should not None here
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
-        
+
         for prefix, namespace in self._namespaces.items():
             graph.bind(prefix, namespace.get_uri())
-        
+
         for record in self._records:
             if record.is_asserted():
                 record.rdf(graph)
         return graph
-    
+
     def get_provjson(self, **kw):
         """Return the `PROV-JSON <http://www.w3.org/Submission/prov-json/>`_ representation for the bundle/document.
 
