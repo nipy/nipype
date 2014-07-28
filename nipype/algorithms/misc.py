@@ -1190,20 +1190,20 @@ class AddCSVRow(BaseInterface):
     """
     input_spec = AddCSVRowInputSpec
     output_spec = AddCSVRowOutputSpec
-    _have_lock = False
-    _lock = None
 
     def __init__(self, infields=None, force_run=True, **kwargs):
         super(AddCSVRow, self).__init__(**kwargs)
         undefined_traits = {}
         self._infields = infields
+        self._have_lock = False
+        self._lock = None
 
         if infields:
             for key in infields:
                 self.inputs.add_trait( key, traits.Any )
                 self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
-        self.inputs.trait_set( trait_change_notify=False, **undefined_traits )
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits )
 
         if force_run:
             self._always_run = True
@@ -1222,10 +1222,7 @@ class AddCSVRow(BaseInterface):
             warnings.warn(('Python module lockfile was not found: AddCSVRow will not be thread-safe '
                           'in multi-processor execution'))
 
-
-
         input_dict = {}
-
         for key, val in self.inputs._outputs.items():
             # expand lists to several columns
             if isinstance(val, list):
