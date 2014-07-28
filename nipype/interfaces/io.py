@@ -688,7 +688,7 @@ class SelectFiles(IOBase):
             # Handle the case where nothing matched
             if not filelist:
                 msg = "No files were found matching %s template: %s" % (
-                    field, template)
+                    field, filled_template)
                 if self.inputs.raise_on_empty:
                     raise IOError(msg)
                 else:
