@@ -6,21 +6,19 @@ interfaces were written to work with niftyreg version 1.4
 """
 
 import os
-import os.path as op
 import warnings
 
 from nipype.interfaces.niftyreg.base import NIFTYREGCommand, NIFTYREGCommandInputSpec
 
-from nipype.interfaces.base import (TraitedSpec, File, 
+from nipype.interfaces.base import (TraitedSpec,
+                                    File, 
                                     InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
-                                    isdefined, OutputMultiPath)
+                                    traits,
+                                    isdefined)
 
-from nipype.utils.filemanip import split_filename, fname_presuffix
 
 from nipype.interfaces.niftyreg.base import Info
 
-from nibabel import load
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -184,27 +182,6 @@ class RegTools(NIFTYREGCommand):
     _cmd = 'reg_tools'
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
-
-#-----------------------------------------------------------
-# reg_measure wrapper interface
-#-----------------------------------------------------------
-class RegMeasureInputSpec(NIFTYREGCommandInputSpec):
-    ref_file = File(exists=True, desc='The input reference/target image',
-                    argstr='-ref %s', mandatory=True)
-    flo_file = File(exists=True, desc='The input floating/source image',
-                    argstr='-flo %s', mandatory=True)
-    ncc_flag = traits.Bool(argstr='-ncc', desc='Compute NCC')
-    lncc_flag = traits.Bool(argstr='-lncc', desc='Compute LNCC')
-    nmi_flag = traits.Bool(argstr='-nmi', desc='Compute NMI')
-    ssd_flag = traits.Bool(argstr='-ssd', desc='Compute SSD')
-
-class RegMeasureOutputSpec(TraitedSpec):
-    pass
-
-class RegMeasure(NIFTYREGCommand):
-    _cmd = 'reg_measure'
-    input_spec = RegMeasureInputSpec
-    output_spec = RegMeasureOutputSpec 
 
 #-----------------------------------------------------------
 # reg_average wrapper interface
@@ -732,15 +709,46 @@ class RegF3D(NIFTYREGCommand):
         ret = os.path.basename(in_file)
         ret = ret.replace('.nii.gz', '')
         ret = ret.replace('.nii', '')
+        ret = ret.replace('.img.gz', '')
+        ret = ret.replace('.img.bz2', '')
+        ret = ret.replace('.img', '')
+        ret = ret.replace('.hdr', '')
         return ret
 
     def _list_outputs(self):
         outputs = super(RegF3D, self)._list_outputs()
         basename = self._get_basename_without_extension (outputs['cpp_file'])
         outputs['invcpp_file'] = os.path.abspath (basename + '_backward.nii.gz')
-
         # Make a list of the linear transformation file and the input image
         outputs['avg_output'] = os.path.abspath(outputs['cpp_file']) + ' ' + os.path.abspath(self.inputs.flo_file)
 
         return outputs
         
+
+#-----------------------------------------------------------
+# reg_measure wrapper interface
+#-----------------------------------------------------------
+# Input spec
+class RegMeasureInputSpec(NIFTYREGCommandInputSpec):
+    # Input reference file
+    ref_file = File(exists=True, desc='The input reference/target image',
+                    argstr='-ref %s', mandatory=True)
+    # Input floating file
+    flo_file = File(exists=True, desc='The input floating/source image',
+                    argstr='-flo %s', mandatory=True)
+    measure_type = traits.Enum('ncc', 'lncc', 'nmi', 'ssd',
+                               mandatory=True, argstr='-%s',
+                               desc='Measure of similarity to compute')
+    out_file = File(desc='The output text file containing the measure',
+                    argstr='-out %s', name_source = ['flo_file'],
+                    name_template = '%s_measure.txt', keep_extension=True)
+
+# Output spec
+class RegMeasureOutputSpec(TraitedSpec):
+    out_file = File(desc='The output text file containing the measure')
+
+# Main interface class
+class RegMeasure(NIFTYREGCommand):
+    _cmd = 'reg_measure'
+    input_spec = RegMeasureInputSpec
+    output_spec = RegMeasureOutputSpec
