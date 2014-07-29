@@ -835,10 +835,10 @@ class AddCSVRow(BaseInterface):
 
         if infields:
             for key in infields:
-                self.inputs.add_trait( key, traits.Any )
+                self.inputs.add_trait(key, traits.Any)
                 self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
-        self.inputs.trait_set(trait_change_notify=False, **undefined_traits )
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
         if force_run:
             self._always_run = True
@@ -876,7 +876,7 @@ class AddCSVRow(BaseInterface):
 
         if op.exists(self.inputs.in_file):
             formerdf = pd.read_csv(self.inputs.in_file, index_col=0)
-            df = pd.concat( [formerdf, df], ignore_index=True )
+            df = pd.concat([formerdf, df], ignore_index=True )
 
         with open(self.inputs.in_file, 'w') as f:
             df.to_csv(f)
