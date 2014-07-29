@@ -64,10 +64,10 @@ class PickAtlasOutputSpec(TraitedSpec):
 
 
 class PickAtlas(BaseInterface):
-    '''
-    Returns ROI masks given an atlas and a list of labels. Supports dilation
+    """Returns ROI masks given an atlas and a list of labels. Supports dilation
     and left right masking (assuming the atlas is properly aligned).
-    '''
+    """
+
     input_spec = PickAtlasInputSpec
     output_spec = PickAtlasOutputSpec
 
@@ -132,6 +132,8 @@ class SimpleThresholdOutputSpec(TraitedSpec):
 
 
 class SimpleThreshold(BaseInterface):
+    """Applies a threshold to input volumes
+    """
     input_spec = SimpleThresholdInputSpec
     output_spec = SimpleThresholdOutputSpec
 
@@ -182,10 +184,9 @@ class ModifyAffineOutputSpec(TraitedSpec):
 
 
 class ModifyAffine(BaseInterface):
-    '''
-    Left multiplies the affine matrix with a specified values. Saves the volume
+    """Left multiplies the affine matrix with a specified values. Saves the volume
     as a nifti file.
-    '''
+    """
     input_spec = ModifyAffineInputSpec
     output_spec = ModifyAffineOutputSpec
 
@@ -225,6 +226,8 @@ class CreateNiftiOutputSpec(TraitedSpec):
 
 
 class CreateNifti(BaseInterface):
+    """Creates a nifti volume
+    """
     input_spec = CreateNiftiInputSpec
     output_spec = CreateNiftiOutputSpec
 
@@ -344,8 +347,7 @@ class GunzipOutputSpec(TraitedSpec):
 
 
 class Gunzip(BaseInterface):
-    """
-
+    """Gunzip wrapper
     """
     input_spec = GunzipInputSpec
     output_spec = GunzipOutputSpec
@@ -409,8 +411,7 @@ class Matlab2CSVOutputSpec(TraitedSpec):
 
 
 class Matlab2CSV(BaseInterface):
-    """
-    Simple interface to save the components of a MATLAB .mat file as a text
+    """Simple interface to save the components of a MATLAB .mat file as a text
     file with comma-separated values (CSVs).
 
     CSV files are easily loaded in R, for use in statistical processing.
@@ -602,8 +603,7 @@ class MergeCSVFilesOutputSpec(TraitedSpec):
 
 
 class MergeCSVFiles(BaseInterface):
-    """
-    This interface is designed to facilitate data loading in the R environment.
+    """This interface is designed to facilitate data loading in the R environment.
     It takes input CSV files and merges them into a single CSV file.
     If provided, it will also incorporate column heading names into the
     resulting CSV file.
@@ -738,8 +738,7 @@ class AddCSVColumnOutputSpec(TraitedSpec):
 
 
 class AddCSVColumn(BaseInterface):
-    """
-    Short interface to add an extra column and field to a text file
+    """Short interface to add an extra column and field to a text file
 
     Example
     -------
@@ -799,8 +798,7 @@ class CalculateNormalizedMomentsOutputSpec(TraitedSpec):
 
 
 class CalculateNormalizedMoments(BaseInterface):
-    """
-    Calculates moments of timeseries.
+    """Calculates moments of timeseries.
 
     Example
     -------
@@ -827,8 +825,7 @@ class CalculateNormalizedMoments(BaseInterface):
 
 
 def calc_moments(timeseries_file, moment):
-    """
-    Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
+    """Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
     (list of values; one per timeseries).
 
     Keyword arguments:
@@ -842,8 +839,117 @@ def calc_moments(timeseries_file, moment):
     zero = (m2 == 0)
     return np.where(zero, 0, m3 / m2**(moment/2.0))
 
+
+class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
+    in_files = InputMultiPath(File(exists=True, mandatory=True,
+                    desc='The tpms to be normalized') )
+    in_mask = File(exists=True, mandatory=False,
+                    desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
+
+class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc="normalized maps")
+
+
+class NormalizeProbabilityMapSet(BaseInterface):
+    """ Returns the input tissue probability maps (tpms, aka volume fractions)
+    normalized to sum up 1.0 at each voxel within the mask.
+
+    .. note:: Please recall this is not a spatial normalization algorithm
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> normalize = misc.NormalizeProbabilityMapSet()
+    >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', 'tpm_02.nii.gz' ]
+    >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
+    >>> normalize.run() # doctest: +SKIP
+    """
+    input_spec = NormalizeProbabilityMapSetInputSpec
+    output_spec = NormalizeProbabilityMapSetOutputSpec
+
+    def _run_interface(self, runtime):
+        mask = None
+
+        if isdefined( self.inputs.in_mask ):
+            mask = self.inputs.in_mask
+
+        self._out_filenames = normalize_tpms( self.inputs.in_files, mask )
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_files'] = self._out_filenames
+        return outputs
+
+
+def normalize_tpms( in_files, in_mask=None, out_files=[] ):
+    """
+    Returns the input tissue probability maps (tpms, aka volume fractions)
+    normalized to sum up 1.0 at each voxel within the mask.
+    """
+    import nibabel as nib
+    import numpy as np
+    import os.path as op
+
+    in_files = np.atleast_1d( in_files ).tolist()
+
+    if len(out_files)!=len(in_files):
+        for i,finname in enumerate( in_files ):
+            fname,fext = op.splitext( op.basename( finname ) )
+            if fext == '.gz':
+                fname,fext2 = op.splitext( fname )
+                fext = fext2 + fext
+
+            out_file = op.abspath(fname+'_norm'+('_%02d' % i)+fext)
+            out_files+= [out_file]
+
+    imgs = [nib.load(fim) for fim in in_files]
+
+    if len(in_files)==1:
+        img_data = imgs[0].get_data()
+        img_data[img_data>0.0] = 1.0
+        hdr = imgs[0].get_header().copy()
+        hdr['data_type']= 16
+        hdr.set_data_dtype( 'float32' )
+        nib.save( nib.Nifti1Image( img_data.astype(np.float32), imgs[0].get_affine(), hdr ), out_files[0] )
+        return out_files[0]
+
+    img_data = np.array( [ im.get_data() for im in imgs ] ).astype( 'f32' )
+    #img_data[img_data>1.0] = 1.0
+    img_data[img_data<0.0] = 0.0
+    weights = np.sum( img_data, axis=0 )
+
+    msk = np.ones_like( imgs[0].get_data() )
+    msk[ weights<= 0 ] = 0
+
+    if not in_mask is None:
+        msk = nib.load( in_mask ).get_data()
+        msk[ msk<=0 ] = 0
+        msk[ msk>0 ] = 1
+
+    msk = np.ma.masked_equal( msk, 0 )
+
+
+    for i,out_file in enumerate( out_files ):
+        data = np.ma.masked_equal( img_data[i], 0 )
+        probmap = data / weights
+        hdr = imgs[i].get_header().copy()
+        hdr['data_type']= 16
+        hdr.set_data_dtype( 'float32' )
+        nib.save( nib.Nifti1Image( probmap.astype(np.float32), imgs[i].get_affine(), hdr ), out_file )
+
+    return out_files
+
+
 # Deprecated interfaces ---------------------------------------------------------
 class Distance( nam.Distance ):
+    """Calculates distance between two volumes.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.Distance` instead.
+    """
     def __init__(self, **inputs):
         super(nam.Distance, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
@@ -851,6 +957,11 @@ class Distance( nam.Distance ):
                       DeprecationWarning)
 
 class Overlap( nam.Overlap ):
+    """Calculates various overlap measures between two maps.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.Overlap` instead.
+    """
     def __init__(self, **inputs):
         super(nam.Overlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
@@ -859,8 +970,15 @@ class Overlap( nam.Overlap ):
 
 
 class FuzzyOverlap( nam.FuzzyOverlap ):
+    """Calculates various overlap measures between two maps, using a fuzzy
+    definition.
+
+    .. deprecated:: 0.10.0
+       Use :py:class:`nipype.algorithms.metrics.FuzzyOverlap` instead.
+    """
     def __init__(self, **inputs):
         super(nam.FuzzyOverlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)
+

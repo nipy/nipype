@@ -11,7 +11,8 @@ def test_ErrorMap_inputs():
     in_tst=dict(mandatory=True,
     ),
     mask=dict(),
-    method=dict(usedefault=True,
+    metric=dict(mandatory=True,
+    usedefault=True,
     ),
     out_map=dict(),
     )

@@ -26,9 +26,9 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
 
            outputspec.subject_id : freesurfer subject id
            outputspec.subjects_dir : freesurfer subjects directory
-    """    
+    """
     wf = pe.Workflow(name=name)
-    
+
     inputnode = pe.Node(niu.IdentityInterface(fields=['subject_id',
                                                       'subjects_dir',
                                                       'T1_files']),
@@ -43,8 +43,8 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(inputnode, "T1_files", autorecon1, "T1_files")
     wf.connect(inputnode, "subjects_dir", autorecon1, "subjects_dir")
     wf.connect(inputnode, "subject_id", autorecon1, "subject_id")
-    
-    
+
+
     def link_masks(subjects_dir, subject_id):
         import os
         os.symlink(os.path.join(subjects_dir, subject_id, "mri", "T1.mgz"),
@@ -52,25 +52,25 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
         os.symlink(os.path.join(subjects_dir, subject_id, "mri", "brainmask.auto.mgz"),
                    os.path.join(subjects_dir, subject_id, "mri", "brainmask.mgz"))
         return subjects_dir, subject_id
-    
-    masks = pe.Node(niu.Function(input_names=['subjects_dir', 'subject_id'], 
+
+    masks = pe.Node(niu.Function(input_names=['subjects_dir', 'subject_id'],
                                   output_names=['subjects_dir', 'subject_id'],
                                   function=link_masks), name="link_masks")
-    
+
     wf.connect(autorecon1, "subjects_dir", masks, "subjects_dir")
-    wf.connect(autorecon1, "subject_id", masks, "subject_id")   
-    
-    
+    wf.connect(autorecon1, "subject_id", masks, "subject_id")
+
+
     autorecon_resume = pe.Node(fs.ReconAll(), name="autorecon_resume")
     autorecon_resume.plugin_args={'submit_specs': 'request_memory = 2500'}
     autorecon_resume.inputs.args = "-no-isrunning"
     wf.connect(masks, "subjects_dir", autorecon_resume, "subjects_dir")
     wf.connect(masks, "subject_id", autorecon_resume, "subject_id")
-    
+
     outputnode = pe.Node(niu.IdentityInterface(fields=['subject_id',
                                                       'subjects_dir']),
                         name='outputspec')
-    
+
     wf.connect(autorecon_resume, "subjects_dir", outputnode, "subjects_dir")
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")
     return wf
