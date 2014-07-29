@@ -337,7 +337,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                     ,(inputnode,      mask_mag, [('in_mask', 'mask_file' )])
                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
                     ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
-                    ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_file')])
+                    ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')])
                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file'),
                                                  ('encoding_direction','unwarp_direction'),
                                                  (('te_diff', _ms2sec), 'asym_se_time'),
@@ -550,7 +550,7 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
                     ,(mask_mag_dil,    prelude, [('out_file', 'mask_file')])
                     ,(prelude,      fill_phase, [('unwrapped_phase_file', 'in_file')])
                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
-                    ,(fill_phase,          vsm, [('out_file', 'phasemap_file')])
+                    ,(fill_phase,          vsm, [('out_file', 'phasemap_in_file')])
                     ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d')])
                     ,(dwell_time,          vsm, [(('dwell_time', _ms2sec), 'dwell_time')])
                     ,(mask_mag_dil,        vsm, [('out_file', 'mask_file')])
