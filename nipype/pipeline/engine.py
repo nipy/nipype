@@ -512,7 +512,7 @@ class Workflow(WorkflowBase):
             workflow nodes;
             flat - expands workflow nodes recursively;
             hierarchical - expands workflow nodes recursively with a
-            notion on hierarchy; 
+            notion on hierarchy;
             colored - expands workflow nodes recursively with a
             notion on hierarchy in color;
             exec - expands workflows to depict iterables
@@ -1211,10 +1211,10 @@ class InterfacedWorkflow(Workflow):
                 for c in conn[2]:
                     srcport = c[0]
                     dstport = c[1]
-                    if len(srcpref) > 0 and not srcpref in srcport:
+                    if len(srcpref) > 0 and not '.' in srcport:
                         srcport = srcpref + srcport
 
-                    if len(dstpref) > 0 and not dstpref in dstport:
+                    if len(dstpref) > 0 and not '.' in dstport:
                         dstport = dstpref + dstport
 
                     ports.append((srcport, dstport))
@@ -2297,7 +2297,7 @@ class MapNode(Node):
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
         self._got_inputs = False
-        
+
         self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
