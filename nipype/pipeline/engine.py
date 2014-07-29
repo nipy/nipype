@@ -1283,7 +1283,9 @@ class GraftWorkflow(InterfacedWorkflow):
     >>> wf2 = wf1.clone(name='testname2')
     >>> wf = npe.GraftWorkflow(name='graft', fields_from=wf1)
     >>> wf.insert(wf1)
+    0
     >>> wf.insert(wf2)
+    1
     >>> wf.inputs.in_file = 'structural.nii'
     >>> wf.inputs.thresh = 1.0
     >>> wf.run() # doctest: +SKIP
