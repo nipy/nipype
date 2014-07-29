@@ -29,6 +29,10 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                    argstr='-mask %s', mandatory=False)
     prior_file = File(exists=True, desc='Filename of parameter priors for -ball and -nod',
                    argstr='-prior %s', mandatory=False)
+    rotsform_flag = traits.Int(0, desc='Rotate the output tensors according to the q/s form of the image (resulting tensors will be in mm coordinates, default: 0).',
+                               argstr='-rotsform %s', 
+                               mandatory=False, 
+                               usedefault = True)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
