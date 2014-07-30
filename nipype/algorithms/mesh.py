@@ -38,13 +38,35 @@ class WarpPointsOutputSpec(TraitedSpec):
 
 class WarpPoints(BaseInterface):
     """
-    Applies a warp field to a point set in vtk
+    Applies a displacement field to a point set in vtk
+
+    Example
+    -------
+
+    >>> from nipype.algorithms.mesh import WarpPoints
+    >>> wp = mesh.P2PDistance()
+    >>> wp.inputs.points = 'surf1.vtk'
+    >>> wp.inputs.warp = 'warpfield.nii'
+    >>> res = wp.run() # doctest: +SKIP
     """
     input_spec = WarpPointsInputSpec
     output_spec = WarpPointsOutputSpec
 
-    def _overload_extension(self, value, name):
-        return value + '.vtk'
+    def _gen_fname(self, in_file, suffix='generated', ext=None):
+        import os.path as op
+
+        fname, fext = op.splitext(op.basename(in_file))
+
+        if fext == '.gz':
+            fname, fext2 = op.splitext(fname)
+            fext = fext2+fext
+
+        if ext is None:
+            ext = fext
+
+        if ext[0] == '.':
+            ext = ext[1:]
+        return op.abspath('%s_%s.%s' % (fname, suffix, ext))
 
     def _run_interface(self, runtime):
         from tvtk.api import tvtk
@@ -60,29 +82,40 @@ class WarpPoints(BaseInterface):
 
         affine = warp_dims[0].get_affine()
         voxsize = warp_dims[0].get_header().get_zooms()
-        R = np.linalg.inv(affine[0:3,0:3])
+        vox2ras = affine[0:3,0:3]
+        ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3,3]
-        points = points - origin[np.newaxis,:]
-        points = np.array([np.dot(R,p) for p in points])
+        voxpoints = np.array([np.dot(ras2vox,
+                             (p-origin)) for p in points])
 
         warps = []
         for axis in warp_dims:
             wdata = axis.get_data()
             if np.any(wdata!=0):
-                warps.append([ndimage.map_coordinates(wdata, points.transpose())])
-            else:
-                warps.append([np.zeros((points.shape[0],))])
-        warps = np.squeeze(np.array(warps)).reshape(-1,3)
-        print warps.shape
-        print points.shape
 
-        newpoints = [ p + d for p,d in zip(points, warps)]
+                warp = ndimage.map_coordinates(wdata,
+                               voxpoints.transpose())
+            else:
+                warp = np.zeros((points.shape[0],))
+
+            warps.append(warp)
+
+        disps = np.squeeze(np.dstack(warps))
+        newpoints = [p+d for p,d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter(input=mesh)
-        w.file_name = self._filename_from_source('out_points')
+        w.file_name = self._gen_fname(self.inputs.points,
+                                      suffix='warped',
+                                      ext='.vtk')
         w.write()
-
         return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_points'] = self._gen_fname(self.inputs.points,
+                                                suffix='warped',
+                                                ext='.vtk')
+        return outputs
 
 class P2PDistanceInputSpec(BaseInterfaceInputSpec):
     surface1 = File(exists=True, mandatory=True,
