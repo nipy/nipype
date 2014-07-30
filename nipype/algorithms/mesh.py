@@ -22,6 +22,68 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
 iflogger = logging.getLogger('interface')
 
 
+class WarpPointsInputSpec(BaseInterfaceInputSpec):
+    points = File(exists=True, mandatory=True,
+                  desc=('file containing the point set'))
+    warp = File(exists=True, mandatory=True,
+                desc=('dense deformation field to be applied'))
+    interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
+                         mandatory=True, desc='interpolation')
+    out_points = File(name_source='points', name_template='%s_warped',
+                      output_name='out_points', keep_extension=True,
+                      desc='the warped point set')
+
+class WarpPointsOutputSpec(TraitedSpec):
+    out_points = File(desc='the warped point set')
+
+class WarpPoints(BaseInterface):
+    """
+    Applies a warp field to a point set in vtk
+    """
+    input_spec = WarpPointsInputSpec
+    output_spec = WarpPointsOutputSpec
+
+    def _overload_extension(self, value, name):
+        return value + '.vtk'
+
+    def _run_interface(self, runtime):
+        from tvtk.api import tvtk
+        import nibabel as nb
+        import numpy as np
+        from scipy import ndimage
+
+        r = tvtk.PolyDataReader(file_name=self.inputs.points)
+        r.update()
+        mesh = r.output
+        points = np.array(mesh.points)
+        warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
+
+        affine = warp_dims[0].get_affine()
+        voxsize = warp_dims[0].get_header().get_zooms()
+        R = np.linalg.inv(affine[0:3,0:3])
+        origin = affine[0:3,3]
+        points = points - origin[np.newaxis,:]
+        points = np.array([np.dot(R,p) for p in points])
+
+        warps = []
+        for axis in warp_dims:
+            wdata = axis.get_data()
+            if np.any(wdata!=0):
+                warps.append([ndimage.map_coordinates(wdata, points.transpose())])
+            else:
+                warps.append([np.zeros((points.shape[0],))])
+        warps = np.squeeze(np.array(warps)).reshape(-1,3)
+        print warps.shape
+        print points.shape
+
+        newpoints = [ p + d for p,d in zip(points, warps)]
+        mesh.points = newpoints
+        w = tvtk.PolyDataWriter(input=mesh)
+        w.file_name = self._filename_from_source('out_points')
+        w.write()
+
+        return runtime
+
 class P2PDistanceInputSpec(BaseInterfaceInputSpec):
     surface1 = File(exists=True, mandatory=True,
                     desc=("Reference surface (vtk format) to which compute "
