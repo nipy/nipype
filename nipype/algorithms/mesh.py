@@ -33,8 +33,10 @@ class WarpPointsInputSpec(BaseInterfaceInputSpec):
                       output_name='out_points', keep_extension=True,
                       desc='the warped point set')
 
+
 class WarpPointsOutputSpec(TraitedSpec):
     out_points = File(desc='the warped point set')
+
 
 class WarpPoints(BaseInterface):
     """
@@ -69,6 +71,8 @@ class WarpPoints(BaseInterface):
         return op.abspath('%s_%s.%s' % (fname, suffix, ext))
 
     def _run_interface(self, runtime):
+        from traits.etsconfig.api import ETSConfig  # This is necessary to
+        ETSConfig.toolkit = 'null'  # avoid 'unable to connect display' errors
         from tvtk.api import tvtk
         import nibabel as nb
         import numpy as np
@@ -82,26 +86,26 @@ class WarpPoints(BaseInterface):
 
         affine = warp_dims[0].get_affine()
         voxsize = warp_dims[0].get_header().get_zooms()
-        vox2ras = affine[0:3,0:3]
+        vox2ras = affine[0:3, 0:3]
         ras2vox = np.linalg.inv(vox2ras)
-        origin = affine[0:3,3]
+        origin = affine[0:3, 3]
         voxpoints = np.array([np.dot(ras2vox,
                              (p-origin)) for p in points])
 
         warps = []
         for axis in warp_dims:
             wdata = axis.get_data()
-            if np.any(wdata!=0):
+            if np.any(wdata != 0):
 
                 warp = ndimage.map_coordinates(wdata,
-                               voxpoints.transpose())
+                                               voxpoints.transpose())
             else:
                 warp = np.zeros((points.shape[0],))
 
             warps.append(warp)
 
         disps = np.squeeze(np.dstack(warps))
-        newpoints = [p+d for p,d in zip(points, disps)]
+        newpoints = [p+d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter(input=mesh)
         w.file_name = self._gen_fname(self.inputs.points,
@@ -117,6 +121,7 @@ class WarpPoints(BaseInterface):
                                                 ext='.vtk')
         return outputs
 
+
 class P2PDistanceInputSpec(BaseInterfaceInputSpec):
     surface1 = File(exists=True, mandatory=True,
                     desc=("Reference surface (vtk format) to which compute "
@@ -126,8 +131,8 @@ class P2PDistanceInputSpec(BaseInterfaceInputSpec):
                           "distance."))
     weighting = traits.Enum("none", "surface", usedefault=True,
                             desc=('"none": no weighting is performed, '
-                                  '"surface": edge distance is weighted by the '
-                                  'corresponding surface area'))
+                                  '"surface": edge distance is weighted by the'
+                                  ' corresponding surface area'))
 
 class P2PDistanceOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
