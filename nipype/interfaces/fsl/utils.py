@@ -1711,7 +1711,7 @@ class WarpPoints(CommandLine):
     >>> warppoints.inputs.warp_file = 'warpfield.nii'
     >>> warppoints.inputs.coord_mm = True
     >>> warppoints.cmdline # doctest: +ELLIPSIS
-    'img2imgcoord -mm -dest T1.nii -scr epi.nii -warp warpfield.nii surf.txt'
+    'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
     >>> res = invwarp.run() # doctest: +SKIP
     """
 
