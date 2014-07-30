@@ -44,7 +44,7 @@ class WarpPoints(BaseInterface):
     -------
 
     >>> from nipype.algorithms.mesh import WarpPoints
-    >>> wp = mesh.P2PDistance()
+    >>> wp = WarpPoints()
     >>> wp.inputs.points = 'surf1.vtk'
     >>> wp.inputs.warp = 'warpfield.nii'
     >>> res = wp.run() # doctest: +SKIP
