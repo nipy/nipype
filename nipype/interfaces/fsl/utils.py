@@ -18,12 +18,13 @@ See the docstrings of the individual classes for examples.
 import os
 from glob import glob
 import warnings
+import tempfile
 
 import numpy as np
 
 from .base import FSLCommand, FSLCommandInputSpec, Info
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
-                                    isdefined)
+                    CommandLine, CommandLineInputSpec, isdefined)
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 
@@ -1663,3 +1664,204 @@ class ConvertWarp(FSLCommand):
     input_spec = ConvertWarpInputSpec
     output_spec = ConvertWarpOutputSpec
     _cmd = 'convertwarp'
+
+
+class WarpPointsBaseInputSpec(CommandLineInputSpec):
+    in_coords = File(exists=True, position=-1, argstr='%s', mandatory=True,
+                     desc=('filename of file containing coordinates'))
+    xfm_file = File(exists=True, argstr='-xfm %s', xor=['warp_file'],
+                    desc=('filename of affine transform (e.g. source2dest.mat)'))
+    warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
+                     desc=('filename of warpfield (e.g. '
+                           'intermediate2dest_warp.nii.gz)'))
+    coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
+                            desc=('all coordinates in voxels - default'))
+    coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
+                           desc=('all coordinates in mm'))
+    out_file = File(name_source='in_coords',
+                    name_template='%s_warped', output_name='out_file',
+                    desc='output file name')
+
+class WarpPointsInputSpec(WarpPointsBaseInputSpec):
+    src_file = File(exists=True, argstr='-src %s', mandatory=True,
+                    desc=('filename of source image'))
+    dest_file = File(exists=True, argstr='-dest %s', mandatory=True,
+                     desc=('filename of destination image'))
+
+
+class WarpPointsOutputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc=('Name of output file, containing the warp as field or coefficients.'))
+
+
+class WarpPoints(CommandLine):
+    """Use FSL `img2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets. Accepts plain text files and vtk files.
+
+    .. Note:: transformation of TrackVis trk files is not yet implemented
+
+
+    Examples::
+
+    >>> from nipype.interfaces.fsl import WarpPoints
+    >>> warppoints = WarpPoints()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.src_file = 'epi.nii'
+    >>> warppoints.inputs.dest_file = 'T1.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    'img2imgcoord -mm -dest T1.nii -scr epi.nii -warp warpfield.nii surf.txt'
+    >>> res = invwarp.run() # doctest: +SKIP
+    """
+
+    input_spec = WarpPointsInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'img2imgcoord'
+    _terminal_output = 'stream'
+
+    def __init__(self, command=None, **inputs):
+        self._tmpfile = None
+        super(WarpPoints, self).__init__(command=command, **inputs)
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'out_file':
+            return ''
+        else:
+            return super(WarpPoints, self)._format_arg(name, trait_spec, value)
+
+    def _parse_inputs(self, skip=None):
+        import os.path as op
+        fname, ext = op.splitext(self.inputs.in_coords)
+        setattr(self, '_in_file', fname)
+        setattr(self, '_outformat', ext[1:])
+        first_args = super(WarpPoints, self)._parse_inputs(skip=['in_coords', 'out_file'])
+
+        second_args = fname + '.txt'
+
+        if ext in ['.vtk', '.trk']:
+            if self._tmpfile is None:
+                self._tmpfile = tempfile.NamedTemporaryFile(suffix='.txt', dir=os.getcwd()).name
+            second_args = self._tmpfile
+
+        return first_args + [ second_args ]
+
+    def _vtk_to_coords(self, in_file, out_file=None):
+        import os.path as op
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('This interface requires tvtk to run.')
+
+        reader = tvtk.PolyDataReader(file_name=in_file+'.vtk')
+        reader.update()
+        points = reader.output.points
+
+        if out_file is None:
+            out_file, _ = op.splitext(in_file)  + '.txt'
+
+        np.savetxt(out_file, points)
+        return out_file
+
+    def _coords_to_vtk(self, points, out_file):
+        import os.path as op
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('This interface requires tvtk to run.')
+
+        reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
+        reader.update()
+        mesh = reader.output
+        mesh.points = points
+
+        writer = tvtk.PolyDataWriter(file_name=out_file, input=mesh)
+        writer.write()
+
+    def _trk_to_coords(self, in_file, out_file=None):
+        raise NotImplementedError('trk files are not yet supported')
+        try:
+            from nibabel.trackvis import TrackvisFile
+        except ImportError:
+            raise ImportError('This interface requires nibabel to run')
+
+        trkfile = TrackvisFile.from_file(in_file)
+        streamlines = trkfile.streamlines
+
+        if out_file is None:
+            out_file, _ = op.splitext(in_file)
+
+        np.savetxt(points, out_file + '.txt')
+        return out_file + '.txt'
+
+    def _coords_to_trk(self, points, out_file):
+        raise NotImplementedError('trk files are not yet supported')
+
+    def _overload_extension(self, value, name):
+        if name == 'out_file':
+            return '%s.%s' % (value, getattr(self, '_outformat'))
+
+    def _run_interface(self, runtime):
+        fname = getattr(self, '_in_file')
+        outformat = getattr(self, '_outformat')
+        tmpfile = None
+
+        if outformat == 'vtk':
+            tmpfile = self._tmpfile
+            self._vtk_to_coords(fname, out_file=tmpfile)
+        elif outformat == 'trk':
+            tmpfile = self._tmpfile
+            self._trk_to_coords(fname, out_file=tmpfile)
+
+        runtime = super(WarpPoints, self)._run_interface(runtime)
+        newpoints = np.fromstring('\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
+
+        if not tmpfile is None:
+            os.unlink(tmpfile.name)
+
+        out_file = self._filename_from_source('out_file')
+
+        if outformat == 'vtk':
+            self._coords_to_vtk(newpoints, out_file)
+        elif outformat == 'trk':
+            self._coords_to_trk(newpoints, out_file)
+        else:
+            np.savetxt(out_file, newpoints.reshape(-1,3))
+        return runtime
+
+
+class WarpPointsToStdInputSpec(WarpPointsBaseInputSpec):
+    img_file = File(exists=True, argstr='-img %s', mandatory=True,
+                    desc=('filename of input image'))
+    std_file = File(exists=True, argstr='-std %s', mandatory=True,
+                    desc=('filename of destination image'))
+    premat_file = File(exists=True, argstr='-premat %s',
+                       desc=('filename of pre-warp affine transform '
+                             '(e.g. example_func2highres.mat)'))
+
+
+class WarpPointsToStd(WarpPoints):
+    """
+    Use FSL `img2stdcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+    to transform point sets to standard space coordinates. Accepts plain text files and
+    vtk files.
+
+    .. Note:: transformation of TrackVis trk files is not yet implemented
+
+    Examples::
+
+    >>> from nipype.interfaces.fsl import WarpPointsToStd
+    >>> warppoints = WarpPointsToStd()
+    >>> warppoints.inputs.in_coords = 'surf.txt'
+    >>> warppoints.inputs.img_file = 'T1.nii'
+    >>> warppoints.inputs.std_file = 'mni.nii'
+    >>> warppoints.inputs.warp_file = 'warpfield.nii'
+    >>> warppoints.inputs.coord_mm = True
+    >>> warppoints.cmdline # doctest: +ELLIPSIS
+    'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+    >>> res = invwarp.run() # doctest: +SKIP
+    """
+
+    input_spec = WarpPointsToStdInputSpec
+    output_spec = WarpPointsOutputSpec
+    _cmd = 'img2stdcoord'
