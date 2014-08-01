@@ -1391,16 +1391,13 @@ class Node(WorkflowBase):
                 try:
                     rmtree(outdir)
                 except OSError as ex:
-                    if ex.errno == errno.ENOTEMPTY:
-                        logger.warn('Folder %s is not empty' % outdir)
-                        logger.debug('Folder contents: %s' % ",".join(os.listdir(outdir)))
-                        for f in os.listdir(outdir):
-                            if op.isfile(f):
-                                os.remove(f)
-                            else:
-                                rmtree(f)
-                    else:
-                        raise ex
+                    outdircont = os.listdir(outdir)
+                    if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
+                        logger.warn(('An exception was raised trying to remove old %s, '
+                                    'but the path seems empty. Is it an NFS mount?. '
+                                    'Passing the exception.') % outdir)
+                        pass
+                    raise ex
 
             else:
                 logger.debug(("%s found and can_resume is True or Node is a "
