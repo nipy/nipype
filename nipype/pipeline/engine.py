@@ -1398,9 +1398,11 @@ class Node(WorkflowBase):
                                     'Passing the exception.') % outdir)
                         pass
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
-                        logger.debug(('Folder is not empty (%d items): '
+                        logger.debug(('Folder contents (%d items): '
                                      '%s') % (len(outdircont), outdircont))
-                    raise ex
+                        raise ex
+                    else:
+                        raise ex
 
             else:
                 logger.debug(("%s found and can_resume is True or Node is a "
