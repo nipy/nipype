@@ -1890,7 +1890,9 @@ class JSONFileSink(IOBase):
 
         out_dict = dict()
         for name in self._input_names:
-            out_dict[name] = getattr(self.inputs, name)
+            val = getattr(self.inputs, name)
+            val = val if isdefined(val) else 'undefined'
+            out_dict[name] = val
 
         with open(out_file, 'w') as f:
             json.dump(out_dict, f)
