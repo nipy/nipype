@@ -1397,6 +1397,9 @@ class Node(WorkflowBase):
                                     'but the path seems empty. Is it an NFS mount?. '
                                     'Passing the exception.') % outdir)
                         pass
+                    elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
+                        logger.debug(('Folder is not empty (%d items): '
+                                     '%s') % (len(outdircont), outdircont))
                     raise ex
 
             else:
