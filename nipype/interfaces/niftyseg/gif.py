@@ -35,6 +35,38 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
 
     out_dir = Directory(exists=True, argstr='-out %s', 
                         desc='Output folder [default: ./]')
+
+    
+    lssd_ker = traits.Float(argstr = '-lssd_ker %f',
+                            desc='SSD kernel stdev in voxels (mm if negative) [-2.5]')
+    ldef_ker = traits.Float(argstr = '-ldef_ker %f',
+                            desc='DEF kernel stdev in voxels (mm if negative) [-2.5]')
+    lncc_ker = traits.Float(argstr = '-lncc_ker %f',
+                            desc='NCC kernel stdev in voxels (mm if negative) [-2.5]')
+    t1dti_ker = traits.Float(argstr = '-t1dti_ker %f',
+                             desc='T1DTI kernel stdev in voxels (mm if negative) [-2.5]')
+    lssd_weig = traits.Float(argstr = '-lssd_weig %f',
+                             desc='SSD distance weight <float> [0.0]')
+    ldef_weig = traits.Float(argstr = '-ldef_weig %f',
+                             desc='DEF distance weight <float> [0.0]')
+    lncc_weig = traits.Float(argstr = '-lncc_weig %f',
+                             desc='NCC distance weight <float> [1.0]')
+    t1dti_weig = traits.Float(argstr = '-t1dti_weig %f',
+                              desc='T1DTI distance weight <float> [0.0]')
+    temper = traits.Float(argstr = '-temper %f',
+                          desc='Kernel emperature <float> [0.15]')
+    sort_beta = traits.Float(argstr = '-sort_beta %f',
+                             desc='The beta scaling factor (defined in xml) [0.5]')
+    sort_numb = traits.Int(argstr = '-sort_numb %d', 
+                           desc='The number of elements in the sort (defined in xml) [7]')
+    regNMI = traits.Bool(argstr = 'regNMI',
+                         desc='Ust NMI as a registration similarity, instead of LNCC')
+    regBE = traits.Float(argstr = '-regBE %f',
+                         desc='Bending energy value for the registration [0.005]')
+    regJL = traits.Float(argstr = '-regJL %f',
+                         desc='Jacobian log value for the registration [0.0001]')
+    regSL = traits.Bool(argstr = '-regSL',
+                         desc='Skip the second Level non-rigid registration')
     
 
 class GifOutputSpec(TraitedSpec):
