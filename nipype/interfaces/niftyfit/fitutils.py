@@ -30,7 +30,7 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     prior_file = File(exists=True, desc='Filename of parameter priors for -ball and -nod',
                    argstr='-prior %s', mandatory=False)
     rotsform_flag = traits.Int(0, desc='Rotate the output tensors according to the q/s form of the image (resulting tensors will be in mm coordinates, default: 0).',
-                               argstr='-rotsform %s', 
+                               argstr='-rotsform %d', 
                                mandatory=False, 
                                usedefault = True)
 
