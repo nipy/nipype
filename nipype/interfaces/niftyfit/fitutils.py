@@ -36,7 +36,10 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
-                      argstr='-mcmap %s')     
+                      argstr='-mcmap %s',
+                      name_source=['source_file'], 
+                      name_template='%s_mcmap', 
+                      requires=['nodv_flag'])
     error_file = File(desc='Filename of parameter error maps', 
                       argstr='-error %s')
     res_file = File(desc='Filename of model residual map', 
