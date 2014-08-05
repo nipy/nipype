@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The fitutils module, which wraps the fitting methods in NiftyFit.
+"""The dwi module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
 import warnings
