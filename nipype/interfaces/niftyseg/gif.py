@@ -73,10 +73,10 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
 class GifOutputSpec(TraitedSpec):
 
     out_dir    = Directory(desc='Output folder [default: ./]')    
-    parc_file  = File(genfile=True, desc='Parcellation file')
-    geo_file   = File(genfile=True, desc='Geodesic distance file')
-    prior_file = File(genfile=True, desc='Prior file')
-    synth_file = File(genfile=True, desc='Synthetic file')
+    parc_file  = File(desc='Parcellation file')
+    geo_file   = File(desc='Geodesic distance file')
+    prior_file = File(desc='Prior file')
+    synth_file = File(desc='Synthetic file')
 
 class Gif(NIFTYSEGCommand):
 
@@ -121,10 +121,10 @@ class Gif(NIFTYSEGCommand):
         ret = ret.replace('.nii', '')
         return ret
         
-    def _find_file_from_patterns(directory, begin_pattern, end_pattern):
+    def _find_file_from_patterns(self, directory, begin_pattern, end_pattern):
         list_of_files = glob.glob(directory + os.sep + begin_pattern + '*' + end_pattern)
         if len(list_of_files) != 1:
-            return None
+            return ''
         else:
             return list_of_files[0]
 
@@ -141,7 +141,7 @@ class Gif(NIFTYSEGCommand):
         outputs['parc_file']   = self._find_file_from_patterns(outputs['out_dir'], basename, 'Parcellation.nii.gz')
         outputs['geo_file']    = self._find_file_from_patterns(outputs['out_dir'], basename, 'geo.nii.gz')
         outputs['prior_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'prior.nii.gz')        
-        outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'synth.nii.gz')
+        outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Synth.nii.gz')
         
 #        outputs['parc_file']   = os.path.join (outputs['out_dir'], basename + '_labels_Parcellation.nii.gz')
 #        outputs['geo_file']    = os.path.join (outputs['out_dir'], basename + '_labels_geo.nii.gz')
