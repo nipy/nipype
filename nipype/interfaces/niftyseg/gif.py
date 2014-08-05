@@ -9,6 +9,7 @@ import numpy as np
 from nibabel import load
 import os.path as op
 import warnings
+import glob
 
 from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, InputMultiPath,
@@ -75,6 +76,7 @@ class GifOutputSpec(TraitedSpec):
     parc_file  = File(genfile=True, desc='Parcellation file')
     geo_file   = File(genfile=True, desc='Geodesic distance file')
     prior_file = File(genfile=True, desc='Prior file')
+    synth_file = File(genfile=True, desc='Synthetic file')
 
 class Gif(NIFTYSEGCommand):
 
@@ -119,6 +121,13 @@ class Gif(NIFTYSEGCommand):
         ret = ret.replace('.nii', '')
         return ret
         
+    def _find_file_from_patterns(directory, begin_pattern, end_pattern):
+        list_of_files = glob.glob(directory + os.sep + begin_pattern + '*' + end_pattern)
+        if len(list_of_files) != 1:
+            return None
+        else:
+            return list_of_files[0]
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
@@ -128,9 +137,15 @@ class Gif(NIFTYSEGCommand):
             outputs['out_dir'] = os.getcwd()
  
         basename = self._get_basename_without_extension(self.inputs.in_file)
-        outputs['parc_file']   = os.path.join (outputs['out_dir'], basename + '_labels_Parcellation.nii.gz')
-        outputs['geo_file']    = os.path.join (outputs['out_dir'], basename + '_labels_geo.nii.gz')
-        outputs['prior_file']  = os.path.join (outputs['out_dir'], basename + '_labels_prior.nii.gz')        
+        
+        outputs['parc_file']   = self._find_file_from_patterns(outputs['out_dir'], basename, 'Parcellation.nii.gz')
+        outputs['geo_file']    = self._find_file_from_patterns(outputs['out_dir'], basename, 'geo.nii.gz')
+        outputs['prior_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'prior.nii.gz')        
+        outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'synth.nii.gz')
+        
+#        outputs['parc_file']   = os.path.join (outputs['out_dir'], basename + '_labels_Parcellation.nii.gz')
+#        outputs['geo_file']    = os.path.join (outputs['out_dir'], basename + '_labels_geo.nii.gz')
+#        outputs['prior_file']  = os.path.join (outputs['out_dir'], basename + '_labels_prior.nii.gz')        
 
         return outputs
         
