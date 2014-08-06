@@ -65,7 +65,7 @@ class RegResampleInputSpec(NIFTYREGCommandInputSpec):
     inter_val = traits.Enum('NN', 'LIN', 'CUB', desc = 'Interpolation type',
                             argstr='-inter %d')
     # Padding value
-    pad_val = traits.Int(desc = 'Padding value', argstr='-pad %d')
+    pad_val = traits.Float(desc = 'Padding value', argstr='-pad %f')
     # Verbosity off?
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
@@ -542,9 +542,13 @@ class RegTransform(NIFTYREGCommand):
     def _gen_filename(self, name):
         if name == 'out_file':
             input_to_use = self._find_input()
-            if isdefined(self.inputs.inv_aff_input):
+            if isdefined(self.inputs.inv_aff_input) or \
+                isdefined(self.inputs.aff_2_rig_input) or \
+                isdefined(self.inputs.flirt_2_nr_input):
                 return self._gen_fname(input_to_use,
-                                       suffix=self._suffix, change_ext=False, ext='.txt')
+                                       suffix=self._suffix,
+                                       change_ext=False,
+                                       ext='.txt')
             else:
                 return self._gen_fname(input_to_use,
                                        suffix=self._suffix)
