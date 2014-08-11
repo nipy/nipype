@@ -5,7 +5,7 @@ Miscellaneous algorithms
 
     Change directory to provide relative paths for doctests
     >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> filepath = os.path.dirname(os.path.realpath(__file__))
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
@@ -34,7 +34,7 @@ import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
-                               DynamicTraitedSpec )
+                               DynamicTraitedSpec)
 from nipype.utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
@@ -785,7 +785,7 @@ class AddCSVColumn(BaseInterface):
 
 class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
-    _outputs = traits.Dict( traits.Any, value={}, usedefault=True )
+    _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -876,7 +876,7 @@ class AddCSVRow(BaseInterface):
 
         if op.exists(self.inputs.in_file):
             formerdf = pd.read_csv(self.inputs.in_file, index_col=0)
-            df = pd.concat([formerdf, df], ignore_index=True )
+            df = pd.concat([formerdf, df], ignore_index=True)
 
         with open(self.inputs.in_file, 'w') as f:
             df.to_csv(f)
@@ -993,14 +993,14 @@ class AddNoise(BaseInterface):
     output_spec = AddNoiseOutputSpec
 
     def _run_interface(self, runtime):
-        in_image = nb.load( self.inputs.in_file )
+        in_image = nb.load(self.inputs.in_file)
         in_data = in_image.get_data()
         snr = self.inputs.snr
 
-        if isdefined( self.inputs.in_mask ):
-            in_mask = nb.load( self.inputs.in_mask ).get_data()
+        if isdefined(self.inputs.in_mask):
+            in_mask = nb.load(self.inputs.in_mask).get_data()
         else:
-            in_mask = np.ones_like( in_data )
+            in_mask = np.ones_like(in_data)
 
         result = self.gen_noise(in_data, mask=in_mask, snr_db=snr,
                                 dist=self.inputs.dist, bg_dist=self.inputs.bg_dist)
@@ -1008,10 +1008,10 @@ class AddNoise(BaseInterface):
         res_im.to_filename(self._gen_output_filename())
         return runtime
 
-    def _gen_output_filename( self ):
-        if not isdefined( self.inputs.out_file ):
-            _, base, _ = split_filename( self.inputs.in_file )
-            out_file = os.path.abspath( base + ('_SNR%03.2f' % self.inputs.snr) + '.nii.gz' )
+    def _gen_output_filename(self):
+        if not isdefined(self.inputs.out_file):
+            _, base, ext = split_filename(self.inputs.in_file)
+            out_file = os.path.abspath('%s_SNR%03.2f%s' % (base, self.inputs.snr, ext))
         else:
             out_file = self.inputs.out_file
 
@@ -1030,30 +1030,31 @@ class AddNoise(BaseInterface):
         from math import sqrt
         snr = sqrt(np.power(10.0, snr_db/10.0))
 
-        if dist == 'normal':
-            noise = np.random.normal(size=image.shape)
-        else:
-            raise NotImplementedError('Only normal distribution is supported')
-
         if mask is None:
             mask = np.ones_like(image)
 
         signal = image[mask>0].reshape(-1)
         signal = signal - signal.mean()
-        S = (signal.var())**2
+        sigma_s = signal.var()
+        sigma_n = sqrt((sigma_s**2)/snr)
+
+        if dist == 'normal':
+            noise = np.random.normal(size=image.shape, scale=sigma_n)
+        else:
+            raise NotImplementedError('Only normal distribution is supported')
 
         if np.any(mask==0):
             if bg_dist == 'rayleigh':
-                bg_noise = np.random.rayleigh(size=image.shape)
+                bg_noise = np.random.rayleigh(size=image.shape, scale=sigma_n)
                 noise[mask==0] = bg_noise[mask==0]
 
-        im_noise = image +  noise * (S/snr)
+        im_noise = image +  noise
         return im_noise
 
 
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
-                    desc='The tpms to be normalized') )
+                    desc='The tpms to be normalized'))
     in_mask = File(exists=True, mandatory=False,
                     desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
@@ -1080,10 +1081,10 @@ class NormalizeProbabilityMapSet(BaseInterface):
     def _run_interface(self, runtime):
         mask = None
 
-        if isdefined( self.inputs.in_mask ):
+        if isdefined(self.inputs.in_mask):
             mask = self.inputs.in_mask
 
-        self._out_filenames = normalize_tpms( self.inputs.in_files, mask )
+        self._out_filenames = normalize_tpms(self.inputs.in_files, mask)
         return runtime
 
     def _list_outputs(self):
@@ -1092,7 +1093,7 @@ class NormalizeProbabilityMapSet(BaseInterface):
         return outputs
 
 
-def normalize_tpms( in_files, in_mask=None, out_files=[] ):
+def normalize_tpms(in_files, in_mask=None, out_files=[]):
     """
     Returns the input tissue probability maps (tpms, aka volume fractions)
     normalized to sum up 1.0 at each voxel within the mask.
@@ -1101,16 +1102,16 @@ def normalize_tpms( in_files, in_mask=None, out_files=[] ):
     import numpy as np
     import os.path as op
 
-    in_files = np.atleast_1d( in_files ).tolist()
+    in_files = np.atleast_1d(in_files).tolist()
 
-    if len(out_files)!=len(in_files):
-        for i,finname in enumerate( in_files ):
-            fname,fext = op.splitext( op.basename( finname ) )
+    if len(out_files) != len(in_files):
+        for i,finname in enumerate(in_files):
+            fname,fext = op.splitext(op.basename(finname))
             if fext == '.gz':
-                fname,fext2 = op.splitext( fname )
+                fname,fext2 = op.splitext(fname)
                 fext = fext2 + fext
 
-            out_file = op.abspath(fname+'_norm'+('_%02d' % i)+fext)
+            out_file = op.abspath('%s_norm_%02d%s' % (fname,i,fext))
             out_files+= [out_file]
 
     imgs = [nib.load(fim) for fim in in_files]
@@ -1120,39 +1121,39 @@ def normalize_tpms( in_files, in_mask=None, out_files=[] ):
         img_data[img_data>0.0] = 1.0
         hdr = imgs[0].get_header().copy()
         hdr['data_type']= 16
-        hdr.set_data_dtype( 'float32' )
-        nib.save( nib.Nifti1Image( img_data.astype(np.float32), imgs[0].get_affine(), hdr ), out_files[0] )
+        hdr.set_data_dtype(np.float32)
+        nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].get_affine(), hdr), out_files[0])
         return out_files[0]
 
-    img_data = np.array( [ im.get_data() for im in imgs ] ).astype( 'f32' )
+    img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
     #img_data[img_data>1.0] = 1.0
     img_data[img_data<0.0] = 0.0
-    weights = np.sum( img_data, axis=0 )
+    weights = np.sum(img_data, axis=0)
 
-    msk = np.ones_like( imgs[0].get_data() )
+    msk = np.ones_like(imgs[0].get_data())
     msk[ weights<= 0 ] = 0
 
     if not in_mask is None:
-        msk = nib.load( in_mask ).get_data()
+        msk = nib.load(in_mask).get_data()
         msk[ msk<=0 ] = 0
         msk[ msk>0 ] = 1
 
-    msk = np.ma.masked_equal( msk, 0 )
+    msk = np.ma.masked_equal(msk, 0)
 
 
-    for i,out_file in enumerate( out_files ):
-        data = np.ma.masked_equal( img_data[i], 0 )
+    for i,out_file in enumerate(out_files):
+        data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
         hdr = imgs[i].get_header().copy()
         hdr['data_type']= 16
-        hdr.set_data_dtype( 'float32' )
-        nib.save( nib.Nifti1Image( probmap.astype(np.float32), imgs[i].get_affine(), hdr ), out_file )
+        hdr.set_data_dtype('float32')
+        nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].get_affine(), hdr), out_file)
 
     return out_files
 
 
 # Deprecated interfaces ---------------------------------------------------------
-class Distance( nam.Distance ):
+class Distance(nam.Distance):
     """Calculates distance between two volumes.
 
     .. deprecated:: 0.10.0
@@ -1164,7 +1165,7 @@ class Distance( nam.Distance ):
                       " please use nipype.algorithms.metrics.Distance"),
                       DeprecationWarning)
 
-class Overlap( nam.Overlap ):
+class Overlap(nam.Overlap):
     """Calculates various overlap measures between two maps.
 
     .. deprecated:: 0.10.0
@@ -1177,7 +1178,7 @@ class Overlap( nam.Overlap ):
                       DeprecationWarning)
 
 
-class FuzzyOverlap( nam.FuzzyOverlap ):
+class FuzzyOverlap(nam.FuzzyOverlap):
     """Calculates various overlap measures between two maps, using a fuzzy
     definition.
 
