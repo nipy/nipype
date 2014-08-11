@@ -955,20 +955,21 @@ def calc_moments(timeseries_file, moment):
     zero = (m2 == 0)
     return np.where(zero, 0, m3 / m2**(moment/2.0))
 
-<<<<<<< HEAD
+
 class AddNoiseInputSpec(TraitedSpec):
-    in_file = File( exists=True, mandatory=True,
-                    desc='input image that will be corrupted with noise')
+    in_file = File(exists=True, mandatory=True,
+                   desc='input image that will be corrupted with noise')
+    in_mask = File(exists=True, desc=('input mask, voxels outside this mask '
+                   'will be considered background'))
+    snr = traits.Float(10.0, desc='desired output SNR in dB', usedefault=True)
+    dist = traits.Enum('normal', usedefault=True, mandatory=True,
+                       desc=('desired noise distribution, currently '
+                       'only normal is implemented'))
+    bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
+                          desc=('desired noise distribution, currently '
+                          'only normal is implemented'))
+    out_file = File(desc='desired output filename')
 
-    in_mask = File( exists=True, desc='input mask, voxels outside this mask\
-                    will be considered background and corrupted with noise\
-                    with Rayleigh distribution' )
-
-    snr = traits.Float( 10.0, desc='desired output SNR in dB', usedefault=True )
-
-    dist = traits.Enum( 'normal', desc='desired noise distribution, currently\
-                        only gaussian is implemented' )
-    out_file = File( desc='desired output filename' )
 
 class AddNoiseOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='corrupted image')
@@ -1001,9 +1002,10 @@ class AddNoise(BaseInterface):
         else:
             in_mask = np.ones_like( in_data )
 
-        result = self.gen_noise( in_data, mask=in_mask, snr_db=snr )
-        res_im = nb.Nifti1Image( result, in_image.get_affine(), in_image.get_header() )
-        nb.save( res_im, self._gen_output_filename() )
+        result = self.gen_noise(in_data, mask=in_mask, snr_db=snr,
+                                dist=self.inputs.dist, bg_dist=self.inputs.bg_dist)
+        res_im = nb.Nifti1Image(result, in_image.get_affine(), in_image.get_header())
+        res_im.to_filename(self._gen_output_filename())
         return runtime
 
     def _gen_output_filename( self ):
@@ -1020,28 +1022,32 @@ class AddNoise(BaseInterface):
         outputs['out_file'] = self._gen_output_filename()
         return outputs
 
-    def gen_noise( self, image, mask=None, snr_db=10.0 ):
+    def gen_noise(self, image, mask=None, snr_db=10.0, dist='normal', bg_dist='normal'):
         """
         Generates a copy of an image with a certain amount of
         added gaussian noise (rayleigh for background in mask)
         """
         from math import sqrt
-        snr = sqrt( np.power( 10.0, snr_db/10.0 ) )
-        noise = np.random.normal( size=image.shape )
+        snr = sqrt(np.power(10.0, snr_db/10.0))
+
+        if dist == 'normal':
+            noise = np.random.normal(size=image.shape)
+        else:
+            raise NotImplementedError('Only normal distribution is supported')
 
         if mask is None:
-            mask = np.ones_like( image )
+            mask = np.ones_like(image)
 
+        signal = image[mask>0].reshape(-1)
+        signal = signal - signal.mean()
+        S = (signal.var())**2
 
-        S = np.mean(image[mask>0])
-
-        if np.any( mask==0 ):
-            S = S - np.mean( image[mask==0] )
-            bg_noise = np.random.rayleigh( size=image.shape )
-            noise[mask==0] = bg_noise[mask==0]
+        if np.any(mask==0):
+            if bg_dist == 'rayleigh':
+                bg_noise = np.random.rayleigh(size=image.shape)
+                noise[mask==0] = bg_noise[mask==0]
 
         im_noise = image +  noise * (S/snr)
-
         return im_noise
 
 
