@@ -262,6 +262,13 @@ class AnonymousIDGenerator():
 class Literal(object):
     def __init__(self, value, datatype=None, langtag=None):
         self._value = value
+        if langtag:
+            if datatype is None:
+                logger.debug('Assuming prov:InternationalizedString as the type of "%s"@%s' % (value, langtag))
+                datatype = PROV["InternationalizedString"]
+            elif datatype != PROV["InternationalizedString"]:
+                logger.warn('Invalid data type (%s) for "%s"@%s, overridden as prov:InternationalizedString.' % (value, langtag))
+                datatype = PROV["InternationalizedString"]
         self._datatype = datatype
         self._langtag = langtag
 
@@ -291,14 +298,14 @@ class Literal(object):
 
     def provn_representation(self):
         if self._langtag:
-            #  a langtag can only goes with string
+            #  a language tag can only go with prov:InternationalizedString
             return u'%s@%s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._langtag))
         else:
             return u'%s %%%% %s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._datatype))
 
     def json_representation(self):
         if self._langtag:
-            #  a langtag can only goes with string
+            #  a language tag can only go with prov:InternationalizedString
             return {'$': unicode(self._value), 'lang': self._langtag}
         else:
             if isinstance(self._datatype, QName):
@@ -339,7 +346,7 @@ class Identifier(object):
 
     def json_representation(self):
         return {'$': self._uri, 'type': u'xsd:anyURI'}
-    
+
     def rdf_representation(self):
         return URIRef(self.get_uri())
 
@@ -424,6 +431,9 @@ class ProvExceptionMissingRequiredAttribute(ProvException):
         self.attribute_id = attribute_id
         self.args += (PROV_N_MAP[record_type], attribute_id)
 
+    def __str__(self):
+        return 'Missing the required attribute "%s" in %s' % (PROV_ID_ATTRIBUTES_MAP[self.attribute_id], PROV_N_MAP[self.record_type])
+
 
 class ProvExceptionNotValidAttribute(ProvException):
     def __init__(self, record_type, attribute, attribute_types):
@@ -432,6 +442,9 @@ class ProvExceptionNotValidAttribute(ProvException):
         self.attribute_types = attribute_types
         self.args += (PROV_N_MAP[record_type], unicode(attribute), attribute_types)
 
+    def __str__(self):
+        return 'Invalid attribute value: %s. %s expected' % (self.attribute, self.attribute_types)
+
 
 class ProvExceptionCannotUnifyAttribute(ProvException):
     def __init__(self, identifier, record_type1, record_type2):
@@ -439,6 +452,9 @@ class ProvExceptionCannotUnifyAttribute(ProvException):
         self.record_type1 = record_type1
         self.record_type2 = record_type2
         self.args += (identifier, PROV_N_MAP[record_type1], PROV_N_MAP[record_type2])
+
+    def __str__(self):
+        return 'Cannot unify two records of type %s and %s with same identifier (%s)' % (self.identifier, PROV_N_MAP[self.record_type1], PROV_N_MAP[self.record_type2])
 
 
 class ProvExceptionContraint(ProvException):
@@ -517,12 +533,10 @@ class ProvRecord(object):
     def _auto_literal_conversion(self, literal):
         '''This method normalise datatype for literals
         '''
+        if isinstance(literal, URIRef):
+            return literal
+
         if isinstance(literal, basestring):
-            # try if this is a QName
-            qname = self._bundle.valid_identifier(literal)
-            if isinstance(qname, QName):
-                return qname
-            # if not a QName, convert all strings to unicode
             return unicode(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():
@@ -539,7 +553,9 @@ class ProvRecord(object):
         if isinstance(extra_attributes, dict):
             #  Converting the dictionary into a list of tuples (i.e. attribute-value pairs)
             extra_attributes = extra_attributes.items()
-        attr_set = set((self._bundle.valid_identifier(attribute), self._auto_literal_conversion(value)) for attribute, value in extra_attributes)
+        attr_set = set((self._bundle.valid_identifier(attribute),
+                        self._auto_literal_conversion(value))
+                       for attribute, value in extra_attributes)
         return attr_set
 
     def add_extra_attributes(self, extra_attributes):
@@ -653,7 +669,7 @@ class ProvRecord(object):
         return self._validate_attribute(attribute, attribute_types)
 
     def __eq__(self, other):
-        if self.__class__ != other.__class__:
+        if self.get_prov_type() != other.get_prov_type():
             return False
         if self._identifier and not (self._identifier == other._identifier):
             return False
@@ -682,6 +698,13 @@ class ProvRecord(object):
         sattr = sorted(self._extra_attributes, key=_normalise_attributes) if self._extra_attributes else None
         oattr = sorted(other._extra_attributes, key=_normalise_attributes) if other._extra_attributes else None
         if sattr != oattr:
+            if logger.isEnabledFor(logging.DEBUG):
+                for spair, opair in zip(sattr, oattr):
+                    # Log the first unequal pair of attributes
+                    if spair != opair:
+                        logger.debug("Equality (ProvRecord): unequal attribute-value pairs - %s = %s - %s = %s",
+                                     spair[0], spair[1], opair[0], opair[1])
+                        break
             return False
         return True
 
@@ -740,20 +763,31 @@ class ProvRecord(object):
                 graph.add((subj, pred, obj))
         if self._extra_attributes:
             for (attr, value) in self._extra_attributes:
+                try:
+                    # try if there is a RDF representation defined
+                    obj = value.rdf_representation()
+                except Exception, e:
+                    obj = RDFLiteral(value)
+                if attr == PROV['location']:
+                    pred = PROV['atLocation'].rdf_representation()
+                    if isinstance(value, (URIRef, QName)):
+                        if isinstance(value, QName):
+                            value = URIRef(value.get_uri())
+                        graph.add((subj, pred, value))
+                        graph.add((value, RDF.type,
+                                   PROV['Location'].rdf_representation()))
+                    else:
+                        graph.add((subj, pred, obj))
+                    continue
                 if attr == PROV['type']:
                     pred = RDF.type
                 elif attr == PROV['label']:
                     pred = RDFS.label
                 else:
                     pred = attr.rdf_representation()
-                try:
-                    # try if there is a RDF representation defined
-                    obj = value.rdf_representation()
-                except Exception, e:
-                    obj = RDFLiteral(value)
                 graph.add((subj, pred, obj))
         return graph
-        
+
     def is_asserted(self):
         return self._asserted
 
@@ -768,7 +802,7 @@ class ProvRecord(object):
 class ProvElement(ProvRecord):
     def is_element(self):
         return True
-    
+
     def rdf(self, graph=None):
         if graph is None:
             graph = Graph()
@@ -853,8 +887,7 @@ class ProvActivity(ProvElement):
         startTime = self.optional_attribute(attributes, PROV_ATTR_STARTTIME, datetime.datetime)
         endTime = self.optional_attribute(attributes, PROV_ATTR_ENDTIME, datetime.datetime)
         if startTime and endTime and startTime > endTime:
-            #  TODO Raise logic exception here
-            pass
+            raise ValueError('StartTime %s > EndTime %s' % (startTime, endTime))
         attributes = OrderedDict()
         attributes[PROV_ATTR_STARTTIME] = startTime
         attributes[PROV_ATTR_ENDTIME] = endTime
@@ -1337,8 +1370,8 @@ class NamespaceManager(dict):
                 #  create and return an identifier in the default namespace
                 return self._default[identifier]
             else:
-                #  TODO Should an exception raised here
-                return Identifier(identifier)
+                # This is not an identifier
+                return None
 
     def get_anonymous_identifier(self, local_prefix='id'):
         self._anon_id_count += 1
@@ -1362,11 +1395,7 @@ class ProvBundle(ProvEntity):
         self._records = list()
         self._id_map = dict()
         self._bundles = dict()
-        if bundle is None:
-            self._namespaces = NamespaceManager(namespaces)
-        else:
-            self._namespaces = bundle._namespaces
-            self._namespaces.add_namespaces(namespaces)
+        self._namespaces = NamespaceManager(namespaces, parent=(bundle._namespaces if bundle is not None else None))
 
         #  Initializing record-specific attributes
         super(ProvBundle, self).__init__(bundle, identifier, attributes, other_attributes, asserted)
@@ -1379,9 +1408,6 @@ class ProvBundle(ProvEntity):
         return self._namespaces.get_default_namespace()
 
     def add_namespace(self, namespace_or_prefix, uri=None):
-        if self._bundle is not None:  # This is a bundle
-            logger.warn("Namespace cannot be added into a bundle. It will be added to the document instead.")
-
         if uri is None:
             self._namespaces.add_namespace(namespace_or_prefix)
         else:
@@ -1398,10 +1424,12 @@ class ProvBundle(ProvEntity):
         return self._namespaces.get_anonymous_identifier()
 
     def get_records(self, class_or_type_or_tuple=None):
-        if class_or_type_or_tuple is None:
-            return self._records
+        # Only returning asserted records
+        results = [rec for rec in self._records if rec.is_asserted()]
+        if class_or_type_or_tuple:
+            return filter(lambda rec: isinstance(rec, class_or_type_or_tuple), results)
         else:
-            return filter(lambda rec: isinstance(rec, class_or_type_or_tuple), self._records)
+            return results
 
     def get_record(self, identifier):
         if identifier is None:
@@ -1453,22 +1481,21 @@ class ProvBundle(ProvEntity):
                 return value
 
     def _decode_json_representation(self, literal):
-        try:
+        if isinstance(literal, dict):
+            # complex type
             value = literal['$']
-            if 'lang' in literal:
-                return Literal(value, langtag=literal['lang'])
+            datatype = literal['type'] if 'type' in literal else None
+            langtag = literal['lang'] if 'lang' in literal else None
+            if datatype == u'xsd:anyURI':
+                return Identifier(value)
+            elif datatype == u'xsd:QName':
+                return self.valid_identifier(value)
             else:
-                datatype = literal['type']
-                if datatype == u'xsd:anyURI':
-                    return Identifier(value)
-                elif datatype == u'xsd:QName':
-                    return self.valid_identifier(value)
-                else:
-                    # The literal of standard Python types is not converted here
-                    # It will be automatically converted when added to a record by _auto_literal_conversion()
-                    return Literal(value, self.valid_identifier(datatype))
-        except:
-            #  simple type, just return it
+                # The literal of standard Python types is not converted here
+                # It will be automatically converted when added to a record by _auto_literal_conversion()
+                return Literal(value, self.valid_identifier(datatype), langtag)
+        else:
+            # simple type, just return it
             return literal
 
     def _encode_JSON_container(self):
@@ -1646,15 +1673,15 @@ class ProvBundle(ProvEntity):
             # graph should not None here
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
-        
+
         for prefix, namespace in self._namespaces.items():
             graph.bind(prefix, namespace.get_uri())
-        
+
         for record in self._records:
             if record.is_asserted():
                 record.rdf(graph)
         return graph
-    
+
     def get_provjson(self, **kw):
         """Return the `PROV-JSON <http://www.w3.org/Submission/prov-json/>`_ representation for the bundle/document.
 
@@ -1701,12 +1728,10 @@ class ProvBundle(ProvEntity):
         return document
 
     def __eq__(self, other):
-        try:
-            other_records = set(other._records)
-        except:
-            #  other is not a bundle
+        if not isinstance(other, ProvBundle):
             return False
-        this_records = set(self._records)
+        other_records = set(other.get_records())
+        this_records = set(self.get_records())
         if len(this_records) != len(other_records):
             return False
         #  check if all records for equality
@@ -1721,12 +1746,12 @@ class ProvBundle(ProvEntity):
                         other_records.remove(record_b)
                         continue
                     else:
-                        logger.debug("Unequal PROV records:")
-                        logger.debug("%s" % unicode(record_a))
-                        logger.debug("%s" % unicode(record_b))
+                        logger.debug("Equality (ProvBundle): Unequal PROV records:")
+                        logger.debug("%s", unicode(record_a))
+                        logger.debug("%s", unicode(record_b))
                         return False
                 else:
-                    logger.debug("Could not find a record with this identifier: %s" % unicode(record_a._identifier))
+                    logger.debug("Equality (ProvBundle): Could not find a record with this identifier: %s", unicode(record_a._identifier))
                     return False
             else:
                 #  Manually look for the record
@@ -1737,7 +1762,7 @@ class ProvBundle(ProvEntity):
                         found = True
                         break
                 if not found:
-                    logger.debug("Could not find this record: %s" % unicode(record_a))
+                    logger.debug("Equality (ProvBundle): Could not find this record: %s", unicode(record_a))
                     return False
         return True
 

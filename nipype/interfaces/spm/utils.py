@@ -121,28 +121,25 @@ class ApplyTransformInputSpec(SPMCommandInputSpec):
                    desc='file to apply transform to, (only updates header)')
     mat = File( exists = True, mandatory = True,
                 desc='file holding transform to apply')
-
+    out_file = File(desc="output file name for transformed data",
+                    genfile=True)
 
 class ApplyTransformOutputSpec(TraitedSpec):
-    out_file = File(exists = True, desc = 'File with updated header')
+    out_file = File(exists = True, desc = 'Transformed image file')
 
 
 class ApplyTransform(SPMCommand):
-    """ Uses spm to apply transform stored in a .mat file to given file
+    """ Uses SPM to apply transform stored in a .mat file to given file
 
     Examples
     --------
 
     >>> import nipype.interfaces.spm.utils as spmu
-    >>> applymat = spmu.ApplyTransform(matlab_cmd='matlab-spm8')
+    >>> applymat = spmu.ApplyTransform()
     >>> applymat.inputs.in_file = 'functional.nii'
     >>> applymat.inputs.mat = 'func_to_struct.mat'
     >>> applymat.run() # doctest: +SKIP
 
-    .. warning::
-
-       CHANGES YOUR INPUT FILE (applies transform by updating the header)
-       except when used with nipype caching or workflow.
     """
     input_spec = ApplyTransformInputSpec
     output_spec = ApplyTransformOutputSpec
@@ -151,18 +148,36 @@ class ApplyTransform(SPMCommand):
         """checks for SPM, generates script"""
         script = """
         infile = '%s';
+        outfile = '%s'
         transform = load('%s');
-        M  = inv(transform.M);
-        img_space = spm_get_space(infile);
-        spm_get_space(infile, M * img_space);
+
+        V = spm_vol(infile);
+        X = spm_read_vols(V);
+        [p n e v] = spm_fileparts(V.fname);
+        V.mat = transform.M * V.mat;
+        V.fname = fullfile(outfile);
+        spm_write_vol(V,X);
+
         """%(self.inputs.in_file,
+             self.inputs.out_file,
              self.inputs.mat)
+                #img_space = spm_get_space(infile);
+        #spm_get_space(infile, transform.M * img_space);
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_file):
+            _, name, _ = split_filename(self.inputs.in_file)
+            outputs['out_file'] = os.path.abspath(name + '_trans.nii')
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
 
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File( exists = True, mandatory=True,

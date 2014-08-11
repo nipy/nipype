@@ -75,22 +75,22 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
     'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
     'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
-    
+
     seed_xor = ['seed_file', 'seed_spec']
     seed_file = File(exists=True, argstr='-seed %s', desc='seed file', xor = seed_xor)
     seed_spec = traits.List(traits.Float, desc='seed specification in mm and radius (x y z r)', position=2,
         argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm', xor = seed_xor)
-    
+
     include_xor = ['include_file', 'include_spec']
     include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
         argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
-    
+
     exclude_xor = ['exclude_file', 'exclude_spec']
     exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
         argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor = exclude_xor)
-    
+
     mask_xor = ['mask_file', 'mask_spec']
     mask_file = File(exists=True, argstr='-mask %s', desc='mask file. Only tracks within mask.', xor = mask_xor)
     mask_spec = traits.List(traits.Float, desc='Mask specification in mm and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
@@ -127,8 +127,8 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
         argstr='-initdirection %s', minlen=2, maxlen=2, units='voxels')
-    out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck', 
-                    output_name='tracked.tck', desc='output data file')
+    out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck',
+                    output_name='tracked', desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')

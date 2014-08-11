@@ -87,12 +87,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             sbatch_args = '%s -o %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
         if '-e' not in sbatch_args:
             sbatch_args = '%s -e %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
-        if '-p' not in sbatch_args:
-            sbatch_args = '%s -p normal' % (sbatch_args)
-        if '-n' not in sbatch_args:
-            sbatch_args = '%s -n 16' % (sbatch_args)
-        if '-t' not in sbatch_args:
-            sbatch_args = '%s -t 1:00:00' % (sbatch_args)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,

@@ -14,6 +14,8 @@ def test_ApplyTransform_inputs():
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
+    out_file=dict(genfile=True,
+    ),
     paths=dict(),
     use_mcr=dict(),
     use_v8struct=dict(min_ver='8',

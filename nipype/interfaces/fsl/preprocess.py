@@ -678,17 +678,17 @@ class MCFLIRT(FSLCommand):
                                                       '_variance.ext', cwd=cwd)
             outputs['std_img'] = self._gen_fname(outputs['out_file'] +
                                                  '_sigma.ext', cwd=cwd)
-                                                  
+
         # The mean image created if -stats option is specified ('meanvol')
-        # is missing the top and bottom slices. Therefore we only expose the 
-        # mean image created by -meanvol option ('mean_reg') which isn't 
+        # is missing the top and bottom slices. Therefore we only expose the
+        # mean image created by -meanvol option ('mean_reg') which isn't
         # corrupted.
         # Note that the same problem holds for the std and variance image.
-                                                  
+
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
             outputs['mean_img'] = self._gen_fname(outputs['out_file'] +
                                                   '_mean_reg.ext', cwd=cwd)
-                                                  
+
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
@@ -1159,35 +1159,27 @@ class SUSAN(FSLCommand):
 class FUGUEInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
                    desc='filename of input volume')
-    unwarped_file = File(
-        argstr='--unwarp=%s', genfile=True,
-        desc='apply unwarping and save as filename', hash_files=False)
-    forward_warping = traits.Bool(
-        False, usedefault=True,
-        desc='apply forward warping instead of unwarping')
-    warped_file = File(argstr='--warp=%s',
-                       desc='apply forward warping and save as filename',
-                       hash_files=False)
-    phasemap_file = File(exists=True, argstr='--phasemap=%s',
-                         desc='filename for input phase image')
+    shift_in_file = File(exists=True, argstr='--loadshift=%s',
+                         desc='filename for reading pixel shift volume')
+    phasemap_in_file = File(exists=True, argstr='--phasemap=%s',
+                            desc='filename for input phase image')
+    fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
+                        desc='filename for loading fieldmap (rad/s)')
+    unwarped_file = File(argstr='--unwarp=%s', desc='apply unwarping and save as filename',
+                         xor=['warped_file'], requires=['in_file'])
+    warped_file = File(argstr='--warp=%s', desc='apply forward warping and save as filename',
+                       xor=['unwarped_file'], requires=['in_file'])
+
+    forward_warping = traits.Bool(False, usedefault=True,
+                                  desc='apply forward warping instead of unwarping')
+
     dwell_to_asym_ratio = traits.Float(argstr='--dwelltoasym=%.10f',
                                        desc='set the dwell to asym time ratio')
     dwell_time = traits.Float(argstr='--dwell=%.10f',
-                              desc='set the EPI dwell time per phase-encode line - same as echo spacing - (sec)')
+                              desc=('set the EPI dwell time per phase-encode line - same as echo '
+                                    'spacing - (sec)'))
     asym_se_time = traits.Float(argstr='--asym=%.10f',
                                 desc='set the fieldmap asymmetric spin echo time (sec)')
-    fmap_out_file = File(argstr='--savefmap=%s',
-                     desc='filename for saving fieldmap (rad/s)', hash_files=False)
-    fmap_in_file = File(exists=True, argstr='--loadfmap=%s',
-                        desc='filename for loading fieldmap (rad/s)')
-
-    save_shift = traits.Bool(desc='output pixel shift volume')
-
-    shift_out_file = traits.File(argstr='--saveshift=%s',
-                           desc='filename for saving pixel shift volume', hash_files=False)
-
-    shift_in_file = File(exists=True, argstr='--loadshift=%s',
-                         desc='filename for reading pixel shift volume')
     median_2dfilter = traits.Bool(argstr='--median',
                                 desc='apply 2D median filtering')
     despike_2dfilter = traits.Bool(argstr='--despike',
@@ -1217,16 +1209,24 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                         desc='apply intensity correction to unwarping (pixel shift method only)')
     icorr_only = traits.Bool(argstr='--icorronly', requires=['unwarped_file'],
                              desc='apply intensity correction only')
-    mask_file = File(exists=True, argstr='--mask=%s',
-                     desc='filename for loading valid mask')
-    save_unmasked_fmap = traits.Bool(argstr='--unmaskfmap',
-                                     requires=['fmap_out_file'],
-                                     desc='saves the unmasked fieldmap when using --savefmap')
-    save_unmasked_shift = traits.Bool(argstr='--unmaskshift',
-                                      requires=['shift_out_file'],
+    mask_file = File(exists=True, argstr='--mask=%s', desc='filename for loading valid mask')
+    nokspace = traits.Bool(False, argstr='--nokspace', desc='do not use k-space forward warping')
+
+    # Special outputs: shift (voxel shift map, vsm)
+    save_shift = traits.Bool(False, xor=['save_unmasked_shift'],
+                             desc='write pixel shift volume')
+    shift_out_file = File(argstr='--saveshift=%s', desc='filename for saving pixel shift volume')
+    save_unmasked_shift = traits.Bool(argstr='--unmaskshift', xor=['save_shift'],
                                       desc='saves the unmasked shiftmap when using --saveshift')
-    nokspace = traits.Bool(
-        argstr='--nokspace', desc='do not use k-space forward warping')
+
+    # Special outputs: fieldmap (fmap)
+    save_fmap = traits.Bool(False, xor=['save_unmasked_fmap'],
+                            desc='write field map volume')
+    fmap_out_file = File(argstr='--savefmap=%s', desc='filename for saving fieldmap (rad/s)')
+    save_unmasked_fmap = traits.Bool(False, argstr='--unmaskfmap', xor=['save_fmap'],
+                                     desc='saves the unmasked fieldmap when using --savefmap')
+
+
 
 
 class FUGUEOutputSpec(TraitedSpec):
@@ -1237,12 +1237,61 @@ class FUGUEOutputSpec(TraitedSpec):
 
 
 class FUGUE(FSLCommand):
-    """Use FSL FUGUE to unwarp epi's with fieldmaps
+    """
+    `FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_ is, most generally, a set of tools for
+    EPI distortion correction.
+
+    Distortions may be corrected for
+        1. improving registration with non-distorted images (e.g. structurals), or
+        2. dealing with motion-dependent changes.
+
+    FUGUE is designed to deal only with the first case - improving registration.
+
 
     Examples
     --------
 
-    Please insert examples for use of this command
+
+    Unwarping an input image (shift map is known) ::
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
+    >>> fugue.run() #doctest: +SKIP
+
+
+    Warping an input image (shift map is known) ::
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.forward_warping = True
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
+    >>> fugue.run() #doctest: +SKIP
+
+
+    Computing the vsm (unwrapped phase map is known) ::
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.phasemap_in_file = 'epi_phasediff.nii'
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.save_shift = True
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
+    >>> fugue.run() #doctest: +SKIP
+
 
     """
 
@@ -1250,62 +1299,86 @@ class FUGUE(FSLCommand):
     input_spec = FUGUEInputSpec
     output_spec = FUGUEOutputSpec
 
-    def __init__(self, **kwargs):
-        super(FUGUE, self).__init__(**kwargs)
-        warn(
-            'This interface has not been fully tested. Please report any failures.')
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if self.inputs.forward_warping:
-            out_field = 'warped_file'
-        else:
-            out_field = 'unwarped_file'
-
-        out_file = getattr(self.inputs, out_field)
-        if not isdefined(out_file):
-            if isdefined(self.inputs.in_file):
-                out_file = self._gen_fname(self.inputs.in_file,
-                                           suffix='_'+out_field[:-5])
-        if isdefined(out_file):
-            outputs[out_field] = os.path.abspath(out_file)
-        if isdefined(self.inputs.fmap_out_file):
-            outputs['fmap_out_file'] = os.path.abspath(
-                self.inputs.fmap_out_file)
-        if isdefined(self.inputs.shift_out_file):
-            outputs['shift_out_file'] = os.path.abspath(
-                self.inputs.shift_out_file)
-
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'unwarped_file' and not self.inputs.forward_warping:
-            return self._list_outputs()['unwarped_file']
-        if name == 'warped_file' and self.inputs.forward_warping:
-            return self._list_outputs()['warped_file']
-        return None
-
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
 
-        if not isdefined(self.inputs.save_shift) or not self.inputs.save_shift:
-            skip += ['shift_out_file']
-        else:
-            if not isdefined(self.inputs.shift_out_file):
-                self.inputs.shift_out_file = self._gen_fname(
-                    self.inputs.in_file, suffix='_vsm')
+        input_phase = isdefined(self.inputs.phasemap_in_file)
+        input_vsm = isdefined(self.inputs.shift_in_file)
+        input_fmap = isdefined(self.inputs.fmap_in_file)
+
+        if not input_phase and not input_vsm and not input_fmap:
+            raise RuntimeError('Either phasemap_in_file, shift_in_file or fmap_in_file must be set.')
 
         if not isdefined(self.inputs.in_file):
             skip += ['unwarped_file', 'warped_file']
-        elif self.inputs.forward_warping:
-            if not isdefined(self.inputs.warped_file):
-                self.inputs.warped_file = self._gen_fname(
-                    self.inputs.in_file, suffix='_warped')
-        elif not self.inputs.forward_warping:
-            if not isdefined(self.inputs.unwarped_file):
-                self.inputs.unwarped_file = self._gen_fname(
-                    self.inputs.in_file, suffix='_unwarped')
+        else:
+            if self.inputs.forward_warping:
+                skip += ['unwarped_file']
+                trait_spec = self.inputs.trait('warped_file')
+                trait_spec.name_template = "%s_warped"
+                trait_spec.name_source = 'in_file'
+                trait_spec.output_name = 'warped_file'
+            else:
+                skip += ['warped_file']
+                trait_spec = self.inputs.trait('unwarped_file')
+                trait_spec.name_template = "%s_unwarped"
+                trait_spec.name_source = 'in_file'
+                trait_spec.output_name = 'unwarped_file'
+
+        # Handle shift output
+        if not isdefined(self.inputs.shift_out_file):
+            vsm_save_masked = (isdefined(self.inputs.save_shift) and self.inputs.save_shift)
+            vsm_save_unmasked = (isdefined(self.inputs.save_unmasked_shift) and
+                                 self.inputs.save_unmasked_shift)
+
+            if (vsm_save_masked or vsm_save_unmasked):
+                trait_spec = self.inputs.trait('shift_out_file')
+                trait_spec.output_name = 'shift_out_file'
+
+                if input_fmap:
+                    trait_spec.name_source = 'fmap_in_file'
+                elif input_phase:
+                    trait_spec.name_source = 'phasemap_in_file'
+                elif input_vsm:
+                    trait_spec.name_source = 'shift_in_file'
+                else:
+                    raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                       'fmap_in_file must be set.'))
+
+                if vsm_save_unmasked:
+                    trait_spec.name_template = '%s_vsm_unmasked'
+                else:
+                    trait_spec.name_template = '%s_vsm'
+            else:
+                skip += ['save_shift', 'save_unmasked_shift', 'shift_out_file']
+
+        # Handle fieldmap output
+        if not isdefined(self.inputs.fmap_out_file):
+            fmap_save_masked = (isdefined(self.inputs.save_fmap) and self.inputs.save_fmap)
+            fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
+                                 self.inputs.save_unmasked_fmap)
+
+            if (fmap_save_masked or fmap_save_unmasked):
+                trait_spec = self.inputs.trait('fmap_out_file')
+                trait_spec.output_name = 'fmap_out_file'
+
+                if input_vsm:
+                    trait_spec.name_source = 'shift_in_file'
+                elif input_phase:
+                    trait_spec.name_source = 'phasemap_in_file'
+                elif input_fmap:
+                    trait_spec.name_source = 'fmap_in_file'
+                else:
+                    raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
+                                       'fmap_in_file must be set.'))
+
+                if fmap_save_unmasked:
+                    trait_spec.name_template = '%s_fieldmap_unmasked'
+                else:
+                    trait_spec.name_template = '%s_fieldmap'
+            else:
+                skip += ['save_fmap', 'save_unmasked_fmap', 'fmap_out_file']
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 

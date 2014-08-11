@@ -50,7 +50,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline #doctest: +ELLIPSIS
-    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm functional_2.dcm'
+    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm'
     >>> converter.run() # doctest: +SKIP
     """
 
@@ -67,6 +67,8 @@ class Dcm2nii(CommandLine):
             else:
                 spec.argstr += ' n'
                 val = True
+        if opt == 'source_names':
+            return spec.argstr % val[0]
         return super(Dcm2nii, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
@@ -104,8 +106,8 @@ class Dcm2nii(CommandLine):
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base,filename + ".bvec"))
                         bvals.append(os.path.join(base,filename + ".bval"))
-                elif re.search('.*->(.*)', line):
-                    val = re.search('.*->(.*)', line)
+                elif re.search('.*-->(.*)', line):
+                    val = re.search('.*-->(.*)', line)
                     val = val.groups()[0]
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
@@ -115,8 +117,7 @@ class Dcm2nii(CommandLine):
                     file = val
 
                 if file:
-                    if last_added_file and os.path.exists(file) and not last_added_file in file:
-                        files.append(file)
+                    files.append(file)
                     last_added_file = file
                     continue
 

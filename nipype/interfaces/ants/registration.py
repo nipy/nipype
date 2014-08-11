@@ -12,18 +12,19 @@ from .base import ANTSCommand, ANTSCommandInputSpec
 import os
 from nipype.interfaces.base import InputMultiPath
 from nipype.interfaces.traits_extension import isdefined
+import numpy as np
 
 
 class ANTSInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False,
                             position=1, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
-           desc=('image to apply transformation to (generally a coregistered '
-                 'functional)'))
+                                 desc=('image to apply transformation to (generally a coregistered '
+                                       'functional)'))
     moving_image = InputMultiPath(File(exists=True), argstr='%s',
                                   mandatory=True,
-           desc=('image to apply transformation to (generally a coregistered '
-                 'functional)'))
+                                  desc=('image to apply transformation to (generally a coregistered '
+                                        'functional)'))
 
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
                          'MSQ', 'PSE'), mandatory=True, desc='')
@@ -74,6 +75,7 @@ class ANTSOutputSpec(TraitedSpec):
 
 
 class ANTS(ANTSCommand):
+
     """
 
 
@@ -113,9 +115,12 @@ class ANTS(ANTSCommand):
             if self.inputs.metric[ii] in intensityBased:
                 retval.append(
                     '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
-                                                             self.inputs.fixed_image[ii],
-                                                             self.inputs.moving_image[ii],
-                                                             self.inputs.metric_weight[ii],
+                                                             self.inputs.fixed_image[
+                                                                 ii],
+                                                             self.inputs.moving_image[
+                                                                 ii],
+                                                             self.inputs.metric_weight[
+                                                                 ii],
                                                              self.inputs.radius[ii]))
             elif self.inputs.metric[ii] == pointSetBased:
                 pass
@@ -207,16 +212,16 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc='', xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
-                    default=0, xor=['initial_moving_transform'],
-                    desc="Use center of mass for moving transform")
+                                               default=0, xor=['initial_moving_transform'],
+                                               desc="Use center of mass for moving transform")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
-        "Mattes")
+                                    "Mattes")
     metric_stage_trait = traits.Either(
         metric_item_trait, traits.List(metric_item_trait))
     metric = traits.List(metric_stage_trait, mandatory=True,
-        desc='the metric(s) to use for each stage. '
-        'Note that multiple metrics per stage are not supported '
-        'in ANTS 1.9.1 and earlier.')
+                         desc='the metric(s) to use for each stage. '
+                         'Note that multiple metrics per stage are not supported '
+                         'in ANTS 1.9.1 and earlier.')
     metric_weight_item_trait = traits.Float(1.0)
     metric_weight_stage_trait = traits.Either(
         metric_weight_item_trait, traits.List(metric_weight_item_trait))
@@ -233,20 +238,23 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         requires=['metric_weight'],
         desc='the number of bins in each stage for the MI and Mattes metric, '
         'the radius for other metrics')
-    sampling_strategy_item_trait = traits.Enum("None", "Regular", "Random", None)
+    sampling_strategy_item_trait = traits.Enum(
+        "None", "Regular", "Random", None)
     sampling_strategy_stage_trait = traits.Either(
         sampling_strategy_item_trait, traits.List(sampling_strategy_item_trait))
     sampling_strategy = traits.List(
         trait=sampling_strategy_stage_trait, requires=['metric_weight'],
         desc='the metric sampling strategy (strategies) for each stage')
-    sampling_percentage_item_trait = traits.Either(traits.Range(low=0.0, high=1.0), None)
+    sampling_percentage_item_trait = traits.Either(
+        traits.Range(low=0.0, high=1.0), None)
     sampling_percentage_stage_trait = traits.Either(
         sampling_percentage_item_trait, traits.List(sampling_percentage_item_trait))
     sampling_percentage = traits.List(
         trait=sampling_percentage_stage_trait, requires=['sampling_strategy'],
         desc="the metric sampling percentage(s) to use for each stage")
     use_estimate_learning_rate_once = traits.List(traits.Bool(), desc='')
-    use_histogram_matching = traits.Either(traits.Bool, traits.List(traits.Bool(argstr='%s')),
+    use_histogram_matching = traits.Either(
+        traits.Bool, traits.List(traits.Bool(argstr='%s')),
         default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
@@ -255,11 +263,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         # 'Gaussian',
         # 'BSpline',
         argstr='%s', usedefault=True)
-        #MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
-        #Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
-        #BSpline[<order=3>]
-    write_composite_transform = traits.Bool(argstr='--write-composite-transform %d',
-                                            default=False, usedefault=True, desc='')
+        # MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
+        # Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
+        # BSpline[<order=3>]
+    write_composite_transform = traits.Bool(
+        argstr='--write-composite-transform %d',
+        default=False, usedefault=True, desc='')
     collapse_output_transforms = traits.Bool(
         argstr='--collapse-output-transforms %d', default=True,
         usedefault=True,  # This should be true for explicit completeness
@@ -273,12 +282,17 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                          'GaussianDisplacementField', 'TimeVaryingVelocityField',
                                          'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
                                          'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
-    # TODO: transform_parameters currently supports rigid, affine, composite affine, translation, bspline, gaussian displacement field (gdf), and SyN -----ONLY-----!
+    # TODO: transform_parameters currently supports rigid, affine, composite
+    # affine, translation, bspline, gaussian displacement field (gdf), and SyN
+    # -----ONLY-----!
     transform_parameters = traits.List(traits.Either(traits.Float(),
-                                                     traits.Tuple(traits.Float()),
+                                                     traits.Tuple(
+                                                         traits.Float()),
                                                      traits.Tuple(traits.Float(),  # gdf & syn
-                                                                  traits.Float(),
-                                                                  traits.Float()),
+                                                                  traits.Float(
+                                                                  ),
+                                                                  traits.Float(
+                                                                  )),
                                                      traits.Tuple(traits.Float(),  # BSplineSyn
                                                                   traits.Int(),
                                                                   traits.Int(),
@@ -290,8 +304,10 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                               requires=['smoothing_sigmas'],
                               desc="units for smoothing sigmas")
     shrink_factors = traits.List(traits.List(traits.Int()), mandatory=True)
-    convergence_threshold = traits.List(trait=traits.Float(), value=[1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
-    convergence_window_size = traits.List(trait=traits.Int(), value=[10], minlen=1, requires=['convergence_threshold'], usedefault=True)
+    convergence_threshold = traits.List(trait=traits.Float(), value=[
+                                        1e-6], minlen=1, requires=['number_of_iterations'], usedefault=True)
+    convergence_window_size = traits.List(trait=traits.Int(), value=[
+                                          10], minlen=1, requires=['convergence_threshold'], usedefault=True)
     # Output flags
     output_transform_prefix = traits.Str(
         "transform", usedefault=True, argstr="%s", desc="")
@@ -299,9 +315,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         traits.Bool, File(), hash_files=False, desc="")
     output_inverse_warped_image = traits.Either(traits.Bool, File(),
                                                 hash_files=False,
-                                      requires=['output_warped_image'], desc="")
-    winsorize_upper_quantile = traits.Range(low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
-    winsorize_lower_quantile = traits.Range(low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+                                                requires=['output_warped_image'], desc="")
+    winsorize_upper_quantile = traits.Range(
+        low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
+    winsorize_lower_quantile = traits.Range(
+        low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
     collapse_linear_transforms_to_fixed_image_header = traits.Bool(
         argstr='%s', default=False, usedefault=True, desc='')
 
@@ -315,7 +333,8 @@ class RegistrationOutputSpec(TraitedSpec):
     ), desc='List of flags corresponding to the forward transforms')
     reverse_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the reverse transforms')
-    composite_transform = traits.List(File(exists=True), desc='Composite transform file')
+    composite_transform = traits.List(
+        File(exists=True), desc='Composite transform file')
     inverse_composite_transform = traits.List(
         File(exists=True), desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
@@ -323,6 +342,7 @@ class RegistrationOutputSpec(TraitedSpec):
 
 
 class Registration(ANTSCommand):
+
     """
     Examples
     --------
@@ -391,12 +411,14 @@ class Registration(ANTSCommand):
     'antsRegistration --collapse-linear-transforms-to-fixed-image-header 0 --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
-    """The default sampling stratey argument."""
+    """The default sampling strategy argument."""
 
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
     _quantilesDone = False
+    _linear_transform_names = np.array(
+        ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity'])
 
     def _formatMetric(self, index):
         """
@@ -441,11 +463,12 @@ class Registration(ANTSCommand):
             indexes = range(0, len(name_input))
             # dict-comprehension only works with python 2.7 and up
             #specs = [{k: v[i] for k, v in items} for i in indexes]
-            specs = [dict([(k, v[i]) for k,v in items]) for i in indexes]
+            specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
         else:
             specs = [stage_inputs]
 
-        # Format the --metric command line metric arguments, one per specification.
+        # Format the --metric command line metric arguments, one per
+        # specification.
         return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
 
     def _formatMetricArgument(self, fixed, moving, **kwargs):
@@ -490,11 +513,12 @@ class Registration(ANTSCommand):
             retval.append('--convergence %s' % self._formatConvergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append('--smoothing-sigmas %s%s' %
-                        (self._antsJoinList(self.inputs.smoothing_sigmas[ii]),
-                         self.inputs.sigma_units[ii]))
+                             (self._antsJoinList(self.inputs.smoothing_sigmas[
+                                 ii]),
+                              self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %
-                    self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
+                              self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
             retval.append('--shrink-factors %s' %
                           self._antsJoinList(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
@@ -570,18 +594,21 @@ class Registration(ANTSCommand):
             return self._formatRegistration()
         elif opt == 'initial_moving_transform':
             try:
-                doInvertTransform = int(self.inputs.invert_initial_moving_transform)
+                doInvertTransform = int(
+                    self.inputs.invert_initial_moving_transform)
             except:
-                doInvertTransform = 0 ## Just do the default behavior
+                doInvertTransform = 0  # Just do the default behavior
             return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
                                                               doInvertTransform)
         elif opt == 'initial_moving_transform_com':
             try:
-                doCenterOfMassInit = int(self.inputs.initial_moving_transform_com)
+                doCenterOfMassInit = int(
+                    self.inputs.initial_moving_transform_com)
             except:
-                doCenterOfMassInit = 0 ## Just do the default behavior
+                doCenterOfMassInit = 0  # Just do the default behavior
             return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
-                                                                  self.inputs.moving_image[0],
+                                                                  self.inputs.moving_image[
+                                                                      0],
                                                                   doCenterOfMassInit)
         elif opt == 'interpolation':
             # TODO: handle multilabel, gaussian, and bspline options
@@ -632,29 +659,49 @@ class Registration(ANTSCommand):
         outputs['forward_invert_flags'] = []
         outputs['reverse_transforms'] = []
         outputs['reverse_invert_flags'] = []
+
+        # invert_initial_moving_transform should be always defined, even if
+        # there's no initial transform
+        invert_initial_moving_transform = False
+        if isdefined(self.inputs.invert_initial_moving_transform):
+            invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
+
         if not self.inputs.collapse_output_transforms:
             transformCount = 0
             if isdefined(self.inputs.initial_moving_transform):
                 outputs['forward_transforms'].append(
                     self.inputs.initial_moving_transform)
                 outputs['forward_invert_flags'].append(
-                    self.inputs.invert_initial_moving_transform)
+                    invert_initial_moving_transform)
                 outputs['reverse_transforms'].insert(
                     0, self.inputs.initial_moving_transform)
-                outputs['reverse_invert_flags'].insert(0, not self.inputs.invert_initial_moving_transform)  # Prepend
+                outputs['reverse_invert_flags'].insert(
+                    0, not invert_initial_moving_transform)  # Prepend
                 transformCount += 1
             elif isdefined(self.inputs.initial_moving_transform_com):
-                #forwardFileName, _ = self._outputFileNames(self.inputs.output_transform_prefix,
-                #                                           transformCount,
-                #                                           'Initial')
-                #outputs['forward_transforms'].append(forwardFileName)
+                forwardFileName, forwardInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix,
+                    transformCount,
+                    'Initial')
+                reverseFileName, reverseInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix,
+                    transformCount,
+                    'Initial',
+                    True)
+                outputs['forward_transforms'].append(forwardFileName)
+                outputs['forward_invert_flags'].append(False)
+                outputs['reverse_transforms'].insert(0,
+                                                     os.path.abspath(reverseFileName))
+                outputs['reverse_invert_flags'].insert(0, True)
                 transformCount += 1
 
             for count in range(len(self.inputs.transforms)):
-                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
-                                                                            self.inputs.transforms[count])
-                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount,
-                                                                            self.inputs.transforms[count], True)
+                forwardFileName, forwardInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix, transformCount,
+                    self.inputs.transforms[count])
+                reverseFileName, reverseInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix, transformCount,
+                    self.inputs.transforms[count], True)
                 outputs['forward_transforms'].append(
                     os.path.abspath(forwardFileName))
                 outputs['forward_invert_flags'].append(forwardInverseMode)
@@ -665,11 +712,33 @@ class Registration(ANTSCommand):
                 transformCount += 1
         else:
             transformCount = 0
-            for transform in ['GenericAffine', 'SyN']:  # Only files returned by collapse_output_transforms
-                forwardFileName, forwardInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform)
-                reverseFileName, reverseInverseMode = self._outputFileNames(self.inputs.output_transform_prefix, transformCount, transform, True)
-                outputs['forward_transforms'].append(
-                    os.path.abspath(forwardFileName))
+            isLinear = [any(self._linear_transform_names == t)
+                        for t in self.inputs.transforms]
+            collapse_list = []
+
+            if isdefined(self.inputs.initial_moving_transform) or \
+               isdefined(self.inputs.initial_moving_transform_com):
+                isLinear.insert(0, True)
+
+            # Only files returned by collapse_output_transforms
+            if any(isLinear):
+                collapse_list.append('GenericAffine')
+            if not all(isLinear):
+                collapse_list.append('SyN')
+
+            for transform in collapse_list:
+                forwardFileName, forwardInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix,
+                    transformCount,
+                    transform,
+                    inverse=False)
+                reverseFileName, reverseInverseMode = self._outputFileNames(
+                    self.inputs.output_transform_prefix,
+                    transformCount,
+                    transform,
+                    inverse=True)
+                outputs['forward_transforms'].append(os.path.abspath(
+                    forwardFileName))
                 outputs['forward_invert_flags'].append(forwardInverseMode)
                 outputs['reverse_transforms'].append(
                     os.path.abspath(reverseFileName))

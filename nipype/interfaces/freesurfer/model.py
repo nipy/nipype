@@ -635,7 +635,7 @@ class SegStats(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['summary_file'] = self.inputs.summary_file
+        outputs['summary_file'] = os.path.abspath(self.inputs.summary_file)
         if not isdefined(outputs['summary_file']):
             outputs['summary_file'] = os.path.join(os.getcwd(), 'summary.stats')
         suffices = dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
@@ -654,7 +654,7 @@ class SegStats(FSCommand):
                                                     newpath=os.getcwd(),
                                                     use_ext=False)
                 else:
-                    outputs[name] = value
+                    outputs[name] = os.path.abspath(value)
         return outputs
 
     def _format_arg(self, name, spec, value):
