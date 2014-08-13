@@ -923,6 +923,80 @@ class MRITessellate(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
 
+
+class MRIPretessInputSpec(FSTraitedSpec):
+    in_filled = File(exists=True, mandatory=True, position=-4, argstr='%s',
+                     desc=('filled volume, usually wm.mgz'))
+    label = traits.Either(traits.Str('wm'), traits.Int(1), argstr='%s', default='wm',
+                          mandatory=True, usedefault=True, position=-3,
+                          desc=('label to be picked up, can be a Freesurfer\'s string like '
+                                '\'wm\' or a label value (e.g. 127 for rh or 255 for lh)'))
+    in_norm = File(exists=True, mandatory=True, position=-2, argstr='%s',
+                   desc=('the normalized, brain-extracted T1w image. Usually norm.mgz'))
+    out_file = File(position=-1, argstr='%s', genfile=True,
+                    desc=('the output file after mri_pretess.'))
+
+
+    nocorners = traits.Bool(False, argstr='-nocorners', desc=('do not remove corner configurations'
+                            ' in addition to edge ones.'))
+    keep = traits.Bool(False, argstr='-keep', desc=('keep WM edits'))
+    test = traits.Bool(False, argstr='-test', desc=('adds a voxel that should be removed by '
+                       'mri_pretess. The value of the voxel is set to that of an ON-edited WM, '
+                       'so it should be kept with -keep. The output will NOT be saved.'))
+
+class MRIPretessOutputSpec(TraitedSpec):
+    """
+    Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
+    """
+    out_file = File(exists=True, desc='output file after mri_pretess')
+
+
+class MRIPretess(FSCommand):
+    """
+    Uses Freesurfer's mri_pretess to prepare volumes to be tessellated.
+
+    Description
+    -----------
+
+    Changes white matter (WM) segmentation so that the neighbors of all
+    voxels labeled as WM have a face in common - no edges or corners
+    allowed.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> pretess = fs.MRIPretess()
+    >>> pretess.inputs.in_filled = 'wm.mgz'
+    >>> pretess.inputs.in_norm = 'norm.mgz'
+    >>> pretess.inputs.nocorners = True
+    >>> pretess.cmdline
+    'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
+    >>> pretess.run() # doctest: +SKIP
+    """
+    _cmd = 'mri_pretess'
+    input_spec = MRIPretessInputSpec
+    output_spec = MRIPretessOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        else:
+            _, name, ext = split_filename(self.inputs.in_filled)
+            return name + '_pretess' + str(self.inputs.label) + ext
+
+
 class MRIMarchingCubesInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
