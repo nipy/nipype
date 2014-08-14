@@ -1467,7 +1467,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                            'would typically be the file that was specified '
                            'with the --in argument when running fnirt.'))
 
-    out_format = traits.Either('field', 'spline', argstr='--outformat=%s',
+    out_format = traits.Either('spline', 'field', argstr='--outformat=%s',
                                desc=('Specifies the output format. If set to field (default) '
                                      'the output will be a (4D) field-file. If set to spline '
                                      'the format will be a (4D) file of spline coefficients.'))
@@ -1511,10 +1511,8 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                                      'stored separately from the displacements).'))
 
 class WarpUtilsOutputSpec(TraitedSpec):
-    out_file = File(exists=True,
-                    desc=('Name of output file, containing the warp as field or coefficients.'))
-    out_jacobian = File(exists=True,
-                        desc=('Name of output file, containing the map of the determinant of '
+    out_file = File(desc=('Name of output file, containing the warp as field or coefficients.'))
+    out_jacobian = File(desc=('Name of output file, containing the map of the determinant of '
                               'the Jacobian'))
 
 
@@ -1557,6 +1555,8 @@ class WarpUtils(FSLCommand):
                 trait_spec = self.inputs.trait('out_jacobian')
                 trait_spec.name_source = ['in_file']
                 trait_spec.name_template = '%s_jac'
+        else:
+            skip+=['out_jacobian']
 
         skip+=['write_jacobian']
         return super(WarpUtils, self)._parse_inputs(skip=skip)
