@@ -1552,9 +1552,10 @@ class WarpUtils(FSLCommand):
 
         if self.inputs.write_jacobian:
             if not isdefined(self.inputs.out_jacobian):
-                trait_spec = self.inputs.trait('out_jacobian')
-                trait_spec.name_source = ['in_file']
-                trait_spec.name_template = '%s_jac'
+                jac_spec = self.inputs.trait('out_jacobian')
+                jac_spec.name_source = ['in_file']
+                jac_spec.name_template = '%s_jac'
+                jac_spec.output_name = 'out_jacobian'
         else:
             skip+=['out_jacobian']
 
