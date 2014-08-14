@@ -6,23 +6,21 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-03 13:42:46
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-06-17 10:17:43
+# @Last Modified time: 2014-08-14 19:25:37
 """The :py:mod:`nipype.interfaces.elastix` provides the interface to
 the elastix registration software.
 
 .. note:: http://elastix.isi.uu.nl/
 
-
 """
 
-from ..base import (CommandLine, CommandLineInputSpec, isdefined,
-                    TraitedSpec, File, traits, InputMultiPath)
-from ... import logging
+from nipype.interfaces.base import CommandLineInputSpec, traits
+from nipype import logging
 logger = logging.getLogger('interface')
 
 
 class ElastixBaseInputSpec(CommandLineInputSpec):
-    output_path = traits.Directory('./', exists=True, mandatory=True, usedefault=True,
-                              argstr='-out %s', desc='output directory')
     num_threads = traits.Int(1, argstr='-threads %01d',
                              desc='set the maximum number of threads of elastix')
+    output_path = traits.Str('./', mandatory=True, usedefault=True,
+                             argstr='-out %s', desc='output directory')
