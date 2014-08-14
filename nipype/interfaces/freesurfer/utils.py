@@ -945,9 +945,6 @@ class MRIPretessInputSpec(FSTraitedSpec):
                        'so it should be kept with -keep. The output will NOT be saved.'))
 
 class MRIPretessOutputSpec(TraitedSpec):
-    """
-    Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
-    """
     out_file = File(exists=True, desc='output file after mri_pretess')
 
 
