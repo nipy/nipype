@@ -962,9 +962,8 @@ class AddNoiseInputSpec(TraitedSpec):
     in_mask = File(exists=True, desc=('input mask, voxels outside this mask '
                    'will be considered background'))
     snr = traits.Float(10.0, desc='desired output SNR in dB', usedefault=True)
-    dist = traits.Enum('normal', usedefault=True, mandatory=True,
-                       desc=('desired noise distribution, currently '
-                       'only normal is implemented'))
+    dist = traits.Enum('normal', 'rician', usedefault=True, mandatory=True,
+                       desc=('desired noise distribution'))
     bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
                           desc=('desired noise distribution, currently '
                           'only normal is implemented'))
@@ -1032,23 +1031,37 @@ class AddNoise(BaseInterface):
 
         if mask is None:
             mask = np.ones_like(image)
+        else:
+            mask[mask>0] = 1
+            mask[mask<1] = 0
+
+            if mask.ndim < image.ndim:
+                mask = np.rollaxis(np.array([mask]*image.shape[3]),0, 4)
 
         signal = image[mask>0].reshape(-1)
-        signal = signal - signal.mean()
-        sigma_s = signal.var()
-        sigma_n = sqrt((sigma_s**2)/snr)
 
         if dist == 'normal':
+            signal = signal - signal.mean()
+            sigma_n = sqrt(signal.var()/snr)
             noise = np.random.normal(size=image.shape, scale=sigma_n)
-        else:
-            raise NotImplementedError('Only normal distribution is supported')
 
-        if np.any(mask==0):
-            if bg_dist == 'rayleigh':
+            if (np.any(mask==0)) and (bg_dist == 'rayleigh'):
                 bg_noise = np.random.rayleigh(size=image.shape, scale=sigma_n)
                 noise[mask==0] = bg_noise[mask==0]
 
-        im_noise = image +  noise
+            im_noise = image +  noise
+
+        elif dist == 'rician':
+            sigma_n = signal.mean()/snr
+            n_1 = np.random.normal(size=image.shape, scale=sigma_n)
+            n_2 = np.random.normal(size=image.shape, scale=sigma_n)
+            stde_1 = n_1/sqrt(2.0)
+            stde_2 = n_2/sqrt(2.0)
+            im_noise = np.sqrt((image + stde_1)**2 + (stde_2)**2)
+        else:
+            raise NotImplementedError(('Only normal and rician distributions '
+                                      'are supported'))
+
         return im_noise
 
 
