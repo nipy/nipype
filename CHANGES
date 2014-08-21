@@ -25,6 +25,7 @@ Next Release
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 * FIX: FNIRT registration pathway and associated OpenFMRI example script
 * FIX: spm12b compatibility for Model estimate
+* FIX: Batch scheduler controls the number of maximum jobs properly
 
 Release 0.9.2 (January 31, 2014)
 ============
