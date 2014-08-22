@@ -20,6 +20,8 @@ def test_ConvertWarp_inputs():
     ),
     jacobian_min=dict(argstr='--jmin=%f',
     ),
+    midmat=dict(argstr='--midmat=%s',
+    ),
     out_abswarp=dict(argstr='--absout',
     xor=['out_relwarp'],
     ),

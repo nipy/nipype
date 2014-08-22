@@ -27,8 +27,9 @@ logger = logging.getLogger('interface')
 class EditTransformInputSpec(BaseInterfaceInputSpec):
     transform_file = File(exists=True, mandatory=True,
                           desc='transform-parameter file, only 1')
-    reference_image = File(exists=True, mandatory=False,
-                           desc='set a new reference image to change the target coordinate system.')
+    reference_image = File(exists=True,
+                           desc=('set a new reference image to change the '
+                                 'target coordinate system.'))
     interpolation = traits.Enum('cubic','linear','nearest', usedefault=True,
                                 argstr='FinalBSplineInterpolationOrder',
                                 desc='set a new interpolator for transformation')
