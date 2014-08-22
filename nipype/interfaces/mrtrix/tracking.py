@@ -30,7 +30,10 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
         desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
 
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filtered track filename')
+
+    out_file = File(argstr='%s', position=-1, desc='Output filtered track filename',
+            name_source=['in_file'], hash_files=False, name_template='%s_filt')
+
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
     invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" \
                 "otherwise have been included are now excluded and vice-versa.")
@@ -59,25 +62,6 @@ class FilterTracks(CommandLine):
     _cmd = 'filter_tracks'
     input_spec=FilterTracksInputSpec
     output_spec=FilterTracksOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        if isdefined(self.inputs.out_filename):
-            path, name , _ = split_filename(self.inputs.out_filename)
-            return op.join(path, name + '.tck')
-        else:
-            _, name , _ = split_filename(self.inputs.in_file)
-            return op.abspath(name + '_filt.tck')
 
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):

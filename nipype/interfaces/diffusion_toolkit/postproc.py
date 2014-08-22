@@ -24,6 +24,23 @@ class SplineFilterOutputSpec(TraitedSpec):
     smoothed_track_file = File(exists=True)
 
 class SplineFilter(CommandLine):
+    """
+    Smoothes TrackVis track files with a B-Spline filter.
+
+    Helps remove redundant track points and segments
+    (thus reducing the size of the track file) and also
+    make tracks nicely smoothed. It will NOT change the
+    quality of the tracks or lose any original information.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.diffusion_toolkit as dtk
+    >>> filt = dtk.SplineFilter()
+    >>> filt.inputs.track_file = 'tracks.trk'
+    >>> filt.inputs.step_length = 0.5
+    >>> filt.run()                                 # doctest: +SKIP
+    """
     input_spec=SplineFilterInputSpec
     output_spec=SplineFilterOutputSpec
 
@@ -43,6 +60,25 @@ class TrackMergeOutputSpec(TraitedSpec):
     track_file = File(exists=True)
 
 class TrackMerge(CommandLine):
+    """
+    Merges several TrackVis track files into a single track
+    file.
+
+    An id type property tag is added to each track in the
+    newly merged file, with each unique id representing where
+    the track was originally from. When the merged file is
+    loaded in TrackVis, a property filter will show up in
+    Track Property panel. Users can adjust that to distinguish
+    and sub-group tracks by its id (origin).
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.diffusion_toolkit as dtk
+    >>> mrg = dtk.TrackMerge()
+    >>> mrg.inputs.track_files = ['track1.trk','track2.trk']
+    >>> mrg.run()                                 # doctest: +SKIP
+    """
     input_spec=TrackMergeInputSpec
     output_spec=TrackMergeOutputSpec
 
