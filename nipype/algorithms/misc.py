@@ -959,7 +959,7 @@ def calc_moments(timeseries_file, moment):
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                     desc='The tpms to be normalized') )
-    in_mask = File(exists=True, mandatory=False,
+    in_mask = File(exists=True,
                     desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
 class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
