@@ -256,9 +256,12 @@ class ProvStore(object):
         inputs = results.inputs
         outputs = results.outputs
         classname = interface.__name__
+        modulepath = "{0}.{1}".format(interface.__module__, interface.__name__)
+        activitytype = ''.join([i.capitalize() for i in modulepath.split('.')])
 
         a0_attrs = {nipype_ns['module']: interface.__module__,
                     nipype_ns["interface"]: classname,
+                    pm.PROV["type"]: nipype_ns[activitytype],
                     pm.PROV["label"]: classname,
                     nipype_ns['duration']: safe_encode(runtime.duration),
                     nipype_ns['workingDirectory']: safe_encode(runtime.cwd),
