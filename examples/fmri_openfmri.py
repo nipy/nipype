@@ -305,33 +305,41 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
     wf.connect(datasource, 'anat', registration, 'inputspec.anatomical_image')
     registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
+    registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+    registration.inputs.inputspec.config_file = 'T1_2_MNI152_2mm'
 
-    def merge_files(copes, varcopes):
+    def merge_files(copes, varcopes, zstats):
         out_files = []
         splits = []
         out_files.extend(copes)
         splits.append(len(copes))
         out_files.extend(varcopes)
         splits.append(len(varcopes))
+        out_files.extend(zstats)
+        splits.append(len(zstats))
         return out_files, splits
 
-    mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes'],
+    mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                  'zstats'],
                                    output_names=['out_files', 'splits'],
                                    function=merge_files),
                       name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
                                  [('copes', 'copes'),
                                   ('varcopes', 'varcopes'),
+                                  ('zstats', 'zstats'),
                                   ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):
-        copes = in_files[:splits[1]]
-        varcopes = in_files[splits[1]:]
-        return copes, varcopes
+        copes = in_files[:splits[0]]
+        varcopes = in_files[splits[0]:(splits[0] + splits[1])]
+        zstats = in_files[(splits[0] + splits[1]):]
+        return copes, varcopes, zstats
 
     splitfunc = pe.Node(niu.Function(input_names=['in_files', 'splits'],
-                                     output_names=['copes', 'varcopes'],
+                                     output_names=['copes', 'varcopes',
+                                                   'zstats'],
                                      function=split_files),
                       name='split_files')
     wf.connect(mergefunc, 'splits', splitfunc, 'splits')
@@ -347,7 +355,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         subs = [('_subject_id_%s_' % subject_id, '')]
         subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
-        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp_warp',
+        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
         'mean'))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
         'affine'))
@@ -358,10 +366,12 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
             subs.append(('_flameo%d/zstat1.' % i, 'zstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/tstat1.' % i, 'tstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/res4d.' % i, 'res4d%02d.' % (i + 1)))
-            subs.append(('_warpall%d/cope1_warp_warp.' % i,
+            subs.append(('_warpall%d/cope1_warp.' % i,
                          'cope%02d.' % (i + 1)))
-            subs.append(('_warpall%d/varcope1_warp_warp.' % (len(conds) + i),
+            subs.append(('_warpall%d/varcope1_warp.' % (len(conds) + i),
                          'varcope%02d.' % (i + 1)))
+            subs.append(('_warpall%d/zstat1_warp.' % (2 * len(conds) + i),
+                         'zstat%02d.' % (i + 1)))
         return subs
 
     subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds',
@@ -388,6 +398,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect([(splitfunc, datasink,
                  [('copes', 'copes.mni'),
                   ('varcopes', 'varcopes.mni'),
+                  ('zstats', 'zstats.mni'),
                   ])])
     wf.connect(registration, 'outputspec.transformed_mean', datasink, 'mean.mni')
     wf.connect(registration, 'outputspec.func2anat_transform', datasink, 'xfm.mean2anat')

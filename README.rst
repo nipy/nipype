@@ -8,6 +8,25 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://coveralls.io/repos/nipy/nipype/badge.png
   :target: https://coveralls.io/r/nipy/nipype
 
+.. image:: https://pypip.in/version/nipype/badge.png
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Latest Version
+
+.. image:: https://pypip.in/download/nipype/badge.png
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Downloads
+
+.. image:: https://pypip.in/py_versions/nipype/badge.png
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Supported Python versions
+
+.. image:: https://pypip.in/status/nipype/badge.png
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Development Status
+
+.. image:: https://pypip.in/license/nipype/badge.png
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: License
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
