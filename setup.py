@@ -33,8 +33,8 @@ from distutils.command.build_py import build_py
 
 # XXX: write COMMIT_INFO.txt with versioneer
 versioneer.VCS = 'git'
-versioneer.versionfile_source = 'src/nipype/_version.py'
-versioneer.versionfile_build = 'nipype/_version.py'
+versioneer.versionfile_source = 'nipype/_version.py'
+versioneer.versionfile_build = 'build/_version.py'
 versioneer.tag_prefix = '' # tags are like 1.2.0
 versioneer.parentdir_prefix = 'nipype-' # dirname like 'myproject-1.2.0'
 

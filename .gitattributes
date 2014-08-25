@@ -1,1 +1,2 @@
 nipype/COMMIT_INFO.txt export-subst
+nipype/_version.py export-subst
