@@ -114,137 +114,6 @@ def _add_append_key(in_dict, key, value):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
-# Dependency checks
-def package_check(pkg_name, version=None,
-                  optional=False,
-                  checker=LooseVersion,
-                  version_getter=None,
-                  messages=None,
-                  setuptools_args=None,
-                  pypi_pkg_name=None
-                  ):
-    ''' Check if package `pkg_name` is present and has good enough version
-
-    Has two modes of operation.  If `setuptools_args` is None (the default),
-    raise an error for missing non-optional dependencies and log warnings for
-    missing optional dependencies.  If `setuptools_args` is a dict, then fill
-    ``install_requires`` key value with any missing non-optional dependencies,
-    and the ``extras_requires`` key value with optional dependencies.
-
-    This allows us to work with and without setuptools.  It also means we can
-    check for packages that have not been installed with setuptools to avoid
-    installing them again.
-
-    Parameters
-    ----------
-    pkg_name : str
-       name of package as imported into python
-    version : {None, str}, optional
-       minimum version of the package that we require. If None, we don't
-       check the version.  Default is None
-    optional : bool or str, optional
-       If ``bool(optional)`` is False, raise error for absent package or wrong
-       version; otherwise warn.  If ``setuptools_args`` is not None, and
-       ``bool(optional)`` is not False, then `optional` should be a string
-       giving the feature name for the ``extras_require`` argument to setup.
-    checker : callable, optional
-       callable with which to return comparable thing from version
-       string.  Default is ``distutils.version.LooseVersion``
-    version_getter : {None, callable}:
-       Callable that takes `pkg_name` as argument, and returns the
-       package version string - as in::
-
-          ``version = version_getter(pkg_name)``
-
-       If None, equivalent to::
-
-          mod = __import__(pkg_name); version = mod.__version__``
-    messages : None or dict, optional
-       dictionary giving output messages
-    setuptools_args : None or dict
-       If None, raise errors / warnings for missing non-optional / optional
-       dependencies.  If dict fill key values ``install_requires`` and
-       ``extras_require`` for non-optional and optional dependencies.
-    pypi_pkg_name : None or string
-       When the pypi package name differs from the installed module. This is the
-       case with the package python-dateutil which installs as dateutil.
-    '''
-    setuptools_mode = not setuptools_args is None
-    optional_tf = bool(optional)
-    if version_getter is None:
-        def version_getter(pkg_name):
-            mod = __import__(pkg_name)
-            return mod.__version__
-    if messages is None:
-        messages = {}
-    msgs = {
-         'missing': 'Cannot import package "%s" - is it installed?',
-         'missing opt': 'Missing optional package "%s"',
-         'opt suffix' : '; you may get run-time errors',
-         'version too old': 'You have version %s of package "%s"'
-                            ' but we need version >= %s', }
-    msgs.update(messages)
-    status, have_version = _package_status(pkg_name,
-                                           version,
-                                           version_getter,
-                                           checker)
-    if pypi_pkg_name:
-        pkg_name = pypi_pkg_name
-
-    if status == 'satisfied':
-        return
-    if not setuptools_mode:
-        if status == 'missing':
-            if not optional_tf:
-                raise RuntimeError(msgs['missing'] % pkg_name)
-            log.warn(msgs['missing opt'] % pkg_name +
-                     msgs['opt suffix'])
-            return
-        elif status == 'no-version':
-            raise RuntimeError('Cannot find version for %s' % pkg_name)
-        assert status == 'low-version'
-        if not optional_tf:
-            raise RuntimeError(msgs['version too old'] % (have_version,
-                                                          pkg_name,
-                                                          version))
-        log.warn(msgs['version too old'] % (have_version,
-                                            pkg_name,
-                                            version)
-                    + msgs['opt suffix'])
-        return
-    # setuptools mode
-    if optional_tf and not isinstance(optional, string_types):
-        raise RuntimeError('Not-False optional arg should be string')
-    dependency = pkg_name
-
-    if version:
-        dependency += '>=' + version
-    if optional_tf:
-        if not 'extras_require' in setuptools_args:
-            setuptools_args['extras_require'] = {}
-        _add_append_key(setuptools_args['extras_require'],
-                        optional,
-                        dependency)
-        return
-    _add_append_key(setuptools_args, 'install_requires', dependency)
-    return
-
-
-def _package_status(pkg_name, version, version_getter, checker):
-    try:
-        __import__(pkg_name)
-    except ImportError:
-        return 'missing', None
-    if not version:
-        return 'satisfied', None
-    try:
-        have_version = version_getter(pkg_name)
-    except AttributeError:
-        return 'no-version', None
-    if checker(have_version) < checker(version):
-        return 'low-version', have_version
-    return 'satisfied', have_version
-
 ## END - COPIED FROM NIBABEL
 
 from build_docs import cmdclass, INFO_VARS
@@ -268,31 +137,6 @@ def configuration(parent_package='',top_path=None):
     config.get_version('nipype/__init__.py') # sets config.version
     config.add_subpackage('nipype', 'nipype')
     return config
-
-# Prepare setuptools args
-if 'setuptools' in sys.modules:
-    extra_setuptools_args = dict(
-        tests_require=['nose'],
-        test_suite='nose.collector',
-        zip_safe=False,
-        extras_require = dict(
-            doc='Sphinx>=0.3',
-            test='nose>=0.10.1'),
-    )
-    pkg_chk = partial(package_check, setuptools_args = extra_setuptools_args)
-else:
-    extra_setuptools_args = {}
-    pkg_chk = package_check
-
-# Hard and soft dependency checking
-pkg_chk('networkx', INFO_VARS['NETWORKX_MIN_VERSION'])
-pkg_chk('nibabel', INFO_VARS['NIBABEL_MIN_VERSION'])
-pkg_chk('numpy', INFO_VARS['NUMPY_MIN_VERSION'])
-pkg_chk('scipy', INFO_VARS['SCIPY_MIN_VERSION'])
-pkg_chk('traits', INFO_VARS['TRAITS_MIN_VERSION'])
-pkg_chk('nose', INFO_VARS['NOSE_MIN_VERSION'])
-pkg_chk('dateutil', INFO_VARS['DATEUTIL_MIN_VERSION'],
-        pypi_pkg_name='python-dateutil')
 
 ################################################################################
 # Import the documentation building classes.
@@ -324,8 +168,10 @@ def main(**extra_args):
           version=INFO_VARS['VERSION'],
           configuration=configuration,
           cmdclass=cmdclass,
+          install_requires=['networkx', 'nibabel', 'numpy', 'scipy', 'traits',
+                            'nose', 'dateutils'],
           scripts=glob('bin/*'),
           **extra_args)
 
 if __name__ == "__main__":
-    main(**extra_setuptools_args)
+    main()
