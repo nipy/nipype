@@ -31,16 +31,17 @@ if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 from setuptools import setup, find_packages
 from distutils.command.build_py import build_py
 
-# XXX: write COMMIT_INFO.txt with versioneer
 versioneer.VCS = 'git'
 versioneer.versionfile_source = 'nipype/_version.py'
 versioneer.versionfile_build = 'nipype/_version.py'
 versioneer.tag_prefix = '' # tags are like 1.2.0
 versioneer.parentdir_prefix = 'nipype-' # dirname like 'myproject-1.2.0'
 
-from build_docs import cmdclass, INFO_VARS
+from build_docs import INFO_VARS
+from build_docs import cmdclass as docs_class
 
-#XXX: Build docs too
+#XXX: Build docs too from setup.py? requires
+# merging cmdclasses versioneer and build_docs
 
 install_reqs = parse_requirements('requirements.txt')
 reqs = [str(ir.req) for ir in install_reqs]
