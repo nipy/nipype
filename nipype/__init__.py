@@ -77,3 +77,7 @@ except:
 from pipeline import Node, MapNode, JoinNode, Workflow
 from interfaces import (DataGrabber, DataSink, SelectFiles,
                         IdentityInterface, Rename, Function, Select, Merge)
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions

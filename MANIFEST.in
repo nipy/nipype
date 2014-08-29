@@ -12,3 +12,5 @@ include nipype/COMMIT_INFO.txt
 recursive-include doc *
 recursive-include matlabscripts *
 recursive-include tools *
+include versioneer.py
+include nipype/_version.py
