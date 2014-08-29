@@ -106,8 +106,8 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     maxit_val = traits.Int(desc='Maximum number of non-linear LSQR iterations [100x2 passes])', argstr='-maxit %i', requires=['gn_flag'])
     lm_vals = traits.Tuple(traits.Float, traits.Float,
                            desc='LM parameters (initial value, decrease rate) [100,1.2]', argstr='-lm %f $f', requires=['gn_flag'])
-    gn_flag = traits.Bool(desc='Use Gauss-Newton algorithm [Levenberg-Marquardt].', argstr='-gn', xor=['opt_type'])
-    wls_flag = traits.Bool(desc='Use variance-weighted least squares for DTI fitting', argstr='-wls', xor=['opt_type'])
+    gn_flag = traits.Bool(desc='Use Gauss-Newton algorithm [Levenberg-Marquardt].', argstr='-gn', xor=['wls_flag'], default=False)
+    wls_flag = traits.Bool(desc='Use variance-weighted least squares for DTI fitting', argstr='-wls', xor=['gn_flag'], default=False)
     slice_no = traits.Int(desc='Fit to single slice number', argstr='-slice %i')
     diso_val = traits.Float(desc='Isotropic diffusivity for -nod [3e-3]', argstr='-diso %f')
     dpr_val = traits.Float(desc='Parallel diffusivity for -nod [1.7e-3].', argstr='-dpr %f')
