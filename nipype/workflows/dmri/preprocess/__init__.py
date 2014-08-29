@@ -1,1 +1,1 @@
-from epi import (motion_correct)
+from epi import motion_correct

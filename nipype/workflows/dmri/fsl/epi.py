@@ -118,11 +118,12 @@ def create_motion_correct_pipeline(name='motion_correct'):
     (Leemans et al. 2009 - http://www.ncbi.nlm.nih.gov/pubmed/19319973),
     making use of the rotation matrix obtained by FLIRT.
 
-    .. warning::
+    .. deprecated:: 1.0.0.
+      Use :func:`nipype.workflows.dmri.preprocess.epi.motion_correct` instead
 
-    IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
-    that not all the dicom converters ensure the consistency between the resulting
-    nifti orientation and the b matrix table (e.g. dcm2nii checks it).
+    .. warning:: IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
+      that not all the dicom converters ensure the consistency between the resulting
+      nifti orientation and the b matrix table (e.g. dcm2nii checks it).
 
 
     Example
