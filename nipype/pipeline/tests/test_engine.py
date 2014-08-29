@@ -10,8 +10,7 @@ from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false)
+from nipype.testing import (assert_raises, assert_equal, assert_true, assert_false)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
 from nipype import logging
@@ -551,7 +550,7 @@ def test_old_config():
     w1.connect(n1, ('a', modify), n2,'a')
     w1.base_dir = wd
 
-    w1.config = {'crashdump_dir': wd}
+    w1.config['execution']['crashdump_dir'] = wd
     # generate outputs
     error_raised = False
     try:
@@ -581,7 +580,7 @@ def test_mapnode_json():
     n1.inputs.in1 = [1]
     w1 = Workflow(name='test')
     w1.base_dir = wd
-    w1.config = {'crashdump_dir': wd}
+    w1.config['execution']['crashdump_dir'] = wd
     w1.add_nodes([n1])
     w1.run()
     n1.inputs.in1 = [2]
@@ -604,5 +603,56 @@ def test_mapnode_json():
     except:
         error_raised = True
     yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_serial_input():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function, Workflow
+    def func1(in1):
+        return in1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 name='n1')
+    n1.inputs.in1 = [1,2,3]
+
+
+    w1 = Workflow(name='test')
+    w1.base_dir = wd
+    w1.add_nodes([n1])
+    # set local check
+    w1.config['execution'] = {'stop_on_first_crash': 'true',
+                              'local_hash_check': 'true',
+                              'crashdump_dir': wd}
+
+    # test output of num_subnodes method when serial is default (False)
+    yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
+
+    # test running the workflow on default conditions
+    error_raised = False
+    try:
+        w1.run(plugin='MultiProc')
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+
+    # test output of num_subnodes method when serial is True
+    n1._serial=True
+    yield assert_equal, n1.num_subnodes(), 1
+
+    # test running the workflow on serial conditions
+    error_raised = False
+    try:
+        w1.run(plugin='MultiProc')
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+
     os.chdir(cwd)
     rmtree(wd)

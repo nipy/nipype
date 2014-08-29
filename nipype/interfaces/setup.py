@@ -14,6 +14,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('cmtk')
     config.add_subpackage('diffusion_toolkit')
     config.add_subpackage('dipy')
+    config.add_subpackage('elastix')
     config.add_subpackage('freesurfer')
     config.add_subpackage('fsl')
     config.add_subpackage('mne')
