@@ -9,6 +9,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('mrtrix')
     config.add_subpackage('fsl')
     config.add_subpackage('connectivity')
+    config.add_subpackage('preprocess')
 
     return config
 

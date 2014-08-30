@@ -3,20 +3,26 @@
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.ants as ants
 import os
 
-def motion_correct(name='motion_correct'):
-    """Creates a pipeline that corrects for head motion artifacts in dMRI sequences.
+from .utils import *
+
+def hmc_pipeline(name='motion_correct'):
+    """
+    HMC stands for head-motion correction.
+
+    Creates a pipeline that corrects for head motion artifacts in dMRI sequences.
     It takes a series of diffusion weighted images and rigidly co-registers
-    them to one reference image. Finally, the `b`-matrix is rotated accordingly [1]_
+    them to one reference image. Finally, the `b`-matrix is rotated accordingly [Leemans09]_
     making use of the rotation matrix obtained by FLIRT.
 
-    Search angles have been limited to 3.5 degrees, based on results in [2]_.
+    Search angles have been limited to 3.5 degrees, based on results in [Yendiki13]_.
 
     A list of rigid transformation matrices is provided, so that transforms can be
     chained. This is useful to correct for artifacts with only one interpolation process (as
     previously discussed `here <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_),
-    and also to compute nuisance regressors as proposed by [2]_.
+    and also to compute nuisance regressors as proposed by [Yendiki13]_.
 
     .. warning:: This workflow rotates the `b`-vectors, so please be advised
       that not all the dicom converters ensure the consistency between the resulting
@@ -24,12 +30,13 @@ def motion_correct(name='motion_correct'):
 
     .. admonition:: References
 
-      .. [1] Leemans A, and Jones DK, Magn Reson Med. 2009 Jun;61(6):1336-49.
-        doi: 10.1002/mrm.21890.
+      .. [Leemans09] Leemans A, and Jones DK, `The B-matrix must be rotated when correcting
+        for subject motion in DTI data <http://dx.doi.org/10.1002/mrm.21890>`_,
+        Magn Reson Med. 61(6):1336-49. 2009. doi: 10.1002/mrm.21890.
 
-      .. [2] Yendiki A et al., Spurious group differences due to head motion in a
-        diffusion MRI study. Neuroimage. 2013 Nov 21;88C:79-90.
-        doi: 10.1016/j.neuroimage.2013.11.027
+      .. [Yendiki13] Yendiki A et al., `Spurious group differences due to head motion in
+        a diffusion MRI study <http://dx.doi.org/10.1016/j.neuroimage.2013.11.027>`_.
+        Neuroimage. 21(88C):79-90. 2013. doi: 10.1016/j.neuroimage.2013.11.027
 
     Example
     -------
@@ -91,14 +98,17 @@ taken as reference
     ])
     return wf
 
-def eddy_correct(name='eddy_correct'):
-    """Creates a pipeline that corrects for artifacts induced by Eddy currents in dMRI
+def ecc_pipeline(name='eddy_correct'):
+    """
+    ECC stands for Eddy currents correction.
+
+    Creates a pipeline that corrects for artifacts induced by Eddy currents in dMRI
     sequences.
     It takes a series of diffusion weighted images and linearly co-registers
     them to one reference image (the average of all b0s in the dataset).
 
-    DWIs are also modulated by the determinant of the Jacobian as indicated by [3]_ and
-    [4]_.
+    DWIs are also modulated by the determinant of the Jacobian as indicated by [Jones10]_ and
+    [Rohde04]_.
 
     A list of rigid transformation matrices can be provided, sourcing from a
     :func:`.motion_correct` workflow, to initialize registrations in a *motion free*
@@ -110,12 +120,12 @@ def eddy_correct(name='eddy_correct'):
 
     .. admonition:: References
 
-      .. [3] Jones DK, `The signal intensity must be modulated by the determinant of \
-        the Jacobian when correcting for eddy currents in diffusion MRI \
+      .. [Jones10] Jones DK, `The signal intensity must be modulated by the determinant of
+        the Jacobian when correcting for eddy currents in diffusion MRI
         <http://cds.ismrm.org/protected/10MProceedings/files/1644_129.pdf>`_,
         Proc. ISMRM 18th Annual Meeting, (2010).
 
-      .. [4] Rohde et al., `Comprehensive Approach for Correction of Motion and Distortion \
+      .. [Rohde04] Rohde et al., `Comprehensive Approach for Correction of Motion and Distortion \
         in Diffusion-Weighted MRI \
         <http://stbb.nichd.nih.gov/pdf/com_app_cor_mri04.pdf>`_, MRM 51:103-114 (2004).
 
@@ -196,6 +206,99 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
     ])
     return wf
 
+def sdc_fmb(name='fmb_correction',
+            fugue_params=dict(smooth3d=2.0, despike_2dfilter=True),
+            bmap_params=dict(delta_te=2.46e-3),
+            epi_params=dict()):
+    """
+    SDC stands for susceptibility distortion correction. FMB stands for fieldmap-based.
+
+    The fieldmap based method (FMB) implements SDC by using a mapping of the B0 field
+    as proposed by [Jezzard95]_. This workflow uses the implementation of FSL
+    (`FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_). Phase unwrapping is performed
+    using `PRELUDE <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html>`_
+    [Jenkinson03]_.
+
+
+    .. admonition:: References
+
+      .. [Jezzard95] Jezzard P, and Balaban RS, `Correction for geometric distortion in echo
+        planar images from B0 field variations <http://dx.doi.org/10.1002/mrm.1910340111>`_,
+        MRM 34(1):65-73. (1995). doi: 10.1002/mrm.1910340111.
+
+      .. [Jenkinson03] Jenkinson M., `Fast, automated, N-dimensional phase-unwrapping algorithm
+        <http://dx.doi.org/10.1002/mrm.10354>`_, MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.
+
+    """
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask',
+                        'bmap_pha', 'bmap_mag']),
+                        name='inputnode')
+
+
+    firstmag = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name='GetFirst')
+    n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
+    bet = pe.Node(fsl.BET(frac=0.4, mask=True), name='BrainExtraction')
+    dilate = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
+                     args='-kernel sphere 5 -dilM'), name='MskDilate')
+    pha2rads = pe.Node(niu.Function(input_names=['in_file'], output_names=['out_file'],
+                      function=siemens2rads), name='PreparePhase')
+    prelude = pe.Node(fsl.PRELUDE(process3d=True), name='PhaseUnwrap')
+    rad2rsec = pe.Node(niu.Function(input_names=['in_file', 'delta_te'],
+                       output_names=['out_file'], function=rads2radsec), name='ToRadSec')
+    rad2rsec.inputs.delta_te = bmap_params['delta_te']
+
+    avg_b0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
+                     output_names=['out_file'], function=b0_average), name='b0_avg')
+
+    flirt = pe.Node(fsl.FLIRT(interp='spline', cost='normmi', cost_func='normmi',
+                    dof=6, bins=64, save_log=True, padding_size=10,
+                    searchr_x=[-4,4], searchr_y=[-4,4], searchr_z=[-4,4],
+                    fine_search=1, coarse_search=10),
+                    name='BmapMag2B0')
+    applyxfm = pe.Node(fsl.ApplyXfm(interp='spline', padding_size=10, apply_xfm=True),
+                       name='BmapPha2B0')
+
+    pre_fugue = pe.Node(fsl.FUGUE(save_fmap=True), name='PreliminaryFugue')
+    demean = pe.Node(niu.Function(input_names=['in_file', 'in_mask'],
+                     output_names=['out_file'], function=demean_image),
+                     name='DemeanFmap')
+
+    cleanup = cleanup_edge_pipeline()
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+         (inputnode,    pha2rads,  [('bmap_pha', 'in_file')])
+        ,(inputnode,    firstmag,  [('bmap_mag', 'in_file')])
+        ,(inputnode,    avg_b0,    [('in_file', 'in_dwi'),
+                                    ('in_bval', 'in_bval')])
+        ,(firstmag,     n4,        [('roi_file', 'input_image')])
+        ,(n4,           bet,       [('output_image', 'in_file')])
+        ,(bet,          dilate,    [('mask_file', 'in_file')])
+        ,(pha2rads,     prelude,   [('out_file', 'phase_file')])
+        ,(n4,           prelude,   [('output_image', 'magnitude_file')])
+        ,(dilate,       prelude,   [('out_file', 'mask_file')])
+        ,(prelude,      rad2rsec,  [('unwrapped_phase_file', 'in_file')])
+
+        ,(avg_b0,       flirt,     [('out_file', 'reference')])
+        ,(inputnode,    flirt,     [('in_mask', 'ref_weight')])
+        ,(n4,           flirt,     [('output_image', 'in_file')])
+        ,(dilate,       flirt,     [('out_file', 'in_weight')])
+
+        ,(avg_b0,       applyxfm,  [('out_file', 'reference')])
+        ,(rad2rsec,     applyxfm,  [('out_file', 'in_file')])
+        ,(flirt,        applyxfm,  [('out_matrix_file', 'in_matrix_file')])
+
+        ,(applyxfm,     pre_fugue, [('out_file', 'fmap_in_file')])
+        ,(inputnode,    pre_fugue, [('in_mask', 'mask_file')])
+
+        ,(pre_fugue,    demean,    [('fmap_out_file', 'in_file')])
+        ,(inputnode,    demean,    [('in_mask', 'in_mask')])
+
+        ,(demean,       cleanup,   [('out_file', 'inputnode.in_file')])
+        ,(inputnode,    cleanup,   [('in_mask', 'inputnode.in_mask')])
+    ])
+    return wf
+
 
 def _checkrnum(ref_num):
     from nipype.interfaces.base import isdefined
@@ -226,132 +329,7 @@ def _nonb0(in_bval):
     bvals = np.loadtxt(in_bval)
     return np.where(bvals!=0)[0].tolist()
 
-def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
-    """
-    Recompose back the dMRI data accordingly the b-values table after EC correction
-    """
-    import numpy as np
-    import nibabel as nb
-    import os.path as op
-
-    if out_file is None:
-        fname,ext = op.splitext(op.basename(in_dwi))
-        if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
-            ext = ext2 + ext
-        out_file = op.abspath("%s_eccorrect%s" % (fname, ext))
-
-    im = nb.load(in_dwi)
-    dwidata = im.get_data()
-    bvals = np.loadtxt(in_bval)
-    non_b0 = np.where(bvals!=0)[0].tolist()
-
-    if len(non_b0)!=len(in_corrected):
-        raise RuntimeError('Length of DWIs in b-values table and after correction should match')
-
-    for bindex, dwi in zip(non_b0, in_corrected):
-        dwidata[...,bindex] = nb.load(dwi).get_data()
-
-    nb.Nifti1Image(dwidata, im.get_affine(), im.get_header()).to_filename(out_file)
-    return out_file
-
-def recompose_xfm(in_bval, in_xfms):
-    """
-    Insert identity transformation matrices in b0 volumes to build up a list
-    """
-    import numpy as np
-    import os.path as op
-
-    bvals = np.loadtxt(in_bval)
-    out_matrix = np.array([np.eye(4)] * len(bvals))
-    xfms = iter([np.loadtxt(xfm) for xfm in in_xfms])
-    out_files = []
-
-    for i, b in enumerate(bvals):
-        if b == 0.0:
-            mat = np.eye(4)
-        else:
-            mat = xfms.next()
-
-        out_name = 'eccor_%04d.mat' % i
-        out_files.append(out_name)
-        np.savetxt(out_name, mat)
-
-    return out_files
-
-
 def _xfm_jacobian(in_xfm):
     import numpy as np
     from math import fabs
     return [fabs(np.linalg.det(np.loadtxt(xfm))) for xfm in in_xfm]
-
-
-def b0_average(in_dwi, in_bval, out_file=None):
-    """
-    A function that averages the *b0* volumes from a DWI dataset.
-
-    .. warning:: *b0* should be already registered (head motion artifact should
-      be corrected).
-
-    """
-    import numpy as np
-    import nibabel as nb
-    import os.path as op
-
-    if out_file is None:
-        fname,ext = op.splitext(op.basename(in_dwi))
-        if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
-            ext = ext2 + ext
-        out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
-
-    imgs = nb.four_to_three(nb.load(in_dwi))
-    bval = np.loadtxt(in_bval)
-
-    b0s = []
-
-    for bval, img in zip(bval, imgs):
-        if bval==0:
-            b0s.append(img.get_data())
-
-    b0 = np.average(np.array(b0s), axis=0)
-
-    hdr = imgs[0].get_header().copy()
-    nii = nb.Nifti1Image(b0, imgs[0].get_affine(), hdr)
-
-    nb.save(nii, out_file)
-    return out_file
-
-
-def rotate_bvecs(in_bvec, in_matrix):
-    """
-    Rotates the input bvec file accordingly with a list of matrices.
-
-    .. note:: the input affine matrix transforms points in the destination image to their \
-    corresponding coordinates in the original image. Therefore, this matrix should be inverted \
-    first, as we want to know the target position of :math:`\\vec{r}`.
-
-    """
-    import os
-    import numpy as np
-
-    name, fext = os.path.splitext(os.path.basename(in_bvec))
-    if fext == '.gz':
-        name, _ = os.path.splitext(name)
-    out_file = os.path.abspath('./%s_rotated.bvec' % name)
-    bvecs = np.loadtxt(in_bvec).T
-    new_bvecs = []
-
-    if len(bvecs) != len(in_matrix):
-        raise RuntimeError('Number of b-vectors and rotation matrices should match.')
-
-    for bvec, mat in zip(bvecs, in_matrix):
-        if np.all(bvec==0.0):
-            new_bvecs.append(bvec)
-        else:
-            invrot = np.linalg.inv(np.loadtxt(mat))[:3,:3]
-            newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
-
-    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
-    return out_file
