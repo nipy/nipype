@@ -76,6 +76,8 @@ taken as reference
     rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'],
                            output_names=['out_file'], function=rotate_bvecs),
                            name='Rotate_Bvec')
+    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
+                       name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file',
                          'out_bvec', 'out_xfms']),
@@ -91,7 +93,8 @@ taken as reference
         ,(inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')])
         ,(flirt,      rot_bvec,   [('out_matrix_file', 'in_matrix')])
         ,(pick_ref,   flirt,      [('out', 'reference')])
-        ,(flirt,      merge,      [('out_file', 'in_files')])
+        ,(flirt,      thres,      [('out_file', 'in_file')])
+        ,(thres,      merge,      [('out_file', 'in_files')])
         ,(merge,      outputnode, [('merged_file', 'out_file')])
         ,(rot_bvec,   outputnode, [('out_file', 'out_bvec')])
         ,(flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
@@ -207,9 +210,11 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
     return wf
 
 def sdc_fmb(name='fmb_correction',
-            fugue_params=dict(smooth3d=2.0, despike_2dfilter=True),
+            fugue_params=dict(smooth3d=2.0),
             bmap_params=dict(delta_te=2.46e-3),
-            epi_params=dict()):
+            epi_params=dict(echospacing=0.77e-3,
+                            acc_factor=3,
+                            enc_dir='y-')):
     """
     SDC stands for susceptibility distortion correction. FMB stands for fieldmap-based.
 
@@ -233,6 +238,8 @@ def sdc_fmb(name='fmb_correction',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask',
                         'bmap_pha', 'bmap_mag']),
                         name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm']),
+                         name='outputnode')
 
 
     firstmag = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name='GetFirst')
@@ -265,37 +272,58 @@ def sdc_fmb(name='fmb_correction',
 
     cleanup = cleanup_edge_pipeline()
 
+    addvol = pe.Node(niu.Function(input_names=['in_file'], output_names=['out_file'],
+                     function=add_empty_vol), name='AddEmptyVol')
+
+    vsm = pe.Node(fsl.FUGUE(save_shift=True, **fugue_params),
+                  name="ComputeVSM")
+    vsm.inputs.asym_se_time = bmap_params['delta_te']
+    vsm.inputs.dwell_time = epi_params['echospacing'] / (1.0 * epi_params['acc_factor'])
+
+    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
+    merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
+    unwarp = pe.MapNode(fsl.FUGUE(icorr=True, forward_warping=False),
+                        iterfield=['in_file'], name='UnwarpDWIs')
+    unwarp.inputs.unwarp_direction=epi_params['enc_dir']
+    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
+                       name='RemoveNegative')
+
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,    pha2rads,  [('bmap_pha', 'in_file')])
-        ,(inputnode,    firstmag,  [('bmap_mag', 'in_file')])
-        ,(inputnode,    avg_b0,    [('in_file', 'in_dwi'),
+         (inputnode,   pha2rads,   [('bmap_pha', 'in_file')])
+        ,(inputnode,   firstmag,   [('bmap_mag', 'in_file')])
+        ,(inputnode,   avg_b0,     [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
-        ,(firstmag,     n4,        [('roi_file', 'input_image')])
-        ,(n4,           bet,       [('output_image', 'in_file')])
-        ,(bet,          dilate,    [('mask_file', 'in_file')])
-        ,(pha2rads,     prelude,   [('out_file', 'phase_file')])
-        ,(n4,           prelude,   [('output_image', 'magnitude_file')])
-        ,(dilate,       prelude,   [('out_file', 'mask_file')])
-        ,(prelude,      rad2rsec,  [('unwrapped_phase_file', 'in_file')])
-
-        ,(avg_b0,       flirt,     [('out_file', 'reference')])
-        ,(inputnode,    flirt,     [('in_mask', 'ref_weight')])
-        ,(n4,           flirt,     [('output_image', 'in_file')])
-        ,(dilate,       flirt,     [('out_file', 'in_weight')])
-
-        ,(avg_b0,       applyxfm,  [('out_file', 'reference')])
-        ,(rad2rsec,     applyxfm,  [('out_file', 'in_file')])
-        ,(flirt,        applyxfm,  [('out_matrix_file', 'in_matrix_file')])
-
-        ,(applyxfm,     pre_fugue, [('out_file', 'fmap_in_file')])
-        ,(inputnode,    pre_fugue, [('in_mask', 'mask_file')])
-
-        ,(pre_fugue,    demean,    [('fmap_out_file', 'in_file')])
-        ,(inputnode,    demean,    [('in_mask', 'in_mask')])
-
-        ,(demean,       cleanup,   [('out_file', 'inputnode.in_file')])
-        ,(inputnode,    cleanup,   [('in_mask', 'inputnode.in_mask')])
+        ,(firstmag,    n4,         [('roi_file', 'input_image')])
+        ,(n4,          bet,        [('output_image', 'in_file')])
+        ,(bet,         dilate,     [('mask_file', 'in_file')])
+        ,(pha2rads,    prelude,    [('out_file', 'phase_file')])
+        ,(n4,          prelude,    [('output_image', 'magnitude_file')])
+        ,(dilate,      prelude,    [('out_file', 'mask_file')])
+        ,(prelude,     rad2rsec,   [('unwrapped_phase_file', 'in_file')])
+        ,(avg_b0,      flirt,      [('out_file', 'reference')])
+        ,(inputnode,   flirt,      [('in_mask', 'ref_weight')])
+        ,(n4,          flirt,      [('output_image', 'in_file')])
+        ,(dilate,      flirt,      [('out_file', 'in_weight')])
+        ,(avg_b0,      applyxfm,   [('out_file', 'reference')])
+        ,(rad2rsec,    applyxfm,   [('out_file', 'in_file')])
+        ,(flirt,       applyxfm,   [('out_matrix_file', 'in_matrix_file')])
+        ,(applyxfm,    pre_fugue,  [('out_file', 'fmap_in_file')])
+        ,(inputnode,   pre_fugue,  [('in_mask', 'mask_file')])
+        ,(pre_fugue,   demean,     [('fmap_out_file', 'in_file')])
+        ,(inputnode,   demean,     [('in_mask', 'in_mask')])
+        ,(demean,      cleanup,    [('out_file', 'inputnode.in_file')])
+        ,(inputnode,   cleanup,    [('in_mask', 'inputnode.in_mask')])
+        ,(cleanup,     addvol,     [('outputnode.out_file', 'in_file')])
+        ,(inputnode,   vsm,        [('in_mask', 'mask_file')])
+        ,(addvol,      vsm,        [('out_file', 'fmap_in_file')])
+        ,(inputnode,   split,      [('in_file', 'in_file')])
+        ,(split,       unwarp,     [('out_files', 'in_file')])
+        ,(vsm,         unwarp,     [('shift_out_file', 'shift_in_file')])
+        ,(unwarp,      thres,      [('unwarped_file', 'in_file')])
+        ,(thres,       merge,      [('out_file', 'in_files')])
+        ,(merge,       outputnode, [('merged_file', 'out_file')])
+        ,(vsm,         outputnode, [('shift_out_file', 'out_vsm')])
     ])
     return wf
 

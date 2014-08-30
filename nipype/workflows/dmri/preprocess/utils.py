@@ -5,7 +5,7 @@
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-08-30 16:06:15
+# @Last Modified time: 2014-08-30 18:54:43
 
 def cleanup_edge_pipeline(name='Cleanup'):
     """
@@ -190,9 +190,9 @@ def siemens2rads(in_file, out_file=None):
     hdr = im.get_header().copy()
 
     if len(in_file) == 2:
-        data = data - nb.load(in_file[1]).get_data().astype(np.float32)
+        data = nb.load(in_file[1]).get_data().astype(np.float32) - data
     elif (data.ndim == 4) and (data.shape[-1] == 2):
-        data = np.squeeze(data[...,0] - data[...,1])
+        data = np.squeeze(data[...,1] - data[...,0])
         hdr.set_data_shape(data.shape[:3])
 
     imin = data.min()
@@ -252,4 +252,26 @@ def demean_image(in_file, in_mask=None, out_file=None):
     mean = np.median(data[msk==1].reshape(-1))
     data[msk==1] = data[msk==1] - mean
     nb.Nifti1Image(data, im.get_affine(), im.get_header()).to_filename(out_file)
+    return out_file
+
+
+def add_empty_vol(in_file, out_file=None):
+    """
+    Adds an empty vol to the phase difference image
+    """
+    import nibabel as nb
+    import os.path as op
+    import numpy as np
+    import math
+
+    if out_file is None:
+        fname, fext = op.splitext(op.basename(in_file))
+        if fext == '.gz':
+            fname, _ = op.splitext(fname)
+        out_file = op.abspath('./%s_4D.nii.gz' % fname)
+
+    im = nb.load(in_file)
+    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.get_affine(),
+                         im.get_header())
+    nb.funcs.concat_images([im, zim]).to_filename(out_file)
     return out_file
