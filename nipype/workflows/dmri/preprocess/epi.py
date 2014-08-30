@@ -222,8 +222,10 @@ def sdc_fmb(name='fmb_correction',
     as proposed by [Jezzard95]_. This workflow uses the implementation of FSL
     (`FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_). Phase unwrapping is performed
     using `PRELUDE <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html>`_
-    [Jenkinson03]_.
+    [Jenkinson03]_. Preparation of the fieldmap is performed reproducing the script in FSL
+    `fsl_prepare_fieldmap <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data>`_.
 
+    .. warning:: Only SIEMENS format fieldmaps are supported.
 
     .. admonition:: References
 
