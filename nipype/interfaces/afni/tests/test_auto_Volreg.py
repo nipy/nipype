@@ -32,11 +32,6 @@ def test_Volreg_inputs():
     name_source='in_file',
     name_template='%s.1D',
     ),
-    oned_matrix_save=dict(argstr='-1Dmatrix_save %s',
-    keep_extension=True,
-    name_source='in_file',
-    name_template='%s.aff12.1D',
-    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_volreg',
@@ -62,7 +57,6 @@ def test_Volreg_inputs():
 def test_Volreg_outputs():
     output_map = dict(md1d_file=dict(),
     oned_file=dict(),
-    oned_matrix_save=dict(),
     out_file=dict(),
     )
     outputs = Volreg.output_spec()
