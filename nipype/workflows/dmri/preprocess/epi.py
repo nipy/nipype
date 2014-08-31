@@ -1,4 +1,6 @@
 # coding: utf-8
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
@@ -41,8 +43,8 @@ def hmc_pipeline(name='motion_correct'):
     Example
     -------
 
-    >>> from nipype.workflows.dmri.fsl.epi import motion_correct
-    >>> hmc = motion_correct()
+    >>> from nipype.workflows.dmri.preprocess.epi import hmc_pipeline
+    >>> hmc = hmc_pipeline()
     >>> hmc.inputs.inputnode.in_file = 'diffusion.nii'
     >>> hmc.inputs.inputnode.in_bvec = 'diffusion.bvec'
     >>> hmc.inputs.inputnode.in_mask = 'mask.nii'
@@ -128,15 +130,15 @@ def ecc_pipeline(name='eddy_correct'):
         <http://cds.ismrm.org/protected/10MProceedings/files/1644_129.pdf>`_,
         Proc. ISMRM 18th Annual Meeting, (2010).
 
-      .. [Rohde04] Rohde et al., `Comprehensive Approach for Correction of Motion and Distortion \
-        in Diffusion-Weighted MRI \
+      .. [Rohde04] Rohde et al., `Comprehensive Approach for Correction of Motion and Distortion
+        in Diffusion-Weighted MRI
         <http://stbb.nichd.nih.gov/pdf/com_app_cor_mri04.pdf>`_, MRM 51:103-114 (2004).
 
     Example
     -------
 
-    >>> from nipype.workflows.dmri.fsl.epi import eddy_correct
-    >>> ecc = eddy_correct()
+    >>> from nipype.workflows.dmri.preprocess.epi import ecc_pipeline
+    >>> ecc = ecc_pipeline()
     >>> ecc.inputs.inputnode.in_file = 'diffusion.nii'
     >>> ecc.inputs.inputnode.in_bval = 'diffusion.bval'
     >>> ecc.inputs.inputnode.in_mask = 'mask.nii'
@@ -224,6 +226,18 @@ def sdc_fmb(name='fmb_correction',
     using `PRELUDE <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html>`_
     [Jenkinson03]_. Preparation of the fieldmap is performed reproducing the script in FSL
     `fsl_prepare_fieldmap <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data>`_.
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.preprocess.epi import sdc_fmb
+    >>> fmb = sdc_fmb()
+    >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> fmb.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
+    >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
+    >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'
+    >>> fmb.run() # doctest: +SKIP
 
     .. warning:: Only SIEMENS format fieldmaps are supported.
 
