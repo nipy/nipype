@@ -295,7 +295,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension=traits.Enum(3, 2, argstr= '-d %d', usedefault=True,
                            desc='image dimension (2 or 3)')
     anatomical_image=File(exists=True,
-                           argstr='-a %s', 
+                           argstr='-a %s',
                            desc='Structural *intensity* image, typically T1.'
                            'If more than one anatomical image is specified,'
                            'subsequently specified images are used during the'
@@ -308,33 +308,35 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
             argstr='-e %s',
             desc='Anatomical *intensity* template (possibly created using a'
             'population data set with buildtemplateparallel.sh in ANTs).'
-            'This template is  *not* skull-stripped.')
+            'This template is  *not* skull-stripped.',
+            mandatory=True)
     brain_probability_mask=File(exists=True,
             argstr='-m %s', desc='brain probability mask in template space',
-            mandatory=True, copyfile=False)
+            copyfile=False, mandatory=True)
     segmentation_priors = InputMultiPath(File(exists=True),
-            argstr='-p %s')
+            argstr='-p %s', mandatory=True)
     out_prefix = traits.Str('antsCT_', argstr='-o %s', usedefault=True,
                              desc=('Prefix that is prepended to all output'
                                    ' files (default = antsCT_)'))
     image_suffix=traits.Str('nii.gz', desc=('any of standard ITK formats,'
-        ' nii.gz is default'), mandatory = False, argstr='-s %s', 
+        ' nii.gz is default'), mandatory = False, argstr='-s %s',
         usedefault=True)
-    t1_registration_template = File(exists=True, 
+    t1_registration_template = File(exists=True,
             desc = ('Anatomical *intensity* template'
-           '(assumed to be skull-stripped). A common' 
+           '(assumed to be skull-stripped). A common'
            'case would be where this would be the same'
            'template as specified in the -e option which'
            'is not skull stripped.'),
-           mandatory=True, argstr='-t %s')
+           argstr='-t %s',
+           mandatory=True)
     extraction_registration_mask=File(exists=True, argstr='-f %s',
             mandatory=False, desc='Mask (defined in the template'
             'space) used during registration for brain extraction.')
-    keep_temporary_files=traits.Int(argstrr='-k %d', 
+    keep_temporary_files=traits.Int(argstrr='-k %d',
             desc='Keep brain extraction/segmentation'
             'warps, etc (default = 0).', mandatory=False)
-    max_iterations=traits.Int(argstr='-i %d', 
-            desc='ANTS registration max iterations' 
+    max_iterations=traits.Int(argstr='-i %d',
+            desc='ANTS registration max iterations'
             '(default = 100x100x70x20)',  mandatory=False)
     prior_segmentation_weight=traits.Float(mandatory=False, argstr='-w %f',
             desc='Atropos spatial prior *probability* weight for'
@@ -342,7 +344,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
     segmentation_iterations=traits.Int(argstr='-n %d', mandatory=False,
             desc='N4 -> Atropos -> N4 iterations during segmentation'
             '(default = 3)')
-    posterior_formulation=traits.Str(argstr='-b %s', mandatory=False, 
+    posterior_formulation=traits.Str(argstr='-b %s', mandatory=False,
             desc=('Atropos posterior formulation and whether or not'
                 'to use mixture model proportions.'
                    '''e.g 'Socrates[1]' (default) or 'Aristotle[1]'.'''
@@ -363,7 +365,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
     label_propagation=traits.Str(argstr='-l %s', mandatory=False,
             desc='Incorporate a distance prior one the posterior formulation.  Should be'
               '''of the form 'label[lambda,boundaryProbability]' where label'''
-              'is a value of 1,2,3,... denoting label ID.  The label' 
+              'is a value of 1,2,3,... denoting label ID.  The label'
               'probability for anything outside the current label'
               '  = boundaryProbability * exp( -lambda * distanceFromBoundary )'
               'Intuitively, smaller lambda values will increase the spatial capture'
@@ -372,7 +374,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
     quick_registration=traits.Bool(argstr='-q 1', mandatory=False,
             desc='If = 1, use antsRegistrationSyNQuick.sh as the basis for registration'
                   'during brain extraction, brain segmentation, and'
-                  '(optional) normalization to a template.' 
+                  '(optional) normalization to a template.'
                   'Otherwise use antsRegistrationSyN.sh (default = 0).')
     debug=traits.Bool(argstr='-z 1', mandatory=False,
             desc='If > 0, runs a faster version of the script.'
@@ -412,17 +414,17 @@ class antsCorticalThickness(ANTSCommand):
     Examples
     --------
     >>> from nipype.interfaces.ants.segmentation import antsCorticalThickness
-    >>> corticalthickness = anstCorticalThickness()
+    >>> corticalthickness = antsCorticalThickness()
     >>> corticalthickness.inputs.dimension = 3
     >>> corticalthickness.inputs.anatomical_image ='T1.nii.gz'
     >>> corticalthickness.inputs.brain_template = 'study_template.nii.gz'
     >>> corticalthickness.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
-    >>> corticalthickness.inputs.segmentation_priors =['CSF.nii.gz','WM.nii.gz','GM.nii.gz','DEEP_GM.nii.gz']
+    >>> corticalthickness.inputs.segmentation_priors = ['BrainSegmentationPrior01.nii.gz', 'BrainSegmentationPrior02.nii.gz', 'BrainSegmentationPrior03.nii.gz', 'BrainSegmentationPrior04.nii.gz']
     >>> corticalthickness.inputs.t1_registration_template = 'brain_study_template.nii.gz'
     >>> corticalthickness.cmdline
-   'antsCorticalThickness.sh -d 3 -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -o antsCT_ -p BrainSegmentationPrior%0d.nii.gz -t brain_study_template.nii.gz' 
+    'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o antsCT_ -p BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
     """
-    
+
     input_spec = antsCorticalThicknessInputSpec
     output_spec = antsCorticalThicknessoutputSpec
     _cmd = 'antsCorticalThickness.sh'
@@ -444,7 +446,7 @@ class antsCorticalThickness(ANTSCommand):
             return retval
         if opt == 'segmentation_priors':
             _, _, ext = split_filename(self.inputs.segmentation_priors[0])
-            retval = "-p priors/BrainSegmentationPrior%02d"
+            retval = "-p BrainSegmentationPrior%02d"
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
@@ -474,7 +476,7 @@ class antsCorticalThickness(ANTSCommand):
                                              self.inputs.image_suffix)
         outputs['BrainSegmentationN4'] = os.path.join(os.getcwd(),
                                                      self.inputs.out_prefix +
-                                                     'BrainSegmentation0N4.' + 
+                                                     'BrainSegmentation0N4.' +
                                                      self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsCSF'] = os.path.join(os.getcwd(),
                                                  self.inputs.out_prefix +
@@ -496,14 +498,14 @@ class antsCorticalThickness(ANTSCommand):
                 os.getcwd(),
                 'TemplateToSubject1GenericAffine.mat')
         outputs['TemplateToSubject0Warp'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'TemplateToSubject0Warp.'+ 
+               self.inputs.out_prefix + 'TemplateToSubject0Warp.'+
                self.inputs.image_suffix)
         outputs['SubjectToTemplate1Warp'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'SubjectToTemplate1Warp' + 
+               self.inputs.out_prefix + 'SubjectToTemplate1Warp' +
                self.inputs.image_suffix)
         outputs['SubjectToTemplate0GenericAffine'] = os.path.join(os.getcwd(),
                 self.inputs.out_prefix + 'SubjectToTemplate0GenericAffine.mat')
-        outputs['TemplateToSubjectLogJacobian'] = os.path.join(os.getcwd(), 
+        outputs['TemplateToSubjectLogJacobian'] = os.path.join(os.getcwd(),
                self.inputs.out_prefix + 'subjectToTemplateLogJacobian.'+
                self.inputs.image_suffix)
         return outputs
