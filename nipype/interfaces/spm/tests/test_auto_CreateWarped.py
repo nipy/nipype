@@ -21,8 +21,6 @@ def test_CreateWarped_inputs():
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
-    modulate=dict(field='crt_warped.jactransf',
-    ),
     paths=dict(),
     use_mcr=dict(),
     use_v8struct=dict(min_ver='8',
