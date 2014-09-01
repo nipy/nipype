@@ -1722,7 +1722,11 @@ class WarpPoints(CommandLine):
 
     def __init__(self, command=None, **inputs):
         self._tmpfile = None
+        self._in_file = None
+        self._outformat = None
+
         super(WarpPoints, self).__init__(command=command, **inputs)
+
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'out_file':
@@ -1732,6 +1736,7 @@ class WarpPoints(CommandLine):
 
     def _parse_inputs(self, skip=None):
         import os.path as op
+
         fname, ext = op.splitext(self.inputs.in_coords)
         setattr(self, '_in_file', fname)
         setattr(self, '_outformat', ext[1:])
@@ -1741,7 +1746,8 @@ class WarpPoints(CommandLine):
 
         if ext in ['.vtk', '.trk']:
             if self._tmpfile is None:
-                self._tmpfile = tempfile.NamedTemporaryFile(suffix='.txt', dir=os.getcwd()).name
+                self._tmpfile = tempfile.NamedTemporaryFile(suffix='.txt', dir=os.getcwd(),
+                                                            delete=False).name
             second_args = self._tmpfile
 
         return first_args + [ second_args ]
@@ -1817,7 +1823,10 @@ class WarpPoints(CommandLine):
         newpoints = np.fromstring('\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
 
         if not tmpfile is None:
-            os.unlink(tmpfile.name)
+            try:
+                os.remove(tmpfile.name)
+            except:
+                pass
 
         out_file = self._filename_from_source('out_file')
 
@@ -1827,6 +1836,7 @@ class WarpPoints(CommandLine):
             self._coords_to_trk(newpoints, out_file)
         else:
             np.savetxt(out_file, newpoints.reshape(-1,3))
+
         return runtime
 
 
