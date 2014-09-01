@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: New FSL interfaces: WarpPoints, WarpPointsToStd.
 * ENH: New Freesurfer interface: MRIPretess
 * ENH: New miscelaneous interface: AddCSVRow
 * ENH: FUGUE interface has been refactored to use the name_template system, 3 examples 
