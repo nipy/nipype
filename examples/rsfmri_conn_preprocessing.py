@@ -217,14 +217,17 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     imgseries = nb.load(realigned_file)
     components = None
     for filename in filename_to_list(mask_file):
-        mask = nb.load(filename)
-        voxel_timecourses = imgseries.get_data()[np.nonzero(mask)]
-        voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
+        mask = nb.load(filename).get_data()
+        voxel_timecourses = imgseries.get_data()[mask > 0]
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
         # remove mean and normalize by variance
         # voxel_timecourses.shape == [nvoxels, time]
         X = voxel_timecourses.T
-        X = (X - np.mean(X, axis=0))/np.std(X, axis=0)
+        stdX = np.std(X, axis=0)
+        stdX[stdX == 0] = 1.
+        stdX[np.isnan(stdX)] = 1.
+        stdX[np.isinf(stdX)] = 1.
+        X = (X - np.mean(X, axis=0))/stdX
         u, _, _ = sp.linalg.svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
