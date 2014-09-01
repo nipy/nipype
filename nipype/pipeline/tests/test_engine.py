@@ -619,8 +619,8 @@ def test_serial_input():
                  iterfield=['in1'],
                  name='n1')
     n1.inputs.in1 = [1,2,3]
-    
-    
+
+
     w1 = Workflow(name='test')
     w1.base_dir = wd
     w1.add_nodes([n1])
@@ -628,10 +628,10 @@ def test_serial_input():
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
                               'crashdump_dir': wd}
-    
+
     # test output of num_subnodes method when serial is default (False)
     yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
-    
+
     # test running the workflow on default conditions
     error_raised = False
     try:
@@ -640,11 +640,11 @@ def test_serial_input():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
-    
+
     # test output of num_subnodes method when serial is True
     n1._serial=True
     yield assert_equal, n1.num_subnodes(), 1
-    
+
     # test running the workflow on serial conditions
     error_raised = False
     try:
@@ -653,6 +653,6 @@ def test_serial_input():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
-    
+
     os.chdir(cwd)
     rmtree(wd)
