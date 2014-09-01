@@ -6,7 +6,7 @@
 # @Author: oesteban - code@oscaresteban.es
 # @Date:   2014-06-02 12:06:50
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-08-14 19:04:57
+# @Last Modified time: 2014-09-01 21:03:57
 """
 Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
@@ -60,6 +60,8 @@ class Registration(CommandLine):
     >>> reg.inputs.parameters = ['elastix.txt']
     >>> reg.cmdline
     'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
+
+
     """
 
     _cmd = 'elastix'
@@ -137,10 +139,12 @@ class ApplyWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input moving image warped to fixed image')
 
 class ApplyWarp(CommandLine):
-    """Use `transformix` to apply a transform on an input image.
+    """
+    Use ``transformix`` to apply a transform on an input image.
     The transform is specified in the transform-parameter file.
 
-    Example::
+    Example
+    -------
 
     >>> from nipype.interfaces.elastix import ApplyWarp
     >>> reg = ApplyWarp()
@@ -148,6 +152,8 @@ class ApplyWarp(CommandLine):
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
+
+
     """
 
     _cmd = 'transformix'
@@ -185,6 +191,8 @@ class AnalyzeWarp(CommandLine):
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
+
+
     """
 
     _cmd = 'transformix -def all -jac all -jacmat all'
@@ -212,10 +220,11 @@ class PointsWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input points displaced in fixed image domain')
 
 class PointsWarp(CommandLine):
-    """Use `transformix` to apply a transform on an input point set.
+    """Use ``transformix`` to apply a transform on an input point set.
     The transform is specified in the transform-parameter file.
 
-    Example::
+    Example
+    -------
 
     >>> from nipype.interfaces.elastix import PointsWarp
     >>> reg = PointsWarp()
@@ -223,6 +232,8 @@ class PointsWarp(CommandLine):
     >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
     >>> reg.cmdline
     'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
+
+
     """
 
     _cmd = 'transformix'
