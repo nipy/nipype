@@ -39,7 +39,7 @@ specifically the 2mm versions of:
 
 The 2mm version was generated with::
 
-   >>> from nipype import freesurfer as fs
+   >>> from nipype.interfaces import freesurfer as fs
    >>> rs = fs.Resample()
    >>> rs.inputs.in_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152.nii.gz'
    >>> rs.inputs.resampled_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz'
@@ -113,7 +113,7 @@ def median(in_files):
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
         data = np.median(img.get_data(), axis=3)
-        if not average:
+        if average is None:
             average = data
         else:
             average = average + data
@@ -216,30 +216,20 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     """
     imgseries = nb.load(realigned_file)
     components = None
-    variance_map = np.var(imgseries.get_data(), axis=3).squeeze()
-    variance_mask = variance_map > np.percentile(variance_map.flatten(), 98)
-    for filename in range(1): #filename_to_list(mask_file):
-        #noise_mask = nb.load(filename)
-        voxel_timecourses = imgseries.get_data()[np.nonzero(variance_mask)]
+    for filename in filename_to_list(mask_file):
+        mask = nb.load(filename)
+        voxel_timecourses = imgseries.get_data()[np.nonzero(mask)]
         voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-        voxel_timecourses = voxel_timecourses - np.mean(voxel_timecourses, axis=1)[:, None]
-        '''
-        from sklearn.decomposition import PCA
-        pca = PCA(n_components=num_components).fit(voxel_timecourses)
+        # remove mean and normalize by variance
+        # voxel_timecourses.shape == [nvoxels, time]
+        X = voxel_timecourses.T
+        X = (X - np.mean(X, axis=0))/np.std(X, axis=0)
+        u, _, _ = sp.linalg.svd(X, full_matrices=False)
         if components is None:
-            components = pca.components_.T
+            components = u[:, :num_components]
         else:
-            components = np.hstack((components, pca.components_.T))
-        '''
-        #from scipy.stats import zscore
-        voxel_timecourses = voxel_timecourses/np.var(voxel_timecourses, axis=1)[:, None]
-        C = voxel_timecourses.T.dot(voxel_timecourses)
-        _, _, v = sp.linalg.svd(C, full_matrices=False)
-        if components is None:
-            components = v[:num_components, :].T
-        else:
-            components = np.hstack((components, v[:num_components, :].T))
+            components = np.hstack((components, u[:, :num_components]))
     if extra_regressors:
         regressors = np.genfromtxt(extra_regressors)
         components = np.hstack((components, regressors))
@@ -797,6 +787,10 @@ def create_workflow(files,
     sample2mni.inputs.reference_image = \
         os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     sample2mni.inputs.terminal_output = 'file'
+    sample2mni.inputs.num_threads = 4
+    sample2mni.plugin_args = {'qsub_args':
+                   '-q max10 -l nodes=1:ppn=%d' % sample2mni.inputs.num_threads,
+                              'overwrite': True}
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
 
