@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-09-01 10:33:35
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-01 11:27:55
+# @Last Modified time: 2014-09-02 01:12:14
 from nipype.interfaces.base import (traits, TraitedSpec, BaseInterface,
                                     File, isdefined)
 from nipype.utils.filemanip import split_filename
@@ -29,11 +29,13 @@ else:
 class ResampleInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input 4D diffusion-weighted image file')
-    vox_size = traits.Tuple(traits.Float, traits.Float, traits.Float, desc=('specify the new '
-                            'voxel zooms. If no vox_size is set, then isotropic regridding will '
-                            'be performed, with spacing equal to the smallest current zoom.'))
-    interp = traits.Int(1, mandatory=True, usedefault=True, desc=('order of the interpolator'
-                        '(0 = nearest, 1 = linear, etc.'))
+    vox_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                            desc=('specify the new voxel zooms. If no vox_size'
+                                  ' is set, then isotropic regridding will '
+                                  'be performed, with spacing equal to the '
+                                  'smallest current zoom.'))
+    interp = traits.Int(1, mandatory=True, usedefault=True, desc=('order of '
+                        'the interpolator (0 = nearest, 1 = linear, etc.'))
 
 
 class ResampleOutputSpec(TraitedSpec):
@@ -43,7 +45,8 @@ class ResampleOutputSpec(TraitedSpec):
 class Resample(BaseInterface):
     """
     An interface to reslicing diffusion datasets.
-    See http://nipy.org/dipy/examples_built/reslice_datasets.html#example-reslice-datasets.
+    See
+    http://nipy.org/dipy/examples_built/reslice_datasets.html#example-reslice-datasets.
 
     Example
     -------
@@ -87,7 +90,8 @@ class DenoiseInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input 4D diffusion-weighted image file')
     in_mask = File(exists=True, desc='brain mask')
-    noise_model = traits.Enum('rician', 'gaussian', mandatory=True, usedefault=True,
+    noise_model = traits.Enum('rician', 'gaussian', mandatory=True,
+                              usedefault=True,
                               desc=('noise distribution model'))
 
 
@@ -98,12 +102,14 @@ class DenoiseOutputSpec(TraitedSpec):
 class Denoise(BaseInterface):
     """
     An interface to denoising diffusion datasets [Coupe2008]_.
-    See http://nipy.org/dipy/examples_built/denoise_nlmeans.html#example-denoise-nlmeans.
+    See
+    http://nipy.org/dipy/examples_built/denoise_nlmeans.html#example-denoise-nlmeans.
 
-    .. [Coupe2008] P. Coupe, P. Yger, S. Prima, P. Hellier, C. Kervrann, C. Barillot,
-      `An Optimized Blockwise Non Local Means Denoising Filter for 3D Magnetic Resonance Images
+    .. [Coupe2008] Coupe P et al., `An Optimized Blockwise Non Local Means
+      Denoising Filter for 3D Magnetic Resonance Images
       <http://dx.doi.org/10.1109%2FTMI.2007.906087>`_,
       IEEE Transactions on Medical Imaging, 27(4):425-441, 2008.
+
 
     Example
     -------
@@ -124,7 +130,7 @@ class Denoise(BaseInterface):
             mask = nb.load(self.inputs.in_mask).get_data()
 
         nlmeans_proxy(self.inputs.in_file, in_mask=mask,
-                      rician=(self.inputs.noise_model=='rician'),
+                      rician=(self.inputs.noise_model == 'rician'),
                       out_file=out_file)
         iflogger.info('Denoised image saved as {i}'.format(i=out_file))
         return runtime
@@ -140,6 +146,7 @@ class Denoise(BaseInterface):
             fname, fext2 = op.splitext(fname)
             fext = fext2 + fext
         return op.abspath('%s_denoise%s' % (fname, fext))
+
 
 def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
@@ -205,4 +212,3 @@ def nlmeans_proxy(in_file, in_mask=None, rician=True, out_file=None):
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
                    hdr).to_filename(out_file)
     return out_file
-
