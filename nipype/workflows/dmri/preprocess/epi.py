@@ -5,10 +5,125 @@
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 import nipype.interfaces.fsl as fsl
+import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.ants as ants
 import os
 
 from .utils import *
+
+
+def all_fmb_pipeline(name='hmc_sdc_ecc'):
+    """
+    Builds a pipeline including three artifact corrections: head-motion correction (HMC),
+    susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
+    correction (ECC).
+    """
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
+                        'bmap_pha', 'bmap_mag']), name='inputnode')
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
+                         name='outputnode')
+
+
+    avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
+                       output_names=['out_file'], function=b0_average), name='b0_avg_pre')
+    avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
+                       output_names=['out_file'], function=b0_average), name='b0_avg_post')
+    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
+
+    hmc = hmc_pipeline()
+    sdc = sdc_fmb()
+    ecc = ecc_pipeline()
+
+    regrid = pe.Node(fs.MRIConvert(vox_size=(2.0, 2.0, 2.0), out_orientation='RAS'),
+                     name='Reslice')
+
+    wf = pe.Workflow('dMRI_Artifacts')
+    wf.connect([
+         (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
+                                    ('in_bvec', 'inputnode.in_bvec')])
+        ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
+                                    ('in_bval', 'in_bval')])
+        ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
+        ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
+
+        ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
+        ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
+        ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
+                                    ('bmap_pha', 'inputnode.bmap_pha'),
+                                    ('bmap_mag', 'inputnode.bmap_mag')])
+        ,(inputnode,   ecc,        [('in_bval', 'inputnode.in_bval')])
+        ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
+        ,(sdc,         ecc,        [('outputnode.out_file', 'inputnode.in_file')])
+        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
+        ,(ecc,         regrid,     [('outputnode.out_file', 'in_file')])
+        ,(regrid,      outputnode, [('out_file', 'out_file')])
+        ,(regrid,      avg_b0_1,   [('out_file', 'in_dwi')])
+        ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
+        ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
+        ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
+    ])
+    return wf
+
+
+def all_peb_pipeline(name='hmc_sdc_ecc',
+                     epi_params=dict(echospacing=0.77e-3,
+                                     acc_factor=3,
+                                     enc_dir='y-'),
+                     altepi_params=dict(echospacing=0.77e-3,
+                                        acc_factor=3,
+                                        enc_dir='y')):
+    """
+    Builds a pipeline including three artifact corrections: head-motion correction (HMC),
+    susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
+    correction (ECC).
+    """
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
+                        'alt_file']), name='inputnode')
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
+                         name='outputnode')
+
+    avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
+                       output_names=['out_file'], function=b0_average), name='b0_avg_pre')
+    avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
+                       output_names=['out_file'], function=b0_average), name='b0_avg_post')
+    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
+
+    hmc = hmc_pipeline()
+    sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
+    ecc = ecc_pipeline()
+
+    regrid = pe.Node(fs.MRIConvert(vox_size=(2.0, 2.0, 2.0), out_orientation='RAS'),
+                     name='Reslice')
+
+    wf = pe.Workflow('dMRI_Artifacts')
+    wf.connect([
+         (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
+                                    ('in_bvec', 'inputnode.in_bvec')])
+        ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
+                                    ('in_bval', 'in_bval')])
+        ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
+        ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
+        ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
+        ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
+        ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
+                                    ('alt_file', 'inputnode.alt_file')])
+        ,(inputnode,   ecc,        [('in_bval', 'inputnode.in_bval')])
+        ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
+        ,(sdc,         ecc,        [('outputnode.out_file', 'inputnode.in_file')])
+        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
+        ,(ecc,         regrid,     [('outputnode.out_file', 'in_file')])
+        ,(regrid,      outputnode, [('out_file', 'out_file')])
+        ,(regrid,      avg_b0_1,   [('out_file', 'in_dwi')])
+        ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
+        ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
+        ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
+    ])
+    return wf
+
 
 def hmc_pipeline(name='motion_correct'):
     """
@@ -116,7 +231,7 @@ def ecc_pipeline(name='eddy_correct'):
     [Rohde04]_.
 
     A list of rigid transformation matrices can be provided, sourcing from a
-    :func:`.motion_correct` workflow, to initialize registrations in a *motion free*
+    :func:`.hmc_pipeline` workflow, to initialize registrations in a *motion free*
     framework.
 
     A list of affine transformation matrices is available as output, so that transforms
@@ -340,6 +455,90 @@ def sdc_fmb(name='fmb_correction',
         ,(thres,       merge,      [('out_file', 'in_files')])
         ,(merge,       outputnode, [('merged_file', 'out_file')])
         ,(vsm,         outputnode, [('shift_out_file', 'out_vsm')])
+    ])
+    return wf
+
+
+def sdc_peb(name='peb_correction',
+            epi_params=dict(echospacing=0.77e-3,
+                            acc_factor=3,
+                            enc_dir='y-'),
+            altepi_params=dict(echospacing=0.77e-3,
+                               acc_factor=3,
+                               enc_dir='y')):
+    """
+    SDC stands for susceptibility distortion correction. PEB stands for phase-encoding-based.
+
+    The phase-encoding-based (PEB) method implements SDC by acquiring diffusion images with
+    two different enconding directions [Andersson2003]_. The most typical case is acquiring
+    with opposed phase-gradient blips (e.g. *A>>>P* and *P>>>A*, or equivalently, *-y* and *y*)
+    as in [Chiou2000]_, but it is also possible to use orthogonal configurations [Cordes2000]_
+    (e.g. *A>>>P* and *L>>>R*, or equivalently *-y* and *x*).
+    This workflow uses the implementation of FSL
+    (`TOPUP <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP>`_).
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.preprocess.epi import sdc_peb
+    >>> peb = sdc_peb()
+    >>> peb.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> peb.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> peb.inputs.inputnode.in_mask = 'mask.nii'
+    >>> peb.run() # doctest: +SKIP
+
+    .. admonition:: References
+
+      .. [Andersson2003] Andersson JL et al., `How to correct susceptibility distortions in
+        spin-echo echo-planar images: application to diffusion tensor imaging
+        <http://dx.doi.org/10.1016/S1053-8119(03)00336-7>`_.
+        Neuroimage. 2003 Oct;20(2):870-88. doi: 10.1016/S1053-8119(03)00336-7
+
+      .. [Cordes2000] Cordes D et al., Geometric distortion correction in EPI using two
+        images with orthogonal phase-encoding directions, in Proc. ISMRM (8), p.1712,
+        Denver, US, 2000.
+
+      .. [Chiou2000] Chiou JY, and Nalcioglu O, A simple method to correct off-resonance
+        related distortion in echo planar imaging, in Proc. ISMRM (8), p.1712, Denver, US,
+        2000.
+
+    """
+
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask',
+                        'alt_file', 'ref_num']),
+                        name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm']),
+                         name='outputnode')
+
+    b0_ref = pe.Node(fsl.ExtractROI(t_size=1), name='b0_ref')
+    b0_alt = pe.Node(fsl.ExtractROI(t_size=1), name='b0_alt')
+    b0_comb = pe.Node(niu.Merge(2), name='b0_list')
+    b0_merge = pe.Node(fsl.Merge(dimension='t'), name='b0_merged')
+
+    topup = pe.Node(fsl.TOPUP(), name='topup')
+    topup.inputs.encoding_direction = [epi_params['enc_dir'], altepi_params['enc_dir']]
+    topup.inputs.readout_times = [epi_params['echospacing']/(1.0*epi_params['acc_factor']),
+                                  altepi_params['echospacing']/(1.0*altepi_params['acc_factor'])]
+    unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1,2]), name='unwarp')
+    dwi_comb = pe.Node(niu.Merge(2), name='DWIcomb')
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+         (inputnode,  b0_ref,     [('in_file','in_file'),
+                                   (('ref_num', _checkrnum),'t_min')])
+        ,(inputnode,  b0_alt,     [('alt_file','in_file'),
+                                   (('ref_num', _checkrnum),'t_min')])
+        ,(inputnode,  dwi_comb,   [('in_file','in1'),
+                                   ('alt_file','in2') ] )
+        ,(b0_ref,     b0_comb,    [('roi_file','in1')] )
+        ,(b0_alt,     b0_comb,    [('roi_file','in2')] )
+        ,(b0_comb,    b0_merge,   [('out', 'in_files')] )
+        ,(b0_merge,   topup,      [('merged_file','in_file')])
+        ,(topup,      unwarp,     [('out_fieldcoef','in_topup_fieldcoef'),
+                                   ('out_movpar','in_topup_movpar'),
+                                   ('out_enc_file','encoding_file')])
+        ,(dwi_comb,   unwarp,     [('out','in_files')])
+        ,(unwarp,     outputnode, [('out_corrected','out_file')])
     ])
     return wf
 
