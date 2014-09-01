@@ -174,7 +174,7 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
                                    position=5)
     dT = traits.Float(argstr='dT=%d', desc='', position=6)
     sulcus_prior = traits.Bool(argstr='use-sulcus-prior', desc='', position=7)
-    opt_tolerance = traits.Float(argstr='optional-laplacian-tolerance=%d', 
+    opt_tolerance = traits.Float(argstr='optional-laplacian-tolerance=%d',
                                  desc='', position=8)
 
 

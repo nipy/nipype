@@ -1548,12 +1548,9 @@ class MySQLSink(IOBase):
         return None
 
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = traits.Str(mandatory=True,
-                               desc='Server hostname.')
-    username = traits.Str(mandatory=False,
-                                desc='Server username.')
-    password = traits.Password(mandatory=False,
-                                desc='Server password.')
+    hostname = traits.Str(mandatory=True, desc='Server hostname.')
+    username = traits.Str(desc='Server username.')
+    password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
                                     desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
