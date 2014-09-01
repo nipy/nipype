@@ -519,8 +519,7 @@ def sdc_peb(name='peb_correction',
     topup.inputs.encoding_direction = [epi_params['enc_dir'], altepi_params['enc_dir']]
     topup.inputs.readout_times = [epi_params['echospacing']/(1.0*epi_params['acc_factor']),
                                   altepi_params['echospacing']/(1.0*altepi_params['acc_factor'])]
-    unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1,2]), name='unwarp')
-    dwi_comb = pe.Node(niu.Merge(2), name='DWIcomb')
+    unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1], method='jac'), name='unwarp')
 
     wf = pe.Workflow(name=name)
     wf.connect([
@@ -528,16 +527,14 @@ def sdc_peb(name='peb_correction',
                                    (('ref_num', _checkrnum),'t_min')])
         ,(inputnode,  b0_alt,     [('alt_file','in_file'),
                                    (('ref_num', _checkrnum),'t_min')])
-        ,(inputnode,  dwi_comb,   [('in_file','in1'),
-                                   ('alt_file','in2') ] )
-        ,(b0_ref,     b0_comb,    [('roi_file','in1')] )
-        ,(b0_alt,     b0_comb,    [('roi_file','in2')] )
-        ,(b0_comb,    b0_merge,   [('out', 'in_files')] )
+        ,(b0_ref,     b0_comb,    [('roi_file','in1')])
+        ,(b0_alt,     b0_comb,    [('roi_file','in2')])
+        ,(b0_comb,    b0_merge,   [('out', 'in_files')])
         ,(b0_merge,   topup,      [('merged_file','in_file')])
         ,(topup,      unwarp,     [('out_fieldcoef','in_topup_fieldcoef'),
                                    ('out_movpar','in_topup_movpar'),
                                    ('out_enc_file','encoding_file')])
-        ,(dwi_comb,   unwarp,     [('out','in_files')])
+        ,(inputnode,  unwarp,     [('in_file','in_files')])
         ,(unwarp,     outputnode, [('out_corrected','out_file')])
     ])
     return wf
