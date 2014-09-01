@@ -160,6 +160,67 @@ class Atropos(ANTSCommand):
                 outputs['posteriors'].append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
         return outputs
 
+class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
+    input_wm = File(argstr='%s', mandatory=True, copyfile=True,
+                       desc=('white matter segmentation image'),
+                       position=1)
+    input_gm = File(argstr='%s', mandatory=True, copyfile=True,
+                       desc=('gray matter segmentation image'),
+                       position=2)
+    output_image = File(desc='name of output file', argstr='%s', position=3,
+                        genfile=True, hash_files=False)
+    smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
+    prior_thickness = traits.Float(argstr='priorthickval=%d', desc='',
+                                   position=5)
+    dT = traits.Float(argstr='dT=%d', desc='', position=6)
+    sulcus_prior = traits.Bool(argstr='use-sulcus-prior', desc='', position=7)
+    opt_tolerance = traits.Float(argstr='optional-laplacian-tolerance=%d',
+                                 desc='', position=8)
+
+
+class LaplacianThicknessOutputSpec(TraitedSpec):
+    output_image = File(exists=True, desc='Cortical thickness')
+
+
+class LaplacianThickness(ANTSCommand):
+    """Calculates the cortical thickness from an anatomical image
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.ants import LaplacianThickness
+    >>> cort_thick = LaplacianThickness()
+    >>> cort_thick.inputs.input_wm = 'white_matter.nii.gz'
+    >>> cort_thick.inputs.input_gm = 'gray_matter.nii.gz'
+    >>> cort_thick.inputs.output_image = 'output_thickness.nii.gz'
+    >>> cort_thick.cmdline
+    'LaplacianThickness white_matter.nii.gz gray_matter.nii.gz output_thickness.nii.gz'
+
+    """
+
+    _cmd = 'LaplacianThickness'
+    input_spec = LaplacianThicknessInputSpec
+    output_spec = LaplacianThicknessOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'output_image':
+            output = self.inputs.output_image
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.input_wm)
+                output = name + '_thickness' + ext
+            return output
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
+        outputs['output_image'] = os.path.join(os.getcwd(),
+                                               ''.join((name,
+                                                        self.inputs.output_image,
+                                                        ext)))
+        return outputs
+
+
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='--image-dimension %d',
                             usedefault=True,

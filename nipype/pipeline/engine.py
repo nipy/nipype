@@ -26,6 +26,7 @@ import os
 import os.path as op
 import re
 import shutil
+import errno
 from shutil import rmtree
 from socket import gethostname
 from string import Template
@@ -190,6 +191,8 @@ class WorkflowBase(object):
         return hasattr(self.outputs, parameter)
 
     def _check_inputs(self, parameter):
+        if isinstance(self.inputs, DynamicTraitedSpec):
+            return True
         return hasattr(self.inputs, parameter)
 
     def _verify_name(self, name):
@@ -505,10 +508,14 @@ connected.
         Parameters
         ----------
 
-        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
+        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec', 'colored'
             orig - creates a top level graph without expanding internal
             workflow nodes;
             flat - expands workflow nodes recursively;
+            hierarchical - expands workflow nodes recursively with a
+            notion on hierarchy;
+            colored - expands workflow nodes recursively with a
+            notion on hierarchy in color;
             exec - expands workflows to depict iterables
 
         format: 'png', 'svg'
@@ -519,23 +526,23 @@ connected.
             False.
 
         """
-        graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
+        graphtypes = ['orig', 'flat', 'hierarchical', 'exec', 'colored']
         if graph2use not in graphtypes:
             raise ValueError('Unknown graph2use keyword. Must be one of: ' +
                              str(graphtypes))
-        base_dir, dotfilename = os.path.split(dotfilename)
+        base_dir, dotfilename = op.split(dotfilename)
         if base_dir == '':
             if self.base_dir:
                 base_dir = self.base_dir
                 if self.name:
-                    base_dir = os.path.join(base_dir, self.name)
+                    base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
-        if graph2use == 'hierarchical':
-            dotfilename = os.path.join(base_dir, dotfilename)
+        if graph2use in ['hierarchical', 'colored']:
+            dotfilename = op.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                            colored=False,
+                                            colored=graph2use == "colored",
                                             simple_form=simple_form)
             format_dot(dotfilename, format=format)
         else:
@@ -547,11 +554,9 @@ connected.
             export_graph(graph, base_dir, dotfilename=dotfilename,
                          format=format, simple_form=simple_form)
 
-    def write_hierarchical_dotfile(self, dotfilename=None, colored=True,
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=False,
                                    simple_form=True):
         dotlist = ['digraph %s{' % self.name]
-        if colored:
-            dotlist.append('  ' + 'colorscheme=pastel28;')
         dotlist.append(self._get_dot(prefix='  ', colored=colored,
                                      simple_form=simple_form))
         dotlist.append('}')
@@ -693,7 +698,7 @@ connected.
         runner.run(execgraph, updatehash=updatehash, config=self.config)
         datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         if str2bool(self.config['execution']['write_provenance']):
-            prov_base = os.path.join(self.base_dir,
+            prov_base = op.join(self.base_dir,
                                      'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
@@ -704,17 +709,17 @@ connected.
     def _write_report_info(self, workingdir, name, graph):
         if workingdir is None:
             workingdir = os.getcwd()
-        report_dir = os.path.join(workingdir, name)
-        if not os.path.exists(report_dir):
+        report_dir = op.join(workingdir, name)
+        if not op.exists(report_dir):
             os.makedirs(report_dir)
-        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+        shutil.copyfile(op.join(op.dirname(__file__),
                                      'report_template.html'),
-                        os.path.join(report_dir, 'index.html'))
-        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                        op.join(report_dir, 'index.html'))
+        shutil.copyfile(op.join(op.dirname(__file__),
                                      '..', 'external', 'd3.v3.min.js'),
-                        os.path.join(report_dir, 'd3.v3.min.js'))
+                        op.join(report_dir, 'd3.v3.min.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
-        graph_file = os.path.join(report_dir, 'graph1.json')
+        graph_file = op.join(report_dir, 'graph1.json')
         json_dict = {'nodes': [], 'links': [], 'groups': [], 'maxN': 0}
         for i, node in enumerate(nodes):
             report_file = "%s/_report/report.rst" % \
@@ -741,7 +746,7 @@ connected.
                                            target=nodes.index(v),
                                            value=1))
         save_json(graph_file, json_dict)
-        graph_file = os.path.join(report_dir, 'graph.json')
+        graph_file = op.join(report_dir, 'graph.json')
         template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
         def getname(u, i):
             name_parts = u.fullname.split('.')
@@ -786,7 +791,7 @@ connected.
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = \
-                        (os.path.join(edge[0].output_dir(),
+                        (op.join(edge[0].output_dir(),
                          'result_%s.pklz' % edge[0].name),
                          sourceinfo)
 
@@ -1007,18 +1012,18 @@ connected.
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None, colored=True,
-                 simple_form=True):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=False,
+                 simple_form=True, level=0):
         """Create a dot file with connection info
         """
         if prefix is None:
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        level = (len(prefix) / 2) + 1
+        colorset = ['#FFFFC8','#0000FF','#B4B4FF','#E6E6FF','#FF0000',
+                    '#FFB4B4','#FFE6E6','#00A300','#B4FFB4','#E6FFE6']
+
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
-        if colored:
-            dotlist.append('%scolor=%d;' % (prefix, level))
         for node in nx.topological_sort(self._graph):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.', '_')
@@ -1027,24 +1032,35 @@ connected.
                 if not simple_form:
                     node_class_name = '.'.join(node_class_name.split('.')[1:])
                 if hasattr(node, 'iterables') and node.iterables:
-                    dotlist.append(('%s[label="%s", style=filled, colorscheme'
-                                    '=greys7 color=2];') % (nodename,
+                    dotlist.append(('%s[label="%s", shape=box3d,'
+                                    'style=filled, color=black, colorscheme'
+                                    '=greys7 fillcolor=2];') % (nodename,
                                                             node_class_name))
                 else:
-                    dotlist.append('%s[label="%s"];' % (nodename,
-                                                        node_class_name))
+                    if colored:
+                        dotlist.append(('%s[label="%s", style=filled,'
+                                        ' fillcolor="%s"];')
+                                        % (nodename,node_class_name,
+                                           colorset[level]))
+                    else:
+                        dotlist.append(('%s[label="%s"];')
+                                        % (nodename,node_class_name))
+
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.', '_')
                 dotlist.append('subgraph cluster_%s {' % nodename)
                 if colored:
+                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level+1]))
                     dotlist.append(prefix + prefix + 'style=filled;')
+                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level+2]))
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy + [self.name],
                                              colored=colored,
-                                             simple_form=simple_form))
+                                             simple_form=simple_form, level=level+3))
                 dotlist.append('}')
+                if level==6:level=2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:
@@ -1230,15 +1246,15 @@ class Node(WorkflowBase):
             self.base_dir = mkdtemp()
         outputdir = self.base_dir
         if self._hierarchy:
-            outputdir = os.path.join(outputdir, *self._hierarchy.split('.'))
+            outputdir = op.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
             if not str2bool(self.config['execution']['parameterize_dirs']):
                 param_dirs = [self._parameterization_dir(p) for p in
                               self.parameterization]
-                outputdir = os.path.join(outputdir, *param_dirs)
+                outputdir = op.join(outputdir, *param_dirs)
             else:
-                outputdir = os.path.join(outputdir, *self.parameterization)
-        return os.path.abspath(os.path.join(outputdir,
+                outputdir = op.join(outputdir, *self.parameterization)
+        return op.abspath(op.join(outputdir,
                                             self.name))
 
     def set_input(self, parameter, val):
@@ -1269,23 +1285,23 @@ class Node(WorkflowBase):
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
-        if os.path.exists(outdir):
+        if op.exists(outdir):
             logger.debug(os.listdir(outdir))
-        hashfiles = glob(os.path.join(outdir, '_0x*.json'))
+        hashfiles = glob(op.join(outdir, '_0x*.json'))
         logger.debug(hashfiles)
         if len(hashfiles) > 1:
             logger.info(hashfiles)
             logger.info('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
                 os.unlink(hashfile)
-        hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
         logger.debug(hashfile)
-        if updatehash and os.path.exists(outdir):
+        if updatehash and op.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
-            for file in glob(os.path.join(outdir, '_0x*.json')):
+            for file in glob(op.join(outdir, '_0x*.json')):
                 os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
-        return os.path.exists(hashfile), hashvalue, hashfile, hashed_inputs
+        return op.exists(hashfile), hashvalue, hashfile, hashed_inputs
 
     def run(self, updatehash=False):
         """Execute the node in its directory.
@@ -1306,7 +1322,7 @@ class Node(WorkflowBase):
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
-        if os.path.exists(outdir):
+        if op.exists(outdir):
             logger.debug(os.listdir(outdir))
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
@@ -1322,7 +1338,7 @@ class Node(WorkflowBase):
             # by rerunning we mean only nodes that did finish to run previously
             json_pat = op.join(outdir, '_0x*.json')
             json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-            need_rerun = (os.path.exists(outdir)
+            need_rerun = (op.exists(outdir)
                           and not isinstance(self, MapNode)
                           and len(glob(json_pat)) != 0
                           and len(glob(json_unfinished_pat)) == 0)
@@ -1337,7 +1353,7 @@ class Node(WorkflowBase):
                               str(self.overwrite),
                               str(self._interface.always_run),
                               hashfile,
-                              str(os.path.exists(hashfile)),
+                              str(op.exists(hashfile)),
                               self.config['execution']['hash_method'].lower()))
                 log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
                 if log_debug and not op.exists(hashfile):
@@ -1361,7 +1377,7 @@ class Node(WorkflowBase):
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
-            hashfile_unfinished = os.path.join(outdir,
+            hashfile_unfinished = op.join(outdir,
                                                '_0x%s_unfinished.json' %
                                                hashvalue)
             if op.exists(hashfile):
@@ -1372,20 +1388,35 @@ class Node(WorkflowBase):
                          and not isinstance(self, MapNode))
             if rm_outdir:
                 logger.debug("Removing old %s and its contents" % outdir)
-                rmtree(outdir)
+                try:
+                    rmtree(outdir)
+                except OSError as ex:
+                    outdircont = os.listdir(outdir)
+                    if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
+                        logger.warn(('An exception was raised trying to remove old %s, '
+                                    'but the path seems empty. Is it an NFS mount?. '
+                                    'Passing the exception.') % outdir)
+                        pass
+                    elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
+                        logger.debug(('Folder contents (%d items): '
+                                     '%s') % (len(outdircont), outdircont))
+                        raise ex
+                    else:
+                        raise ex
+
             else:
                 logger.debug(("%s found and can_resume is True or Node is a "
                               "MapNode - resuming execution") %
                              hashfile_unfinished)
                 if isinstance(self, MapNode):
                     # remove old json files
-                    for filename in glob(os.path.join(outdir, '_0x*.json')):
+                    for filename in glob(op.join(outdir, '_0x*.json')):
                         os.unlink(filename)
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
-            savepkl(os.path.join(outdir, '_node.pklz'), self)
-            savepkl(os.path.join(outdir, '_inputs.pklz'),
+            savepkl(op.join(outdir, '_node.pklz'), self)
+            savepkl(op.join(outdir, '_inputs.pklz'),
                     self.inputs.get_traitsfree())
             try:
                 self._run_interface()
@@ -1395,13 +1426,13 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
-            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+            if not op.exists(op.join(outdir, '_inputs.pklz')):
                 logger.debug('%s: creating inputs file' % self.name)
-                savepkl(os.path.join(outdir, '_inputs.pklz'),
+                savepkl(op.join(outdir, '_inputs.pklz'),
                         self.inputs.get_traitsfree())
-            if not os.path.exists(os.path.join(outdir, '_node.pklz')):
+            if not op.exists(op.join(outdir, '_node.pklz')):
                 logger.debug('%s: creating node file' % self.name)
-                savepkl(os.path.join(outdir, '_node.pklz'), self)
+                savepkl(op.join(outdir, '_node.pklz'), self)
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n' % (self._id, outdir))
@@ -1502,7 +1533,7 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsfile = op.join(cwd, 'result_%s.pklz' % self.name)
         if result.outputs:
             try:
                 outputs = result.outputs.get()
@@ -1535,10 +1566,10 @@ class Node(WorkflowBase):
             rerun
         """
         aggregate = True
-        resultsoutputfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsoutputfile = op.join(cwd, 'result_%s.pklz' % self.name)
         result = None
         attribute_error = False
-        if os.path.exists(resultsoutputfile):
+        if op.exists(resultsoutputfile):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
@@ -1574,7 +1605,7 @@ class Node(WorkflowBase):
         if aggregate:
             logger.debug('aggregating results')
             if attribute_error:
-                old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
+                old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
                 self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
@@ -1618,7 +1649,7 @@ class Node(WorkflowBase):
                 except Exception, msg:
                     self._result.runtime.stderr = msg
                     raise
-                cmdfile = os.path.join(cwd, 'command.txt')
+                cmdfile = op.join(cwd, 'command.txt')
                 fd = open(cmdfile, 'wt')
                 fd.writelines(cmd + "\n")
                 fd.close()
@@ -1631,7 +1662,7 @@ class Node(WorkflowBase):
 
             dirs2keep = None
             if isinstance(self, MapNode):
-                dirs2keep = [os.path.join(cwd, 'mapflow')]
+                dirs2keep = [op.join(cwd, 'mapflow')]
             result.outputs = clean_working_directory(result.outputs, cwd,
                                                      self._interface.inputs,
                                                      self.needed_outputs,
@@ -1655,7 +1686,7 @@ class Node(WorkflowBase):
             if isinstance(f, list):
                 out.append(self._strip_temp(f, wd))
             else:
-                out.append(f.replace(os.path.join(wd, '_tempinput'), wd))
+                out.append(f.replace(op.join(wd, '_tempinput'), wd))
         return out
 
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
@@ -1665,7 +1696,7 @@ class Node(WorkflowBase):
                          (str(execute), str(linksonly)))
             if execute and linksonly:
                 olddir = outdir
-                outdir = os.path.join(outdir, '_tempinput')
+                outdir = op.join(outdir, '_tempinput')
                 os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
@@ -1685,7 +1716,7 @@ class Node(WorkflowBase):
                                                             newpath=outdir)
                             newfiles = self._strip_temp(
                                 newfiles,
-                                op.abspath(olddir).split(os.path.sep)[-1])
+                                op.abspath(olddir).split(op.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles,
                                                  [outdir],
@@ -1705,9 +1736,9 @@ class Node(WorkflowBase):
     def write_report(self, report_type=None, cwd=None):
         if not str2bool(self.config['execution']['create_report']):
             return
-        report_dir = os.path.join(cwd, '_report')
-        report_file = os.path.join(report_dir, 'report.rst')
-        if not os.path.exists(report_dir):
+        report_dir = op.join(cwd, '_report')
+        report_file = op.join(report_dir, 'report.rst')
+        if not op.exists(report_dir):
             os.makedirs(report_dir)
         if report_type == 'preexec':
             logger.debug('writing pre-exec report to %s' % report_file)
@@ -1995,7 +2026,7 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, iterfield, name, **kwargs):
+    def __init__(self, interface, iterfield, name, serial=False, **kwargs):
         """
 
         Parameters
@@ -2009,9 +2040,12 @@ class MapNode(Node):
             paired (i.e. it does not compute a combinatorial product).
         name : alphanumeric string
             node specific name
-
+        serial : boolean
+            flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
         See Node docstring for additional keyword arguments.
         """
+
+
         super(MapNode, self).__init__(interface, name, **kwargs)
         if isinstance(iterfield, str):
             iterfield = [iterfield]
@@ -2020,6 +2054,7 @@ class MapNode(Node):
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
         self._got_inputs = False
+        self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
@@ -2117,7 +2152,7 @@ class MapNode(Node):
                 setattr(node.inputs, field,
                         fieldvals[i])
             node.config = self.config
-            node.base_dir = os.path.join(cwd, 'mapflow')
+            node.base_dir = op.join(cwd, 'mapflow')
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
@@ -2179,8 +2214,8 @@ class MapNode(Node):
             super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
         if report_type == 'postexec':
             super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-            report_dir = os.path.join(cwd, '_report')
-            report_file = os.path.join(report_dir, 'report.rst')
+            report_dir = op.join(cwd, '_report')
+            report_file = op.join(report_dir, 'report.rst')
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Subnode reports', level=1))
             nitems = len(filename_to_list(
@@ -2189,7 +2224,7 @@ class MapNode(Node):
             for i in range(nitems):
                 nodename = '_' + self.name + str(i)
                 subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
-                                               os.path.join(cwd,
+                                               op.join(cwd,
                                                             'mapflow',
                                                             nodename,
                                                             '_report',
@@ -2210,7 +2245,10 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+        if self._serial :
+            return 1
+        else:
+            return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
         old_inputs = self._inputs.get()
@@ -2259,9 +2297,9 @@ class MapNode(Node):
             self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
-            for path in glob(os.path.join(cwd, 'mapflow', '*')):
-                if os.path.isdir(path):
-                    if path.split(os.path.sep)[-1] not in nodenames:
+            for path in glob(op.join(cwd, 'mapflow', '*')):
+                if op.isdir(path):
+                    if path.split(op.sep)[-1] not in nodenames:
                         dirs2remove.append(path)
             for path in dirs2remove:
                 shutil.rmtree(path)

@@ -40,8 +40,8 @@ class Vnifti2Image(CommandLine):
     _cmd = 'vnifti2image'
     input_spec=Vnifti2ImageInputSpec
     output_spec=Vnifti2ImageOutputSpec
-    
-    
+
+
 class VtoMatInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-in %s', mandatory=True, position=1, desc='in file')
     out_file = File(name_template="%s.mat", keep_extension=False, argstr='-out %s', hash_files=False,
