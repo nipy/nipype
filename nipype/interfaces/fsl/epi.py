@@ -47,7 +47,8 @@ class PrepareFieldmapOutputSpec( TraitedSpec ):
     out_fieldmap = File( exists=True, desc='output name for prepared fieldmap' )
 
 class PrepareFieldmap(FSLCommand):
-    """ Interface for the fsl_prepare_fieldmap script (FSL 5.0)
+    """
+    Interface for the fsl_prepare_fieldmap script (FSL 5.0)
 
     Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in rad/s format
     e.g. fsl_prepare_fieldmap SIEMENS images_3_gre_field_mapping images_4_gre_field_mapping fmap_rads 2.65
@@ -134,6 +135,9 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_logfile = File(argstr='--logout=%s', desc='name of log-file',
                        name_source=['in_file'], name_template='%s_topup.log',
                        keep_extension=True, hash_files=False)
+
+    # TODO: the following traits admit values separated by commas, one value per
+    # registration level inside topup.
     warp_res = traits.Float(10.0, argstr='--warpres=%f',
                             desc=('(approximate) resolution (in mm) of warp '
                                   'basis for the different sub-sampling levels'))
@@ -146,13 +150,24 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                                  'arguments'))
     max_iter = traits.Int(5, argstr='--miter=%d',
                           desc='max # of non-linear iterations')
-    # @oesteban: I don't know how to implement these 3 parameters, AFAIK there's
-    # no documentation.
-    #lambda	Weight of regularisation, default depending on --ssqlambda and --regmod switches. See user documetation.
-    #ssqlambda	If set (=1), lambda is weighted by current ssq, default 1
-    #regmod	Model for regularisation of warp-field [membrane_energy bending_energy], default bending_energy
-    estmov = traits.Enum(1, 0,
-                         desc='estimate movements if set', argstr='--estmov=%d')
+    reg_lambda = traits.Float(1.0, argstr='--miter=%0.f',
+                              desc='lambda weighting value of the regularisation term')
+    ssqlambda = traits.Enum(1, 0, argstr='--ssqlambda=%d',
+                            desc=('Weight lambda by the current value of the ssd. If used (=1), '
+                                  'the effective weight of regularisation term becomes higher for '
+                                  'the initial iterations, therefore initial steps are a little '
+                                  'smoother than they would without weighting. This reduces the '
+                                  'risk of finding a local minimum.'))
+    regmod = traits.Enum('bending_energy', 'membrane_energy', argstr='--regmod=%s',
+                         desc=('Regularisation term implementation. Defaults to bending_energy. '
+                               'Note that the two functions have vastly different scales. The '
+                               'membrane energy is based on the first derivatives and the bending '
+                               'energy on the second derivatives. The second derivatives will '
+                               'typically be much smaller than the first derivatives, so input '
+                               'lambda will have to be larger for bending_energy to yield '
+                               'approximately the same level of regularisation.'))
+    estmov = traits.Enum(1, 0, argstr='--estmov=%d',
+                         desc='estimate movements if set')
     minmet = traits.Enum(0, 1, argstr='--minmet=%d',
                          desc=('Minimisation method 0=Levenberg-Marquardt, '
                                '1=Scaled Conjugate Gradient'))
@@ -183,24 +198,27 @@ class TOPUPOutputSpec(TraitedSpec):
 
 
 class TOPUP(FSLCommand):
-    """ Interface for FSL topup, a tool for estimating and correcting
-        susceptibility induced distortions
-        Reference: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP
-        Example: http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup
+    """
+    Interface for FSL topup, a tool for estimating and correcting
+    susceptibility induced distortions. See FSL documentation for
+    `reference <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP>`_,
+    `usage examples
+    <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup>`_,
+    and `exemplary config files
+    <https://github.com/ahheckel/FSL-scripts/blob/master/rsc/fsl/fsl4/topup/b02b0.cnf`_.
 
-        topup --imain=<some 4D image> --datain=<text file> --config=<text file with parameters> --coutname=my_field
+    Examples
+    --------
 
-
-        Examples
-        --------
-
-        >>> from nipype.interfaces.fsl import TOPUP
-        >>> topup = TOPUP()
-        >>> topup.inputs.in_file = "b0_b0rev.nii"
-        >>> topup.inputs.encoding_file = "topup_encoding.txt"
-        >>> topup.cmdline #doctest: +ELLIPSIS
-        'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
-        >>> res = topup.run() # doctest: +SKIP
+    >>> from nipype.interfaces.fsl import TOPUP
+    >>> topup = TOPUP()
+    >>> topup.inputs.in_file = "b0_b0rev.nii"
+    >>> topup.inputs.encoding_file = "topup_encoding.txt"
+    >>> topup.cmdline #doctest: +ELLIPSIS
+    'topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii \
+--out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz \
+--logout=b0_b0rev_topup.log'
+    >>> res = topup.run() # doctest: +SKIP
 
     """
     _cmd = 'topup'
@@ -297,24 +315,26 @@ class ApplyTOPUPOutputSpec( TraitedSpec ):
 
 
 class ApplyTOPUP( FSLCommand ):
-    """ Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions.
-        `General reference <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide>`_
-        and `use example <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup>`_.
+    """
+    Interface for FSL topup, a tool for estimating and correcting susceptibility induced distortions.
+    `General reference <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide>`_
+    and `use example <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup>`_.
 
 
-        Examples
-        --------
+    Examples
+    --------
 
-        >>> from nipype.interfaces.fsl import ApplyTOPUP
-        >>> applytopup = ApplyTOPUP()
-        >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
-        >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
-        >>> applytopup.inputs.in_index = [ 1,2 ]
-        >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
-        >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
-        >>> applytopup.cmdline #doctest: +ELLIPSIS
-        'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
-        >>> res = applytopup.run() # doctest: +SKIP
+    >>> from nipype.interfaces.fsl import ApplyTOPUP
+    >>> applytopup = ApplyTOPUP()
+    >>> applytopup.inputs.in_files = [ "epi.nii", "epi_rev.nii" ]
+    >>> applytopup.inputs.encoding_file = "topup_encoding.txt"
+    >>> applytopup.inputs.in_index = [ 1,2 ]
+    >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
+    >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
+    >>> applytopup.cmdline #doctest: +ELLIPSIS
+    'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 \
+--topup=topup --out=epi_corrected.nii.gz'
+    >>> res = applytopup.run() # doctest: +SKIP
 
     """
     _cmd = 'applytopup'
@@ -391,6 +411,7 @@ class Eddy(FSLCommand):
 
     Examples
     --------
+
     >>> from nipype.interfaces.fsl import Eddy
     >>> eddy = Eddy()
     >>> eddy.inputs.in_file = 'epi.nii'
@@ -400,7 +421,8 @@ class Eddy(FSLCommand):
     >>> eddy.inputs.in_bvec  = 'bvecs.scheme'
     >>> eddy.inputs.in_bval  = 'bvals.scheme'
     >>> eddy.cmdline #doctest: +ELLIPSIS
-    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii --out=.../eddy_corrected'
+    'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii \
+--index=epi_index.txt --mask=epi_mask.nii --out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
@@ -426,6 +448,67 @@ class Eddy(FSLCommand):
         outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
         outputs['out_parameter'] = '%s.eddy_parameters' % self.inputs.out_base
         return outputs
+
+
+class SigLossInputSpec(FSLCommandInputSpec):
+    in_file = File(mandatory=True,
+                   exists=True,
+                   argstr='-i %s',
+                   desc='b0 fieldmap file')
+    out_file = File(argstr='-s %s',
+                    desc='output signal loss estimate file',
+                    genfile=True)
+
+    mask_file = File(exists=True,
+                     argstr='-m %s',
+                     desc='brain mask file')
+    echo_time = traits.Float(argstr='--te=%f',
+                             desc='echo time in seconds')
+    slice_direction = traits.Enum('x','y','z',
+                                  argstr='-d %s',
+                                  desc='slicing direction')
+class SigLossOuputSpec(TraitedSpec):
+    out_file = File(exists=True,
+                    desc='signal loss estimate file')
+
+class SigLoss(FSLCommand):
+    """
+    Estimates signal loss from a field map (in rad/s)
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.fsl import SigLoss
+    >>> sigloss = SigLoss()
+    >>> sigloss.inputs.in_file = "phase.nii"
+    >>> sigloss.inputs.echo_time = 0.03
+    >>> sigloss.inputs.output_type = "NIFTI_GZ"
+    >>> sigloss.cmdline #doctest: +ELLIPSIS
+    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
+    >>> res = sigloss.run() # doctest: +SKIP
+
+
+    """
+    input_spec = SigLossInputSpec
+    output_spec = SigLossOuputSpec
+    _cmd = 'sigloss'
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.out_file
+        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
+            outputs['out_file']=self._gen_fname(self.inputs.in_file,
+                                                suffix='_sigloss')
+        return outputs
+
+    def _gen_filename(self, name):
+        if name=='out_file':
+            return self._list_outputs()['out_file']
+        return None
+
+#######################################
+# deprecated interfaces
+#######################################
 
 
 class EPIDeWarpInputSpec(FSLCommandInputSpec):
@@ -472,7 +555,12 @@ class EPIDeWarpOutputSpec(TraitedSpec):
 
 
 class EPIDeWarp(FSLCommand):
-    """Wraps fieldmap unwarping script from Freesurfer's epidewarp.fsl_
+    """
+    Wraps the unwarping script `epidewarp.fsl
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl>`_.
+
+    .. warning:: deprecated in FSL, please use
+      :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
 
     Examples
     --------
@@ -487,15 +575,23 @@ class EPIDeWarp(FSLCommand):
     'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 --tmpdir .../temp --vsm .../vsm.nii.gz'
     >>> res = dewarp.run() # doctest: +SKIP
 
-    References
-    ----------
-    _epidewarp.fsl: http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl
 
     """
 
     _cmd = 'epidewarp.fsl'
     input_spec = EPIDeWarpInputSpec
     output_spec = EPIDeWarpOutputSpec
+
+    def __init__(self, **inputs):
+        warnings.warn("Deprecated: Please use nipype.workflows.dmri.preprocess.epi.sdc_fmb instead",
+                      DeprecationWarning)
+        return super(EPIDeWarp, self).__init__(**inputs)
+
+    def _run_interface(self, runtime):
+        runtime = super(EPIDeWarp, self)._run_interface(runtime)
+        if runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
 
     def _gen_filename(self, name):
         if name == 'exfdw':
@@ -539,59 +635,6 @@ class EPIDeWarp(FSLCommand):
         return outputs
 
 
-class SigLossInputSpec(FSLCommandInputSpec):
-    in_file = File(mandatory=True,
-                   exists=True,
-                   argstr='-i %s',
-                   desc='b0 fieldmap file')
-    out_file = File(argstr='-s %s',
-                    desc='output signal loss estimate file',
-                    genfile=True)
-
-    mask_file = File(exists=True,
-                     argstr='-m %s',
-                     desc='brain mask file')
-    echo_time = traits.Float(argstr='--te=%f',
-                             desc='echo time in seconds')
-    slice_direction = traits.Enum('x','y','z',
-                                  argstr='-d %s',
-                                  desc='slicing direction')
-class SigLossOuputSpec(TraitedSpec):
-    out_file = File(exists=True,
-                    desc='signal loss estimate file')
-
-class SigLoss(FSLCommand):
-    """Estimates signal loss from a field map (in rad/s)
-
-    Examples
-    --------
-
-    >>> from nipype.interfaces.fsl import SigLoss
-    >>> sigloss = SigLoss()
-    >>> sigloss.inputs.in_file = "phase.nii"
-    >>> sigloss.inputs.echo_time = 0.03
-    >>> sigloss.inputs.output_type = "NIFTI_GZ"
-    >>> sigloss.cmdline #doctest: +ELLIPSIS
-    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
-    >>> res = sigloss.run() # doctest: +SKIP
-    """
-    input_spec = SigLossInputSpec
-    output_spec = SigLossOuputSpec
-    _cmd = 'sigloss'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
-            outputs['out_file']=self._gen_fname(self.inputs.in_file,
-                                                suffix='_sigloss')
-        return outputs
-
-    def _gen_filename(self, name):
-        if name=='out_file':
-            return self._list_outputs()['out_file']
-        return None
-
 class EddyCorrectInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='%s', position=0,
                    mandatory=True)
@@ -607,7 +650,9 @@ class EddyCorrectOutputSpec(TraitedSpec):
 
 
 class EddyCorrect(FSLCommand):
-    """  Deprecated! Please use create_eddy_correct_pipeline instead
+    """
+
+    .. warning:: Deprecated in FSL. Please use :class:`nipype.interfaces.fsl.epi.Eddy` instead
 
     Example
     -------
@@ -623,7 +668,8 @@ class EddyCorrect(FSLCommand):
     output_spec = EddyCorrectOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_eddy_correct_pipeline instead", DeprecationWarning)
+        warnings.warn("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy instead",
+                      DeprecationWarning)
         return super(EddyCorrect, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
