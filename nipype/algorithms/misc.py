@@ -26,15 +26,16 @@ import scipy.io as sio
 import itertools
 import scipy.stats as stats
 
-from .. import logging
+from nipype import logging
 
 import warnings
 
 import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
-                               BaseInterfaceInputSpec, isdefined)
-from ..utils.filemanip import fname_presuffix, split_filename
+                               BaseInterfaceInputSpec, isdefined,
+                               DynamicTraitedSpec )
+from nipype.utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 
@@ -782,6 +783,121 @@ class AddCSVColumn(BaseInterface):
         return outputs
 
 
+class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
+    _outputs = traits.Dict( traits.Any, value={}, usedefault=True )
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(AddCSVRowInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(AddCSVRowInputSpec, self).__setattr__(key, value)
+
+class AddCSVRowOutputSpec(TraitedSpec):
+    csv_file = File(desc='Output CSV file containing rows ')
+
+class AddCSVRow(BaseInterface):
+    """Simple interface to add an extra row to a csv file
+
+    .. note:: Requires `pandas <http://pandas.pydata.org/>`_
+
+    .. warning:: Multi-platform thread-safe execution is possible with
+        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please recall that (1)
+        this module is alpha software; and (2) it should be installed for thread-safe writing.
+        If lockfile is not installed, then the interface is not thread-safe.
+
+
+    Example
+    -------
+
+    >>> import nipype.algorithms.misc as misc
+    >>> addrow = misc.AddCSVRow()
+    >>> addrow.inputs.in_file = 'scores.csv'
+    >>> addrow.inputs.si = 0.74
+    >>> addrow.inputs.di = 0.93
+    >>> addrow.subject_id = 'S400'
+    >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
+    >>> addrow.run() # doctest: +SKIP
+    """
+    input_spec = AddCSVRowInputSpec
+    output_spec = AddCSVRowOutputSpec
+
+    def __init__(self, infields=None, force_run=True, **kwargs):
+        super(AddCSVRow, self).__init__(**kwargs)
+        undefined_traits = {}
+        self._infields = infields
+        self._have_lock = False
+        self._lock = None
+
+        if infields:
+            for key in infields:
+                self.inputs.add_trait(key, traits.Any)
+                self.inputs._outputs[key] = Undefined
+                undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+        if force_run:
+            self._always_run = True
+
+    def _run_interface(self, runtime):
+        try:
+            import pandas as pd
+        except ImportError:
+            raise ImportError('This interface requires pandas (http://pandas.pydata.org/) to run.')
+
+        try:
+            import lockfile as pl
+            self._have_lock = True
+        except ImportError:
+            import warnings
+            warnings.warn(('Python module lockfile was not found: AddCSVRow will not be thread-safe '
+                          'in multi-processor execution'))
+
+        input_dict = {}
+        for key, val in self.inputs._outputs.items():
+            # expand lists to several columns
+            if isinstance(val, list):
+                for i,v in enumerate(val):
+                    input_dict['%s_%d' % (key,i)]=v
+            else:
+                input_dict[key] = val
+
+        df = pd.DataFrame([input_dict])
+
+        if self._have_lock:
+            self._lock = pl.FileLock(self.inputs.in_file)
+
+            # Acquire lock
+            self._lock.acquire()
+
+        if op.exists(self.inputs.in_file):
+            formerdf = pd.read_csv(self.inputs.in_file, index_col=0)
+            df = pd.concat([formerdf, df], ignore_index=True )
+
+        with open(self.inputs.in_file, 'w') as f:
+            df.to_csv(f)
+
+        if self._have_lock:
+            self._lock.release()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['csv_file'] = self.inputs.in_file
+        return outputs
+
+    def _outputs(self):
+        return self._add_output_traits(super(AddCSVRow, self)._outputs())
+
+    def _add_output_traits(self, base):
+        return base
+
+
 class CalculateNormalizedMomentsInputSpec(TraitedSpec):
     timeseries_file = File(
         exists=True, mandatory=True,
@@ -843,7 +959,7 @@ def calc_moments(timeseries_file, moment):
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                     desc='The tpms to be normalized') )
-    in_mask = File(exists=True, mandatory=False,
+    in_mask = File(exists=True,
                     desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
 class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
