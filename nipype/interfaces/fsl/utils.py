@@ -1513,10 +1513,10 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                            'would typically be the file that was specified '
                            'with the --in argument when running fnirt.'))
 
-    out_format = traits.Either('spline', 'field', argstr='--outformat=%s',
-                               desc=('Specifies the output format. If set to field (default) '
-                                     'the output will be a (4D) field-file. If set to spline '
-                                     'the format will be a (4D) file of spline coefficients.'))
+    out_format = traits.Enum('spline', 'field', argstr='--outformat=%s',
+                             desc=('Specifies the output format. If set to field (default) '
+                             'the output will be a (4D) field-file. If set to spline '
+                             'the format will be a (4D) file of spline coefficients.'))
 
     warp_resolution = traits.Tuple(traits.Float, traits.Float, traits.Float,
                                    argstr='--warpres=%0.4f,%0.4f,%0.4f',
