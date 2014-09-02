@@ -319,8 +319,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
                              desc=('Prefix that is prepended to all output'
                                    ' files (default = antsCT_)'))
     image_suffix=traits.Str('nii.gz', desc=('any of standard ITK formats,'
-        ' nii.gz is default'), mandatory = False, argstr='-s %s',
-        usedefault=True)
+        ' nii.gz is default'),  argstr='-s %s', usedefault=True)
     t1_registration_template = File(exists=True,
             desc = ('Anatomical *intensity* template'
            '(assumed to be skull-stripped). A common'
@@ -330,21 +329,20 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
            argstr='-t %s',
            mandatory=True)
     extraction_registration_mask=File(exists=True, argstr='-f %s',
-            mandatory=False, desc='Mask (defined in the template'
-            'space) used during registration for brain extraction.')
-    keep_temporary_files=traits.Int(argstrr='-k %d',
-            desc='Keep brain extraction/segmentation'
-            'warps, etc (default = 0).', mandatory=False)
+                        desc=('Mask (defined in the template space) used during'
+                              ' registration for brain extraction.'))
+    keep_temporary_files=traits.Int(argstr='-k %d',
+            desc='Keep brain extraction/segmentation warps, etc (default = 0).')
     max_iterations=traits.Int(argstr='-i %d',
             desc='ANTS registration max iterations'
-            '(default = 100x100x70x20)',  mandatory=False)
-    prior_segmentation_weight=traits.Float(mandatory=False, argstr='-w %f',
+            '(default = 100x100x70x20)')
+    prior_segmentation_weight=traits.Float(argstr='-w %f',
             desc='Atropos spatial prior *probability* weight for'
             'the segmentation')
-    segmentation_iterations=traits.Int(argstr='-n %d', mandatory=False,
+    segmentation_iterations=traits.Int(argstr='-n %d',
             desc='N4 -> Atropos -> N4 iterations during segmentation'
             '(default = 3)')
-    posterior_formulation=traits.Str(argstr='-b %s', mandatory=False,
+    posterior_formulation=traits.Str(argstr='-b %s',
             desc=('Atropos posterior formulation and whether or not'
                 'to use mixture model proportions.'
                    '''e.g 'Socrates[1]' (default) or 'Aristotle[1]'.'''
@@ -352,34 +350,33 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
                    'want use the distance priors (see also the -l option'
                    'for label propagation control).'))
     use_floatingpoint_precision=traits.Enum(0, 1, argstr='-j %d',
-            mandatory=False,
             desc='Use floating point precision in registrations (default = 0)')
-    use_random_seeding=traits.Enum(0, 1, argstr='-u %d', mandatory=False,
-            desc='Use random number generated from system clock in Atropos'
-            '(default = 1)')
-    b_spline_smoothing=traits.Bool(argst='-v', mandatory=False,
-            desc='Use B-spline SyN for registrations and B-spline'
-            'exponential mapping in DiReCT.')
-    cortical_label_image=File(exists=True, mandatory=False,
+    use_random_seeding=traits.Enum(0, 1, argstr='-u %d',
+            desc=('Use random number generated from system clock in Atropos'
+            '(default = 1)'))
+    b_spline_smoothing=traits.Bool(argstr='-v',
+            desc=('Use B-spline SyN for registrations and B-spline'
+            'exponential mapping in DiReCT.'))
+    cortical_label_image=File(exists=True,
             desc='Cortical ROI labels to use as a prior for ATITH.')
-    label_propagation=traits.Str(argstr='-l %s', mandatory=False,
-            desc='Incorporate a distance prior one the posterior formulation.  Should be'
+    label_propagation=traits.Str(argstr='-l %s',
+            desc=('Incorporate a distance prior one the posterior formulation.  Should be'
               '''of the form 'label[lambda,boundaryProbability]' where label'''
               'is a value of 1,2,3,... denoting label ID.  The label'
               'probability for anything outside the current label'
               '  = boundaryProbability * exp( -lambda * distanceFromBoundary )'
               'Intuitively, smaller lambda values will increase the spatial capture'
               'range of the distance prior.  To apply to all label values, simply omit'
-              'specifying the label, i.e. -l [lambda,boundaryProbability].')
-    quick_registration=traits.Bool(argstr='-q 1', mandatory=False,
-            desc='If = 1, use antsRegistrationSyNQuick.sh as the basis for registration'
+              'specifying the label, i.e. -l [lambda,boundaryProbability].'))
+    quick_registration=traits.Bool(argstr='-q 1',
+            desc=('If = 1, use antsRegistrationSyNQuick.sh as the basis for registration'
                   'during brain extraction, brain segmentation, and'
                   '(optional) normalization to a template.'
-                  'Otherwise use antsRegistrationSyN.sh (default = 0).')
-    debug=traits.Bool(argstr='-z 1', mandatory=False,
-            desc='If > 0, runs a faster version of the script.'
+                  'Otherwise use antsRegistrationSyN.sh (default = 0).'))
+    debug=traits.Bool(argstr='-z 1',
+            desc=('If > 0, runs a faster version of the script.'
             'Only for testing. Implies -u 0.'
-            'Requires single thread computation for complete reproducibility.')
+            'Requires single thread computation for complete reproducibility.'))
 
 class antsCorticalThicknessoutputSpec(TraitedSpec):
     BrainExtractionMask=File(exists=True,
