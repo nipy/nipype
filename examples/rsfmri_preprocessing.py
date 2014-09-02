@@ -38,7 +38,7 @@ specifically the 2mm versions of:
 
 The 2mm version was generated with::
 
-   >>> from nipype import freesurfer as fs
+   >>> from nipype.interfaces import freesurfer as fs
    >>> rs = fs.Resample()
    >>> rs.inputs.in_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152.nii.gz'
    >>> rs.inputs.resampled_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz'
@@ -56,7 +56,8 @@ CommandLine.set_default_terminal_output('file')
 from nipype import config
 config.enable_provenance()
 
-from nipype import (ants, afni, fsl, freesurfer, nipy, Function, DataSink)
+from nipype.interfaces import (ants, afni, fsl, freesurfer, nipy, Function,
+                               DataSink)
 from nipype import Workflow, Node, MapNode
 
 from nipype.algorithms.rapidart import ArtifactDetect
@@ -66,6 +67,7 @@ from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
 from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
+from nipype.workflows.rsfmri.fsl.resting import extract_noise_components
 
 import numpy as np
 import scipy as sp
@@ -190,30 +192,6 @@ def build_filter1(motion_params, comp_norm, outliers):
         np.savetxt(filename, out_params, fmt="%.10f")
         out_files.append(filename)
     return out_files
-
-
-def extract_noise_components(realigned_file, mask_file, num_components=6):
-    """Derive components most reflective of physiological noise
-
-    Parameters
-    ----------
-    realigned_file: a 4D Nifti file containing realigned volumes
-    mask_file: a 3D Nifti file containing white matter + ventricular masks
-    num_components: number of components to use for noise decomposition
-
-    Returns
-    -------
-    components_file: a text file containing the noise components
-    """
-    imgseries = nb.load(realigned_file)
-    noise_mask = nb.load(mask_file)
-    voxel_timecourses = imgseries.get_data()[np.nonzero(noise_mask.get_data())]
-    voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
-    voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-    _, _, v = sp.linalg.svd(voxel_timecourses, full_matrices=False)
-    components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, v[:num_components, :].T)
-    return components_file
 
 
 def extract_subrois(timeseries_file, label_file, indices):
