@@ -5,8 +5,6 @@ from nipype.interfaces.ants.segmentation import N4BiasFieldCorrection
 def test_N4BiasFieldCorrection_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    bias_image=dict(hash_files=False,
-    ),
     bspline_fitting_distance=dict(argstr='--bsline-fitting [%g]',
     ),
     convergence_threshold=dict(argstr=',%g]',
@@ -39,10 +37,6 @@ def test_N4BiasFieldCorrection_inputs():
     genfile=True,
     hash_files=False,
     ),
-    save_bias=dict(mandatory=True,
-    usedefault=True,
-    xor=['bias_image'],
-    ),
     shrink_factor=dict(argstr='--shrink-factor %d',
     ),
     terminal_output=dict(mandatory=True,
@@ -56,8 +50,7 @@ def test_N4BiasFieldCorrection_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_N4BiasFieldCorrection_outputs():
-    output_map = dict(bias_image=dict(),
-    output_image=dict(),
+    output_map = dict(output_image=dict(),
     )
     outputs = N4BiasFieldCorrection.output_spec()
 

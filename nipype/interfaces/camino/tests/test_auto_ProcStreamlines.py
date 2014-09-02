@@ -56,18 +56,14 @@ def test_ProcStreamlines_inputs():
     position=-1,
     ),
     outputacm=dict(argstr='-outputacm',
-    requires=['outputroot', 'seedfile'],
     ),
     outputcbs=dict(argstr='-outputcbs',
-    requires=['outputroot', 'targetfile', 'seedfile'],
     ),
     outputcp=dict(argstr='-outputcp',
-    requires=['outputroot', 'seedfile'],
     ),
     outputroot=dict(argstr='-outputroot %s',
     ),
     outputsc=dict(argstr='-outputsc',
-    requires=['outputroot', 'seedfile'],
     ),
     outputtracts=dict(argstr='-outputtracts',
     ),
@@ -107,8 +103,7 @@ def test_ProcStreamlines_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_ProcStreamlines_outputs():
-    output_map = dict(outputroot_files=dict(),
-    proc=dict(),
+    output_map = dict(proc=dict(),
     )
     outputs = ProcStreamlines.output_spec()
 
