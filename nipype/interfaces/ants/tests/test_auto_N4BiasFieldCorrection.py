@@ -5,7 +5,8 @@ from nipype.interfaces.ants.segmentation import N4BiasFieldCorrection
 def test_N4BiasFieldCorrection_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    bias_image=dict(),
+    bias_image=dict(hash_files=False,
+    ),
     bspline_fitting_distance=dict(argstr='--bsline-fitting [%g]',
     ),
     convergence_threshold=dict(argstr=',%g]',
