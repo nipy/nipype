@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-08-31 20:32:22
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-02 09:41:46
+# @Last Modified time: 2014-09-02 13:12:12
 """
 ===================
 dMRI: Preprocessing
@@ -15,24 +15,24 @@ Introduction
 This script, dmri_preprocessing.py, demonstrates how to prepare dMRI data
 for tractography and connectivity analysis with nipype.
 
-We perform this analysis using the FSL course data, which can be acquired from here:
-http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+We perform this analysis using the FSL course data, which can be acquired from
+here: http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 Can be executed in command line using ``python dmri_preprocessing.py``
 
 
 Import necessary modules from nipype.
 """
+
 import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
+import nipype.interfaces.utility as niu      # utility
 import nipype.algorithms.misc as misc
 
 import nipype.pipeline.engine as pe          # pypeline engine
 
 from nipype.interfaces import fsl
 from nipype.interfaces import ants
-
 
 
 """
@@ -43,8 +43,7 @@ as data include a *b0* volume with reverse encoding direction
 that is *A>>>P* or *-y* (in RAS systems).
 """
 
-from nipype.workflows.dmri.preprocess.epi import all_peb_pipeline
-
+from nipype.workflows.dmri.preprocess.epi import all_fsl_pipeline, remove_bias
 
 """
 Map field names into individual subject runs
@@ -55,7 +54,7 @@ info = dict(dwi=[['subject_id', 'dwidata']],
             bvals=[['subject_id', 'bvals']],
             dwi_rev=[['subject_id', 'nodif_PA']])
 
-infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
+infosource = pe.Node(interface=niu.IdentityInterface(fields=['subject_id']),
                      name="infosource")
 
 # Set the subject 1 identifier in subject_list,
@@ -102,7 +101,7 @@ An inputnode is used to pass the data obtained by the data grabber to the
 actual processing functions
 """
 
-inputnode = pe.Node(util.IdentityInterface(fields=["dwi", "bvecs", "bvals",
+inputnode = pe.Node(niu.IdentityInterface(fields=["dwi", "bvecs", "bvals",
                     "dwi_rev"]), name="inputnode")
 
 
@@ -117,7 +116,7 @@ diffusion images.
 Artifacts correction
 --------------------
 
-We will use the combination of ```topup``` and ```eddy``` as suggested by FSL.
+We will use the combination of ``topup`` and ``eddy`` as suggested by FSL.
 
 In order to configure the susceptibility distortion correction (SDC), we first
 write the specific parameters of our echo-planar imaging (EPI) images.
@@ -128,9 +127,9 @@ it is > 1), and readout time or echospacing.
 
 """
 
-epi_AP = {'echospacing': 66.5e-3, 'acc_factor': 1, 'enc_dir': 'y-'}
-epi_PA = {'echospacing': 66.5e-3, 'acc_factor': 1, 'enc_dir': 'y'}
-prep = all_peb_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
+epi_AP = {'echospacing': 66.5e-3, 'enc_dir': 'y-'}
+epi_PA = {'echospacing': 66.5e-3, 'enc_dir': 'y'}
+prep = all_fsl_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
 
 
 """
@@ -138,15 +137,13 @@ prep = all_peb_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
 Bias field correction
 ---------------------
 
-Finally, we set up a node to estimate a single multiplicative bias field from
-the *b0* image, as suggested in [Jeurissen2014]_.
+Finally, we set up a node to correct for a single multiplicative bias field
+from computed on the *b0* image, as suggested in [Jeurissen2014]_.
 
 """
 
-n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias_b0')
-split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-merge = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval', 'in_corrected'],
-                output_names=['out_file'], function=recompose_dwi), name='MergeDWIs')
+bias = remove_bias()
+
 
 """
 Connect nodes in workflow
@@ -165,6 +162,9 @@ wf.connect([
                                      ('dwi_rev', 'inputnode.alt_file'),
                                      ('bvals', 'inputnode.in_bval'),
                                      ('bvecs', 'inputnode.in_bvec')])
+    ,(prep,         bias,           [('outputnode.out_file', 'inputnode.in_file'),
+                                     ('outputnode.out_mask', 'inputnode.in_mask')])
+    ,(datasource,   bias,           [('bvals', 'inputnode.in_bval')])
 ])
 
 
@@ -176,12 +176,3 @@ if __name__ == '__main__':
     wf.run()
     wf.write_graph()
 
-
-"""
-
-.. admonition:: References
-
-  .. [Jeurissen2014] Jeurissen B. et al., `Multi-tissue constrained spherical deconvolution
-    for improved analysis of multi-shell diffusion MRI data
-    <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_. NeuroImage (2014).
-    doi: 10.1016/j.neuroimage.2014.07.061
