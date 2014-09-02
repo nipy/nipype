@@ -115,7 +115,8 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                               'coregistered functional)'), position=2)
     output_image = File(genfile=True, hash_files=False, argstr='%s',
                         desc=('name of the output warped image'), position = 3, xor=['out_postfix'])
-    out_postfix = File("_wimt", usedefault=True, hash_files=False,
+    out_postfix = File("_wimt", #usedefault=True, 
+                       hash_files=False,
                        desc=('Postfix that is prepended to all output '
                              'files (default = _wimt)'), xor=['output_image'])
     reference_image = File(argstr='-R %s', xor=['tightest_box'],
@@ -130,11 +131,11 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                                           'with additional transforms'))
     use_nearest = traits.Bool(argstr='--use-NN',
                               desc='Use nearest neighbor interpolation')
-    use_bspline = traits.Bool(argstr='--use-Bspline',
+    use_bspline = traits.Bool(argstr='--use-BSpline',
                               desc='Use 3rd order B-Spline interpolation')
     transformation_series = InputMultiPath(File(exists=True), argstr='%s',
                                            desc='transformation file(s) to be applied',
-                                           mandatory=True)
+                                           mandatory=True, position=-1)
     invert_affine = traits.List(traits.Int,
                                 desc=('List of Affine transformations to invert.'
                                       'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
@@ -145,7 +146,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
 
 
 class WarpImageMultiTransformOutputSpec(TraitedSpec):
-    output_image = File(exists=True, desc='Warped image')
+    output_image = File(desc='Warped image')
 
 
 class WarpImageMultiTransform(ANTSCommand):
@@ -255,7 +256,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
 
 
 class ApplyTransformsOutputSpec(TraitedSpec):
-    output_image = File(exists=True, desc='Warped image')
+    output_image = File(desc='Warped image')
 
 
 class ApplyTransforms(ANTSCommand):
