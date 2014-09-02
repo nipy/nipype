@@ -62,14 +62,12 @@ from nipype.algorithms.misc import TSNR
 from nipype.interfaces.fsl.epi import EPIDeWarp
 from nipype.interfaces.io import FreeSurferSource
 from nipype.interfaces.c3 import C3dAffineTool
-from nipype.interfaces.utility import Merge, IdentityInterface
+from nipype.interfaces.utility import Merge, IdentityInterface, Rename
 from nipype.utils.filemanip import filename_to_list
 
 import numpy as np
 import scipy as sp
 import nibabel as nb
-from dcmstack.extract import default_extractor
-from dicom import read_file
 
 imports = ['import os',
            'import nibabel as nb',
@@ -89,6 +87,8 @@ def get_info(dicom_files):
     Slice Acquisition Times
     Spacing between slices
     """
+    from dcmstack.extract import default_extractor
+    from dicom import read_file
     meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
                                        stop_before_pixels=True,
                                        force=True))
@@ -217,14 +217,17 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     imgseries = nb.load(realigned_file)
     components = None
     for filename in filename_to_list(mask_file):
-        mask = nb.load(filename)
-        voxel_timecourses = imgseries.get_data()[np.nonzero(mask)]
-        voxel_timecourses = voxel_timecourses.byteswap().newbyteorder()
+        mask = nb.load(filename).get_data()
+        voxel_timecourses = imgseries.get_data()[mask > 0]
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
         # remove mean and normalize by variance
         # voxel_timecourses.shape == [nvoxels, time]
         X = voxel_timecourses.T
-        X = (X - np.mean(X, axis=0))/np.std(X, axis=0)
+        stdX = np.std(X, axis=0)
+        stdX[stdX == 0] = 1.
+        stdX[np.isnan(stdX)] = 1.
+        stdX[np.isinf(stdX)] = 1.
+        X = (X - np.mean(X, axis=0))/stdX
         u, _, _ = sp.linalg.svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
@@ -323,6 +326,18 @@ def combine_hemi(left, right):
                fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
 
+def rename(in_files, suffix=None):
+    from nipype.utils.filemanip import (filename_to_list, split_filename,
+                                        list_to_filename)
+    out_files = []
+    for idx, filename in enumerate(filename_to_list(in_files)):
+        _, name, ext = split_filename(filename)
+        if suffix is None:
+            out_files.append(name + ('_%03d' % idx) + ext)
+        else:
+            out_files.append(name + suffix + ext)
+    return list_to_filename(out_files)
+
 
 """
 Creates the main preprocessing workflow
@@ -354,29 +369,41 @@ def create_workflow(files,
     
     wf = Workflow(name=name)
 
+    # Rename files in case they are named identically
+    name_unique = MapNode(Rename(format_string='rest_%(run)02d'), 
+                          iterfield = ['in_file', 'run'],
+                          name='rename')
+    name_unique.inputs.keep_ext = True
+    name_unique.inputs.run = range(1, len(files) + 1)
+    name_unique.inputs.in_file = files
+
     # Skip starting volumes
     remove_vol = MapNode(fsl.ExtractROI(t_min=n_vol, t_size=-1),
                          iterfield=['in_file'],
                          name="remove_volumes")
-    remove_vol.inputs.in_file = files
+    wf.connect(name_unique, 'out_file', remove_vol, 'in_file')
 
     # Run AFNI's despike. This is always run, however, whether this is fed to
     # realign depends on the input configuration
     despiker = MapNode(afni.Despike(outputtype='NIFTI_GZ'),
                        iterfield=['in_file'],
                        name='despike')
-    despiker.plugin_args = {'qsub_args':
-                                '-l nodes=1:ppn=%s' % os.environ['OMP_NUM_THREADS']}
+    num_threads = 4
+    despiker.inputs.environ = {'OMP_NUM_THREADS': '%d' % num_threads}
+    despiker.plugin_args = {'sbatch_args': '-c %d' % num_threads}
+    #despiker.plugin_args = {'qsub_args':
+    #                            '-l nodes=1:ppn=%s' % os.environ['OMP_NUM_THREADS']}
 
     wf.connect(remove_vol, 'roi_file', despiker, 'in_file')
 
     # Run Nipy joint slice timing and realignment algorithm
     realign = Node(nipy.SpaceTimeRealigner(), name='realign')
-    realign.inputs.tr = TR
-    realign.inputs.slice_times = slice_times
-    realign.inputs.slice_info = 2
-    realign.plugin_args = {'qsub_args':
-                               '-l nodes=1:ppn=%s' % os.environ['MKL_NUM_THREADS']}
+    if slice_times is not None:
+        realign.inputs.tr = TR
+        realign.inputs.slice_times = slice_times
+        realign.inputs.slice_info = 2
+    #realign.plugin_args = {'qsub_args': '-l nodes=1:ppn=%s' % os.environ['MKL_NUM_THREADS']}
+    realign.plugin_args = {'sbatch_args': '-c %s' % os.environ['MKL_NUM_THREADS']}
 
     if despike:
         wf.connect(despiker, 'out_file', realign, 'in_file')
@@ -508,17 +535,19 @@ def create_workflow(files,
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
     # Filter the motion and art confounds and detrend
-    filter1 = MapNode(fsl.GLM(out_res_name='timeseries.nii.gz',
-                              out_f_name='F_mcart.nii.gz',
+    filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii.gz',
                               out_pf_name='pF_mcart.nii.gz',
                               demean=True),
-                      iterfield=['in_file', 'design'],
+                      iterfield=['in_file', 'design', 'out_res_name'],
                       name='filtermotion')
     if fieldmap_images:
         wf.connect(dewarper, 'unwarped_file', filter1, 'in_file')
+        wf.connect(dewarper, ('unwarped_file', rename, '_filtermotart'), 
+                   filter1, 'out_res_name')
     else:
         wf.connect(realign, 'out_file', filter1, 'in_file')
-
+        wf.connect(realign, ('out_file', rename, '_filtermotart'), 
+                   filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
     wf.connect(masktransform, 'transformed_file', filter1, 'mask')
 
@@ -537,17 +566,19 @@ def create_workflow(files,
     wf.connect(wmcsftransform, 'transformed_file', createfilter2, 'mask_file')
 
     # Filter noise components from unsmoothed data
-    filter2 = MapNode(fsl.GLM(out_res_name='timeseries_unsmooth_cleaned.nii.gz',
-                              out_f_name='F.nii.gz',
+    filter2 = MapNode(fsl.GLM(out_f_name='F.nii.gz',
                               out_pf_name='pF.nii.gz',
                               demean=True),
-                      iterfield=['in_file', 'design'],
+                      iterfield=['in_file', 'design', 'out_res_name'],
                       name='filter_noise_nosmooth')
-
     if fieldmap_images:
         wf.connect(dewarper, 'unwarped_file', filter2, 'in_file')
+        wf.connect(dewarper, ('unwarped_file', rename, '_unsmooth_cleaned'), 
+                   filter2, 'out_res_name')
     else:
         wf.connect(realign, 'out_file', filter2, 'in_file')
+        wf.connect(realign, ('out_file', rename, '_unsmooth_cleaned'), 
+                   filter2, 'out_res_name')
     wf.connect(createfilter2, 'out_files', filter2, 'design')
     wf.connect(masktransform, 'transformed_file', filter2, 'mask')
 
@@ -588,13 +619,13 @@ def create_workflow(files,
         wf.connect(realign, 'out_file', smooth, 'in_file')
 
     # Filter noise components from smoothed data
-    filter3 = MapNode(fsl.GLM(out_res_name='timeseries_smooth_cleaned.nii.gz',
-                              out_f_name='F.nii.gz',
+    filter3 = MapNode(fsl.GLM(out_f_name='F.nii.gz',
                               out_pf_name='pF.nii.gz',
                               demean=True),
-                      iterfield=['in_file', 'design'],
+                      iterfield=['in_file', 'design', 'out_res_name'],
                       name='filter_noise_smooth')
-
+    wf.connect(smooth, ('out_file', rename, '_cleaned'),
+               filter3, 'out_res_name')
     wf.connect(smooth, 'out_file', filter3, 'in_file')
     wf.connect(createfilter2, 'out_files', filter3, 'design')
     wf.connect(masktransform, 'transformed_file', filter3, 'mask')
@@ -746,9 +777,10 @@ def create_workflow(files,
     reg.inputs.fixed_image = \
         os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args':
-                           '-q max10 -l nodes=1:ppn=%d' % reg.inputs.num_threads,
-                           'overwrite': True}
+    #reg.plugin_args = {'qsub_args':
+    #                       '-q max10 -l nodes=1:ppn=%d' % reg.inputs.num_threads,
+    #                       'overwrite': True}
+    reg.plugin_args = {'sbatch_args': '-c %d' % reg.inputs.num_threads}
 
     # Convert T1.mgz to nifti for using with ANTS
     convert = Node(freesurfer.MRIConvert(out_type='niigz'), name='convert2nii')
@@ -788,9 +820,9 @@ def create_workflow(files,
         os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     sample2mni.inputs.terminal_output = 'file'
     sample2mni.inputs.num_threads = 4
-    sample2mni.plugin_args = {'qsub_args':
-                   '-q max10 -l nodes=1:ppn=%d' % sample2mni.inputs.num_threads,
-                              'overwrite': True}
+    sample2mni.inputs.args = '--float'
+    sample2mni.plugin_args = {'sbatch_args': '-c %d' % sample2mni.inputs.num_threads}
+
     wf.connect(bandpass, 'out_file', sample2mni, 'input_image')
     wf.connect(merge, 'out', sample2mni, 'transforms')
 
@@ -813,7 +845,7 @@ def create_workflow(files,
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    datasink.inputs.substitutions = [('_target_subject_', '')]
+    #datasink.inputs.substitutions = [('_target_subject_', '')]
     #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(despiker, 'out_file', datasink, 'resting.qa.despike')
     wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
@@ -858,7 +890,7 @@ def create_workflow(files,
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
-    datasink2.inputs.substitutions = [('_target_subject_', '')]
+    #datasink2.inputs.substitutions = [('_target_subject_', '')]
     #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
