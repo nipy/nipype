@@ -941,19 +941,19 @@ class FNIRT(FSLCommand):
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                   mandatory=True,
-                   desc='image to be warped', position=0)
-    out_file = File(argstr='--out=%s', genfile=True,
-                    desc='output filename', hash_files=False, position=2)
+                   mandatory=True, position=0,
+                   desc='image to be warped')
+    out_file = File(argstr='--out=%s', genfile=True, position=2,
+                    desc='output filename', hash_files=False)
     ref_file = File(exists=True, argstr='--ref=%s',
-                    mandatory=True,
-                    desc='reference image', position=1)
+                    mandatory=True, position=1,
+                    desc='reference image')
     field_file = File(exists=True, argstr='--warp=%s',
-                      desc='file containing warp field', position=3, mandatory=True)
+                      desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc="treat warp field as absolute: x' = w(x)")
-    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
-                          desc="treat warp field as relative: x' = x + w(x)", position=-1)
+    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'], position=-1,
+                          desc="treat warp field as relative: x' = x + w(x)")
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr='--datatype=%s',
                            desc='Force output data type [char short int float double].')
@@ -969,8 +969,8 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
     mask_file = File(exists=True, argstr='--mask=%s',
                      desc='filename for mask image (in reference space)')
     interp = traits.Enum(
-        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s',
-        desc='interpolation method', position=-2)
+        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
+        desc='interpolation method')
 
 
 class ApplyWarpOutputSpec(TraitedSpec):
