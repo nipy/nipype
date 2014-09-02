@@ -8,17 +8,18 @@ def test_Tkregister2_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    fsl=dict(argstr='--fsl %s',
+    fsl_in_matrix=dict(argstr='--fsl %s',
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    mov=dict(argstr='--mov %s',
+    moving_image=dict(argstr='--mov %s',
     mandatory=True,
     ),
     noedit=dict(argstr='--noedit',
+    usedefault=True,
     ),
-    out_reg_file=dict(argstr='--reg %s',
+    reg_file=dict(argstr='--reg %s',
     mandatory=True,
     name_source='fsl',
     name_template='%s.dat',
@@ -26,7 +27,8 @@ def test_Tkregister2_inputs():
     subject_id=dict(argstr='--s %s',
     mandatory=True,
     ),
-    subjects_dir=dict(),
+    subjects_dir=dict(argstr='--sd %s',
+    ),
     terminal_output=dict(mandatory=True,
     nohash=True,
     ),
@@ -38,7 +40,7 @@ def test_Tkregister2_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_Tkregister2_outputs():
-    output_map = dict(out_reg_file=dict(),
+    output_map = dict(reg_file=dict(),
     )
     outputs = Tkregister2.output_spec()
 
