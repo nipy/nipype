@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-08-31 20:32:22
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-01 18:12:14
+# @Last Modified time: 2014-09-02 09:41:46
 """
 ===================
 dMRI: Preprocessing
@@ -23,13 +23,16 @@ Can be executed in command line using ``python dmri_preprocessing.py``
 
 Import necessary modules from nipype.
 """
-
+import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.fsl as fsl
 import nipype.algorithms.misc as misc
-import os                                    # system functions
+
+import nipype.pipeline.engine as pe          # pypeline engine
+
+from nipype.interfaces import fsl
+from nipype.interfaces import ants
+
 
 
 """
@@ -48,9 +51,9 @@ Map field names into individual subject runs
 """
 
 info = dict(dwi=[['subject_id', 'dwidata']],
-            bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']],
-            dwi_rev=[['subject_id','nodif_PA']])
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']],
+            dwi_rev=[['subject_id', 'nodif_PA']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -81,20 +84,22 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                     outfields=info.keys()), name = 'datasource')
+                     outfields=info.keys()), name='datasource')
 
 datasource.inputs.template = "%s/%s"
 
 # This needs to point to the fdt folder you can find after extracting
 # http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 datasource.inputs.base_directory = os.path.abspath('fdt1')
-datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz', dwi_rev='%s/%s.nii.gz')
+datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
+                                        dwi_rev='%s/%s.nii.gz')
 datasource.inputs.template_args = info
 datasource.inputs.sort_filelist = True
 
 
 """
-An inputnode is used to pass the data obtained by the data grabber to the actual processing functions
+An inputnode is used to pass the data obtained by the data grabber to the
+actual processing functions
 """
 
 inputnode = pe.Node(util.IdentityInterface(fields=["dwi", "bvecs", "bvals",
@@ -106,10 +111,20 @@ inputnode = pe.Node(util.IdentityInterface(fields=["dwi", "bvecs", "bvals",
 Setup for dMRI preprocessing
 ============================
 
-In this section we initialize the appropriate workflow for preprocessing of diffusion images.
-Particularly, we look into the ``acqparams.txt`` file of the selected subject to gather the
-encoding direction, acceleration factor (in parallel sequences it is > 1), and readout time or
-echospacing.
+In this section we initialize the appropriate workflow for preprocessing of
+diffusion images.
+
+Artifacts correction
+--------------------
+
+We will use the combination of ```topup``` and ```eddy``` as suggested by FSL.
+
+In order to configure the susceptibility distortion correction (SDC), we first
+write the specific parameters of our echo-planar imaging (EPI) images.
+
+Particularly, we look into the ``acqparams.txt`` file of the selected subject
+to gather the encoding direction, acceleration factor (in parallel sequences
+it is > 1), and readout time or echospacing.
 
 """
 
@@ -119,12 +134,27 @@ prep = all_peb_pipeline(epi_params=epi_AP, altepi_params=epi_PA)
 
 
 """
+
+Bias field correction
+---------------------
+
+Finally, we set up a node to estimate a single multiplicative bias field from
+the *b0* image, as suggested in [Jeurissen2014]_.
+
+"""
+
+n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias_b0')
+split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
+merge = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval', 'in_corrected'],
+                output_names=['out_file'], function=recompose_dwi), name='MergeDWIs')
+
+"""
 Connect nodes in workflow
 =========================
 
-We create a higher level workflow to connect the nodes. Please excuse the author for
-writing the arguments of the ``connect`` function in a not-standard fashion with readability
-aims.
+We create a higher level workflow to connect the nodes. Please excuse the
+author for writing the arguments of the ``connect`` function in a not-standard
+style with readability aims.
 """
 
 wf = pe.Workflow(name="dMRI_Preprocessing")
@@ -145,3 +175,13 @@ Run the workflow as command line executable
 if __name__ == '__main__':
     wf.run()
     wf.write_graph()
+
+
+"""
+
+.. admonition:: References
+
+  .. [Jeurissen2014] Jeurissen B. et al., `Multi-tissue constrained spherical deconvolution
+    for improved analysis of multi-shell diffusion MRI data
+    <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_. NeuroImage (2014).
+    doi: 10.1016/j.neuroimage.2014.07.061
