@@ -243,7 +243,8 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
                                   ' to file.'), xor=['bias_image'])
-    bias_image = File(desc=('Filename for the estimated bias.'))
+    bias_image = File(desc=('Filename for the estimated bias.'),
+                      hash_files=False)
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
