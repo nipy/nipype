@@ -46,7 +46,7 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
                           usedefault=True,
                           desc=('do not perform sanity checks for image '
                                 'size/range/dimensions'))
-    out_fieldmap = File(argstr='%s', position=5,
+    out_fieldmap = File(argstr='%s', position=4,
                         desc='output name for prepared fieldmap')
 
 
@@ -709,3 +709,68 @@ class EddyCorrect(FSLCommand):
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
+    
+    
+class EpiRegInputSpec(FSLCommandInputSpec):
+    
+    epi = File(exists=True, argstr='--epi=%s', mandatory=True, position=-4, desc='EPI image')
+    t1_head = File(exists=True, argstr='--t1=%s', mandatory=True, position=-3, desc='wholehead T1 image')
+    t1_brain = File(exists=True, argstr='--t1brain=%s', mandatory=True, position=-2, desc='brain extracted T1 image')
+    out_base = traits.String(desc='output base name', argstr='--out=%s', position=-1)
+    fmap = File(exists=True, argstr='--fmap=%s', desc='fieldmap image (in rad/s)')
+    fmapmag = File(exists=True, argstr='--fmapmag=%s', desc='fieldmap magnitude image - wholehead extracted')
+    fmapmagbrain = File(exists=True, argstr='--fmapmagbrain=%s', desc='fieldmap magnitude image - brain extracted')
+    wmseg = File(exists=True, argstr='--wmseg=%s', desc='white matter segmentation of T1 image, has to be named like the t1brain plus ending _wmseg')
+    echospacing = traits.Float(argstr='--echospacing=%f', desc='Effective EPI echo spacing (sometimes called dwell time) - in seconds')
+    pedir = traits.Enum('x', 'y', 'z', '-x', '-y', '-z',argstr='--pedir=%s',desc='phase encoding direction, dir = x/y/z/-x/-y/-z')
+
+class EpiRegOutputSpec( TraitedSpec ):
+    
+    out_file = File(exists=True, desc='epi input unwarped and registered to anatomy')     
+    out_flirt_file = File(exists=True, desc='output of last flirt bbr fieldmap registration, basically the same as out_file but different interpolation?') 
+    fmap2str_mat = File(exists=True, desc='affine fieldmap to structural transformation')
+    fmap2epi_mat = File(exists=True, desc='affine fieldmap to epi transformation')
+    fmap_epi = File(exists=True, desc='fielmap in epi space')
+    fmap_str = File(exists=True, desc='fieldmap in structural space')
+    epi2str_inv = File(exists=True, desc='affine structural to epi transformation')
+    epi2str_mat = File(exists=True, desc='affine epi to structural transformation')
+    fullwarp = File(exists=True, desc='warpfield to unwarp epi and transform into structural space')
+    wmedge = File(exists=True, desc='white matter edges used in flirt bbr')
+    shiftmap = File(exists=True, desc='shiftmap in epi space')
+#     _init.mat
+#     _fieldmap2str.nii.gz   
+#     _fieldmaprads2str_pad0.nii.gz    
+#     _fieldmap2str_init.mat  
+#     _fieldmaprads2str_dilated.nii.gz  
+
+class EpiReg(FSLCommand):
+    _cmd = 'epi_reg'
+    input_spec = EpiRegInputSpec
+    output_spec = EpiRegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '.nii.gz')
+        outputs['out_flirt_file'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_1vol.nii.gz')
+        outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmap2str.mat')
+        outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2epi.mat')
+        outputs['fmap_epi'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
+        outputs['fmap_str'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2str.nii.gz')
+        outputs['epi2str_inv'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_inv.mat')
+        outputs['epi2str_mat'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '.mat')
+        outputs['fullwarp'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_warp.nii.gz')
+        outputs['wmedge'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fast_wmedge.nii.gz')
+        outputs['shiftmap'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+
+        return outputs
