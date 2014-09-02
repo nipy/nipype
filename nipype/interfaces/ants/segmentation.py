@@ -447,6 +447,7 @@ class antsCorticalThickness(ANTSCommand):
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
+
     def _run_interface(self, runtime):
         priors_directory = os.path.join(os.getcwd(), "priors")
         if not os.path.exists(priors_directory):
