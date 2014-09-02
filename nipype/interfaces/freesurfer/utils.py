@@ -1188,3 +1188,26 @@ class ExtractMainComponent(CommandLine):
     _cmd='mris_extract_main_component'
     input_spec=ExtractMainComponentInputSpec
     output_spec=ExtractMainComponentOutputSpec
+
+class Tkregister2InputSpec(FSTraitedSpec):
+
+    mov = File(exists=True, mandatory=True, argstr="--mov %s")
+    fsl = File(exists=True, argstr="--fsl %s")
+    subject_id = traits.String(argstr="--s %s", mandatory=True)
+    noedit = traits.Bool(argstr="--noedit")
+    out_reg_file = File(name_template='%s.dat', name_source='fsl', mandatory=True, argstr="--reg %s")
+
+
+class Tkregister2OutputSpec(TraitedSpec):
+
+    out_reg_file = File(exists=True)
+
+
+class Tkregister2(FSCommand):
+    
+    _cmd = "tkregister2"
+    input_spec = Tkregister2InputSpec
+    output_spec = Tkregister2OutputSpec
+    
+
+    
