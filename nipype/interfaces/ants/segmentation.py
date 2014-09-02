@@ -296,19 +296,19 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
                            desc='image dimension (2 or 3)')
     anatomical_image=File(exists=True,
                            argstr='-a %s',
-                           desc='Structural *intensity* image, typically T1.'
+                           desc=('Structural *intensity* image, typically T1.'
                            'If more than one anatomical image is specified,'
                            'subsequently specified images are used during the'
                            'segmentation process. However, only the first'
                            'image is used in the registration of priors.'
                            'Our suggestion would be to specify the T1'
-                           'as the first image.',
+                           'as the first image.'),
                            mandatory=True)
     brain_template=File(exists=True,
             argstr='-e %s',
-            desc='Anatomical *intensity* template (possibly created using a'
+            desc=('Anatomical *intensity* template (possibly created using a'
             'population data set with buildtemplateparallel.sh in ANTs).'
-            'This template is  *not* skull-stripped.',
+            'This template is  *not* skull-stripped.'),
             mandatory=True)
     brain_probability_mask=File(exists=True,
             argstr='-m %s', desc='brain probability mask in template space',
@@ -334,14 +334,14 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
     keep_temporary_files=traits.Int(argstr='-k %d',
             desc='Keep brain extraction/segmentation warps, etc (default = 0).')
     max_iterations=traits.Int(argstr='-i %d',
-            desc='ANTS registration max iterations'
-            '(default = 100x100x70x20)')
+            desc=('ANTS registration max iterations'
+            '(default = 100x100x70x20)'))
     prior_segmentation_weight=traits.Float(argstr='-w %f',
-            desc='Atropos spatial prior *probability* weight for'
-            'the segmentation')
+            desc=('Atropos spatial prior *probability* weight for'
+            'the segmentation'))
     segmentation_iterations=traits.Int(argstr='-n %d',
-            desc='N4 -> Atropos -> N4 iterations during segmentation'
-            '(default = 3)')
+            desc=('N4 -> Atropos -> N4 iterations during segmentation'
+            '(default = 3)'))
     posterior_formulation=traits.Str(argstr='-b %s',
             desc=('Atropos posterior formulation and whether or not'
                 'to use mixture model proportions.'
