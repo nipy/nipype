@@ -174,7 +174,7 @@ class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
                                    position=5)
     dT = traits.Float(argstr='dT=%d', desc='', position=6)
     sulcus_prior = traits.Bool(argstr='use-sulcus-prior', desc='', position=7)
-    opt_tolerance = traits.Float(argstr='optional-laplacian-tolerance=%d', 
+    opt_tolerance = traits.Float(argstr='optional-laplacian-tolerance=%d',
                                  desc='', position=8)
 
 
@@ -226,12 +226,12 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                             usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input-image %s', mandatory=True,
-                        desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'))
+                       desc=('image to apply transformation to (generally a '
+                             'coregistered functional)'))
     mask_image = File(argstr='--mask-image %s')
     output_image = traits.Str(argstr='--output %s',
-                             desc=('output file name'), genfile=True,
-                             hash_files=False)
+                              desc=('output file name'), genfile=True,
+                              hash_files=False)
     bspline_fitting_distance = traits.Float(argstr="--bsline-fitting [%g]")
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
     n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s",
@@ -240,10 +240,16 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     convergence_threshold = traits.Float(argstr=",%g]",
                                          requires=['n_iterations'],
                                          position=2)
+    save_bias = traits.Bool(False, mandatory=True, usedefault=True,
+                            desc=('True if the estimated bias should be saved'
+                                  ' to file.'), xor=['bias_image'])
+    bias_image = File(desc=('Filename for the estimated bias.'),
+                      hash_files=False)
 
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
+    bias_image = File(exists=True, desc='Estimated bias')
 
 
 class N4BiasFieldCorrection(ANTSCommand):
@@ -254,9 +260,11 @@ class N4BiasFieldCorrection(ANTSCommand):
     iterate between deconvolving the intensity histogram by a Gaussian, remapping
     the intensities, and then spatially smoothing this result by a B-spline modeling
     of the bias field itself. The modifications from and improvements obtained over
-    the original N3 algorithm are described in the following paper: N. Tustison et
-    al., N4ITK: Improved N3 Bias Correction, IEEE Transactions on Medical Imaging,
-    29(6):1310-1320, June 2010.
+    the original N3 algorithm are described in [Tustison2010]_.
+
+    .. [Tustison2010] N. Tustison et al.,
+      N4ITK: Improved N3 Bias Correction, IEEE Transactions on Medical Imaging,
+      29(6):1310-1320, June 2010.
 
     Examples
     --------
@@ -270,7 +278,16 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.n_iterations = [50,50,30,20]
     >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
-    'N4BiasFieldCorrection --convergence [ 50x50x30x20 ,1e-06] --bsline-fitting [300] --image-dimension 3 --input-image structural.nii --output structural_corrected.nii --shrink-factor 3'
+    'N4BiasFieldCorrection --convergence [ 50x50x30x20 ,1e-06] \
+--bsline-fitting [300] --image-dimension 3 --input-image structural.nii \
+--output structural_corrected.nii --shrink-factor 3'
+
+    >>> n4_2 = N4BiasFieldCorrection()
+    >>> n4_2.inputs.input_image = 'structural.nii'
+    >>> n4_2.inputs.save_bias = True
+    >>> n4_2.cmdline
+    'N4BiasFieldCorrection --image-dimension 3 --input-image structural.nii \
+--output [structural_corrected.nii,structural_bias.nii]'
     """
 
     _cmd = 'N4BiasFieldCorrection'
@@ -284,9 +301,36 @@ class N4BiasFieldCorrection(ANTSCommand):
                 _, name, ext = split_filename(self.inputs.input_image)
                 output = name + '_corrected' + ext
             return output
+
+        if name == 'bias_image':
+            output = self.inputs.bias_image
+            if not isdefined(output):
+                _, name, ext = split_filename(self.inputs.input_image)
+                output = name + '_bias' + ext
+            return output
         return None
+
+    def _format_arg(self, name, trait_spec, value):
+        if ((name == 'output_image') and
+           (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
+            bias_image = self._gen_filename('bias_image')
+            output = self._gen_filename('output_image')
+            newval = '[%s,%s]' % (output, bias_image)
+            return trait_spec.argstr % newval
+
+        return super(N4BiasFieldCorrection,
+                     self)._format_arg(name, trait_spec, value)
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['save_bias', 'bias_image']
+        return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
+
+        if self.inputs.save_bias or isdefined(self.inputs.bias_image):
+            outputs['bias_image'] = os.path.abspath(self._gen_filename('bias_image'))
         return outputs

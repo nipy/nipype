@@ -252,13 +252,17 @@ class DistributedPluginBase(PluginBase):
             if toappend:
                 self.pending_tasks.extend(toappend)
             num_jobs = len(self.pending_tasks)
+            logger.debug('Number of pending tasks: %d' % num_jobs)
             if num_jobs < self.max_jobs:
                 if np.isinf(self.max_jobs):
                     slots = None
                 else:
-                    slots = self.max_jobs - num_jobs
+                    slots = max(0, self.max_jobs - num_jobs)
+                logger.debug('Slots available: %s' % slots)
                 self._send_procs_to_workers(updatehash=updatehash,
                                             slots=slots, graph=graph)
+            else:
+                logger.debug('Not submitting')
             sleep(2)
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
@@ -327,9 +331,12 @@ class DistributedPluginBase(PluginBase):
             # Check to see if a job is available
             jobids = np.flatnonzero((self.proc_done == False) &
                                     (self.depidx.sum(axis=0) == 0).__array__())
+            num_jobs = len(self.pending_tasks)
+            if num_jobs >= self.max_jobs:
+                break
             if len(jobids) > 0:
                 # send all available jobs
-                logger.info('Submitting %d jobs' % len(jobids))
+                logger.info('Submitting %d jobs' % len(jobids[:slots]))
                 for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode):
                         try:
@@ -339,6 +346,8 @@ class DistributedPluginBase(PluginBase):
                             self.proc_pending[jobid] = False
                             continue
                         if num_subnodes > 1:
+                            if num_subnodes > (self.max_jobs - len(self.pending_tasks)):
+                                break
                             submit = self._submit_mapnode(jobid)
                             if not submit:
                                 continue

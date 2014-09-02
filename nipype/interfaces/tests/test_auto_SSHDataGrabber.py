@@ -12,8 +12,7 @@ def test_SSHDataGrabber_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    password=dict(mandatory=False,
-    ),
+    password=dict(),
     raise_on_empty=dict(usedefault=True,
     ),
     sort_filelist=dict(mandatory=True,
@@ -25,8 +24,7 @@ def test_SSHDataGrabber_inputs():
     template_args=dict(),
     template_expression=dict(usedefault=True,
     ),
-    username=dict(mandatory=False,
-    ),
+    username=dict(),
     )
     inputs = SSHDataGrabber.input_spec()
 

@@ -4,8 +4,7 @@ from nipype.algorithms.misc import NormalizeProbabilityMapSet
 
 def test_NormalizeProbabilityMapSet_inputs():
     input_map = dict(in_files=dict(),
-    in_mask=dict(mandatory=False,
-    ),
+    in_mask=dict(),
     )
     inputs = NormalizeProbabilityMapSet.input_spec()
 
