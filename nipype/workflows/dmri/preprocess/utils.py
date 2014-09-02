@@ -5,17 +5,16 @@
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
 # @Last Modified by:   Oscar Esteban
-# @Last Modified time: 2014-09-02 13:17:12
+# @Last Modified time: 2014-09-02 19:52:57
+import nipype.pipeline.engine as pe
+import nipype.interfaces.utility as niu
+from nipype.interfaces import fsl
 
 def cleanup_edge_pipeline(name='Cleanup'):
     """
     Perform some de-spiking filtering to clean up the edge of the fieldmap
     (copied from fsl_prepare_fieldmap)
     """
-    import nipype.pipeline.engine as pe
-    import nipype.interfaces.utility as niu
-    import nipype.interfaces.fsl as fsl
-
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_mask']),
                         name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']),
@@ -44,8 +43,100 @@ def cleanup_edge_pipeline(name='Cleanup'):
         ,(erode,         join,       [('out_file', 'in1')])
         ,(applymsk,      join,       [('out_file', 'in2')])
         ,(inputnode,     addedge,    [('in_file', 'in_file')])
-        ,(join,          addedge,     [('out', 'operand_files')])
+        ,(join,          addedge,    [('out', 'operand_files')])
         ,(addedge,       outputnode, [('out_file', 'out_file')])
+    ])
+    return wf
+
+
+def vsm2warp(name='Shiftmap2Warping'):
+    """
+    Converts a voxel shift map (vsm) to a displacements field (warp).
+    """
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_vsm',
+                        'in_ref', 'scaling', 'enc_dir']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_warp']),
+                         name='outputnode')
+    fixhdr = pe.Node(niu.Function(input_names=['in_file', 'in_file_hdr'],
+                     output_names=['out_file'], function=copy_hdr),
+                     name='Fix_hdr')
+    vsm = pe.Node(fsl.maths.BinaryMaths(operation='mul'), name='ScaleField')
+    vsm2dfm = pe.Node(fsl.ConvertWarp(relwarp=True, out_relwarp=True),
+                      name='vsm2dfm')
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+         (inputnode,   fixhdr,      [('in_vsm', 'in_file'),
+                                     ('in_ref', 'in_file_hdr')])
+        ,(inputnode,   vsm,         [('scaling', 'operand_value')])
+        ,(fixhdr,      vsm,         [('out_file', 'in_file')])
+
+        ,(vsm,         vsm2dfm,     [('out_file', 'shift_in_file')])
+        ,(inputnode,   vsm2dfm,     [('in_ref', 'reference'),
+                                     ('enc_dir', 'shift_direction')])
+        ,(vsm2dfm,     outputnode,  [('out_file', 'out_warp')])
+    ])
+    return wf
+
+
+def apply_all_corrections(name='UnwarpArtifacts'):
+    """
+    Combines two lists of linear transforms with the deformation field
+    map obtained typically after the SDC process.
+    Additionally, computes the corresponding bspline coefficients and
+    the map of determinants of the jacobian.
+    """
+
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_sdc',
+                        'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_warp',
+                         'out_coeff', 'out_jacobian']), name='outputnode')
+    warps = pe.MapNode(fsl.ConvertWarp(relwarp=True),
+                       iterfield=['premat', 'postmat'],
+                       name='ConvertWarp')
+
+    selref = pe.Node(niu.Select(index=[0]), name='Reference')
+
+    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
+    unwarp = pe.MapNode(fsl.ApplyWarp(), iterfield=['in_file', 'field_file'],
+                        name='UnwarpDWIs')
+
+    coeffs = pe.MapNode(fsl.WarpUtils(out_format='spline'),
+                        iterfield=['in_file'], name='CoeffComp')
+    jacobian = pe.MapNode(fsl.WarpUtils(write_jacobian=True),
+                          iterfield=['in_file'], name='JacobianComp')
+    jacmult = pe.MapNode(fsl.MultiImageMaths(op_string='-mul %s'),
+                         iterfield=['in_file', 'operand_files'],
+                         name='ModulateDWIs')
+
+    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
+                       name='RemoveNegative')
+    merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+         (inputnode,   warps,      [('in_sdc', 'warp1'),
+                                    ('in_hmc', 'premat'),
+                                    ('in_ecc', 'postmat'),
+                                    ('in_dwi', 'reference')])
+        ,(inputnode,   split,      [('in_dwi', 'in_file')])
+        ,(split,       selref,     [('out_files', 'inlist')])
+        ,(warps,       unwarp,     [('out_file', 'field_file')])
+        ,(split,       unwarp,     [('out_files', 'in_file')])
+        ,(selref,      unwarp,     [('out', 'ref_file')])
+        ,(selref,      coeffs,     [('out', 'reference')])
+        ,(warps,       coeffs,     [('out_file', 'in_file')])
+        ,(selref,      jacobian,   [('out', 'reference')])
+        ,(coeffs,      jacobian,   [('out_file', 'in_file')])
+        ,(unwarp,      jacmult,    [('out_file', 'in_file')])
+        ,(jacobian,    jacmult,    [('out_jacobian', 'operand_files')])
+        ,(jacmult,     thres,      [('out_file', 'in_file')])
+        ,(thres,       merge,      [('out_file', 'in_files')])
+
+        ,(warps,       outputnode, [('out_file', 'out_warp')])
+        ,(coeffs,      outputnode, [('out_file', 'out_coeff')])
+        ,(jacobian,    outputnode, [('out_jacobian', 'out_jacobian')])
+        ,(merge,       outputnode, [('merged_file', 'out_file')])
     ])
     return wf
 
@@ -79,6 +170,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     nb.Nifti1Image(dwidata, im.get_affine(), im.get_header()).to_filename(out_file)
     return out_file
 
+
 def recompose_xfm(in_bval, in_xfms):
     """
     Insert identity transformation matrices in b0 volumes to build up a list
@@ -97,7 +189,7 @@ def recompose_xfm(in_bval, in_xfms):
         else:
             mat = xfms.next()
 
-        out_name = 'eccor_%04d.mat' % i
+        out_name = op.abspath('eccor_%04d.mat' % i)
         out_files.append(out_name)
         np.savetxt(out_name, mat)
 
@@ -151,7 +243,7 @@ def rotate_bvecs(in_bvec, in_matrix):
     name, fext = os.path.splitext(os.path.basename(in_bvec))
     if fext == '.gz':
         name, _ = os.path.splitext(name)
-    out_file = os.path.abspath('./%s_rotated.bvec' % name)
+    out_file = os.path.abspath('%s_rotated.bvec' % name)
     bvecs = np.loadtxt(in_bvec).T
     new_bvecs = []
 
@@ -293,6 +385,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
                    im.get_header()).to_filename(out_file)
     return out_file
 
+
 def demean_image(in_file, in_mask=None, out_file=None):
     """
     Demean image data inside mask
@@ -342,4 +435,51 @@ def add_empty_vol(in_file, out_file=None):
     zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.get_affine(),
                          im.get_header())
     nb.funcs.concat_images([im, zim]).to_filename(out_file)
+    return out_file
+
+
+def reorient_bvecs(in_dwi, old_dwi, in_bvec):
+    """
+    Checks reorientations of ``in_dwi`` w.r.t. ``old_dwi`` and
+    reorients the in_bvec table accordingly.
+    """
+    import os
+    import numpy as np
+    import nibabel as nb
+
+    name, fext = os.path.splitext(os.path.basename(in_bvec))
+    if fext == '.gz':
+        name, _ = os.path.splitext(name)
+    out_file = os.path.abspath('%s_reorient.bvec' % name)
+    bvecs = np.loadtxt(in_bvec).T
+    new_bvecs = []
+
+    N = nb.load(in_dwi).get_affine()
+    O = nb.load(old_dwi).get_affine()
+    RS = N.dot(np.linalg.inv(O))[:3, :3]
+    sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
+    S = np.ones_like(RS)
+    S[sc_idx] = RS[sc_idx]
+    R = RS/S
+
+    new_bvecs = [R.dot(b) for b in bvecs]
+    np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
+    return out_file
+
+
+def copy_hdr(in_file, in_file_hdr, out_file=None):
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+
+    if out_file is None:
+        fname, fext = op.splitext(op.basename(in_file))
+        if fext == '.gz':
+            fname, _ = op.splitext(fname)
+        out_file = op.abspath('./%s_fixhdr.nii.gz' % fname)
+
+    imref = nb.load(in_file_hdr)
+    nii = nb.Nifti1Image(nb.load(in_file).get_data(),
+                         imref.get_affine(), imref.get_header())
+    nii.to_filename(out_file)
     return out_file

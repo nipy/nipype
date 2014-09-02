@@ -17,6 +17,13 @@ def all_fmb_pipeline(name='hmc_sdc_ecc'):
     Builds a pipeline including three artifact corrections: head-motion correction (HMC),
     susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
     correction (ECC).
+
+    The displacement fields from each kind of distortions are combined. Thus,
+    only one interpolation occurs between input data and result.
+
+    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+
+
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
                         'bmap_pha', 'bmap_mag']), name='inputnode')
@@ -35,9 +42,7 @@ def all_fmb_pipeline(name='hmc_sdc_ecc'):
     hmc = hmc_pipeline()
     sdc = sdc_fmb()
     ecc = ecc_pipeline()
-
-    regrid = pe.Node(fs.MRIConvert(vox_size=(2.0, 2.0, 2.0), out_orientation='RAS'),
-                     name='Reslice')
+    unwarp = apply_all_corrections()
 
     wf = pe.Workflow('dMRI_Artifacts')
     wf.connect([
@@ -45,9 +50,8 @@ def all_fmb_pipeline(name='hmc_sdc_ecc'):
                                     ('in_bvec', 'inputnode.in_bvec')])
         ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
-        ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
+        ,(avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')])
         ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
-
         ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
         ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
         ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
@@ -56,12 +60,17 @@ def all_fmb_pipeline(name='hmc_sdc_ecc'):
         ,(inputnode,   ecc,        [('in_bval', 'inputnode.in_bval')])
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
         ,(sdc,         ecc,        [('outputnode.out_file', 'inputnode.in_file')])
-        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
-        ,(ecc,         regrid,     [('outputnode.out_file', 'in_file')])
-        ,(regrid,      outputnode, [('out_file', 'out_file')])
-        ,(regrid,      avg_b0_1,   [('out_file', 'in_dwi')])
+        ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
-        ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
+        ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
+
+        ,(inputnode,   unwarp,     [('in_file', 'inputnode.in_dwi')])
+        ,(hmc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')])
+        ,(ecc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')])
+        ,(sdc,         unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')])
+
+        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
+        ,(unwarp,      outputnode, [('outputnode.out_file', 'out_file')])
         ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
@@ -80,6 +89,10 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     Builds a pipeline including three artifact corrections: head-motion correction (HMC),
     susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
     correction (ECC).
+
+    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+
+
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
                         'alt_file']), name='inputnode')
@@ -98,13 +111,6 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
     ecc = ecc_pipeline()
 
-    rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'eddy_params'],
-                       output_names=['out_file'], function=eddy_rotate_bvecs),
-                       name='Rotate_Bvec')
-
-    regrid = pe.Node(fs.MRIConvert(vox_size=(2.0, 2.0, 2.0), out_orientation='RAS'),
-                     name='Reslice')
-
     wf = pe.Workflow('dMRI_Artifacts')
     wf.connect([
          (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
@@ -120,16 +126,12 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
         ,(inputnode,   ecc,        [('in_bval', 'inputnode.in_bval')])
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
         ,(sdc,         ecc,        [('outputnode.out_file', 'inputnode.in_file')])
-        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
-        ,(ecc,         regrid,     [('outputnode.out_file', 'in_file')])
-        ,(regrid,      outputnode, [('out_file', 'out_file')])
-        ,(regrid,      avg_b0_1,   [('out_file', 'in_dwi')])
+        ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
         ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
-        ,(inputnode,   rot_bvec,   [('in_bvec', 'in_bvec')])
-        ,(ecc,         rot_bvec,   [('out_parameter', 'eddy_params')])
+        ,(ecc,         outputnode, [('outputnode.out_file', 'out_file')])
+        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
         ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
-        ,(rot_bvec,    outputnode, [('out_file', 'out_bvec')])
     ])
     return wf
 
@@ -143,6 +145,15 @@ def all_fsl_pipeline(name='fsl_all_correct',
                                         enc_dir='y')):
     """
     Workflow that integrates FSL ``topup`` and ``eddy``.
+
+
+    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+
+
+    .. warning:: this workflow does not perform jacobian modulation of each
+      *DWI* [Jones10]_.
+
+
     """
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
@@ -166,9 +177,9 @@ def all_fsl_pipeline(name='fsl_all_correct',
 
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
     ecc = pe.Node(fsl.Eddy(method='jac'), name='fsl_eddy')
-
-    regrid = pe.Node(fs.MRIConvert(vox_size=(2.0, 2.0, 2.0), out_orientation='RAS'),
-                     name='Reslice')
+    rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'eddy_params'],
+                       output_names=['out_file'], function=eddy_rotate_bvecs),
+                       name='Rotate_Bvec')
     avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
                        output_names=['out_file'], function=b0_average), name='b0_avg_post')
     bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
@@ -191,11 +202,13 @@ def all_fsl_pipeline(name='fsl_all_correct',
                                     (('in_file', _gen_index), 'in_index'),
                                     ('in_bval', 'in_bval'),
                                     ('in_bvec', 'in_bvec')])
-        ,(ecc,         regrid,     [('out_corrected', 'in_file')])
-        ,(regrid,      outputnode, [('out_file', 'out_file')])
-        ,(regrid,      avg_b0_1,   [('out_file', 'in_dwi')])
+        ,(inputnode,   rot_bvec,   [('in_bvec', 'in_bvec')])
+        ,(ecc,         rot_bvec,   [('out_parameter', 'eddy_params')])
+        ,(ecc,         avg_b0_1,   [('out_corrected', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
         ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
+        ,(ecc,         outputnode, [('out_corrected', 'out_file')])
+        ,(rot_bvec,    outputnode, [('out_file', 'out_bvec')])
         ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
@@ -444,12 +457,14 @@ def sdc_fmb(name='fmb_correction',
         <http://dx.doi.org/10.1002/mrm.10354>`_, MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask',
-                        'bmap_pha', 'bmap_mag']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
+                        'in_mask', 'bmap_pha', 'bmap_mag']),
                         name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm']),
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm',
+                         'out_warp']),
                          name='outputnode')
 
+    delta_te = epi_params['echospacing'] / (1.0 * epi_params['acc_factor'])
 
     firstmag = pe.Node(fsl.ExtractROI(t_min=0, t_size=1), name='GetFirst')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
@@ -487,15 +502,18 @@ def sdc_fmb(name='fmb_correction',
     vsm = pe.Node(fsl.FUGUE(save_shift=True, **fugue_params),
                   name="ComputeVSM")
     vsm.inputs.asym_se_time = bmap_params['delta_te']
-    vsm.inputs.dwell_time = epi_params['echospacing'] / (1.0 * epi_params['acc_factor'])
+    vsm.inputs.dwell_time = delta_te
 
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
     unwarp = pe.MapNode(fsl.FUGUE(icorr=True, forward_warping=False),
                         iterfield=['in_file'], name='UnwarpDWIs')
-    unwarp.inputs.unwarp_direction=epi_params['enc_dir']
+    unwarp.inputs.unwarp_direction = epi_params['enc_dir']
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
+    vsm2dfm = vsm2warp()
+    vsm2dfm.inputs.inputnode.scaling = 1.0
+    vsm2dfm.inputs.inputnode.enc_dir = epi_params['enc_dir']
 
     wf = pe.Workflow(name=name)
     wf.connect([
@@ -531,8 +549,11 @@ def sdc_fmb(name='fmb_correction',
         ,(vsm,         unwarp,     [('shift_out_file', 'shift_in_file')])
         ,(unwarp,      thres,      [('unwarped_file', 'in_file')])
         ,(thres,       merge,      [('out_file', 'in_files')])
+        ,(merge,       vsm2dfm,    [('merged_file', 'inputnode.in_ref')])
+        ,(vsm,         vsm2dfm,    [('shift_out_file', 'inputnode.in_vsm')])
         ,(merge,       outputnode, [('merged_file', 'out_file')])
         ,(vsm,         outputnode, [('shift_out_file', 'out_vsm')])
+        ,(vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
     ])
     return wf
 
