@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-09-01 10:33:35
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-02 01:12:14
+# @Last Modified time: 2014-09-02 16:00:36
 from nipype.interfaces.base import (traits, TraitedSpec, BaseInterface,
                                     File, isdefined)
 from nipype.utils.filemanip import split_filename
@@ -93,6 +93,8 @@ class DenoiseInputSpec(TraitedSpec):
     noise_model = traits.Enum('rician', 'gaussian', mandatory=True,
                               usedefault=True,
                               desc=('noise distribution model'))
+    noise_mask = File(desc=('mask in which the standard deviation of noise '
+                            'will be computed'), exists=True)
 
 
 class DenoiseOutputSpec(TraitedSpec):
@@ -129,7 +131,12 @@ class Denoise(BaseInterface):
         if isdefined(self.inputs.in_mask):
             mask = nb.load(self.inputs.in_mask).get_data()
 
+        noise_mask = None
+        if isdefined(self.inputs.in_mask):
+            noise_mask = nb.load(self.inputs.noise_mask).get_data()
+
         nlmeans_proxy(self.inputs.in_file, in_mask=mask,
+                      noise_mask=noise_mask,
                       rician=(self.inputs.noise_model == 'rician'),
                       out_file=out_file)
         iflogger.info('Denoised image saved as {i}'.format(i=out_file))
@@ -184,7 +191,8 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     return out_file, new_zooms
 
 
-def nlmeans_proxy(in_file, in_mask=None, rician=True, out_file=None):
+def nlmeans_proxy(in_file, in_mask=None, rician=True,
+                  noise_mask=None, out_file=None):
     """
     Uses non-local means to denoise 4D datasets
     """
@@ -206,7 +214,11 @@ def nlmeans_proxy(in_file, in_mask=None, rician=True, out_file=None):
     else:
         mask = in_mask > 0
 
-    sigma = np.std(data[~mask])
+    nmask = mask
+    if noise_mask is not None:
+        nmask = noise_mask > 0
+
+    sigma = np.std(data[~nmask])
     den = nlmeans(data, sigma=sigma, mask=mask)
 
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,

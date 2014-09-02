@@ -6,6 +6,7 @@ def test_Denoise_inputs():
     input_map = dict(in_file=dict(mandatory=True,
     ),
     in_mask=dict(),
+    noise_mask=dict(),
     noise_model=dict(mandatory=True,
     usedefault=True,
     ),
