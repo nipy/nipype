@@ -218,6 +218,8 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     components = None
     for filename in filename_to_list(mask_file):
         mask = nb.load(filename).get_data()
+        if len(np.nonzero(mask > 0)[0]) == 0:
+            continue
         voxel_timecourses = imgseries.get_data()[mask > 0]
         voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
         # remove mean and normalize by variance
