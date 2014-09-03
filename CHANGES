@@ -3,6 +3,7 @@ Next Release
 
 * ENH: Deep revision of workflows for correction of dMRI artifacts. New dmri_preprocessing
        example.
+* ENH: New Freesurfer interface: Tkregister2 (for conversion of fsl style matrices to freesurfer format)
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd.
 * ENH: New Freesurfer interface: MRIPretess
 * ENH: New miscelaneous interface: AddCSVRow
