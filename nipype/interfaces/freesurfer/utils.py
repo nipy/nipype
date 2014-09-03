@@ -1219,7 +1219,6 @@ class Tkregister2(FSCommand):
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
     >>> tk2.inputs.subject_id = 'test_subject'
-    >>> tk2.inputs.subjects_dir = '.'
     >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
