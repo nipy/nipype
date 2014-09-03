@@ -1197,8 +1197,6 @@ class Tkregister2InputSpec(FSTraitedSpec):
                desc='fsl-style registration input matrix')
     subject_id = traits.String(argstr="--s %s", mandatory=True,
                                desc='freesurfer subject ID')
-    subjects_dir = traits.Str(argstr='--sd %s',
-                              desc=('freesurfer subjects directory defaults to $SUBJECTS_DIR'))
     noedit = traits.Bool(True, argstr="--noedit", desc='do not open edit window (exit)', usedefault=True)
     reg_file = File(name_template='%s.dat', name_source='fsl',
                         mandatory=True, argstr="--reg %s",
