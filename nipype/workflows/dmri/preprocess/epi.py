@@ -690,6 +690,7 @@ def remove_bias(name='bias_correct'):
         ,(split,        mult,           [('out_files', 'in_file')])
         ,(mult,         thres,          [('out_file', 'in_file')])
         ,(thres,        merge,          [('out_file', 'in_files')])
+        ,(merge,        outputnode,     [('merged_file', 'out_file')])
     ])
     return wf
 
