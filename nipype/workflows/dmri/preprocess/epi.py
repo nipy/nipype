@@ -64,9 +64,9 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
         ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
                                     ('bmap_pha', 'inputnode.bmap_pha'),
                                     ('bmap_mag', 'inputnode.bmap_mag')])
-        ,(inputnode,   ecc,        [('in_bval', 'inputnode.in_bval')])
+        ,(inputnode,   ecc,        [('in_file', 'inputnode.in_file'),
+                                    ('in_bval', 'inputnode.in_bval')])
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
-        ,(sdc,         ecc,        [('outputnode.out_file', 'inputnode.in_file')])
         ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
         ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
