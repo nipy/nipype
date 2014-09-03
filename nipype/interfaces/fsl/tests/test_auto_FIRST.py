@@ -18,7 +18,6 @@ def test_FIRST_inputs():
     usedefault=True,
     ),
     in_file=dict(argstr='-i %s',
-    copyfile=False,
     mandatory=True,
     position=-2,
     ),
