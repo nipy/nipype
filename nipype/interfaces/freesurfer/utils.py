@@ -1191,21 +1191,23 @@ class ExtractMainComponent(CommandLine):
 
 
 class Tkregister2InputSpec(FSTraitedSpec):
-    moving_image = File(exists=True, mandatory=True, argstr="--mov %s", 
+    moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
                desc='moving volume')
-    fsl_in_matrix = File(exists=True, argstr="--fsl %s", 
+    fsl_in_matrix = File(exists=True, argstr="--fsl %s",
                desc='fsl-style registration input matrix')
-    subject_id = traits.String(argstr="--s %s", mandatory=True, 
+    subject_id = traits.String(argstr="--s %s", mandatory=True,
                                desc='freesurfer subject ID')
     subjects_dir = traits.Str(argstr='--sd %s',
                               desc=('freesurfer subjects directory defaults to $SUBJECTS_DIR'))
     noedit = traits.Bool(True, argstr="--noedit", desc='do not open edit window (exit)', usedefault=True)
-    reg_file = File(name_template='%s.dat', name_source='fsl', 
-                        mandatory=True, argstr="--reg %s", 
+    reg_file = File(name_template='%s.dat', name_source='fsl',
+                        mandatory=True, argstr="--reg %s",
                         desc='freesurfer-style registration file')
+
 
 class Tkregister2OutputSpec(TraitedSpec):
     reg_file = File(exists=True, desc='freesurfer-style registration file')
+
 
 class Tkregister2(FSCommand):
     """Use tkregister2 without the manual editing stage to convert 
@@ -1216,11 +1218,11 @@ class Tkregister2(FSCommand):
 
     >>> from nipype.interfaces.freesurfer import Tkregister2
     >>> tk2 = Tkregister2(reg_file='register.dat')
-    >>> tk2.inputs.moving_image = 'func.nii.gz'
-    >>> tk2.inputs.fsl_in_matrix = 'func2anat.mat'
+    >>> tk2.inputs.moving_image = 'epi.nii'
+    >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
     >>> tk2.inputs.subject_id = 'test_subject'
     >>> tk2.inputs.subjects_dir = '.'
-    >>> tk2.run()
+    >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
     input_spec = Tkregister2InputSpec
