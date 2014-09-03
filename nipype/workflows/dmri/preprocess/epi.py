@@ -229,7 +229,7 @@ def hmc_pipeline(name='motion_correct'):
     them to one reference image. Finally, the `b`-matrix is rotated accordingly [Leemans09]_
     making use of the rotation matrix obtained by FLIRT.
 
-    Search angles have been limited to 3.5 degrees, based on results in [Yendiki13]_.
+    Search angles have been limited to 4 degrees, based on results in [Yendiki13]_.
 
     A list of rigid transformation matrices is provided, so that transforms can be
     chained. This is useful to correct for artifacts with only one interpolation process (as
@@ -276,18 +276,24 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num', 'in_bvec',
-                        'in_mask']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
+                        'in_bvec', 'in_mask']), name='inputnode')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     pick_ref = pe.Node(niu.Select(), name='Pick_b0')
+    enhb0 = pe.Node(niu.Function(input_names=['in_file'],
+                    output_names=['out_file'], function=enhance),
+                    name='B0Equalize')
+    enhdw = pe.MapNode(niu.Function(input_names=['in_file'],
+                       output_names=['out_file'], function=enhance),
+                       name='DWEqualize', iterfield=['in_file'])
     flirt = pe.MapNode(fsl.FLIRT(interp='spline', cost='normmi',
-                       cost_func = 'normmi', dof=6, bins=64, save_log=True,
-                       searchr_x=[-4,4], searchr_y=[-4,4], searchr_z=[-4,4],
+                       cost_func='normmi', dof=6, bins=64, save_log=True,
+                       searchr_x=[-4, 4], searchr_y=[-4, 4], searchr_z=[-4, 4],
                        fine_search=1, coarse_search=10, padding_size=1),
                        name='CoRegistration', iterfield=['in_file'])
     rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'],
-                           output_names=['out_file'], function=rotate_bvecs),
-                           name='Rotate_Bvec')
+                       output_names=['out_file'], function=rotate_bvecs),
+                       name='Rotate_Bvec')
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
@@ -301,10 +307,12 @@ taken as reference
         ,(split,      pick_ref,   [('out_files', 'inlist')])
         ,(inputnode,  pick_ref,   [(('ref_num', _checkrnum), 'index')])
         ,(inputnode,  flirt,      [('in_mask', 'ref_weight')])
-        ,(split,      flirt,      [('out_files', 'in_file')])
+        ,(pick_ref,   enhb0,      [('out', 'in_file')])
+        ,(split,      enhdw,      [('out_files', 'in_file')])
+        ,(enhb0,      flirt,      [('out_file', 'reference')])
+        ,(enhdw,      flirt,      [('out_file', 'in_file')])
         ,(inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')])
         ,(flirt,      rot_bvec,   [('out_matrix_file', 'in_matrix')])
-        ,(pick_ref,   flirt,      [('out', 'reference')])
         ,(flirt,      thres,      [('out_file', 'in_file')])
         ,(thres,      merge,      [('out_file', 'in_files')])
         ,(merge,      outputnode, [('merged_file', 'out_file')])

@@ -4,11 +4,12 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
-# @Last Modified by:   Oscar Esteban
-# @Last Modified time: 2014-09-02 19:52:57
+# @Last Modified by:   oesteban
+# @Last Modified time: 2014-09-03 18:03:47
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
+
 
 def cleanup_edge_pipeline(name='Cleanup'):
     """
@@ -20,8 +21,8 @@ def cleanup_edge_pipeline(name='Cleanup'):
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file']),
                          name='outputnode')
 
-    fugue = pe.Node(fsl.FUGUE(save_fmap=True, despike_2dfilter=True, despike_threshold=2.1),
-                    name='Despike')
+    fugue = pe.Node(fsl.FUGUE(save_fmap=True, despike_2dfilter=True,
+                    despike_threshold=2.1), name='Despike')
     erode = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
                     args='-kernel 2D -ero'), name='MskErode')
     newmsk = pe.Node(fsl.MultiImageMaths(op_string='-sub %s -thr 0.5 -bin'),
@@ -364,6 +365,7 @@ def siemens2rads(in_file, out_file=None):
     nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
     return out_file
 
+
 def rads2radsec(in_file, delta_te, out_file=None):
     """
     Converts input phase difference map to rads
@@ -482,4 +484,38 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
     nii = nb.Nifti1Image(nb.load(in_file).get_data(),
                          imref.get_affine(), imref.get_header())
     nii.to_filename(out_file)
+    return out_file
+
+
+def enhance(in_file, clip_limit=0.015, in_mask=None, out_file=None):
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+    from skimage import exposure, img_as_int
+
+    if out_file is None:
+        fname, fext = op.splitext(op.basename(in_file))
+        if fext == '.gz':
+            fname, _ = op.splitext(fname)
+        out_file = op.abspath('./%s_enh.nii.gz' % fname)
+
+    im = nb.load(in_file)
+    imdata = im.get_data()
+    imshape = im.get_shape()
+
+    if in_mask is not None:
+        msk = nb.load(in_mask).get_data()
+        msk[msk > 0] = 1
+        msk[msk < 1] = 0
+        imdata = imdata * msk
+
+    immin = imdata.min()
+    imdata = (imdata - immin).astype(np.uint16)
+
+    adapted = exposure.equalize_adapthist(imdata.reshape(imshape[0], -1),
+                                          clip_limit=clip_limit)
+
+    nb.Nifti1Image(adapted.reshape(imshape), im.get_affine(),
+                   im.get_header()).to_filename(out_file)
+
     return out_file
