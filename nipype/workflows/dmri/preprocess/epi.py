@@ -387,6 +387,7 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
 
+    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     get_mat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms'],
                       output_names=['out_files'], function=recompose_xfm),
                       name='GatherMatrices')
@@ -413,7 +414,8 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
         ,(flirt,      get_mat,    [('outputnode.out_xfms', 'in_xfms')])
         ,(flirt,      mult,       [(('outputnode.out_xfms',_xfm_jacobian),
                                    'operand_value')])
-        ,(flirt,      mult,       [('outputnode.out_file', 'in_file')])
+        ,(flirt,      split,      [('outputnode.out_file', 'in_file')])
+        ,(split,      mult,       [('out_files', 'in_file')])
         ,(mult,       thres,      [('out_file', 'in_file')])
         ,(thres,      merge,      [('out_file', 'in_corrected')])
         ,(get_mat,    outputnode, [('out_files', 'out_xfms')])
