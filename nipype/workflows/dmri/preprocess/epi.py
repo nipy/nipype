@@ -12,7 +12,12 @@ import os
 from .utils import *
 
 
-def all_fmb_pipeline(name='hmc_sdc_ecc'):
+def all_fmb_pipeline(name='hmc_sdc_ecc',
+                     fugue_params=dict(smooth3d=2.0),
+                     bmap_params=dict(delta_te=2.46e-3),
+                     epi_params=dict(echospacing=0.77e-3,
+                                     acc_factor=3,
+                                     enc_dir='y-')):
     """
     Builds a pipeline including three artifact corrections: head-motion correction (HMC),
     susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
@@ -40,7 +45,8 @@ def all_fmb_pipeline(name='hmc_sdc_ecc'):
     bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
 
     hmc = hmc_pipeline()
-    sdc = sdc_fmb()
+    sdc = sdc_fmb(fugue_params=fugue_params, bmap_params=bmap_params,
+                  epi_params=epi_params)
     ecc = ecc_pipeline()
     unwarp = apply_all_corrections()
 
