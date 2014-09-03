@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-09-01 10:33:35
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-02 16:00:36
+# @Last Modified time: 2014-09-03 15:07:46
 from nipype.interfaces.base import (traits, TraitedSpec, BaseInterface,
                                     File, isdefined)
 from nipype.utils.filemanip import split_filename
@@ -95,6 +95,8 @@ class DenoiseInputSpec(TraitedSpec):
                               desc=('noise distribution model'))
     noise_mask = File(desc=('mask in which the standard deviation of noise '
                             'will be computed'), exists=True)
+    patch_radius = traits.Int(1, desc='patch radius')
+    block_radius = traits.Int(5, desc='block_radius')
 
 
 class DenoiseOutputSpec(TraitedSpec):
@@ -127,19 +129,28 @@ class Denoise(BaseInterface):
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())
 
-        mask = None
+        settings = dict(mask=None,
+                        rician=(self.inputs.noise_model == 'rician'))
+
         if isdefined(self.inputs.in_mask):
-            mask = nb.load(self.inputs.in_mask).get_data()
+            settings['mask'] = nb.load(self.inputs.in_mask).get_data()
+
+        if isdefined(self.inputs.patch_radius):
+            settings['patch_radius'] = self.inputs.patch_radius
+
+        if isdefined(self.inputs.block_radius):
+            settings['block_radius'] = self.inputs.block_radius
 
         noise_mask = None
         if isdefined(self.inputs.in_mask):
             noise_mask = nb.load(self.inputs.noise_mask).get_data()
 
-        nlmeans_proxy(self.inputs.in_file, in_mask=mask,
-                      noise_mask=noise_mask,
-                      rician=(self.inputs.noise_model == 'rician'),
-                      out_file=out_file)
-        iflogger.info('Denoised image saved as {i}'.format(i=out_file))
+        _, s = nlmeans_proxy(self.inputs.in_file,
+                             settings,
+                             noise_mask=noise_mask,
+                             out_file=out_file)
+        iflogger.info(('Denoised image saved as {i}, estimated '
+                      'sigma={s}').format(i=out_file, s=s))
         return runtime
 
     def _list_outputs(self):
@@ -191,7 +202,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     return out_file, new_zooms
 
 
-def nlmeans_proxy(in_file, in_mask=None, rician=True,
+def nlmeans_proxy(in_file, settings,
                   noise_mask=None, out_file=None):
     """
     Uses non-local means to denoise 4D datasets
@@ -209,18 +220,13 @@ def nlmeans_proxy(in_file, in_mask=None, rician=True,
     data = img.get_data()
     aff = img.get_affine()
 
-    if in_mask is None:
-        mask = data[..., 0] > 80
-    else:
-        mask = in_mask > 0
-
-    nmask = mask
+    nmask = data[..., 0] > 80
     if noise_mask is not None:
         nmask = noise_mask > 0
 
-    sigma = np.std(data[~nmask])
-    den = nlmeans(data, sigma=sigma, mask=mask)
+    sigma = np.std(data[nmask == 1])
+    den = nlmeans(data, sigma, **settings)
 
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
                    hdr).to_filename(out_file)
-    return out_file
+    return out_file, sigma

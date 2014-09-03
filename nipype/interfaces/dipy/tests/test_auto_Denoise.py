@@ -3,13 +3,15 @@ from nipype.testing import assert_equal
 from nipype.interfaces.dipy.preprocess import Denoise
 
 def test_Denoise_inputs():
-    input_map = dict(in_file=dict(mandatory=True,
+    input_map = dict(block_radius=dict(),
+    in_file=dict(mandatory=True,
     ),
     in_mask=dict(),
     noise_mask=dict(),
     noise_model=dict(mandatory=True,
     usedefault=True,
     ),
+    patch_radius=dict(),
     )
     inputs = Denoise.input_spec()
 
