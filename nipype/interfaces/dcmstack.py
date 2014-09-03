@@ -22,6 +22,7 @@ from nipype.interfaces.base import (TraitedSpec,
                                    )
 import nibabel as nb
 from nipype.interfaces.traits_extension import isdefined, Undefined
+import imghdr
 
 have_dcmstack = True
 try:
@@ -83,6 +84,9 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                   "any default exclude filters")
     include_regexes = traits.List(desc="Meta data to include, overriding any "
                                   "exclude filters")
+    force_read = traits.Bool(True, usedefault=True, 
+                             desc=('Force reading files without DICM marker'))
+
 
 class DcmStackOutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -125,8 +129,12 @@ class DcmStack(NiftiGeneratorBase):
                                                      include_regexes)
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
-            src_dcm = dicom.read_file(src_path, force=True)
-            stack.add_dcm(src_dcm)
+            if not imghdr.what(src_path)=="gif":
+                if self.inputs.force_read:
+                    src_dcm = dicom.read_file(src_path, force=True)
+                else:
+                    src_dcm = dicom.read_file(src_path)
+                stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
         self.out_path = \
