@@ -5,10 +5,11 @@
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-03 18:03:47
+# @Last Modified time: 2014-09-03 20:04:13
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
+from nipype.interfaces import ants
 
 
 def cleanup_edge_pipeline(name='Cleanup'):
@@ -80,6 +81,59 @@ def vsm2warp(name='Shiftmap2Warping'):
     return wf
 
 
+def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
+              flirt_param={}):
+    """
+    Generates a workflow for linear registration of dwi volumes
+    """
+    inputnode = pe.Node(niu.IdentityInterface(fields=['reference',
+                        'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
+                        name='inputnode')
+
+    initmat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms',
+                      'excl_nodiff'], output_names=['init_xfms'],
+                      function=_checkinitxfm), name='InitXforms')
+    initmat.inputs.excl_nodiff = excl_nodiff
+
+    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
+    pick_ref = pe.Node(niu.Select(), name='Pick_b0')
+    n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
+    enhb0 = pe.Node(niu.Function(input_names=['in_file', 'in_mask',
+                    'clip_limit'], output_names=['out_file'],
+                    function=enhance), name='B0Equalize')
+    enhb0.inputs.clip_limit = 0.02
+    enhdw = pe.MapNode(niu.Function(input_names=['in_file'],
+                       output_names=['out_file'], function=enhance),
+                       name='DWEqualize', iterfield=['in_file'])
+    flirt = pe.MapNode(fsl.FLIRT(**flirt_param), name='CoRegistration',
+                       iterfield=['in_file', 'in_matrix_file'])
+    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
+                       name='RemoveNegative')
+    merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file',
+                         'out_xfms']), name='outputnode')
+    wf = pe.Workflow(name=name)
+    wf.connect([
+         (inputnode,  split,      [('in_file', 'in_file')])
+        ,(inputnode,  enhb0,      [('ref_mask', 'in_mask')])
+        ,(inputnode,  initmat,    [('in_xfms', 'in_xfms'),
+                                   ('in_bval', 'in_bval')])
+        ,(inputnode,  n4,         [('reference', 'input_image'),
+                                   ('ref_mask', 'mask_image')])
+        ,(inputnode,  flirt,      [('ref_mask', 'ref_weight')])
+        ,(n4,         enhb0,      [('output_image', 'in_file')])
+        ,(split,      enhdw,      [('out_files', 'in_file')])
+        ,(enhb0,      flirt,      [('out_file', 'reference')])
+        ,(enhdw,      flirt,      [('out_file', 'in_file')])
+        ,(initmat,    flirt,      [('init_xfms', 'in_matrix_file')])
+        ,(flirt,      thres,      [('out_file', 'in_file')])
+        ,(thres,      merge,      [('out_file', 'in_files')])
+        ,(merge,      outputnode, [('merged_file', 'out_file')])
+        ,(flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
+    ])
+    return wf
+
+
 def apply_all_corrections(name='UnwarpArtifacts'):
     """
     Combines two lists of linear transforms with the deformation field
@@ -142,6 +196,41 @@ def apply_all_corrections(name='UnwarpArtifacts'):
     return wf
 
 
+def extract_bval(in_dwi, in_bval, b=0, out_file=None):
+    """
+    Writes an image containing only the volumes with b-value specified at
+    input
+    """
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+
+    if out_file is None:
+        fname, ext = op.splitext(op.basename(in_dwi))
+        if ext == ".gz":
+            fname, ext2 = op.splitext(fname)
+            ext = ext2 + ext
+        out_file = op.abspath("%s_tsoi%s" % (fname, ext))
+
+    im = nb.load(in_dwi)
+    dwidata = im.get_data()
+    bvals = np.loadtxt(in_bval)
+
+    if b == 'diff':
+        selection = np.where(bvals != 0)
+    elif b == 'nodiff':
+        selection = np.where(bvals == 0)
+    else:
+        selection = np.where(bvals == b)
+
+    extdata = np.squeeze(dwidata.take(selection, axis=3))
+    hdr = im.get_header().copy()
+    hdr.set_data_shape(extdata.shape)
+    nb.Nifti1Image(extdata, im.get_affine(),
+                   hdr).to_filename(out_file)
+    return out_file
+
+
 def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     """
     Recompose back the dMRI data accordingly the b-values table after EC correction
@@ -151,24 +240,25 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     import os.path as op
 
     if out_file is None:
-        fname,ext = op.splitext(op.basename(in_dwi))
+        fname, ext = op.splitext(op.basename(in_dwi))
         if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
+            fname, ext2 = op.splitext(fname)
             ext = ext2 + ext
         out_file = op.abspath("%s_eccorrect%s" % (fname, ext))
 
     im = nb.load(in_dwi)
     dwidata = im.get_data()
     bvals = np.loadtxt(in_bval)
-    non_b0 = np.where(bvals!=0)[0].tolist()
+    dwis = np.where(bvals != 0)[0].tolist()
 
-    if len(non_b0)!=len(in_corrected):
+    if len(dwis) != len(in_corrected):
         raise RuntimeError('Length of DWIs in b-values table and after correction should match')
 
-    for bindex, dwi in zip(non_b0, in_corrected):
-        dwidata[...,bindex] = nb.load(dwi).get_data()
+    for bindex, dwi in zip(dwis, in_corrected):
+        dwidata[..., bindex] = nb.load(dwi).get_data()
 
-    nb.Nifti1Image(dwidata, im.get_affine(), im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(dwidata, im.get_affine(),
+                   im.get_header()).to_filename(out_file)
     return out_file
 
 
@@ -519,3 +609,30 @@ def enhance(in_file, clip_limit=0.015, in_mask=None, out_file=None):
                    im.get_header()).to_filename(out_file)
 
     return out_file
+
+
+def _checkinitxfm(in_bval, excl_nodiff, in_xfms=None):
+    from nipype.interfaces.base import isdefined
+    import numpy as np
+    import os.path as op
+    bvals = np.loadtxt(in_bval)
+
+    gen_id = ((in_xfms is None) or
+              (not isdefined(in_xfms)) or
+              (len(in_xfms) != len(bvals)))
+
+    init_xfms = []
+    if excl_nodiff:
+        dws = np.where(bvals != 0)[0].tolist()
+    else:
+        dws = range(len(bvals))
+
+    if gen_id:
+        for i in dws:
+            xfm_file = op.abspath('init_%04d.mat' % i)
+            np.savetxt(xfm_file, np.eye(4))
+            init_xfms.append(xfm_file)
+    else:
+        init_xfms = [in_xfms[i] for i in dws]
+
+    return init_xfms

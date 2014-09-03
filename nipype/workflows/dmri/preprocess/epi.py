@@ -53,7 +53,8 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
     wf = pe.Workflow('dMRI_Artifacts')
     wf.connect([
          (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bvec', 'inputnode.in_bvec')])
+                                    ('in_bvec', 'inputnode.in_bvec'),
+                                    ('in_bval', 'inputnode.in_bval')])
         ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
         ,(avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')])
@@ -120,7 +121,8 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     wf = pe.Workflow('dMRI_Artifacts')
     wf.connect([
          (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bvec', 'inputnode.in_bvec')])
+                                    ('in_bvec', 'inputnode.in_bvec'),
+                                    ('in_bval', 'inputnode.in_bval')])
         ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
         ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
@@ -257,6 +259,7 @@ def hmc_pipeline(name='motion_correct'):
     >>> hmc = hmc_pipeline()
     >>> hmc.inputs.inputnode.in_file = 'diffusion.nii'
     >>> hmc.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> hmc.inputs.inputnode.in_bval = 'diffusion.bval'
     >>> hmc.inputs.inputnode.in_mask = 'mask.nii'
     >>> hmc.run() # doctest: +SKIP
 
@@ -276,48 +279,35 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
+    params = dict(interp='spline', cost='normmi',
+                  cost_func='normmi', dof=6, bins=64, save_log=True,
+                  searchr_x=[-4, 4], searchr_y=[-4, 4], searchr_z=[-4, 4],
+                  fine_search=1, coarse_search=10, padding_size=1)
+
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
-                        'in_bvec', 'in_mask']), name='inputnode')
-    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
-    pick_ref = pe.Node(niu.Select(), name='Pick_b0')
-    enhb0 = pe.Node(niu.Function(input_names=['in_file'],
-                    output_names=['out_file'], function=enhance),
-                    name='B0Equalize')
-    enhdw = pe.MapNode(niu.Function(input_names=['in_file'],
-                       output_names=['out_file'], function=enhance),
-                       name='DWEqualize', iterfield=['in_file'])
-    flirt = pe.MapNode(fsl.FLIRT(interp='spline', cost='normmi',
-                       cost_func='normmi', dof=6, bins=64, save_log=True,
-                       searchr_x=[-4, 4], searchr_y=[-4, 4], searchr_z=[-4, 4],
-                       fine_search=1, coarse_search=10, padding_size=1),
-                       name='CoRegistration', iterfield=['in_file'])
+                        'in_bvec', 'in_bval', 'in_mask']), name='inputnode')
+    pick_ref = pe.Node(fsl.ExtractROI(t_size=1), name='GetB0')
+    flirt = dwi_flirt(flirt_param=params)
     rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'],
                        output_names=['out_file'], function=rotate_bvecs),
                        name='Rotate_Bvec')
-    thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
-                       name='RemoveNegative')
-    merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file',
                          'out_bvec', 'out_xfms']),
                          name='outputnode')
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  split,      [('in_file', 'in_file')])
-        ,(split,      pick_ref,   [('out_files', 'inlist')])
-        ,(inputnode,  pick_ref,   [(('ref_num', _checkrnum), 'index')])
-        ,(inputnode,  flirt,      [('in_mask', 'ref_weight')])
-        ,(pick_ref,   enhb0,      [('out', 'in_file')])
-        ,(split,      enhdw,      [('out_files', 'in_file')])
-        ,(enhb0,      flirt,      [('out_file', 'reference')])
-        ,(enhdw,      flirt,      [('out_file', 'in_file')])
+         (inputnode,  pick_ref,   [('in_file', 'in_file'),
+                                   (('ref_num', _checkrnum), 't_min')])
+        ,(inputnode,  flirt,      [('in_file', 'inputnode.in_file'),
+                                   ('in_mask', 'inputnode.ref_mask'),
+                                   ('in_bval', 'inputnode.in_bval')])
+        ,(pick_ref,   flirt,      [('roi_file', 'inputnode.reference')])
         ,(inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')])
-        ,(flirt,      rot_bvec,   [('out_matrix_file', 'in_matrix')])
-        ,(flirt,      thres,      [('out_file', 'in_file')])
-        ,(thres,      merge,      [('out_file', 'in_files')])
-        ,(merge,      outputnode, [('merged_file', 'out_file')])
+        ,(flirt,      rot_bvec,   [('outputnode.out_xfms', 'in_matrix')])
         ,(rot_bvec,   outputnode, [('out_file', 'out_bvec')])
-        ,(flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
+        ,(flirt,      outputnode, [('outputnode.out_xfms', 'out_xfms'),
+                                   ('outputnode.out_file', 'out_file')])
     ])
     return wf
 
@@ -376,19 +366,21 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
         outputnode.out_file - corrected dwi file
         outputnode.out_xfms - list of transformation matrices
     """
+    params = dict(no_search=True, interp='spline', cost='normmi',
+                  cost_func='normmi', dof=12, bins=64,
+                  padding_size=1)
+
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
                         'in_mask', 'in_xfms']), name='inputnode')
-    split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     avg_b0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                     output_names=['out_file'], function=b0_average), name='b0_avg')
-    pick_dwi = pe.Node(niu.Select(), name='Pick_DWIs')
-    flirt = pe.MapNode(fsl.FLIRT(no_search=True, interp='spline', cost='normmi',
-                       cost_func = 'normmi', dof=12, bins=64, save_log=True,
-                       padding_size=1), name='CoRegistration',
-                       iterfield=['in_file', 'in_matrix_file'])
-    initmat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms'],
-                      output_names=['init_xfms'], function=_checkinitxfm),
-                      name='InitXforms')
+                     output_names=['out_file'], function=b0_average),
+                     name='b0_avg')
+    pick_dws = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval', 'b'],
+                       output_names=['out_file'], function=extract_bval),
+                       name='ExtractDWI')
+    pick_dws.inputs.b = 'diff'
+
+    flirt = dwi_flirt(flirt_param=params, excl_nodiff=True)
 
     mult = pe.MapNode(fsl.BinaryMaths(operation='mul'), name='ModulateDWIs',
                       iterfield=['in_file', 'operand_value'])
@@ -406,23 +398,22 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  split,      [('in_file', 'in_file')])
-        ,(inputnode,  avg_b0,     [('in_file', 'in_dwi'),
+         (inputnode,  avg_b0,     [('in_file', 'in_dwi'),
+                                   ('in_bval', 'in_bval')])
+        ,(inputnode,  pick_dws,   [('in_file', 'in_dwi'),
                                    ('in_bval', 'in_bval')])
         ,(inputnode,  merge,      [('in_file', 'in_dwi'),
                                    ('in_bval', 'in_bval')])
-        ,(inputnode,  initmat,    [('in_xfms', 'in_xfms'),
-                                   ('in_bval', 'in_bval')])
+        ,(inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask'),
+                                   ('in_xfms', 'inputnode.in_xfms'),
+                                   ('in_bval', 'inputnode.in_bval')])
         ,(inputnode,  get_mat,    [('in_bval', 'in_bval')])
-        ,(split,      pick_dwi,   [('out_files', 'inlist')])
-        ,(inputnode,  pick_dwi,   [(('in_bval', _nonb0), 'index')])
-        ,(inputnode,  flirt,      [('in_mask', 'ref_weight')])
-        ,(avg_b0,     flirt,      [('out_file', 'reference')])
-        ,(pick_dwi,   flirt,      [('out', 'in_file')])
-        ,(initmat,    flirt,      [('init_xfms', 'in_matrix_file')])
-        ,(flirt,      get_mat,    [('out_matrix_file', 'in_xfms')])
-        ,(flirt,      mult,       [(('out_matrix_file',_xfm_jacobian), 'operand_value')])
-        ,(flirt,      mult,       [('out_file', 'in_file')])
+        ,(avg_b0,     flirt,      [('out_file', 'inputnode.reference')])
+        ,(pick_dws,   flirt,      [('out_file', 'inputnode.in_file')])
+        ,(flirt,      get_mat,    [('outputnode.out_xfms', 'in_xfms')])
+        ,(flirt,      mult,       [(('outputnode.out_xfms',_xfm_jacobian),
+                                   'operand_value')])
+        ,(flirt,      mult,       [('outputnode.out_file', 'in_file')])
         ,(mult,       thres,      [('out_file', 'in_file')])
         ,(thres,      merge,      [('out_file', 'in_corrected')])
         ,(get_mat,    outputnode, [('out_files', 'out_xfms')])
@@ -709,24 +700,6 @@ def _checkrnum(ref_num):
         return 0
     return ref_num
 
-
-def _checkinitxfm(in_bval, in_xfms=None):
-    from nipype.interfaces.base import isdefined
-    import numpy as np
-    import os.path as op
-    bvals = np.loadtxt(in_bval)
-    non_b0 = np.where(bvals != 0)[0].tolist()
-
-    init_xfms = []
-    if (in_xfms is None) or (not isdefined(in_xfms)) or (len(in_xfms)!=len(bvals)):
-        for i in non_b0:
-            xfm_file = op.abspath('init_%04d.mat' % i)
-            np.savetxt(xfm_file, np.eye(4))
-            init_xfms.append(xfm_file)
-    else:
-        for i in non_b0:
-            init_xfms.append(in_xfms[i])
-    return init_xfms
 
 def _nonb0(in_bval):
     import numpy as np
