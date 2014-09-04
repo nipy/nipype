@@ -299,7 +299,7 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    params = dict(dof=6, padding_size=10, save_log=True,
+    params = dict(dof=6, bgvalue=0, save_log=True,
                   searchr_x=[-3, 3], searchr_y=[-3, 3], searchr_z=[-3, 3],
                   fine_search=1, coarse_search=2,
                   cost='mutualinfo', cost_func='mutualinfo', bins=64)
@@ -401,7 +401,7 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
         outputnode.out_file - corrected dwi file
         outputnode.out_xfms - list of transformation matrices
     """
-    params = dict(dof=12, no_search=True, interp='spline', padding_size=1, save_log=True)
+    params = dict(dof=12, no_search=True, interp='spline', bgvalue=0, save_log=True)
     # cost='normmi', cost_func='normmi', bins=64,
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
