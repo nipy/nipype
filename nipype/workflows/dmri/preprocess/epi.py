@@ -104,8 +104,8 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
                         'alt_file']), name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
-                         name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask',
+                         'out_bvec']), name='outputnode')
 
     avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
                        output_names=['out_file'], function=b0_average), name='b0_avg_pre')
@@ -117,6 +117,8 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     hmc = hmc_pipeline()
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
     ecc = ecc_pipeline()
+
+    unwarp = apply_all_corrections()
 
     wf = pe.Workflow('dMRI_Artifacts')
     wf.connect([
@@ -137,8 +139,15 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
         ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
         ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
-        ,(ecc,         outputnode, [('outputnode.out_file', 'out_file')])
+
+
+        ,(inputnode,   unwarp,     [('in_file', 'inputnode.in_dwi')])
+        ,(hmc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')])
+        ,(ecc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')])
+        ,(sdc,         unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')])
+
         ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
+        ,(unwarp,      outputnode, [('outputnode.out_file', 'out_file')])
         ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
@@ -575,13 +584,16 @@ def sdc_peb(name='peb_correction',
                                enc_dir='y',
                                epi_factor=1)):
     """
-    SDC stands for susceptibility distortion correction. PEB stands for phase-encoding-based.
+    SDC stands for susceptibility distortion correction. PEB stands for
+    phase-encoding-based.
 
-    The phase-encoding-based (PEB) method implements SDC by acquiring diffusion images with
-    two different enconding directions [Andersson2003]_. The most typical case is acquiring
-    with opposed phase-gradient blips (e.g. *A>>>P* and *P>>>A*, or equivalently, *-y* and *y*)
-    as in [Chiou2000]_, but it is also possible to use orthogonal configurations [Cordes2000]_
-    (e.g. *A>>>P* and *L>>>R*, or equivalently *-y* and *x*).
+    The phase-encoding-based (PEB) method implements SDC by acquiring
+    diffusion images with two different enconding directions [Andersson2003]_.
+    The most typical case is acquiring with opposed phase-gradient blips
+    (e.g. *A>>>P* and *P>>>A*, or equivalently, *-y* and *y*)
+    as in [Chiou2000]_, but it is also possible to use orthogonal
+    configurations [Cordes2000]_ (e.g. *A>>>P* and *L>>>R*,
+                                  or equivalently *-y* and *x*).
     This workflow uses the implementation of FSL
     (`TOPUP <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP>`_).
 
@@ -597,26 +609,26 @@ def sdc_peb(name='peb_correction',
 
     .. admonition:: References
 
-      .. [Andersson2003] Andersson JL et al., `How to correct susceptibility distortions in
-        spin-echo echo-planar images: application to diffusion tensor imaging
-        <http://dx.doi.org/10.1016/S1053-8119(03)00336-7>`_.
+      .. [Andersson2003] Andersson JL et al., `How to correct susceptibility
+        distortions in spin-echo echo-planar images: application to diffusion
+        tensor imaging <http://dx.doi.org/10.1016/S1053-8119(03)00336-7>`_.
         Neuroimage. 2003 Oct;20(2):870-88. doi: 10.1016/S1053-8119(03)00336-7
 
-      .. [Cordes2000] Cordes D et al., Geometric distortion correction in EPI using two
-        images with orthogonal phase-encoding directions, in Proc. ISMRM (8), p.1712,
-        Denver, US, 2000.
+      .. [Cordes2000] Cordes D et al., Geometric distortion correction in EPI
+        using two images with orthogonal phase-encoding directions, in Proc.
+        ISMRM (8), p.1712, Denver, US, 2000.
 
-      .. [Chiou2000] Chiou JY, and Nalcioglu O, A simple method to correct off-resonance
-        related distortion in echo planar imaging, in Proc. ISMRM (8), p.1712, Denver, US,
-        2000.
+      .. [Chiou2000] Chiou JY, and Nalcioglu O, A simple method to correct
+        off-resonance related distortion in echo planar imaging, in Proc.
+        ISMRM (8), p.1712, Denver, US, 2000.
 
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval', 'in_mask',
-                        'alt_file', 'ref_num']),
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
+                        'in_mask', 'alt_file', 'ref_num']),
                         name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm']),
-                         name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_vsm',
+                         'out_warp']), name='outputnode')
 
     b0_ref = pe.Node(fsl.ExtractROI(t_size=1), name='b0_ref')
     b0_alt = pe.Node(fsl.ExtractROI(t_size=1), name='b0_alt')
@@ -624,11 +636,19 @@ def sdc_peb(name='peb_correction',
     b0_merge = pe.Node(fsl.Merge(dimension='t'), name='b0_merged')
 
     topup = pe.Node(fsl.TOPUP(), name='topup')
-    topup.inputs.encoding_direction = [epi_params['enc_dir'], altepi_params['enc_dir']]
+    topup.inputs.encoding_direction = [epi_params['enc_dir'],
+                                       altepi_params['enc_dir']]
     topup.inputs.readout_times = [compute_readout(epi_params),
                                   compute_readout(altepi_params)]
 
     unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1], method='jac'), name='unwarp')
+
+    scaling = pe.Node(niu.Function(input_names=['in_file', 'enc_dir'],
+                      output_names=['factor'], function=_get_zoom),
+                      name='GetZoom')
+    scaling.inputs.enc_dir = epi_params['enc_dir']
+    vsm2dfm = vsm2warp()
+    vsm2dfm.inputs.inputnode.enc_dir = epi_params['enc_dir']
 
     wf = pe.Workflow(name=name)
     wf.connect([
@@ -645,6 +665,13 @@ def sdc_peb(name='peb_correction',
                                    ('out_enc_file', 'encoding_file')])
         ,(inputnode,  unwarp,     [('in_file', 'in_files')])
         ,(unwarp,     outputnode, [('out_corrected', 'out_file')])
+
+        ,(b0_ref,      scaling,    [('roi_file', 'in_file')])
+        ,(b0_ref,      vsm2dfm,    [('roi_file', 'inputnode.in_ref')])
+        ,(scaling,     vsm2dfm,    [('factor', 'inputnode.scaling')])
+        ,(topup,       vsm2dfm,    [('out_field', 'inputnode.in_vsm')])
+        ,(topup,       outputnode, [('out_field', 'out_vsm')])
+        ,(vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
     ])
     return wf
 
@@ -706,9 +733,25 @@ def _checkrnum(ref_num):
 def _nonb0(in_bval):
     import numpy as np
     bvals = np.loadtxt(in_bval)
-    return np.where(bvals!=0)[0].tolist()
+    return np.where(bvals != 0)[0].tolist()
+
 
 def _xfm_jacobian(in_xfm):
     import numpy as np
     from math import fabs
     return [fabs(np.linalg.det(np.loadtxt(xfm))) for xfm in in_xfm]
+
+
+def _get_zoom(in_file, enc_dir):
+    import nibabel as nb
+
+    zooms = nb.load(in_file).get_zooms()
+
+    if 'y' in enc_dir:
+        return zooms[1]
+    elif 'x' in enc_dir:
+        return zooms[0]
+    elif 'z' in enc_dir:
+        return zooms[2]
+    else:
+        raise ValueError('Wrong encoding direction string')
