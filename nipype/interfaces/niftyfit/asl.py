@@ -20,11 +20,11 @@ class FitAslInputSpec(NIFTYFITCommandInputSpec):
 
 # *** Output options:
     cbf_file     = File(genfile = True, exists=True, desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).',
-                   argstr='-cbf %s', name_source = ['source'], name_template = '%s_cbf')
+                   argstr='-cbf %s', name_source = ['source_file'], name_template = '%s_cbf')
     error_file   = File(genfile = True, exists=True, desc='Filename of the CBF error map.',
-                   argstr='-error %s', name_source = ['source'], name_template = '%s_error')
+                   argstr='-error %s', name_source = ['source_file'], name_template = '%s_error')
     syn_file     = File(genfile = True, exists=True, desc='Filename of the synthetic ASL data.',
-                   argstr='-syn %s', name_source = ['source'], name_template = '%s_syn')
+                   argstr='-syn %s', name_source = ['source_file'], name_template = '%s_syn')
 
 # *** Input options (see also fit_qt1 for generic T1 fitting):
     t1map = File(exists=True, desc='Filename of the estimated input T1 map (in ms).',
@@ -40,7 +40,7 @@ class FitAslInputSpec(NIFTYFITCommandInputSpec):
 
 # *** Experimental options (Choose those suitable for the model!):
     mask  = File(exists=True, desc='Filename of image mask.',
-                   argstr='-source %s')
+                   argstr='-mask %s')
     T1a  = traits.Float(desc='T1 of arterial component [1650ms].',
                         argstr = '-T1a %f')
     L    = traits.Float(desc='Single plasma/tissue partition coefficient [0.9ml/g].',
