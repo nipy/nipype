@@ -20,6 +20,8 @@ def test_ApplyXfm_inputs():
     bbrtype=dict(argstr='-bbrtype %s',
     min_ver='5.0.0',
     ),
+    bgvalue=dict(argstr='-setbackground %f',
+    ),
     bins=dict(argstr='-bins %d',
     ),
     coarse_search=dict(argstr='-coarsesearch %d',
