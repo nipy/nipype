@@ -471,10 +471,12 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                                    desc='do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr='-2D',
                           desc='use 2D rigid body mode - ignores dof')
-
     save_log = traits.Bool(desc='save to log file')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
+    bgvalue = traits.Float(0, argstr='-setbackground %f',
+                           desc=('use specified background value for points '
+                                 'outside FOV'))
 
     # BBR options
     wm_seg = File(
