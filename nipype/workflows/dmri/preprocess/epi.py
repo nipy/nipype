@@ -127,7 +127,7 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
                                     ('in_bval', 'inputnode.in_bval')])
         ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
-        ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
+        ,(avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')])
         ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
         ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
         ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
@@ -138,7 +138,7 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
         ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
-        ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
+        ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
 
 
         ,(inputnode,   unwarp,     [('in_file', 'inputnode.in_dwi')])
@@ -189,8 +189,10 @@ def all_fsl_pipeline(name='fsl_all_correct',
         return out_file
 
     avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_pre')
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_pre')
+    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_pre')
 
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
     ecc = pe.Node(fsl.Eddy(method='jac'), name='fsl_eddy')
@@ -198,8 +200,10 @@ def all_fsl_pipeline(name='fsl_all_correct',
                        output_names=['out_file'], function=eddy_rotate_bvecs),
                        name='Rotate_Bvec')
     avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_post')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_post')
+    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_post')
 
     wf = pe.Workflow('dMRI_Artifacts_FSL')
     wf.connect([
@@ -235,30 +239,37 @@ def hmc_pipeline(name='motion_correct'):
     """
     HMC stands for head-motion correction.
 
-    Creates a pipeline that corrects for head motion artifacts in dMRI sequences.
+    Creates a pipeline that corrects for head motion artifacts in dMRI
+    sequences.
     It takes a series of diffusion weighted images and rigidly co-registers
-    them to one reference image. Finally, the `b`-matrix is rotated accordingly [Leemans09]_
-    making use of the rotation matrix obtained by FLIRT.
+    them to one reference image. Finally, the `b`-matrix is rotated accordingly
+    [Leemans09]_ making use of the rotation matrix obtained by FLIRT.
 
-    Search angles have been limited to 4 degrees, based on results in [Yendiki13]_.
+    Search angles have been limited to 4 degrees, based on results in
+    [Yendiki13]_.
 
-    A list of rigid transformation matrices is provided, so that transforms can be
-    chained. This is useful to correct for artifacts with only one interpolation process (as
-    previously discussed `here <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_),
+    A list of rigid transformation matrices is provided, so that transforms
+    can be chained.
+    This is useful to correct for artifacts with only one interpolation process
+    (as previously discussed `here
+     <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_),
     and also to compute nuisance regressors as proposed by [Yendiki13]_.
 
     .. warning:: This workflow rotates the `b`-vectors, so please be advised
-      that not all the dicom converters ensure the consistency between the resulting
-      nifti orientation and the gradients table (e.g. dcm2nii checks it).
+      that not all the dicom converters ensure the consistency between the
+      resulting nifti orientation and the gradients table (e.g. dcm2nii
+      checks it).
 
     .. admonition:: References
 
-      .. [Leemans09] Leemans A, and Jones DK, `The B-matrix must be rotated when correcting
-        for subject motion in DTI data <http://dx.doi.org/10.1002/mrm.21890>`_,
+      .. [Leemans09] Leemans A, and Jones DK, `The B-matrix must be rotated
+        when correcting for subject motion in DTI data
+        <http://dx.doi.org/10.1002/mrm.21890>`_,
         Magn Reson Med. 61(6):1336-49. 2009. doi: 10.1002/mrm.21890.
 
-      .. [Yendiki13] Yendiki A et al., `Spurious group differences due to head motion in
-        a diffusion MRI study <http://dx.doi.org/10.1016/j.neuroimage.2013.11.027>`_.
+      .. [Yendiki13] Yendiki A et al., `Spurious group differences due to head
+        motion in a diffusion MRI study
+        <http://dx.doi.org/10.1016/j.neuroimage.2013.11.027>`_.
         Neuroimage. 21(88C):79-90. 2013. doi: 10.1016/j.neuroimage.2013.11.027
 
     Example
@@ -288,15 +299,23 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    params = dict(interp='spline', cost='normmi',
-                  cost_func='normmi', dof=6, bins=64, save_log=True,
-                  searchr_x=[-4, 4], searchr_y=[-4, 4], searchr_z=[-4, 4],
-                  fine_search=1, coarse_search=10, padding_size=1)
+    params = dict(dof=6, interp='spline', padding_size=10, save_log=True,
+                  searchr_x=[-3, 3], searchr_y=[-3, 3], searchr_z=[-3, 3],
+                  fine_search=1, coarse_search=2)
+    # cost='normmi', cost_func='normmi', bins=64,
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
                         'in_bvec', 'in_bval', 'in_mask']), name='inputnode')
-    pick_ref = pe.Node(fsl.ExtractROI(t_size=1), name='GetB0')
+    refid = pe.Node(niu.IdentityInterface(fields=['ref_num']),
+                    name='RefVolume')
+    pick_ref = pe.Node(fsl.ExtractROI(t_size=1), name='GetRef')
+    pick_mov = pe.Node(niu.Function(input_names=['in_file', 'volid'],
+                       output_names=['out_file'], function=remove_comp),
+                       name='GetMovingDWs')
     flirt = dwi_flirt(flirt_param=params)
+    insmat = pe.Node(niu.Function(input_names=['inlist', 'volid'],
+                     output_names=['out'], function=insert_mat),
+                     name='InsertRefmat')
     rot_bvec = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'],
                        output_names=['out_file'], function=rotate_bvecs),
                        name='Rotate_Bvec')
@@ -306,17 +325,22 @@ taken as reference
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  pick_ref,   [('in_file', 'in_file'),
-                                   (('ref_num', _checkrnum), 't_min')])
+         (inputnode,  refid,      [(('ref_num', _checkrnum), 'ref_num')])
+        ,(inputnode,  pick_ref,   [('in_file', 'in_file')])
+        ,(refid,      pick_ref,   [('ref_num', 't_min')])
+        ,(inputnode,  pick_mov,   [('in_file', 'in_file')])
+        ,(refid,      pick_mov,   [('ref_num', 'volid')])
         ,(inputnode,  flirt,      [('in_file', 'inputnode.in_file'),
                                    ('in_mask', 'inputnode.ref_mask'),
                                    ('in_bval', 'inputnode.in_bval')])
         ,(pick_ref,   flirt,      [('roi_file', 'inputnode.reference')])
+        ,(flirt,      insmat,     [('outputnode.out_xfms', 'inlist')])
+        ,(refid,      insmat,     [('ref_num', 'volid')])
         ,(inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')])
-        ,(flirt,      rot_bvec,   [('outputnode.out_xfms', 'in_matrix')])
+        ,(insmat,     rot_bvec,   [('out', 'in_matrix')])
         ,(rot_bvec,   outputnode, [('out_file', 'out_bvec')])
-        ,(flirt,      outputnode, [('outputnode.out_xfms', 'out_xfms'),
-                                   ('outputnode.out_file', 'out_file')])
+        ,(flirt,      outputnode, [('outputnode.out_file', 'out_file')])
+        ,(insmat,     outputnode, [('out', 'out_xfms')])
     ])
     return wf
 
@@ -375,9 +399,8 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
         outputnode.out_file - corrected dwi file
         outputnode.out_xfms - list of transformation matrices
     """
-    params = dict(no_search=True, interp='spline', cost='normmi',
-                  cost_func='normmi', dof=12, bins=64,
-                  padding_size=1)
+    params = dict(dof=12, no_search=True, interp='spline', padding_size=1, save_log=True)
+    # cost='normmi', cost_func='normmi', bins=64,
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
                         'in_mask', 'in_xfms']), name='inputnode')
@@ -638,17 +661,20 @@ def sdc_peb(name='peb_correction',
     topup = pe.Node(fsl.TOPUP(), name='topup')
     topup.inputs.encoding_direction = [epi_params['enc_dir'],
                                        altepi_params['enc_dir']]
-    topup.inputs.readout_times = [compute_readout(epi_params),
+
+    readout = compute_readout(epi_params)
+    topup.inputs.readout_times = [readout,
                                   compute_readout(altepi_params)]
 
     unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1], method='jac'), name='unwarp')
 
-    scaling = pe.Node(niu.Function(input_names=['in_file', 'enc_dir'],
-                      output_names=['factor'], function=_get_zoom),
-                      name='GetZoom')
-    scaling.inputs.enc_dir = epi_params['enc_dir']
+    #scaling = pe.Node(niu.Function(input_names=['in_file', 'enc_dir'],
+    #                  output_names=['factor'], function=_get_zoom),
+    #                  name='GetZoom')
+    #scaling.inputs.enc_dir = epi_params['enc_dir']
     vsm2dfm = vsm2warp()
     vsm2dfm.inputs.inputnode.enc_dir = epi_params['enc_dir']
+    vsm2dfm.inputs.inputnode.scaling = readout
 
     wf = pe.Workflow(name=name)
     wf.connect([
@@ -666,9 +692,9 @@ def sdc_peb(name='peb_correction',
         ,(inputnode,  unwarp,     [('in_file', 'in_files')])
         ,(unwarp,     outputnode, [('out_corrected', 'out_file')])
 
-        ,(b0_ref,      scaling,    [('roi_file', 'in_file')])
+        #,(b0_ref,      scaling,    [('roi_file', 'in_file')])
+        #,(scaling,     vsm2dfm,    [('factor', 'inputnode.scaling')])
         ,(b0_ref,      vsm2dfm,    [('roi_file', 'inputnode.in_ref')])
-        ,(scaling,     vsm2dfm,    [('factor', 'inputnode.scaling')])
         ,(topup,       vsm2dfm,    [('out_field', 'inputnode.in_vsm')])
         ,(topup,       outputnode, [('out_field', 'out_vsm')])
         ,(vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
@@ -745,7 +771,7 @@ def _xfm_jacobian(in_xfm):
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
 
-    zooms = nb.load(in_file).get_zooms()
+    zooms = nb.load(in_file).get_header().get_zooms()
 
     if 'y' in enc_dir:
         return zooms[1]

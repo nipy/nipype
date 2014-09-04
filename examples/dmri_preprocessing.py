@@ -3,7 +3,7 @@
 # @Author: oesteban
 # @Date:   2014-08-31 20:32:22
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-02 13:12:12
+# @Last Modified time: 2014-09-04 10:55:15
 """
 ===================
 dMRI: Preprocessing
@@ -175,4 +175,3 @@ Run the workflow as command line executable
 if __name__ == '__main__':
     wf.run()
     wf.write_graph()
-

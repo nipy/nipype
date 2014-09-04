@@ -5,7 +5,7 @@
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
 # @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-03 20:04:13
+# @Last Modified time: 2014-09-04 16:44:28
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
@@ -101,7 +101,7 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
     enhb0 = pe.Node(niu.Function(input_names=['in_file', 'in_mask',
                     'clip_limit'], output_names=['out_file'],
                     function=enhance), name='B0Equalize')
-    enhb0.inputs.clip_limit = 0.02
+    enhb0.inputs.clip_limit = 0.015
     enhdw = pe.MapNode(niu.Function(input_names=['in_file'],
                        output_names=['out_file'], function=enhance),
                        name='DWEqualize', iterfield=['in_file'])
@@ -231,6 +231,47 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
     return out_file
 
 
+def remove_comp(in_file, volid=0, out_file=None):
+    """
+    Removes the volume ``volid`` from the 4D nifti file
+    """
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+
+    if out_file is None:
+        fname, ext = op.splitext(op.basename(in_file))
+        if ext == ".gz":
+            fname, ext2 = op.splitext(fname)
+            ext = ext2 + ext
+        out_file = op.abspath("%s_extract%s" % (fname, ext))
+
+    im = nb.load(in_file)
+    data = im.get_data()
+    hdr = im.get_header().copy()
+
+    if volid == 0:
+        data = data[..., 1:]
+    elif volid == (data.shape[-1] - 1):
+        data = data[..., :-1]
+    else:
+        data = np.concatenate((data[..., :volid], data[..., (volid + 1):]),
+                              axis=3)
+    hdr.set_data_shape(data.shape)
+    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
+    return out_file
+
+
+def insert_mat(inlist, volid=0):
+    import numpy as np
+    import os.path as op
+    idfname = op.abspath('identity.mat')
+    out = inlist
+    np.savetxt(idfname, np.eye(4))
+    out.insert(volid, idfname)
+    return out
+
+
 def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     """
     Recompose back the dMRI data accordingly the b-values table after EC correction
@@ -323,9 +364,10 @@ def rotate_bvecs(in_bvec, in_matrix):
     """
     Rotates the input bvec file accordingly with a list of matrices.
 
-    .. note:: the input affine matrix transforms points in the destination image to their \
-    corresponding coordinates in the original image. Therefore, this matrix should be inverted \
-    first, as we want to know the target position of :math:`\\vec{r}`.
+    .. note:: the input affine matrix transforms points in the destination
+      image to their corresponding coordinates in the original image.
+      Therefore, this matrix should be inverted first, as we want to know
+      the target position of :math:`\\vec{r}`.
 
     """
     import os
@@ -339,13 +381,15 @@ def rotate_bvecs(in_bvec, in_matrix):
     new_bvecs = []
 
     if len(bvecs) != len(in_matrix):
-        raise RuntimeError('Number of b-vectors and rotation matrices should match.')
+        raise RuntimeError(('Number of b-vectors (%d) and rotation '
+                           'matrices (%d) should match.') % (len(bvecs),
+                           len(in_matrix)))
 
     for bvec, mat in zip(bvecs, in_matrix):
         if np.all(bvec == 0.0):
             new_bvecs.append(bvec)
         else:
-            invrot = np.linalg.inv(np.loadtxt(mat))[:3,:3]
+            invrot = np.linalg.inv(np.loadtxt(mat))[:3, :3]
             newbvec = invrot.dot(bvec)
             new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
 
@@ -373,7 +417,8 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
     params = np.loadtxt(eddy_params)
 
     if len(bvecs) != len(params):
-        raise RuntimeError('Number of b-vectors and rotation matrices should match.')
+        raise RuntimeError(('Number of b-vectors and rotation '
+                           'matrices should match.'))
 
     for bvec, row in zip(bvecs, params):
         if np.all(bvec == 0.0):
@@ -383,9 +428,15 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             ay = row[4]
             az = row[5]
 
-            Rx = np.array([[1.0, 0.0, 0.0], [0.0, cos(ax), -sin(ax)], [0.0, sin(ax), cos(ax)]])
-            Ry = np.array([[cos(ay), 0.0, sin(ay)], [0.0, 1.0, 0.0], [-sin(ay), 0.0, cos(ay)]])
-            Rz = np.array([[cos(az), -sin(az), 0.0], [sin(az), cos(az), 0.0], [0.0, 0.0, 1.0]])
+            Rx = np.array([[1.0, 0.0, 0.0],
+                          [0.0, cos(ax), -sin(ax)],
+                          [0.0, sin(ax), cos(ax)]])
+            Ry = np.array([[cos(ay), 0.0, sin(ay)],
+                          [0.0, 1.0, 0.0],
+                          [-sin(ay), 0.0, cos(ay)]])
+            Rz = np.array([[cos(az), -sin(az), 0.0],
+                          [sin(az), cos(az), 0.0],
+                          [0.0, 0.0, 1.0]])
             R = Rx.dot(Ry).dot(Rz)
 
             invrot = np.linalg.inv(R)
@@ -443,7 +494,7 @@ def siemens2rads(in_file, out_file=None):
     if len(in_file) == 2:
         data = nb.load(in_file[1]).get_data().astype(np.float32) - data
     elif (data.ndim == 4) and (data.shape[-1] == 2):
-        data = np.squeeze(data[...,1] - data[...,0])
+        data = np.squeeze(data[..., 1] - data[..., 0])
         hdr.set_data_shape(data.shape[:3])
 
     imin = data.min()
@@ -497,14 +548,15 @@ def demean_image(in_file, in_mask=None, out_file=None):
     data = im.get_data().astype(np.float32)
     msk = np.ones_like(data)
 
-    if not in_mask is None:
+    if in_mask is not None:
         msk = nb.load(in_mask).get_data().astype(np.float32)
-        msk[msk>0] = 1.0
-        msk[msk<1] = 0.0
+        msk[msk > 0] = 1.0
+        msk[msk < 1] = 0.0
 
-    mean = np.median(data[msk==1].reshape(-1))
-    data[msk==1] = data[msk==1] - mean
-    nb.Nifti1Image(data, im.get_affine(), im.get_header()).to_filename(out_file)
+    mean = np.median(data[msk == 1].reshape(-1))
+    data[msk == 1] = data[msk == 1] - mean
+    nb.Nifti1Image(data, im.get_affine(),
+                   im.get_header()).to_filename(out_file)
     return out_file
 
 
@@ -571,13 +623,17 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
         out_file = op.abspath('./%s_fixhdr.nii.gz' % fname)
 
     imref = nb.load(in_file_hdr)
-    nii = nb.Nifti1Image(nb.load(in_file).get_data(),
-                         imref.get_affine(), imref.get_header())
+    hdr = imref.get_header().copy()
+    hdr.set_data_dtype(np.float32)
+    vsm = nb.load(in_file).get_data().astype(np.float32)
+    hdr.set_data_shape(vsm.shape)
+    hdr.set_xyzt_units('mm')
+    nii = nb.Nifti1Image(vsm, imref.get_affine(), hdr)
     nii.to_filename(out_file)
     return out_file
 
 
-def enhance(in_file, clip_limit=0.015, in_mask=None, out_file=None):
+def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
