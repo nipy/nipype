@@ -256,13 +256,16 @@ class ProvStore(object):
         inputs = results.inputs
         outputs = results.outputs
         classname = interface.__name__
+        modulepath = "{0}.{1}".format(interface.__module__, interface.__name__)
+        activitytype = ''.join([i.capitalize() for i in modulepath.split('.')])
 
         a0_attrs = {nipype_ns['module']: interface.__module__,
                     nipype_ns["interface"]: classname,
+                    pm.PROV["type"]: nipype_ns[activitytype],
                     pm.PROV["label"]: classname,
                     nipype_ns['duration']: safe_encode(runtime.duration),
-                    nipype_ns['working_directory']: safe_encode(runtime.cwd),
-                    nipype_ns['return_code']: safe_encode(runtime.returncode),
+                    nipype_ns['workingDirectory']: safe_encode(runtime.cwd),
+                    nipype_ns['returnCode']: safe_encode(runtime.returncode),
                     nipype_ns['platform']: safe_encode(runtime.platform),
                     nipype_ns['version']: safe_encode(runtime.version),
                     }
@@ -274,7 +277,7 @@ class ProvStore(object):
 
         try:
             a0_attrs.update({nipype_ns['command']: safe_encode(runtime.cmdline)})
-            a0_attrs.update({nipype_ns['command_path']:
+            a0_attrs.update({nipype_ns['commandPath']:
                                  safe_encode(runtime.command_path)})
             a0_attrs.update({nipype_ns['dependencies']:
                                  safe_encode(runtime.dependencies)})
@@ -286,7 +289,7 @@ class ProvStore(object):
         id = get_id()
         env_collection = self.g.collection(id)
         env_collection.add_extra_attributes({pm.PROV['type']:
-                                                 nipype_ns['environment'],
+                                                 nipype_ns['Environment'],
                                              pm.PROV['label']: "Environment"})
         self.g.used(a0, id)
         # write environment entities
@@ -299,7 +302,7 @@ class ProvStore(object):
                            'MKL_NUM_THREADS', 'OMP_NUM_THREADS']:
                 continue
             in_attr = {pm.PROV["label"]: key,
-                       nipype_ns["environment_variable"]: key,
+                       nipype_ns["environmentVariable"]: key,
                        pm.PROV["value"]: safe_encode(val)}
             id = get_attr_id(in_attr)
             self.g.entity(id, in_attr)
@@ -309,14 +312,14 @@ class ProvStore(object):
             id = get_id()
             input_collection = self.g.collection(id)
             input_collection.add_extra_attributes({pm.PROV['type']:
-                                                       nipype_ns['inputs'],
+                                                       nipype_ns['Inputs'],
                                                    pm.PROV['label']: "Inputs"})
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
                 in_entity = prov_encode(self.g, val).get_identifier()
                 self.g.hadMember(input_collection, in_entity)
                 used_attr = {pm.PROV["label"]: key,
-                             nipype_ns["in_port"]: key}
+                             nipype_ns["inPort"]: key}
                 self.g.used(activity=a0, entity=in_entity,
                             other_attributes=used_attr)
         # write output entities
@@ -326,7 +329,7 @@ class ProvStore(object):
             if not isinstance(outputs, dict):
                 outputs = outputs.get_traitsfree()
             output_collection.add_extra_attributes({pm.PROV['type']:
-                                                        nipype_ns['outputs'],
+                                                        nipype_ns['Outputs'],
                                                     pm.PROV['label']:
                                                         "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
@@ -335,14 +338,14 @@ class ProvStore(object):
                 out_entity = prov_encode(self.g, val).get_identifier()
                 self.g.hadMember(output_collection, out_entity)
                 gen_attr = {pm.PROV["label"]: key,
-                            nipype_ns["out_port"]: key}
+                            nipype_ns["outPort"]: key}
                 self.g.generation(out_entity, activity=a0,
                                   other_attributes=gen_attr)
         # write runtime entities
         id = get_id()
         runtime_collection = self.g.collection(id)
         runtime_collection.add_extra_attributes({pm.PROV['type']:
-                                                     nipype_ns['runtime'],
+                                                     nipype_ns['Runtime'],
                                                  pm.PROV['label']:
                                                      "RuntimeInfo"})
         self.g.wasGeneratedBy(runtime_collection, a0)
