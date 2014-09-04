@@ -13,18 +13,18 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
 # Input spec
 class FitAslInputSpec(NIFTYFITCommandInputSpec):
 
-    source = File(exists=True, desc='Filename of the 4D ASL (control/label) source image (mandatory)',
-                   argstr='-source %s', mandatory=True)
-    pasl   = traits.Bool(desc='Fit PASL ASL data [default]')
-    pcasl  = traits.Bool(desc='Fit PCASL ASL data')
+    source_file = File(exists=True, desc='Filename of the 4D ASL (control/label) source image (mandatory)',
+                       argstr='-source %s', mandatory=True)
+    pasl   = traits.Bool(desc='Fit PASL ASL data [default]', argstr='-pasl')
+    pcasl  = traits.Bool(desc='Fit PCASL ASL data', argstr='-pcasl')
 
 # *** Output options:
-    cbf     = File(exists=True, desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).',
-                   argstr='-cbf %s')
-    error   = File(exists=True, desc='Filename of the CBF error map.',
-                   argstr='-error %s')
-    syn     = File(exists=True, desc='Filename of the synthetic ASL data.',
-                   argstr='-syn %s')
+    cbf_file     = File(genfile = True, exists=True, desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).',
+                   argstr='-cbf %s', name_source = ['source'], name_template = '%s_cbf')
+    error_file   = File(genfile = True, exists=True, desc='Filename of the CBF error map.',
+                   argstr='-error %s', name_source = ['source'], name_template = '%s_error')
+    syn_file     = File(genfile = True, exists=True, desc='Filename of the synthetic ASL data.',
+                   argstr='-syn %s', name_source = ['source'], name_template = '%s_syn')
 
 # *** Input options (see also fit_qt1 for generic T1 fitting):
     t1map = File(exists=True, desc='Filename of the estimated input T1 map (in ms).',
@@ -98,9 +98,9 @@ class FitAslInputSpec(NIFTYFITCommandInputSpec):
 
 # Output spec
 class FitAslOutputSpec(TraitedSpec):
-    cbf     = File(exists=True, desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).')
-    error   = File(exists=True, desc='Filename of the CBF error map.')
-    syn     = File(exists=True, desc='Filename of the synthetic ASL data.')
+    cbf_file     = File(exists=True, desc='Filename of the Cerebral Blood Flow map (in ml/100g/min).')
+    error_file   = File(exists=True, desc='Filename of the CBF error map.')
+    syn_file     = File(exists=True, desc='Filename of the synthetic ASL data.')
 
 # FitAsl function
 class FitAsl(NIFTYFITCommand):
