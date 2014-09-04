@@ -130,10 +130,7 @@ class DcmStack(NiftiGeneratorBase):
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
             if not imghdr.what(src_path)=="gif":
-                if self.inputs.force_read:
-                    src_dcm = dicom.read_file(src_path, force=True)
-                else:
-                    src_dcm = dicom.read_file(src_path)
+                src_dcm = dicom.read_file(src_path, force=self.inputs.force_read)
                 stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
