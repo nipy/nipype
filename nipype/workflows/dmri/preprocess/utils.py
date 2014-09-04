@@ -4,8 +4,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
-# @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-04 16:44:28
+# @Last Modified by:   Oscar Esteban
+# @Last Modified time: 2014-09-04 17:21:33
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
@@ -231,7 +231,7 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
     return out_file
 
 
-def remove_comp(in_file, volid=0, out_file=None):
+def remove_comp(in_file, in_bval, volid=0, out_file=None):
     """
     Removes the volume ``volid`` from the 4D nifti file
     """
@@ -249,17 +249,24 @@ def remove_comp(in_file, volid=0, out_file=None):
     im = nb.load(in_file)
     data = im.get_data()
     hdr = im.get_header().copy()
+    bval = np.loadtxt(in_bval)
 
     if volid == 0:
         data = data[..., 1:]
+        bval = bval[1:]
     elif volid == (data.shape[-1] - 1):
         data = data[..., :-1]
+        bval = bval[:-1]
     else:
         data = np.concatenate((data[..., :volid], data[..., (volid + 1):]),
                               axis=3)
+        bval = np.hstack((bval[:volid], bval[(volid + 1):]))
     hdr.set_data_shape(data.shape)
     nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
-    return out_file
+
+    out_bval = op.abspath('bval_extract.txt')
+    np.savetxt(out_bval, bval)
+    return out_file, out_bval
 
 
 def insert_mat(inlist, volid=0):

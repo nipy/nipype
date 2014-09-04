@@ -299,19 +299,19 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
-    params = dict(dof=6, interp='spline', padding_size=10, save_log=True,
+    params = dict(dof=6, padding_size=10, save_log=True,
                   searchr_x=[-3, 3], searchr_y=[-3, 3], searchr_z=[-3, 3],
-                  fine_search=1, coarse_search=2)
-    # cost='normmi', cost_func='normmi', bins=64,
+                  fine_search=1, coarse_search=2,
+                  cost='mutualinfo', cost_func='mutualinfo', bins=64)
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
                         'in_bvec', 'in_bval', 'in_mask']), name='inputnode')
     refid = pe.Node(niu.IdentityInterface(fields=['ref_num']),
                     name='RefVolume')
     pick_ref = pe.Node(fsl.ExtractROI(t_size=1), name='GetRef')
-    pick_mov = pe.Node(niu.Function(input_names=['in_file', 'volid'],
-                       output_names=['out_file'], function=remove_comp),
-                       name='GetMovingDWs')
+    pick_mov = pe.Node(niu.Function(input_names=['in_file', 'in_bval', 'volid'],
+                       output_names=['out_file', 'out_bval'],
+                       function=remove_comp), name='GetMovingDWs')
     flirt = dwi_flirt(flirt_param=params)
     insmat = pe.Node(niu.Function(input_names=['inlist', 'volid'],
                      output_names=['out'], function=insert_mat),
@@ -327,12 +327,14 @@ taken as reference
     wf.connect([
          (inputnode,  refid,      [(('ref_num', _checkrnum), 'ref_num')])
         ,(inputnode,  pick_ref,   [('in_file', 'in_file')])
+        ,(inputnode,  pick_mov,   [('in_file', 'in_file'),
+                                   ('in_bval', 'in_bval')])
+        ,(inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask')])
         ,(refid,      pick_ref,   [('ref_num', 't_min')])
-        ,(inputnode,  pick_mov,   [('in_file', 'in_file')])
         ,(refid,      pick_mov,   [('ref_num', 'volid')])
-        ,(inputnode,  flirt,      [('in_file', 'inputnode.in_file'),
-                                   ('in_mask', 'inputnode.ref_mask'),
-                                   ('in_bval', 'inputnode.in_bval')])
+        ,(pick_mov,   flirt,      [('out_file', 'inputnode.in_file'),
+                                   ('out_bval', 'inputnode.in_bval')])
+
         ,(pick_ref,   flirt,      [('roi_file', 'inputnode.reference')])
         ,(flirt,      insmat,     [('outputnode.out_xfms', 'inlist')])
         ,(refid,      insmat,     [('ref_num', 'volid')])
