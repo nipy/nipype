@@ -19,30 +19,33 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
                                      acc_factor=3,
                                      enc_dir='y-')):
     """
-    Builds a pipeline including three artifact corrections: head-motion correction (HMC),
-    susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
-    correction (ECC).
+    Builds a pipeline including three artifact corrections: head-motion
+    correction (HMC), susceptibility-derived distortion correction (SDC),
+    and Eddy currents-derived distortion correction (ECC).
 
     The displacement fields from each kind of distortions are combined. Thus,
     only one interpolation occurs between input data and result.
 
-    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+    .. warning:: this workflow rotates the gradients table (*b*-vectors)
+      [Leemans09]_.
 
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
-                        'bmap_pha', 'bmap_mag']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
+                        'in_bval', 'bmap_pha', 'bmap_mag']), name='inputnode')
 
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask', 'out_bvec']),
-                         name='outputnode')
-
-
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask',
+                         'out_bvec']), name='outputnode')
     avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_pre')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_pre')
     avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_post')
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_post')
+    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_post')
 
     hmc = hmc_pipeline()
     sdc = sdc_fmb(fugue_params=fugue_params, bmap_params=bmap_params,
@@ -50,7 +53,7 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
     ecc = ecc_pipeline()
     unwarp = apply_all_corrections()
 
-    wf = pe.Workflow('dMRI_Artifacts')
+    wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
                                     ('in_bvec', 'inputnode.in_bvec'),
@@ -64,6 +67,7 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
         ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
                                     ('bmap_pha', 'inputnode.bmap_pha'),
                                     ('bmap_mag', 'inputnode.bmap_mag')])
+        ,(hmc,         ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')])
         ,(inputnode,   ecc,        [('in_file', 'inputnode.in_file'),
                                     ('in_bval', 'inputnode.in_bval')])
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
@@ -93,26 +97,31 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
                                         enc_dir='y',
                                         epi_factor=1)):
     """
-    Builds a pipeline including three artifact corrections: head-motion correction (HMC),
-    susceptibility-derived distortion correction (SDC), and Eddy currents-derived distortion
-    correction (ECC).
+    Builds a pipeline including three artifact corrections: head-motion
+    correction (HMC), susceptibility-derived distortion correction (SDC),
+    and Eddy currents-derived distortion correction (ECC).
 
-    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+    .. warning:: this workflow rotates the gradients table (*b*-vectors)
+      [Leemans09]_.
 
 
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
-                        'alt_file']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
+                        'in_bval', 'alt_file']), name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask',
                          'out_bvec']), name='outputnode')
 
     avg_b0_0 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_pre')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_pre')
     avg_b0_1 = pe.Node(niu.Function(input_names=['in_dwi', 'in_bval'],
-                       output_names=['out_file'], function=b0_average), name='b0_avg_post')
-    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_pre')
-    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True), name='bet_dwi_post')
+                       output_names=['out_file'], function=b0_average),
+                       name='b0_avg_post')
+    bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_pre')
+    bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
+                       name='bet_dwi_post')
 
     hmc = hmc_pipeline()
     sdc = sdc_peb(epi_params=epi_params, altepi_params=altepi_params)
@@ -120,7 +129,7 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
 
     unwarp = apply_all_corrections()
 
-    wf = pe.Workflow('dMRI_Artifacts')
+    wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
                                     ('in_bvec', 'inputnode.in_bvec'),
@@ -136,6 +145,7 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
         ,(inputnode,   ecc,        [('in_file', 'inputnode.in_file'),
                                     ('in_bval', 'inputnode.in_bval')])
         ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
+        ,(hmc,         ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')])
         ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
         ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
         ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
@@ -173,8 +183,8 @@ def all_fsl_pipeline(name='fsl_all_correct',
 
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec', 'in_bval',
-                        'alt_file']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
+                        'in_bval', 'alt_file']), name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_mask',
                          'out_bvec']), name='outputnode')
@@ -205,7 +215,7 @@ def all_fsl_pipeline(name='fsl_all_correct',
     bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
                        name='bet_dwi_post')
 
-    wf = pe.Workflow('dMRI_Artifacts_FSL')
+    wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
                                     ('in_bval', 'in_bval')])
@@ -299,10 +309,13 @@ taken as reference
         outputnode.out_xfms - list of transformation matrices
 
     """
+    from nipype.workflows.data import get_flirt_schedule
+
     params = dict(dof=6, bgvalue=0, save_log=True,
                   searchr_x=[-3, 3], searchr_y=[-3, 3], searchr_z=[-3, 3],
                   fine_search=1, coarse_search=2,
-                  cost='mutualinfo', cost_func='mutualinfo', bins=64)
+                  #cost='mutualinfo', cost_func='mutualinfo', bins=64,
+                  schedule=get_flirt_schedule('hmc'))
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
                         'in_bvec', 'in_bval', 'in_mask']), name='inputnode')
@@ -401,7 +414,10 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
         outputnode.out_file - corrected dwi file
         outputnode.out_xfms - list of transformation matrices
     """
-    params = dict(dof=12, no_search=True, interp='spline', bgvalue=0, save_log=True)
+
+    from nipype.workflows.data import get_flirt_schedule
+    params = dict(dof=12, no_search=True, interp='spline', bgvalue=0,
+                  schedule=get_flirt_schedule('ecc'))
     # cost='normmi', cost_func='normmi', bins=64,
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',

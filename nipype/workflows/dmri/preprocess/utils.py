@@ -4,8 +4,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 # @Author: oesteban
 # @Date:   2014-08-30 10:53:13
-# @Last Modified by:   Oscar Esteban
-# @Last Modified time: 2014-09-04 17:21:33
+# @Last Modified by:   oesteban
+# @Last Modified time: 2014-09-05 11:31:30
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
@@ -92,17 +92,18 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
 
     initmat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms',
                       'excl_nodiff'], output_names=['init_xfms'],
-                      function=_checkinitxfm), name='InitXforms')
+                                   function=_checkinitxfm), name='InitXforms')
     initmat.inputs.excl_nodiff = excl_nodiff
-
+    dilate = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
+                     args='-kernel sphere 5 -dilM'), name='MskDilate')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     pick_ref = pe.Node(niu.Select(), name='Pick_b0')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
     enhb0 = pe.Node(niu.Function(input_names=['in_file', 'in_mask',
                     'clip_limit'], output_names=['out_file'],
-                    function=enhance), name='B0Equalize')
+                                 function=enhance), name='B0Equalize')
     enhb0.inputs.clip_limit = 0.015
-    enhdw = pe.MapNode(niu.Function(input_names=['in_file'],
+    enhdw = pe.MapNode(niu.Function(input_names=['in_file', 'in_mask'],
                        output_names=['out_file'], function=enhance),
                        name='DWEqualize', iterfield=['in_file'])
     flirt = pe.MapNode(fsl.FLIRT(**flirt_param), name='CoRegistration',
@@ -115,14 +116,17 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
     wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,  split,      [('in_file', 'in_file')])
+        ,(inputnode,  dilate,     [('ref_mask', 'in_file')])
         ,(inputnode,  enhb0,      [('ref_mask', 'in_mask')])
         ,(inputnode,  initmat,    [('in_xfms', 'in_xfms'),
                                    ('in_bval', 'in_bval')])
         ,(inputnode,  n4,         [('reference', 'input_image'),
                                    ('ref_mask', 'mask_image')])
-        ,(inputnode,  flirt,      [('ref_mask', 'ref_weight')])
+        ,(dilate,     flirt,      [('out_file', 'ref_weight'),
+                                   ('out_file', 'in_weight')])
         ,(n4,         enhb0,      [('output_image', 'in_file')])
         ,(split,      enhdw,      [('out_files', 'in_file')])
+        ,(dilate,     enhdw,      [('out_file', 'in_mask')])
         ,(enhb0,      flirt,      [('out_file', 'reference')])
         ,(enhdw,      flirt,      [('out_file', 'in_file')])
         ,(initmat,    flirt,      [('init_xfms', 'in_matrix_file')])
