@@ -19,7 +19,7 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints, WarpPointsToStd)
 
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
-                  SigLoss, EddyCorrect)
+                  SigLoss, EddyCorrect, EpiReg)
 
 from .dti import (BEDPOSTX, DTIFit, ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
