@@ -987,14 +987,13 @@ class BaseInterface(Interface):
                 if xvfb_proc.poll() is not None:
                     raise Exception('Error: Xvfb did not start')
                 old_displaynum = os.environ['DISPLAY']
-                os.environ['DISPLAY'] = ':%s' % vdisplay_num
+                runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
     
             runtime = self._run_interface(runtime)
             
             if self._redirect_x:
                 xvfb_proc.kill()
                 xvfb_proc.wait()
-                os.environ['DISPLAY'] = old_displaynum
             
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
