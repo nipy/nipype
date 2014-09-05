@@ -468,7 +468,7 @@ class SPMCommand(BaseInterface):
 
         if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
            spm_jobman('initcfg');
-           spm_get_defaults('CmdLine', 1);
+           spm_get_defaults('cmdline', 1);
         end\n
         """
         if self.mlab.inputs.mfile:
