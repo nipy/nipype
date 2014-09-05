@@ -130,11 +130,11 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                                           'with additional transforms'))
     use_nearest = traits.Bool(argstr='--use-NN',
                               desc='Use nearest neighbor interpolation')
-    use_bspline = traits.Bool(argstr='--use-Bspline',
+    use_bspline = traits.Bool(argstr='--use-BSpline',
                               desc='Use 3rd order B-Spline interpolation')
     transformation_series = InputMultiPath(File(exists=True), argstr='%s',
                                            desc='transformation file(s) to be applied',
-                                           mandatory=True)
+                                           mandatory=True, position=-1)
     invert_affine = traits.List(traits.Int,
                                 desc=('List of Affine transformations to invert.'
                                       'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
