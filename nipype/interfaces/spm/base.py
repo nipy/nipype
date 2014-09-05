@@ -499,6 +499,12 @@ class SPMCommand(BaseInterface):
         mscript += """
         spm_jobman(\'run\', jobs);\n
         """
+        if self.inputs.use_mcr:
+            mscript += """
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+            close(\'all\', \'force\');
+        end;
+            """
         if postscript is not None:
             mscript += postscript
         return mscript
