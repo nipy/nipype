@@ -6,6 +6,183 @@ from nipype.interfaces.base import CommandLine, CommandLineInputSpec, SEMLikeCom
 import os
 
 
+class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    inT1_MPRAGE = File(desc="T1_MPRAGE Image", exists=True, argstr="--inT1_MPRAGE %s")
+    inT1_SPGR = File(desc="T1_SPGR Image", exists=True, argstr="--inT1_SPGR %s")
+    inFLAIR = File(desc="FLAIR Image", exists=True, argstr="--inFLAIR %s")
+    inAtlas = traits.Enum("With Lesion", "No Lesion", desc="Atlas to Use", argstr="--inAtlas %s")
+    inOutput = traits.Enum("hard segmentation", "hard segmentation+memberships", "cruise inputs", "dura removal inputs", desc="Output images", argstr="--inOutput %s")
+    inOutput2 = traits.Enum("true", "false", desc="Output the hard classification using maximum membership (not neceesarily topologically correct)", argstr="--inOutput2 %s")
+    inCorrect = traits.Enum("true", "false", desc="Correct MR field inhomogeneity.", argstr="--inCorrect %s")
+    inOutput3 = traits.Enum("true", "false", desc="Output the estimated inhomogeneity field", argstr="--inOutput3 %s")
+    inAtlas2 = File(desc="Atlas File - With Lesions", exists=True, argstr="--inAtlas2 %s")
+    inAtlas3 = File(desc="Atlas File - No Lesion - T1 and FLAIR", exists=True, argstr="--inAtlas3 %s")
+    inAtlas4 = File(desc="Atlas File - No Lesion - T1 Only", exists=True, argstr="--inAtlas4 %s")
+    inMaximum = traits.Int(desc="Maximum distance from the interventricular WM boundary to downweight the lesion membership to avoid false postives", argstr="--inMaximum %d")
+    inMaximum2 = traits.Int(desc="Maximum Ventircle Distance", argstr="--inMaximum2 %d")
+    inMaximum3 = traits.Int(desc="Maximum InterVentricular Distance", argstr="--inMaximum3 %d")
+    inInclude = traits.Enum("true", "false", desc="Include lesion in WM class in hard classification", argstr="--inInclude %s")
+    inAtlas5 = traits.Float(desc="Controls the effect of the statistical atlas on the segmentation", argstr="--inAtlas5 %f")
+    inSmooting = traits.Float(desc="Controls the effect of neighberhood voxels on the membership", argstr="--inSmooting %f")
+    inMaximum4 = traits.Float(desc="Maximum amount of relative change in the energy function considered as the convergence criteria", argstr="--inMaximum4 %f")
+    inMaximum5 = traits.Int(desc="Maximum iterations", argstr="--inMaximum5 %d")
+    inAtlas6 = traits.Enum("rigid", "multi_fully_affine", desc="Atlas alignment", argstr="--inAtlas6 %s")
+    inConnectivity = traits.Enum("(26,6)", "(6,26)", "(6,18)", "(18,6)", desc="Connectivity (foreground,background)", argstr="--inConnectivity %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    outHard = traits.Either(traits.Bool, File(), hash_files=False, desc="Hard segmentation", argstr="--outHard %s")
+    outHard2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Hard segmentationfrom memberships", argstr="--outHard2 %s")
+    outInhomogeneity = traits.Either(traits.Bool, File(), hash_files=False, desc="Inhomogeneity Field", argstr="--outInhomogeneity %s")
+    outMembership = traits.Either(traits.Bool, File(), hash_files=False, desc="Membership Functions", argstr="--outMembership %s")
+    outLesion = traits.Either(traits.Bool, File(), hash_files=False, desc="Lesion Segmentation", argstr="--outLesion %s")
+    outSulcal = traits.Either(traits.Bool, File(), hash_files=False, desc="Sulcal CSF Membership", argstr="--outSulcal %s")
+    outCortical = traits.Either(traits.Bool, File(), hash_files=False, desc="Cortical GM Membership", argstr="--outCortical %s")
+    outFilled = traits.Either(traits.Bool, File(), hash_files=False, desc="Filled WM Membership", argstr="--outFilled %s")
+    outWM = traits.Either(traits.Bool, File(), hash_files=False, desc="WM Mask", argstr="--outWM %s")
+    outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
+
+
+class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
+    outHard = File(desc="Hard segmentation", exists=True)
+    outHard2 = File(desc="Hard segmentationfrom memberships", exists=True)
+    outInhomogeneity = File(desc="Inhomogeneity Field", exists=True)
+    outMembership = File(desc="Membership Functions", exists=True)
+    outLesion = File(desc="Lesion Segmentation", exists=True)
+    outSulcal = File(desc="Sulcal CSF Membership", exists=True)
+    outCortical = File(desc="Cortical GM Membership", exists=True)
+    outFilled = File(desc="Filled WM Membership", exists=True)
+    outWM = File(desc="WM Mask", exists=True)
+
+
+class MedicAlgorithmLesionToads(SEMLikeCommandLine):
+    """title: Lesion TOADS
+
+category: Developer Tools
+
+description: Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains. The brain segmentation is topologically consistent and the algorithm can use multiple MR sequences as input data.
+N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham, "A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis", NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.
+
+version: 1.7.R
+
+contributor: Navid Shiee (navid.shiee@nih.gov) http://iacl.ece.jhu.edu/~nshiee/
+
+"""
+
+    input_spec = MedicAlgorithmLesionToadsInputSpec
+    output_spec = MedicAlgorithmLesionToadsOutputSpec
+    _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads "
+    _outputs_filenames = {'outWM':'outWM.nii','outHard':'outHard.nii','outFilled':'outFilled.nii','outMembership':'outMembership.nii','outInhomogeneity':'outInhomogeneity.nii','outCortical':'outCortical.nii','outHard2':'outHard2.nii','outLesion':'outLesion.nii','outSulcal':'outSulcal.nii'}
+    _redirect_x = True
+
+
+class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    inLevelset = File(desc="Levelset Image", exists=True, argstr="--inLevelset %s")
+    inSOR = traits.Float(desc="SOR Parameter", argstr="--inSOR %f")
+    inMean = traits.Float(desc="Mean Curvature Threshold", argstr="--inMean %f")
+    inStep = traits.Int(desc="Step Size", argstr="--inStep %d")
+    inMax = traits.Int(desc="Max Iterations", argstr="--inMax %d")
+    inLorentzian = traits.Enum("true", "false", desc="Lorentzian Norm", argstr="--inLorentzian %s")
+    inTopology = traits.Enum("26/6", "6/26", "18/6", "6/18", "6/6", "wcs", "wco", "no", desc="Topology", argstr="--inTopology %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    outOriginal = traits.Either(traits.Bool, File(), hash_files=False, desc="Original Surface", argstr="--outOriginal %s")
+    outInflated = traits.Either(traits.Bool, File(), hash_files=False, desc="Inflated Surface", argstr="--outInflated %s")
+    outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
+
+
+class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
+    outOriginal = File(desc="Original Surface", exists=True)
+    outInflated = File(desc="Inflated Surface", exists=True)
+
+
+class JistCortexSurfaceMeshInflation(SEMLikeCommandLine):
+    """title: Surface Mesh Inflation
+
+category: Developer Tools
+
+description: Inflates a cortical surface mesh.
+D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince, Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108--S118, 2004.
+
+version: 3.0.RC
+
+contributor: Duygu Tosun
+
+"""
+
+    input_spec = JistCortexSurfaceMeshInflationInputSpec
+    output_spec = JistCortexSurfaceMeshInflationOutputSpec
+    _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation "
+    _outputs_filenames = {'outOriginal':'outOriginal','outInflated':'outInflated'}
+    _redirect_x = True
+
+
+class MedicAlgorithmImageCalculatorInputSpec(CommandLineInputSpec):
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    inVolume = File(desc="Volume 1", exists=True, argstr="--inVolume %s")
+    inVolume2 = File(desc="Volume 2", exists=True, argstr="--inVolume2 %s")
+    inOperation = traits.Enum("Add", "Subtract", "Multiply", "Divide", "Min", "Max", desc="Operation", argstr="--inOperation %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result Volume", argstr="--outResult %s")
+    outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
+
+
+class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
+    outResult = File(desc="Result Volume", exists=True)
+
+
+class MedicAlgorithmImageCalculator(SEMLikeCommandLine):
+    """title: Image Calculator
+
+category: Developer Tools
+
+description: Perform simple image calculator operations on two images. The operations include 'Add', 'Subtract', 'Multiply', and 'Divide'
+
+version: 1.10.RC
+
+documentation-url: http://www.iacl.ece.jhu.edu/
+
+"""
+
+    input_spec = MedicAlgorithmImageCalculatorInputSpec
+    output_spec = MedicAlgorithmImageCalculatorOutputSpec
+    _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator "
+    _outputs_filenames = {'outResult':'outResult.nii'}
+    _redirect_x = True
+
+
+class JistBrainMp2rageDuraEstimationInputSpec(CommandLineInputSpec):
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    inSecond = File(desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s")
+    inSkull = File(desc="Skull Stripping Mask", exists=True, argstr="--inSkull %s")
+    inDistance = traits.Float(desc="Distance to background (mm)", argstr="--inDistance %f")
+    inoutput = traits.Enum("dura_region", "boundary", "dura_prior", "bg_prior", "intens_prior", desc="Outputs an estimate of the dura / CSF boundary or an estimate of the entire dura region.", argstr="--inoutput %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    outDura = traits.Either(traits.Bool, File(), hash_files=False, desc="Dura Image", argstr="--outDura %s")
+    outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
+
+
+class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
+    outDura = File(desc="Dura Image", exists=True)
+
+
+class JistBrainMp2rageDuraEstimation(SEMLikeCommandLine):
+    """title: MP2RAGE Dura Estimation
+
+category: Developer Tools
+
+description: Filters a MP2RAGE brain image to obtain a probability map of dura matter.
+
+version: 3.0.RC
+
+"""
+
+    input_spec = JistBrainMp2rageDuraEstimationInputSpec
+    output_spec = JistBrainMp2rageDuraEstimationOutputSpec
+    _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation "
+    _outputs_filenames = {'outDura':'outDura.nii'}
+    _redirect_x = True
+
+
 class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
     maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInput = File(desc="Input volume to be skullstripped.", exists=True, argstr="--inInput %s")
@@ -93,6 +270,38 @@ Hanlin Wan (hanlinwan@gmail.com)
     output_spec = MedicAlgorithmSPECTRE2010OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 "
     _outputs_filenames = {'outd0':'outd0.nii','outOriginal':'outOriginal.nii','outMask':'outMask.nii','outSplitHalves':'outSplitHalves.nii','outMidsagittal':'outMidsagittal.nii','outPrior':'outPrior.nii','outFANTASM':'outFANTASM.nii','outSegmentation':'outSegmentation.nii','outStripped':'outStripped.nii'}
+    _redirect_x = True
+
+
+class JistBrainPartialVolumeFilterInputSpec(CommandLineInputSpec):
+    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
+    inInput = File(desc="Input Image", exists=True, argstr="--inInput %s")
+    inPV = traits.Enum("bright", "dark", "both", desc="Outputs the raw intensity values or a probability score for the partial volume regions.", argstr="--inPV %s")
+    inoutput = traits.Enum("probability", "intensity", desc="output", argstr="--inoutput %s")
+    xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
+    outPartial = traits.Either(traits.Bool, File(), hash_files=False, desc="Partial Volume Image", argstr="--outPartial %s")
+    outExecution = traits.Str(desc="Execution Time", argstr="--outExecution %s")
+
+
+class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
+    outPartial = File(desc="Partial Volume Image", exists=True)
+
+
+class JistBrainPartialVolumeFilter(SEMLikeCommandLine):
+    """title: Partial Volume Filter
+
+category: Developer Tools
+
+description: Filters an image for regions of partial voluming assuming a ridge-like model of intensity.
+
+version: 2.0.RC
+
+"""
+
+    input_spec = JistBrainPartialVolumeFilterInputSpec
+    output_spec = JistBrainPartialVolumeFilterOutputSpec
+    _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter "
+    _outputs_filenames = {'outPartial':'outPartial.nii'}
     _redirect_x = True
 
 

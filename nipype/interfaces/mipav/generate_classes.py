@@ -34,7 +34,7 @@ if __name__ == "__main__":
                      'de.mpg.cbs.jist.modules.JistModuleRelabelSegmentation',
                      'de.mpg.cbs.jist.modules.JistModuleAggregativeSliceClustering',
                      #'de.mpg.cbs.jist.modules.JistModuleMgdmMultiSegmentation',
-                     'de.mpg.cbs.jist.modules.JistModuleCorticalProfileFeatures',
+                     #'de.mpg.cbs.jist.modules.JistModuleCorticalProfileFeatures',
                      'de.mpg.cbs.jist.modules.JistModuleCorticalProfileMeshSampling',
                      'de.mpg.cbs.jist.modules.JistModuleIntensityBounds',
                      'de.mpg.cbs.jist.modules.JistModuleCorticalMeshMapping',
@@ -75,7 +75,7 @@ if __name__ == "__main__":
                      #'de.mpg.cbs.jist.modules.JistModuleCorticalInflation', 
                      'de.mpg.cbs.jist.modules.JistModuleExtractBrainRegion',
                      'de.mpg.cbs.jist.modules.JistModuleAtlasBasedSimulator',
-                     'de.mpg.cbs.jist.modules.JistModuleProbabilityToLevelset',
+                     #'de.mpg.cbs.jist.modules.JistModuleProbabilityToLevelset',
                      #'de.mpg.cbs.jist.modules.JistModuleROISimilarity',
                      'de.mpg.cbs.jist.modules.JistModuleROIMembership',
                      'de.mpg.cbs.jist.modules.JistModuleRenameImage',
@@ -116,15 +116,16 @@ if __name__ == "__main__":
                          #'de.mpg.cbs.jist.modules.JistModuleCopyData', XML not well formed
                          #'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization',
                          #'de.mpg.cbs.jist.tools.JistToolsExtractBrainRegion',
-                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',# XML not well formed
+                         #'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',# XML not well formed
                          #'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE',
                          'de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation']
     
     modules_from_julia = ['de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking',
                           'edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010']
+    modules_from_leaonie = ['edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads']
     
     #modules_list = list(set(modules_list).union(set(modules_from_chris)))
-    modules_list = modules_from_julia
+    modules_list = list(set(modules_from_chris).union(set(modules_from_leaonie)).union(set(modules_from_julia)))
 
     ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
     generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run" ], redirect_x = True)
