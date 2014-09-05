@@ -471,10 +471,12 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                                    desc='do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr='-2D',
                           desc='use 2D rigid body mode - ignores dof')
-
     save_log = traits.Bool(desc='save to log file')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
+    bgvalue = traits.Float(0, argstr='-setbackground %f',
+                           desc=('use specified background value for points '
+                                 'outside FOV'))
 
     # BBR options
     wm_seg = File(
@@ -941,18 +943,18 @@ class FNIRT(FSLCommand):
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                   mandatory=True,
+                   mandatory=True, position=0,
                    desc='image to be warped')
-    out_file = File(argstr='--out=%s', genfile=True,
+    out_file = File(argstr='--out=%s', genfile=True, position=2,
                     desc='output filename', hash_files=False)
     ref_file = File(exists=True, argstr='--ref=%s',
-                    mandatory=True,
+                    mandatory=True, position=1,
                     desc='reference image')
     field_file = File(exists=True, argstr='--warp=%s',
                       desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc="treat warp field as absolute: x' = w(x)")
-    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
+    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'], position=-1,
                           desc="treat warp field as relative: x' = x + w(x)")
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr='--datatype=%s',
@@ -969,7 +971,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
     mask_file = File(exists=True, argstr='--mask=%s',
                      desc='filename for mask image (in reference space)')
     interp = traits.Enum(
-        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s',
+        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
         desc='interpolation method')
 
 
