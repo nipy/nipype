@@ -41,7 +41,7 @@ as data include a *b0* volume with reverse encoding direction
 that is *A>>>P* or *-y* (in RAS systems).
 """
 
-from nipype.workflows.dmri.preprocess.epi import all_fsl_pipeline, remove_bias
+from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline, remove_bias
 
 """
 Map field names into individual subject runs
