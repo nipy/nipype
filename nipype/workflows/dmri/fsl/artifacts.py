@@ -204,6 +204,17 @@ def all_fsl_pipeline(name='fsl_all_correct',
       *DWI* [Jones10]_.
 
 
+    Examples
+    --------
+
+    >>> from nipype.workflows.dmri.fsl.artifacts import all_fsl_pipeline
+    >>> allcorr = all_fsl_pipeline()
+    >>> allcorr.inputs.inputnode.in_file = 'epi.nii'
+    >>> allcorr.inputs.inputnode.alt_file = 'epi_rev.nii'
+    >>> allcorr.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> allcorr.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> allcorr.run() # doctest: +SKIP
+
     """
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
@@ -285,7 +296,7 @@ def hmc_pipeline(name='motion_correct'):
     can be chained.
     This is useful to correct for artifacts with only one interpolation process
     (as previously discussed `here
-     <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_),
+    <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_),
     and also to compute nuisance regressors as proposed by [Yendiki13]_.
 
     .. warning:: This workflow rotates the `b`-vectors, so please be advised
@@ -657,7 +668,7 @@ def sdc_peb(name='peb_correction',
     (e.g. *A>>>P* and *P>>>A*, or equivalently, *-y* and *y*)
     as in [Chiou2000]_, but it is also possible to use orthogonal
     configurations [Cordes2000]_ (e.g. *A>>>P* and *L>>>R*,
-                                  or equivalently *-y* and *x*).
+    or equivalently *-y* and *x*).
     This workflow uses the implementation of FSL
     (`TOPUP <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP>`_).
 
@@ -755,6 +766,17 @@ def remove_bias(name='bias_correct'):
         for improved analysis of multi-shell diffusion MRI data
         <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_. NeuroImage (2014).
         doi: 10.1016/j.neuroimage.2014.07.061
+
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.fsl.artifacts import remove_bias
+    >>> bias = remove_bias()
+    >>> bias.inputs.inputnode.in_file = 'epi.nii'
+    >>> bias.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> bias.inputs.inputnode.in_mask = 'mask.nii'
+    >>> bias.run() # doctest: +SKIP
 
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
