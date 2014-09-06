@@ -345,9 +345,7 @@ taken as reference
     """
     from nipype.workflows.data import get_flirt_schedule
 
-    params = dict(dof=6, bgvalue=0, save_log=True,
-                  searchr_x=[-3, 3], searchr_y=[-3, 3], searchr_z=[-3, 3],
-                  fine_search=1, coarse_search=2,
+    params = dict(dof=6, bgvalue=0, save_log=True, nosearch=True,
                   #cost='mutualinfo', cost_func='mutualinfo', bins=64,
                   schedule=get_flirt_schedule('hmc'))
 
