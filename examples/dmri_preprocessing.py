@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Author: oesteban
-# @Date:   2014-08-31 20:32:22
-# @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-04 10:55:15
+# coding: utf-8
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+
 """
 ===================
 dMRI: Preprocessing
