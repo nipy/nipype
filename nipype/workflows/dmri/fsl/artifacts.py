@@ -30,6 +30,18 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
       [Leemans09]_.
 
 
+    Examples
+    --------
+
+    >>> from nipype.workflows.dmri.fsl.artifacts import all_fmb_pipeline
+    >>> allcorr = all_fmb_pipeline()
+    >>> allcorr.inputs.inputnode.in_file = 'epi.nii'
+    >>> allcorr.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> allcorr.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> allcorr.inputs.inputnode.bmap_mag = 'magnitude.nii'
+    >>> allcorr.inputs.inputnode.bmap_pha = 'phase.nii'
+    >>> allcorr.run() # doctest: +SKIP
+
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
                         'in_bval', 'bmap_pha', 'bmap_mag']), name='inputnode')
@@ -104,6 +116,17 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
     .. warning:: this workflow rotates the gradients table (*b*-vectors)
       [Leemans09]_.
 
+
+    Examples
+    --------
+
+    >>> from nipype.workflows.dmri.fsl.artifacts import all_peb_pipeline
+    >>> allcorr = all_peb_pipeline()
+    >>> allcorr.inputs.inputnode.in_file = 'epi.nii'
+    >>> allcorr.inputs.inputnode.alt_file = 'epi_rev.nii'
+    >>> allcorr.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> allcorr.inputs.inputnode.in_bvec = 'diffusion.bvec'
+    >>> allcorr.run() # doctest: +SKIP
 
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bvec',
@@ -285,7 +308,7 @@ def hmc_pipeline(name='motion_correct'):
     Example
     -------
 
-    >>> from nipype.workflows.dmri.preprocess.epi import hmc_pipeline
+    >>> from nipype.workflows.dmri.fsl.artifacts import hmc_pipeline
     >>> hmc = hmc_pipeline()
     >>> hmc.inputs.inputnode.in_file = 'diffusion.nii'
     >>> hmc.inputs.inputnode.in_bvec = 'diffusion.bvec'
@@ -394,7 +417,7 @@ def ecc_pipeline(name='eddy_correct'):
     Example
     -------
 
-    >>> from nipype.workflows.dmri.preprocess.epi import ecc_pipeline
+    >>> from nipype.workflows.dmri.fsl.artifacts import ecc_pipeline
     >>> ecc = ecc_pipeline()
     >>> ecc.inputs.inputnode.in_file = 'diffusion.nii'
     >>> ecc.inputs.inputnode.in_bval = 'diffusion.bval'
@@ -493,7 +516,7 @@ def sdc_fmb(name='fmb_correction',
     Example
     -------
 
-    >>> from nipype.workflows.dmri.preprocess.epi import sdc_fmb
+    >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
     >>> fmb = sdc_fmb()
     >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
     >>> fmb.inputs.inputnode.in_bval = 'diffusion.bval'
@@ -641,9 +664,10 @@ def sdc_peb(name='peb_correction',
     Example
     -------
 
-    >>> from nipype.workflows.dmri.preprocess.epi import sdc_peb
+    >>> from nipype.workflows.dmri.fsl.artifacts import sdc_peb
     >>> peb = sdc_peb()
-    >>> peb.inputs.inputnode.in_file = 'diffusion.nii'
+    >>> peb.inputs.inputnode.in_file = 'epi.nii'
+    >>> peb.inputs.inputnode.alt_file = 'epi_rev.nii'
     >>> peb.inputs.inputnode.in_bval = 'diffusion.bval'
     >>> peb.inputs.inputnode.in_mask = 'mask.nii'
     >>> peb.run() # doctest: +SKIP
