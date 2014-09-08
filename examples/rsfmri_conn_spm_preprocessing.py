@@ -348,20 +348,7 @@ def create_workflow(files,
     """
 
     smooth = Node(interface=spm.Smooth(), name = "smooth")
-
-    """`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
-    the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
-    using the following function:
-    """
-
-    def get_vox_dims(volume):
-        import nibabel as nb
-        if isinstance(volume, list):
-            volume = volume[0]
-        nii = nb.load(volume)
-        hdr = nii.get_header()
-        voxdims = hdr.get_zooms()
-        return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+    smooth.inputs.fwhm = vol_fwhm
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
@@ -495,14 +482,8 @@ def create_workflow(files,
                      name='bandpass_unsmooth')
     bandpass1.inputs.fs = 1./TR
 
-    if highpass_freq < 0:
-            bandpass1.inputs.highpass_freq = -1
-    else:
-            bandpass1.inputs.highpass_freq = highpass_freq
-    if lowpass_freq < 0:
-            bandpass1.inputs.lowpass_freq = -1
-    else:
-            bandpass1.inputs.lowpass_freq = lowpass_freq
+    bandpass1.inputs.highpass_freq = highpass_freq
+    bandpass1.inputs.lowpass_freq = lowpass_freq
     wf.connect(filter2, 'out_res', bandpass1, 'files')
 
     bandpass2 = bandpass1.clone(name='bandpass_smooth')
