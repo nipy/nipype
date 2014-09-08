@@ -484,7 +484,7 @@ def create_workflow(files,
                filter3, 'out_res_name')
     wf.connect(smooth, 'smoothed_files', filter3, 'in_file')
     wf.connect(createfilter2, 'out_files', filter3, 'design')
-    #wf.connect(masktransform, 'transformed_file', filter3, 'mask')
+    # wf.connect(masktransform, 'transformed_file', filter3, 'mask')
 
     # Bandpass filter the data
     bandpass1 = Node(Function(input_names=['files', 'lowpass_freq',
