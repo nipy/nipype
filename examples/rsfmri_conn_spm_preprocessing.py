@@ -63,6 +63,7 @@ mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.interfaces.utility import Rename
 from nipype.utils.filemanip import filename_to_list
+from nipype.interfaces.io import DataSink
 
 import numpy as np
 import scipy as sp
@@ -497,16 +498,43 @@ def create_workflow(files,
     wf.connect(bandpass1, 'out_files', bandpass, 'in1')
     wf.connect(bandpass2, 'out_files', bandpass, 'in2')
 
+    # Save the relevant data into an output directory
+    datasink = Node(interface=DataSink(), name="datasink")
+    datasink.inputs.base_directory = sink_directory
+    datasink.inputs.container = subject_id
+    #datasink.inputs.substitutions = [('_target_subject_', '')]
+    #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
+    wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
+    wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
+    wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
+    wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.fullpass')
+    wf.connect(bin_and_erode, 'out_file', datasink, 'resting.mask_files')
+    wf.connect(filter1, 'out_f', datasink, 'resting.qa.compmaps.@mc_F')
+    wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
+    wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
+    wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
+    wf.connect(filter3, 'out_f', datasink, 'resting.qa.compmaps.@sF')
+    wf.connect(filter3, 'out_pf', datasink, 'resting.qa.compmaps.@sp')
+    wf.connect(bandpass, 'out_file', datasink, 'resting.timeseries.bandpassed')
+    wf.connect(createfilter1, 'out_files',
+               datasink, 'resting.regress.@regressors')
+    wf.connect(createfilter2, 'out_files',
+               datasink, 'resting.regress.@compcorr')
     return wf
 
 
-from glob import glob
+if __name__ == "__main__":
+    from glob import glob
 
-subj_id = 'SUB_1024011'
-files = sorted(glob(os.path.abspath('%s/E?/func/rest.nii' % subj_id)))
-anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
-wf = create_workflow(files, anat_file, subj_id, 2.0, 33, vol_fwhm=6.0,
-                     lowpass_freq=0.1, highpass_freq=0.01)
-wf.base_dir = os.getcwd()
-#wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
-wf.run()
+    subj_id = 'SUB_1024011'
+    files = sorted(glob(os.path.abspath('%s/E?/func/rest.nii' % subj_id)))
+    anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
+    wf = create_workflow(files, anat_file, subj_id, 2.0, 33, vol_fwhm=6.0,
+                         lowpass_freq=0.1, highpass_freq=0.01,
+                         sink_directory=os.getcwd(),
+                         name='resting_' + subj_id)
+    wf.base_dir = os.getcwd()
+    #wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
+    wf.run()
+
