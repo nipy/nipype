@@ -58,10 +58,10 @@ from nipype.interfaces import matlab as mlab
 
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 # If SPM is not in your MATLAB path you should add it here
-# mlab.MatlabCommand.set_default_paths('/path/to/your/spm8')
+mlab.MatlabCommand.set_default_paths('/cm/shared/openmind/spm/spm12b/spm12b_r5918/')
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.interfaces.utility import Rename
+from nipype.interfaces.utility import Rename, Merge
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink
 
@@ -366,29 +366,34 @@ def create_workflow(files,
                 (smooth, art, [('smoothed_files', 'realigned_files')]),
                 ])
 
+    def selectN(files, N=1):
+        from nipype.utils.filemanip import filename_to_list, list_to_filename
+        return list_to_filename(filename_to_list(files)[:N])
+
+    mask = Node(fsl.BET(), name='getmask')
+    mask.inputs.mask = True
+    wf.connect(normalize_func, ('normalized_files', selectN, 1), mask, 'in_file')
     # get segmentation in normalized functional space
 
     segment.inputs.wm_output_type = [False, False, True]
     segment.inputs.csf_output_type = [False, False, True]
+    segment.inputs.gm_output_type = [False, False, True]
 
     def merge_files(in1, in2):
         out_files = filename_to_list(in1)
         out_files.extend(filename_to_list(in2))
         return out_files
 
-    merge = Node(Function(input_names=['in1', 'in2'],
-                              output_names=['out_file'],
-                              function=merge_files,
-                              imports=imports),
-                     name='merge')
+    merge = Node(Merge(3), name='merge')
     wf.connect(segment, 'native_wm_image', merge, 'in1')
     wf.connect(segment, 'native_csf_image', merge, 'in2')
+    wf.connect(segment, 'native_gm_image', merge, 'in3')
 
     normalize_segs = Node(interface=spm.Normalize(), name = "normalize_segs")
     normalize_segs.inputs.jobtype = "write"
     normalize_segs.inputs.write_voxel_sizes = [2., 2., 2.]
 
-    wf.connect(merge, 'out_file', normalize_segs, 'apply_to_files')
+    wf.connect(merge, 'out', normalize_segs, 'apply_to_files')
     wf.connect(segment, 'transformation_mat', normalize_segs, 'parameter_file')
 
     # binarize and erode
@@ -448,7 +453,7 @@ def create_workflow(files,
     createfilter2.inputs.num_components = num_components
     wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
-    wf.connect(bin_and_erode, 'out_file', createfilter2, 'mask_file')
+    wf.connect(bin_and_erode, ('out_file', selectN, 2), createfilter2, 'mask_file')
 
     # Filter noise components from unsmoothed data
     filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
@@ -460,7 +465,7 @@ def create_workflow(files,
     wf.connect(normalize_func, ('normalized_files', rename, '_unsmooth_cleaned'),
                filter2, 'out_res_name')
     wf.connect(createfilter2, 'out_files', filter2, 'design')
-    #wf.connect(masktransform, 'transformed_file', filter2, 'mask')
+    wf.connect(mask, 'mask_file', filter2, 'mask')
 
     # Filter noise components from smoothed data
     filter3 = MapNode(fsl.GLM(out_f_name='F.nii',
@@ -472,7 +477,7 @@ def create_workflow(files,
                filter3, 'out_res_name')
     wf.connect(smooth, 'smoothed_files', filter3, 'in_file')
     wf.connect(createfilter2, 'out_files', filter3, 'design')
-    # wf.connect(masktransform, 'transformed_file', filter3, 'mask')
+    wf.connect(mask, 'mask_file', filter3, 'mask')
 
     # Bandpass filter the data
     bandpass1 = Node(Function(input_names=['files', 'lowpass_freq',
@@ -504,12 +509,13 @@ def create_workflow(files,
     datasink.inputs.container = subject_id
     #datasink.inputs.substitutions = [('_target_subject_', '')]
     #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
-    wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
+    wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
-    wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.fullpass')
+    wf.connect(smooth, 'smoothed_files', datasink, 'resting.timeseries.fullpass')
     wf.connect(bin_and_erode, 'out_file', datasink, 'resting.mask_files')
+    wf.connect(mask, 'mask_file', datasink, 'resting.mask_files.@brainmask')
     wf.connect(filter1, 'out_f', datasink, 'resting.qa.compmaps.@mc_F')
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
