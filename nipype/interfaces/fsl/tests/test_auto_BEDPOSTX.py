@@ -38,7 +38,7 @@ def test_BEDPOSTX_inputs():
     ),
     fudge=dict(argstr='--fudge=%d',
     ),
-    gradnonlin=dict(argstr='--gradnonlin=%s',
+    gradnonlin=dict(argstr='-g',
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,

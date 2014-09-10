@@ -101,8 +101,8 @@ class DTIFit(FSLCommand):
 
 
 class BEDPOSTXInputSpec(FSLXCommandInputSpec):
-    gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
-                      desc='consider gradient nonlinearities, default off')
+    gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
+                             'nonlinearities, default off'))
 
 
 class BEDPOSTX(FSLXCommand):
@@ -138,12 +138,18 @@ class BEDPOSTX(FSLXCommand):
     _can_resume = True
 
 
+class XFibresInputSpec(FSLXCommandInputSpec):
+    gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
+                      desc='gradient file corresponding to slice')
+
+
 class XFibres(FSLXCommand):
     """
-    Perform model parameters estimation for local (voxelwise) diffusion parameters
+    Perform model parameters estimation for local (voxelwise) diffusion
+    parameters
     """
     _cmd = 'xfibres'
-    input_spec = FSLXCommandInputSpec
+    input_spec = XFibresInputSpec
     output_spec = FSLXCommandOutputSpec
 
 
