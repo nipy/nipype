@@ -276,9 +276,9 @@ class SPMCommand(BaseInterface):
 
     @property
     def version(self):
-        version_dict = Info.version(matlab_cmd=self._matlab_cmd,
-                                    paths=self._paths,
-                                    use_mcr=self._use_mcr)
+        version_dict = Info.version(matlab_cmd=self.inputs.matlab_cmd,
+                                    paths=self.inputs.paths,
+                                    use_mcr=self.inputs.use_mcr)
         if version_dict:
             return '.'.join((version_dict['name'].split('SPM')[-1],
                              version_dict['release']))
@@ -468,7 +468,7 @@ class SPMCommand(BaseInterface):
 
         if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
            spm_jobman('initcfg');
-           spm_get_defaults('CmdLine', 1);
+           spm_get_defaults('cmdline', 1);
         end\n
         """
         if self.mlab.inputs.mfile:
@@ -499,6 +499,12 @@ class SPMCommand(BaseInterface):
         mscript += """
         spm_jobman(\'run\', jobs);\n
         """
+        if self.inputs.use_mcr:
+            mscript += """
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+            close(\'all\', \'force\');
+        end;
+            """
         if postscript is not None:
             mscript += postscript
         return mscript

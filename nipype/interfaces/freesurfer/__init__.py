@@ -10,6 +10,6 @@ from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
 from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
                     SegStats, Label2Vol, MS_LDA)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2VolTransform,
-                    SurfaceSnapshots,ApplyMask, MRIsConvert, MRITessellate,
+                    SurfaceSnapshots,ApplyMask, MRIsConvert, MRITessellate, MRIPretess,
                     MRIMarchingCubes, SmoothTessellation, MakeAverageSubject,
-                    ExtractMainComponent, TransformSurface2Talairach, FloodfillSurface)
+                    ExtractMainComponent, Tkregister2, TransformSurface2Talairach, FloodfillSurface)

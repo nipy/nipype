@@ -15,6 +15,8 @@ nipype tutorial directory:
 
 Import necessary modules from nipype."""
 
+import os                                    # system functions
+
 from nipype import config
 config.enable_provenance()
 
@@ -30,7 +32,7 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
+import nipype.interfaces.matlab as mlab
 
 """
 
@@ -49,6 +51,9 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 # Set the way matlab should be called
 # import nipype.interfaces.matlab as mlab      # how to run matlab
 # mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+
+# In case a different path is required
+# mlab.MatlabCommand.set_default_paths('/software/matlab/spm12b/spm12b_r5918')
 
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
