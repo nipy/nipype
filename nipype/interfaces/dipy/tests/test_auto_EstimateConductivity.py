@@ -14,7 +14,7 @@ def test_EstimateConductivity_inputs():
     ),
     out_filename=dict(genfile=True,
     ),
-    sigma_white_matter=dict(units='NA',
+    sigma_white_matter=dict(units='S/m',
     usedefault=True,
     ),
     use_outlier_correction=dict(usedefault=True,
