@@ -50,7 +50,9 @@ import os
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
-from nipype.interfaces import (spm, fsl, Function)
+from nipype.interfaces import (spm, fsl, Function, ants)
+from nipype.interfaces.c3 import C3dAffineTool
+
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 from nipype import Workflow, Node, MapNode
@@ -61,7 +63,8 @@ mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 mlab.MatlabCommand.set_default_paths('/cm/shared/openmind/spm/spm12b/spm12b_r5918/')
 
 from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.interfaces.utility import Rename, Merge
+from nipype.algorithms.misc import TSNR
+from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink
 
@@ -266,6 +269,206 @@ def rename(in_files, suffix=None):
             out_files.append(name + suffix + ext)
     return list_to_filename(out_files)
 
+def create_reg_workflow(name='registration'):
+    """Create a FEAT preprocessing workflow together with freesurfer
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: 'registration')
+
+    Inputs::
+
+        inputspec.source_files : files (filename or list of filenames to register)
+        inputspec.mean_image : reference image to use
+        inputspec.anatomical_image : anatomical image to coregister to
+        inputspec.target_image : registration target
+
+    Outputs::
+
+        outputspec.func2anat_transform : FLIRT transform
+        outputspec.anat2target_transform : FLIRT+FNIRT transform
+        outputspec.transformed_files : transformed files in target space
+        outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+
+    """
+
+    register = Workflow(name=name)
+
+    inputnode = Node(interface=IdentityInterface(fields=['source_files',
+                                                         'mean_image',
+                                                         'anatomical_image',
+                                                         'target_image']),
+                     name='inputspec')
+
+    outputnode = Node(interface=IdentityInterface(fields=['func2anat_transform',
+                                                          'anat2target_transform',
+                                                          'transforms',
+                                                          'transformed_mean',
+                                                          'segmentation_files',
+                                                          'anat2target'
+                                                          ]),
+                      name='outputspec')
+
+    """
+    Estimate the tissue classes from the anatomical image. But use spm's segment
+    as FSL appears to be breaking.
+    """
+
+    stripper = Node(fsl.BET(), name='stripper')
+    register.connect(inputnode, 'anatomical_image', stripper, 'in_file')
+    fast = Node(fsl.FAST(), name='fast')
+    register.connect(stripper, 'out_file', fast, 'in_files')
+
+    """
+    Binarize the segmentation
+    """
+
+    binarize = MapNode(fsl.ImageMaths(op_string='-nan -thr 0.5 -bin'),
+                       iterfield=['in_file'],
+                       name='binarize')
+    pickindex = lambda x, i: x[i]
+    register.connect(fast, 'partial_volume_files', binarize, 'in_file')
+
+    """
+    Calculate rigid transform from mean image to anatomical image
+    """
+
+    mean2anat = Node(fsl.FLIRT(), name='mean2anat')
+    mean2anat.inputs.dof = 6
+    register.connect(inputnode, 'mean_image', mean2anat, 'in_file')
+    register.connect(stripper, 'out_file', mean2anat, 'reference')
+
+    """
+    Now use bbr cost function to improve the transform
+    """
+
+    mean2anatbbr = Node(fsl.FLIRT(), name='mean2anatbbr')
+    mean2anatbbr.inputs.dof = 6
+    mean2anatbbr.inputs.cost = 'bbr'
+    mean2anatbbr.inputs.schedule = os.path.join(os.getenv('FSLDIR'),
+                                                'etc/flirtsch/bbr.sch')
+    register.connect(inputnode, 'mean_image', mean2anatbbr, 'in_file')
+    register.connect(binarize, ('out_file', pickindex, 2),
+                     mean2anatbbr, 'wm_seg')
+    register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
+    register.connect(mean2anat, 'out_matrix_file',
+                     mean2anatbbr, 'in_matrix_file')
+
+    """
+    Invert transform
+    """
+    invert_xfm = Node(fsl.ConvertXFM(invert_xfm=True), name='invert_transform')
+    register.connect(mean2anatbbr, 'out_matrix_file', invert_xfm, 'in_file')
+
+    """
+    Apply inverse transform to take segmentations to functional space
+    """
+    applyxfm = MapNode(fsl.ApplyXfm(), iterfield=['in_file'],
+                       name="inverse_transform")
+    applyxfm.inputs.interp = 'nearestneighbour'
+    register.connect(invert_xfm, 'out_file', applyxfm, 'in_matrix_file')
+    register.connect(binarize, 'out_file', applyxfm, 'in_file')
+    register.connect(inputnode, 'mean_image', applyxfm, 'reference')
+
+    """
+    Convert the BBRegister transformation to ANTS ITK format
+    """
+
+    convert2itk = Node(C3dAffineTool(), name='convert2itk')
+    convert2itk.inputs.fsl2ras = True
+    convert2itk.inputs.itk_transform = True
+    register.connect(mean2anatbbr, 'out_matrix_file', convert2itk, 'transform_file')
+    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(stripper, 'out_file', convert2itk, 'reference_file')
+
+    """
+    Compute registration between the subject's structural and MNI template
+    This is currently set to perform a very quick registration. However, the
+    registration can be made significantly more accurate for cortical
+    structures by increasing the number of iterations
+    All parameters are set using the example from:
+    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+    """
+
+    reg = Node(ants.Registration(), name='antsRegister')
+    reg.inputs.output_transform_prefix = "output_"
+    reg.inputs.transforms = ['Rigid', 'Affine', 'SyN']
+    reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.2, 3.0, 0.0)]
+    reg.inputs.number_of_iterations = [[10000, 11110, 11110]] * 2 + [[100, 30, 20]]
+    reg.inputs.dimension = 3
+    reg.inputs.write_composite_transform = True
+    reg.inputs.collapse_output_transforms = True
+    reg.inputs.initial_moving_transform_com = True
+    reg.inputs.metric = ['Mattes'] * 2 + [['Mattes', 'CC']]
+    reg.inputs.metric_weight = [1] * 2 + [[0.5, 0.5]]
+    reg.inputs.radius_or_number_of_bins = [32] * 2 + [[32, 4]]
+    reg.inputs.sampling_strategy = ['Regular'] * 2 + [[None, None]]
+    reg.inputs.sampling_percentage = [0.3] * 2 + [[None, None]]
+    reg.inputs.convergence_threshold = [1.e-8] * 2 + [-0.01]
+    reg.inputs.convergence_window_size = [20] * 2 + [5]
+    reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 2 + [[1, 0.5, 0]]
+    reg.inputs.sigma_units = ['vox'] * 3
+    reg.inputs.shrink_factors = [[3, 2, 1]]*2 + [[4, 2, 1]]
+    reg.inputs.use_estimate_learning_rate_once = [True] * 3
+    reg.inputs.use_histogram_matching = [False] * 2 + [True]
+    reg.inputs.winsorize_lower_quantile = 0.005
+    reg.inputs.winsorize_upper_quantile = 0.995
+    reg.inputs.args = '--float'
+    reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
+    reg.inputs.num_threads = 4
+    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    register.connect(stripper, 'out_file', reg, 'moving_image')
+    register.connect(inputnode,'target_image', reg,'fixed_image')
+
+
+    """
+    Concatenate the affine and ants transforms into a list
+    """
+
+    pickfirst = lambda x: x[0]
+
+    merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
+    register.connect(convert2itk, 'itk_transform', merge, 'in2')
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+
+
+    """
+    Transform the mean image. First to anatomical and then to target
+    """
+    warpmean = Node(ants.ApplyTransforms(), name='warpmean')
+    warpmean.inputs.input_image_type = 3
+    warpmean.inputs.interpolation = 'BSpline'
+    warpmean.inputs.invert_transform_flags = [False, False]
+    warpmean.inputs.terminal_output = 'file'
+    warpmean.inputs.args = '--float'
+    warpmean.inputs.num_threads = 4
+
+    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'mean_image', warpmean, 'input_image')
+    register.connect(merge, 'out', warpmean, 'transforms')
+
+
+    """
+    Assign all the output files
+    """
+
+    register.connect(reg, 'warped_image', outputnode, 'anat2target')
+    register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
+    register.connect(applyxfm, 'out_file', outputnode, 'segmentation_files')
+    register.connect(mean2anatbbr, 'out_matrix_file',
+                     outputnode, 'func2anat_transform')
+    register.connect(reg, 'composite_transform',
+                     outputnode, 'anat2target_transform')
+    register.connect(merge, 'out', outputnode, 'transforms')
+
+    return register
+
 
 """
 Creates the main preprocessing workflow
@@ -274,6 +477,7 @@ Creates the main preprocessing workflow
 
 def create_workflow(files,
                     anat_file,
+                    target_file,
                     subject_id,
                     TR,
                     num_slices,
@@ -305,13 +509,24 @@ def create_workflow(files,
     slice_timing.inputs.slice_order = range(1, num_slices + 1, 2) + range(2, num_slices + 1, 2)
     slice_timing.inputs.ref_slice = int(num_slices/2)
 
-    """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
-    body registration of the functional data to the structural data.
-    """
+    # Comute TSNR on realigned data regressing polynomials upto order 2
+    tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
+    wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
 
-    coregister = Node(interface=spm.Coregister(), name="coregister")
-    coregister.inputs.jobtype = 'estimate'
-    coregister.inputs.target = anat_file
+    # Compute the median image across runs
+    calc_median = Node(Function(input_names=['in_files'],
+                                output_names=['median_file'],
+                                function=median,
+                                imports=imports),
+                       name='median')
+    wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
+
+    """Segment and Register
+    """
+    registration = create_reg_workflow(name='registration')
+    wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
+    registration.inputs.inputspec.anatomical_image = anat_file
+    registration.inputs.inputspec.target_image = target_file
 
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
@@ -326,30 +541,6 @@ def create_workflow(files,
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'SPM'
 
-    segment = Node(interface=spm.Segment(), name="segment")
-    segment.inputs.save_bias_corrected = True
-    segment.inputs.data = anat_file
-
-    """Uncomment the following line for faster execution
-    """
-
-    #segment.inputs.gaussians_per_class = [1, 1, 1, 4]
-
-    """Warp functional and structural data to SPM's T1 template using
-    :class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
-    includes the template image, T1.nii.
-    """
-
-    normalize_func = Node(interface=spm.Normalize(), name = "normalize_func")
-    normalize_func.inputs.jobtype = "write"
-    normalize_func.inputs.write_voxel_sizes =[2., 2., 2.]
-
-    """Smooth the functional data using
-    :class:`nipype.interfaces.spm.Smooth`.
-    """
-
-    smooth = Node(interface=spm.Smooth(), name = "smooth")
-    smooth.inputs.fwhm = vol_fwhm
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
@@ -357,52 +548,25 @@ def create_workflow(files,
     """
 
     wf.connect([(name_unique, realign, [('out_file', 'in_files')]),
-                (realign, coregister, [('mean_image', 'source')]),
-                (segment, normalize_func, [('transformation_mat', 'parameter_file')]),
                 (realign, slice_timing, [('realigned_files', 'in_files')]),
-                (slice_timing, normalize_func, [('timecorrected_files', 'apply_to_files')]),
-                (normalize_func, art, [('normalized_files', 'realigned_files')]),
+                (slice_timing, art, [('timecorrected_files', 'realigned_files')]),
                 (realign, art, [('realignment_parameters', 'realignment_parameters')]),
                 ])
 
-    def selectN(files, N=1):
+    def selectindex(files, idx):
+        import numpy as np
         from nipype.utils.filemanip import filename_to_list, list_to_filename
-        return list_to_filename(filename_to_list(files)[:N])
+        return list_to_filename(np.array(filename_to_list(files))[idx].tolist())
 
     mask = Node(fsl.BET(), name='getmask')
     mask.inputs.mask = True
-    wf.connect(normalize_func, ('normalized_files', selectN, 1), mask, 'in_file')
+    wf.connect(calc_median, 'median_file', mask, 'in_file')
     # get segmentation in normalized functional space
-
-    segment.inputs.wm_output_type = [False, False, True]
-    segment.inputs.csf_output_type = [False, False, True]
-    segment.inputs.gm_output_type = [False, False, True]
 
     def merge_files(in1, in2):
         out_files = filename_to_list(in1)
         out_files.extend(filename_to_list(in2))
         return out_files
-
-    merge = Node(Merge(3), name='merge')
-    wf.connect(segment, 'native_wm_image', merge, 'in1')
-    wf.connect(segment, 'native_csf_image', merge, 'in2')
-    wf.connect(segment, 'native_gm_image', merge, 'in3')
-
-    normalize_segs = Node(interface=spm.Normalize(), name = "normalize_segs")
-    normalize_segs.inputs.jobtype = "write"
-    normalize_segs.inputs.write_voxel_sizes = [2., 2., 2.]
-
-    wf.connect(merge, 'out', normalize_segs, 'apply_to_files')
-    wf.connect(segment, 'transformation_mat', normalize_segs, 'parameter_file')
-
-    # binarize and erode
-    bin_and_erode = MapNode(fsl.ImageMaths(),
-                            iterfield=['in_file'],
-                            name='bin_and_erode')
-    bin_and_erode.inputs.op_string = '-thr 0.99 -bin -ero'
-
-    wf.connect(normalize_segs, 'normalized_files',
-               bin_and_erode, 'in_file')
 
     # filter some noise
 
@@ -434,8 +598,8 @@ def create_workflow(files,
                       iterfield=['in_file', 'design', 'out_res_name'],
                       name='filtermotion')
 
-    wf.connect(normalize_func, 'normalized_files', filter1, 'in_file')
-    wf.connect(normalize_func, ('normalized_files', rename, '_filtermotart'),
+    wf.connect(slice_timing, 'timecorrected_files', filter1, 'in_file')
+    wf.connect(slice_timing, ('timecorrected_files', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
 
@@ -448,11 +612,12 @@ def create_workflow(files,
                                      imports=imports),
                             iterfield=['realigned_file', 'extra_regressors'],
                             name='makecompcorrfilter')
-    createfilter2.inputs.num_components = 5
+    createfilter2.inputs.num_components = num_components
 
     wf.connect(createfilter1, 'out_files', createfilter2, 'extra_regressors')
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
-    wf.connect(bin_and_erode, 'out_file', createfilter2, 'mask_file')
+    wf.connect(registration, ('outputspec.segmentation_files', selectindex, [0, 2]),
+               createfilter2, 'mask_file')
 
 
     filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
@@ -461,10 +626,10 @@ def create_workflow(files,
                       iterfield=['in_file', 'design', 'out_res_name'],
                       name='filter_noise_nosmooth')
     wf.connect(filter1, 'out_res', filter2, 'in_file')
-    wf.connect(filter1, ('out_res', rename, '_unsmooth_cleaned'),
+    wf.connect(filter1, ('out_res', rename, '_cleaned'),
                filter2, 'out_res_name')
     wf.connect(createfilter2, 'out_files', filter2, 'design')
-
+    wf.connect(mask, 'mask_file', filter2, 'mask')
 
     bandpass = Node(Function(input_names=['files', 'lowpass_freq',
                                            'highpass_freq', 'fs'],
@@ -477,6 +642,12 @@ def create_workflow(files,
     bandpass.inputs.lowpass_freq = lowpass_freq
     wf.connect(filter2, 'out_res', bandpass, 'files')
 
+    """Smooth the functional data using
+    :class:`nipype.interfaces.spm.Smooth`.
+    """
+
+    smooth = Node(interface=spm.Smooth(), name="smooth")
+    smooth.inputs.fwhm = vol_fwhm
 
     wf.connect(bandpass, 'out_files', smooth, 'in_files')
 
@@ -485,7 +656,31 @@ def create_workflow(files,
     wf.connect(smooth, 'smoothed_files', collector, 'in1')
     wf.connect(bandpass, 'out_files', collector, 'in2')
 
+    """
+    Transform the remaining images. First to anatomical and then to target
+    """
 
+    warpall = MapNode(ants.ApplyTransforms(), iterfield=['input_image'],
+                      name='warpall')
+    warpall.inputs.input_image_type = 3
+    warpall.inputs.interpolation = 'BSpline'
+    warpall.inputs.invert_transform_flags = [False, False]
+    warpall.inputs.terminal_output = 'file'
+    warpall.inputs.reference_image = target_file
+    warpall.inputs.args = '--float'
+    warpall.inputs.num_threads = 1
+
+    # transform to target
+    wf.connect(collector, 'out', warpall, 'input_image')
+    wf.connect(registration, 'outputspec.transforms', warpall, 'transforms')
+
+    mask_target = Node(fsl.ImageMaths(op_string='-bin'), name='target_mask')
+
+    wf.connect(registration, 'outputspec.anat2target', mask_target, 'in_file')
+
+    maskts = MapNode(fsl.ApplyMask(), iterfield=['in_file'], name='ts_masker')
+    wf.connect(warpall, 'output_image', maskts, 'in_file')
+    wf.connect(mask_target, 'out_file', maskts, 'mask_file')
 
     # Save the relevant data into an output directory
     datasink = Node(interface=DataSink(), name="datasink")
@@ -497,8 +692,10 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
-    wf.connect(bin_and_erode, 'out_file', datasink, 'resting.mask_files')
+    wf.connect(registration, 'outputspec.segmentation_files', datasink, 'resting.mask_files')
+    wf.connect(registration, 'outputspec.anat2target', datasink, 'resting.qa.ants')
     wf.connect(mask, 'mask_file', datasink, 'resting.mask_files.@brainmask')
+    wf.connect(mask_target, 'out_file', datasink, 'resting.mask_files.target')
     wf.connect(filter1, 'out_f', datasink, 'resting.qa.compmaps.@mc_F')
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
@@ -509,6 +706,7 @@ def create_workflow(files,
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
                datasink, 'resting.regress.@compcorr')
+    wf.connect(maskts, 'out_file', datasink, 'resting.timeseries.target')
     return wf
 
 
@@ -518,11 +716,14 @@ if __name__ == "__main__":
     subj_id = 'SUB_1024011'
     files = sorted(glob(os.path.abspath('%s/E?/func/rest.nii' % subj_id)))
     anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
-    wf = create_workflow(files, anat_file, subj_id, 2.0, 33, vol_fwhm=6.0,
+    target_file = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+    wf = create_workflow(files, anat_file, target_file, subj_id,
+                         2.0, 33, vol_fwhm=6.0,
                          lowpass_freq=0.1, highpass_freq=0.01,
                          sink_directory=os.getcwd(),
                          name='resting_' + subj_id)
     wf.base_dir = os.getcwd()
-    #wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
-    wf.run()
+    wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
+    #wf.write_graph(graph2use='colored')
+    #wf.run()
 

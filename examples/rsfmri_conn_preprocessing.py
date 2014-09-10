@@ -573,16 +573,23 @@ def create_workflow(files,
                               demean=True),
                       iterfield=['in_file', 'design', 'out_res_name'],
                       name='filter_noise_nosmooth')
-    if fieldmap_images:
-        wf.connect(dewarper, 'unwarped_file', filter2, 'in_file')
-        wf.connect(dewarper, ('unwarped_file', rename, '_unsmooth_cleaned'), 
-                   filter2, 'out_res_name')
-    else:
-        wf.connect(realign, 'out_file', filter2, 'in_file')
-        wf.connect(realign, ('out_file', rename, '_unsmooth_cleaned'), 
-                   filter2, 'out_res_name')
+    wf.connect(filter1, 'out_files', filter2, 'in_file')
+    wf.connect(filter1, ('out_files', rename, '_unsmooth_cleaned'),
+               filter2, 'out_res_name')
     wf.connect(createfilter2, 'out_files', filter2, 'design')
     wf.connect(masktransform, 'transformed_file', filter2, 'mask')
+
+    # Bandpass filter the data
+    bandpass = Node(Function(input_names=['files', 'lowpass_freq',
+                                           'highpass_freq', 'fs'],
+                              output_names=['out_files'],
+                              function=bandpass_filter,
+                              imports=imports),
+                     name='bandpass_unsmooth')
+    bandpass.inputs.fs = 1./TR
+    bandpass.inputs.highpass_freq = highpass_freq
+    bandpass.inputs.lowpass_freq = lowpass_freq
+    wf.connect(filter2, 'out_res', bandpass, 'files')
 
     # Smoothing using surface and volume smoothing
     '''
@@ -615,57 +622,20 @@ def create_workflow(files,
             vol_fwhm = 3 * slice_thickness
         smooth.inputs.fwhm = vol_fwhm
 
-    if fieldmap_images:
-        wf.connect(dewarper, 'unwarped_file', smooth, 'in_file')
-    else:
-        wf.connect(realign, 'out_file', smooth, 'in_file')
-
-    # Filter noise components from smoothed data
-    filter3 = MapNode(fsl.GLM(out_f_name='F.nii.gz',
-                              out_pf_name='pF.nii.gz',
-                              demean=True),
-                      iterfield=['in_file', 'design', 'out_res_name'],
-                      name='filter_noise_smooth')
-    wf.connect(smooth, ('out_file', rename, '_cleaned'),
-               filter3, 'out_res_name')
-    wf.connect(smooth, 'out_file', filter3, 'in_file')
-    wf.connect(createfilter2, 'out_files', filter3, 'design')
-    wf.connect(masktransform, 'transformed_file', filter3, 'mask')
-
-    # Bandpass filter the data
-    bandpass1 = Node(Function(input_names=['files', 'lowpass_freq',
-                                           'highpass_freq', 'fs'],
-                              output_names=['out_files'],
-                              function=bandpass_filter,
-                              imports=imports),
-                     name='bandpass_unsmooth')
-    bandpass1.inputs.fs = 1./TR
-
-    if highpass_freq < 0:
-            bandpass1.inputs.highpass_freq = -1
-    else:
-            bandpass1.inputs.highpass_freq = highpass_freq
-    if lowpass_freq < 0:
-            bandpass1.inputs.lowpass_freq = -1
-    else:
-            bandpass1.inputs.lowpass_freq = lowpass_freq
-    wf.connect(filter2, 'out_res', bandpass1, 'files')
-
-    bandpass2 = bandpass1.clone(name='bandpass_smooth')
-    wf.connect(filter3, 'out_res', bandpass2, 'files')
+    wf.connect(bandpass, 'out_files', smooth, 'in_file')
 
     def merge_files(in1, in2):
         out_files = filename_to_list(in1)
         out_files.extend(filename_to_list(in2))
         return out_files
 
-    bandpass = Node(Function(input_names=['in1', 'in2'],
+    collector = Node(Function(input_names=['in1', 'in2'],
                               output_names=['out_file'],
                               function=merge_files,
                               imports=imports),
-                     name='bandpass_merge')
-    wf.connect(bandpass1, 'out_files', bandpass, 'in1')
-    wf.connect(bandpass2, 'out_files', bandpass, 'in2')
+                     name='collector')
+    wf.connect(bandpass, 'out_files', collector, 'in1')
+    wf.connect(smooth, 'out_files', collector, 'in2')
 
     # Convert aparc to subject functional space
     aparctransform = masktransform.clone("aparctransform")
@@ -688,7 +658,7 @@ def create_workflow(files,
 
     wf.connect(aparctransform, 'transformed_file',
                sampleaparc, 'segmentation_file')
-    wf.connect(bandpass, 'out_file', sampleaparc, 'in_file')
+    wf.connect(collector, 'out_file', sampleaparc, 'in_file')
     
     def get_names(files, suffix):
         """Generate appropriate names for output files
@@ -701,9 +671,9 @@ def create_workflow(files,
             out_names.append(name + suffix)
         return list_to_filename(out_names)
     
-    wf.connect(bandpass, ('out_file', get_names, '_avgwf.txt'), 
+    wf.connect(collector, ('out_file', get_names, '_avgwf.txt'),
                sampleaparc, 'avgwf_txt_file')
-    wf.connect(bandpass, ('out_file', get_names, '_summary.stats'), 
+    wf.connect(collector, ('out_file', get_names, '_summary.stats'),
                sampleaparc, 'summary_file')
 
     # Sample the time series onto the surface of the target surface. Performs
@@ -725,12 +695,12 @@ def create_workflow(files,
     samplerrh = samplerlh.clone('sampler_rh')
 
     samplerlh.inputs.hemi = 'lh'
-    wf.connect(bandpass, 'out_file', samplerlh, 'source_file')
+    wf.connect(collector, 'out_file', samplerlh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerlh, 'reg_file')
     wf.connect(target, 'target_subject', samplerlh, 'target_subject')
 
     samplerrh.set_input('hemi', 'rh')
-    wf.connect(bandpass, 'out_file', samplerrh, 'source_file')
+    wf.connect(collector, 'out_file', samplerrh, 'source_file')
     wf.connect(register, 'out_reg_file', samplerrh, 'reg_file')
     wf.connect(target, 'target_subject', samplerrh, 'target_subject')
 
@@ -870,13 +840,11 @@ def create_workflow(files,
                datasink, 'resting.registration.ants')
     wf.connect(register, 'min_cost_file',
                datasink, 'resting.qa.bbreg.@mincost')
-    wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.fullpass')
+    wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.smoothed')
     wf.connect(filter1, 'out_f', datasink, 'resting.qa.compmaps.@mc_F')
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
-    wf.connect(filter3, 'out_f', datasink, 'resting.qa.compmaps.@sF')
-    wf.connect(filter3, 'out_pf', datasink, 'resting.qa.compmaps.@sp')
     wf.connect(bandpass, 'out_file', datasink, 'resting.timeseries.bandpassed')
     wf.connect(sample2mni, 'output_image', datasink, 'resting.timeseries.mni')
     wf.connect(createfilter1, 'out_files',
