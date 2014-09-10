@@ -71,7 +71,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
                      (inputnode, slice_mask, [('mask', 'in_file')])
                      ])
 
-    xfibres = pe.MapNode(interface=fsl.XFibres(), name="xfibres",
+    xfibres = pe.MapNode(interface=fsl.OldXFibres(), name="xfibres",
                          iterfield=['dwi', 'mask'])
 
     # Normal set of parameters
@@ -155,7 +155,7 @@ def create_bedpostx_pipeline(name="bedpostx"):
                           ('thsamples', 'inputnode.thsamples'),
                        ('phsamples',
                         'inputnode.phsamples'),
-                    ('fsamples', 'inputnode.fsamples'),
+                       ('fsamples', 'inputnode.fsamples'),
                           ('dyads', 'inputnode.dyads'),
                           ('mean_dsamples', 'inputnode.mean_dsamples')]),
     ])

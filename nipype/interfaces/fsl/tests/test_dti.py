@@ -11,8 +11,8 @@ import numpy as np
 
 import nibabel as nb
 
-from nipype.testing import ( assert_equal, assert_not_equal,
-                             assert_raises, skipif, example_data)
+from nipype.testing import (assert_equal, assert_not_equal,
+                            assert_raises, skipif, example_data)
 import nipype.interfaces.fsl.dti as fsl
 from nipype.interfaces.fsl import Info, no_fsl
 from nipype.interfaces.base import Undefined
@@ -25,19 +25,21 @@ def skip_dti_tests():
     """
     return True
 
+
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nb.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                os.path.join(outdir, f))
     return filelist, outdir, cwd
+
 
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
@@ -47,9 +49,9 @@ def clean_directory(outdir, old_wd):
 
 # test bedpostx
 @skipif(no_fsl)
-def test_bedpostx2():
+def test_oldbedpostx2():
     filelist, outdir, cwd = create_files_in_directory()
-    bpx = fsl.BEDPOSTX()
+    bpx = fsl.OldBEDPOSTX()
 
     # make sure command gets called
     yield assert_equal, bpx.cmd, 'bedpostx'
@@ -58,7 +60,7 @@ def test_bedpostx2():
     yield assert_raises, ValueError, bpx.run
 
     # .inputs based parameters setting
-    bpx2 = fsl.BEDPOSTX()
+    bpx2 = fsl.OldBEDPOSTX()
     bpx2.inputs.mask = example_data('mask.nii')
     bpx2.inputs.dwi = example_data('diffusion.nii')
     bpx2.inputs.bvals = example_data('bvals')
@@ -107,6 +109,8 @@ def test_dtifit2():
 # Globals to store paths for tbss tests
 tbss_dir = None
 test_dir = None
+
+
 def setup_tbss():
     # Setup function is called before each test.  Setup is called only
     # once for each generator function.
@@ -114,11 +118,12 @@ def setup_tbss():
     test_dir = os.getcwd()
     tbss_dir = tempfile.mkdtemp()
     os.chdir(tbss_dir)
-    tbss_files = ['a.nii','b.nii']
+    tbss_files = ['a.nii', 'b.nii']
     for f in tbss_files:
-        fp = open(f,'wt')
+        fp = open(f, 'wt')
         fp.write('dummy')
         fp.close()
+
 
 def teardown_tbss():
     # Teardown is called after each test to perform cleanup
@@ -162,51 +167,52 @@ def test_randomise2():
 
     rand3 = fsl.Randomise()
     results = rand3.run(input_4D='infile3',
-                      output_rootname='outfile3')
+                        output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
           'randomise -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
-              'one_sample_gmean':                   ('-1', True),
-              'mask_image':                         ('-m inp_mask', 'inp_mask'),
-              'design_matrix':                      ('-d design.mat',
-                                                     'design.mat'),
-              't_contrast':                         ('-t input.con',
-                                                     'input.con'),
-              'f_contrast':                         ('-f input.fts',
-                                                     'input.fts'),
-              'xchange_block_labels':               ('-e design.grp',
-                                                     'design.grp'),
-              'print_unique_perm':                  ('-q', True),
-              'print_info_parallelMode':            ('-Q', True),
-              'num_permutations':                   ('-n 10', 10),
-              'vox_pvalus':                         ('-x', True),
-              'fstats_only':                        ('--fonly', True),
-              'thresh_free_cluster':                ('-T', True),
-              'thresh_free_cluster_2Dopt':          ('--T2', True),
-              'cluster_thresholding':               ('-c 0.20', 0.20),
-              'cluster_mass_thresholding':          ('-C 0.40', 0.40),
-              'fcluster_thresholding':              ('-F 0.10', 0.10),
-              'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
-              'variance_smoothing':                 ('-v 0.20', 0.20),
-              'diagnostics_off':                    ('--quiet', True),
-              'output_raw':                         ('-R', True),
-              'output_perm_vect':                   ('-P', True),
-              'int_seed':                           ('--seed=20', 20),
-              'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
-              'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
-              'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl=1,2,3,4',
-                                                     '1,2,3,4'),
-              'list_img_voxel_EVs':                 ('--vxf=6,7,8,9,3',
-                                                     '6,7,8,9,3')}
+               'one_sample_gmean':                   ('-1', True),
+               'mask_image':                         ('-m inp_mask', 'inp_mask'),
+               'design_matrix':                      ('-d design.mat',
+                                                      'design.mat'),
+               't_contrast':                         ('-t input.con',
+                                                      'input.con'),
+               'f_contrast':                         ('-f input.fts',
+                                                      'input.fts'),
+               'xchange_block_labels':               ('-e design.grp',
+                                                      'design.grp'),
+               'print_unique_perm':                  ('-q', True),
+               'print_info_parallelMode':            ('-Q', True),
+               'num_permutations':                   ('-n 10', 10),
+               'vox_pvalus':                         ('-x', True),
+               'fstats_only':                        ('--fonly', True),
+               'thresh_free_cluster':                ('-T', True),
+               'thresh_free_cluster_2Dopt':          ('--T2', True),
+               'cluster_thresholding':               ('-c 0.20', 0.20),
+               'cluster_mass_thresholding':          ('-C 0.40', 0.40),
+               'fcluster_thresholding':              ('-F 0.10', 0.10),
+               'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
+               'variance_smoothing':                 ('-v 0.20', 0.20),
+               'diagnostics_off':                    ('--quiet', True),
+               'output_raw':                         ('-R', True),
+               'output_perm_vect':                   ('-P', True),
+               'int_seed':                           ('--seed=20', 20),
+               'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
+               'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
+               'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
+               'list_num_voxel_EVs_pos':             ('--vxl=1,2,3,4',
+                                                      '1,2,3,4'),
+               'list_img_voxel_EVs':                 ('--vxf=6,7,8,9,3',
+                                                      '6,7,8,9,3')}
 
     for name, settings in opt_map.items():
         rand4 = fsl.Randomise(input_4D='infile', output_rootname='root',
                               **{name: settings[1]})
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
             + settings[0]
+
 
 @skipif(skip_dti_tests)
 def test_Randomise_parallel():
@@ -225,16 +231,17 @@ def test_Randomise_parallel():
     rand.inputs.t_contrast = 'infile.con'
 
     actualCmdline = sorted(rand.cmdline.split())
-    cmd = 'randomise_parallel -i infile.nii -o outfile -d design.mat -t infile.con'
+    cmd = ('randomise_parallel -i infile.nii -o outfile -d design.mat -t '
+           'infile.con')
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 
     # .run based parameter setting
     rand2 = fsl.Randomise_parallel(input_4D='infile2',
-                          output_rootname='outfile2',
-                          f_contrast='infile.f',
-                          one_sample_gmean=True,
-                          int_seed=4)
+                                   output_rootname='outfile2',
+                                   f_contrast='infile.f',
+                                   one_sample_gmean=True,
+                                   int_seed=4)
 
     actualCmdline = sorted(rand2.cmdline.split())
     cmd = 'randomise_parallel -i infile2 -o outfile2 -1 -f infile.f --seed=4'
@@ -243,47 +250,47 @@ def test_Randomise_parallel():
 
     rand3 = fsl.Randomise_parallel()
     results = rand3.run(input_4D='infile3',
-                      output_rootname='outfile3')
+                        output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
           'randomise_parallel -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
-              'one_sample_gmean':                   ('-1', True),
-              'mask_image':                         ('-m inp_mask', 'inp_mask'),
-              'design_matrix':                      ('-d design.mat',
-                                                     'design.mat'),
-              't_contrast':                         ('-t input.con',
-                                                     'input.con'),
-              'f_contrast':                         ('-f input.fts',
-                                                     'input.fts'),
-              'xchange_block_labels':               ('-e design.grp',
-                                                     'design.grp'),
-              'print_unique_perm':                  ('-q', True),
-              'print_info_parallelMode':            ('-Q', True),
-              'num_permutations':                   ('-n 10', 10),
-              'vox_pvalus':                         ('-x', True),
-              'fstats_only':                        ('--fonly', True),
-              'thresh_free_cluster':                ('-T', True),
-              'thresh_free_cluster_2Dopt':          ('--T2', True),
-              'cluster_thresholding':               ('-c 0.20', 0.20),
-              'cluster_mass_thresholding':          ('-C 0.40', 0.40),
-              'fcluster_thresholding':              ('-F 0.10', 0.10),
-              'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
-              'variance_smoothing':                 ('-v 0.20', 0.20),
-              'diagnostics_off':                    ('--quiet', True),
-              'output_raw':                         ('-R', True),
-              'output_perm_vect':                   ('-P', True),
-              'int_seed':                           ('--seed=20', 20),
-              'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
-              'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
-              'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
-              'list_num_voxel_EVs_pos':             ('--vxl=' \
-                                                         + repr([1, 2, 3, 4]),
-                                                     repr([1, 2, 3, 4])),
-              'list_img_voxel_EVs':               ('--vxf=' \
-                                                       + repr([6, 7, 8, 9, 3]),
-                                                     repr([6, 7, 8, 9, 3]))}
+               'one_sample_gmean':                   ('-1', True),
+               'mask_image':                         ('-m inp_mask', 'inp_mask'),
+               'design_matrix':                      ('-d design.mat',
+                                                      'design.mat'),
+               't_contrast':                         ('-t input.con',
+                                                      'input.con'),
+               'f_contrast':                         ('-f input.fts',
+                                                      'input.fts'),
+               'xchange_block_labels':               ('-e design.grp',
+                                                      'design.grp'),
+               'print_unique_perm':                  ('-q', True),
+               'print_info_parallelMode':            ('-Q', True),
+               'num_permutations':                   ('-n 10', 10),
+               'vox_pvalus':                         ('-x', True),
+               'fstats_only':                        ('--fonly', True),
+               'thresh_free_cluster':                ('-T', True),
+               'thresh_free_cluster_2Dopt':          ('--T2', True),
+               'cluster_thresholding':               ('-c 0.20', 0.20),
+               'cluster_mass_thresholding':          ('-C 0.40', 0.40),
+               'fcluster_thresholding':              ('-F 0.10', 0.10),
+               'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
+               'variance_smoothing':                 ('-v 0.20', 0.20),
+               'diagnostics_off':                    ('--quiet', True),
+               'output_raw':                         ('-R', True),
+               'output_perm_vect':                   ('-P', True),
+               'int_seed':                           ('--seed=20', 20),
+               'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
+               'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
+               'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
+               'list_num_voxel_EVs_pos':             ('--vxl=' \
+                                                          + repr([1, 2, 3, 4]),
+                                                      repr([1, 2, 3, 4])),
+               'list_img_voxel_EVs':               ('--vxf=' \
+                                                        + repr([6, 7, 8, 9, 3]),
+                                                      repr([6, 7, 8, 9, 3]))}
 
     for name, settings in opt_map.items():
         rand4 = fsl.Randomise_parallel(input_4D='infile',
@@ -317,7 +324,8 @@ def test_Proj_thresh():
     results = proj3.run(volumes=['inp1', 'inp3', 'inp2'], threshold=2)
     yield assert_equal, results.runtime.cmdline, 'proj_thresh inp1 inp3 inp2 2'
     yield assert_not_equal, results.runtime.returncode, 0
-    yield assert_equal, isinstance(results.interface.inputs.volumes, list), True
+    yield assert_equal, isinstance(results.interface.inputs.volumes, list), \
+        True
     yield assert_equal, results.interface.inputs.threshold, 2
 
     # test arguments for opt_map
@@ -346,10 +354,10 @@ def test_Vec_reg():
 
     # .run based parameter setting
     vrg2 = fsl.VecReg(infile='infile2',
-                       outfile='outfile2',
-                       refVolName='MNI152',
-                       affineTmat='tmat2.mat',
-                       brainMask='nodif_brain_mask')
+                      outfile='outfile2',
+                      refVolName='MNI152',
+                      affineTmat='tmat2.mat',
+                      brainMask='nodif_brain_mask')
 
     actualCmdline = sorted(vrg2.cmdline.split())
     cmd = 'vecreg -i infile2 -o outfile2 -r MNI152 -t tmat2.mat -m nodif_brain_mask'

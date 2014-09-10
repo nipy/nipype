@@ -29,8 +29,10 @@ from glob import glob
 import os
 import warnings
 
-from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+from ..base import (traits, isdefined,
+                    CommandLine, CommandLineInputSpec, TraitedSpec,
+                    File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -242,6 +244,185 @@ class FSLCommand(CommandLine):
     def _overload_extension(self, value, name=None):
         return value + Info.output_type_to_ext(self.inputs.output_type)
 
+
+class FSLXCommandInputSpec(FSLCommandInputSpec):
+    out_dir = Directory('.', mandatory=True, desc='output directory',
+                        usedefault=True, position=1, argstr='%s')
+    dwi = File(exists=True, argstr='--data=%s', mandatory=True,
+               desc='diffusion weighted image data file')
+    mask = File(exists=True, argstr='--mask=%s', mandatory=True,
+                desc='brain binary mask file (i.e. from BET)')
+    bvecs = File(exists=True, argstr='--bvecs=%s', mandatory=True,
+                 desc='b vectors file')
+    bvals = File(exists=True, argstr='--bvals=%s', mandatory=True,
+                 desc='b values file')
+
+    logdir = Directory('logdir', argstr='--logdir=%s', usedefault=True)
+    n_fibres = traits.Range(low=1, argstr='--nfibres=%d', desc=('Maximum '
+                            'number of fibres to fit in each voxel'))
+    model = traits.Enum(1, 2, argstr='--model=%d',
+                        desc=('use monoexponential (1, default, required for '
+                              'single-shell) or multiexponential (2, multi-'
+                              'shell) model'))
+    fudge = traits.Int(argstr='--fudge=%d',
+                       desc='ARD fudge factor')
+    n_jumps = traits.Int(5000, argstr='--njumps=%d',
+                         desc='Num of jumps to be made by MCMC')
+    burn_in = traits.Range(low=0, default=0, argstr='--burnin=%d',
+                           desc=('Total num of jumps at start of MCMC to be '
+                                 'discarded'))
+    burn_in_no_ard = traits.Range(low=0, default=0, argstr='--burninnoard=%d',
+                                  desc=('num of burnin jumps before the ard is'
+                                        ' imposed'))
+    sample_every = traits.Range(low=0, default=1, argstr='--sampleevery=%d',
+                                desc='Num of jumps for each sample (MCMC)')
+    update_proposal_every = traits.Range(low=1, default=40,
+                                         argstr='--updateproposalevery=%d',
+                                         desc=('Num of jumps for each update '
+                                               'to the proposal density std '
+                                               '(MCMC)'))
+    seed = traits.Int(argstr='--seed=%d',
+                      desc='seed for pseudo random number generator')
+
+    _xor_inputs1 = ('no_ard', 'all_ard')
+    no_ard = traits.Bool(argstr='--noard', xor=_xor_inputs1,
+                         desc='Turn ARD off on all fibres')
+    all_ard = traits.Bool(argstr='--allard', xor=_xor_inputs1,
+                          desc='Turn ARD on on all fibres')
+
+    _xor_inputs2 = ('no_spat', 'non_linear', 'cnlinear')
+    no_spat = traits.Bool(argstr='--nospat', xor=_xor_inputs2,
+                          desc='Initialise with tensor, not spatially')
+    non_linear = traits.Bool(argstr='--nonlinear', xor=_xor_inputs2,
+                             desc='Initialise with nonlinear fitting')
+    cnlinear = traits.Bool(argstr='--cnonlinear', xor=_xor_inputs2,
+                           desc=('Initialise with constrained nonlinear '
+                                 'fitting'))
+    rician = traits.Bool(argstr='--rician', desc=('use Rician noise modeling'))
+
+    _xor_inputs3 = ['f0_noard', 'f0_ard']
+    f0_noard = traits.Bool(argstr='--f0', xor=_xor_inputs3,
+                           desc=('Noise floor model: add to the model an '
+                                 'unattenuated signal compartment f0'))
+    f0_ard = traits.Bool(argstr='--f0 --ardf0', xor=_xor_inputs3 + ['all_ard'],
+                         desc=('Noise floor model: add to the model an '
+                               'unattenuated signal compartment f0'))
+    force_dir = traits.Bool(False, argstr='--forcedir', usedefault=True,
+                            desc=('use the actual directory name given '
+                                  '(do not add + to make a new directory)'))
+
+
+class FSLXCommandOutputSpec(TraitedSpec):
+    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
+                                       'the distribution on theta'))
+    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
+                                       'the distribution on phi'))
+    merged_fsamples = OutputMultiPath(File(exists=True),
+                                      desc=('Samples from the distribution on '
+                                            'anisotropic volume fraction.'))
+
+    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                     'distribution on theta'))
+    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                     'distribution on phi'))
+    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                    'distribution on f anisotropy'))
+
+    mean_dsamples = File(exists=True, desc='Mean of distribution on '
+                         'diffusivity d')
+    mean_S0samples = File(exists=True, desc='Mean of distribution on T2w'
+                          'baseline signal intensity S0')
+    mean_tausamples = File(exists=True, desc='Mean of distribution on '
+                           'tau samples (only with rician noise)')
+
+    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
+                            ' in vector form.'))
+    dyads_disp = OutputMultiPath(File(exists=True), desc=('Uncertainty on the '
+                                 ' estimated fiber orientation'))
+    fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
+                               'distribution on anisotropic volume fraction'))
+
+
+class FSLXCommand(FSLCommand):
+    """
+    Base support for ``xfibres`` and ``bedpostx``
+    """
+    input_spec = FSLXCommandInputSpec
+    output_spec = FSLXCommandOutputSpec
+
+    def _run_interface(self, runtime):
+        subjectdir = os.path.abspath(self.inputs.out_dir)
+        out_dir = subjectdir + '.bedpostX'
+
+        if isdefined(self.inputs.force_dir) and self.inputs.force_dir:
+            out_dir = os.path.abspath(self.inputs.out_dir)
+        self._out_dir = out_dir
+
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        _, _, ext = split_filename(self.inputs.mask)
+        copyfile(self.inputs.mask,
+                 os.path.join(subjectdir,
+                              'nodif_brain_mask' + ext))
+        _, _, ext = split_filename(self.inputs.dwi)
+        copyfile(self.inputs.dwi,
+                 os.path.join(subjectdir, 'data' + ext))
+        copyfile(self.inputs.bvals,
+                 os.path.join(subjectdir, 'bvals'))
+        copyfile(self.inputs.bvecs,
+                 os.path.join(subjectdir, 'bvecs'))
+
+        runtime = super(FSLXCommand, self)._run_interface(runtime)
+        if runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_dir = self._out_dir
+
+        for k in outputs.keys():
+            if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
+                         'xfms_directory', 'mean_dsamples', 'mean_S0samples',
+                         'mean_tausamples'):
+                outputs[k] = []
+
+        outputs['mean_dsamples'] = self._gen_fname('mean_dsamples',
+                                                   cwd=out_dir)
+        outputs['mean_S0samples'] = self._gen_fname('mean_S0samples',
+                                                    cwd=out_dir)
+
+        if isdefined(self.inputs.rician) and self.inputs.rician:
+            outputs['mean_tausamples'] = self._gen_fname('mean_tausamples',
+                                                         cwd=out_dir)
+
+        for i in xrange(1, self.inputs.fibres + 1):
+            outputs['merged_thsamples'].append(self._gen_fname(('merged_th%d'
+                                               'samples') % i),
+                                               cwd=out_dir)
+            outputs['merged_phsamples'].append(self._gen_fname(('merged_ph%d'
+                                               'samples') % i),
+                                               cwd=out_dir)
+            outputs['merged_fsamples'].append(self._gen_fname(('merged_f%d'
+                                              'samples') % i),
+                                              cwd=out_dir)
+
+            outputs['mean_thsamples'].append(self._gen_fname(('mean_th%d'
+                                             'samples') % i),
+                                             cwd=out_dir)
+            outputs['mean_phsamples'].append(self._gen_fname(('mean_ph%d'
+                                             'samples') % i),
+                                             cwd=out_dir)
+            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
+                                            'samples') % i),
+                                            cwd=out_dir)
+            outputs['dyads'].append(self._gen_fname('dyads%d' % i),
+                                    cwd=out_dir)
+            outputs['dyads_dispersion'].append(self._gen_fname(('dyads%d'
+                                               '_dispersion') % i),
+                                               cwd=out_dir)
+        return outputs
 
 
 def check_fsl():

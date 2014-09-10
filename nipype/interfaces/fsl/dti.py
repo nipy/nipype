@@ -16,7 +16,9 @@ import os
 import shutil
 import warnings
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info,
+                                        FSLXCommand, FSLXCommandInputSpec,
+                                        FSLXCommandOutputSpec)
 from nipype.interfaces.base import (TraitedSpec, isdefined, File, Directory,
                                     InputMultiPath, OutputMultiPath, traits)
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
@@ -26,9 +28,8 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 class DTIFitInputSpec(FSLCommandInputSpec):
-
     dwi = File(exists=True, desc='diffusion weighted image data file',
-                  argstr='-k %s', position=0, mandatory=True)
+               argstr='-k %s', position=0, mandatory=True)
     base_name = traits.Str("dtifit_", desc='base_name that all output files will start with',
                            argstr='-o %s', position=1, usedefault=True)
     mask = File(exists=True, desc='bet binary mask file',
@@ -52,7 +53,6 @@ class DTIFitInputSpec(FSLCommandInputSpec):
 
 
 class DTIFitOutputSpec(TraitedSpec):
-
     V1 = File(exists=True, desc='path/name of file with the 1st eigenvector')
     V2 = File(exists=True, desc='path/name of file with the 2nd eigenvector')
     V3 = File(exists=True, desc='path/name of file with the 3rd eigenvector')
@@ -100,134 +100,51 @@ class DTIFit(FSLCommand):
         return outputs
 
 
-class BEDPOSTXInputSpec(FSLCommandInputSpec):
-    dwi = File(exists=True, desc='diffusion weighted image data file', mandatory=True)
-    mask = File(exists=True, desc='bet binary mask file', mandatory=True)
-    bvecs = File(exists=True, desc='b vectors file', mandatory=True)
-    bvals = File(exists=True, desc='b values file', mandatory=True)
-    bpx_directory = Directory('bedpostx', argstr='%s', usedefault=True,
-                             desc='the name for this subject''s bedpostx folder')
-
-    fibres = traits.Int(1, argstr='-n %d', desc='number of fibres per voxel')
-    weight = traits.Float(1.00, argstr='-w %.2f',
-                          desc='ARD weight, more weight means less' +
-                               ' secondary fibres per voxel')
-    burn_period = traits.Int(1000, argstr='-b %d', desc='burnin period')
-    jumps = traits.Int(1250, argstr='-j %d', desc='number of jumps')
-    sampling = traits.Int(25, argstr='-s %d', desc='sample every')
+class BEDPOSTXInputSpec(FSLXCommandInputSpec):
+    gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
+                      desc='consider gradient nonlinearities, default off')
 
 
-class BEDPOSTXOutputSpec(TraitedSpec):
-    bpx_out_directory = Directory(exists=True,
-                                  desc='path/name of directory with all ' +
-                                       'bedpostx output files for this subject')
-    xfms_directory = Directory(exists=True,
-                              desc='path/name of directory with the ' +
-                                   'tranformation matrices')
-    merged_thsamples = traits.List(File(exists=True),
-                                   desc='a list of path/name of 4D volume ' +
-                                        'with samples from the distribution ' +
-                                        'on theta')
-    merged_phsamples = traits.List(File(exists=True),
-                                   desc='a list of path/name of file with '
-                                        'samples from the distribution on phi')
-    merged_fsamples = traits.List(File(exists=True),
-                                   desc='a list of path/name of 4D volume ' +
-                                        'with samples from the distribution ' +
-                                        'on anisotropic volume fraction')
-    mean_thsamples = traits.List(File(exists=True),
-                                 desc='a list of path/name of 3D volume with mean of distribution on theta')
-    mean_phsamples = traits.List(File(exists=True),
-                                 desc='a list of path/name of 3D volume with mean of distribution on phi')
-    mean_fsamples = traits.List(File(exists=True),
-                                 desc='a list of path/name of 3D volume with mean of distribution on f anisotropy')
-    dyads = traits.List(File(exists=True),  desc='a list of path/name of mean of PDD distribution in vector form')
+class BEDPOSTX(FSLXCommand):
+    """
+    BEDPOSTX stands for Bayesian Estimation of Diffusion Parameters Obtained
+    using Sampling Techniques. The X stands for modelling Crossing Fibres.
+    bedpostx runs Markov Chain Monte Carlo sampling to build up distributions
+    on diffusion parameters at each voxel. It creates all the files necessary
+    for running probabilistic tractography. For an overview of the modelling
+    carried out within bedpostx see this `technical report
+    <http://www.fmrib.ox.ac.uk/analysis/techrep/tr03tb1/tr03tb1/index.html>`_.
 
 
-class BEDPOSTX(FSLCommand):
-    """ Deprecated! Please use create_bedpostx_pipeline instead
+    .. note:: Consider using
+      :func:`nipype.workflows.fsl.dmri.create_bedpostx_pipeline` instead.
+
 
     Example
     -------
 
     >>> from nipype.interfaces import fsl
-    >>> bedp = fsl.BEDPOSTX(bpx_directory='subjdir', bvecs='bvecs', bvals='bvals', dwi='diffusion.nii', \
-    mask='mask.nii', fibres=1)
+    >>> bedp = fsl.BEDPOSTX(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
+    ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
-    'bedpostx subjdir -n 1'
+    'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
+--logdir=logdir --mask=mask.nii --nfibres=1'
 
     """
 
     _cmd = 'bedpostx'
     input_spec = BEDPOSTXInputSpec
-    output_spec = BEDPOSTXOutputSpec
+    output_spec = FSLXCommandOutputSpec
     _can_resume = True
 
-    def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
-        return super(BEDPOSTX, self).__init__(**inputs)
 
-    def _run_interface(self, runtime):
-
-        #create the subject specific bpx_directory
-        bpx_directory = os.path.join(os.getcwd(), self.inputs.bpx_directory)
-        self.inputs.bpx_directory = bpx_directory
-        if not os.path.exists(bpx_directory):
-            os.makedirs(bpx_directory)
-
-            _, _, ext = split_filename(self.inputs.mask)
-            shutil.copyfile(self.inputs.mask,
-                            os.path.join(self.inputs.bpx_directory,
-                                         'nodif_brain_mask' + ext))
-            _, _, ext = split_filename(self.inputs.dwi)
-            shutil.copyfile(self.inputs.dwi,
-                            os.path.join(self.inputs.bpx_directory, 'data' + ext))
-            shutil.copyfile(self.inputs.bvals,
-                            os.path.join(self.inputs.bpx_directory, 'bvals'))
-            shutil.copyfile(self.inputs.bvecs,
-                            os.path.join(self.inputs.bpx_directory, 'bvecs'))
-
-        runtime = super(BEDPOSTX, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
-        return runtime
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['bpx_out_directory'] = os.path.join(os.getcwd(),
-                                    self.inputs.bpx_directory + '.bedpostX')
-        outputs['xfms_directory'] = os.path.join(os.getcwd(),
-                                    self.inputs.bpx_directory + '.bedpostX',
-                                    'xfms')
-
-        for k in outputs.keys():
-            if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
-                         'xfms_directory'):
-                outputs[k] = []
-
-        for n in range(self.inputs.fibres):
-            outputs['merged_thsamples'].append(self._gen_fname('merged_th' + repr(n + 1)
-                                                               + 'samples', suffix='',
-                                               cwd=outputs['bpx_out_directory']))
-            outputs['merged_phsamples'].append(self._gen_fname('merged_ph' + repr(n + 1)
-                                                               + 'samples', suffix='',
-                                                               cwd=outputs['bpx_out_directory']))
-            outputs['merged_fsamples'].append(self._gen_fname('merged_f' + repr(n + 1)
-                                                              + 'samples', suffix='',
-                                                              cwd=outputs['bpx_out_directory']))
-            outputs['mean_thsamples'].append(self._gen_fname('mean_th' + repr(n + 1)
-                                                              + 'samples', suffix='',
-                                                              cwd=outputs['bpx_out_directory']))
-            outputs['mean_phsamples'].append(self._gen_fname('mean_ph' + repr(n + 1)
-                                                             + 'samples', suffix='',
-                                                             cwd=outputs['bpx_out_directory']))
-            outputs['mean_fsamples'].append(self._gen_fname('mean_f' + repr(n + 1)
-                                                            + 'samples', suffix='',
-                                                            cwd=outputs['bpx_out_directory']))
-            outputs['dyads'].append(self._gen_fname('dyads' + repr(n + 1),
-                                                            suffix='',
-                                                            cwd=outputs['bpx_out_directory']))
-        return outputs
+class XFibres(FSLXCommand):
+    """
+    Perform model parameters estimation for local (voxelwise) diffusion parameters
+    """
+    _cmd = 'xfibres'
+    input_spec = FSLXCommandInputSpec
+    output_spec = FSLXCommandOutputSpec
 
 
 class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
@@ -299,6 +216,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
                           "Level 2 is required to output particle files.",
                           argstr="--verbose=%d")
 
+
 class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
     mode = traits.Enum("simple", "two_mask_symm", "seedmask",
                        desc='options: simple (single seed voxel), seedmask (mask of seed voxels), '
@@ -308,6 +226,7 @@ class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
                  argstr='--mask2=%s')
     mesh = File(exists=True, desc='Freesurfer-type surface descriptor (in ascii format)',
                 argstr='--mesh=%s')
+
 
 class ProbTrackXOutputSpec(TraitedSpec):
     log = File(exists=True, desc='path/name of a text record of the command that was run')
@@ -320,6 +239,7 @@ class ProbTrackXOutputSpec(TraitedSpec):
     particle_files = traits.List(File(exists=True), desc='Files describing ' +
                                  'all of the tract samples. Generated only if ' +
                                  'verbose is set to 2')
+
 
 class ProbTrackX(FSLCommand):
     """ Use FSL  probtrackx for tractography on bedpostx results
@@ -434,6 +354,7 @@ class ProbTrackX(FSLCommand):
                 return "simple"
             else:
                 return "seedmask"
+
 
 class ProbTrackX2InputSpec(ProbTrackXBaseInputSpec):
     simple = traits.Bool(desc='rack from a list of voxels (seed must be a ASCII list of coordinates)',
@@ -863,7 +784,40 @@ class DistanceMap(FSLCommand):
         return None
 
 
-class XFibresInputSpec(FSLCommandInputSpec):
+class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
+    theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
+    phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
+    mask = File(exists=True, position=2, argstr="%s")
+    output = File("dyads", position=3, usedefault=True, argstr="%s", hash_files=False)
+    perc = traits.Float(desc="the {perc}% angle of the output cone of \
+uncertainty (output will be in degrees)",
+                        position=4,
+                        argstr="%f")
+
+
+class MakeDyadicVectorsOutputSpec(TraitedSpec):
+    dyads = File(exists=True)
+    dispersion = File(exists=True)
+
+
+class MakeDyadicVectors(FSLCommand):
+    """Create vector volume representing mean principal diffusion direction
+    and its uncertainty (dispersion)"""
+
+    _cmd = "make_dyadic_vectors"
+    input_spec = MakeDyadicVectorsInputSpec
+    output_spec = MakeDyadicVectorsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["dyads"] = self._gen_fname(self.inputs.output)
+        outputs["dispersion"] = self._gen_fname(self.inputs.output,
+                                                suffix="_dispersion")
+
+        return outputs
+
+
+class OldXFibresInputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, argstr="--data=%s", mandatory=True)
     mask = File(exists=True, argstr="--mask=%s", mandatory=True)
     gradnonlin = File(exists=True, argstr="--gradnonlin=%s")
@@ -902,7 +856,7 @@ exponential (for multi-shell experiments)")
                                argstr='--forcedir', usedefault=True)
 
 
-class XFibresOutputSpec(TraitedSpec):
+class OldXFibresOutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc="Mean of PDD distribution in vector form.")
     fsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on anisotropic volume fraction")
     mean_dsamples = File(exists=True, desc="Mean of distribution on diffusivity d")
@@ -912,15 +866,22 @@ class XFibresOutputSpec(TraitedSpec):
     thsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on theta")
 
 
-class XFibres(FSLCommand):
-    """Perform model parameters estimation for local (voxelwise) diffusion parameters
+class OldXFibres(FSLCommand):
+    """
+    Perform model parameters estimation for local (voxelwise) diffusion
+    parameters
+
+    .. deprecated:: 0.9.2
+      Use :class:`.XFibres` instead.
+
+
     """
     _cmd = "xfibres"
-    input_spec = XFibresInputSpec
-    output_spec = XFibresOutputSpec
+    input_spec = OldXFibresInputSpec
+    output_spec = OldXFibresOutputSpec
 
     def _run_interface(self, runtime):
-        runtime = super(XFibres, self)._run_interface(runtime)
+        runtime = super(OldXFibres, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -946,34 +907,149 @@ class XFibres(FSLCommand):
         return outputs
 
 
-class MakeDyadicVectorsInputSpec(FSLCommandInputSpec):
-    theta_vol = File(exists=True, mandatory=True, position=0, argstr="%s")
-    phi_vol = File(exists=True, mandatory=True, position=1, argstr="%s")
-    mask = File(exists=True, position=2, argstr="%s")
-    output = File("dyads", position=3, usedefault=True, argstr="%s", hash_files=False)
-    perc = traits.Float(desc="the {perc}% angle of the output cone of \
-uncertainty (output will be in degrees)",
-                        position=4,
-                        argstr="%f")
+class OldBEDPOSTXInputSpec(FSLCommandInputSpec):
+    dwi = File(exists=True, desc='diffusion weighted image data file',
+               mandatory=True)
+    mask = File(exists=True, desc='bet binary mask file', mandatory=True)
+    bvecs = File(exists=True, desc='b vectors file', mandatory=True)
+    bvals = File(exists=True, desc='b values file', mandatory=True)
+    bpx_directory = Directory('bedpostx', argstr='%s', usedefault=True,
+                              desc=('the name for this subject\'s bedpostx'
+                                    ' folder'))
+
+    fibres = traits.Int(2, argstr='-n %d', desc='number of fibres per voxel')
+    weight = traits.Float(1.00, argstr='-w %.2f',
+                          desc=('ARD weight, more weight means less'
+                                ' secondary fibres per voxel'))
+    burn_period = traits.Int(1000, argstr='-b %d', desc='burnin period')
+    jumps = traits.Int(1250, argstr='-j %d', desc='number of jumps')
+    sampling = traits.Int(25, argstr='-s %d', desc='sample every')
+    model = traits.Enum(1, 2, argstr='-model %d', desc=('model choice: '
+                        'monoexponential (1) or multiexponential (2). '))
+    nlgradient = traits.Bool(False, argstr='-g', desc=('consider gradient'
+                             'nonlinearities, default off'))
+    no_cuda = traits.Bool(False, argstr='-c', desc=('do not use CUDA capable'
+                          'hardware/queue (if found)'))
 
 
-class MakeDyadicVectorsOutputSpec(TraitedSpec):
-    dyads = File(exists=True)
-    dispersion = File(exists=True)
+class OldBEDPOSTXOutputSpec(TraitedSpec):
+    bpx_out_directory = Directory(exists=True,
+                                  desc='path/name of directory with all ' +
+                                       'bedpostx output files for this subject')
+    xfms_directory = Directory(exists=True,
+                              desc='path/name of directory with the ' +
+                                   'tranformation matrices')
+    merged_thsamples = traits.List(File(exists=True),
+                                   desc='a list of path/name of 4D volume ' +
+                                        'with samples from the distribution ' +
+                                        'on theta')
+    merged_phsamples = traits.List(File(exists=True),
+                                   desc='a list of path/name of file with '
+                                        'samples from the distribution on phi')
+    merged_fsamples = traits.List(File(exists=True),
+                                   desc='a list of path/name of 4D volume ' +
+                                        'with samples from the distribution ' +
+                                        'on anisotropic volume fraction')
+    mean_thsamples = traits.List(File(exists=True),
+                                 desc='a list of path/name of 3D volume with mean of distribution on theta')
+    mean_phsamples = traits.List(File(exists=True),
+                                 desc='a list of path/name of 3D volume with mean of distribution on phi')
+    mean_fsamples = traits.List(File(exists=True),
+                                 desc='a list of path/name of 3D volume with mean of distribution on f anisotropy')
+    dyads = traits.List(File(exists=True),  desc='a list of path/name of mean of PDD distribution in vector form')
 
 
-class MakeDyadicVectors(FSLCommand):
-    """Create vector volume representing mean principal diffusion direction
-    and its uncertainty (dispersion)"""
+class OldBEDPOSTX(FSLCommand):
+    """
+    bedpostx has an old interface, implemented here
 
-    _cmd = "make_dyadic_vectors"
-    input_spec = MakeDyadicVectorsInputSpec
-    output_spec = MakeDyadicVectorsOutputSpec
+    .. deprecated:: 0.8.0
+      Please use :class:`.BEDPOSTX` or :func:`.create_bedpostx_pipeline`
+      instead
+
+
+    .. warning:: this is an early (deprecated interface of bedpostx),
+      the new interface is implemented in :class:`.BEDPOSTX`
+
+
+    Example
+    -------
+
+    >>> from nipype.interfaces import fsl
+    >>> bedp = fsl.OldBEDPOSTX(bpx_directory='subjdir', bvecs='bvecs', \
+bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
+    >>> bedp.cmdline
+    'bedpostx subjdir -n 1'
+
+    """
+
+    _cmd = 'bedpostx'
+    input_spec = OldBEDPOSTXInputSpec
+    output_spec = OldBEDPOSTXOutputSpec
+    _can_resume = True
+
+    def __init__(self, **inputs):
+        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
+        return super(OldBEDPOSTX, self).__init__(**inputs)
+
+    def _run_interface(self, runtime):
+
+        #create the subject specific bpx_directory
+        bpx_directory = os.path.join(os.getcwd(), self.inputs.bpx_directory)
+        self.inputs.bpx_directory = bpx_directory
+        if not os.path.exists(bpx_directory):
+            os.makedirs(bpx_directory)
+
+            _, _, ext = split_filename(self.inputs.mask)
+            shutil.copyfile(self.inputs.mask,
+                            os.path.join(self.inputs.bpx_directory,
+                                         'nodif_brain_mask' + ext))
+            _, _, ext = split_filename(self.inputs.dwi)
+            shutil.copyfile(self.inputs.dwi,
+                            os.path.join(self.inputs.bpx_directory, 'data' + ext))
+            shutil.copyfile(self.inputs.bvals,
+                            os.path.join(self.inputs.bpx_directory, 'bvals'))
+            shutil.copyfile(self.inputs.bvecs,
+                            os.path.join(self.inputs.bpx_directory, 'bvecs'))
+
+        runtime = super(BEDPOSTX, self)._run_interface(runtime)
+        if runtime.stderr:
+            self.raise_exception(runtime)
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["dyads"] = self._gen_fname(self.inputs.output)
-        outputs["dispersion"] = self._gen_fname(self.inputs.output,
-                                                suffix="_dispersion")
+        outputs['bpx_out_directory'] = os.path.join(os.getcwd(),
+                                    self.inputs.bpx_directory + '.bedpostX')
+        outputs['xfms_directory'] = os.path.join(os.getcwd(),
+                                    self.inputs.bpx_directory + '.bedpostX',
+                                    'xfms')
 
+        for k in outputs.keys():
+            if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
+                         'xfms_directory'):
+                outputs[k] = []
+
+        for n in range(self.inputs.fibres):
+            outputs['merged_thsamples'].append(self._gen_fname('merged_th' + repr(n + 1)
+                                                               + 'samples', suffix='',
+                                               cwd=outputs['bpx_out_directory']))
+            outputs['merged_phsamples'].append(self._gen_fname('merged_ph' + repr(n + 1)
+                                                               + 'samples', suffix='',
+                                                               cwd=outputs['bpx_out_directory']))
+            outputs['merged_fsamples'].append(self._gen_fname('merged_f' + repr(n + 1)
+                                                              + 'samples', suffix='',
+                                                              cwd=outputs['bpx_out_directory']))
+            outputs['mean_thsamples'].append(self._gen_fname('mean_th' + repr(n + 1)
+                                                              + 'samples', suffix='',
+                                                              cwd=outputs['bpx_out_directory']))
+            outputs['mean_phsamples'].append(self._gen_fname('mean_ph' + repr(n + 1)
+                                                             + 'samples', suffix='',
+                                                             cwd=outputs['bpx_out_directory']))
+            outputs['mean_fsamples'].append(self._gen_fname('mean_f' + repr(n + 1)
+                                                            + 'samples', suffix='',
+                                                            cwd=outputs['bpx_out_directory']))
+            outputs['dyads'].append(self._gen_fname('dyads' + repr(n + 1),
+                                                            suffix='',
+                                                            cwd=outputs['bpx_out_directory']))
         return outputs

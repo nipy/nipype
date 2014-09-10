@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still available with the prefix `Old`.
 * ENH: New FSL interface: EpiReg
 * ENH: New Freesurfer interface: Tkregister2 (for conversion of fsl style matrices to freesurfer format)
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd.

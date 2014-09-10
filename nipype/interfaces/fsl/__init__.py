@@ -21,9 +21,9 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
                   SigLoss, EddyCorrect, EpiReg)
 
-from .dti import (BEDPOSTX, DTIFit, ProbTrackX, ProbTrackX2,
+from .dti import (BEDPOSTX, XFibres, DTIFit, ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
-                  TractSkeleton, XFibres, MakeDyadicVectors)
+                  TractSkeleton, MakeDyadicVectors, OldBEDPOSTX, OldXFibres)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
