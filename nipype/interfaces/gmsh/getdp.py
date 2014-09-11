@@ -56,7 +56,7 @@ class GetDP(CommandLine):
     Example
     -------
 
-    >>> from nipype.interfaces.getdp import GetDP
+    >>> from nipype.interfaces.gmsh import GetDP
     >>> solve = GetDP()
     >>> solve.inputs.problem_file = 'eeg_forward.pro'
     >>> solve.inputs.mesh_file = 'mesh.msh'

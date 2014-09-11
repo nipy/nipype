@@ -127,7 +127,7 @@ class Gmsh(CommandLine):
 
     >>> from nipype.interfaces.gmsh import Gmsh
     >>> msh = Gmsh()
-    >>> msh.inputs.in_files = ['lh-pial.stl']
+    >>> msh.inputs.in_files = ['lh.hippocampus.stl']
     >>> msh.run()                                    # doctest: +SKIP
     """
     _cmd = 'gmsh'
