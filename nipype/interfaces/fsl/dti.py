@@ -130,7 +130,7 @@ class BEDPOSTX(FSLXCommand):
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
     'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
---logdir=logdir --mask=mask.nii --nfibres=1'
+--forcedir --logdir=logdir --mask=mask.nii --nfibres=1'
 
     """
 
