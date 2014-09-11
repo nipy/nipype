@@ -123,40 +123,61 @@ def merge_and_mean(name='mm'):
     return wf
 
 
-def gen_chunks(dwi, mask, nchunks=6):
+def gen_chunks(dwi, mask, nvoxels=100):
     import nibabel as nb
     import numpy as np
+    from math import sqrt, ceil
 
     mask = nb.load(mask).get_data()
     mask[mask > 0] = 1
     mask[mask < 1] = 0
-    nzels = np.nonzero(mask)
-    np.savetxt('nonzeroidx.txt', nzels)
 
     dshape = mask.shape
     mask = mask.reshape(-1).astype(np.uint8)
-    els = np.sum(mask)
-    chunkels = round(els / nchunks)
 
-    data = mask.copy()
+    nzels = np.nonzero(mask)
+    np.savez('nonzeroidx', nzels)
+    els = np.sum(mask)
+
+    chunkside = int(ceil(sqrt(nvoxels)))
+    chshape = (chunkside, chunkside, 1)
+    chunkels = chunkside**2
+    nchunks = int(ceil(els/chunkels))
+
+    data = nb.load(dwi).get_data().astype(np.float32)
+    data = np.squeeze(data.reshape((mask.size, -1)).take(nzels, axis=0))
 
     out_files = []
     out_masks = []
 
-    for i in xrange(chunkels):
+    for i in xrange(nchunks):
         first = i * chunkels
-        last = (i+1) * chunkels + 1
+        last = (i+1) * chunkels
+        fill = 0
 
-        chunk = data[first:last, ...]
+        if last > els:
+            fill = last - els
+            last = els
 
-        fname = 'chunk%05d.nii.gz' % i
-        nb.Nifti1Image(chunk, None, None).to_filename(fname)
-        out_files.append(fname)
+        datchunk = data[first:last, ...]
+        mskchunk = np.ones((last-first), dtype=np.uint8)
+
+        if fill > 0:
+            print 'filling %d elements' % fill
+            mskchunk = np.hstack((mskchunk, np.zeros((fill,), dtype=np.uint8)))
+            datchunk = np.vstack((datchunk, np.zeros((fill,
+                                 data.shape[-1]), dtype=np.float32)))
 
         mname = 'mask%05d.nii.gz' % i
-        nb.Nifti1Image(mask[first:last],
+        nb.Nifti1Image(mskchunk.reshape(chshape),
                        None, None).to_filename(mname)
         out_masks.append(mname)
+
+        datashape = [s for s in chshape] + [-1]
+        fname = 'chunk%05d.nii.gz' % i
+        nb.Nifti1Image(datchunk.reshape(tuple(datashape)),
+                       None, None).to_filename(fname)
+        out_files.append(fname)
 
     return out_files, out_masks
 
