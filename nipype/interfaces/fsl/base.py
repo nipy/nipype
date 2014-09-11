@@ -246,8 +246,6 @@ class FSLCommand(CommandLine):
 
 
 class FSLXCommandInputSpec(FSLCommandInputSpec):
-    out_dir = Directory('.', mandatory=True, desc='output directory',
-                        usedefault=True, position=1, argstr='%s')
     dwi = File(exists=True, argstr='--data=%s', mandatory=True,
                desc='diffusion weighted image data file')
     mask = File(exists=True, argstr='--mask=%s', mandatory=True,
@@ -307,39 +305,39 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     f0_ard = traits.Bool(argstr='--f0 --ardf0', xor=_xor_inputs3 + ['all_ard'],
                          desc=('Noise floor model: add to the model an '
                                'unattenuated signal compartment f0'))
-    force_dir = traits.Bool(False, argstr='--forcedir', usedefault=True,
+    force_dir = traits.Bool(True, argstr='--forcedir', usedefault=True,
                             desc=('use the actual directory name given '
                                   '(do not add + to make a new directory)'))
 
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
+    merged_thsamples = OutputMultiPath(File(), desc=('Samples from '
                                        'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
+    merged_phsamples = OutputMultiPath(File(), desc=('Samples from '
                                        'the distribution on phi'))
-    merged_fsamples = OutputMultiPath(File(exists=True),
+    merged_fsamples = OutputMultiPath(File(),
                                       desc=('Samples from the distribution on '
                                             'anisotropic volume fraction.'))
 
-    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+    mean_thsamples = OutputMultiPath(File(), desc=('Mean of '
                                      'distribution on theta'))
-    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+    mean_phsamples = OutputMultiPath(File(), desc=('Mean of '
                                      'distribution on phi'))
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+    mean_fsamples = OutputMultiPath(File(), desc=('Mean of '
                                     'distribution on f anisotropy'))
 
-    mean_dsamples = File(exists=True, desc='Mean of distribution on '
+    mean_dsamples = File(desc='Mean of distribution on '
                          'diffusivity d')
-    mean_S0samples = File(exists=True, desc='Mean of distribution on T2w'
+    mean_S0samples = File(desc='Mean of distribution on T2w'
                           'baseline signal intensity S0')
-    mean_tausamples = File(exists=True, desc='Mean of distribution on '
+    mean_tausamples = File(desc='Mean of distribution on '
                            'tau samples (only with rician noise)')
 
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
+    dyads = OutputMultiPath(File(), desc=('Mean of PDD distribution'
                             ' in vector form.'))
-    dyads_disp = OutputMultiPath(File(exists=True), desc=('Uncertainty on the '
+    dyads_disp = OutputMultiPath(File(), desc=('Uncertainty on the '
                                  ' estimated fiber orientation'))
-    fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
+    fsamples = OutputMultiPath(File(), desc=('Samples from the '
                                'distribution on anisotropic volume fraction'))
 
 
@@ -351,28 +349,7 @@ class FSLXCommand(FSLCommand):
     output_spec = FSLXCommandOutputSpec
 
     def _run_interface(self, runtime):
-        subjectdir = os.path.abspath(self.inputs.out_dir)
-        out_dir = subjectdir + '.bedpostX'
-
-        if isdefined(self.inputs.force_dir) and self.inputs.force_dir:
-            out_dir = os.path.abspath(self.inputs.out_dir)
-        self._out_dir = out_dir
-
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-
-        _, _, ext = split_filename(self.inputs.mask)
-        copyfile(self.inputs.mask,
-                 os.path.join(subjectdir,
-                              'nodif_brain_mask' + ext))
-        _, _, ext = split_filename(self.inputs.dwi)
-        copyfile(self.inputs.dwi,
-                 os.path.join(subjectdir, 'data' + ext))
-        copyfile(self.inputs.bvals,
-                 os.path.join(subjectdir, 'bvals'))
-        copyfile(self.inputs.bvecs,
-                 os.path.join(subjectdir, 'bvecs'))
-
+        self._out_dir = os.getcwd()
         runtime = super(FSLXCommand, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)

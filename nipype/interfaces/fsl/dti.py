@@ -101,6 +101,8 @@ class DTIFit(FSLCommand):
 
 
 class BEDPOSTXInputSpec(FSLXCommandInputSpec):
+    out_dir = Directory('.', mandatory=True, desc='output directory',
+                        usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
                              'nonlinearities, default off'))
 
@@ -136,6 +138,31 @@ class BEDPOSTX(FSLXCommand):
     input_spec = BEDPOSTXInputSpec
     output_spec = FSLXCommandOutputSpec
     _can_resume = True
+
+    def _run_interface(self, runtime):
+        subjectdir = os.path.abspath(self.inputs.out_dir)
+        out_dir = subjectdir + '.bedpostX'
+
+        if isdefined(self.inputs.force_dir) and self.inputs.force_dir:
+            out_dir = os.path.abspath(self.inputs.out_dir)
+        self._out_dir = out_dir
+
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        _, _, ext = split_filename(self.inputs.mask)
+        copyfile(self.inputs.mask,
+                 os.path.join(subjectdir,
+                              'nodif_brain_mask' + ext))
+        _, _, ext = split_filename(self.inputs.dwi)
+        copyfile(self.inputs.dwi,
+                 os.path.join(subjectdir, 'data' + ext))
+        copyfile(self.inputs.bvals,
+                 os.path.join(subjectdir, 'bvals'))
+        copyfile(self.inputs.bvecs,
+                 os.path.join(subjectdir, 'bvecs'))
+
+        return super(BEDPOSTX, self)._run_interface(runtime)
 
 
 class XFibresInputSpec(FSLXCommandInputSpec):
