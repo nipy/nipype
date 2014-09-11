@@ -419,9 +419,8 @@ class FSLXCommand(FSLCommand):
                                             cwd=out_dir))
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
                                     cwd=out_dir))
-            outputs['dyads_dispersion'].append(self._gen_fname(('dyads%d'
-                                               '_dispersion') % i,
-                                               cwd=out_dir))
+            outputs['dyads_disp'].append(self._gen_fname(('dyads%d'
+                                         '_dispersion') % i, cwd=out_dir))
         return outputs
 
 
