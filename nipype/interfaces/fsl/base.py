@@ -397,31 +397,31 @@ class FSLXCommand(FSLCommand):
             outputs['mean_tausamples'] = self._gen_fname('mean_tausamples',
                                                          cwd=out_dir)
 
-        for i in xrange(1, self.inputs.fibres + 1):
+        for i in xrange(1, self.inputs.n_fibres + 1):
             outputs['merged_thsamples'].append(self._gen_fname(('merged_th%d'
-                                               'samples') % i),
-                                               cwd=out_dir)
+                                               'samples') % i,
+                                               cwd=out_dir))
             outputs['merged_phsamples'].append(self._gen_fname(('merged_ph%d'
-                                               'samples') % i),
-                                               cwd=out_dir)
+                                               'samples') % i,
+                                               cwd=out_dir))
             outputs['merged_fsamples'].append(self._gen_fname(('merged_f%d'
-                                              'samples') % i),
-                                              cwd=out_dir)
+                                              'samples') % i,
+                                              cwd=out_dir))
 
             outputs['mean_thsamples'].append(self._gen_fname(('mean_th%d'
-                                             'samples') % i),
-                                             cwd=out_dir)
+                                             'samples') % i,
+                                             cwd=out_dir))
             outputs['mean_phsamples'].append(self._gen_fname(('mean_ph%d'
-                                             'samples') % i),
-                                             cwd=out_dir)
+                                             'samples') % i,
+                                             cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                            'samples') % i),
-                                            cwd=out_dir)
-            outputs['dyads'].append(self._gen_fname('dyads%d' % i),
-                                    cwd=out_dir)
+                                            'samples') % i,
+                                            cwd=out_dir))
+            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
+                                    cwd=out_dir))
             outputs['dyads_dispersion'].append(self._gen_fname(('dyads%d'
-                                               '_dispersion') % i),
-                                               cwd=out_dir)
+                                               '_dispersion') % i,
+                                               cwd=out_dir))
         return outputs
 
 
