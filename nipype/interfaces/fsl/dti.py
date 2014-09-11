@@ -107,6 +107,23 @@ class BEDPOSTXInputSpec(FSLXCommandInputSpec):
                              'nonlinearities, default off'))
 
 
+class BEDPOSTXOutputSpec(FSLXCommandOutputSpec):
+    mean_thsamples = OutputMultiPath(File(), desc=('Mean of '
+                                     'distribution on theta'))
+    mean_phsamples = OutputMultiPath(File(), desc=('Mean of '
+                                     'distribution on phi'))
+
+    merged_thsamples = OutputMultiPath(File(), desc=('Samples from '
+                                       'the distribution on theta'))
+    merged_phsamples = OutputMultiPath(File(), desc=('Samples from '
+                                       'the distribution on phi'))
+    merged_fsamples = OutputMultiPath(File(),
+                                      desc=('Samples from the distribution on '
+                                            'anisotropic volume fraction.'))
+    dyads_disp = OutputMultiPath(File(), desc=('Uncertainty on the '
+                                 ' estimated fiber orientation'))
+
+
 class BEDPOSTX(FSLXCommand):
     """
     BEDPOSTX stands for Bayesian Estimation of Diffusion Parameters Obtained
@@ -130,13 +147,13 @@ class BEDPOSTX(FSLXCommand):
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
     'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
---forcedir --logdir=logdir --mask=mask.nii --nfibres=1'
+--forcedir --logdir=. --mask=mask.nii --nfibres=1'
 
     """
 
     _cmd = 'bedpostx'
     input_spec = BEDPOSTXInputSpec
-    output_spec = FSLXCommandOutputSpec
+    output_spec = BEDPOSTXOutputSpec
     _can_resume = True
 
     def _run_interface(self, runtime):
@@ -163,6 +180,41 @@ class BEDPOSTX(FSLXCommand):
                  os.path.join(subjectdir, 'bvecs'))
 
         return super(BEDPOSTX, self)._run_interface(runtime)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        out_dir = self._out_dir
+
+        post_fields = ['merged_thsamples', 'merged_phsamples',
+                       'merged_fsamples', 'dyads_disp']
+        for k in post_fields:
+            outputs[k] = []
+
+        for i in xrange(1, self.inputs.n_fibres + 1):
+            outputs['merged_thsamples'].append(self._gen_fname(('merged_th%d'
+                                               'samples') % i,
+                                               cwd=out_dir))
+            outputs['merged_phsamples'].append(self._gen_fname(('merged_ph%d'
+                                               'samples') % i,
+                                               cwd=out_dir))
+            outputs['merged_fsamples'].append(self._gen_fname(('merged_f%d'
+                                              'samples') % i,
+                                              cwd=out_dir))
+            outputs['mean_thsamples'].append(self._gen_fname(('mean_th%d'
+                                             'samples') % i,
+                                             cwd=out_dir))
+            outputs['mean_phsamples'].append(self._gen_fname(('mean_ph%d'
+                                             'samples') % i,
+                                             cwd=out_dir))
+            outputs['dyads_disp'].append(self._gen_fname(('dyads%d'
+                                         '_dispersion') % i, cwd=out_dir))
+
+        super_out = super(BEDPOSTX, self)._list_outputs()
+
+        for k, v in super_out.iteritems():
+            outputs[k] = v
+
+        return outputs
 
 
 class XFibresInputSpec(FSLXCommandInputSpec):

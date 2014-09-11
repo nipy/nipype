@@ -255,7 +255,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     bvals = File(exists=True, argstr='--bvals=%s', mandatory=True,
                  desc='b values file')
 
-    logdir = Directory('logdir', argstr='--logdir=%s', usedefault=True)
+    logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
     n_fibres = traits.Range(low=1, argstr='--nfibres=%d', desc=('Maximum '
                             'number of fibres to fit in each voxel'))
     model = traits.Enum(1, 2, argstr='--model=%d',
@@ -311,34 +311,22 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    merged_thsamples = OutputMultiPath(File(), desc=('Samples from '
-                                       'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(), desc=('Samples from '
-                                       'the distribution on phi'))
-    merged_fsamples = OutputMultiPath(File(),
-                                      desc=('Samples from the distribution on '
-                                            'anisotropic volume fraction.'))
-
-    mean_thsamples = OutputMultiPath(File(), desc=('Mean of '
-                                     'distribution on theta'))
-    mean_phsamples = OutputMultiPath(File(), desc=('Mean of '
-                                     'distribution on phi'))
+    dsamples = File(desc=('Samples from the distribution on diffusivity d'))
+    d_stdsamples = File(desc=('Std of samples from the distribution d'))
+    dyads = OutputMultiPath(File(), desc=('Mean of PDD distribution'
+                            ' in vector form.'))
+    fsamples = OutputMultiPath(File(), desc=('Samples from the '
+                               'distribution on f anisotropy'))
+    mean_dsamples = File(desc='Mean of distribution on diffusivity d')
+    mean_d_stdsamples = File(desc='Mean of distribution on diffusivity d')
     mean_fsamples = OutputMultiPath(File(), desc=('Mean of '
                                     'distribution on f anisotropy'))
-
-    mean_dsamples = File(desc='Mean of distribution on '
-                         'diffusivity d')
     mean_S0samples = File(desc='Mean of distribution on T2w'
                           'baseline signal intensity S0')
     mean_tausamples = File(desc='Mean of distribution on '
                            'tau samples (only with rician noise)')
-
-    dyads = OutputMultiPath(File(), desc=('Mean of PDD distribution'
-                            ' in vector form.'))
-    dyads_disp = OutputMultiPath(File(), desc=('Uncertainty on the '
-                                 ' estimated fiber orientation'))
-    fsamples = OutputMultiPath(File(), desc=('Samples from the '
-                               'distribution on anisotropic volume fraction'))
+    phsamples = OutputMultiPath(File(), desc=('phi samples, per fiber'))
+    thsamples = OutputMultiPath(File(), desc=('theta samples, per fiber'))
 
 
 class FSLXCommand(FSLCommand):
@@ -359,45 +347,38 @@ class FSLXCommand(FSLCommand):
         outputs = self.output_spec().get()
         out_dir = self._out_dir
 
-        for k in outputs.keys():
-            if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
-                         'xfms_directory', 'mean_dsamples', 'mean_S0samples',
-                         'mean_tausamples'):
-                outputs[k] = []
+        if isdefined(self.inputs.logdir):
+            out_dir = os.path.abspath(self.inputs.logdir)
+        else:
+            out_dir = os.path.abspath('logdir')
 
-        outputs['mean_dsamples'] = self._gen_fname('mean_dsamples',
-                                                   cwd=out_dir)
-        outputs['mean_S0samples'] = self._gen_fname('mean_S0samples',
-                                                    cwd=out_dir)
+        multi_out = ['dyads', 'fsamples', 'mean_fsamples',
+                     'phsamples', 'thsamples']
+        single_out = ['dsamples', 'd_stdsamples', 'mean_dsamples',
+                      'mean_S0samples', 'mean_d_stdsamples']
+
+        for k in single_out:
+            outputs[k] = self._gen_fname(k, cwd=out_dir)
 
         if isdefined(self.inputs.rician) and self.inputs.rician:
             outputs['mean_tausamples'] = self._gen_fname('mean_tausamples',
                                                          cwd=out_dir)
 
-        for i in xrange(1, self.inputs.n_fibres + 1):
-            outputs['merged_thsamples'].append(self._gen_fname(('merged_th%d'
-                                               'samples') % i,
-                                               cwd=out_dir))
-            outputs['merged_phsamples'].append(self._gen_fname(('merged_ph%d'
-                                               'samples') % i,
-                                               cwd=out_dir))
-            outputs['merged_fsamples'].append(self._gen_fname(('merged_f%d'
-                                              'samples') % i,
-                                              cwd=out_dir))
+        for k in multi_out:
+            outputs[k] = []
 
-            outputs['mean_thsamples'].append(self._gen_fname(('mean_th%d'
-                                             'samples') % i,
-                                             cwd=out_dir))
-            outputs['mean_phsamples'].append(self._gen_fname(('mean_ph%d'
-                                             'samples') % i,
-                                             cwd=out_dir))
-            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                            'samples') % i,
-                                            cwd=out_dir))
+        for i in xrange(1, self.inputs.n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
                                     cwd=out_dir))
-            outputs['dyads_disp'].append(self._gen_fname(('dyads%d'
-                                         '_dispersion') % i, cwd=out_dir))
+            outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
+                                       cwd=out_dir))
+            outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
+                                            'samples') % i, cwd=out_dir))
+            outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
+                                        cwd=out_dir))
+            outputs['thsamples'].append(self._gen_fname('th%dsamples' % i,
+                                        cwd=out_dir))
+
         return outputs
 
 

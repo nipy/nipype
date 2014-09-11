@@ -89,10 +89,13 @@ def test_BEDPOSTX_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_BEDPOSTX_outputs():
-    output_map = dict(dyads=dict(),
+    output_map = dict(d_stdsamples=dict(),
+    dsamples=dict(),
+    dyads=dict(),
     dyads_disp=dict(),
     fsamples=dict(),
     mean_S0samples=dict(),
+    mean_d_stdsamples=dict(),
     mean_dsamples=dict(),
     mean_fsamples=dict(),
     mean_phsamples=dict(),
@@ -101,6 +104,8 @@ def test_BEDPOSTX_outputs():
     merged_fsamples=dict(),
     merged_phsamples=dict(),
     merged_thsamples=dict(),
+    phsamples=dict(),
+    thsamples=dict(),
     )
     outputs = BEDPOSTX.output_spec()
 

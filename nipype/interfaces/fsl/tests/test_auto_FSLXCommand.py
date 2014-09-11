@@ -82,18 +82,17 @@ def test_FSLXCommand_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_FSLXCommand_outputs():
-    output_map = dict(dyads=dict(),
-    dyads_disp=dict(),
+    output_map = dict(d_stdsamples=dict(),
+    dsamples=dict(),
+    dyads=dict(),
     fsamples=dict(),
     mean_S0samples=dict(),
+    mean_d_stdsamples=dict(),
     mean_dsamples=dict(),
     mean_fsamples=dict(),
-    mean_phsamples=dict(),
     mean_tausamples=dict(),
-    mean_thsamples=dict(),
-    merged_fsamples=dict(),
-    merged_phsamples=dict(),
-    merged_thsamples=dict(),
+    phsamples=dict(),
+    thsamples=dict(),
     )
     outputs = FSLXCommand.output_spec()
 
