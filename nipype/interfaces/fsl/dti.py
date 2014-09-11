@@ -581,7 +581,7 @@ class VecReg(FSLCommand):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
             pth, base_name = os.path.split(self.inputs.in_file)
-            self.inputs.out_file = self._gen_fname(base_name, cwd=os.path.abspath(pth),
+            self.inputs.out_file = self._gen_fname(base_name, cwd=os.path.abspath(os.path.curdir),
                                                    suffix='_vreg')
         return super(VecReg, self)._run_interface(runtime)
 
@@ -590,7 +590,7 @@ class VecReg(FSLCommand):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
             pth, base_name = os.path.split(self.inputs.in_file)
-            outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(pth),
+            outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(os.path.curdir),
                                                  suffix='_vreg')
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs

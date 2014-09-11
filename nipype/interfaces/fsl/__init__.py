@@ -7,7 +7,7 @@ Top-level namespace for fsl.
 """
 
 from .base import (FSLCommand, Info, check_fsl, no_fsl, no_fsl_course_data)
-from .preprocess import (FAST, FLIRT, ApplyXfm, BET, MCFLIRT, FNIRT, ApplyWarp,
+from .preprocess import (FAST, FLIRT, ApplyXfm, BET, BETSurface, MCFLIRT, FNIRT, ApplyWarp,
                          SliceTimer, SUSAN, PRELUDE, FUGUE, FIRST)
 from .model import (Level1Design, FEAT, FEATModel, FILMGLS, FEATRegister,
                     FLAMEO, ContrastMgr, MultipleRegressDesign, L2Model, SMM,
@@ -26,4 +26,5 @@ from .dti import (BEDPOSTX, DTIFit, ProbTrackX, ProbTrackX2,
                   TractSkeleton, XFibres, MakeDyadicVectors)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
-                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)
+                    SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths,
+                    DecomposeTensor)
