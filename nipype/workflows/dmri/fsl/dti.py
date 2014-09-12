@@ -3,6 +3,7 @@
 import nipype.pipeline.engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import fsl
+from nipype.algorithms import misc
 import os
 
 #backwards compatibility
@@ -116,6 +117,111 @@ def merge_and_mean(name='mm'):
     wf = pe.Workflow(name=name)
     wf.connect([
         (inputnode, merge,  [(('in_files', transpose), 'in_files')]),
+        (merge, mean,       [('merged_file', 'in_file')]),
+        (merge, outputnode, [('merged_file', 'merged')]),
+        (mean, outputnode,  [('out_file', 'mean')])
+    ])
+    return wf
+
+
+def bedpostx_parallel(name='bedpostx_parallel', params={}):
+    """
+    Does the same as :func:`.create_bedpostx_pipeline` by splitting
+    the input dMRI in small ROIs that are better suited for parallel
+    processing).
+
+    Example
+    -------
+
+    >>> from nipype.workflows.dmri.fsl.dti import bedpostx_parallel
+    >>> params = dict(n_fibres = 2, fudge = 1, burn_in = 1000,
+    ...               n_jumps = 1250, sample_every = 25)
+    >>> bpwf = bedpostx_parallel('nipype_bedpostx_parallel', params)
+    >>> bpwf.inputs.inputnode.dwi = 'diffusion.nii'
+    >>> bpwf.inputs.inputnode.mask = 'mask.nii'
+    >>> bpwf.inputs.inputnode.bvecs = 'bvecs'
+    >>> bpwf.inputs.inputnode.bvals = 'bvals'
+    >>> bpwf.run(plugin='CondorDAGMan') # doctest: +SKIP
+
+    Inputs::
+
+        inputnode.dwi
+        inputnode.mask
+        inputnode.bvecs
+        inputnode.bvals
+
+    Outputs::
+
+        outputnode wraps all XFibres outputs
+
+    """
+
+    inputnode = pe.Node(niu.IdentityInterface(fields=['dwi', 'mask',
+                        'bvecs', 'bvals']), name='inputnode')
+    slice_dwi = pe.Node(misc.SplitROIs(roi_size=(5, 5, 1)), name='slice_dwi')
+    xfib_if = fsl.XFibres(**params)
+    xfibres = pe.MapNode(xfib_if, name='xfibres',
+                         iterfield=['dwi', 'mask'])
+
+    make_dyads = pe.MapNode(fsl.MakeDyadicVectors(), name="make_dyads",
+                            iterfield=['theta_vol', 'phi_vol'])
+    out_fields = ['dyads', 'dyads_disp',
+                  'thsamples', 'phsamples', 'fsamples',
+                  'mean_thsamples', 'mean_phsamples', 'mean_fsamples']
+
+    outputnode = pe.Node(niu.IdentityInterface(fields=out_fields),
+                         name='outputnode')
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+        (inputnode, slice_dwi,  [('dwi', 'in_file'),
+                                 ('mask', 'in_mask')]),
+        (slice_dwi, xfibres,    [('out_files', 'dwi'),
+                                 ('out_masks', 'mask')]),
+        (inputnode, xfibres,    [('bvecs', 'bvecs'),
+                                 ('bvals', 'bvals')]),
+        (inputnode, make_dyads, [('mask', 'mask')])
+    ])
+
+    mms = {}
+    for k in ['thsamples', 'phsamples', 'fsamples']:
+        mms[k] = merge_and_mean_parallel(k)
+        wf.connect([
+            (slice_dwi, mms[k], [('out_index', 'inputnode.in_index')]),
+            (inputnode, mms[k], [('mask', 'inputnode.in_reference')]),
+            (xfibres, mms[k], [(k, 'inputnode.in_files')]),
+            (mms[k], outputnode, [('outputnode.merged', k),
+                                  ('outputnode.mean', 'mean_%s' % k)])
+
+        ])
+
+    # m_mdsamples = pe.Node(fsl.Merge(dimension="z"),
+    #                       name="merge_mean_dsamples")
+    wf.connect([
+        (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
+        (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
+        #(xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
+        (make_dyads, outputnode, [('dyads', 'dyads'),
+                                  ('dispersion', 'dyads_disp')])
+    ])
+    return wf
+
+
+def merge_and_mean_parallel(name='mm'):
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in_files',
+                        'in_reference', 'in_index']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['merged', 'mean']),
+                         name='outputnode')
+    merge = pe.MapNode(misc.MergeROIs(), name='Merge',
+                       iterfield=['in_files'])
+    mean = pe.MapNode(fsl.ImageMaths(op_string='-Tmean'), name='Mean',
+                      iterfield=['in_file'])
+
+    wf = pe.Workflow(name=name)
+    wf.connect([
+        (inputnode, merge,  [(('in_files', transpose), 'in_files'),
+                             ('in_reference', 'in_reference'),
+                             ('in_index', 'in_index')]),
         (merge, mean,       [('merged_file', 'in_file')]),
         (merge, outputnode, [('merged_file', 'merged')]),
         (mean, outputnode,  [('out_file', 'mean')])

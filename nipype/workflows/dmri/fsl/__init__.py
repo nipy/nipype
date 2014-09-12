@@ -1,4 +1,4 @@
-from dti import create_bedpostx_pipeline
+from dti import create_bedpostx_pipeline, bedpostx_parallel
 
 from epi import (fieldmap_correction, topup_correction,
                  create_eddy_correct_pipeline,
