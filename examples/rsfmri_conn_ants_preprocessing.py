@@ -329,7 +329,7 @@ def create_reg_workflow(name='registration'):
     Binarize the segmentation
     """
 
-    binarize = MapNode(fsl.ImageMaths(op_string='-nan -thr 0.5 -bin'),
+    binarize = MapNode(fsl.ImageMaths(op_string='-nan -thr 0.9 -ero -bin'),
                        iterfield=['in_file'],
                        name='binarize')
     pickindex = lambda x, i: x[i]
@@ -723,7 +723,7 @@ if __name__ == "__main__":
                          sink_directory=os.getcwd(),
                          name='resting_' + subj_id)
     wf.base_dir = os.getcwd()
-    wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
-    #wf.write_graph(graph2use='colored')
-    #wf.run()
+    #wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
+    wf.write_graph(graph2use='colored')
+    wf.run()
 
