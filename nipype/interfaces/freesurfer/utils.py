@@ -1216,8 +1216,6 @@ class Tkregister2InputSpec(FSTraitedSpec):
                         desc='set mov to be tal and reg to be tal xfm')
     movscale = traits.Float(argstr='--movscale %f',
                             desc='adjust registration matrix to scale mov')
-    fsl = File(exists=True, argstr='--fsl %s',
-               desc='use the matrix produced by FSL as initial registration')
     xfm = File(exists=True, argstr='--xfm %s',
                desc='use a matrix in MNI coordinates as initial registration')
     fsl_out = File(argstr='--fslregout %s',

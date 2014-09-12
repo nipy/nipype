@@ -8,8 +8,6 @@ def test_Tkregister2_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    fsl=dict(argstr='--fsl %s',
-    ),
     fsl_in_matrix=dict(argstr='--fsl %s',
     ),
     fsl_out=dict(argstr='--fslregout %s',
