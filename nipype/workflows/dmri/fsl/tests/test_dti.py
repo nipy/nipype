@@ -1,6 +1,6 @@
 import os
 
-from nipype.testing import (skipif)
+from nipype.testing import (skipif, example_data, assert_equal)
 import nipype.workflows.fmri.fsl as fsl_wf
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.utility as util
@@ -10,7 +10,7 @@ import nipype.pipeline.engine as pe
 import warnings
 import tempfile
 import shutil
-from nipype.workflows.dmri.fsl.dti import  create_bedpostx_pipeline
+from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 
 
 @skipif(no_fsl)
@@ -81,3 +81,4 @@ def test_create_bedpostx_pipeline():
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
+
