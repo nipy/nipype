@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: New miscelaneous interfaces: SplitROIs, MergeROIs to enable parallel processing of very large images.
 * ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still available with the prefix `Old`.
 * ENH: New FSL interface: EpiReg
 * ENH: New Freesurfer interface: Tkregister2 (for conversion of fsl style matrices to freesurfer format)
