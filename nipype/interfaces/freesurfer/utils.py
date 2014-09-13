@@ -1265,7 +1265,8 @@ class Tkregister2(FSCommand):
     output_spec = Tkregister2OutputSpec
 
     def _list_outputs(self):
-        outputs = super(Tkregister2, self)._list_outputs()
+        outputs = self._outputs().get()
+        outputs['reg_file'] = op.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
             outputs['fsl_file'] = op.abspath(self.inputs.fsl_out)
         return outputs
