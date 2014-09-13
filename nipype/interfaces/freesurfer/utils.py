@@ -1207,7 +1207,7 @@ class Tkregister2InputSpec(FSTraitedSpec):
     noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
                          desc='do not open edit window (exit)')
     reg_file = File('register.dat', usedefault=True,
-                    mandatory=True, argstr="--reg %s",
+                    mandatory=True, argstr='--reg %s',
                     desc='freesurfer-style registration file')
     reg_header = traits.Bool(False, argstr='--regheader',
                              desc='compute regstration from headers')
@@ -1266,7 +1266,14 @@ class Tkregister2(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['reg_file'] = op.abspath(self.inputs.reg_file)
+        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
             outputs['fsl_file'] = op.abspath(self.inputs.fsl_out)
         return outputs
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return os.path.abspath(self.inputs.out_file)
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return os.path.abspath(name + '_smoothed' + ext)
