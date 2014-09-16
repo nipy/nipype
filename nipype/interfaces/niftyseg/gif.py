@@ -60,7 +60,7 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
                              desc='The beta scaling factor (defined in xml) [0.5]')
     sort_numb = traits.Int(argstr = '-sort_numb %d', 
                            desc='The number of elements in the sort (defined in xml) [7]')
-    regNMI = traits.Bool(argstr = 'regNMI',
+    regNMI = traits.Bool(argstr = '-regNMI',
                          desc='Ust NMI as a registration similarity, instead of LNCC')
     regBE = traits.Float(argstr = '-regBE %f',
                          desc='Bending energy value for the registration [0.005]')
