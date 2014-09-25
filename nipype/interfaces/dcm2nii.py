@@ -67,8 +67,8 @@ class Dcm2nii(CommandLine):
 
     def _format_arg(self, opt, spec, val):
         if opt in ['anonymize', 'collapse_folders', 'date_in_filename', 'events_in_filename',
-                   'source_in_filename','gzip_output', 'id_in_filename','nii_output',
-                   'protocol_in_filename','reorient','spm_analyze','convert_all_pars',
+                   'source_in_filename', 'gzip_output', 'id_in_filename', 'nii_output',
+                   'protocol_in_filename', 'reorient', 'spm_analyze', 'convert_all_pars',
                    'reorient_and_crop']:
             spec = deepcopy(spec)
             if val:
