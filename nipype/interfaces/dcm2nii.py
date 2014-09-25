@@ -21,7 +21,7 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
                                   copyfile=False, mandatory=True)
     anonymize = traits.Bool(True, argstr='-a', usedefault=True, position=0)
     config_file = File(exists=True, argstr="-b %s", genfile=True, position=1)
-    collapse_folders = traits.Bool(True, argstr='-c', usedefault=True, position=2)    
+    collapse_folders = traits.Bool(True, argstr='-c', usedefault=True, position=2)
     date_in_filename = traits.Bool(True, argstr='-d', usedefault=True, position=3)
     events_in_filename = traits.Bool(True, argstr='-e', usedefault=True, position=4)
     source_in_filename = traits.Bool(False, argstr='-f', usedefault=True, position=5)
@@ -56,7 +56,7 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
     >>> converter.cmdline #doctest: +ELLIPSIS
-    'dcm2nii -g y -n y -i n -o . -b config.ini functional_1.dcm'
+    'dcm2nii -a y -b config.ini -c y -d y -e y -f n -g y -i n -n y -o . -p y -v y -x n functional_1.dcm'
     >>> converter.run() # doctest: +SKIP
     """
 
@@ -69,7 +69,7 @@ class Dcm2nii(CommandLine):
         if opt in ['anonymize', 'collapse_folders', 'date_in_filename', 'events_in_filename',
                    'source_in_filename','gzip_output', 'id_in_filename','nii_output',
                    'protocol_in_filename','reorient','spm_analyze','convert_all_pars',
-                   'reorient_and_crop']:          
+                   'reorient_and_crop']:
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
