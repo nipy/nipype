@@ -89,7 +89,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, str):
+                    elif isinstance(value_list, basestring):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

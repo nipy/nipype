@@ -140,7 +140,7 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self['References']:
             out += self._str_header('References')
-            if isinstance(self['References'], str):
+            if isinstance(self['References'], basestring):
                 self['References'] = [self['References']]
             out.extend(self['References'])
             out += ['']

@@ -416,7 +416,7 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
-                    elif isinstance(val, str):
+                    elif isinstance(val, basestring):
                         jobstring += '\'%s\';...\n' % (val)
                     else:
                         jobstring += '%s;...\n' % str(val)
@@ -431,7 +431,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, str):
+        if isinstance(contents, basestring):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))

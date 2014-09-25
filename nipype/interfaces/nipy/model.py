@@ -80,7 +80,7 @@ class FitGLM(BaseInterface):
         session_info = self.inputs.session_info
 
         functional_runs = self.inputs.session_info[0]['scans']
-        if isinstance(functional_runs, str):
+        if isinstance(functional_runs, basestring):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
         data = nii.get_data()

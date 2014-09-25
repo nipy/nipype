@@ -94,7 +94,7 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, str) and os.path.isfile(object):
+        if isinstance(object, basestring) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)

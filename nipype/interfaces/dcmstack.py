@@ -109,7 +109,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, str):
+        if isinstance(trait_input, basestring):
             if path.isdir(trait_input):
                 return glob(path.join(trait_input, '*.dcm'))
             else:
@@ -334,7 +334,7 @@ class MergeNifti(NiftiGeneratorBase):
               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, str):
+            if isinstance(sort_order, basestring):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:

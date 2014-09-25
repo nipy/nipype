@@ -47,7 +47,7 @@ import os\n\n\n"""
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
     for k, v in code_struct.iteritems():
-        if isinstance(v, str) or isinstance(v, unicode):
+        if isinstance(v, basestring) or isinstance(v, unicode):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -57,7 +57,7 @@ def crawl_code_struct(code_struct, package_dir):
             l1 = {}
             l2 = {}
             for key in v.keys():
-                if (isinstance(v[key], str) or isinstance(v[key], unicode)):
+                if (isinstance(v[key], basestring) or isinstance(v[key], unicode)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -313,7 +313,7 @@ def grab_xml(module, launcher):
 def parse_params(params):
     list = []
     for key, value in params.iteritems():
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, basestring) or isinstance(value, unicode):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))

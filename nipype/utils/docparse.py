@@ -277,7 +277,7 @@ def _parse_doc(doc, style=['--']):
     # individual flag/option.
     doclist = doc.split('\n')
     optmap = {}
-    if isinstance(style,str):
+    if isinstance(style,basestring):
         style = [style]
     for line in doclist:
         linelist = line.split()

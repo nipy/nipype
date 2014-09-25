@@ -422,7 +422,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, str):
+            elif isinstance(f, basestring):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:

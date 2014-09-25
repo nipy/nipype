@@ -279,7 +279,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, str):
+        if isinstance(motionfile, basestring):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -350,7 +350,7 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, str):
+        if isinstance(imgfile, basestring):
             nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:

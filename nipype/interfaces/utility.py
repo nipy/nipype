@@ -386,7 +386,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, str):
+            elif isinstance(function, basestring):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
@@ -404,7 +404,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, str):
+            elif isinstance(new, basestring):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})

@@ -103,7 +103,7 @@ def modify_paths(object, relative=True, basedir=None):
             out = tuple(out)
     else:
         if isdefined(object):
-            if isinstance(object, str) and os.path.isfile(object):
+            if isinstance(object, basestring) and os.path.isfile(object):
                 if relative:
                     if config.getboolean('execution', 'use_relative_paths'):
                         out = relpath(object, start=basedir)
@@ -186,7 +186,7 @@ def _write_detailed_dot(graph, dotfilename):
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], str):
+                if isinstance(cd[0], basestring):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -206,7 +206,7 @@ def _write_detailed_dot(graph, dotfilename):
         outports = []
         for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], str):
+                if isinstance(cd[0], basestring):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -607,7 +607,7 @@ def generate_expanded_graph(graph_in):
             # the itersource is a (node name, fields) tuple
             src_name, src_fields = inode.itersource
             # convert a single field to a list
-            if isinstance(src_fields, str):
+            if isinstance(src_fields, basestring):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
             try:
@@ -789,7 +789,7 @@ def _standardize_iterables(node):
     if node.synchronize:
         if len(iterables) == 2:
             first, last = iterables
-            if all((isinstance(item, str) and item in fields
+            if all((isinstance(item, basestring) and item in fields
                     for item in first)):
                 iterables = _transpose_iterables(first, last)
 

@@ -196,7 +196,7 @@ class EstimateModel(SPMCommand):
         if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
-            if isinstance(val, str):
+            if isinstance(val, basestring):
                 return {'%s' % val: 1}
             else:
                 return val
