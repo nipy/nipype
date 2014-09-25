@@ -17,19 +17,25 @@ from nipype.utils.filemanip import split_filename
 import re
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
-    source_names = InputMultiPath(File(exists=True), argstr="%s", position=10,
+    source_names = InputMultiPath(File(exists=True), argstr="%s", position=16,
                                   copyfile=False, mandatory=True)
-    gzip_output = traits.Bool(False, argstr='-g', position=0, usedefault=True)
-    nii_output = traits.Bool(True, argstr='-n', position=1, usedefault=True)
-    anonymize = traits.Bool(argstr='-a', position=2)
-    id_in_filename = traits.Bool(False, argstr='-i', usedefault=True, position=3)
-    reorient = traits.Bool(argstr='-r', position=4)
-    reorient_and_crop = traits.Bool(argstr='-x', position=5)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=6)
-    config_file = File(exists=True, argstr="-b %s", genfile=True, position=7)
-    convert_all_pars = traits.Bool(argstr='-v', position=8)
+    anonymize = traits.Bool(True, argstr='-a', usedefault=True, position=0)
+    config_file = File(exists=True, argstr="-b %s", genfile=True, position=1)
+    collapse_folders = traits.Bool(True, argstr='-c', usedefault=True, position=2)    
+    date_in_filename = traits.Bool(True, argstr='-d', usedefault=True, position=3)
+    events_in_filename = traits.Bool(True, argstr='-e', usedefault=True, position=4)
+    source_in_filename = traits.Bool(False, argstr='-f', usedefault=True, position=5)
+    gzip_output = traits.Bool(False, argstr='-g', usedefault=True, position=6)
+    id_in_filename = traits.Bool(False, argstr='-i', usedefault=True, position=7)
+    nii_output = traits.Bool(True, argstr='-n', usedefault=True, position=8)
+    output_dir = Directory(exists=True, argstr='-o %s', genfile=True, position=9)
+    protocol_in_filename = traits.Bool(True, argstr='-p', usedefault=True, position=10)
+    reorient = traits.Bool(argstr='-r', position=11)
+    spm_analyze = traits.Bool(argstr='-s', xor=['nii_output'], position=12)
+    convert_all_pars = traits.Bool(True, argstr='-v', usedefault=True, position=13)
+    reorient_and_crop = traits.Bool(False, argstr='-x', usedefault=True, position=14)
     args = traits.Str(argstr='%s', desc='Additional parameters to the command',
-                      position=9)
+                      position=15)
 
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
@@ -60,7 +66,10 @@ class Dcm2nii(CommandLine):
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
-        if opt in ['gzip_output', 'nii_output', 'anonymize', 'id_in_filename', 'reorient', 'reorient_and_crop', 'convert_all_pars']:
+        if opt in ['anonymize', 'collapse_folders', 'date_in_filename', 'events_in_filename',
+                   'source_in_filename','gzip_output', 'id_in_filename','nii_output',
+                   'protocol_in_filename','reorient','spm_analyze','convert_all_pars',
+                   'reorient_and_crop']:          
             spec = deepcopy(spec)
             if val:
                 spec.argstr += ' y'
