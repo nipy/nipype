@@ -367,7 +367,7 @@ class AutoTcorrelate(AFNICommand):
     output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         path, base, ext = split_filename(value)
         if ext.lower() not in [".1d", ".nii.gz", ".nii"]:
             ext = ext + ".1D"
@@ -611,7 +611,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run() # doctest: +SKIP
 
     """
@@ -1968,8 +1968,8 @@ class Eval(AFNICommand):
     
     >>> from nipype.interfaces import afni as afni
     >>> eval = afni.Eval()
-    >>> eval.inputs.in_file_a = 'data1.1D'
-    >>> eval.inputs.in_file_b = 'data2.1D'
+    >>> eval.inputs.in_file_a = 'seed.1D'
+    >>> eval.inputs.in_file_b = 'resp.1D'
     >>> eval.inputs.expr='a*b'
     >>> eval.inputs.out1D = True
     >>> eval.inputs.out_file =  'data_calc.1D'
@@ -2030,11 +2030,11 @@ class Means(AFNICommand):
 
     >>> from nipype.interfaces import afni as afni
     >>> means = afni.Means()
-    >>> means.inputs.in_file_a = 'dset.nii'
-    >>> means.inputs.in_file_b = 'dset2.nii'
+    >>> means.inputs.in_file_a = 'im1.nii'
+    >>> means.inputs.in_file_b = 'im2.nii'
     >>> means.inputs.out_file =  'output.nii'
     >>> means.cmdline
-    '3dMean -prefix output.nii dset.nii'
+    '3dMean im1.nii im2.nii -prefix output.nii'
 
     """
 

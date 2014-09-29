@@ -86,13 +86,13 @@ class SVMTrain(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> svmTrain = afni.svmTrain()
-    >>> svmTrain.inputs.in_file= 'run1+orig'
-    >>> svmTrain.inputs.trainlabels= 'run1_categories.1D'
+    >>> svmTrain = afni.SVMTrain()
+    >>> svmTrain.inputs.in_file = 'run1+orig'
+    >>> svmTrain.inputs.trainlabels = 'run1_categories.1D'
     >>> svmTrain.inputs.ttype = 'regression'
-    >>> svmTrain.inputs.mask= 'mask+orig'
-    >>> svmTrain.inputs.model= 'model_run1'
-    >>> svmTrain.inputs.alphas= 'alphas_run1'
+    >>> svmTrain.inputs.mask = 'mask.nii'
+    >>> svmTrain.inputs.model = 'model_run1'
+    >>> svmTrain.inputs.alphas = 'alphas_run1'
     >>> res = svmTrain.run() # doctest: +SKIP
 
     """
@@ -141,7 +141,7 @@ class SVMTest(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> svmTest = afni.svmTest()
+    >>> svmTest = afni.SVMTest()
     >>> svmTest.inputs.in_file= 'run2+orig'
     >>> svmTest.inputs.model= 'run1+orig_model'
     >>> svmTest.inputs.testlabels= 'run2_categories.1D'
