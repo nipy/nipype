@@ -100,7 +100,10 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         n_streams = 0
         iflogger.info('Reading tracks...')
         while True:
-            n_pts = track_points[n_streams]
+            try:
+                n_pts = track_points[n_streams]
+            except IndexError:
+                break
             pts_str = fileobj.read(n_pts * bytesize)
             nan_str = fileobj.read(bytesize)
             if len(pts_str) < (n_pts * bytesize):

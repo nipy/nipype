@@ -14,6 +14,8 @@ Next Release
 * ENH: Support for elastix via a set of new interfaces: Registration, ApplyWarp, 
        AnalyzeWarp, PointsWarp, and EditTransform
 * ENH: New ANTs interface: ApplyTransformsToPoints, LaplacianThickness
+* ENH: New Diffusion Toolkit interface: TrackMerge
+* ENH: New MRtrix interface: FilterTracks
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
        are found in nipype.algorithms.metrics instead of misc
 * ENH: New interface in algorithms.metrics: ErrorMap (a voxel-wise diff map).
