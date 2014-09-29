@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: New dipy interfaces: Denoise, Resample
 * ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format),
        MRIPretess
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp
