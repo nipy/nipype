@@ -4,17 +4,22 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 import nipype.interfaces.fsl as fsl
 import os
+import warnings
 
 def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
-    """Creates a workflow that chains the necessary pipelines to
+    """
+    Creates a workflow that chains the necessary pipelines to
     correct for motion, eddy currents, and, if selected, susceptibility
     artifacts in EPI dMRI sequences.
 
-    .. warning::
+    .. deprecated:: 0.9.3
+      Use :func:`nipype.workflows.dmri.preprocess.epi.all_fmb_pipeline` or
+      :func:`nipype.workflows.dmri.preprocess.epi.all_peb_pipeline` instead.
 
-    IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
-    that not all the dicom converters ensure the consistency between the resulting
-    nifti orientation and the b matrix table (e.g. dcm2nii checks it).
+
+    .. warning:: This workflow rotates the b-vectors, so please be
+      advised that not all the dicom converters ensure the consistency between the resulting
+      nifti orientation and the b matrix table (e.g. dcm2nii checks it).
 
 
     Example
@@ -54,11 +59,15 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
 
 
     Optional arguments::
+
         use_fieldmap - True if there are fieldmap files that should be used (default True)
         fieldmap_registration - True if registration to fieldmap should be performed (default False)
 
 
     """
+
+    warnings.warn(('This workflow is deprecated from v.1.0.0, use of available '
+                  'nipype.workflows.dmri.preprocess.epi.all_*'), DeprecationWarning)
 
     pipeline = pe.Workflow(name=name)
 
@@ -118,11 +127,14 @@ def create_motion_correct_pipeline(name='motion_correct'):
     (Leemans et al. 2009 - http://www.ncbi.nlm.nih.gov/pubmed/19319973),
     making use of the rotation matrix obtained by FLIRT.
 
-    .. warning::
 
-    IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
-    that not all the dicom converters ensure the consistency between the resulting
-    nifti orientation and the b matrix table (e.g. dcm2nii checks it).
+    .. deprecated:: 0.9.3
+      Use :func:`nipype.workflows.dmri.preprocess.epi.hmc_pipeline` instead.
+
+
+    .. warning:: This workflow rotates the b-vectors, so please be adviced
+      that not all the dicom converters ensure the consistency between the resulting
+      nifti orientation and the b matrix table (e.g. dcm2nii checks it).
 
 
     Example
@@ -146,6 +158,10 @@ def create_motion_correct_pipeline(name='motion_correct'):
         outputnode.out_bvec
 
     """
+
+    warnings.warn(('This workflow is deprecated from v.1.0.0, use '
+                  'nipype.workflows.dmri.preprocess.epi.hmc_pipeline instead'),
+                  DeprecationWarning)
 
     inputnode = pe.Node(
         niu.IdentityInterface(
@@ -183,7 +199,13 @@ def create_motion_correct_pipeline(name='motion_correct'):
 
 
 def create_eddy_correct_pipeline(name='eddy_correct'):
-    """Creates a pipeline that replaces eddy_correct script in FSL. It takes a
+    """
+
+    .. deprecated:: 0.9.3
+      Use :func:`nipype.workflows.dmri.preprocess.epi.ecc_pipeline` instead.
+
+
+    Creates a pipeline that replaces eddy_correct script in FSL. It takes a
     series of diffusion weighted images and linearly co-registers them to one
     reference image. No rotation of the B-matrix is performed, so this pipeline
     should be executed after the motion correction pipeline.
@@ -205,6 +227,10 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
 
         outputnode.eddy_corrected
     """
+
+    warnings.warn(('This workflow is deprecated from v.1.0.0, use '
+                  'nipype.workflows.dmri.preprocess.epi.ecc_pipeline instead'),
+                  DeprecationWarning)
 
     inputnode = pe.Node(
         niu.IdentityInterface(fields=['in_file', 'ref_num']),
@@ -237,6 +263,11 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
 
 def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     """
+
+    .. deprecated:: 0.9.3
+      Use :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
+
+
     Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
     artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
     to EPI data, and a brain mask is required.
@@ -244,7 +275,6 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     Replaces the former workflow, still available as create_epidewarp_pipeline().  The difference
     with respect the epidewarp pipeline is that now the workflow uses the new fsl_prepare_fieldmap
     available as of FSL 5.0.
-
 
 
     Example
@@ -281,6 +311,10 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
         outputnode.out_vsm
 
     """
+
+    warnings.warn(('This workflow is deprecated from v.1.0.0, use '
+                  'nipype.workflows.dmri.preprocess.epi.sdc_fmb instead'),
+                  DeprecationWarning)
 
     inputnode = pe.Node(niu.IdentityInterface(
                         fields=['in_file',
@@ -360,8 +394,13 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
 
 def topup_correction( name='topup_correction' ):
     """
-        Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
-        been acquired
+
+    .. deprecated:: 0.9.3
+      Use :func:`nipype.workflows.dmri.preprocess.epi.sdc_peb` instead.
+
+
+    Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
+    been acquired
 
 
     Example
@@ -374,11 +413,14 @@ def topup_correction( name='topup_correction' ):
     >>> nipype_epicorrect.inputs.inputnode.ref_num = 0
     >>> nipype_epicorrect.run() # doctest: +SKIP
 
+
     Inputs::
+
         inputnode.in_file_dir - EPI volume acquired in 'forward' phase encoding
         inputnode.in_file_rev - EPI volume acquired in 'reversed' phase encoding
         inputnode.encoding_direction - Direction encoding of in_file_dir
         inputnode.ref_num - Identifier of the reference volumes (usually B0 volume)
+
 
     Outputs::
 
@@ -386,6 +428,11 @@ def topup_correction( name='topup_correction' ):
 
 
     """
+
+    warnings.warn(('This workflow is deprecated from v.1.0.0, use '
+                  'nipype.workflows.dmri.preprocess.epi.sdc_peb instead'),
+                  DeprecationWarning)
+
     pipeline = pe.Workflow(name=name)
 
     inputnode = pe.Node(niu.IdentityInterface(
@@ -435,10 +482,17 @@ def topup_correction( name='topup_correction' ):
 
 
 def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
-    """ Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
+    """
+    Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
     for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
     information (Jezzard et al., 1995) using FSL's FUGUE. The registration to the (warped) fieldmap
     (strictly following the original script) is available using fieldmap_registration=True.
+
+
+    .. warning:: This workflow makes use of ``epidewarp.fsl`` a script of FSL deprecated long
+      time ago. The use of this workflow is not recommended, use
+      :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
+
 
     Example
     -------
@@ -478,6 +532,9 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
         fieldmap_registration - True if registration to fieldmap should be done (default False)
 
     """
+
+    warnings.warn(('This workflow reproduces a deprecated FSL script.'),
+                  DeprecationWarning)
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file',
                                                                    'fieldmap_mag',
