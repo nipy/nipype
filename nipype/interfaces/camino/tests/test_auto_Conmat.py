@@ -30,10 +30,12 @@ def test_Conmat_inputs():
     ),
     tract_prop=dict(argstr='-tractstat %s',
     units='NA',
+    xor=['tract_stat'],
     ),
     tract_stat=dict(argstr='-tractstat %s',
     requires=['scalar_file'],
     units='NA',
+    xor=['tract_prop'],
     ),
     )
     inputs = Conmat.input_spec()

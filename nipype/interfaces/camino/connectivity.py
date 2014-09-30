@@ -35,9 +35,10 @@ class ConmatInputSpec(CommandLineInputSpec):
 
     tract_stat = traits.Enum("mean", "min", "max", "sum", "median", "var", argstr='-tractstat %s', units='NA',
                              desc=("Tract statistic to use. See TractStats for other options."),
-                             requires=['scalar_file'])
+                             requires=['scalar_file'],xor=['tract_prop'])
 
-    tract_prop = traits.Enum("length", "endpointsep", argstr='-tractstat %s', units='NA',
+    tract_prop = traits.Enum("length", "endpointsep", argstr='-tractstat %s', 
+                             units='NA', xor=['tract_stat'],
                              desc=('Tract property average to compute in the connectivity matrix. '
                                    'See TractStats for details.'))
 
