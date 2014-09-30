@@ -4,6 +4,7 @@ import os
 import pwd
 from socket import getfqdn
 from uuid import uuid1
+from nipype.external import six
 
 import numpy as np
 try:
@@ -94,7 +95,7 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, basestring) and os.path.isfile(object):
+        if isinstance(object, six.string_types) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
@@ -213,7 +214,7 @@ def prov_encode(graph, value, create_container=True):
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, basestring) and os.path.exists(value):
+        if isinstance(value, six.string_types) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)

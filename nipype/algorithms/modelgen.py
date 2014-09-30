@@ -30,6 +30,7 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
 from .. import config, logging
+from nipype.external import six
 iflogger = logging.getLogger('interface')
 
 def gcd(a, b):
@@ -422,7 +423,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, basestring):
+            elif isinstance(f, six.string_types):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:

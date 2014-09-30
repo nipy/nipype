@@ -12,6 +12,7 @@ import sys
 import tempfile
 import warnings
 
+from nipype.external import six
 from nipype.interfaces.base import BaseInterface
 
 # Functions and classes
@@ -215,7 +216,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, basestring):
+                            if isinstance(value, six.string_types):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'
@@ -257,7 +258,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, basestring):
+                            if isinstance(value, six.string_types):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'

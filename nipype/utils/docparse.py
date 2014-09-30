@@ -16,6 +16,7 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 import subprocess
 from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container
+from nipype.external import six
 
 def grab_doc(cmd, trap_error=True):
     """Run cmd without args and grab documentation.
@@ -277,7 +278,7 @@ def _parse_doc(doc, style=['--']):
     # individual flag/option.
     doclist = doc.split('\n')
     optmap = {}
-    if isinstance(style,basestring):
+    if isinstance(style,six.string_types):
         style = [style]
     for line in doclist:
         linelist = line.split()

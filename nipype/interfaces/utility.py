@@ -5,6 +5,7 @@ import re
 from cPickle import dumps, loads
 import numpy as np
 import nibabel as nb
+from nipype.external import six
 
 from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
@@ -386,7 +387,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, basestring):
+            elif isinstance(function, six.string_types):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
@@ -404,7 +405,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, basestring):
+            elif isinstance(new, six.string_types):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
