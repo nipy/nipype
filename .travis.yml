@@ -10,13 +10,6 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
-  # The next couple lines fix a crash with multiprocessing on Travis
-  - sudo rm -rf /dev/shm
-  - sudo ln -s /run/shm /dev/shm
-  - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
-  - travis_retry sudo apt-get install -qq --no-install-recommends fsl afni elastix
-  - travis_retry sudo apt-get install -qq fsl-atlases
-  - source /etc/fsl/fsl.sh
 
 # Install packages
 install:
