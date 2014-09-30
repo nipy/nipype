@@ -104,8 +104,8 @@ if __name__ == "__main__":
                      'de.mpg.cbs.jist.modules.JistModuleCorticalProfileFeatureSetCalculator']
     
     modules_from_chris = ['edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010',
-                         #'edu.jhu.ece.iacl.plugins.registration.MedicAlgorithmFLIRT', XML not well formed
-                         #'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient', # not well formed "<file collection: semi-colon delimited list>"
+                         'edu.jhu.ece.iacl.plugins.registration.MedicAlgorithmFLIRT', #XML not well formed
+                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient', # not well formed "<file collection: semi-colon delimited list>"
                          'edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator',
                          'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation',
                          #'de.mpg.cbs.jist.modules.JistModuleFilterStacking', not found
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                          #'de.mpg.cbs.jist.modules.JistModuleTubularVolumeFilter', # not found
                          #'de.mpg.cbs.jist.modules.JistModuleMgdmMultiSegmentation',
                          #'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization', # not found
-                         #'de.mpg.cbs.jist.modules.JistModuleCopyData', XML not well formed
+                         #'de.mpg.cbs.jist.modules.JistModuleCopyData', not found
                          #'de.mpg.cbs.jist.tools.JistToolsIntensityNormalization',
                          #'de.mpg.cbs.jist.tools.JistToolsExtractBrainRegion',
                          #'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',# XML not well formed
@@ -126,9 +126,9 @@ if __name__ == "__main__":
     
     #modules_list = list(set(modules_list).union(set(modules_from_chris)))
     modules_list = list(set(modules_from_chris).union(set(modules_from_leaonie)).union(set(modules_from_julia)))
-
+    #modules_list = ["'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient'"]
     ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
-    generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run" ], redirect_x = True)
+    generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run" ], redirect_x=True, mipav_hacks=True)
     ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
     #launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
     #generate_all_classes(modules_list=modules_list, launcher=launcher)

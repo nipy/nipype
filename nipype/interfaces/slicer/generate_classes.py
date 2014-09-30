@@ -101,7 +101,7 @@ if __name__ == '__main__':
             f.close()
 
 
-def generate_all_classes(modules_list=[], launcher=[], redirect_x = False):
+def generate_all_classes(modules_list=[], launcher=[], redirect_x=False, mipav_hacks=False):
     """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
         launcher containtains the command line prefix wrapper arugments needed to prepare
         a proper environment for each of the modules.
@@ -111,7 +111,7 @@ def generate_all_classes(modules_list=[], launcher=[], redirect_x = False):
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code, module = generate_class(module, launcher, redirect_x = redirect_x)
+        package, code, module = generate_class(module, launcher, redirect_x = redirect_x, mipav_hacks=mipav_hacks)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -126,8 +126,8 @@ def generate_all_classes(modules_list=[], launcher=[], redirect_x = False):
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x = False):
-    dom = grab_xml(module, launcher)
+def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x = False, mipav_hacks=False):
+    dom = grab_xml(module, launcher, mipav_hacks=mipav_hacks)
     if strip_module_name_prefix:
         module_name = module.split(".")[-1]
     else:
@@ -224,7 +224,10 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
                               param.nodeName.replace('-vector', '')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector', '')]]
-                traitsParams["sep"] = ','
+                if mipav_hacks == True:
+                    traitsParams["sep"] = ";"
+                else:
+                    traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
@@ -301,7 +304,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
     return category, input_spec_code + output_spec_code + main_class, module_name
 
 
-def grab_xml(module, launcher):
+def grab_xml(module, launcher, mipav_hacks=False):
 #        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
 #        ret = cmd.run()
     command_list = launcher[:]  # force copy to preserve original
@@ -309,11 +312,27 @@ def grab_xml(module, launcher):
     final_command = " ".join(command_list)
     xmlReturnValue = subprocess.Popen(
         final_command, stdout=subprocess.PIPE, shell=True).communicate()[0]
-    #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
-    if xmlReturnValue.strip().endswith("XML"):
-        xmlReturnValue = xmlReturnValue.strip()[:-3]
-    if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
-        xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
+    if mipav_hacks:
+        #workaround for a jist bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7234&group_id=228&atid=942
+        new_xml = ""
+        replace_closing_tag = False
+        for line in xmlReturnValue.splitlines():
+            if line.strip() == "<file collection: semi-colon delimited list>":
+                new_xml += "<file-vector>\n"
+                replace_closing_tag = True
+            elif replace_closing_tag and line.strip() == "</file>":
+                new_xml += "</file-vector>\n"
+                replace_closing_tag = False
+            else:
+                new_xml += line + "\n"
+                
+        xmlReturnValue = new_xml
+        
+        #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
+        if xmlReturnValue.strip().endswith("XML"):
+            xmlReturnValue = xmlReturnValue.strip()[:-3]
+        if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
+            xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
     return xml.dom.minidom.parseString(xmlReturnValue.strip())
 #        if ret.runtime.returncode == 0:
 #            return xml.dom.minidom.parseString(ret.runtime.stdout)
