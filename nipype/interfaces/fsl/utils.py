@@ -1359,6 +1359,7 @@ class InvWarp(FSLCommand):
     >>> invwarp = InvWarp()
     >>> invwarp.inputs.warp = "struct2mni.nii"
     >>> invwarp.inputs.reference = "anatomical.nii"
+    >>> invwarp.inputs.output_type = "NIFTI_GZ"
     >>> invwarp.cmdline
     'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
     >>> res = invwarp.run() # doctest: +SKIP
@@ -1576,6 +1577,7 @@ class WarpUtils(FSLCommand):
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.out_format = 'spline'
     >>> warputils.inputs.warp_resolution = (10,10,10)
+    >>> warputils.inputs.output_type = "NIFTI_GZ"
     >>> warputils.cmdline # doctest: +ELLIPSIS
     'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
@@ -1706,6 +1708,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.warp1 = "warpfield.nii"
     >>> warputils.inputs.reference = "T1.nii"
     >>> warputils.inputs.relwarp = True
+    >>> warputils.inputs.output_type = "NIFTI_GZ"
     >>> warputils.cmdline # doctest: +ELLIPSIS
     'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
     >>> res = invwarp.run() # doctest: +SKIP
