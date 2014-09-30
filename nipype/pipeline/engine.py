@@ -716,8 +716,8 @@ connected.
                                      'report_template.html'),
                         op.join(report_dir, 'index.html'))
         shutil.copyfile(op.join(op.dirname(__file__),
-                                     '..', 'external', 'd3.v3.min.js'),
-                        op.join(report_dir, 'd3.v3.min.js'))
+                                     '..', 'external', 'd3.js'),
+                        op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = op.join(report_dir, 'graph1.json')
         json_dict = {'nodes': [], 'links': [], 'groups': [], 'maxN': 0}
