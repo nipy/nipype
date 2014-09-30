@@ -34,6 +34,7 @@ import sys
 from tempfile import mkdtemp
 from warnings import warn
 from hashlib import sha1
+from nipype.external import six
 
 import numpy as np
 
@@ -361,7 +362,7 @@ connected.
                         # handles the case that source is specified
                         # with a function
                         sourcename = source[0]
-                    elif isinstance(source, str):
+                    elif isinstance(source, six.string_types):
                         sourcename = source
                     else:
                         raise Exception(('Unknown source specification in '
@@ -382,7 +383,7 @@ connected.
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], str):
+                if isinstance(src, tuple) and not isinstance(src[1], six.string_types):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -896,7 +897,7 @@ connected.
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
-        if isinstance(sourceinfo, str):
+        if isinstance(sourceinfo, six.string_types):
             val = source.get_output(sourceinfo)
         elif isinstance(sourceinfo, tuple):
             if callable(sourceinfo[1]):
@@ -1841,7 +1842,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, str):
+        elif isinstance(joinfield, six.string_types):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -2047,7 +2048,7 @@ class MapNode(Node):
 
 
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, str):
+        if isinstance(iterfield, six.string_types):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self._inputs = self._create_dynamic_traits(self._interface.inputs,

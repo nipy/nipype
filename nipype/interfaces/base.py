@@ -24,6 +24,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
+from nipype.external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -541,7 +542,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, str) and
+                if (hash_files and isinstance(object, six.string_types) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -984,7 +985,7 @@ class BaseInterface(Interface):
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], str):
+            if len(e.args) == 1 and isinstance(e.args[0], six.string_types):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
