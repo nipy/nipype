@@ -26,13 +26,6 @@ except Exception, e:
 else:
     from dipy.align.aniso2iso import resample
     from dipy.core.gradients import GradientTable
-    
-try:
-    package_check('dipy', version='0.7.2')
-except Exception, e:
-    have_dipy = False
-else:
-    from dipy.denoise.nlmeans import nlmeans
 
 
 class ResampleInputSpec(TraitedSpec):
@@ -134,6 +127,15 @@ class Denoise(BaseInterface):
     """
     input_spec = DenoiseInputSpec
     output_spec = DenoiseOutputSpec
+    
+    def __init__(self, **inputs):
+        try:
+            package_check('dipy', version='0.8.0.dev')
+        except Exception, e:
+            have_dipy = False
+        else:
+            from dipy.denoise.nlmeans import nlmeans
+        BaseInterface.__init__(self, **inputs)
 
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())
