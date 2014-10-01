@@ -13,12 +13,12 @@ before_install:
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - export PATH=/home/travis/miniconda/bin:$PATH
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; sudo rm -rf /dev/shm; fi
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; sudo ln -s /run/shm /dev/shm; fi
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh); fi
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; travis_retry sudo apt-get install -qq --no-install-recommends fsl afni elastix; fi
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; travis_retry sudo apt-get install -qq fsl-atlases; fi
-  - if [ ${INSTALL_DEB_DEPENDECIES} ]; source /etc/fsl/fsl.sh; fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; sudo rm -rf /dev/shm; fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; sudo ln -s /run/shm /dev/shm; fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh); fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; travis_retry sudo apt-get install -qq --no-install-recommends fsl afni elastix; fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; travis_retry sudo apt-get install -qq fsl-atlases; fi
+  - if [ "$INSTALL_DEB_DEPENDECIES" = true ]; source /etc/fsl/fsl.sh; fi
 
 # Install packages
 install:
