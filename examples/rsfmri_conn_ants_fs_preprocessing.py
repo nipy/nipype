@@ -900,7 +900,7 @@ if __name__ == "__main__":
     anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
     target_file = \
         os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
-                         'v2.nii.gz'))
+                         '2mm_v2.nii.gz'))
     wf = create_workflow(files, anat_file, target_file, subj_id,
                          2.0, 33, vol_fwhm=6.0, surf_fwhm=15.0,
                          lowpass_freq=0.1, highpass_freq=0.01,
