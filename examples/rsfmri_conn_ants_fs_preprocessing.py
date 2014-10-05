@@ -320,7 +320,7 @@ def combine_hemi(left, right):
                          2000000 + np.arange(0, rh_data.shape[0])[:, None]))
     all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
                                               rh_data.squeeze()))))
-    filename = 'combined_surf.txt'
+    filename = left.split('.')[1] + '_combined.txt'
     np.savetxt(filename, all_data,
                fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
@@ -853,7 +853,7 @@ def create_workflow(files,
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    #datasink.inputs.substitutions = [('_target_subject_', '')]
+    datasink.inputs.substitutions = [('_target_subject_', '')]
     #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
@@ -884,7 +884,7 @@ def create_workflow(files,
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
-    #datasink2.inputs.substitutions = [('_target_subject_', '')]
+    datasink2.inputs.substitutions = [('_target_subject_', '')]
     #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
@@ -898,12 +898,14 @@ if __name__ == "__main__":
     fsdir = '/software/temp/brainconnect/fsdata'
     files = sorted(glob(os.path.abspath('%s/E?/func/rest.nii' % subj_id)))
     anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
-    target_file = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+    target_file = \
+        os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
+                         'v2.nii.gz'))
     wf = create_workflow(files, anat_file, target_file, subj_id,
                          2.0, 33, vol_fwhm=6.0, surf_fwhm=15.0,
                          lowpass_freq=0.1, highpass_freq=0.01,
                          subjects_dir=fsdir,
-                         target_subject=['fsaverage4'],
+                         target_subject=['fsaverage5'],
                          sink_directory=os.getcwd(),
                          name='resting_' + subj_id)
     wf.base_dir = os.getcwd()
