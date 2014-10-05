@@ -269,6 +269,63 @@ def rename(in_files, suffix=None):
             out_files.append(name + suffix + ext)
     return list_to_filename(out_files)
 
+
+def get_aparc_aseg(files):
+    """Return the aparc+aseg.mgz file"""
+    for name in files:
+        if 'aparc+aseg.mgz' in name:
+            return name
+    raise ValueError('aparc+aseg.mgz not found')
+
+
+def extract_subrois(timeseries_file, label_file, indices):
+    """Extract voxel time courses for each subcortical roi index
+
+    Parameters
+    ----------
+
+    timeseries_file: a 4D Nifti file
+    label_file: a 3D file containing rois in the same space/size of the 4D file
+    indices: a list of indices for ROIs to extract.
+
+    Returns
+    -------
+    out_file: a text file containing time courses for each voxel of each roi
+        The first four columns are: freesurfer index, i, j, k positions in the
+        label file
+    """
+    img = nb.load(timeseries_file)
+    data = img.get_data()
+    roiimg = nb.load(label_file)
+    rois = roiimg.get_data()
+    out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
+    with open(out_ts_file, 'wt') as fp:
+        for fsindex in indices:
+            ijk = np.nonzero(rois == fsindex)
+            ts = data[ijk]
+            for i0, row in enumerate(ts):
+                fp.write('%d,%d,%d,%d,' % (fsindex, ijk[0][i0],
+                                           ijk[1][i0], ijk[2][i0]) +
+                         ','.join(['%.10f' % val for val in row]) + '\n')
+    return out_ts_file
+
+
+def combine_hemi(left, right):
+    """Combine left and right hemisphere time series into a single text file
+    """
+    lh_data = nb.load(left).get_data()
+    rh_data = nb.load(right).get_data()
+
+    indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
+                         2000000 + np.arange(0, rh_data.shape[0])[:, None]))
+    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
+                                              rh_data.squeeze()))))
+    filename = 'combined_surf.txt'
+    np.savetxt(filename, all_data,
+               fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
+    return os.path.abspath(filename)
+
+
 def create_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow together with freesurfer
 
@@ -308,11 +365,13 @@ def create_reg_workflow(name='registration'):
                      name='inputspec')
 
     outputnode = Node(interface=IdentityInterface(fields=['func2anat_transform',
+                                                          'out_reg_file',
                                                           'anat2target_transform',
                                                           'transforms',
                                                           'transformed_mean',
                                                           'segmentation_files',
-                                                          'anat2target'
+                                                          'anat2target',
+                                                          'aparc'
                                                           ]),
                       name='outputspec')
 
@@ -368,6 +427,18 @@ def create_reg_workflow(name='registration'):
     register.connect(bbregister, 'out_reg_file', applyxfm, 'reg_file')
     register.connect(binarize, 'out_file', applyxfm, 'target_file')
     register.connect(inputnode, 'mean_image', applyxfm, 'source_file')
+
+    """
+    Apply inverse transform to aparc file
+    """
+    aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
+                                                 interp='nearest'),
+                    name='aparc_inverse_transform')
+    register.connect(inputnode, 'subjects_dir', aparcxfm, 'subjects_dir')
+    register.connect(bbregister, 'out_reg_file', aparcxfm, 'reg_file')
+    register.connect(fssource, ('aparc_aseg', get_aparc_aseg),
+                     aparcxfm, 'target_file')
+    register.connect(inputnode, 'mean_image', aparcxfm, 'source_file')
 
     """
     Convert the BBRegister transformation to ANTS ITK format
@@ -453,9 +524,14 @@ def create_reg_workflow(name='registration'):
 
     register.connect(reg, 'warped_image', outputnode, 'anat2target')
     register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
-    register.connect(applyxfm, 'transformed_file', outputnode, 'segmentation_files')
+    register.connect(applyxfm, 'transformed_file',
+                     outputnode, 'segmentation_files')
+    register.connect(aparcxfm, 'transformed_file',
+                     outputnode, 'aparc')
     register.connect(bbregister, 'out_fsl_file',
                      outputnode, 'func2anat_transform')
+    register.connect(bbregister, 'out_reg_file',
+                     outputnode, 'out_reg_file')
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
@@ -477,10 +553,12 @@ def create_workflow(files,
                     norm_threshold=1,
                     num_components=5,
                     vol_fwhm=None,
+                    surf_fwhm=None,
                     lowpass_freq=-1,
                     highpass_freq=-1,
                     subjects_dir=None,
                     sink_directory=os.getcwd(),
+                    target_subject=['fsaverage3', 'fsaverage4'],
                     name='resting'):
 
     wf = Workflow(name=name)
@@ -647,7 +725,6 @@ def create_workflow(files,
 
     wf.connect(bandpass, 'out_files', smooth, 'in_files')
 
-
     collector = Node(Merge(2), name='collect_streams')
     wf.connect(smooth, 'smoothed_files', collector, 'in1')
     wf.connect(bandpass, 'out_files', collector, 'in2')
@@ -684,6 +761,93 @@ def create_workflow(files,
     # extract target space ROIs
     # combine subcortical and cortical rois into a single cifti file
 
+    #######
+    # Convert aparc to subject functional space
+
+    # Sample the average time series in aparc ROIs
+    sampleaparc = MapNode(freesurfer.SegStats(default_color_table=True),
+                          iterfield=['in_file', 'summary_file',
+                                     'avgwf_txt_file'],
+                          name='aparc_ts')
+    sampleaparc.inputs.segment_id = ([8] + range(10, 14) + [17, 18, 26, 47] +
+                                     range(49, 55) + [58] + range(1001, 1036) +
+                                     range(2001, 2036))
+
+    wf.connect(registration, 'outputspec.aparc',
+               sampleaparc, 'segmentation_file')
+    wf.connect(collector, 'out', sampleaparc, 'in_file')
+
+    def get_names(files, suffix):
+        """Generate appropriate names for output files
+        """
+        from nipype.utils.filemanip import (split_filename, filename_to_list,
+                                            list_to_filename)
+        out_names = []
+        for filename in files:
+            _, name, _ = split_filename(filename)
+            out_names.append(name + suffix)
+        return list_to_filename(out_names)
+
+    wf.connect(collector, ('out', get_names, '_avgwf.txt'),
+               sampleaparc, 'avgwf_txt_file')
+    wf.connect(collector, ('out', get_names, '_summary.stats'),
+               sampleaparc, 'summary_file')
+
+    # Sample the time series onto the surface of the target surface. Performs
+    # sampling into left and right hemisphere
+    target = Node(IdentityInterface(fields=['target_subject']), name='target')
+    target.iterables = ('target_subject', filename_to_list(target_subject))
+
+    samplerlh = MapNode(freesurfer.SampleToSurface(),
+                        iterfield=['source_file'],
+                        name='sampler_lh')
+    samplerlh.inputs.sampling_method = "average"
+    samplerlh.inputs.sampling_range = (0.1, 0.9, 0.1)
+    samplerlh.inputs.sampling_units = "frac"
+    samplerlh.inputs.interp_method = "trilinear"
+    samplerlh.inputs.smooth_surf = surf_fwhm
+    #samplerlh.inputs.cortex_mask = True
+    samplerlh.inputs.out_type = 'niigz'
+    samplerlh.inputs.subjects_dir = subjects_dir
+
+    samplerrh = samplerlh.clone('sampler_rh')
+
+    samplerlh.inputs.hemi = 'lh'
+    wf.connect(collector, 'out', samplerlh, 'source_file')
+    wf.connect(registration, 'outputspec.out_reg_file', samplerlh, 'reg_file')
+    wf.connect(target, 'target_subject', samplerlh, 'target_subject')
+
+    samplerrh.set_input('hemi', 'rh')
+    wf.connect(collector, 'out', samplerrh, 'source_file')
+    wf.connect(registration, 'outputspec.out_reg_file', samplerrh, 'reg_file')
+    wf.connect(target, 'target_subject', samplerrh, 'target_subject')
+
+    # Combine left and right hemisphere to text file
+    combiner = MapNode(Function(input_names=['left', 'right'],
+                                output_names=['out_file'],
+                                function=combine_hemi,
+                                imports=imports),
+                       iterfield=['left', 'right'],
+                       name="combiner")
+    wf.connect(samplerlh, 'out_file', combiner, 'left')
+    wf.connect(samplerrh, 'out_file', combiner, 'right')
+
+    # Sample the time series file for each subcortical roi
+    ts2txt = MapNode(Function(input_names=['timeseries_file', 'label_file',
+                                           'indices'],
+                              output_names=['out_file'],
+                              function=extract_subrois,
+                              imports=imports),
+                     iterfield=['timeseries_file'],
+                     name='getsubcortts')
+    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] +\
+                            range(49, 55) + [58]
+    ts2txt.inputs.label_file = \
+        os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
+                         '2mm_v2.nii.gz'))
+    wf.connect(maskts, 'out_file', ts2txt, 'timeseries_file')
+
+    ######
 
     # Save the relevant data into an output directory
     datasink = Node(interface=DataSink(), name="datasink")
@@ -710,6 +874,20 @@ def create_workflow(files,
     wf.connect(createfilter2, 'out_files',
                datasink, 'resting.regress.@compcorr')
     wf.connect(maskts, 'out_file', datasink, 'resting.timeseries.target')
+    wf.connect(sampleaparc, 'summary_file',
+               datasink, 'resting.parcellations.aparc')
+    wf.connect(sampleaparc, 'avgwf_txt_file',
+               datasink, 'resting.parcellations.aparc.@avgwf')
+    wf.connect(ts2txt, 'out_file',
+               datasink, 'resting.parcellations.grayo.@subcortical')
+
+    datasink2 = Node(interface=DataSink(), name="datasink2")
+    datasink2.inputs.base_directory = sink_directory
+    datasink2.inputs.container = subject_id
+    #datasink2.inputs.substitutions = [('_target_subject_', '')]
+    #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    wf.connect(combiner, 'out_file',
+               datasink2, 'resting.parcellations.grayo.@surface')
     return wf
 
 
@@ -722,13 +900,14 @@ if __name__ == "__main__":
     anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
     target_file = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
     wf = create_workflow(files, anat_file, target_file, subj_id,
-                         2.0, 33, vol_fwhm=6.0,
+                         2.0, 33, vol_fwhm=6.0, surf_fwhm=15.0,
                          lowpass_freq=0.1, highpass_freq=0.01,
                          subjects_dir=fsdir,
+                         target_subject=['fsaverage4'],
                          sink_directory=os.getcwd(),
                          name='resting_' + subj_id)
     wf.base_dir = os.getcwd()
-    #wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
-    wf.write_graph(graph2use='colored')
-    wf.run()
+    wf.run(plugin='MultiProc', plugin_args={'nprocs': 4})
+    #wf.write_graph(graph2use='colored')
+    #wf.run()
 
