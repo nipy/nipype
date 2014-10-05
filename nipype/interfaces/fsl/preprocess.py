@@ -532,10 +532,11 @@ class FLIRT(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
-    >>> flt.inputs.in_file = example_data('structural.nii')
-    >>> flt.inputs.reference = example_data('mni.nii')
+    >>> flt.inputs.in_file = 'structural.nii'
+    >>> flt.inputs.reference = 'mni.nii'
+    >>> flt.inputs.output_type = "NIFTI_GZ"
     >>> flt.cmdline #doctest: +ELLIPSIS
-    'flirt -in .../structural.nii -ref .../mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
+    'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
     """
@@ -1262,6 +1263,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
@@ -1276,6 +1278,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
@@ -1290,6 +1293,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP
