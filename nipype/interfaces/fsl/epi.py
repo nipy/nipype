@@ -135,16 +135,20 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                                          'phase-encode steps minus 1)'))
     out_base = File(desc=('base-name of output files (spline '
                     'coefficients (Hz) and movement parameters)'),
-                    name_source=['in_file'], name_template='%s_base',
+                    name_source=['in_file'], name_template='%s',
                     argstr='--out=%s', hash_files=False)
     out_field = File(argstr='--fout=%s', hash_files=False,
-                     name_source=['in_file'], name_template='%s_field',
+                     name_source=['out_base'], name_template='%s_field',
+                     output_name='out_field',
                      desc='name of image file with field (Hz)')
     out_corrected = File(argstr='--iout=%s', hash_files=False,
-                         name_source=['in_file'], name_template='%s_corrected',
+                         name_source=['out_base'],
+                         name_template='%s_corrected',
+                         output_name='out_corrected',
                          desc='name of 4D image file with unwarped images')
-    out_logfile = File(argstr='--logout=%s', desc='name of log-file',
-                       name_source=['in_file'], name_template='%s_topup.log',
+    out_logfile = File(argstr='--logout=%s',desc='name of log-file',
+                       name_source=['out_base'], name_template='%s_topup.log',
+                       outputname='out_logfile',
                        keep_extension=True, hash_files=False)
 
     # TODO: the following traits admit values separated by commas, one value
@@ -207,13 +211,17 @@ class TOPUPInputSpec(FSLCommandInputSpec):
 
 
 class TOPUPOutputSpec(TraitedSpec):
+    out_base = File(desc='base path of outputs')
     out_fieldcoef = File(exists=True,
                          desc='file containing the field coefficients')
     out_movpar = File(exists=True, desc='movpar.txt output file')
-    out_enc_file = File(desc='encoding directions file output for applytopup')
-    out_field = File(desc='name of image file with field (Hz)')
-    out_corrected = File(desc='name of 4D image file with unwarped images')
-    out_logfile = File(desc='name of log-file')
+    out_enc_file = File(exists=True,
+                        desc='encoding directions file output for applytopup')
+    out_field = File(exists=True,
+                     desc='name of image file with field (Hz)')
+    out_corrected = File(exists=True,
+                         desc='name of 4D image file with unwarped images')
+    out_logfile = File(exists=True, desc='name of log-file')
 
 
 class TOPUP(FSLCommand):
@@ -236,10 +244,21 @@ class TOPUP(FSLCommand):
     >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline #doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
---imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
+--imain=b0_b0rev.nii --out=b0_b0rev --iout=b0_b0rev_corrected.nii.gz \
 --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log'
     >>> res = topup.run() # doctest: +SKIP
 
+
+    >>> from nipype.interfaces.fsl import TOPUP
+    >>> topup = TOPUP()
+    >>> topup.inputs.in_file = "b0_b0rev.nii"
+    >>> topup.inputs.out_base = "mybase"
+    >>> topup.inputs.encoding_file = "topup_encoding.txt"
+    >>> topup.cmdline #doctest: +ELLIPSIS
+    'topup --config=b02b0.cnf --datain=topup_encoding.txt \
+--imain=b0_b0rev.nii --out=mybase --iout=mybase_corrected.nii.gz \
+--fout=mybase_field.nii.gz --logout=mybase_topup.log'
+    >>> res = topup.run() # doctest: +SKIP
     """
     _cmd = 'topup'
     input_spec = TOPUPInputSpec
@@ -252,17 +271,21 @@ class TOPUP(FSLCommand):
 
     def _list_outputs(self):
         outputs = super(TOPUP, self)._list_outputs()
-        del outputs['out_base']
+
         if isdefined(self.inputs.out_base):
             base = self.inputs.out_base
         else:
-            base = split_filename(self.inputs.in_file)[1] + '_base'
+            base = split_filename(self.inputs.in_file)[1]
+
         outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef')
         outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
                                                 ext='.txt')
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
+        elif isdefined(self.inputs.encoding_file):
+            outputs['out_enc_file'] = self.inputs.encoding_file
+
         return outputs
 
     def _get_encfilename(self):
@@ -568,11 +591,11 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                         (use if fmap already registered)')
     no_clean = traits.Bool(False, argstr='--noclean',
                         desc='do not clean up intermediate files')
-    
+
 
 class EpiRegOutputSpec(TraitedSpec):
     out_file = File(exists=True,
-                    desc='unwarped and coregistered epi input')     
+                    desc='unwarped and coregistered epi input')
     out_1vol = File(exists=True,
                           desc='unwarped and coregistered single volume')
     fmap2str_mat = File(exists=True,
@@ -598,7 +621,7 @@ class EpiRegOutputSpec(TraitedSpec):
 class EpiReg(FSLCommand):
     """
 
-    Runs FSL epi_reg script for simultaneous coregistration and fieldmap 
+    Runs FSL epi_reg script for simultaneous coregistration and fieldmap
     unwarping.
 
     Examples
@@ -620,7 +643,7 @@ class EpiReg(FSLCommand):
 --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --pedir=y \
 --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
     >>> epireg.run() # doctest: +SKIP
-    
+
     """
     _cmd = 'epi_reg'
     input_spec = EpiRegInputSpec
