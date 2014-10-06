@@ -3,15 +3,23 @@ from nipype.testing import assert_equal
 from nipype.algorithms.misc import Overlap
 
 def test_Overlap_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(bg_overlap=dict(mandatory=True,
+    usedefault=True,
+    ),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     mask_volume=dict(),
     out_file=dict(usedefault=True,
     ),
+    vol_units=dict(mandatory=True,
+    usedefault=True,
+    ),
     volume1=dict(mandatory=True,
     ),
     volume2=dict(mandatory=True,
+    ),
+    weighting=dict(usedefault=True,
     ),
     )
     inputs = Overlap.input_spec()
@@ -24,6 +32,10 @@ def test_Overlap_outputs():
     output_map = dict(dice=dict(),
     diff_file=dict(),
     jaccard=dict(),
+    labels=dict(),
+    roi_di=dict(),
+    roi_ji=dict(),
+    roi_voldiff=dict(),
     volume_difference=dict(),
     )
     outputs = Overlap.output_spec()
