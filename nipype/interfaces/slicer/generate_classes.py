@@ -7,6 +7,7 @@ import xml.dom.minidom
 import subprocess
 import os
 from shutil import rmtree
+from nipype.external import six
 
 import keyword
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
@@ -47,7 +48,7 @@ import os\n\n\n"""
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
     for k, v in code_struct.iteritems():
-        if isinstance(v, str) or isinstance(v, unicode):
+        if isinstance(v, six.string_types) or isinstance(v, unicode):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -57,7 +58,7 @@ def crawl_code_struct(code_struct, package_dir):
             l1 = {}
             l2 = {}
             for key in v.keys():
-                if (isinstance(v[key], str) or isinstance(v[key], unicode)):
+                if (isinstance(v[key], six.string_types) or isinstance(v[key], unicode)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -313,7 +314,7 @@ def grab_xml(module, launcher):
 def parse_params(params):
     list = []
     for key, value in params.iteritems():
-        if isinstance(value, str) or isinstance(value, unicode):
+        if isinstance(value, six.string_types) or isinstance(value, unicode):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))

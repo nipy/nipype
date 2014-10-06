@@ -233,6 +233,7 @@ class TOPUP(FSLCommand):
     >>> topup = TOPUP()
     >>> topup.inputs.in_file = "b0_b0rev.nii"
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
+    >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline #doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
@@ -354,6 +355,7 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup.inputs.in_index = [1,2]
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
+    >>> applytopup.inputs.output_type = "NIFTI_GZ"
     >>> applytopup.cmdline #doctest: +ELLIPSIS
     'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
 --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'

@@ -17,7 +17,7 @@ def test_TCat_inputs():
     position=-1,
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
+    name_source='in_files',
     name_template='%s_tcat',
     ),
     outputtype=dict(),

@@ -1191,39 +1191,89 @@ class ExtractMainComponent(CommandLine):
 
 
 class Tkregister2InputSpec(FSTraitedSpec):
+    target_image = File(exists=True, argstr="--targ %s",
+                        xor=['fstarg'],
+                        desc='target volume')
+    fstarg = traits.Bool(False, argstr='--fstarg',
+                         xor=['target_image'],
+                         desc='use subject\'s T1 as reference')
+
     moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
-               desc='moving volume')
+                        desc='moving volume')
     fsl_in_matrix = File(exists=True, argstr="--fsl %s",
-               desc='fsl-style registration input matrix')
-    subject_id = traits.String(argstr="--s %s", mandatory=True,
+                         desc='fsl-style registration input matrix')
+    subject_id = traits.String(argstr="--s %s",
                                desc='freesurfer subject ID')
-    noedit = traits.Bool(True, argstr="--noedit", desc='do not open edit window (exit)', usedefault=True)
-    reg_file = File(name_template='%s.dat', name_source='fsl',
-                        mandatory=True, argstr="--reg %s",
-                        desc='freesurfer-style registration file')
+    noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
+                         desc='do not open edit window (exit)')
+    reg_file = File('register.dat', usedefault=True,
+                    mandatory=True, argstr='--reg %s',
+                    desc='freesurfer-style registration file')
+    reg_header = traits.Bool(False, argstr='--regheader',
+                             desc='compute regstration from headers')
+    fstal = traits.Bool(False, argstr='--fstal',
+                        xor=['target_image', 'moving_image'],
+                        desc='set mov to be tal and reg to be tal xfm')
+    movscale = traits.Float(argstr='--movscale %f',
+                            desc='adjust registration matrix to scale mov')
+    xfm = File(exists=True, argstr='--xfm %s',
+               desc='use a matrix in MNI coordinates as initial registration')
+    fsl_out = File(argstr='--fslregout %s',
+                   desc='compute an FSL-compatible resgitration matrix')
 
 
 class Tkregister2OutputSpec(TraitedSpec):
     reg_file = File(exists=True, desc='freesurfer-style registration file')
+    fsl_file = File(desc='FSL-style registration file')
 
 
 class Tkregister2(FSCommand):
-    """Use tkregister2 without the manual editing stage to convert
-    FSL-style registration matrix (.mat) to FreeSurfer-style registration matrix (.dat)
+    """
 
     Examples
     --------
 
+    Get transform matrix between orig (*tkRAS*) and native (*scannerRAS*)
+    coordinates in Freesurfer. Implements the first step of mapping surfaces
+    to native space in `this guide
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/FsAnat-to-NativeAnat>`_.
+
     >>> from nipype.interfaces.freesurfer import Tkregister2
-    >>> tk2 = Tkregister2(reg_file='register.dat')
+    >>> tk2 = Tkregister2(reg_file='T1_to_native.dat')
+    >>> tk2.inputs.moving_image = 'T1.mgz'
+    >>> tk2.inputs.target_image = 'structural.nii'
+    >>> tk2.inputs.reg_header = True
+    >>> tk2.cmdline
+    'tkregister2 --mov T1.mgz --noedit --reg T1_to_native.dat --regheader \
+--targ structural.nii'
+    >>> tk2.run() # doctest: +SKIP
+
+    The example below uses tkregister2 without the manual editing
+    stage to convert FSL-style registration matrix (.mat) to
+    FreeSurfer-style registration matrix (.dat)
+
+    >>> from nipype.interfaces.freesurfer import Tkregister2
+    >>> tk2 = Tkregister2()
     >>> tk2.inputs.moving_image = 'epi.nii'
     >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
-    >>> tk2.inputs.subject_id = 'test_subject'
+    >>> tk2.cmdline
+    'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
     >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
+        if isdefined(self.inputs.fsl_out):
+            outputs['fsl_file'] = op.abspath(self.inputs.fsl_out)
+        return outputs
 
-
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return os.path.abspath(self.inputs.out_file)
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return os.path.abspath(name + '_smoothed' + ext)
