@@ -128,15 +128,6 @@ class Denoise(BaseInterface):
     input_spec = DenoiseInputSpec
     output_spec = DenoiseOutputSpec
     
-    def __init__(self, **inputs):
-        try:
-            package_check('dipy', version='0.8.0.dev')
-        except Exception, e:
-            have_dipy = False
-        else:
-            from dipy.denoise.nlmeans import nlmeans
-        BaseInterface.__init__(self, **inputs)
-
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())
 
@@ -218,6 +209,8 @@ def nlmeans_proxy(in_file, settings,
     """
     Uses non-local means to denoise 4D datasets
     """
+    package_check('dipy', version='0.8.0.dev')
+    from dipy.denoise.nlmeans import nlmeans
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
