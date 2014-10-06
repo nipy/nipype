@@ -6,9 +6,7 @@
 rsfMRI: FSL - CSF regressed
 ===========================
 
-A pipeline example that intergrates several interfaces to
-perform a first and second level analysis on a two-subject data
-set.
+A pipeline example that performs a simple CSF regression on resting data.
 
 
 1. Tell Python where to find the appropriate functions.

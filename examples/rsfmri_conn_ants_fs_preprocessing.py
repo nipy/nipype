@@ -298,7 +298,8 @@ def extract_subrois(timeseries_file, label_file, indices):
     data = img.get_data()
     roiimg = nb.load(label_file)
     rois = roiimg.get_data()
-    out_ts_file = os.path.join(os.getcwd(), 'subcortical_timeseries.txt')
+    prefix = split_filename(timeseries_file)[1]
+    out_ts_file = os.path.join(os.getcwd(), '%s_subcortical_ts.txt' % prefix)
     with open(out_ts_file, 'wt') as fp:
         for fsindex in indices:
             ijk = np.nonzero(rois == fsindex)
@@ -849,12 +850,28 @@ def create_workflow(files,
 
     ######
 
+    substitutions = [('_target_subject_', ''),
+                     ('_filtermotart_cleaned_bp_trans_masked', ''),
+                     ('_filtermotart_cleaned_bp', '')
+                     ]
+    regex_subs = [('_ts_masker.*/sar', '/smooth/'),
+                  ('_ts_masker.*/ar', '/unsmooth/'),
+                  ('_combiner.*/sar', '/smooth/'),
+                  ('_combiner.*/ar', '/unsmooth/'),
+                  ('_aparc_ts.*/sar', '/smooth/'),
+                  ('_aparc_ts.*/ar', '/unsmooth/'),
+                  ('_getsubcortts.*/sar', '/smooth/'),
+                  ('_getsubcortts.*/ar', '/unsmooth/'),
+                  ('series/sar', 'series/smooth/'),
+                  ('series/ar', 'series/unsmooth/'),
+                  ('_inverse_transform./', ''),
+                  ]
     # Save the relevant data into an output directory
     datasink = Node(interface=DataSink(), name="datasink")
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
-    datasink.inputs.substitutions = [('_target_subject_', '')]
-    #datasink.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    datasink.inputs.substitutions = substitutions
+    datasink.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
     wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
@@ -867,8 +884,8 @@ def create_workflow(files,
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
-    wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.bandpassed')
-    wf.connect(smooth, 'smoothed_files', datasink, 'resting.timeseries.smoothed')
+    wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.@bandpassed')
+    wf.connect(smooth, 'smoothed_files', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files',
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
@@ -884,8 +901,8 @@ def create_workflow(files,
     datasink2 = Node(interface=DataSink(), name="datasink2")
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
-    datasink2.inputs.substitutions = [('_target_subject_', '')]
-    #datasink2.inputs.regexp_substitutions = (r'(/_.*(\d+/))', r'/run\2')
+    datasink2.inputs.substitutions = substitutions
+    datasink2.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf
