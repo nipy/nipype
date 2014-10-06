@@ -233,6 +233,7 @@ class TOPUP(FSLCommand):
     >>> topup = TOPUP()
     >>> topup.inputs.in_file = "b0_b0rev.nii"
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
+    >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline #doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
@@ -354,6 +355,7 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup.inputs.in_index = [1,2]
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
+    >>> applytopup.inputs.output_type = "NIFTI_GZ"
     >>> applytopup.cmdline #doctest: +ELLIPSIS
     'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
 --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'
@@ -566,11 +568,11 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                         (use if fmap already registered)')
     no_clean = traits.Bool(False, argstr='--noclean',
                         desc='do not clean up intermediate files')
-    
+
 
 class EpiRegOutputSpec(TraitedSpec):
     out_file = File(exists=True,
-                    desc='unwarped and coregistered epi input')     
+                    desc='unwarped and coregistered epi input')
     out_1vol = File(exists=True,
                           desc='unwarped and coregistered single volume')
     fmap2str_mat = File(exists=True,
@@ -596,7 +598,7 @@ class EpiRegOutputSpec(TraitedSpec):
 class EpiReg(FSLCommand):
     """
 
-    Runs FSL epi_reg script for simultaneous coregistration and fieldmap 
+    Runs FSL epi_reg script for simultaneous coregistration and fieldmap
     unwarping.
 
     Examples
@@ -618,7 +620,7 @@ class EpiReg(FSLCommand):
 --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --pedir=y \
 --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
     >>> epireg.run() # doctest: +SKIP
-    
+
     """
     _cmd = 'epi_reg'
     input_spec = EpiRegInputSpec

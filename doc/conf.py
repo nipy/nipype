@@ -39,8 +39,8 @@ extensions = ['sphinx.ext.todo',
               'numpy_ext.numpydoc',
               'matplotlib.sphinxext.plot_directive',
               'matplotlib.sphinxext.only_directives',
-              'matplotlib.sphinxext.ipython_directive',
-              'ipython_console_highlighting'
+              'IPython.sphinxext.ipython_directive',
+              'IPython.sphinxext.ipython_console_highlighting'
               ]
 
 # Add any paths that contain templates here, relative to this directory.

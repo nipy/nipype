@@ -5,6 +5,7 @@ Extend numpy's decorators to use nipype's gui and data labels.
 """
 
 from numpy.testing.decorators import *
+from nipype.external import six
 
 from nibabel.data import DataError
 
@@ -44,7 +45,7 @@ def make_label_dec(label, ds=None):
     >>> f.hard
     True
     """
-    if isinstance(label,basestring):
+    if isinstance(label,six.string_types):
         labels = [label]
     else:
         labels = label

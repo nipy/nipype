@@ -1,12 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-#
-# @Author: oesteban - code@oscaresteban.es
-# @Date:   2014-06-17 10:17:07
-# @Last Modified by:   oesteban
-# @Last Modified time: 2014-09-01 21:05:33
+
 """
 Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)

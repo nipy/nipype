@@ -23,6 +23,7 @@ from nipype.interfaces.base import (TraitedSpec,
 import nibabel as nb
 from nipype.interfaces.traits_extension import isdefined, Undefined
 import imghdr
+from nipype.external import six
 
 have_dcmstack = True
 try:
@@ -84,7 +85,7 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                   "any default exclude filters")
     include_regexes = traits.List(desc="Meta data to include, overriding any "
                                   "exclude filters")
-    force_read = traits.Bool(True, usedefault=True, 
+    force_read = traits.Bool(True, usedefault=True,
                              desc=('Force reading files without DICM marker'))
 
 
@@ -109,7 +110,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, str):
+        if isinstance(trait_input, six.string_types):
             if path.isdir(trait_input):
                 return glob(path.join(trait_input, '*.dcm'))
             else:
@@ -334,7 +335,7 @@ class MergeNifti(NiftiGeneratorBase):
               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, str):
+            if isinstance(sort_order, six.string_types):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:
