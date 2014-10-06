@@ -566,11 +566,11 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                         (use if fmap already registered)')
     no_clean = traits.Bool(False, argstr='--noclean',
                         desc='do not clean up intermediate files')
-    
+
 
 class EpiRegOutputSpec(TraitedSpec):
     out_file = File(exists=True,
-                    desc='unwarped and coregistered epi input')     
+                    desc='unwarped and coregistered epi input')
     out_1vol = File(exists=True,
                           desc='unwarped and coregistered single volume')
     fmap2str_mat = File(exists=True,
@@ -596,7 +596,7 @@ class EpiRegOutputSpec(TraitedSpec):
 class EpiReg(FSLCommand):
     """
 
-    Runs FSL epi_reg script for simultaneous coregistration and fieldmap 
+    Runs FSL epi_reg script for simultaneous coregistration and fieldmap
     unwarping.
 
     Examples
@@ -618,7 +618,7 @@ class EpiReg(FSLCommand):
 --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --pedir=y \
 --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct'
     >>> epireg.run() # doctest: +SKIP
-    
+
     """
     _cmd = 'epi_reg'
     input_spec = EpiRegInputSpec

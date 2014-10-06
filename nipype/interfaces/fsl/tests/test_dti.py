@@ -51,7 +51,7 @@ def clean_directory(outdir, old_wd):
 @skipif(no_fsl)
 def test_oldbedpostx2():
     filelist, outdir, cwd = create_files_in_directory()
-    bpx = fsl.OldBEDPOSTX()
+    bpx = fsl.BEDPOSTX()
 
     # make sure command gets called
     yield assert_equal, bpx.cmd, 'bedpostx'
@@ -60,7 +60,7 @@ def test_oldbedpostx2():
     yield assert_raises, ValueError, bpx.run
 
     # .inputs based parameters setting
-    bpx2 = fsl.OldBEDPOSTX()
+    bpx2 = fsl.BEDPOSTX4()
     bpx2.inputs.mask = example_data('mask.nii')
     bpx2.inputs.dwi = example_data('diffusion.nii')
     bpx2.inputs.bvals = example_data('bvals')

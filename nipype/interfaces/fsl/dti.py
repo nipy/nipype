@@ -16,6 +16,7 @@ import os
 import shutil
 import warnings
 
+from ... import LooseVersion
 from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info,
                                         FSLXCommand, FSLXCommandInputSpec,
                                         FSLXCommandOutputSpec)
@@ -100,14 +101,14 @@ class DTIFit(FSLCommand):
         return outputs
 
 
-class BEDPOSTXInputSpec(FSLXCommandInputSpec):
+class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
     out_dir = Directory('.', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
                              'nonlinearities, default off'))
 
 
-class BEDPOSTXOutputSpec(FSLXCommandOutputSpec):
+class BEDPOSTX5OutputSpec(FSLXCommandOutputSpec):
     mean_thsamples = OutputMultiPath(File(), desc=('Mean of '
                                      'distribution on theta'))
     mean_phsamples = OutputMultiPath(File(), desc=('Mean of '
@@ -124,7 +125,7 @@ class BEDPOSTXOutputSpec(FSLXCommandOutputSpec):
                                  ' estimated fiber orientation'))
 
 
-class BEDPOSTX(FSLXCommand):
+class BEDPOSTX5(FSLXCommand):
     """
     BEDPOSTX stands for Bayesian Estimation of Diffusion Parameters Obtained
     using Sampling Techniques. The X stands for modelling Crossing Fibres.
@@ -143,7 +144,7 @@ class BEDPOSTX(FSLXCommand):
     -------
 
     >>> from nipype.interfaces import fsl
-    >>> bedp = fsl.BEDPOSTX(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
+    >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
     'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
@@ -152,8 +153,8 @@ class BEDPOSTX(FSLXCommand):
     """
 
     _cmd = 'bedpostx'
-    input_spec = BEDPOSTXInputSpec
-    output_spec = BEDPOSTXOutputSpec
+    input_spec = BEDPOSTX5InputSpec
+    output_spec = BEDPOSTX5OutputSpec
     _can_resume = True
 
     def _run_interface(self, runtime):
@@ -179,7 +180,7 @@ class BEDPOSTX(FSLXCommand):
         copyfile(self.inputs.bvecs,
                  os.path.join(subjectdir, 'bvecs'))
 
-        return super(BEDPOSTX, self)._run_interface(runtime)
+        return super(BEDPOSTX5, self)._run_interface(runtime)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -209,7 +210,7 @@ class BEDPOSTX(FSLXCommand):
             outputs['dyads_disp'].append(self._gen_fname(('dyads%d'
                                          '_dispersion') % i, cwd=out_dir))
 
-        super_out = super(BEDPOSTX, self)._list_outputs()
+        super_out = super(BEDPOSTX5, self)._list_outputs()
 
         for k, v in super_out.iteritems():
             outputs[k] = v
@@ -217,18 +218,22 @@ class BEDPOSTX(FSLXCommand):
         return outputs
 
 
-class XFibresInputSpec(FSLXCommandInputSpec):
+class BEDPOSTX5GPU(BEDPOSTX5):
+    _cmd = 'bedpostx_gpu'
+
+
+class XFibres5InputSpec(FSLXCommandInputSpec):
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
                       desc='gradient file corresponding to slice')
 
 
-class XFibres(FSLXCommand):
+class XFibres5(FSLXCommand):
     """
     Perform model parameters estimation for local (voxelwise) diffusion
     parameters
     """
     _cmd = 'xfibres'
-    input_spec = XFibresInputSpec
+    input_spec = XFibres5InputSpec
     output_spec = FSLXCommandOutputSpec
 
 
@@ -902,7 +907,7 @@ class MakeDyadicVectors(FSLCommand):
         return outputs
 
 
-class OldXFibresInputSpec(FSLCommandInputSpec):
+class XFibres4InputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, argstr="--data=%s", mandatory=True)
     mask = File(exists=True, argstr="--mask=%s", mandatory=True)
     gradnonlin = File(exists=True, argstr="--gradnonlin=%s")
@@ -941,7 +946,7 @@ exponential (for multi-shell experiments)")
                                argstr='--forcedir', usedefault=True)
 
 
-class OldXFibresOutputSpec(TraitedSpec):
+class XFibres4OutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc="Mean of PDD distribution in vector form.")
     fsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on anisotropic volume fraction")
     mean_dsamples = File(exists=True, desc="Mean of distribution on diffusivity d")
@@ -951,22 +956,22 @@ class OldXFibresOutputSpec(TraitedSpec):
     thsamples = OutputMultiPath(File(exists=True), desc="Samples from the distribution on theta")
 
 
-class OldXFibres(FSLCommand):
+class XFibres4(FSLCommand):
     """
     Perform model parameters estimation for local (voxelwise) diffusion
     parameters
 
     .. deprecated:: 0.9.2
-      Use :class:`.XFibres` instead.
+      Use :class:`.XFibres5` instead.
 
 
     """
     _cmd = "xfibres"
-    input_spec = OldXFibresInputSpec
-    output_spec = OldXFibresOutputSpec
+    input_spec = XFibres4InputSpec
+    output_spec = XFibres4OutputSpec
 
     def _run_interface(self, runtime):
-        runtime = super(OldXFibres, self)._run_interface(runtime)
+        runtime = super(XFibres4, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -992,7 +997,7 @@ class OldXFibres(FSLCommand):
         return outputs
 
 
-class OldBEDPOSTXInputSpec(FSLCommandInputSpec):
+class BEDPOSTX4InputSpec(FSLCommandInputSpec):
     dwi = File(exists=True, desc='diffusion weighted image data file',
                mandatory=True)
     mask = File(exists=True, desc='bet binary mask file', mandatory=True)
@@ -1017,7 +1022,7 @@ class OldBEDPOSTXInputSpec(FSLCommandInputSpec):
                           'hardware/queue (if found)'))
 
 
-class OldBEDPOSTXOutputSpec(TraitedSpec):
+class BEDPOSTX4OutputSpec(TraitedSpec):
     bpx_out_directory = Directory(exists=True,
                                   desc='path/name of directory with all ' +
                                        'bedpostx output files for this subject')
@@ -1044,7 +1049,7 @@ class OldBEDPOSTXOutputSpec(TraitedSpec):
     dyads = traits.List(File(exists=True),  desc='a list of path/name of mean of PDD distribution in vector form')
 
 
-class OldBEDPOSTX(FSLCommand):
+class BEDPOSTX4(FSLCommand):
     """
     bedpostx has an old interface, implemented here
 
@@ -1061,7 +1066,7 @@ class OldBEDPOSTX(FSLCommand):
     -------
 
     >>> from nipype.interfaces import fsl
-    >>> bedp = fsl.OldBEDPOSTX(bpx_directory='subjdir', bvecs='bvecs', \
+    >>> bedp = fsl.BEDPOSTX4(bpx_directory='subjdir', bvecs='bvecs', \
 bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
     >>> bedp.cmdline
     'bedpostx subjdir -n 1'
@@ -1069,13 +1074,14 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
     """
 
     _cmd = 'bedpostx'
-    input_spec = OldBEDPOSTXInputSpec
-    output_spec = OldBEDPOSTXOutputSpec
+    input_spec = BEDPOSTX4InputSpec
+    output_spec = BEDPOSTX4OutputSpec
     _can_resume = True
 
     def __init__(self, **inputs):
-        warnings.warn("Deprecated: Please use create_bedpostx_pipeline instead", DeprecationWarning)
-        return super(OldBEDPOSTX, self).__init__(**inputs)
+        warnings.warn(('Deprecated: Please use BEDPOSTX5 or '
+                      'create_bedpostx_pipeline instead'), DeprecationWarning)
+        return super(BEDPOSTX4, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
 
@@ -1097,7 +1103,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
             shutil.copyfile(self.inputs.bvecs,
                             os.path.join(self.inputs.bpx_directory, 'bvecs'))
 
-        runtime = super(BEDPOSTX, self)._run_interface(runtime)
+        runtime = super(BEDPOSTX4, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
@@ -1138,3 +1144,33 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
                                                             suffix='',
                                                             cwd=outputs['bpx_out_directory']))
         return outputs
+
+
+class BEDPOSTX4GPU(BEDPOSTX4):
+    _cmd = 'bedpostx_gpu'
+
+
+if (Info.version() and
+   LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
+    CurrentXFibres = XFibres5
+    CurrentBEDPOST = BEDPOSTX5
+    CurrentBEDPOSTgpu = BEDPOSTX5GPU
+else:
+    CurrentXFibres = XFibres4
+    CurrentBEDPOST = BEDPOSTX4
+    CurrentBEDPOSTgpu = BEDPOSTX4GPU
+
+
+class XFibres(CurrentXFibres):
+    def __init__(self, **inputs):
+        return super(XFibres, self).__init__(**inputs)
+
+
+class BEDPOSTX(CurrentBEDPOST):
+    def __init__(self, **inputs):
+        return super(BEDPOSTX, self).__init__(**inputs)
+
+
+class BEDPOSTXGPU(CurrentBEDPOSTgpu):
+    def __init__(self, **inputs):
+        return super(BEDPOSTXGPU, self).__init__(**inputs)

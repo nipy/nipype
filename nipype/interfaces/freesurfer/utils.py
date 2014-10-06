@@ -1208,7 +1208,7 @@ class Tkregister2OutputSpec(TraitedSpec):
 
 
 class Tkregister2(FSCommand):
-    """Use tkregister2 without the manual editing stage to convert 
+    """Use tkregister2 without the manual editing stage to convert
     FSL-style registration matrix (.mat) to FreeSurfer-style registration matrix (.dat)
 
     Examples
@@ -1224,6 +1224,6 @@ class Tkregister2(FSCommand):
     _cmd = "tkregister2"
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
-    
 
-    
+
+

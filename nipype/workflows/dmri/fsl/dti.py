@@ -159,7 +159,7 @@ def bedpostx_parallel(name='bedpostx_parallel', params={}):
     inputnode = pe.Node(niu.IdentityInterface(fields=['dwi', 'mask',
                         'bvecs', 'bvals']), name='inputnode')
     slice_dwi = pe.Node(misc.SplitROIs(roi_size=(5, 5, 1)), name='slice_dwi')
-    xfib_if = fsl.XFibres(**params)
+    xfib_if = fsl.XFibres5(**params)
     xfibres = pe.MapNode(xfib_if, name='xfibres',
                          iterfield=['dwi', 'mask'])
 
