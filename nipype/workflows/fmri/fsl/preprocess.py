@@ -601,7 +601,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     """
     Smooth each run using SUSAN with the brightness threshold set to 75%
-    of the median value for each run and a mask consituting the mean
+    of the median value for each run and a mask constituting the mean
     functional
     """
 
