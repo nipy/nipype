@@ -631,7 +631,7 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
         # fugue -i %s -w %s --loadshift=%s --mask=%s % ( mag_name, magfw_name,
         # vsmmag_name, mask_name ), log ) # Forward Map
         vsm_fwd = pe.Node(fsl.FUGUE(
-            save_warped=True), name='vsm_fwd')
+            forward_warping=True), name='vsm_fwd')
         vsm_reg = pe.Node(fsl.FLIRT(bins=256, cost='corratio', dof=6, interp='spline',  searchr_x=[
                           -10, 10], searchr_y=[-10, 10], searchr_z=[-10, 10]), name='vsm_registration')
         # 'flirt -in %s -ref %s -out %s -init %s -applyxfm' % ( vsmmag_name, ref_epi, vsmmag_name, magfw_mat_out )
