@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
 * ENH: New dipy interfaces: Denoise, Resample
 * ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format),
        MRIPretess
