@@ -24,6 +24,7 @@ class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
     outLayer = traits.Either(traits.Bool, File(), hash_files=False, desc="Layer boundary surfaces", argstr="--outLayer %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistLaminarVolumetricLayeringOutputSpec(TraitedSpec):
@@ -77,6 +78,7 @@ class JistBrainMgdmSegmentationInputSpec(CommandLineInputSpec):
     outPosterior3 = traits.Either(traits.Bool, File(), hash_files=False, desc="Posterior Maximum Labels (4D)", argstr="--outPosterior3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistBrainMgdmSegmentationOutputSpec(TraitedSpec):
@@ -114,6 +116,7 @@ class JistLaminarProfileGeometryInputSpec(CommandLineInputSpec):
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistLaminarProfileGeometryOutputSpec(TraitedSpec):
@@ -146,6 +149,7 @@ class JistLaminarProfileCalculatorInputSpec(CommandLineInputSpec):
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistLaminarProfileCalculatorOutputSpec(TraitedSpec):
@@ -185,6 +189,7 @@ class MedicAlgorithmN3InputSpec(CommandLineInputSpec):
     outInhomogeneity2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Inhomogeneity Field", argstr="--outInhomogeneity2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmN3OutputSpec(TraitedSpec):
@@ -219,6 +224,7 @@ class JistLaminarROIAveragingInputSpec(CommandLineInputSpec):
     outROI3 = traits.Either(traits.Bool, File(), hash_files=False, desc="ROI Average", argstr="--outROI3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistLaminarROIAveragingOutputSpec(TraitedSpec):
@@ -277,6 +283,7 @@ class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
     outWM = traits.Either(traits.Bool, File(), hash_files=False, desc="WM Mask", argstr="--outWM %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
@@ -325,6 +332,7 @@ class JistBrainMp2rageSkullStrippingInputSpec(CommandLineInputSpec):
     outMasked3 = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked Filter Image", argstr="--outMasked3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistBrainMp2rageSkullStrippingOutputSpec(TraitedSpec):
@@ -365,6 +373,7 @@ class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
     outInflated = traits.Either(traits.Bool, File(), hash_files=False, desc="Inflated Surface", argstr="--outInflated %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
@@ -407,6 +416,7 @@ class RandomVolInputSpec(CommandLineInputSpec):
     outRand1 = traits.Either(traits.Bool, File(), hash_files=False, desc="Rand1", argstr="--outRand1 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class RandomVolOutputSpec(TraitedSpec):
@@ -441,6 +451,7 @@ class MedicAlgorithmImageCalculatorInputSpec(CommandLineInputSpec):
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result Volume", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
@@ -476,6 +487,7 @@ class JistBrainMp2rageDuraEstimationInputSpec(CommandLineInputSpec):
     outDura = traits.Either(traits.Bool, File(), hash_files=False, desc="Dura Image", argstr="--outDura %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
@@ -509,6 +521,7 @@ class JistLaminarProfileSamplingInputSpec(CommandLineInputSpec):
     outProfile2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Profile 4D Mask", argstr="--outProfile2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistLaminarProfileSamplingOutputSpec(TraitedSpec):
@@ -548,6 +561,7 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
     outReoriented = InputMultiPath(File, desc="Reoriented Volume", sep=";", argstr="--outReoriented %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmMipavReorientOutputSpec(TraitedSpec):
@@ -619,6 +633,7 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
     outSegmentation = traits.Either(traits.Bool, File(), hash_files=False, desc="2D image showing the tissue classification on the midsagittal plane", argstr="--outSegmentation %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmSPECTRE2010OutputSpec(TraitedSpec):
@@ -670,6 +685,7 @@ class JistBrainPartialVolumeFilterInputSpec(CommandLineInputSpec):
     outPartial = traits.Either(traits.Bool, File(), hash_files=False, desc="Partial Volume Image", argstr="--outPartial %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
@@ -708,6 +724,7 @@ class JistIntensityMp2rageMaskingInputSpec(CommandLineInputSpec):
     outMasked2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked Iso Image", argstr="--outMasked2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class JistIntensityMp2rageMaskingOutputSpec(TraitedSpec):
@@ -744,6 +761,7 @@ class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
     outBinary = InputMultiPath(File, desc="Binary Mask", sep=";", argstr="--outBinary %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
     xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
+    xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)
 
 
 class MedicAlgorithmThresholdToBinaryMaskOutputSpec(TraitedSpec):

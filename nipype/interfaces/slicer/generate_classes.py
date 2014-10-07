@@ -275,7 +275,8 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
         blacklisted_inputs = ["maxMemoryUsage"]
         inputTraits = [trait for trait in inputTraits if trait.split()[0] not in blacklisted_inputs]
         
-        compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")']
+        compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")',
+                             'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
         inputTraits += compulsory_inputs
             
 
