@@ -167,14 +167,13 @@ def bedpostx_parallel(name='bedpostx_parallel',
 
     mrg_dyads = pe.MapNode(misc.MergeROIs(), name='Merge_dyads',
                            iterfield=['in_files'])
-    make_dyads = pe.MapNode(fsl.MakeDyadicVectors(), name="Make_dyads",
-                            iterfield=['theta_vol', 'phi_vol'])
-    out_fields = ['dyads']
+    mrg_fsamp = pe.MapNode(misc.MergeROIs(), name='Merge_mean_fsamples',
+                           iterfield=['in_files'])
+    out_fields = ['dyads', 'mean_fsamples']
 
     if compute_all_outputs:
         out_fields += ['dyads_disp', 'thsamples', 'phsamples',
-                       'fsamples', 'mean_thsamples', 'mean_phsamples',
-                       'mean_fsamples']
+                       'fsamples', 'mean_thsamples', 'mean_phsamples']
 
     outputnode = pe.Node(niu.IdentityInterface(fields=out_fields),
                          name='outputnode')
@@ -187,18 +186,23 @@ def bedpostx_parallel(name='bedpostx_parallel',
                                  ('out_masks', 'mask')]),
         (inputnode, xfibres,    [('bvecs', 'bvecs'),
                                  ('bvals', 'bvals')]),
-        (inputnode, make_dyads, [('mask', 'mask')]),
         (inputnode, mrg_dyads,  [('mask', 'in_reference')]),
         (xfibres,   mrg_dyads,  [(('dyads', transpose), 'in_files')]),
+        (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
         (slice_dwi, mrg_dyads,  [('out_index', 'in_index')]),
-        (mrg_dyads, outputnode, [('merged_file', 'dyads')])
+        (mrg_dyads, outputnode, [('merged_file', 'dyads')]),
+        (mrg_fsamp, outputnode, [('merged_file', 'mean_fsamples')])
     ])
 
     if compute_all_outputs:
+        make_dyads = pe.MapNode(fsl.MakeDyadicVectors(), name="Make_dyads",
+                                iterfield=['theta_vol', 'phi_vol'])
+
         mms = {}
         for k in ['thsamples', 'phsamples', 'fsamples']:
             mms[k] = merge_and_mean_parallel(k)
             wf.connect([
+                (inputnode, make_dyads, [('mask', 'mask')]),
                 (slice_dwi, mms[k], [('out_index', 'inputnode.in_index')]),
                 (inputnode, mms[k], [('mask', 'inputnode.in_reference')]),
                 (xfibres, mms[k], [(k, 'inputnode.in_files')]),
