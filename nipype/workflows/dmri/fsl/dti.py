@@ -188,8 +188,10 @@ def bedpostx_parallel(name='bedpostx_parallel',
                                  ('bvals', 'bvals')]),
         (inputnode, mrg_dyads,  [('mask', 'in_reference')]),
         (xfibres,   mrg_dyads,  [(('dyads', transpose), 'in_files')]),
-        (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
         (slice_dwi, mrg_dyads,  [('out_index', 'in_index')]),
+        (inputnode, mrg_fsamp,  [('mask', 'in_reference')]),
+        (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
+        (slice_dwi, mrg_fsamp,  [('out_index', 'in_index')]),
         (mrg_dyads, outputnode, [('merged_file', 'dyads')]),
         (mrg_fsamp, outputnode, [('merged_file', 'mean_fsamples')])
     ])
