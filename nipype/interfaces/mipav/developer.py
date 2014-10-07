@@ -7,7 +7,6 @@ import os
 
 
 class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInner = File(desc="Inner Distance Image (GM/WM boundary)", exists=True, argstr="--inInner %s")
     inOuter = File(desc="Outer Distance Image (CSF/GM boundary)", exists=True, argstr="--inOuter %s")
     inNumber = traits.Int(desc="Number of layers", argstr="--inNumber %d")
@@ -24,6 +23,7 @@ class JistLaminarVolumetricLayeringInputSpec(CommandLineInputSpec):
     outDiscrete = traits.Either(traits.Bool, File(), hash_files=False, desc="Discrete sampled layers", argstr="--outDiscrete %s")
     outLayer = traits.Either(traits.Bool, File(), hash_files=False, desc="Layer boundary surfaces", argstr="--outLayer %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistLaminarVolumetricLayeringOutputSpec(TraitedSpec):
@@ -54,7 +54,6 @@ contributor: Miriam Waehnert (waehnert@cbs.mpg.de) http://www.cbs.mpg.de/
 
 
 class JistBrainMgdmSegmentationInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inMP2RAGE = File(desc="MP2RAGE T1 Map Image", exists=True, argstr="--inMP2RAGE %s")
     inMP2RAGE2 = File(desc="MP2RAGE T1-weighted Image", exists=True, argstr="--inMP2RAGE2 %s")
     inPV = File(desc="PV / Dura Image", exists=True, argstr="--inPV %s")
@@ -77,6 +76,7 @@ class JistBrainMgdmSegmentationInputSpec(CommandLineInputSpec):
     outPosterior2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Posterior Maximum Memberships (4D)", argstr="--outPosterior2 %s")
     outPosterior3 = traits.Either(traits.Bool, File(), hash_files=False, desc="Posterior Maximum Labels (4D)", argstr="--outPosterior3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistBrainMgdmSegmentationOutputSpec(TraitedSpec):
@@ -105,7 +105,6 @@ version: 2.0.RC
 
 
 class JistLaminarProfileGeometryInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inProfile = File(desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
     incomputed = traits.Enum("thickness", "curvedness", "shape_index", "mean_curvature", "gauss_curvature", "profile_length", "profile_curvature", "profile_torsion", desc="computed measure", argstr="--incomputed %s")
     inregularization = traits.Enum("none", "Gaussian", desc="regularization", argstr="--inregularization %s")
@@ -114,6 +113,7 @@ class JistLaminarProfileGeometryInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistLaminarProfileGeometryOutputSpec(TraitedSpec):
@@ -139,13 +139,13 @@ version: 3.0.RC
 
 
 class JistLaminarProfileCalculatorInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inIntensity = File(desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s")
     inMask = File(desc="Mask Image (opt, 3D or 4D)", exists=True, argstr="--inMask %s")
     incomputed = traits.Enum("mean", "stdev", "skewness", "kurtosis", desc="computed statistic", argstr="--incomputed %s")
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistLaminarProfileCalculatorOutputSpec(TraitedSpec):
@@ -171,7 +171,6 @@ version: 3.0.RC
 
 
 class MedicAlgorithmN3InputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInput = File(desc="Input Volume", exists=True, argstr="--inInput %s")
     inSignal = traits.Float(desc="Default = min + 1, Values at less than threshold are treated as part of the background", argstr="--inSignal %f")
     inMaximum = traits.Int(desc="Maximum number of Iterations", argstr="--inMaximum %d")
@@ -185,6 +184,7 @@ class MedicAlgorithmN3InputSpec(CommandLineInputSpec):
     outInhomogeneity = traits.Either(traits.Bool, File(), hash_files=False, desc="Inhomogeneity Corrected Volume", argstr="--outInhomogeneity %s")
     outInhomogeneity2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Inhomogeneity Field", argstr="--outInhomogeneity2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmN3OutputSpec(TraitedSpec):
@@ -211,7 +211,6 @@ version: 1.8.R
 
 
 class JistLaminarROIAveragingInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inIntensity = File(desc="Intensity Profile Image", exists=True, argstr="--inIntensity %s")
     inROI = File(desc="ROI Mask", exists=True, argstr="--inROI %s")
     inROI2 = traits.Str(desc="ROI Name", argstr="--inROI2 %s")
@@ -219,6 +218,7 @@ class JistLaminarROIAveragingInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outROI3 = traits.Either(traits.Bool, File(), hash_files=False, desc="ROI Average", argstr="--outROI3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistLaminarROIAveragingOutputSpec(TraitedSpec):
@@ -244,7 +244,6 @@ version: 3.0.RC
 
 
 class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inT1_MPRAGE = File(desc="T1_MPRAGE Image", exists=True, argstr="--inT1_MPRAGE %s")
     inT1_SPGR = File(desc="T1_SPGR Image", exists=True, argstr="--inT1_SPGR %s")
     inFLAIR = File(desc="FLAIR Image", exists=True, argstr="--inFLAIR %s")
@@ -277,6 +276,7 @@ class MedicAlgorithmLesionToadsInputSpec(CommandLineInputSpec):
     outFilled = traits.Either(traits.Bool, File(), hash_files=False, desc="Filled WM Membership", argstr="--outFilled %s")
     outWM = traits.Either(traits.Bool, File(), hash_files=False, desc="WM Mask", argstr="--outWM %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmLesionToadsOutputSpec(TraitedSpec):
@@ -313,7 +313,6 @@ contributor: Navid Shiee (navid.shiee@nih.gov) http://iacl.ece.jhu.edu/~nshiee/
 
 
 class JistBrainMp2rageSkullStrippingInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSecond = File(desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s")
     inT1 = File(desc="T1 Map (T1_Images) Image (opt)", exists=True, argstr="--inT1 %s")
     inT1weighted = File(desc="T1-weighted (UNI) Image (opt)", exists=True, argstr="--inT1weighted %s")
@@ -325,6 +324,7 @@ class JistBrainMp2rageSkullStrippingInputSpec(CommandLineInputSpec):
     outMasked2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked T1-weighted Image", argstr="--outMasked2 %s")
     outMasked3 = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked Filter Image", argstr="--outMasked3 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistBrainMp2rageSkullStrippingOutputSpec(TraitedSpec):
@@ -353,7 +353,6 @@ version: 3.0.RC
 
 
 class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inLevelset = File(desc="Levelset Image", exists=True, argstr="--inLevelset %s")
     inSOR = traits.Float(desc="SOR Parameter", argstr="--inSOR %f")
     inMean = traits.Float(desc="Mean Curvature Threshold", argstr="--inMean %f")
@@ -365,6 +364,7 @@ class JistCortexSurfaceMeshInflationInputSpec(CommandLineInputSpec):
     outOriginal = traits.Either(traits.Bool, File(), hash_files=False, desc="Original Surface", argstr="--outOriginal %s")
     outInflated = traits.Either(traits.Bool, File(), hash_files=False, desc="Inflated Surface", argstr="--outInflated %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistCortexSurfaceMeshInflationOutputSpec(TraitedSpec):
@@ -394,7 +394,6 @@ contributor: Duygu Tosun
 
 
 class RandomVolInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSize = traits.Int(desc="Size of Volume in X direction", argstr="--inSize %d")
     inSize2 = traits.Int(desc="Size of Volume in Y direction", argstr="--inSize2 %d")
     inSize3 = traits.Int(desc="Size of Volume in Z direction", argstr="--inSize3 %d")
@@ -407,6 +406,7 @@ class RandomVolInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outRand1 = traits.Either(traits.Bool, File(), hash_files=False, desc="Rand1", argstr="--outRand1 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class RandomVolOutputSpec(TraitedSpec):
@@ -434,13 +434,13 @@ documentation-url: http://www.nitrc.org/projects/jist/
 
 
 class MedicAlgorithmImageCalculatorInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inVolume = File(desc="Volume 1", exists=True, argstr="--inVolume %s")
     inVolume2 = File(desc="Volume 2", exists=True, argstr="--inVolume2 %s")
     inOperation = traits.Enum("Add", "Subtract", "Multiply", "Divide", "Min", "Max", desc="Operation", argstr="--inOperation %s")
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outResult = traits.Either(traits.Bool, File(), hash_files=False, desc="Result Volume", argstr="--outResult %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmImageCalculatorOutputSpec(TraitedSpec):
@@ -468,7 +468,6 @@ documentation-url: http://www.iacl.ece.jhu.edu/
 
 
 class JistBrainMp2rageDuraEstimationInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSecond = File(desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s")
     inSkull = File(desc="Skull Stripping Mask", exists=True, argstr="--inSkull %s")
     inDistance = traits.Float(desc="Distance to background (mm)", argstr="--inDistance %f")
@@ -476,6 +475,7 @@ class JistBrainMp2rageDuraEstimationInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outDura = traits.Either(traits.Bool, File(), hash_files=False, desc="Dura Image", argstr="--outDura %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistBrainMp2rageDuraEstimationOutputSpec(TraitedSpec):
@@ -501,7 +501,6 @@ version: 3.0.RC
 
 
 class JistLaminarProfileSamplingInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inProfile = File(desc="Profile Surface Image", exists=True, argstr="--inProfile %s")
     inIntensity = File(desc="Intensity Image", exists=True, argstr="--inIntensity %s")
     inCortex = File(desc="Cortex Mask (opt)", exists=True, argstr="--inCortex %s")
@@ -509,6 +508,7 @@ class JistLaminarProfileSamplingInputSpec(CommandLineInputSpec):
     outProfilemapped = traits.Either(traits.Bool, File(), hash_files=False, desc="Profile-mapped Intensity Image", argstr="--outProfilemapped %s")
     outProfile2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Profile 4D Mask", argstr="--outProfile2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistLaminarProfileSamplingOutputSpec(TraitedSpec):
@@ -535,7 +535,6 @@ version: 3.0.RC
 
 
 class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSource = InputMultiPath(File, desc="Source", sep=";", argstr="--inSource %s")
     inTemplate = File(desc="Template", exists=True, argstr="--inTemplate %s")
     inNew = traits.Enum("Dicom axial", "Dicom coronal", "Dicom sagittal", "User defined", desc="New image orientation", argstr="--inNew %s")
@@ -548,6 +547,7 @@ class MedicAlgorithmMipavReorientInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outReoriented = InputMultiPath(File, desc="Reoriented Volume", sep=";", argstr="--outReoriented %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmMipavReorientOutputSpec(TraitedSpec):
@@ -573,7 +573,6 @@ version: .alpha
 
 
 class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInput = File(desc="Input volume to be skullstripped.", exists=True, argstr="--inInput %s")
     inAtlas = File(desc="SPECTRE atlas description file. A text file enumerating atlas files and landmarks.", exists=True, argstr="--inAtlas %s")
     inInitial = traits.Int(desc="Erosion of the inital mask, which is based on the probability mask and the classification., The initial mask is ouput as the d0 volume at the conclusion of SPECTRE.", argstr="--inInitial %d")
@@ -619,6 +618,7 @@ class MedicAlgorithmSPECTRE2010InputSpec(CommandLineInputSpec):
     outSplitHalves = traits.Either(traits.Bool, File(), hash_files=False, desc="Skullstripped mask of the brain with the hemispheres divided.", argstr="--outSplitHalves %s")
     outSegmentation = traits.Either(traits.Bool, File(), hash_files=False, desc="2D image showing the tissue classification on the midsagittal plane", argstr="--outSegmentation %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmSPECTRE2010OutputSpec(TraitedSpec):
@@ -663,13 +663,13 @@ Hanlin Wan (hanlinwan@gmail.com)
 
 
 class JistBrainPartialVolumeFilterInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inInput = File(desc="Input Image", exists=True, argstr="--inInput %s")
     inPV = traits.Enum("bright", "dark", "both", desc="Outputs the raw intensity values or a probability score for the partial volume regions.", argstr="--inPV %s")
     inoutput = traits.Enum("probability", "intensity", desc="output", argstr="--inoutput %s")
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outPartial = traits.Either(traits.Bool, File(), hash_files=False, desc="Partial Volume Image", argstr="--outPartial %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistBrainPartialVolumeFilterOutputSpec(TraitedSpec):
@@ -695,7 +695,6 @@ version: 2.0.RC
 
 
 class JistIntensityMp2rageMaskingInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inSecond = File(desc="Second inversion (Inv2) Image", exists=True, argstr="--inSecond %s")
     inQuantitative = File(desc="Quantitative T1 Map (T1_Images) Image", exists=True, argstr="--inQuantitative %s")
     inT1weighted = File(desc="T1-weighted (UNI) Image", exists=True, argstr="--inT1weighted %s")
@@ -708,6 +707,7 @@ class JistIntensityMp2rageMaskingInputSpec(CommandLineInputSpec):
     outMasked = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked T1 Map Image", argstr="--outMasked %s")
     outMasked2 = traits.Either(traits.Bool, File(), hash_files=False, desc="Masked Iso Image", argstr="--outMasked2 %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class JistIntensityMp2rageMaskingOutputSpec(TraitedSpec):
@@ -736,7 +736,6 @@ version: 3.0.RC
 
 
 class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
-    maxMemoryUsage = traits.Int(desc="Maximum Memory Allowed (in MegaBytes). Increase or decrease this depending on java virtual machine heap size requirements.", argstr="--maxMemoryUsage %d")
     inLabel = InputMultiPath(File, desc="Input volumes", sep=";", argstr="--inLabel %s")
     inMinimum = traits.Float(desc="Minimum threshold value.", argstr="--inMinimum %f")
     inMaximum = traits.Float(desc="Maximum threshold value.", argstr="--inMaximum %f")
@@ -744,6 +743,7 @@ class MedicAlgorithmThresholdToBinaryMaskInputSpec(CommandLineInputSpec):
     xPrefExt = traits.Enum("nrrd", desc="Output File Type", argstr="--xPrefExt %s")
     outBinary = InputMultiPath(File, desc="Binary Mask", sep=";", argstr="--outBinary %s")
     null = traits.Str(desc="Execution Time", argstr="--null %s")
+    xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")
 
 
 class MedicAlgorithmThresholdToBinaryMaskOutputSpec(TraitedSpec):

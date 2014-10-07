@@ -10,6 +10,7 @@ from shutil import rmtree
 from nipype.external import six
 
 import keyword
+from Bio.Emboss.PrimerSearch import InputRecord
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
 
 
@@ -269,6 +270,14 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
             else:  # For all other parameter types, they are implicitly only input types
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(
                     values), parse_params(traitsParams)))
+                
+    if mipav_hacks:
+        blacklisted_inputs = ["maxMemoryUsage"]
+        inputTraits = [trait for trait in inputTraits if trait.split()[0] not in blacklisted_inputs]
+        
+        compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")']
+        inputTraits += compulsory_inputs
+            
 
     input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
