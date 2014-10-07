@@ -1381,7 +1381,12 @@ def merge_rois(in_files, in_idxs, in_ref,
     rsh = ref.get_shape()
     del ref
     npix = rsh[0] * rsh[1] * rsh[2]
-    ndirs = nb.load(in_files[0]).get_shape()[-1]
+    fcdata = nb.load(in_files[0]).get_data()
+
+    if fcdata.ndim == 4: 
+        ndirs = fcdata.shape[-1]
+    else:
+        ndirs = 1
     newshape = (rsh[0], rsh[1], rsh[2], ndirs)
     hdr.set_data_dtype(dtype)
     hdr.set_xyzt_units('mm', 'sec')
@@ -1394,7 +1399,12 @@ def merge_rois(in_files, in_idxs, in_ref,
             cdata = nb.load(cname).get_data().reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs, )
-            data[idata, ...] = cdata[0:nels, ...]
+            try:
+                data[idata, ...] = cdata[0:nels, ...]
+            except:
+                print(data.shape, cdata.shape)
+                raise
+                
         hdr.set_data_shape(newshape)
 
         nb.Nifti1Image(data.reshape(newshape).astype(dtype),
