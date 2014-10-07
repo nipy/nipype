@@ -11,9 +11,9 @@ from nipype.interfaces.mipav.developer import JistIntensityMp2rageMasking, Medic
 wf = pe.Workflow("skullstripping")
 
 mask = pe.Node(JistIntensityMp2rageMasking(), name="masking")
-mask.inputs.inSecond = "/scr/adenauer1/7T_TRT/pilot/data/OK2T140312_093516.SEPT/nifti/S4_MP2RAGE_5_3_TR5000_iPAT=2_INV2.nii"
-mask.inputs.inQuantitative = "/scr/adenauer1/7T_TRT/pilot/data/OK2T140312_093516.SEPT/nifti/S7_MP2RAGE_5_3_TR5000_iPAT=2_UNI_Images.nii"
-mask.inputs.inT1weighted = "/scr/adenauer1/7T_TRT/pilot/data/OK2T140312_093516.SEPT/nifti/S6_MP2RAGE_5_3_TR5000_iPAT=2_T1_Images.nii"
+mask.inputs.inSecond = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_INV2.nii.gz"
+mask.inputs.inQuantitative = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_UNI.nii.gz"
+mask.inputs.inT1weighted = "/Users/filo/7t_trt/niftis/sub001/session_1/MP2RAGE_T1.nii.gz"
 mask.inputs.outMasked = True
 mask.inputs.outMasked2 = True
 mask.inputs.outSignal = True
@@ -21,7 +21,7 @@ mask.inputs.outSignal2 = True
 
 skullstrip = pe.Node(MedicAlgorithmSPECTRE2010(), name="skullstrip")
 skullstrip.inputs.outStripped = True
-skullstrip.inputs.maxMemoryUsage = 6000
+skullstrip.inputs.xDefaultMem = 6000
 
 wf.connect(mask, 'outMasked', skullstrip, 'inInput')
 wf.run()

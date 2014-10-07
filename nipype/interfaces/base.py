@@ -978,16 +978,22 @@ class BaseInterface(Interface):
                         version=self.version)
         try:
             if self._redirect_x:
-                vdisplay_num = _search_for_free_display()
-                xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
-                xvfb_proc = subprocess.Popen(xvfb_cmd,
-                                             stdout=open(os.devnull),
-                                             stderr=open(os.devnull))
-                time.sleep(0.2)  # give Xvfb time to start
-                if xvfb_proc.poll() is not None:
-                    raise Exception('Error: Xvfb did not start')
-                old_displaynum = os.environ['DISPLAY']
-                runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
+                exist_val, _ = self._exists_in_path('Xvfb',
+                                                    runtime.environ)
+                if not exist_val:
+                    raise IOError("Xvfb could not be found on host %s" %
+                                  (runtime.hostname))
+                else:
+                    vdisplay_num = _search_for_free_display()
+                    xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
+                    xvfb_proc = subprocess.Popen(xvfb_cmd,
+                                                 stdout=open(os.devnull),
+                                                 stderr=open(os.devnull))
+                    time.sleep(0.2)  # give Xvfb time to start
+                    if xvfb_proc.poll() is not None:
+                        raise Exception('Error: Xvfb did not start')
+                    old_displaynum = os.environ['DISPLAY']
+                    runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
     
             runtime = self._run_interface(runtime)
             
