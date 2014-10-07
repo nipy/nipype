@@ -333,7 +333,12 @@ def grab_xml(module, launcher, mipav_hacks=False):
             xmlReturnValue = xmlReturnValue.strip()[:-3]
         if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
             xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
-    return xml.dom.minidom.parseString(xmlReturnValue.strip())
+    try:
+        dom = xml.dom.minidom.parseString(xmlReturnValue.strip())
+    except Exception, e:
+        print xmlReturnValue.strip()
+        raise e
+    return dom
 #        if ret.runtime.returncode == 0:
 #            return xml.dom.minidom.parseString(ret.runtime.stdout)
 #        else:
