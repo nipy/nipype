@@ -24,7 +24,6 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from nipype.external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -542,7 +541,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, six.string_types) and
+                if (hash_files and isinstance(object, str) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -985,7 +984,7 @@ class BaseInterface(Interface):
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], six.string_types):
+            if len(e.args) == 1 and isinstance(e.args[0], str):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
@@ -1469,6 +1468,7 @@ class CommandLine(BaseInterface):
     def _filename_from_source(self, name):
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
+
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
@@ -1478,26 +1478,37 @@ class CommandLine(BaseInterface):
                 name_template = trait_spec.name_template
             if not name_template:
                 name_template = "%s_generated"
-            if isinstance(trait_spec.name_source, list):
-                for ns in trait_spec.name_source:
-                    if isdefined(getattr(self.inputs, ns)):
-                        name_source = ns
-                        break
+
+            ns = trait_spec.name_source
+            while isinstance(ns, list):
+                if len(ns) > 1:
+                    iflogger.warn('Only one name_source per trait is allowed')
+                ns = ns[0]
+
+            if not isinstance(ns, basestring):
+                raise ValueError(('name_source of \'%s\' trait sould be an '
+                                 'input trait name') % name)
+
+            if isdefined(getattr(self.inputs, ns)):
+                name_source = ns
+                source = getattr(self.inputs, name_source)
+                while isinstance(source, list):
+                    source = source[0]
+
+                # special treatment for files
+                try:
+                    _, base, _ = split_filename(source)
+                except AttributeError:
+                    base = source
             else:
-                name_source = trait_spec.name_source
-            source = getattr(self.inputs, name_source)
-            while isinstance(source, list):
-                source = source[0]
-            #special treatment for files
-            try:
-                _, base, _ = split_filename(source)
-            except AttributeError:
-                base = source
+                base = self._filename_from_source(ns)
+
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval
             return self._overload_extension(retval, name)
+
         return retval
 
     def _gen_filename(self, name):
@@ -1513,7 +1524,7 @@ class CommandLine(BaseInterface):
             outputs = self.output_spec().get()
             for name, trait_spec in traits.iteritems():
                 out_name = name
-                if trait_spec.output_name != None:
+                if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
                 outputs[out_name] = \
                     os.path.abspath(self._filename_from_source(name))
