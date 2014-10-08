@@ -127,7 +127,7 @@ class Denoise(BaseInterface):
     """
     input_spec = DenoiseInputSpec
     output_spec = DenoiseOutputSpec
-    
+
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())
 
