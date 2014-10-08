@@ -1383,14 +1383,14 @@ def merge_rois(in_files, in_idxs, in_ref,
     npix = rsh[0] * rsh[1] * rsh[2]
     fcdata = nb.load(in_files[0]).get_data()
 
-    if fcdata.ndim == 4: 
+    if fcdata.ndim == 4:
         ndirs = fcdata.shape[-1]
     else:
         ndirs = 1
     newshape = (rsh[0], rsh[1], rsh[2], ndirs)
     hdr.set_data_dtype(dtype)
     hdr.set_xyzt_units('mm', 'sec')
- 
+
     if ndirs < 300:
         data = np.zeros((npix, ndirs))
         for cname, iname in zip(in_files, in_idxs):
@@ -1404,7 +1404,7 @@ def merge_rois(in_files, in_idxs, in_ref,
             except:
                 print(data.shape, cdata.shape)
                 raise
-                
+
         hdr.set_data_shape(newshape)
 
         nb.Nifti1Image(data.reshape(newshape).astype(dtype),
