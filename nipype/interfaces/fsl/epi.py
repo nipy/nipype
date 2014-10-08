@@ -233,6 +233,7 @@ class TOPUP(FSLCommand):
     >>> topup = TOPUP()
     >>> topup.inputs.in_file = "b0_b0rev.nii"
     >>> topup.inputs.encoding_file = "topup_encoding.txt"
+    >>> topup.inputs.output_type = "NIFTI_GZ"
     >>> topup.cmdline #doctest: +ELLIPSIS
     'topup --config=b02b0.cnf --datain=topup_encoding.txt \
 --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz \
@@ -247,18 +248,27 @@ class TOPUP(FSLCommand):
     def _format_arg(self, name, trait_spec, value):
         if name == 'encoding_direction':
             return trait_spec.argstr % self._generate_encfile()
+        if name == 'out_base':
+            path, name, ext = split_filename(value)
+            if path != '':
+                if not os.path.exists(path):
+                    raise ValueError('out_base path must exist if provided')
         return super(TOPUP, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = super(TOPUP, self)._list_outputs()
         del outputs['out_base']
+        base_path = None
         if isdefined(self.inputs.out_base):
-            base = self.inputs.out_base
+            base_path, base, _ = split_filename(self.inputs.out_base)
+            if base_path == '':
+                base_path = None
         else:
             base = split_filename(self.inputs.in_file)[1] + '_base'
-        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef')
+        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef',
+                                                   cwd=base_path)
         outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
-                                                ext='.txt')
+                                                ext='.txt', cwd=base_path)
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
@@ -354,6 +364,7 @@ class ApplyTOPUP(FSLCommand):
     >>> applytopup.inputs.in_index = [1,2]
     >>> applytopup.inputs.in_topup_fieldcoef = "topup_fieldcoef.nii.gz"
     >>> applytopup.inputs.in_topup_movpar = "topup_movpar.txt"
+    >>> applytopup.inputs.output_type = "NIFTI_GZ"
     >>> applytopup.cmdline #doctest: +ELLIPSIS
     'applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii \
 --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz'

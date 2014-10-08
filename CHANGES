@@ -18,7 +18,8 @@ Next Release
 * ENH: New Diffusion Toolkit interface: TrackMerge
 * ENH: New MRtrix interface: FilterTracks
 * ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
-       are found in nipype.algorithms.metrics instead of misc
+       are found in nipype.algorithms.metrics instead of misc. Overlap interface
+       extended to allow files containing multiple ROIs and volume physical units.
 * ENH: New interface in algorithms.metrics: ErrorMap (a voxel-wise diff map).
 * ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
 * ENH: Deep revision of workflows for correction of dMRI artifacts. New dmri_preprocessing
