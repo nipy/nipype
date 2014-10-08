@@ -71,7 +71,7 @@ def test_oldbedpostx2():
     bpx2.inputs.jumps = 500
     bpx2.inputs.sampling = 20
     actualCmdline = sorted(bpx2.cmdline.split())
-    cmd = 'bedpostx bedpostx -b 200 -n 2 -j 500 -s 20 -w 0.30'
+    cmd = 'bedpostx bedpostx -b 200 -n 2 -j 500 -s 20 -w 0.30 --forcedir --logdir=logdir'
     desiredCmdline = sorted(cmd.split())
     yield assert_equal, actualCmdline, desiredCmdline
 

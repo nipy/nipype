@@ -21,11 +21,11 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
                   SigLoss, EddyCorrect, EpiReg)
 
-from .dti import (BEDPOSTX, BEDPOSTXGPU, XFibres, DTIFit,
+from .dti import (BEDPOSTX, XFibres, DTIFit,
                   ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
                   TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5,
-                  BEDPOSTX4, XFibres4, BEDPOSTX5GPU, BEDPOSTX4GPU)
+                  BEDPOSTX4, XFibres4)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)

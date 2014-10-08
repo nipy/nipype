@@ -126,7 +126,7 @@ def merge_and_mean(name='mm'):
 
 def bedpostx_parallel(name='bedpostx_parallel',
                       compute_all_outputs=True,
-                      params={}):
+                      params=None):
     """
     Does the same as :func:`.create_bedpostx_pipeline` by splitting
     the input dMRI in small ROIs that are better suited for parallel
@@ -161,7 +161,10 @@ def bedpostx_parallel(name='bedpostx_parallel',
     inputnode = pe.Node(niu.IdentityInterface(fields=['dwi', 'mask',
                         'bvecs', 'bvals']), name='inputnode')
     slice_dwi = pe.Node(misc.SplitROIs(roi_size=(5, 5, 1)), name='slice_dwi')
-    xfib_if = fsl.XFibres5(**params)
+    if params is not None:
+        xfib_if = fsl.XFibres5(**params)
+    else:
+        xfib_if = fsl.XFibres5()
     xfibres = pe.MapNode(xfib_if, name='xfibres',
                          iterfield=['dwi', 'mask'])
 
@@ -169,11 +172,13 @@ def bedpostx_parallel(name='bedpostx_parallel',
                            iterfield=['in_files'])
     mrg_fsamp = pe.MapNode(misc.MergeROIs(), name='Merge_mean_fsamples',
                            iterfield=['in_files'])
-    out_fields = ['dyads', 'mean_fsamples']
+    out_fields = ['dyads', 'fsamples']
 
     if compute_all_outputs:
         out_fields += ['dyads_disp', 'thsamples', 'phsamples',
-                       'fsamples', 'mean_thsamples', 'mean_phsamples']
+                       'mean_fsamples', 'mean_thsamples', 'mean_phsamples',
+                       'merged_fsamples', 'merged_thsamples',
+                       'merged_phsamples']
 
     outputnode = pe.Node(niu.IdentityInterface(fields=out_fields),
                          name='outputnode')
@@ -193,22 +198,22 @@ def bedpostx_parallel(name='bedpostx_parallel',
         (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
         (slice_dwi, mrg_fsamp,  [('out_index', 'in_index')]),
         (mrg_dyads, outputnode, [('merged_file', 'dyads')]),
-        (mrg_fsamp, outputnode, [('merged_file', 'mean_fsamples')])
+        (mrg_fsamp, outputnode, [('merged_file', 'fsamples')])
     ])
 
     if compute_all_outputs:
         make_dyads = pe.MapNode(fsl.MakeDyadicVectors(), name="Make_dyads",
                                 iterfield=['theta_vol', 'phi_vol'])
 
+        wf.connect([(inputnode, make_dyads, [('mask', 'mask')])])
         mms = {}
         for k in ['thsamples', 'phsamples', 'fsamples']:
             mms[k] = merge_and_mean_parallel(k)
             wf.connect([
-                (inputnode, make_dyads, [('mask', 'mask')]),
                 (slice_dwi, mms[k], [('out_index', 'inputnode.in_index')]),
                 (inputnode, mms[k], [('mask', 'inputnode.in_reference')]),
                 (xfibres, mms[k], [(k, 'inputnode.in_files')]),
-                (mms[k], outputnode, [('outputnode.merged', k),
+                (mms[k], outputnode, [('outputnode.merged', 'merged_%s' % k),
                                       ('outputnode.mean', 'mean_%s' % k)])
 
             ])

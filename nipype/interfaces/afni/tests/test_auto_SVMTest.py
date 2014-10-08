@@ -17,7 +17,6 @@ def test_SVMTest_inputs():
     mandatory=True,
     ),
     model=dict(argstr='-model %s',
-    exists=True,
     mandatory=True,
     ),
     multiclass=dict(argstr='-multiclass %s',

@@ -81,6 +81,7 @@ def test_BEDPOSTX_inputs():
     ),
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
+    use_gpu=dict(),
     )
     inputs = BEDPOSTX.input_spec()
 
