@@ -542,7 +542,7 @@ class BEDPOSTX4(FSLCommand):
     >>> bedp = fsl.BEDPOSTX4(bpx_directory='subjdir', bvecs='bvecs', \
 bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
     >>> bedp.cmdline
-    'bedpostx subjdir -n 1'
+    'bedpostx subjdir -n 1 --forcedir --logdir=logdir'
 
     """
 
