@@ -109,7 +109,6 @@ class SVMTestInputSpec(AFNICommandInputSpec):
     #testing options
     model = traits.Str(desc='modname is the basename for the brik containing the SVM model',
                 argstr='-model %s',
-                exists=True,
                 mandatory=True)
     in_file = File(desc='A 3D or 3D+t AFNI brik dataset to be used for testing.',
                 argstr='-testvol %s',
