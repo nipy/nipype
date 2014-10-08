@@ -1935,7 +1935,7 @@ class AFNItoNIFTI(AFNICommand):
 
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
-        
+
 class EvalInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 1deval',
                      argstr='-a %s', position=0, mandatory=True, exists=True)
@@ -1955,15 +1955,15 @@ class EvalInputSpec(AFNICommandInputSpec):
                           requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for in_file_a')
     other = File(desc='other options', argstr='')
-    
+
 class Eval(AFNICommand):
     """Evaluates an expression that may include columns of data from one or more text files
 
     see AFNI Documentation: <http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html>
-    
+
     Examples
     ========
-    
+
     >>> from nipype.interfaces import afni as afni
     >>> eval = afni.Eval()
     >>> eval.inputs.in_file_a = 'seed.1D'
@@ -1996,7 +1996,7 @@ class Eval(AFNICommand):
         """
         return super(Eval, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'out1D', 'other'))
-            
+
 class MeansInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 3dMean',
         argstr='%s',

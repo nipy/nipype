@@ -24,10 +24,10 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
-    
+
 class SVMTrainInputSpec(AFNICommandInputSpec):
     #training options
-    ttype = traits.Str(desc='tname: classification or regression', 
+    ttype = traits.Str(desc='tname: classification or regression',
                 argstr='-type %s',
                 mandatory=True)
     in_file = File(desc='A 3D+t AFNI brik dataset to be used for training.',
@@ -35,17 +35,17 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
                 mandatory=True,
                 exists=True,
                 copyfile=False)
-    out_file = File(name_template="%s_vectors", 
+    out_file = File(name_template="%s_vectors",
                 desc='output sum of weighted linear support vectors file name',
                 argstr='-bucket %s',
-                suffix='_bucket', 
+                suffix='_bucket',
                 name_source="in_file")
     model = File(name_template="%s_model",
                 desc='basename for the brik containing the SVM model',
                 argstr='-model %s',
-                suffix='_model', 
-                name_source="in_file")    
-    alphas = File(name_template="%s_alphas", 
+                suffix='_model',
+                name_source="in_file")
+    alphas = File(name_template="%s_alphas",
                 desc='output alphas file name',
                 argstr='-alpha %s',
                 suffix='_alphas',
@@ -62,7 +62,7 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
                 exists=True)
     censor = File(desc='.1D censor file that allows the user to ignore certain samples in the training data.',
                 argstr='-censor %s',
-                exists=True)   
+                exists=True)
     kernel = traits.Str(desc='string specifying type of kernel function:linear, polynomial, rbf, sigmoid',
                 argstr='-kernel %s')
     max_iterations = traits.Int(desc='Specify the maximum number of iterations for the optimization.',
@@ -70,12 +70,12 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
     w_out = traits.Bool(desc='output sum of weighted linear support vectors',
                 argstr='-wout')
     options = traits.Str(desc='additional options for SVM-light', argstr='%s')
-                
+
 class SVMTrainOutputSpec(TraitedSpec):
     out_file = File(desc='sum of weighted linear support vectors file name')
     model = File(desc='brik containing the SVM model file name')
     alphas = File(desc='output alphas file name')
-                
+
 class SVMTrain(AFNICommand):
     """Temporally predictive modeling with the support vector machine
     SVM Train Only
@@ -109,7 +109,6 @@ class SVMTestInputSpec(AFNICommandInputSpec):
     #testing options
     model = traits.Str(desc='modname is the basename for the brik containing the SVM model',
                 argstr='-model %s',
-                exists=True,
                 mandatory=True)
     in_file = File(desc='A 3D or 3D+t AFNI brik dataset to be used for testing.',
                 argstr='-testvol %s',
@@ -130,7 +129,7 @@ class SVMTestInputSpec(AFNICommandInputSpec):
     multiclass = traits.Bool(desc='Specifies multiclass algorithm for classification',
                 argstr='-multiclass %s')
     options = traits.Str(desc='additional options for SVM-light', argstr='%s')
-    
+
 class SVMTest(AFNICommand):
     """Temporally predictive modeling with the support vector machine
     SVM Test Only
