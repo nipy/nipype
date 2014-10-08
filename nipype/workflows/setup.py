@@ -5,6 +5,7 @@ def configuration(parent_package='',top_path=None):
 
     config = Configuration('workflows', parent_package, top_path)
 
+    config.add_subpackage('data')
     config.add_subpackage('dmri')
     config.add_subpackage('fmri')
     config.add_subpackage('graph')
