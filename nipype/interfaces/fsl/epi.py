@@ -248,18 +248,27 @@ class TOPUP(FSLCommand):
     def _format_arg(self, name, trait_spec, value):
         if name == 'encoding_direction':
             return trait_spec.argstr % self._generate_encfile()
+        if name == 'out_base':
+            path, name, ext = split_filename(value)
+            if path != '':
+                if not os.path.exists(path):
+                    raise ValueError('out_base path must exist if provided')
         return super(TOPUP, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
         outputs = super(TOPUP, self)._list_outputs()
         del outputs['out_base']
+        base_path = None
         if isdefined(self.inputs.out_base):
-            base = self.inputs.out_base
+            base_path, base, _ = split_filename(self.inputs.out_base)
+            if base_path == '':
+                base_path = None
         else:
             base = split_filename(self.inputs.in_file)[1] + '_base'
-        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef')
+        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef',
+                                                   cwd=base_path)
         outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
-                                                ext='.txt')
+                                                ext='.txt', cwd=base_path)
 
         if isdefined(self.inputs.encoding_direction):
             outputs['out_enc_file'] = self._get_encfilename()
