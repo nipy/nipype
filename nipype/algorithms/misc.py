@@ -1164,8 +1164,8 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
 
     return out_files
 
+# Deprecated interfaces ------------------------------------------------------
 
-# Deprecated interfaces ---------------------------------------------------------
 class Distance(nam.Distance):
     """Calculates distance between two volumes.
 
