@@ -22,7 +22,7 @@ import numpy as np
 from nipype.interfaces.base import (OutputMultiPath, TraitedSpec, isdefined,
                                     traits, InputMultiPath, File)
 from nipype.interfaces.spm.base import (SPMCommand, scans_for_fname,
-                                        func_is_3d,
+                                        func_is_3d, Info,
                                         scans_for_fnames, SPMCommandInputSpec)
 from nipype.utils.filemanip import (fname_presuffix, filename_to_list,
                                     list_to_filename, split_filename)
@@ -723,8 +723,12 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-    _jobtype = 'tools'
-    _jobname = 'preproc8'
+    if Info.version() and Info.version()['name'] == "SPM12":
+        _jobtype = 'spatial'
+        _jobname = 'preproc'
+    else:
+        _jobtype = 'tools'
+        _jobname = 'preproc8'
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
