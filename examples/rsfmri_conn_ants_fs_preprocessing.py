@@ -30,18 +30,8 @@ http://mindboggle.info/data.html
 
 specifically the 2mm versions of:
 
-- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz>`_
+- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
-
-The 2mm version was generated with::
-
-   >>> from nipype.interfaces import freesurfer as fs
-   >>> rs = fs.Resample()
-   >>> rs.inputs.in_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152.nii.gz'
-   >>> rs.inputs.resampled_file = 'OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm.nii.gz'
-   >>> rs.inputs.voxel_size = (2., 2., 2.)
-   >>> rs.inputs.args = '-rt nearest -ns 1'
-   >>> res = rs.run()
 
 """
 
@@ -60,7 +50,7 @@ from nipype.interfaces import matlab as mlab
 
 mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
 # If SPM is not in your MATLAB path you should add it here
-mlab.MatlabCommand.set_default_paths('/cm/shared/openmind/spm/spm12b/spm12b_r5918/')
+# mlab.MatlabCommand.set_default_paths('/software/matlab/spm12')
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
@@ -609,10 +599,10 @@ def create_workflow(files,
     """
 
     art = Node(interface=ArtifactDetect(), name="art")
-    art.inputs.use_differences = [True, False]
+    art.inputs.use_differences = [True, True]
     art.inputs.use_norm = True
     art.inputs.norm_threshold = norm_threshold
-    art.inputs.zintensity_threshold = 3
+    art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'SPM'
 
@@ -915,12 +905,11 @@ if __name__ == "__main__":
     fsdir = '/software/temp/brainconnect/fsdata'
     files = sorted(glob(os.path.abspath('%s/E?/func/rest.nii' % subj_id)))
     anat_file = glob(os.path.abspath('%s/EO/anat/anat.nii' % subj_id))[0]
-    target_file = \
-        os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
-                         '2mm_v2.nii.gz'))
+    target_file = os.path.abspath('OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz')
     wf = create_workflow(files, anat_file, target_file, subj_id,
                          2.0, 33, vol_fwhm=6.0, surf_fwhm=15.0,
                          lowpass_freq=0.1, highpass_freq=0.01,
+                         norm_threshold=2.,
                          subjects_dir=fsdir,
                          target_subject=['fsaverage5'],
                          sink_directory=os.getcwd(),
