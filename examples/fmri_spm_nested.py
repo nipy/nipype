@@ -419,7 +419,7 @@ function needs to be called.
 """
 
 if __name__ == '__main__':
-    level1.run()
+    level1.run('MultiProc')
     level1.write_graph()
 
 """
@@ -435,7 +435,8 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
-l2source.inputs.template=os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
+# we use .*i* to capture both .img (SPM8) and .nii (SPM12)
+l2source.inputs.template=os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
@@ -477,5 +478,5 @@ Execute the second level pipeline
 """
 
 if __name__ == '__main__':
-    l2pipeline.run()
+    l2pipeline.run('MultiProc')
 
