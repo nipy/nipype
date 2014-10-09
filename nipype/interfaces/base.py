@@ -1486,7 +1486,7 @@ class CommandLine(BaseInterface):
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, basestring):
+            if not isinstance(ns, six.string_types):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
                                  'input trait name') % name)
 
