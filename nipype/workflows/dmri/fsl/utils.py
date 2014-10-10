@@ -229,6 +229,52 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
     return out_file
 
 
+def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
+    """
+    Selects the reference and moving volumes from a dwi dataset
+    for the purpose of HMC.
+    """
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+    from nipype.interfaces.base import isdefined
+
+    im = nb.load(in_file)
+    data = im.get_data()
+    hdr = im.get_header().copy()
+    bval = np.loadtxt(in_bval)
+
+    lowbs = np.where(bval <= lowbval)[0]
+
+    volid = lowbs[0]
+    if (isdefined(ref_num) and (ref_num < len(lowbs))):
+        volid = [ref_num]
+
+    if volid == 0:
+        data = data[..., 1:]
+        bval = bval[1:]
+    elif volid == (data.shape[-1] - 1):
+        data = data[..., :-1]
+        bval = bval[:-1]
+    else:
+        data = np.concatenate((data[..., :volid], data[..., (volid + 1):]),
+                              axis=3)
+        bval = np.hstack((bval[:volid], bval[(volid + 1):]))
+
+    out_ref = op.abspath('hmc_ref.nii.gz')
+    out_mov = op.abspath('hmc_mov.nii.gz')
+    out_bval = op.abspath('bval_split.txt')
+
+    hdr.set_data_shape(refdata.shape)
+    refdata = data[..., volid]
+    nb.Nifti1Image(refdata, im.get_affine(), hdr).to_filename(out_ref)
+
+    hdr.set_data_shape(data.shape)
+    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_mov)
+    np.savetxt(out_bval, bval)
+    return [out_ref, out_mov, out_bval, volid]
+
+
 def remove_comp(in_file, in_bval, volid=0, out_file=None):
     """
     Removes the volume ``volid`` from the 4D nifti file

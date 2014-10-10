@@ -342,17 +342,15 @@ should be taken as reference
     from nipype.workflows.data import get_flirt_schedule
 
     params = dict(dof=6, bgvalue=0, save_log=True, no_search=True,
-                  #cost='mutualinfo', cost_func='mutualinfo', bins=64,
+                  # cost='mutualinfo', cost_func='mutualinfo', bins=64,
                   schedule=get_flirt_schedule('hmc'))
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'ref_num',
                         'in_bvec', 'in_bval', 'in_mask']), name='inputnode')
-    refid = pe.Node(niu.IdentityInterface(fields=['ref_num']),
-                    name='RefVolume')
-    pick_ref = pe.Node(fsl.ExtractROI(t_size=1), name='GetRef')
-    pick_mov = pe.Node(niu.Function(input_names=['in_file', 'in_bval', 'volid'],
-                       output_names=['out_file', 'out_bval'],
-                       function=remove_comp), name='GetMovingDWs')
+    split = pe.Node(niu.Function(function=hmc_split,
+                    input_names=['in_file', 'in_bval', 'ref_num'],
+                    output_names=['out_ref', 'out_mov', 'out_bval', 'volid']),
+                    name='SplitDWI')
     flirt = dwi_flirt(flirt_param=params)
     insmat = pe.Node(niu.Function(input_names=['inlist', 'volid'],
                      output_names=['out'], function=insert_mat),
@@ -366,18 +364,15 @@ should be taken as reference
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode,  refid,      [(('ref_num', _checkrnum), 'ref_num')]),
-        (inputnode,  pick_ref,   [('in_file', 'in_file')]),
-        (inputnode,  pick_mov,   [('in_file', 'in_file'),
-                                  ('in_bval', 'in_bval')]),
+        (inputnode,     split,   [('in_file', 'in_file'),
+                                  ('in_bval', 'in_bval'),
+                                  ('ref_num', 'ref_num')]),
         (inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask')]),
-        (refid,      pick_ref,   [('ref_num', 't_min')]),
-        (refid,      pick_mov,   [('ref_num', 'volid')]),
-        (pick_mov,   flirt,      [('out_file', 'inputnode.in_file'),
+        (split,      flirt,      [('out_ref', 'inputnode.reference'),
+                                  ('out_mov', 'inputnode.in_file'),
                                   ('out_bval', 'inputnode.in_bval')]),
-        (pick_ref,   flirt,      [('roi_file', 'inputnode.reference')]),
         (flirt,      insmat,     [('outputnode.out_xfms', 'inlist')]),
-        (refid,      insmat,     [('ref_num', 'volid')]),
+        (split,      insmat,     [('volid', 'volid')]),
         (inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')]),
         (insmat,     rot_bvec,   [('out', 'in_matrix')]),
         (rot_bvec,   outputnode, [('out_file', 'out_bvec')]),
