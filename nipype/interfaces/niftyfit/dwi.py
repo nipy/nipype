@@ -32,7 +32,7 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     rotsform_flag = traits.Int(0, desc='Rotate the output tensors according to the q/s form of the image (resulting tensors will be in mm coordinates, default: 0).',
                                argstr='-rotsform %d', 
                                mandatory=False, 
-                               usedefault = True)
+                               usedefault = 0)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
