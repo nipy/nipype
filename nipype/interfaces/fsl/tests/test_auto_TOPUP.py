@@ -28,6 +28,7 @@ def test_TOPUP_inputs():
     usedefault=True,
     ),
     in_file=dict(argstr='--imain=%s',
+    checksize=True,
     mandatory=True,
     ),
     interp=dict(argstr='--interp=%s',
@@ -91,9 +92,11 @@ def test_TOPUP_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_TOPUP_outputs():
-    output_map = dict(out_corrected=dict(),
+    output_map = dict(out_corrected=dict(checksize=True,
+    ),
     out_enc_file=dict(),
-    out_field=dict(),
+    out_field=dict(checksize=True,
+    ),
     out_fieldcoef=dict(),
     out_logfile=dict(),
     out_movpar=dict(),

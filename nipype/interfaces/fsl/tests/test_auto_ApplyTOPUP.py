@@ -17,6 +17,7 @@ def test_ApplyTOPUP_inputs():
     usedefault=True,
     ),
     in_files=dict(argstr='--imain=%s',
+    checksize=True,
     mandatory=True,
     sep=',',
     ),
@@ -51,7 +52,8 @@ def test_ApplyTOPUP_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_ApplyTOPUP_outputs():
-    output_map = dict(out_corrected=dict(),
+    output_map = dict(out_corrected=dict(checksize=True,
+    ),
     )
     outputs = ApplyTOPUP.output_spec()
 

@@ -24,6 +24,8 @@ from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
                                     isdefined, Undefined)
 from nipype.utils.filemanip import (load_json, save_json, split_filename,
                                     fname_presuffix)
+from nipype import logging
+iflogger = logging.getLogger('interface')
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -114,8 +116,114 @@ class PrepareFieldmap(FSLCommand):
         return runtime
 
 
+class TOPUPBase(FSLCommand):
+    """
+    A base class to perform preliminary checkpoints
+    """
+    def __init__(self, **inputs):
+        self._size_fixed = False
+        self._offsets = None
+        super(TOPUPBase, self).__init__(**inputs)
+
+    def _cropfile(self, fname, postfix=''):
+        import nibabel as nb
+        im = nb.load(fname)
+        data = im.get_data()
+        sizes = np.array(data.shape[:3])
+
+        if self._offsets is None:
+            self._offsets = np.array(sizes % 2)
+
+        if np.any(self._offsets == 1):
+            from shutil import copy2 as copy
+            import os.path as op
+            self._size_fixed = True
+
+            for i, o in enumerate(self._offsets):
+                if o == 1:
+                    data = data.take(range(sizes[i] - 1), axis=i)
+
+            crop_file, ext = op.splitext(op.basename(fname))
+            if ext == '.gz':
+                crop_file, ext2 = op.splitext(crop_file)
+                ext = ext2 + ext
+            crop_file = op.abspath(crop_file + '_cropped' + postfix + ext)
+            hdr = im.get_header().copy()
+            hdr.set_data_shape(data.shape)
+            nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(crop_file)
+            iflogger.warn(('One or more dimensions have odd size. '
+                           'Input data matrix %s has been cropped '
+                           'to these new sizes: %s.') % (str(tuple(sizes)),
+                          str(data.shape[:3])))
+            return crop_file
+        else:
+            return fname
+
+    def _checksize(self, name):
+        value = getattr(self.inputs, name)
+        islist = isinstance(value, list)
+
+        out_value = []
+        for i, fname in enumerate(np.atleast_1d(value)):
+            postfix = ('%05d' % i) if islist else ''
+            out_value.append(self._cropfile(fname, postfix))
+
+        if not islist:
+            out_value = out_value[0]
+        return out_value
+
+    def _fixsize(self, fname):
+        import nibabel as nb
+        import os.path as op
+        im = nb.load(fname)
+        imdata = im.get_data()
+        s = imdata.shape
+        dests = np.array(s)
+        dests[:3] = s[:3] + self._offsets
+        data = np.zeros(dests, dtype=im.get_data_dtype())
+        data[0:s[0], 0:s[1], 0:s[2], ...] = imdata
+
+        fixfname, ext = op.splitext(op.basename(fname))
+        if ext == '.gz':
+            fixfname, ext2 = op.splitext(fixfname)
+            ext = ext2 + ext
+
+        fixfname = op.abspath(fixfname + '_fix' + ext)
+
+        hdr = im.get_header().copy()
+        hdr.set_data_shape(data.shape)
+        nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(fixfname)
+        return fixfname
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = super(TOPUPBase,
+                        self).aggregate_outputs(runtime, needed_outputs)
+        predicted_outputs = self._list_outputs()
+
+        if self._size_fixed:
+            check = dict(checksize=lambda t: t is not None)
+            for key, value in predicted_outputs.items():
+                try:
+                    spec = outputs.traits(**check)[key]
+                    if spec.checksize:
+                        newval = self._fixsize(value)
+                        setattr(outputs, key, newval)
+                except KeyError:
+                    pass
+        return outputs
+
+    def _run_interface(self, runtime):
+        check = dict(checksize=lambda t: t is not None)
+        for name, spec in sorted(self.inputs.traits(**check).items()):
+            if spec.checksize:
+                value = self._checksize(name)
+                setattr(self.inputs, name, value)
+
+        return super(TOPUPBase, self)._run_interface(runtime)
+
+
 class TOPUPInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True,
+    in_file = File(exists=True, mandatory=True, checksize=True,
                    desc='name of 4D file with images', argstr='--imain=%s')
     encoding_file = File(exists=True, mandatory=True,
                          xor=['encoding_direction'],
@@ -211,12 +319,13 @@ class TOPUPOutputSpec(TraitedSpec):
                          desc='file containing the field coefficients')
     out_movpar = File(exists=True, desc='movpar.txt output file')
     out_enc_file = File(desc='encoding directions file output for applytopup')
-    out_field = File(desc='name of image file with field (Hz)')
-    out_corrected = File(desc='name of 4D image file with unwarped images')
     out_logfile = File(desc='name of log-file')
+    out_field = File(checksize=True, desc='name of image file with field (Hz)')
+    out_corrected = File(checksize=True,
+                         desc='name of 4D image file with unwarped images')
 
 
-class TOPUP(FSLCommand):
+class TOPUP(TOPUPBase):
     """
     Interface for FSL topup, a tool for estimating and correcting
     susceptibility induced distortions. See FSL documentation for
@@ -281,7 +390,8 @@ class TOPUP(FSLCommand):
         return out_file
 
     def _generate_encfile(self):
-        """Generate a topup compatible encoding file based on given directions
+        """
+        Generate a topup compatible encoding file based on given directions
         """
         out_file = self._get_encfilename()
         durations = self.inputs.readout_times
@@ -310,8 +420,8 @@ class TOPUP(FSLCommand):
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True,
-                              desc='name of 4D file with images',
-                              argstr='--imain=%s', sep=',')
+                              argstr='--imain=%s', sep=',', checksize=True,
+                              desc='name of 4D file with images')
     encoding_file = File(exists=True, mandatory=True,
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
@@ -340,11 +450,11 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
 
 
 class ApplyTOPUPOutputSpec(TraitedSpec):
-    out_corrected = File(exists=True, desc=('name of 4D image file with '
-                                            'unwarped images'))
+    out_corrected = File(exists=True,  checksize=True,
+                         desc=('name of 4D image file with unwarped images'))
 
 
-class ApplyTOPUP(FSLCommand):
+class ApplyTOPUP(TOPUPBase):
     """
     Interface for FSL topup, a tool for estimating and correcting
     susceptibility induced distortions.
