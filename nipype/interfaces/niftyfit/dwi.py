@@ -33,11 +33,12 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                                argstr='-rotsform %d', 
                                mandatory=False, 
                                usedefault = 0)
+    op_basename = traits.String('dwifit_', desc='Output file basename',usedefault = True)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
                       argstr='-mcmap %s',
-                      name_source=['source_file'], 
+                      name_source=['op_basename'], 
                       name_template='%s_mcmap', 
                       requires=['nodv_flag'])
     error_file = File(desc='Filename of parameter error maps', 
@@ -46,23 +47,23 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                     argstr='-res %s')
     syn_file = File(desc='Filename of synthetic image', 
                     argstr='-syn %s', 
-                    name_source=['source_file'], 
+                    name_source=['op_basename'], 
                     name_template='%s_syn')
     mdmap_file = File(desc='Filename of MD map/ADC', 
                       argstr='-mdmap %s',
-                      name_source=['source_file'], 
+                      name_source=['op_basename'], 
                       name_template='%s_mdmap')
     famap_file = File(desc='Filename of FA map',
                       argstr='-famap %s', 
-                      name_source=['source_file'],
+                      name_source=['op_basename'],
                       name_template='%s_famap')
     v1map_file = File(desc='Filename of PDD map [x,y,z]',
                       argstr='-v1map %s',
-                      name_source=['source_file'],
+                      name_source=['op_basename'],
                       name_template='%s_v1map')
     rgbmap_file = File(desc='Filename of colour FA map',
                        argstr='-rgbmap %s',
-                       name_source=['source_file'],
+                       name_source=['op_basename'],
                        name_template='%s_rgbmap', 
                        requires=['dti_flag'])
     #tenmap_file = File(desc='Filename of tensor map', 
@@ -72,7 +73,7 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     #                   requires=['dti_flag'])
     tenmap_file = File(desc='Filename of tensor map in lower triangular format', 
                        argstr='-tenmap2 %s',
-                       name_source=['source_file'], 
+                       name_source=['op_basename'], 
                        name_template='%s_tenmap2', 
                        requires=['dti_flag'])
     
@@ -162,34 +163,35 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
     mask_file = File(exists=True, desc='The image mask',
                    argstr='-mask %s', mandatory=False)
     b0_file = File(exists=True, desc='The B0 image corresponding to the', argstr='-b0 %s', mandatory=False)
+    op_basename = traits.String('dwifit_', desc='Output file basename',usedefault = True)
 
     # Output options, with templated output names based on the source image
     mcmap_file = File(desc='Filename of multi-compartment model parameter map (-ivim,-ball,-nod)',
                       argstr='-mcmap %s')     
     syn_file = File(desc='Filename of synthetic image', 
                     argstr='-syn %s', 
-                    name_source=['source_file'], 
+                    name_source=['op_basename'], 
                     name_template='%s_syn')
     mdmap_file = File(desc='Filename of MD map/ADC', 
                       argstr='-mdmap %s',
-                      name_source=['source_file'], 
+                      name_source=['op_basename'], 
                       name_template='%s_mdmap')
     famap_file = File(desc='Filename of FA map', 
                       argstr='-famap %s', 
-                      name_source=['source_file'], 
+                      name_source=['op_basename'], 
                       name_template='%s_famap')
     v1map_file = File(desc='Filename of PDD map [x,y,z]', 
                       argstr='-v1map %s',
-                      name_source=['source_file'], 
+                      name_source=['op_basename'], 
                       name_template='%s_v1map')
     rgbmap_file = File(desc='Filename of colour FA map', 
                        argstr='-rgbmap %s',
-                       name_source=['source_file'], 
+                       name_source=['op_basename'], 
                        name_template='%s_rgbmap', 
                        requires=['dti_flag'])
     logdti_file = File(desc='Filename of output logdti map', 
                        argstr='-logdti2 %s',
-                       name_source=['source_file'], 
+                       name_source=['op_basename'], 
                        name_template='%s_logdti2', 
                        requires=['dti_flag'])
     
