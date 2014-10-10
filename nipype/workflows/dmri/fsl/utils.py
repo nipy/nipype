@@ -31,18 +31,18 @@ def cleanup_edge_pipeline(name='Cleanup'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,     fugue,      [('in_file', 'fmap_in_file'),
-                                      ('in_mask', 'mask_file')])
-        ,(inputnode,     erode,      [('in_mask', 'in_file')])
-        ,(inputnode,     newmsk,     [('in_mask', 'in_file')])
-        ,(erode,         newmsk,     [('out_file', 'operand_files')])
-        ,(fugue,         applymsk,   [('fmap_out_file', 'in_file')])
-        ,(newmsk,        applymsk,   [('out_file', 'mask_file')])
-        ,(erode,         join,       [('out_file', 'in1')])
-        ,(applymsk,      join,       [('out_file', 'in2')])
-        ,(inputnode,     addedge,    [('in_file', 'in_file')])
-        ,(join,          addedge,    [('out', 'operand_files')])
-        ,(addedge,       outputnode, [('out_file', 'out_file')])
+        (inputnode,     fugue,      [('in_file', 'fmap_in_file'),
+                                     ('in_mask', 'mask_file')]),
+        (inputnode,     erode,      [('in_mask', 'in_file')]),
+        (inputnode,     newmsk,     [('in_mask', 'in_file')]),
+        (erode,         newmsk,     [('out_file', 'operand_files')]),
+        (fugue,         applymsk,   [('fmap_out_file', 'in_file')]),
+        (newmsk,        applymsk,   [('out_file', 'mask_file')]),
+        (erode,         join,       [('out_file', 'in1')]),
+        (applymsk,      join,       [('out_file', 'in2')]),
+        (inputnode,     addedge,    [('in_file', 'in_file')]),
+        (join,          addedge,    [('out', 'operand_files')]),
+        (addedge,       outputnode, [('out_file', 'out_file')])
     ])
     return wf
 
@@ -64,15 +64,14 @@ def vsm2warp(name='Shiftmap2Warping'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   fixhdr,      [('in_vsm', 'in_file'),
-                                     ('in_ref', 'in_file_hdr')])
-        ,(inputnode,   vsm,         [('scaling', 'operand_value')])
-        ,(fixhdr,      vsm,         [('out_file', 'in_file')])
-
-        ,(vsm,         vsm2dfm,     [('out_file', 'shift_in_file')])
-        ,(inputnode,   vsm2dfm,     [('in_ref', 'reference'),
-                                     ('enc_dir', 'shift_direction')])
-        ,(vsm2dfm,     outputnode,  [('out_file', 'out_warp')])
+        (inputnode,   fixhdr,      [('in_vsm', 'in_file'),
+                                    ('in_ref', 'in_file_hdr')]),
+        (inputnode,   vsm,         [('scaling', 'operand_value')]),
+        (fixhdr,      vsm,         [('out_file', 'in_file')]),
+        (vsm,         vsm2dfm,     [('out_file', 'shift_in_file')]),
+        (inputnode,   vsm2dfm,     [('in_ref', 'reference'),
+                                    ('enc_dir', 'shift_direction')]),
+        (vsm2dfm,     outputnode,  [('out_file', 'out_warp')])
     ])
     return wf
 
@@ -111,25 +110,25 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
                          'out_xfms']), name='outputnode')
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  split,      [('in_file', 'in_file')])
-        ,(inputnode,  dilate,     [('ref_mask', 'in_file')])
-        ,(inputnode,  enhb0,      [('ref_mask', 'in_mask')])
-        ,(inputnode,  initmat,    [('in_xfms', 'in_xfms'),
-                                   ('in_bval', 'in_bval')])
-        ,(inputnode,  n4,         [('reference', 'input_image'),
-                                   ('ref_mask', 'mask_image')])
-        ,(dilate,     flirt,      [('out_file', 'ref_weight'),
-                                   ('out_file', 'in_weight')])
-        ,(n4,         enhb0,      [('output_image', 'in_file')])
-        ,(split,      enhdw,      [('out_files', 'in_file')])
-        ,(dilate,     enhdw,      [('out_file', 'in_mask')])
-        ,(enhb0,      flirt,      [('out_file', 'reference')])
-        ,(enhdw,      flirt,      [('out_file', 'in_file')])
-        ,(initmat,    flirt,      [('init_xfms', 'in_matrix_file')])
-        ,(flirt,      thres,      [('out_file', 'in_file')])
-        ,(thres,      merge,      [('out_file', 'in_files')])
-        ,(merge,      outputnode, [('merged_file', 'out_file')])
-        ,(flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
+        (inputnode,  split,      [('in_file', 'in_file')]),
+        (inputnode,  dilate,     [('ref_mask', 'in_file')]),
+        (inputnode,  enhb0,      [('ref_mask', 'in_mask')]),
+        (inputnode,  initmat,    [('in_xfms', 'in_xfms'),
+                                  ('in_bval', 'in_bval')]),
+        (inputnode,  n4,         [('reference', 'input_image'),
+                                  ('ref_mask', 'mask_image')]),
+        (dilate,     flirt,      [('out_file', 'ref_weight'),
+                                  ('out_file', 'in_weight')]),
+        (n4,         enhb0,      [('output_image', 'in_file')]),
+        (split,      enhdw,      [('out_files', 'in_file')]),
+        (dilate,     enhdw,      [('out_file', 'in_mask')]),
+        (enhb0,      flirt,      [('out_file', 'reference')]),
+        (enhdw,      flirt,      [('out_file', 'in_file')]),
+        (initmat,    flirt,      [('init_xfms', 'in_matrix_file')]),
+        (flirt,      thres,      [('out_file', 'in_file')]),
+        (thres,      merge,      [('out_file', 'in_files')]),
+        (merge,      outputnode, [('merged_file', 'out_file')]),
+        (flirt,      outputnode, [('out_matrix_file', 'out_xfms')])
     ])
     return wf
 
@@ -170,28 +169,27 @@ def apply_all_corrections(name='UnwarpArtifacts'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   warps,      [('in_sdc', 'warp1'),
-                                    ('in_hmc', 'premat'),
-                                    ('in_ecc', 'postmat'),
-                                    ('in_dwi', 'reference')])
-        ,(inputnode,   split,      [('in_dwi', 'in_file')])
-        ,(split,       selref,     [('out_files', 'inlist')])
-        ,(warps,       unwarp,     [('out_file', 'field_file')])
-        ,(split,       unwarp,     [('out_files', 'in_file')])
-        ,(selref,      unwarp,     [('out', 'ref_file')])
-        ,(selref,      coeffs,     [('out', 'reference')])
-        ,(warps,       coeffs,     [('out_file', 'in_file')])
-        ,(selref,      jacobian,   [('out', 'reference')])
-        ,(coeffs,      jacobian,   [('out_file', 'in_file')])
-        ,(unwarp,      jacmult,    [('out_file', 'in_file')])
-        ,(jacobian,    jacmult,    [('out_jacobian', 'operand_files')])
-        ,(jacmult,     thres,      [('out_file', 'in_file')])
-        ,(thres,       merge,      [('out_file', 'in_files')])
-
-        ,(warps,       outputnode, [('out_file', 'out_warp')])
-        ,(coeffs,      outputnode, [('out_file', 'out_coeff')])
-        ,(jacobian,    outputnode, [('out_jacobian', 'out_jacobian')])
-        ,(merge,       outputnode, [('merged_file', 'out_file')])
+        (inputnode,   warps,      [('in_sdc', 'warp1'),
+                                   ('in_hmc', 'premat'),
+                                   ('in_ecc', 'postmat'),
+                                   ('in_dwi', 'reference')]),
+        (inputnode,   split,      [('in_dwi', 'in_file')]),
+        (split,       selref,     [('out_files', 'inlist')]),
+        (warps,       unwarp,     [('out_file', 'field_file')]),
+        (split,       unwarp,     [('out_files', 'in_file')]),
+        (selref,      unwarp,     [('out', 'ref_file')]),
+        (selref,      coeffs,     [('out', 'reference')]),
+        (warps,       coeffs,     [('out_file', 'in_file')]),
+        (selref,      jacobian,   [('out', 'reference')]),
+        (coeffs,      jacobian,   [('out_file', 'in_file')]),
+        (unwarp,      jacmult,    [('out_file', 'in_file')]),
+        (jacobian,    jacmult,    [('out_jacobian', 'operand_files')]),
+        (jacmult,     thres,      [('out_file', 'in_file')]),
+        (thres,       merge,      [('out_file', 'in_files')]),
+        (warps,       outputnode, [('out_file', 'out_warp')]),
+        (coeffs,      outputnode, [('out_file', 'out_coeff')]),
+        (jacobian,    outputnode, [('out_jacobian', 'out_jacobian')]),
+        (merge,       outputnode, [('merged_file', 'out_file')])
     ])
     return wf
 
@@ -281,7 +279,8 @@ def insert_mat(inlist, volid=0):
 
 def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     """
-    Recompose back the dMRI data accordingly the b-values table after EC correction
+    Recompose back the dMRI data accordingly the b-values table after EC
+    correction
     """
     import numpy as np
     import nibabel as nb
@@ -300,7 +299,8 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     dwis = np.where(bvals != 0)[0].tolist()
 
     if len(dwis) != len(in_corrected):
-        raise RuntimeError('Length of DWIs in b-values table and after correction should match')
+        raise RuntimeError(('Length of DWIs in b-values table and after'
+                            'correction should match'))
 
     for bindex, dwi in zip(dwis, in_corrected):
         dwidata[..., bindex] = nb.load(dwi).get_data()
@@ -348,15 +348,16 @@ def b0_average(in_dwi, in_bval, out_file=None):
     import os.path as op
 
     if out_file is None:
-        fname,ext = op.splitext(op.basename(in_dwi))
+        fname, ext = op.splitext(op.basename(in_dwi))
         if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
+            fname, ext2 = op.splitext(fname)
             ext = ext2 + ext
         out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
 
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
     bval = np.loadtxt(in_bval)
-    b0s = [im.get_data().astype(np.float32) for im in imgs[np.where(bval==0)]]
+    b0s = [im.get_data().astype(np.float32)
+           for im in imgs[np.where(bval == 0)]]
     b0 = np.average(np.array(b0s), axis=0)
 
     hdr = imgs[0].get_header().copy()
