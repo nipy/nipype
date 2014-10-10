@@ -67,34 +67,32 @@ def all_fmb_pipeline(name='hmc_sdc_ecc',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bvec', 'inputnode.in_bvec'),
-                                    ('in_bval', 'inputnode.in_bval')])
-        ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
-                                    ('in_bval', 'in_bval')])
-        ,(avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')])
-        ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
-        ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
-        ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
-        ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
-                                    ('bmap_pha', 'inputnode.bmap_pha'),
-                                    ('bmap_mag', 'inputnode.bmap_mag')])
-        ,(hmc,         ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')])
-        ,(inputnode,   ecc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bval', 'inputnode.in_bval')])
-        ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
-        ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
-        ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
-        ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
-
-        ,(inputnode,   unwarp,     [('in_file', 'inputnode.in_dwi')])
-        ,(hmc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')])
-        ,(ecc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')])
-        ,(sdc,         unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')])
-
-        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
-        ,(unwarp,      outputnode, [('outputnode.out_file', 'out_file')])
-        ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
+        (inputnode, hmc,        [('in_file', 'inputnode.in_file'),
+                                 ('in_bvec', 'inputnode.in_bvec'),
+                                 ('in_bval', 'inputnode.in_bval')]),
+        (inputnode, avg_b0_0,   [('in_file', 'in_dwi'),
+                                 ('in_bval', 'in_bval')]),
+        (avg_b0_0,  bet_dwi0,   [('out_file', 'in_file')]),
+        (bet_dwi0,  hmc,        [('mask_file', 'inputnode.in_mask')]),
+        (hmc,       sdc,        [('outputnode.out_file', 'inputnode.in_file')]),
+        (bet_dwi0,  sdc,        [('mask_file', 'inputnode.in_mask')]),
+        (inputnode, sdc,        [('in_bval', 'inputnode.in_bval'),
+                                 ('bmap_pha', 'inputnode.bmap_pha'),
+                                 ('bmap_mag', 'inputnode.bmap_mag')]),
+        (hmc,       ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')]),
+        (inputnode, ecc,        [('in_file', 'inputnode.in_file'),
+                                 ('in_bval', 'inputnode.in_bval')]),
+        (bet_dwi0,  ecc,        [('mask_file', 'inputnode.in_mask')]),
+        (ecc,       avg_b0_1,   [('outputnode.out_file', 'in_dwi')]),
+        (inputnode, avg_b0_1,   [('in_bval', 'in_bval')]),
+        (avg_b0_1,  bet_dwi1,   [('out_file', 'in_file')]),
+        (inputnode, unwarp,     [('in_file', 'inputnode.in_dwi')]),
+        (hmc,       unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')]),
+        (ecc,       unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')]),
+        (sdc,       unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')]),
+        (hmc,       outputnode, [('outputnode.out_bvec', 'out_bvec')]),
+        (unwarp,    outputnode, [('outputnode.out_file', 'out_file')]),
+        (bet_dwi1,  outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
 
@@ -154,34 +152,31 @@ def all_peb_pipeline(name='hmc_sdc_ecc',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   hmc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bvec', 'inputnode.in_bvec'),
-                                    ('in_bval', 'inputnode.in_bval')])
-        ,(inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
-                                    ('in_bval', 'in_bval')])
-        ,(avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')])
-        ,(bet_dwi0,    hmc,        [('mask_file', 'inputnode.in_mask')])
-        ,(hmc,         sdc,        [('outputnode.out_file', 'inputnode.in_file')])
-        ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
-        ,(inputnode,   sdc,        [('in_bval', 'inputnode.in_bval'),
-                                    ('alt_file', 'inputnode.alt_file')])
-        ,(inputnode,   ecc,        [('in_file', 'inputnode.in_file'),
-                                    ('in_bval', 'inputnode.in_bval')])
-        ,(bet_dwi0,    ecc,        [('mask_file', 'inputnode.in_mask')])
-        ,(hmc,         ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')])
-        ,(ecc,         avg_b0_1,   [('outputnode.out_file', 'in_dwi')])
-        ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
-        ,(avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')])
-
-
-        ,(inputnode,   unwarp,     [('in_file', 'inputnode.in_dwi')])
-        ,(hmc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')])
-        ,(ecc,         unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')])
-        ,(sdc,         unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')])
-
-        ,(hmc,         outputnode, [('outputnode.out_bvec', 'out_bvec')])
-        ,(unwarp,      outputnode, [('outputnode.out_file', 'out_file')])
-        ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
+        (inputnode, hmc,        [('in_file', 'inputnode.in_file'),
+                                 ('in_bvec', 'inputnode.in_bvec'),
+                                 ('in_bval', 'inputnode.in_bval')]),
+        (inputnode, avg_b0_0,   [('in_file', 'in_dwi'),
+                                 ('in_bval', 'in_bval')]),
+        (avg_b0_0,  bet_dwi0,   [('out_file', 'in_file')]),
+        (bet_dwi0,  hmc,        [('mask_file', 'inputnode.in_mask')]),
+        (hmc,       sdc,        [('outputnode.out_file', 'inputnode.in_file')]),
+        (bet_dwi0,  sdc,        [('mask_file', 'inputnode.in_mask')]),
+        (inputnode, sdc,        [('in_bval', 'inputnode.in_bval'),
+                                 ('alt_file', 'inputnode.alt_file')]),
+        (inputnode, ecc,        [('in_file', 'inputnode.in_file'),
+                                 ('in_bval', 'inputnode.in_bval')]),
+        (bet_dwi0,  ecc,        [('mask_file', 'inputnode.in_mask')]),
+        (hmc,       ecc,        [('outputnode.out_xfms', 'inputnode.in_xfms')]),
+        (ecc,       avg_b0_1,   [('outputnode.out_file', 'in_dwi')]),
+        (inputnode, avg_b0_1,   [('in_bval', 'in_bval')]),
+        (avg_b0_1,  bet_dwi1,   [('out_file', 'in_file')]),
+        (inputnode, unwarp,     [('in_file', 'inputnode.in_dwi')]),
+        (hmc,       unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')]),
+        (ecc,       unwarp,     [('outputnode.out_xfms', 'inputnode.in_ecc')]),
+        (sdc,       unwarp,     [('outputnode.out_warp', 'inputnode.in_sdc')]),
+        (hmc,       outputnode, [('outputnode.out_bvec', 'out_bvec')]),
+        (unwarp,    outputnode, [('outputnode.out_file', 'out_file')]),
+        (bet_dwi1,  outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
 
@@ -197,7 +192,8 @@ def all_fsl_pipeline(name='fsl_all_correct',
     Workflow that integrates FSL ``topup`` and ``eddy``.
 
 
-    .. warning:: this workflow rotates the gradients table (*b*-vectors) [Leemans09]_.
+    .. warning:: this workflow rotates the gradients table (*b*-vectors)
+      [Leemans09]_.
 
 
     .. warning:: this workflow does not perform jacobian modulation of each
@@ -251,30 +247,29 @@ def all_fsl_pipeline(name='fsl_all_correct',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
-                                    ('in_bval', 'in_bval')])
-        ,(avg_b0_0,    bet_dwi0,   [('out_file','in_file')])
-        ,(bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')])
-        ,(inputnode,   sdc,        [('in_file', 'inputnode.in_file'),
-                                    ('alt_file', 'inputnode.alt_file'),
-                                    ('in_bval', 'inputnode.in_bval')])
-
-        ,(sdc,         ecc,        [('topup.out_enc_file', 'in_acqp'),
-                                    ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
-                                    ('topup.out_movpar', 'in_topup_movpar')])
-        ,(bet_dwi0,    ecc,        [('mask_file', 'in_mask')])
-        ,(inputnode,   ecc,        [('in_file', 'in_file'),
-                                    (('in_file', _gen_index), 'in_index'),
-                                    ('in_bval', 'in_bval'),
-                                    ('in_bvec', 'in_bvec')])
-        ,(inputnode,   rot_bvec,   [('in_bvec', 'in_bvec')])
-        ,(ecc,         rot_bvec,   [('out_parameter', 'eddy_params')])
-        ,(ecc,         avg_b0_1,   [('out_corrected', 'in_dwi')])
-        ,(inputnode,   avg_b0_1,   [('in_bval', 'in_bval')])
-        ,(avg_b0_1,    bet_dwi1,   [('out_file','in_file')])
-        ,(ecc,         outputnode, [('out_corrected', 'out_file')])
-        ,(rot_bvec,    outputnode, [('out_file', 'out_bvec')])
-        ,(bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
+        (inputnode,   avg_b0_0,   [('in_file', 'in_dwi'),
+                                   ('in_bval', 'in_bval')]),
+        (avg_b0_0,    bet_dwi0,   [('out_file', 'in_file')]),
+        (bet_dwi0,    sdc,        [('mask_file', 'inputnode.in_mask')]),
+        (inputnode,   sdc,        [('in_file', 'inputnode.in_file'),
+                                   ('alt_file', 'inputnode.alt_file'),
+                                   ('in_bval', 'inputnode.in_bval')]),
+        (sdc,         ecc,        [('topup.out_enc_file', 'in_acqp'),
+                                   ('topup.out_fieldcoef', 'in_topup_fieldcoef'),
+                                   ('topup.out_movpar', 'in_topup_movpar')]),
+        (bet_dwi0,    ecc,        [('mask_file', 'in_mask')]),
+        (inputnode,   ecc,        [('in_file', 'in_file'),
+                                   (('in_file', _gen_index), 'in_index'),
+                                   ('in_bval', 'in_bval'),
+                                   ('in_bvec', 'in_bvec')]),
+        (inputnode,   rot_bvec,   [('in_bvec', 'in_bvec')]),
+        (ecc,         rot_bvec,   [('out_parameter', 'eddy_params')]),
+        (ecc,         avg_b0_1,   [('out_corrected', 'in_dwi')]),
+        (inputnode,   avg_b0_1,   [('in_bval', 'in_bval')]),
+        (avg_b0_1,    bet_dwi1,   [('out_file', 'in_file')]),
+        (ecc,         outputnode, [('out_corrected', 'out_file')]),
+        (rot_bvec,    outputnode, [('out_file', 'out_bvec')]),
+        (bet_dwi1,    outputnode, [('mask_file', 'out_mask')])
     ])
     return wf
 
@@ -330,11 +325,12 @@ def hmc_pipeline(name='motion_correct'):
     Inputs::
 
         inputnode.in_file - input dwi file
-        inputnode.in_mask - weights mask of reference image (a file with data range \
-in [0.0, 1.0], indicating the weight of each voxel when computing the metric.
+        inputnode.in_mask - weights mask of reference image (a file with data \
+range in [0.0, 1.0], indicating the weight of each voxel when computing the \
+metric.
         inputnode.in_bvec - gradients file (b-vectors)
-        inputnode.ref_num (optional, default=0) index of the b0 volume that should be \
-taken as reference
+        inputnode.ref_num (optional, default=0) index of the b0 volume that \
+should be taken as reference
 
     Outputs::
 
@@ -370,24 +366,23 @@ taken as reference
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  refid,      [(('ref_num', _checkrnum), 'ref_num')])
-        ,(inputnode,  pick_ref,   [('in_file', 'in_file')])
-        ,(inputnode,  pick_mov,   [('in_file', 'in_file'),
-                                   ('in_bval', 'in_bval')])
-        ,(inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask')])
-        ,(refid,      pick_ref,   [('ref_num', 't_min')])
-        ,(refid,      pick_mov,   [('ref_num', 'volid')])
-        ,(pick_mov,   flirt,      [('out_file', 'inputnode.in_file'),
-                                   ('out_bval', 'inputnode.in_bval')])
-
-        ,(pick_ref,   flirt,      [('roi_file', 'inputnode.reference')])
-        ,(flirt,      insmat,     [('outputnode.out_xfms', 'inlist')])
-        ,(refid,      insmat,     [('ref_num', 'volid')])
-        ,(inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')])
-        ,(insmat,     rot_bvec,   [('out', 'in_matrix')])
-        ,(rot_bvec,   outputnode, [('out_file', 'out_bvec')])
-        ,(flirt,      outputnode, [('outputnode.out_file', 'out_file')])
-        ,(insmat,     outputnode, [('out', 'out_xfms')])
+        (inputnode,  refid,      [(('ref_num', _checkrnum), 'ref_num')]),
+        (inputnode,  pick_ref,   [('in_file', 'in_file')]),
+        (inputnode,  pick_mov,   [('in_file', 'in_file'),
+                                  ('in_bval', 'in_bval')]),
+        (inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask')]),
+        (refid,      pick_ref,   [('ref_num', 't_min')]),
+        (refid,      pick_mov,   [('ref_num', 'volid')]),
+        (pick_mov,   flirt,      [('out_file', 'inputnode.in_file'),
+                                  ('out_bval', 'inputnode.in_bval')]),
+        (pick_ref,   flirt,      [('roi_file', 'inputnode.reference')]),
+        (flirt,      insmat,     [('outputnode.out_xfms', 'inlist')]),
+        (refid,      insmat,     [('ref_num', 'volid')]),
+        (inputnode,  rot_bvec,   [('in_bvec', 'in_bvec')]),
+        (insmat,     rot_bvec,   [('out', 'in_matrix')]),
+        (rot_bvec,   outputnode, [('out_file', 'out_bvec')]),
+        (flirt,      outputnode, [('outputnode.out_file', 'out_file')]),
+        (insmat,     outputnode, [('out', 'out_xfms')])
     ])
     return wf
 
@@ -396,32 +391,34 @@ def ecc_pipeline(name='eddy_correct'):
     """
     ECC stands for Eddy currents correction.
 
-    Creates a pipeline that corrects for artifacts induced by Eddy currents in dMRI
-    sequences.
+    Creates a pipeline that corrects for artifacts induced by Eddy currents in
+    dMRI sequences.
     It takes a series of diffusion weighted images and linearly co-registers
     them to one reference image (the average of all b0s in the dataset).
 
-    DWIs are also modulated by the determinant of the Jacobian as indicated by [Jones10]_ and
-    [Rohde04]_.
+    DWIs are also modulated by the determinant of the Jacobian as indicated by
+    [Jones10]_ and [Rohde04]_.
 
     A list of rigid transformation matrices can be provided, sourcing from a
-    :func:`.hmc_pipeline` workflow, to initialize registrations in a *motion free*
-    framework.
+    :func:`.hmc_pipeline` workflow, to initialize registrations in a *motion
+    free* framework.
 
-    A list of affine transformation matrices is available as output, so that transforms
-    can be chained (discussion
+    A list of affine transformation matrices is available as output, so that
+    transforms can be chained (discussion
     `here <https://github.com/nipy/nipype/pull/530#issuecomment-14505042>`_).
 
     .. admonition:: References
 
-      .. [Jones10] Jones DK, `The signal intensity must be modulated by the determinant of
-        the Jacobian when correcting for eddy currents in diffusion MRI
+      .. [Jones10] Jones DK, `The signal intensity must be modulated by the
+        determinant of the Jacobian when correcting for eddy currents in
+        diffusion MRI
         <http://cds.ismrm.org/protected/10MProceedings/files/1644_129.pdf>`_,
         Proc. ISMRM 18th Annual Meeting, (2010).
 
-      .. [Rohde04] Rohde et al., `Comprehensive Approach for Correction of Motion and Distortion
-        in Diffusion-Weighted MRI
-        <http://stbb.nichd.nih.gov/pdf/com_app_cor_mri04.pdf>`_, MRM 51:103-114 (2004).
+      .. [Rohde04] Rohde et al., `Comprehensive Approach for Correction of
+        Motion and Distortion in Diffusion-Weighted MRI
+        <http://stbb.nichd.nih.gov/pdf/com_app_cor_mri04.pdf>`_, MRM
+        51:103-114 (2004).
 
     Example
     -------
@@ -436,10 +433,12 @@ def ecc_pipeline(name='eddy_correct'):
     Inputs::
 
         inputnode.in_file - input dwi file
-        inputnode.in_mask - weights mask of reference image (a file with data range \
-sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
+        inputnode.in_mask - weights mask of reference image (a file with data \
+range sin [0.0, 1.0], indicating the weight of each voxel when computing the \
+metric.
         inputnode.in_bval - b-values table
-        inputnode.in_xfms - list of matrices to initialize registration (from head-motion correction)
+        inputnode.in_xfms - list of matrices to initialize registration (from \
+head-motion correction)
 
     Outputs::
 
@@ -481,27 +480,27 @@ sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  avg_b0,     [('in_file', 'in_dwi'),
-                                   ('in_bval', 'in_bval')])
-        ,(inputnode,  pick_dws,   [('in_file', 'in_dwi'),
-                                   ('in_bval', 'in_bval')])
-        ,(inputnode,  merge,      [('in_file', 'in_dwi'),
-                                   ('in_bval', 'in_bval')])
-        ,(inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask'),
-                                   ('in_xfms', 'inputnode.in_xfms'),
-                                   ('in_bval', 'inputnode.in_bval')])
-        ,(inputnode,  get_mat,    [('in_bval', 'in_bval')])
-        ,(avg_b0,     flirt,      [('out_file', 'inputnode.reference')])
-        ,(pick_dws,   flirt,      [('out_file', 'inputnode.in_file')])
-        ,(flirt,      get_mat,    [('outputnode.out_xfms', 'in_xfms')])
-        ,(flirt,      mult,       [(('outputnode.out_xfms',_xfm_jacobian),
-                                   'operand_value')])
-        ,(flirt,      split,      [('outputnode.out_file', 'in_file')])
-        ,(split,      mult,       [('out_files', 'in_file')])
-        ,(mult,       thres,      [('out_file', 'in_file')])
-        ,(thres,      merge,      [('out_file', 'in_corrected')])
-        ,(get_mat,    outputnode, [('out_files', 'out_xfms')])
-        ,(merge,      outputnode, [('out_file', 'out_file')])
+        (inputnode,  avg_b0,     [('in_file', 'in_dwi'),
+                                  ('in_bval', 'in_bval')]),
+        (inputnode,  pick_dws,   [('in_file', 'in_dwi'),
+                                  ('in_bval', 'in_bval')]),
+        (inputnode,  merge,      [('in_file', 'in_dwi'),
+                                  ('in_bval', 'in_bval')]),
+        (inputnode,  flirt,      [('in_mask', 'inputnode.ref_mask'),
+                                  ('in_xfms', 'inputnode.in_xfms'),
+                                  ('in_bval', 'inputnode.in_bval')]),
+        (inputnode,  get_mat,    [('in_bval', 'in_bval')]),
+        (avg_b0,     flirt,      [('out_file', 'inputnode.reference')]),
+        (pick_dws,   flirt,      [('out_file', 'inputnode.in_file')]),
+        (flirt,      get_mat,    [('outputnode.out_xfms', 'in_xfms')]),
+        (flirt,      mult,       [(('outputnode.out_xfms', _xfm_jacobian),
+                                  'operand_value')]),
+        (flirt,      split,      [('outputnode.out_file', 'in_file')]),
+        (split,      mult,       [('out_files', 'in_file')]),
+        (mult,       thres,      [('out_file', 'in_file')]),
+        (thres,      merge,      [('out_file', 'in_corrected')]),
+        (get_mat,    outputnode, [('out_files', 'out_xfms')]),
+        (merge,      outputnode, [('out_file', 'out_file')])
     ])
     return wf
 
@@ -513,14 +512,17 @@ def sdc_fmb(name='fmb_correction',
                             acc_factor=3,
                             enc_dir='y-')):
     """
-    SDC stands for susceptibility distortion correction. FMB stands for fieldmap-based.
+    SDC stands for susceptibility distortion correction. FMB stands for
+    fieldmap-based.
 
-    The fieldmap based method (FMB) implements SDC by using a mapping of the B0 field
-    as proposed by [Jezzard95]_. This workflow uses the implementation of FSL
-    (`FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_). Phase unwrapping is performed
-    using `PRELUDE <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html>`_
-    [Jenkinson03]_. Preparation of the fieldmap is performed reproducing the script in FSL
-    `fsl_prepare_fieldmap <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data>`_.
+    The fieldmap based method (FMB) implements SDC by using a mapping of the
+    B0 field as proposed by [Jezzard95]_. This workflow uses the implementation
+    of FSL (`FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_). Phase
+    unwrapping is performed using `PRELUDE
+    <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html>`_
+    [Jenkinson03]_. Preparation of the fieldmap is performed reproducing the
+    script in FSL `fsl_prepare_fieldmap
+    <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data>`_.
 
     Example
     -------
@@ -538,12 +540,14 @@ def sdc_fmb(name='fmb_correction',
 
     .. admonition:: References
 
-      .. [Jezzard95] Jezzard P, and Balaban RS, `Correction for geometric distortion in echo
-        planar images from B0 field variations <http://dx.doi.org/10.1002/mrm.1910340111>`_,
+      .. [Jezzard95] Jezzard P, and Balaban RS, `Correction for geometric
+        distortion in echo planar images from B0 field variations
+        <http://dx.doi.org/10.1002/mrm.1910340111>`_,
         MRM 34(1):65-73. (1995). doi: 10.1002/mrm.1910340111.
 
-      .. [Jenkinson03] Jenkinson M., `Fast, automated, N-dimensional phase-unwrapping algorithm
-        <http://dx.doi.org/10.1002/mrm.10354>`_, MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.
+      .. [Jenkinson03] Jenkinson M., `Fast, automated, N-dimensional
+        phase-unwrapping algorithm <http://dx.doi.org/10.1002/mrm.10354>`_,
+        MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.
 
     """
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file', 'in_bval',
@@ -561,7 +565,7 @@ def sdc_fmb(name='fmb_correction',
     dilate = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
                      args='-kernel sphere 5 -dilM'), name='MskDilate')
     pha2rads = pe.Node(niu.Function(input_names=['in_file'], output_names=['out_file'],
-                      function=siemens2rads), name='PreparePhase')
+                       function=siemens2rads), name='PreparePhase')
     prelude = pe.Node(fsl.PRELUDE(process3d=True), name='PhaseUnwrap')
     rad2rsec = pe.Node(niu.Function(input_names=['in_file', 'delta_te'],
                        output_names=['out_file'], function=rads2radsec), name='ToRadSec')
@@ -572,7 +576,7 @@ def sdc_fmb(name='fmb_correction',
 
     flirt = pe.Node(fsl.FLIRT(interp='spline', cost='normmi', cost_func='normmi',
                     dof=6, bins=64, save_log=True, padding_size=10,
-                    searchr_x=[-4,4], searchr_y=[-4,4], searchr_z=[-4,4],
+                    searchr_x=[-4, 4], searchr_y=[-4, 4], searchr_z=[-4, 4],
                     fine_search=1, coarse_search=10),
                     name='BmapMag2B0')
     applyxfm = pe.Node(fsl.ApplyXfm(interp='spline', padding_size=10, apply_xfm=True),
@@ -606,43 +610,43 @@ def sdc_fmb(name='fmb_correction',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,   pha2rads,   [('bmap_pha', 'in_file')])
-        ,(inputnode,   firstmag,   [('bmap_mag', 'in_file')])
-        ,(inputnode,   avg_b0,     [('in_file', 'in_dwi'),
-                                    ('in_bval', 'in_bval')])
-        ,(firstmag,    n4,         [('roi_file', 'input_image')])
-        ,(n4,          bet,        [('output_image', 'in_file')])
-        ,(bet,         dilate,     [('mask_file', 'in_file')])
-        ,(pha2rads,    prelude,    [('out_file', 'phase_file')])
-        ,(n4,          prelude,    [('output_image', 'magnitude_file')])
-        ,(dilate,      prelude,    [('out_file', 'mask_file')])
-        ,(prelude,     rad2rsec,   [('unwrapped_phase_file', 'in_file')])
-        ,(avg_b0,      flirt,      [('out_file', 'reference')])
-        ,(inputnode,   flirt,      [('in_mask', 'ref_weight')])
-        ,(n4,          flirt,      [('output_image', 'in_file')])
-        ,(dilate,      flirt,      [('out_file', 'in_weight')])
-        ,(avg_b0,      applyxfm,   [('out_file', 'reference')])
-        ,(rad2rsec,    applyxfm,   [('out_file', 'in_file')])
-        ,(flirt,       applyxfm,   [('out_matrix_file', 'in_matrix_file')])
-        ,(applyxfm,    pre_fugue,  [('out_file', 'fmap_in_file')])
-        ,(inputnode,   pre_fugue,  [('in_mask', 'mask_file')])
-        ,(pre_fugue,   demean,     [('fmap_out_file', 'in_file')])
-        ,(inputnode,   demean,     [('in_mask', 'in_mask')])
-        ,(demean,      cleanup,    [('out_file', 'inputnode.in_file')])
-        ,(inputnode,   cleanup,    [('in_mask', 'inputnode.in_mask')])
-        ,(cleanup,     addvol,     [('outputnode.out_file', 'in_file')])
-        ,(inputnode,   vsm,        [('in_mask', 'mask_file')])
-        ,(addvol,      vsm,        [('out_file', 'fmap_in_file')])
-        ,(inputnode,   split,      [('in_file', 'in_file')])
-        ,(split,       unwarp,     [('out_files', 'in_file')])
-        ,(vsm,         unwarp,     [('shift_out_file', 'shift_in_file')])
-        ,(unwarp,      thres,      [('unwarped_file', 'in_file')])
-        ,(thres,       merge,      [('out_file', 'in_files')])
-        ,(merge,       vsm2dfm,    [('merged_file', 'inputnode.in_ref')])
-        ,(vsm,         vsm2dfm,    [('shift_out_file', 'inputnode.in_vsm')])
-        ,(merge,       outputnode, [('merged_file', 'out_file')])
-        ,(vsm,         outputnode, [('shift_out_file', 'out_vsm')])
-        ,(vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
+        (inputnode,   pha2rads,   [('bmap_pha', 'in_file')]),
+        (inputnode,   firstmag,   [('bmap_mag', 'in_file')]),
+        (inputnode,   avg_b0,     [('in_file', 'in_dwi'),
+                                   ('in_bval', 'in_bval')]),
+        (firstmag,    n4,         [('roi_file', 'input_image')]),
+        (n4,          bet,        [('output_image', 'in_file')]),
+        (bet,         dilate,     [('mask_file', 'in_file')]),
+        (pha2rads,    prelude,    [('out_file', 'phase_file')]),
+        (n4,          prelude,    [('output_image', 'magnitude_file')]),
+        (dilate,      prelude,    [('out_file', 'mask_file')]),
+        (prelude,     rad2rsec,   [('unwrapped_phase_file', 'in_file')]),
+        (avg_b0,      flirt,      [('out_file', 'reference')]),
+        (inputnode,   flirt,      [('in_mask', 'ref_weight')]),
+        (n4,          flirt,      [('output_image', 'in_file')]),
+        (dilate,      flirt,      [('out_file', 'in_weight')]),
+        (avg_b0,      applyxfm,   [('out_file', 'reference')]),
+        (rad2rsec,    applyxfm,   [('out_file', 'in_file')]),
+        (flirt,       applyxfm,   [('out_matrix_file', 'in_matrix_file')]),
+        (applyxfm,    pre_fugue,  [('out_file', 'fmap_in_file')]),
+        (inputnode,   pre_fugue,  [('in_mask', 'mask_file')]),
+        (pre_fugue,   demean,     [('fmap_out_file', 'in_file')]),
+        (inputnode,   demean,     [('in_mask', 'in_mask')]),
+        (demean,      cleanup,    [('out_file', 'inputnode.in_file')]),
+        (inputnode,   cleanup,    [('in_mask', 'inputnode.in_mask')]),
+        (cleanup,     addvol,     [('outputnode.out_file', 'in_file')]),
+        (inputnode,   vsm,        [('in_mask', 'mask_file')]),
+        (addvol,      vsm,        [('out_file', 'fmap_in_file')]),
+        (inputnode,   split,      [('in_file', 'in_file')]),
+        (split,       unwarp,     [('out_files', 'in_file')]),
+        (vsm,         unwarp,     [('shift_out_file', 'shift_in_file')]),
+        (unwarp,      thres,      [('unwarped_file', 'in_file')]),
+        (thres,       merge,      [('out_file', 'in_files')]),
+        (merge,       vsm2dfm,    [('merged_file', 'inputnode.in_ref')]),
+        (vsm,         vsm2dfm,    [('shift_out_file', 'inputnode.in_vsm')]),
+        (merge,       outputnode, [('merged_file', 'out_file')]),
+        (vsm,         outputnode, [('shift_out_file', 'out_vsm')]),
+        (vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
     ])
     return wf
 
@@ -719,51 +723,50 @@ def sdc_peb(name='peb_correction',
 
     unwarp = pe.Node(fsl.ApplyTOPUP(in_index=[1], method='jac'), name='unwarp')
 
-    #scaling = pe.Node(niu.Function(input_names=['in_file', 'enc_dir'],
-    #                  output_names=['factor'], function=_get_zoom),
-    #                  name='GetZoom')
-    #scaling.inputs.enc_dir = epi_params['enc_dir']
+    # scaling = pe.Node(niu.Function(input_names=['in_file', 'enc_dir'],
+    #                   output_names=['factor'], function=_get_zoom),
+    #                   name='GetZoom')
+    # scaling.inputs.enc_dir = epi_params['enc_dir']
     vsm2dfm = vsm2warp()
     vsm2dfm.inputs.inputnode.enc_dir = epi_params['enc_dir']
     vsm2dfm.inputs.inputnode.scaling = readout
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  b0_ref,     [('in_file', 'in_file'),
-                                   (('ref_num', _checkrnum), 't_min')])
-        ,(inputnode,  b0_alt,     [('alt_file', 'in_file'),
-                                   (('ref_num', _checkrnum), 't_min')])
-        ,(b0_ref,     b0_comb,    [('roi_file', 'in1')])
-        ,(b0_alt,     b0_comb,    [('roi_file', 'in2')])
-        ,(b0_comb,    b0_merge,   [('out', 'in_files')])
-        ,(b0_merge,   topup,      [('merged_file', 'in_file')])
-        ,(topup,      unwarp,     [('out_fieldcoef', 'in_topup_fieldcoef'),
-                                   ('out_movpar', 'in_topup_movpar'),
-                                   ('out_enc_file', 'encoding_file')])
-        ,(inputnode,  unwarp,     [('in_file', 'in_files')])
-        ,(unwarp,     outputnode, [('out_corrected', 'out_file')])
-
-        #,(b0_ref,      scaling,    [('roi_file', 'in_file')])
-        #,(scaling,     vsm2dfm,    [('factor', 'inputnode.scaling')])
-        ,(b0_ref,      vsm2dfm,    [('roi_file', 'inputnode.in_ref')])
-        ,(topup,       vsm2dfm,    [('out_field', 'inputnode.in_vsm')])
-        ,(topup,       outputnode, [('out_field', 'out_vsm')])
-        ,(vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
+        (inputnode,  b0_ref,     [('in_file', 'in_file'),
+                                  (('ref_num', _checkrnum), 't_min')]),
+        (inputnode,  b0_alt,     [('alt_file', 'in_file'),
+                                  (('ref_num', _checkrnum), 't_min')]),
+        (b0_ref,     b0_comb,    [('roi_file', 'in1')]),
+        (b0_alt,     b0_comb,    [('roi_file', 'in2')]),
+        (b0_comb,    b0_merge,   [('out', 'in_files')]),
+        (b0_merge,   topup,      [('merged_file', 'in_file')]),
+        (topup,      unwarp,     [('out_fieldcoef', 'in_topup_fieldcoef'),
+                                  ('out_movpar', 'in_topup_movpar'),
+                                  ('out_enc_file', 'encoding_file')]),
+        (inputnode,  unwarp,     [('in_file', 'in_files')]),
+        (unwarp,     outputnode, [('out_corrected', 'out_file')]),
+        # (b0_ref,      scaling,    [('roi_file', 'in_file')]),
+        # (scaling,     vsm2dfm,    [('factor', 'inputnode.scaling')]),
+        (b0_ref,      vsm2dfm,    [('roi_file', 'inputnode.in_ref')]),
+        (topup,       vsm2dfm,    [('out_field', 'inputnode.in_vsm')]),
+        (topup,       outputnode, [('out_field', 'out_vsm')]),
+        (vsm2dfm,     outputnode, [('outputnode.out_warp', 'out_warp')])
     ])
     return wf
 
 
 def remove_bias(name='bias_correct'):
     """
-    This workflow estimates a single multiplicative bias field from the averaged *b0*
-    image, as suggested in [Jeurissen2014]_.
+    This workflow estimates a single multiplicative bias field from the
+    averaged *b0* image, as suggested in [Jeurissen2014]_.
 
     .. admonition:: References
 
-      .. [Jeurissen2014] Jeurissen B. et al., `Multi-tissue constrained spherical deconvolution
-        for improved analysis of multi-shell diffusion MRI data
-        <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_. NeuroImage (2014).
-        doi: 10.1016/j.neuroimage.2014.07.061
+      .. [Jeurissen2014] Jeurissen B. et al., `Multi-tissue constrained
+        spherical deconvolution for improved analysis of multi-shell diffusion
+        MRI data <http://dx.doi.org/10.1016/j.neuroimage.2014.07.061>`_.
+        NeuroImage (2014). doi: 10.1016/j.neuroimage.2014.07.061
 
 
     Example
@@ -797,16 +800,16 @@ def remove_bias(name='bias_correct'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,    avg_b0,         [('in_file', 'in_dwi'),
-                                         ('in_bval', 'in_bval')])
-        ,(avg_b0,       n4,             [('out_file', 'input_image')])
-        ,(inputnode,    n4,             [('in_mask', 'mask_image')])
-        ,(inputnode,    split,          [('in_file', 'in_file')])
-        ,(n4,           mult,           [('bias_image', 'operand_files')])
-        ,(split,        mult,           [('out_files', 'in_file')])
-        ,(mult,         thres,          [('out_file', 'in_file')])
-        ,(thres,        merge,          [('out_file', 'in_files')])
-        ,(merge,        outputnode,     [('merged_file', 'out_file')])
+        (inputnode,    avg_b0,         [('in_file', 'in_dwi'),
+                                        ('in_bval', 'in_bval')]),
+        (avg_b0,       n4,             [('out_file', 'input_image')]),
+        (inputnode,    n4,             [('in_mask', 'mask_image')]),
+        (inputnode,    split,          [('in_file', 'in_file')]),
+        (n4,           mult,           [('bias_image', 'operand_files')]),
+        (split,        mult,           [('out_files', 'in_file')]),
+        (mult,         thres,          [('out_file', 'in_file')]),
+        (thres,        merge,          [('out_file', 'in_files')]),
+        (merge,        outputnode,     [('merged_file', 'out_file')])
     ])
     return wf
 
