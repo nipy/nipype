@@ -76,7 +76,10 @@ class GifOutputSpec(TraitedSpec):
     parc_file  = File(desc='Parcellation file')
     geo_file   = File(desc='Geodesic distance file')
     prior_file = File(desc='Prior file')
-    synth_file = File(desc='Synthetic file')
+    tiv_file = File(desc='Synthetic file')
+    seg_file = File(desc='Segmentation file')
+    brain_file = File(desc='Brain file')
+    bias_file = File(desc='Bias Corrected file')
 
 class Gif(NIFTYSEGCommand):
 
@@ -135,17 +138,16 @@ class Gif(NIFTYSEGCommand):
             outputs['out_dir'] = os.path.abspath(self.inputs.out_dir)
         else:
             outputs['out_dir'] = os.getcwd()
- 
+            
         basename = self._get_basename_without_extension(self.inputs.in_file)
         
         outputs['parc_file']   = self._find_file_from_patterns(outputs['out_dir'], basename, 'Parcellation.nii.gz')
         outputs['geo_file']    = self._find_file_from_patterns(outputs['out_dir'], basename, 'geo.nii.gz')
         outputs['prior_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'prior.nii.gz')        
-        outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Synth.nii.gz')
-        
-#        outputs['parc_file']   = os.path.join (outputs['out_dir'], basename + '_labels_Parcellation.nii.gz')
-#        outputs['geo_file']    = os.path.join (outputs['out_dir'], basename + '_labels_geo.nii.gz')
-#        outputs['prior_file']  = os.path.join (outputs['out_dir'], basename + '_labels_prior.nii.gz')        
+        outputs['tiv_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'TIV.nii.gz')
+        outputs['seg_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Brain.nii.gz')
+        outputs['brain_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Segmentation.nii.gz')
+        outputs['bias_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'BiasCorrected.nii.gz')
 
         return outputs
         
