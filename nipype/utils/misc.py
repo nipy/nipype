@@ -10,6 +10,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
+from nipype.external.six import Iterator
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -205,3 +206,25 @@ def str2bool(v):
         return False
     else:
         raise ValueError("%s cannot be converted to bool"%v)
+    
+def flatten(S):
+    if S == []:
+        return S
+    if isinstance(S[0], list):
+        return flatten(S[0]) + flatten(S[1:])
+    return S[:1] + flatten(S[1:])
+
+def unflatten(in_list, prev_structure):
+    if not isinstance(in_list, Iterator):
+        in_list = iter(in_list)
+        
+    if not isinstance(prev_structure, list):
+        return in_list.next()
+    else:
+        out = []
+        for item in prev_structure:
+            out.append(unflatten(in_list, item))
+        return out
+    
+    
+
