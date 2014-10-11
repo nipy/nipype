@@ -165,11 +165,11 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info', 'event_files'],
           desc=("Bunch or List(Bunch) subject specific condition information. "
                 "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
-                                 xor=['subject_info'],
+                                 xor=['subject_info', 'event_files'],
           desc=('list of event description files 1, 2 or 3 column format '
                 'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
