@@ -10,7 +10,6 @@ from shutil import rmtree
 from nipype.external import six
 
 import keyword
-from Bio.Emboss.PrimerSearch import InputRecord
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
 
 
