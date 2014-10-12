@@ -487,7 +487,7 @@ class antsCorticalThickness(ANTSCommand):
             return retval
         if opt == 'segmentation_priors':
             _, _, ext = split_filename(self.inputs.segmentation_priors[0])
-            retval = "-p BrainSegmentationPrior%02d"
+            retval = "-p priors/BrainSegmentationPrior%02d"
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
