@@ -1198,6 +1198,7 @@ def create_reg_workflow(name='registration'):
 
     warpall = pe.MapNode(fsl.ApplyWarp(interp='spline'),
                          iterfield=['in_file'],
+                         nested=True,
                          name='warpall')
     register.connect(inputnode, 'source_files', warpall, 'in_file')
     register.connect(mean2anatbbr, 'out_matrix_file', warpall, 'premat')
