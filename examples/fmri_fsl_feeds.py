@@ -17,12 +17,10 @@ import os                                    # system functions
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model generation
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
-                                       create_fixed_effects_flow,
                                        create_reg_workflow)
 from nipype.interfaces.base import Bunch
 
@@ -36,23 +34,6 @@ routines is being set to compressed NIFTI.
 """
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
-
-"""
-Setting up workflows
---------------------
-
-In this tutorial we will be setting up a hierarchical workflow for fsl
-analysis. This will demonstrate how pre-defined workflows can be setup and
-shared across users, projects and labs.
-
-
-Setup preprocessing workflow
-----------------------------
-
-This is a generic fsl feat preprocessing workflow encompassing skull stripping,
-motion correction and smoothing operations.
-
-"""
 
 
 
@@ -104,7 +85,7 @@ modelspec.inputs.subject_info = [Bunch(conditions=['Visual','Auditory'],
                                 regressor_names=None,
                                 regressors=None)]
 
-modelfit = create_modelfit_workflow()
+modelfit = create_modelfit_workflow(f_contrasts=True)
 modelfit.inputs.inputspec.interscan_interval = TR
 modelfit.inputs.inputspec.model_serial_correlations = True
 modelfit.inputs.inputspec.bases = {'dgamma': {'derivs': True}}
@@ -141,17 +122,13 @@ l1pipeline.connect(modelfit, 'outputspec.zfiles', registration, 'inputspec.sourc
 Setup the datasink
 """
 
-# datasink = pe.Node(interface=nio.DataSink(parameterization=False), name="datasink")
-# datasink.inputs.base_directory = os.path.abspath('./fsl_feeds/l1out')
-# datasink.inputs.substitutions = [('dtype_mcf_mask_mean', 'meanfunc'),
-#                                  ('brain_brain_flirt','coregistered')]
-# # store relevant outputs from various stages of the 1st level analysis
-# l1pipeline.connect([(firstlevel, datasink,[('fixedfx.flameo.stats_dir',"fixedfx.@con"),
-#                                             ('preproc.coregister.out_file','coregstruct'),
-#                                             ('preproc.meanfunc2.out_file','meanfunc'),
-#                                             ('modelfit.conestimate.zstats', 'level1.@Z'),
-#                                             ])
-#                     ])
+datasink = pe.Node(interface=nio.DataSink(parameterization=False), name="datasink")
+datasink.inputs.base_directory = os.path.abspath('./fsl_feeds/l1out')
+datasink.inputs.substitutions = [('fmri_dtype_mcf_mask_smooth_mask_gms_mean_warp', 'meanfunc')]
+# store relevant outputs from various stages of the 1st level analysis
+l1pipeline.connect(registration, 'outputspec.transformed_files', datasink, 'level1.@Z')
+l1pipeline.connect(registration, 'outputspec.transformed_mean', datasink, 'meanfunc')
+
 """
 Execute the pipeline
 --------------------
