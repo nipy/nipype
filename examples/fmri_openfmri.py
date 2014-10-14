@@ -13,7 +13,7 @@ This script demonstrates how to use nipype to analyze a data set.
 """
 
 from nipype import config
-config.enable_provenance()
+#config.enable_provenance()
 from nipype.external import six
 
 from glob import glob
@@ -157,7 +157,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                          name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
-    datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
+    datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
                                 'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
                                 'behav': ('%s/model/model%03d/onsets/task%03d_'
                                           'run%03d/cond*.txt'),
@@ -237,6 +237,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav):
+        from nipype.external import six
         out_behav = []
         if isinstance(behav, six.string_types):
             behav = [behav]
@@ -438,7 +439,7 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--output_dir", dest="outdir",
                         help="Output directory base")
     parser.add_argument("-w", "--work_dir", dest="work_dir",
-                        help="Output directory base")
+                        help="Working directory base")
     parser.add_argument("-p", "--plugin", dest="plugin",
                         default='Linear',
                         help="Plugin to use")
