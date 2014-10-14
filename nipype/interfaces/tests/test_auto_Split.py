@@ -10,6 +10,8 @@ def test_Split_inputs():
     ),
     splits=dict(mandatory=True,
     ),
+    squeeze=dict(usedefault=True,
+    ),
     )
     inputs = Split.input_spec()
 
