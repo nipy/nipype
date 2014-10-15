@@ -525,12 +525,15 @@ class antsCorticalThickness(ANTSCommand):
                                                  'BrainSegmentationPosteriors01.' +
                                                  self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsGM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors02.' +
                                                   self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsWM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors03.' +
                                                    self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsDGM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors04.' +
                                                    self.inputs.image_suffix)
         outputs['CorticalThickness'] = os.path.join(os.getcwd(),
