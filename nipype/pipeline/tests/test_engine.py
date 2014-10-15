@@ -487,7 +487,7 @@ def test_mapnode_nested():
     n1.run()
     print n1.get_output('out')
     yield assert_equal, n1.get_output('out'), [[2,[3]],4,[5,6]]
-    
+
     n2 = MapNode(Function(input_names=['in1'],
                           output_names=['out'],
                           function=func1),

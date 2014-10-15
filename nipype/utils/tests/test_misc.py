@@ -54,19 +54,19 @@ def test_str2bool():
 
 def test_flatten():
     in_list = [[1,2,3],[4],[[5,6],7],8]
-    
+
     flat = flatten(in_list)
     yield assert_equal, flat, [1,2,3,4,5,6,7,8]
-    
+
     back = unflatten(flat, in_list)
     yield assert_equal, in_list, back
-    
+
     new_list = [2,3,4,5,6,7,8,9]
     back = unflatten(new_list, in_list)
     yield assert_equal, back, [[2,3,4],[5],[[6,7],8],9]
-    
+
     flat = flatten([])
     yield assert_equal, flat, []
-    
+
     back = unflatten([], [])
     yield assert_equal, back, []

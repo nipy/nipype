@@ -90,7 +90,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                  iterfield=['tcon_file', 'fcon_file', 'param_estimates',
                                             'sigmasquareds', 'corrections',
                                             'dof_file'])
-    
+
     if f_contrasts:
         iterfield = ['in1', 'in2']
     else:
@@ -125,7 +125,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
         (level1design, modelgen, [('fsf_files', 'fsf_file'),
                                 ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
-        
+
         (merge_contrasts, ztopval,[('out', 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
         (merge_contrasts, outputspec,[('out', 'zfiles')]),
