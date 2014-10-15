@@ -46,6 +46,7 @@ def test_Eddy_inputs():
     usedefault=True,
     ),
     out_base=dict(argstr='--out=%s',
+    usedefault=True,
     ),
     output_type=dict(),
     repol=dict(argstr='--repol',
