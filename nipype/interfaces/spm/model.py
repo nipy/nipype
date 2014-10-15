@@ -70,15 +70,19 @@ class Level1DesignInputSpec(SPMCommandInputSpec):
                         Number of basis functions
 """, mandatory=True)
     volterra_expansion_order = traits.Enum(1, 2, field='volt',
-                     desc='Model interactions - yes:1, no:2 (opt)')
+                     desc='Model interactions - yes:1, no:2')
     global_intensity_normalization = traits.Enum('none', 'scaling', field='global',
-                      desc='Global intensity normalization - scaling or none (opt)')
+                      desc='Global intensity normalization - scaling or none')
     mask_image = File(exists=True, field='mask',
-                      desc='Image  for  explicitly  masking the analysis (opt)')
+                      desc='Image  for  explicitly  masking the analysis')
     mask_threshold = traits.Either(traits.Enum('-Inf'), traits.Float(),
-                      desc="Thresholding for the mask (opt, '-Inf')", default='-Inf', usedefault=True)
-    model_serial_correlations = traits.Enum('AR(1)', 'none', field='cvi',
-                      desc='Model serial correlations AR(1) or none (opt)')
+                      desc="Thresholding for the mask",
+                      default='-Inf', usedefault=True)
+    model_serial_correlations = traits.Enum('AR(1)', 'FAST', 'none',
+                                            field='cvi',
+                                            desc=('Model serial correlations '
+                                                  'AR(1), FAST or none. FAST '
+                                                  'is available in SPM12'))
 
 
 class Level1DesignOutputSpec(TraitedSpec):
