@@ -5,7 +5,7 @@ import nipype.interfaces.camino as camino
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.camino2trackvis as cam2trk
 import nipype.algorithms.misc as misc
-import os  
+import os
 from nipype.interfaces.mipav.developer import JistIntensityMp2rageMasking, MedicAlgorithmSPECTRE2010
 
 wf = pe.Workflow("skullstripping")

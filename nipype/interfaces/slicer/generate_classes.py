@@ -269,15 +269,15 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
             else:  # For all other parameter types, they are implicitly only input types
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(
                     values), parse_params(traitsParams)))
-                
+
     if mipav_hacks:
         blacklisted_inputs = ["maxMemoryUsage"]
         inputTraits = [trait for trait in inputTraits if trait.split()[0] not in blacklisted_inputs]
-        
+
         compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")',
                              'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
         inputTraits += compulsory_inputs
-            
+
 
     input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
@@ -306,7 +306,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
     template += "    _redirect_x = True\n"
-    
+
 
     main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 
@@ -334,9 +334,9 @@ def grab_xml(module, launcher, mipav_hacks=False):
                 replace_closing_tag = False
             else:
                 new_xml += line + "\n"
-                
+
         xmlReturnValue = new_xml
-        
+
         #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
         if xmlReturnValue.strip().endswith("XML"):
             xmlReturnValue = xmlReturnValue.strip()[:-3]
