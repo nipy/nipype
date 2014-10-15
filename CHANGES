@@ -1,6 +1,7 @@
 Next Release
 ============
 
+* ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
 * ENH: New dipy interfaces: Denoise, Resample
 * ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format),
        MRIPretess
@@ -28,7 +29,8 @@ Next Release
 * ENH: New color mode for write_graph
 * ENH: You can now force MapNodes to be run serially
 * ENH: Added ANTS based openfmri workflow
-* ENH: MapNode now supports flattening nested lists 
+* ENH: MapNode now supports flattening of nested lists 
+* ENH: Support for headless mode using Xvfb
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 * FIX: FNIRT registration pathway and associated OpenFMRI example script
 * FIX: spm12b compatibility for Model estimate

@@ -36,6 +36,7 @@
    model_specification
    saving_workflows
    spmmcr
+   mipav
 
  
 
