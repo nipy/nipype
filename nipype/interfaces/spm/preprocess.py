@@ -599,9 +599,13 @@ class Segment(SPMCommand):
     >>> seg.run() # doctest: +SKIP
 
     """
-
-    _jobtype = 'spatial'
-    _jobname = 'preproc'
+    
+    if Info.version() and Info.version()['name'] == "SPM12":
+        _jobtype = 'tools'
+        _jobname = 'oldseg'
+    else:
+        _jobtype = 'spatial'
+        _jobname = 'preproc'
 
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
