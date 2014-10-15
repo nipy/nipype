@@ -7,7 +7,7 @@ import nipype.pipeline.engine as pe          # pypeline engine
 from nipype import LooseVersion
 
 
-def create_modelfit_workflow(name='modelfit'):
+def create_modelfit_workflow(name='modelfit', f_contrasts=False):
     """Create an FSL individual modelfitting workflow
 
     Example
@@ -27,19 +27,17 @@ def create_modelfit_workflow(name='modelfit'):
          inputspec.interscan_interval : interscan interval
          inputspec.contrasts : list of contrasts
          inputspec.film_threshold : image threshold for FILM estimation
+         inputspec.model_serial_correlations
+         inputspec.bases
 
     Outputs::
 
-         outputspec.realignment_parameters : realignment parameter files
-         outputspec.smoothed_files : smoothed functional files
-         outputspec.outlier_files : list of outliers
-         outputspec.outlier_stats : statistics of outliers
-         outputspec.outlier_plots : images of outliers
-         outputspec.mask_file : binary mask file in reference image space
-         outputspec.reg_file : registration file that maps reference image to
-                               freesurfer space
-         outputspec.reg_cost : cost of registration (useful for detecting
-                               misalignment)
+         outputspec.copes
+         outputspec.varcopes
+         outputspec.dof_file
+         outputspec.pfiles
+         outputspec.zfiles
+         outputspec.parameter_estimates
     """
 
     version = 0
@@ -70,31 +68,46 @@ def create_modelfit_workflow(name='modelfit'):
                                    name='modelestimate',
                                    iterfield=['design_file', 'in_file'])
     else:
+        if f_contrasts:
+            iterfield = ['design_file', 'in_file', 'tcon_file', 'fcon_file']
+        else:
+            iterfield = ['design_file', 'in_file', 'tcon_file']
         modelestimate = pe.MapNode(interface=fsl.FILMGLS(smooth_autocorr=True,
                                                          mask_size=5),
                                    name='modelestimate',
-                                   iterfield=['design_file', 'in_file',
-                                              'tcon_file'])
+                                   iterfield=iterfield)
 
     if version < 507:
+        if f_contrasts:
+            iterfield = ['tcon_file', 'fcon_file', 'param_estimates',
+                         'sigmasquareds', 'corrections',
+                         'dof_file']
+        else:
+            iterfield = ['tcon_file', 'param_estimates',
+                         'sigmasquareds', 'corrections',
+                         'dof_file']
         conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                                 iterfield=['tcon_file', 'param_estimates',
+                                 iterfield=['tcon_file', 'fcon_file', 'param_estimates',
                                             'sigmasquareds', 'corrections',
                                             'dof_file'])
+
+    if f_contrasts:
+        iterfield = ['in1', 'in2']
+    else:
+        iterfield = ['in1']
+    merge_contrasts = pe.MapNode(interface=util.Merge(2), name='merge_contrasts',
+                                 iterfield=iterfield)
     ztopval = pe.MapNode(interface=fsl.ImageMaths(op_string='-ztop',
                                                   suffix='_pval'),
+                         nested=True,
                          name='ztop',
                          iterfield=['in_file'])
     outputspec = pe.Node(util.IdentityInterface(fields=['copes', 'varcopes',
                                                         'dof_file', 'pfiles',
+                                                        'zfiles',
                                                         'parameter_estimates']),
                          name='outputspec')
 
-    """
-    Utility function
-    """
-
-    pop_lambda = lambda x: x[0]
 
     """
     Setup the connections
@@ -112,25 +125,32 @@ def create_modelfit_workflow(name='modelfit'):
         (level1design, modelgen, [('fsf_files', 'fsf_file'),
                                 ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
+
+        (merge_contrasts, ztopval,[('out', 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
+        (merge_contrasts, outputspec,[('out', 'zfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
         ])
     if version < 507:
         modelfit.connect([
-            (modelgen, conestimate, [('con_file', 'tcon_file')]),
+            (modelgen, conestimate, [('con_file', 'tcon_file'),
+                                     ('fcon_file', 'fcon_file')]),
             (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
                                         ('sigmasquareds', 'sigmasquareds'),
                                         ('corrections', 'corrections'),
                                         ('dof_file', 'dof_file')]),
-            (conestimate, ztopval, [(('zstats', pop_lambda), 'in_file')]),
+            (conestimate, merge_contrasts, [('zstats', 'in1'),
+                                              ('zfstats', 'in2')]),
             (conestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
             ])
     else:
         modelfit.connect([
-            (modelgen, modelestimate, [('con_file', 'tcon_file')]),
-            (modelestimate, ztopval, [(('zstats', pop_lambda), 'in_file')]),
+            (modelgen, modelestimate, [('con_file', 'tcon_file'),
+                                       ('fcon_file', 'fcon_file')]),
+            (modelestimate, merge_contrasts, [('zstats', 'in1'),
+                                              ('zfstats', 'in2')]),
             (modelestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
             ])

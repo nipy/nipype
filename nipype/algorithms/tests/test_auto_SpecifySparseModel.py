@@ -4,7 +4,7 @@ from nipype.algorithms.modelgen import SpecifySparseModel
 
 def test_SpecifySparseModel_inputs():
     input_map = dict(event_files=dict(mandatory=True,
-    xor=['subject_info'],
+    xor=['subject_info', 'event_files'],
     ),
     functional_runs=dict(copyfile=False,
     mandatory=True,
@@ -29,7 +29,7 @@ def test_SpecifySparseModel_inputs():
     stimuli_as_impulses=dict(usedefault=True,
     ),
     subject_info=dict(mandatory=True,
-    xor=['event_files'],
+    xor=['subject_info', 'event_files'],
     ),
     time_acquisition=dict(mandatory=True,
     ),

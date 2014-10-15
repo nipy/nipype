@@ -252,6 +252,8 @@ class SplitInputSpec(BaseInterfaceInputSpec):
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
                   desc='Number of outputs in each split - should add to number of inputs')
+    squeeze = traits.Bool(False, usedefault=True,
+                          desc='unfold one-element splits removing the list')
 
 
 class Split(IOBase):
@@ -290,7 +292,10 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                outputs['out%d' % (i + 1)] = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                if self.inputs.squeeze and len(val) == 1:
+                    val = val[0]
+                outputs['out%d' % (i + 1)] = val
         return outputs
 
 
