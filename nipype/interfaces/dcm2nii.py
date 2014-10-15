@@ -18,7 +18,9 @@ import re
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
     source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1,
-                                  copyfile=False, mandatory=True)
+                                  copyfile=False, mandatory=True, xor=['source_dir'])
+    source_dir = Directory(exists=True, argstr="%s", position=-1, mandatory=True,
+                           xor=['source_names'])
     anonymize = traits.Bool(True, argstr='-a', usedefault=True)
     config_file = File(exists=True, argstr="-b %s", genfile=True)
     collapse_folders = traits.Bool(True, argstr='-c', usedefault=True)
