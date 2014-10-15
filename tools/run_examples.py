@@ -26,7 +26,7 @@ if __name__ == '__main__':
                 'fmri_spm_nested':['level1','l2pipeline'],
                 'fmri_spm_dartel':['level1','l2pipeline'],
                 'fmri_fsl_feeds':['l1pipeline']}
-    plugins = ['Linear', 'MultiProc', 'IPython']
+    plugins = ['IPython']
     for plugin in plugins:
         for example, pipelines in examples.items():
             run_examples(example, pipelines, plugin)

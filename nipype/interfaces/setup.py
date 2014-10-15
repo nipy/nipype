@@ -22,6 +22,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('nipy')
     config.add_subpackage('spm')
     config.add_subpackage('slicer')
+    config.add_subpackage('mipav')
 
     config.add_data_dir('script_templates')
     config.add_data_dir('tests')
