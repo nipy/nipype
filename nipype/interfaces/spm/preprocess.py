@@ -599,7 +599,7 @@ class Segment(SPMCommand):
     >>> seg.run() # doctest: +SKIP
 
     """
-    
+
     if Info.version() and Info.version()['name'] == "SPM12":
         _jobtype = 'tools'
         _jobname = 'oldseg'

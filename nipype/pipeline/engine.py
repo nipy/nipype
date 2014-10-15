@@ -2045,8 +2045,8 @@ class MapNode(Node):
         serial : boolean
             flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
         nested : boolea
-            support for nested lists, if set the input list will be flattened before running, and the 
-            nested list structure of the outputs will be resored 
+            support for nested lists, if set the input list will be flattened before running, and the
+            nested list structure of the outputs will be resored
         See Node docstring for additional keyword arguments.
         """
 
@@ -2150,7 +2150,7 @@ class MapNode(Node):
             cwd = self.output_dir()
         if self.nested:
             nitems = len(flatten(filename_to_list(getattr(self.inputs, self.iterfield[0]))))
-        else:    
+        else:
             nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
@@ -2216,14 +2216,14 @@ class MapNode(Node):
                     defined_vals = [isdefined(val) for val in values]
                     if any(defined_vals) and self._result.outputs:
                         setattr(self._result.outputs, key, values)
-        
+
         if self.nested:
             for key, _ in self.outputs.items():
                 values = getattr(self._result.outputs, key)
                 if isdefined(values):
                     values = unflatten(values, filename_to_list(getattr(self.inputs, self.iterfield[0])))
                 setattr(self._result.outputs, key, values)
-                        
+
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):

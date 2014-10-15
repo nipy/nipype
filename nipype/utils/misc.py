@@ -206,7 +206,7 @@ def str2bool(v):
         return False
     else:
         raise ValueError("%s cannot be converted to bool"%v)
-    
+
 def flatten(S):
     if S == []:
         return S
@@ -217,7 +217,7 @@ def flatten(S):
 def unflatten(in_list, prev_structure):
     if not isinstance(in_list, Iterator):
         in_list = iter(in_list)
-        
+
     if not isinstance(prev_structure, list):
         return in_list.next()
     else:
@@ -225,6 +225,6 @@ def unflatten(in_list, prev_structure):
         for item in prev_structure:
             out.append(unflatten(in_list, item))
         return out
-    
-    
+
+
 
