@@ -688,7 +688,7 @@ class Registration(ANTSCommand):
                     transformCount,
                     'Initial',
                     True)
-                outputs['forward_transforms'].append(forwardFileName)
+                outputs['forward_transforms'].append(os.path.abspath(forwardFileName))
                 outputs['forward_invert_flags'].append(False)
                 outputs['reverse_transforms'].insert(0,
                                                      os.path.abspath(reverseFileName))
