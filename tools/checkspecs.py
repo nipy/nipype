@@ -186,37 +186,11 @@ class InterfaceChecker(object):
         bad_specs = []
         for c in classes:
             __import__(uri)
-            pkg_check = None
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     classinst = sys.modules[uri].__dict__[c]
-                    pkg_name = uri.split('.')[2]
-                    have_pkg = 'have_%s' % pkg_name
-                    no_pkg = 'no_%s' % pkg_name
-                    base_uri = '.'.join(uri.split('.')[:3])
-                    if have_pkg in sys.modules[uri].__dict__:
-                        pkg_check = True
-                        pkg_check_uri = uri
-                        test_func = have_pkg
-                        test_name = '@skipif(%s==False)' % have_pkg
-                    if no_pkg in sys.modules[uri].__dict__:
-                        pkg_check = True
-                        pkg_check_uri = uri
-                        test_func = no_pkg
-                        test_name = '@skipif(%s)' % no_pkg
-                    if have_pkg in sys.modules[base_uri].__dict__:
-                        pkg_check = True
-                        pkg_check_uri = base_uri
-                        test_func = have_pkg
-                        test_name = '@skipif(%s==False)' % have_pkg
-                    if no_pkg in sys.modules[base_uri].__dict__:
-                        pkg_check = True
-                        pkg_check_uri = base_uri
-                        test_func = no_pkg
-                        test_name = '@skipif(%s)' % no_pkg
             except Exception as inst:
-                print inst
                 continue
 
             if not issubclass(classinst, BaseInterface):
@@ -235,11 +209,6 @@ class InterfaceChecker(object):
                            'from nipype.testing import assert_equal',
                            'from %s import %s' % (uri, c),
                            '']
-                    if pkg_check:
-                        cmd.append('from nipype.testing import skipif')
-                        cmd.append('from %s import %s' % (pkg_check_uri,
-                                                          test_func))
-                        cmd.append(test_name)
                     cmd.append('def test_%s_inputs():' % c)
                     input_fields = ''
                     for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
