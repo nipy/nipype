@@ -68,14 +68,21 @@ class P2PDistance(BaseInterface):
 
     def _run_interface(self, runtime):
         try:
-            from enthought.etsconfig.api import ETSConfig
-            ETSConfig.toolkit = 'null'
-        except:
-            raise RuntimeError('P2PDistance could not access ETSConfig')
-        try:
             from tvtk.api import tvtk
         except ImportError:
             raise ImportError('Interface P2PDistance requires tvtk')
+
+        try:
+            from enthought.etsconfig.api import ETSConfig
+        except ImportError:
+            iflogger.warn(('ETS toolkit could not be imported'))
+        else:
+            try:
+                ETSConfig.toolkit = 'null'
+            except:
+                iflogger.warn(('ETS toolkit could not be set to \'null\' '
+                               'for headless operation'))
+                pass
 
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
