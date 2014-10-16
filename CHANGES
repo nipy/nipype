@@ -35,6 +35,7 @@ Next Release
 * ENH: Added ANTS based openfmri workflow
 * ENH: MapNode now supports flattening of nested lists 
 * ENH: Support for headless mode using Xvfb
+* ENH: nipype_display_crash has a debugging mode
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
 * FIX: FNIRT registration pathway and associated OpenFMRI example script
 * FIX: spm12b compatibility for Model estimate

@@ -459,7 +459,7 @@ class Eddy(FSLCommand):
     >>> eddy.cmdline #doctest: +ELLIPSIS
     'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=eddy_corrected'
+--out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
@@ -489,6 +489,8 @@ class Eddy(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
+        if name == 'out_base':
+            return spec.argstr % os.path.abspath(value)
         return super(Eddy, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
