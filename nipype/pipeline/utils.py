@@ -1138,7 +1138,9 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                 pm.json.dump(ps.g, fp, cls=pm.ProvBundle.JSONEncoder)
     return ps.g
 
-def topological_sort(graph, depth_first=True):
+def topological_sort(graph, depth_first=False):
+    """Returns a depth first sorted order if depth_first is True
+    """
     nodesort = nx.topological_sort(graph)
     if not depth_first:
         return nodesort, None

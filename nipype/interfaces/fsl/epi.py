@@ -398,9 +398,9 @@ class EddyInputSpec(FSLCommandInputSpec):
     in_bval = File(exists=True, mandatory=True, argstr='--bvals=%s',
                    desc=('File containing the b-values for all volumes in '
                          '--imain'))
-    out_base = File(argstr='--out=%s',
-                    desc=('basename for output (warped) image'))
-
+    out_base = traits.Unicode('eddy_corrected', argstr='--out=%s',
+                              usedefault=True,
+                              desc=('basename for output (warped) image'))
     session = File(exists=True, argstr='--session=%s',
                    desc=('File containing session indices for all volumes in '
                          '--imain'))
@@ -424,6 +424,8 @@ class EddyInputSpec(FSLCommandInputSpec):
                                'squares)'))
     repol = traits.Bool(False, argstr='--repol',
                         desc='Detect and replace outlier slices')
+    num_threads = traits.Int(1, usedefault=True, nohash=True,
+                             desc="Number of openmp threads to use")
 
 
 class EddyOutputSpec(TraitedSpec):
@@ -457,7 +459,7 @@ class Eddy(FSLCommand):
     >>> eddy.cmdline #doctest: +ELLIPSIS
     'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=.../eddy_corrected'
+--out=eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
@@ -465,18 +467,29 @@ class Eddy(FSLCommand):
     input_spec = EddyInputSpec
     output_spec = EddyOutputSpec
 
+    _num_threads = 1
+
+    def __init__(self, **inputs):
+        super(Eddy, self).__init__(**inputs)
+        self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
+
+        if not isdefined(self.inputs.num_threads):
+            self.inputs.num_threads = self._num_threads
+        else:
+            self._num_threads_update()
+
+    def _num_threads_update(self):
+        self._num_threads = self.inputs.num_threads
+        if not isdefined(self.inputs.num_threads):
+            if 'OMP_NUM_THREADS' in self.inputs.environ:
+                del self.inputs.environ['OMP_NUM_THREADS']
+        else:
+            self.inputs.environ['OMP_NUM_THREADS'] = str(self.inputs.num_threads)
+
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
             return spec.argstr % value.split('_fieldcoef')[0]
         return super(Eddy, self)._format_arg(name, spec, value)
-
-    def _parse_inputs(self, skip=None):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.out_base):
-            self.inputs.out_base = os.path.abspath('eddy_corrected')
-        return super(Eddy, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
