@@ -43,6 +43,12 @@ OpenfMRI
 
 `OpenfMRI <https://openfmri.org/>`_ is a repository for task based fMRI datasets. It uses Nipype for automated analysis of the deposited data.
 
+
+The Stanford CNI MRS Library (SMAL)
+-----------------------------------
+
+`SMAL <http://cni.github.io/MRS/doc/_build/html/index.html>`_ is a library providing algorithms and methods to read and analyze data from Magnetic Resonance Spectroscopy (MRS) experiments. It provides an API for fitting models of the spectral line-widths of several different molecular species, and quantify their relative abundance in human brain tissue. SMAL uses Nipype Workflows and Interfaces.
+
 tract_querier
 -------------
 
