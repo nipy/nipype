@@ -486,8 +486,11 @@ class antsCorticalThickness(ANTSCommand):
             retval = '-t %s' %(val)
             return retval
         if opt == 'segmentation_priors':
-            _, _, ext = split_filename(self.inputs.segmentation_priors[0])
-            retval = "-p BrainSegmentationPrior%02d"
+            priors_directory, _, ext = split_filename(self.inputs.segmentation_priors[0])
+            if priors_directory is not '':
+                retval = "-p %s/BrainSegmentationPrior%%02d" %(priors_directory)
+            else:
+                retval = "-p BrainSegmentationPrior%02d" 
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
@@ -521,16 +524,19 @@ class antsCorticalThickness(ANTSCommand):
                                                      'BrainSegmentation0N4.' +
                                                      self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsCSF'] = os.path.join(os.getcwd(),
-                                                 self.inputs.out_prefix +
-                                                 'BrainSegmentationPosteriors01.' +
-                                                 self.inputs.image_suffix)
+                                                  self.inputs.out_prefix +
+                                                  'BrainSegmentationPosteriors01.' +
+                                                  self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsGM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors02.' +
                                                   self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsWM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors03.' +
                                                    self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsDGM'] = os.path.join(os.getcwd(),
+                                                  self.inputs.out_prefix +
                                                   'BrainSegmentationPosteriors04.' +
                                                    self.inputs.image_suffix)
         outputs['CorticalThickness'] = os.path.join(os.getcwd(),
