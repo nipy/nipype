@@ -459,7 +459,7 @@ class Eddy(FSLCommand):
     >>> eddy.cmdline #doctest: +ELLIPSIS
     'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=eddy_corrected'
+--out=.../eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
