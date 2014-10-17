@@ -1,5 +1,6 @@
-
 #!/usr/bin/env python
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ====================================
 rsfMRI: ANTS, FS, FSL, SPM, aCompCor
@@ -40,15 +41,15 @@ specifically the 2mm versions of:
 
 - `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
-
 """
+
 
 import os
 
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
-from dcmstack.extract import default_extractor
+
 from dicom import read_file
 
 from nipype.interfaces import (spm, fsl, Function, ants, freesurfer)
@@ -83,6 +84,7 @@ imports = ['import os',
 
 
 def get_info(dicom_files):
+    from dcmstack.extract import default_extractor
     """Given a Siemens dicom file return metadata
 
     Returns
@@ -111,6 +113,8 @@ def median(in_files):
 
     out_file: a 3D Nifti file
     """
+    import numpy as np
+    import nibabel as nb
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
@@ -136,6 +140,9 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     highpass_freq: cutoff frequency for the high pass filter (in Hz)
     fs: sampling rate (in Hz)
     """
+    from nipype.utils.filemanip import split_filename, list_to_filename
+    import numpy as np
+    import nibabel as nb
     out_files = []
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
@@ -168,6 +175,7 @@ def motion_regressors(motion_params, order=0, derivatives=1):
 
     motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)
     """
+    import numpy as np
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -204,6 +212,9 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
     -------
     components_file: a text file containing all the regressors
     """
+    import numpy as np
+    import nibabel as nb
+    from scipy.special import legendre
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -245,6 +256,10 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     -------
     components_file: a text file containing the noise components
     """
+    from scipy.linalg.decomp_svd import svd
+    import numpy as np
+    import nibabel as nb
+    import os
     imgseries = nb.load(realigned_file)
     components = None
     for filename in filename_to_list(mask_file):
@@ -261,7 +276,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
         stdX[np.isnan(stdX)] = 1.
         stdX[np.isinf(stdX)] = 1.
         X = (X - np.mean(X, axis=0))/stdX
-        u, _, _ = sp.linalg.svd(X, full_matrices=False)
+        u, _, _ = svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
         else:
@@ -311,6 +326,9 @@ def extract_subrois(timeseries_file, label_file, indices):
         The first four columns are: freesurfer index, i, j, k positions in the
         label file
     """
+    from nipype.utils.filemanip import split_filename
+    import nibabel as nb
+    import os
     img = nb.load(timeseries_file)
     data = img.get_data()
     roiimg = nb.load(label_file)
@@ -331,6 +349,8 @@ def extract_subrois(timeseries_file, label_file, indices):
 def combine_hemi(left, right):
     """Combine left and right hemisphere time series into a single text file
     """
+    import os
+    import numpy as np
     lh_data = nb.load(left).get_data()
     rh_data = nb.load(right).get_data()
 
@@ -367,10 +387,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -437,6 +453,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to take segmentations to functional space
     """
+
     applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
                                                     interp='nearest'),
                        iterfield=['target_file'],
@@ -449,6 +466,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -508,7 +526,6 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -519,10 +536,10 @@ def create_reg_workflow(name='registration'):
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
 
-
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'BSpline'
@@ -534,7 +551,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode,'target_image', warpmean,'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
-
 
     """
     Assign all the output files
@@ -613,6 +629,7 @@ def create_workflow(files,
 
     """Segment and Register
     """
+
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id

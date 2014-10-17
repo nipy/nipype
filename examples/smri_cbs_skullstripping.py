@@ -1,11 +1,16 @@
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
-import nipype.algorithms.misc as misc
-import os
+#!/usr/bin/env python
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+========================================
+sMRI: USing CBS Tools for skullstripping
+========================================
+
+This simple workflow uses SPECTRE2010 algorithm to skullstrip an MP2RAGE anatomical scan.
+"""
+
+
+import nipype.pipeline.engine as pe
 from nipype.interfaces.mipav.developer import JistIntensityMp2rageMasking, MedicAlgorithmSPECTRE2010
 
 wf = pe.Workflow("skullstripping")
