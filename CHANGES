@@ -1,4 +1,4 @@
-Next Release
+Release 0.10.0 (October 10, 2014)
 ============
 
 * ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
