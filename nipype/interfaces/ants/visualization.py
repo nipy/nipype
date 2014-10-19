@@ -93,7 +93,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
           'in the output image. For example, if the user specifies ''5x10'', ' 
           'then 5 rows by 10 columns of slices are rendered. If R < 0 and C > '
           '0 (or vice versa), the negative value is selected'
-          'based on direction.') 
+          'based on direction.')) 
     direction = traits.Int(argstr = '%d', desc = ('Specifies the direction of '
           'the slices. If no direction is specified, the '
           'direction with the coarsest spacing is chosen.')) 
@@ -122,7 +122,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
 class CreateTiledMosaicOutputSpec(TraitedSpec):
     output_image= File(exists=True, desc='image file')
 
-class CreateTiledMosaicOutputSpec(ANTSCommand):
+class CreateTiledMosaic(ANTSCommand):
     """The program CreateTiledMosaic in conjunction with ConvertScalarImageToRGB
     provides useful functionality for common image analysis tasks. The basic 
     usage of CreateTiledMosaic is to tile a 3-D image volume slice-wise into 
@@ -142,7 +142,7 @@ class CreateTiledMosaicOutputSpec(ANTSCommand):
 
     _cmd = 'CreateTiledMosaic'
     input_spec = CreateTiledMosaicInputSpec
-    output_spec = CreateTiledMosaicInputSpecOutputSpec
+    output_spec = CreateTiledMosaicOutputSpec
 
     def _list_outputs(self):
         outputs = self._outputs().get()
