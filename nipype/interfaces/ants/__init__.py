@@ -14,7 +14,7 @@ from .resampling import ApplyTransforms, ApplyTransformsToPoints, WarpImageMulti
 from .segmentation import Atropos, LaplacianThickness, N4BiasFieldCorrection
 
 # Visualization Programs
-from .visualization import ConvertScalarImageToRGB
+from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
 
 # Utility Programs
 from .utils import AverageAffineTransform, AverageImages, MultiplyImages, JacobianDeterminant

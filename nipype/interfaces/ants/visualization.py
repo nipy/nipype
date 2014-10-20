@@ -8,10 +8,11 @@
 
 from ..base import (TraitedSpec, File, traits)
 from .base import ANTSCommand, ANTSCommandInputSpec
-import os
+from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import InputMultiPath
 from nipype.interfaces.traits_extension import isdefined
 import numpy as np
+import os
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     dimension=traits.Enum(3, 2, argstr= '%d', usedefault=True,
@@ -82,19 +83,18 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
             mandatory = True)
     mask_image = File(argstr = '-x %s', exists = True,
             desc = 'Specifies the ROI of the RGB voxels used.')
-    alpha_value = traits.Float(argstr = '-a %f',
+    alpha_value = traits.Float(argstr = '-a %.2f',
             desc = ('If an Rgb image is provided, render the overlay '
             'using the specified alpha parameter.'))
     output_image = traits.Str(argstr = '-o %s',
             desc = 'The output consists of the tiled mosaic image.') 
-    tile_geometry = traits.Str(argstr = '%s',
-            desc = (
+    tile_geometry = traits.Str(argstr = '-t %s',desc = (
           'The tile geometry specifies the number of rows and columns'
-          'in the output image. For example, if the user specifies ''5x10'', ' 
+          'in the output image. For example, if the user specifies "5x10", ' 
           'then 5 rows by 10 columns of slices are rendered. If R < 0 and C > '
           '0 (or vice versa), the negative value is selected'
           'based on direction.')) 
-    direction = traits.Int(argstr = '%d', desc = ('Specifies the direction of '
+    direction = traits.Int(argstr = '-d %d', desc = ('Specifies the direction of '
           'the slices. If no direction is specified, the '
           'direction with the coarsest spacing is chosen.')) 
     pad_or_crop = traits.Str(argstr='-p %s', 
@@ -133,18 +133,30 @@ class CreateTiledMosaic(ANTSCommand):
 
     >>> from nipype.interfaces.ants.visualization import CreateTiledMosaic 
     >>> mosaic_slicer = CreateTiledMosaic()
-    >>> mosaic_slicer.inputs.dimension = 3
     >>> mosaic_slicer.inputs.input_image = 'T1.nii.gz'
-    >>> mosaic_slicer.inputs.colormap = 'jet'
-    >>>  
-
+    >>> mosaic_slicer.inputs.rgb_image = 'rgb.nii.gz'
+    >>> mosaic_slicer.inputs.mask_image = 'mask.nii.gz'
+    >>> mosaic_slicer.inputs.output_image = 'output.png'
+    >>> mosaic_slicer.inputs.alpha_value = 0.5
+    >>> mosaic_slicer.inputs.direction = 2
+    >>> mosaic_slicer.inputs.pad_or_crop = '[ -15x -50 , -15x -30 ,0]'
+    >>> mosaic_slicer.inputs.slices = '[2 ,100 ,160]' 
+    >>> mosaic_slicer.cmdline
+    'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] -r rgb.nii.gz -s [2 ,100 ,160]'
     """
 
     _cmd = 'CreateTiledMosaic'
     input_spec = CreateTiledMosaicInputSpec
     output_spec = CreateTiledMosaicOutputSpec
 
+    def _gen_outfilename(self):
+        output_image = self.inputs.output_image
+        if not isdefined(output_image) and isdefined(self.inputs.input_image):
+            path, _, _ = split_filename(self.inputs.input_image)
+            output_image = os.path.join(path, 'out.png')
+        return output_image
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.join(os.getcwd(), 
-                self.inputs.output_image)
+        output_image = self._gen_outfilename()
+        outputs['output_image'] = output_image
