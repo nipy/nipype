@@ -109,6 +109,7 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
     mpl_backend = node.config["execution"]["matplotlib_backend"]
+    ets_toolkit = node.config["execution"]["ets_toolkit"]
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
@@ -117,6 +118,13 @@ try:
     matplotlib.use('%s')
 except ImportError:
     pass
+
+try:
+    from enthought.etsconfig.api import ETSConfig
+    ETSConfig.toolkit = '%s'
+except:
+    pass
+
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
@@ -131,6 +139,7 @@ try:
     config_dict=%s
     config.update_config(config_dict)
     config.update_matplotlib()
+    config.update_ets()
     logging.update_logging(config)
     traceback=None
     cwd = os.getcwd()
@@ -162,7 +171,8 @@ except Exception, e:
         report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
-    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
+    cmdstr = cmdstr % (mpl_backend, ets_toolkit, pkl_file,
+                       batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
     fp = open(pyscript, 'wt')
     fp.writelines(cmdstr)

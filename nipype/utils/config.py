@@ -38,6 +38,7 @@ job_finished_timeout = 5
 keep_inputs = false
 local_hash_check = true
 matplotlib_backend = Agg
+ets_toolkit = null
 plugin = Linear
 remove_node_directories = false
 remove_unnecessary_outputs = true
@@ -52,6 +53,7 @@ parameterize_dirs = true
 [check]
 interval = 1209600
 """ % (homedir, os.getcwd())
+
 
 class NipypeConfig(object):
     """Base nipype config class
@@ -149,6 +151,17 @@ class NipypeConfig(object):
     def update_matplotlib(self):
         import matplotlib
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
+
+    def update_ets(self):
+        try:
+            from enthought.etsconfig.api import ETSConfig
+            ETSConfig.toolkit = self.get('execution', 'ets_toolkit')
+        except ImportError:
+            warn('ETS toolkit could not be imported')
+            pass
+        except ValueError as e:
+            warn(e.msg)
+            pass
 
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
