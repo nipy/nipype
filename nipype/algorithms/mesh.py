@@ -72,13 +72,6 @@ class P2PDistance(BaseInterface):
         except ImportError:
             raise ImportError('Interface P2PDistance requires tvtk')
 
-        try:
-            from enthought.etsconfig.api import ETSConfig
-            ETSConfig.toolkit = 'null'
-        except ImportError:
-            iflogger.warn(('ETS toolkit could not be imported'))
-            pass
-
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
         vtk1 = r1.output
