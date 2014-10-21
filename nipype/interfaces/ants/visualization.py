@@ -86,8 +86,9 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
     alpha_value = traits.Float(argstr = '-a %.2f',
             desc = ('If an Rgb image is provided, render the overlay '
             'using the specified alpha parameter.'))
-    output_image = traits.Str(argstr = '-o %s',
-            desc = 'The output consists of the tiled mosaic image.') 
+    output_image = traits.Str('output.png', argstr = '-o %s',
+            desc = 'The output consists of the tiled mosaic image.',
+            usedefault = True) 
     tile_geometry = traits.Str(argstr = '-t %s',desc = (
           'The tile geometry specifies the number of rows and columns'
           'in the output image. For example, if the user specifies "5x10", ' 
@@ -148,15 +149,9 @@ class CreateTiledMosaic(ANTSCommand):
     _cmd = 'CreateTiledMosaic'
     input_spec = CreateTiledMosaicInputSpec
     output_spec = CreateTiledMosaicOutputSpec
-
-    def _gen_outfilename(self):
-        output_image = self.inputs.output_image
-        if not isdefined(output_image) and isdefined(self.inputs.input_image):
-            path, _, _ = split_filename(self.inputs.input_image)
-            output_image = os.path.join(path, 'out.png')
-        return output_image
-
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
-        output_image = self._gen_outfilename()
-        outputs['output_image'] = output_image
+        outputs['output_image'] = os.path.join(os.getcwd(), 
+                self.inputs.output_image)
+        return outputs
