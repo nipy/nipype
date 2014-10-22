@@ -647,8 +647,9 @@ class Registration(ANTSCommand):
             if not self._quantilesDone:
                 return self._formatWinsorizeImageIntensities()
             return ''  # Must return something for argstr!
-        elif opt == 'collapse_linear_transforms_to_fixed_image_header':
-            return '' # Command no longer exist, so return empty string for backwards compatibility
+        # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
+        #elif opt == 'collapse_linear_transforms_to_fixed_image_header':
+        #    return self._formatCollapseLinearTransformsToFixedImageHeader()
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
@@ -684,84 +685,6 @@ class Registration(ANTSCommand):
         if isdefined(self.inputs.invert_initial_moving_transform):
             invert_initial_moving_transform = self.inputs.invert_initial_moving_transform
 
-        if not self.inputs.collapse_output_transforms:
-            transformCount = 0
-            if isdefined(self.inputs.initial_moving_transform):
-                outputs['forward_transforms'].append(
-                    self.inputs.initial_moving_transform)
-                outputs['forward_invert_flags'].append(
-                    invert_initial_moving_transform)
-                outputs['reverse_transforms'].insert(
-                    0, self.inputs.initial_moving_transform)
-                outputs['reverse_invert_flags'].insert(
-                    0, not invert_initial_moving_transform)  # Prepend
-                transformCount += 1
-            elif isdefined(self.inputs.initial_moving_transform_com):
-                forwardFileName, forwardInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix,
-                    transformCount,
-                    'Initial')
-                reverseFileName, reverseInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix,
-                    transformCount,
-                    'Initial',
-                    True)
-                outputs['forward_transforms'].append(os.path.abspath(forwardFileName))
-                outputs['forward_invert_flags'].append(False)
-                outputs['reverse_transforms'].insert(0,
-                                                     os.path.abspath(reverseFileName))
-                outputs['reverse_invert_flags'].insert(0, True)
-                transformCount += 1
-
-            for count in range(len(self.inputs.transforms)):
-                forwardFileName, forwardInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix, transformCount,
-                    self.inputs.transforms[count])
-                reverseFileName, reverseInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix, transformCount,
-                    self.inputs.transforms[count], True)
-                outputs['forward_transforms'].append(
-                    os.path.abspath(forwardFileName))
-                outputs['forward_invert_flags'].append(forwardInverseMode)
-                outputs['reverse_transforms'].insert(
-                    0, os.path.abspath(reverseFileName))
-                outputs[
-                    'reverse_invert_flags'].insert(0, reverseInverseMode)
-                transformCount += 1
-        elif not self.inputs.write_composite_transform:
-            transformCount = 0
-            isLinear = [any(self._linear_transform_names == t)
-                        for t in self.inputs.transforms]
-            collapse_list = []
-
-            if isdefined(self.inputs.initial_moving_transform) or \
-               isdefined(self.inputs.initial_moving_transform_com):
-                isLinear.insert(0, True)
-
-            # Only files returned by collapse_output_transforms
-            if any(isLinear):
-                collapse_list.append('GenericAffine')
-            if not all(isLinear):
-                collapse_list.append('SyN')
-
-            for transform in collapse_list:
-                forwardFileName, forwardInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix,
-                    transformCount,
-                    transform,
-                    inverse=False)
-                reverseFileName, reverseInverseMode = self._outputFileNames(
-                    self.inputs.output_transform_prefix,
-                    transformCount,
-                    transform,
-                    inverse=True)
-                outputs['forward_transforms'].append(os.path.abspath(
-                    forwardFileName))
-                outputs['forward_invert_flags'].append(forwardInverseMode)
-                outputs['reverse_transforms'].append(
-                    os.path.abspath(reverseFileName))
-                outputs['reverse_invert_flags'].append(reverseInverseMode)
-                transformCount += 1
         if self.inputs.write_composite_transform:
             fileName = self.inputs.output_transform_prefix + 'Composite.h5'
             outputs['composite_transform'] = [os.path.abspath(fileName)]
@@ -769,6 +692,86 @@ class Registration(ANTSCommand):
                 'InverseComposite.h5'
             outputs['inverse_composite_transform'] = [
                 os.path.abspath(fileName)]
+        else: # If composite transforms are written, then individuals are not written (as of 2014-10-26
+            if not self.inputs.collapse_output_transforms:
+                transformCount = 0
+                if isdefined(self.inputs.initial_moving_transform):
+                    outputs['forward_transforms'].append(
+                        self.inputs.initial_moving_transform)
+                    outputs['forward_invert_flags'].append(
+                        invert_initial_moving_transform)
+                    outputs['reverse_transforms'].insert(
+                        0, self.inputs.initial_moving_transform)
+                    outputs['reverse_invert_flags'].insert(
+                        0, not invert_initial_moving_transform)  # Prepend
+                    transformCount += 1
+                elif isdefined(self.inputs.initial_moving_transform_com):
+                    forwardFileName, forwardInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix,
+                        transformCount,
+                        'Initial')
+                    reverseFileName, reverseInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix,
+                        transformCount,
+                        'Initial',
+                        True)
+                    outputs['forward_transforms'].append(os.path.abspath(forwardFileName))
+                    outputs['forward_invert_flags'].append(False)
+                    outputs['reverse_transforms'].insert(0,
+                                                         os.path.abspath(reverseFileName))
+                    outputs['reverse_invert_flags'].insert(0, True)
+                    transformCount += 1
+
+                for count in range(len(self.inputs.transforms)):
+                    forwardFileName, forwardInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix, transformCount,
+                        self.inputs.transforms[count])
+                    reverseFileName, reverseInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix, transformCount,
+                        self.inputs.transforms[count], True)
+                    outputs['forward_transforms'].append(
+                        os.path.abspath(forwardFileName))
+                    outputs['forward_invert_flags'].append(forwardInverseMode)
+                    outputs['reverse_transforms'].insert(
+                        0, os.path.abspath(reverseFileName))
+                    outputs[
+                        'reverse_invert_flags'].insert(0, reverseInverseMode)
+                    transformCount += 1
+            else:
+                transformCount = 0
+                isLinear = [any(self._linear_transform_names == t)
+                            for t in self.inputs.transforms]
+                collapse_list = []
+
+                if isdefined(self.inputs.initial_moving_transform) or \
+                   isdefined(self.inputs.initial_moving_transform_com):
+                    isLinear.insert(0, True)
+
+                # Only files returned by collapse_output_transforms
+                if any(isLinear):
+                    collapse_list.append('GenericAffine')
+                if not all(isLinear):
+                    collapse_list.append('SyN')
+
+                for transform in collapse_list:
+                    forwardFileName, forwardInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix,
+                        transformCount,
+                        transform,
+                        inverse=False)
+                    reverseFileName, reverseInverseMode = self._outputFileNames(
+                        self.inputs.output_transform_prefix,
+                        transformCount,
+                        transform,
+                        inverse=True)
+                    outputs['forward_transforms'].append(os.path.abspath(
+                        forwardFileName))
+                    outputs['forward_invert_flags'].append(forwardInverseMode)
+                    outputs['reverse_transforms'].append(
+                        os.path.abspath(reverseFileName))
+                    outputs['reverse_invert_flags'].append(reverseInverseMode)
+                    transformCount += 1
+
         out_filename = self._get_outputfilenames(inverse=False)
         inv_out_filename = self._get_outputfilenames(inverse=True)
         if out_filename:
