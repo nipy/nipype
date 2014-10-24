@@ -242,7 +242,9 @@ class SpatialFilter(MathsCommand):
 
 class UnaryMathsInput(MathsInput):
 
-    operation = traits.Enum("exp", "log", "sin", "cos", "sqr", "sqrt", "recip", "abs", "bin", "index",
+    operation = traits.Enum("exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "sqr", "sqrt",
+                            "recip", "abs", "bin", "binv", "fillh", "fillh26", "index", "edge", "nan",
+                            "nanm", "rand", "randn", "range",
                             argstr="-%s", position=4, mandatory=True,
                             desc="operation to perform")
 

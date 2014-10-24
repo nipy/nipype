@@ -63,6 +63,8 @@ class IPythonPlugin(DistributedPluginBase):
         except Exception, e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
+            if isinstance(e, IOError):
+                raise Exception("ipcluster/ipcontroller has not been started")
             if isinstance(e, ValueError):
                 raise Exception("Ipython kernel not installed")
             raise e

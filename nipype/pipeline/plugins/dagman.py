@@ -27,16 +27,16 @@ class CondorDAGManPlugin(GraphPluginBase):
                  submit file
     - override_specs : additional submit specs that are appended to any job's
                  submit file
-    - wrapper_cmd : path to an exectuable that will be started instead of a node
+    - wrapper_cmd : path to an executable that will be started instead of a node
                  script. This is useful for wrapper script that execute certain
                  functionality prior or after a node runs. If this option is
                  given the wrapper command is called with the respective Python
-                 exectuable and the path to the node script as final arguments
+                 executable and the path to the node script as final arguments
     - wrapper_args : optional additional arguments to a wrapper command
     - dagman_args : arguments to be prepended to the arguments of the
                     condor_submit_dag call
     - block : if True the plugin call will block until Condor has finished
-                 prcoessing the entire workflow (default: False)
+                 processing the entire workflow (default: False)
     """
 
     default_submit_template = """

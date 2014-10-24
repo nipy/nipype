@@ -6,11 +6,12 @@ import nipype.algorithms.misc as misc
 import nipype.pipeline.engine as pe  # pypeline engine
 from nipype.interfaces.utility import Function
 from nipype.utils.misc import package_check
-import warnings
+
+have_cmp = True
 try:
     package_check('cmp')
 except Exception, e:
-    warnings.warn('cmp not installed')
+    have_cmp = False
 else:
     import cmp
 

@@ -1,4 +1,4 @@
-"""Provides interfaces to various commands provided by freeusrfer
+"""Provides interfaces to various commands provided by FreeSurfer
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -22,6 +22,8 @@ from nipype.interfaces.base import (TraitedSpec,
                                    )
 import nibabel as nb
 from nipype.interfaces.traits_extension import isdefined, Undefined
+import imghdr
+from nipype.external import six
 
 have_dcmstack = True
 try:
@@ -83,6 +85,9 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                   "any default exclude filters")
     include_regexes = traits.List(desc="Meta data to include, overriding any "
                                   "exclude filters")
+    force_read = traits.Bool(True, usedefault=True,
+                             desc=('Force reading files without DICM marker'))
+
 
 class DcmStackOutputSpec(TraitedSpec):
     out_file = File(exists=True)
@@ -105,7 +110,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, str):
+        if isinstance(trait_input, six.string_types):
             if path.isdir(trait_input):
                 return glob(path.join(trait_input, '*.dcm'))
             else:
@@ -125,8 +130,9 @@ class DcmStack(NiftiGeneratorBase):
                                                      include_regexes)
         stack = dcmstack.DicomStack(meta_filter=meta_filter)
         for src_path in src_paths:
-            src_dcm = dicom.read_file(src_path, force=True)
-            stack.add_dcm(src_dcm)
+            if not imghdr.what(src_path)=="gif":
+                src_dcm = dicom.read_file(src_path, force=self.inputs.force_read)
+                stack.add_dcm(src_dcm)
         nii = stack.to_nifti(embed_meta=True)
         nw = NiftiWrapper(nii)
         self.out_path = \
@@ -329,7 +335,7 @@ class MergeNifti(NiftiGeneratorBase):
               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, str):
+            if isinstance(sort_order, six.string_types):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:

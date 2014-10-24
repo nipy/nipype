@@ -29,8 +29,10 @@ from glob import glob
 import os
 import warnings
 
-from ...utils.filemanip import fname_presuffix
-from ..base import (CommandLine, traits, CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+from ..base import (traits, isdefined,
+                    CommandLine, CommandLineInputSpec, TraitedSpec,
+                    File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -239,9 +241,8 @@ class FSLCommand(CommandLine):
                                 use_ext=False, newpath=cwd)
         return fname
 
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         return value + Info.output_type_to_ext(self.inputs.output_type)
-
 
 
 def check_fsl():

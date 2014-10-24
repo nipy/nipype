@@ -16,10 +16,11 @@ from ...utils.misc import package_check
 from ...utils.filemanip import split_filename, fname_presuffix
 
 
+have_nipy = True
 try:
     package_check('nipy')
 except Exception, e:
-    warnings.warn('nipy not installed')
+    have_nipy = False
 else:
     import nipy
     from nipy import save_image, load_image

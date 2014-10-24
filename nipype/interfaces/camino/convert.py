@@ -7,10 +7,12 @@
 
 """
 import os
+import glob
 
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
                                     TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec, isdefined)
+                                    OutputMultiPath, StdOutCommandLineInputSpec,
+                                    isdefined)
 from nipype.utils.filemanip import split_filename
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
@@ -226,16 +228,21 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     outputtracts = traits.Bool(argstr='-outputtracts', desc="Output streamlines in raw binary format.")
 
     outputroot = File(exists=False, argstr='-outputroot %s',
-                    desc='root directory for output')
+                    desc='Prepended onto all output file names.')
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
-    outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)")
-    outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)")
-    outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)")
-    outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile")
+    outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)",
+                           requires=['outputroot','seedfile'])
+    outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)",
+                           requires=['outputroot','seedfile'])
+    outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)",
+                            requires=['outputroot','seedfile'])
+    outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile",
+                            requires=['outputroot','targetfile','seedfile'])
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
     proc = File(exists=True, desc='Processed Streamlines')
+    outputroot_files = OutputMultiPath(File(exists=True))
 
 class ProcStreamlines(StdOutCommandLine):
     """
@@ -256,9 +263,33 @@ class ProcStreamlines(StdOutCommandLine):
     input_spec=ProcStreamlinesInputSpec
     output_spec=ProcStreamlinesOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'outputroot':
+            return spec.argstr % self._get_actual_outputroot(value)
+        return super(ProcStreamlines, self)._format_arg(name, spec, value)
+
+    def _run_interface(self, runtime):
+        outputroot = self.inputs.outputroot
+        if isdefined(outputroot):
+            actual_outputroot = self._get_actual_outputroot(outputroot)
+            base, filename, ext = split_filename(actual_outputroot)
+            if not os.path.exists(base):
+                os.makedirs(base)
+            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            self.outputroot_files = glob.glob(os.path.join(os.getcwd(),actual_outputroot+'*'))
+            return new_runtime
+        else:
+            new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
+            return new_runtime
+
+    def _get_actual_outputroot(self, outputroot):
+        actual_outputroot = os.path.join('procstream_outfiles', outputroot)
+        return actual_outputroot
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['proc'] = os.path.abspath(self._gen_outfilename())
+        outputs['outputroot_files'] = self.outputroot_files
         return outputs
 
     def _gen_outfilename(self):
@@ -563,7 +594,7 @@ class AnalyzeHeader(StdOutCommandLine):
 
     >>> import nipype.interfaces.camino as cmon
     >>> hdr = cmon.AnalyzeHeader()
-    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bfloat'
+    >>> hdr.inputs.in_file = 'tensor_fitted_data.Bdouble'
     >>> hdr.inputs.scheme_file = 'A.scheme'
     >>> hdr.inputs.data_dims = [256,256,256]
     >>> hdr.inputs.voxel_dims = [1,1,1]
@@ -581,3 +612,54 @@ class AnalyzeHeader(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name , _ = split_filename(self.inputs.in_file)
         return name + ".hdr"
+
+class ShredderInputSpec(StdOutCommandLineInputSpec):
+    in_file = File(exists=True, argstr='< %s', mandatory=True, position=-2, desc='raw binary data file')
+
+    offset = traits.Int(argstr='%d', units='NA',
+        desc='initial offset of offset bytes', position=1)
+
+    chunksize = traits.Int(argstr='%d', units='NA',
+        desc='reads and outputs a chunk of chunksize bytes', position=2)
+
+    space = traits.Int(argstr='%d', units='NA',
+        desc='skips space bytes', position=3)
+
+class ShredderOutputSpec(TraitedSpec):
+    shredded = File(exists=True, desc='Shredded binary data file')
+
+class Shredder(StdOutCommandLine):
+    """
+    Extracts periodic chunks from a data stream.
+
+    Shredder makes an initial offset of offset bytes. It then reads and outputs
+    chunksize bytes, skips space bytes, and repeats until there is no more input.
+
+    If  the  chunksize  is  negative, chunks of size |chunksize| are read and the
+    byte ordering of each chunk is reversed. The whole chunk will be reversed, so
+    the chunk must be the same size as the data type, otherwise the order of the
+    values in the chunk, as well as their endianness, will be reversed.
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.camino as cam
+    >>> shred = cam.Shredder()
+    >>> shred.inputs.in_file = 'SubjectA.Bfloat'
+    >>> shred.inputs.offset = 0
+    >>> shred.inputs.chunksize = 1
+    >>> shred.inputs.space = 2
+    >>> shred.run()                  # doctest: +SKIP
+    """
+    _cmd = 'shredder'
+    input_spec=ShredderInputSpec
+    output_spec=ShredderOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['shredded_file'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_outfilename(self):
+        _, name , _ = split_filename(self.inputs.in_file)
+        return name + "_shredded"
