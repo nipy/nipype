@@ -2,8 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.interfaces.spm.base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
 from nipype.interfaces.matlab import MatlabCommand
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, 
-                                    BaseInterfaceInputSpec, isdefined, 
+from nipype.interfaces.base import (TraitedSpec, BaseInterface,
+                                    BaseInterfaceInputSpec, isdefined,
                                     OutputMultiPath, InputMultiPath)
 from nipype.interfaces.base import File, traits
 from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_list,list_to_filename
@@ -121,48 +121,63 @@ class ApplyTransformInputSpec(SPMCommandInputSpec):
                    desc='file to apply transform to, (only updates header)')
     mat = File( exists = True, mandatory = True,
                 desc='file holding transform to apply')
-
+    out_file = File(desc="output file name for transformed data",
+                    genfile=True)
 
 class ApplyTransformOutputSpec(TraitedSpec):
-    out_file = File(exists = True, desc = 'File with updated header')
+    out_file = File(exists = True, desc = 'Transformed image file')
 
 
 class ApplyTransform(SPMCommand):
-    """ Uses spm to apply transform stored in a .mat file to given file
+    """ Uses SPM to apply transform stored in a .mat file to given file
 
     Examples
     --------
 
     >>> import nipype.interfaces.spm.utils as spmu
-    >>> applymat = spmu.ApplyTransform(matlab_cmd='matlab-spm8')
+    >>> applymat = spmu.ApplyTransform()
     >>> applymat.inputs.in_file = 'functional.nii'
     >>> applymat.inputs.mat = 'func_to_struct.mat'
     >>> applymat.run() # doctest: +SKIP
 
-    .. warning::
-
-       CHANGES YOUR INPUT FILE (applies transform by updating the header)
-       except when used with nipype caching or workflow.
     """
     input_spec = ApplyTransformInputSpec
     output_spec = ApplyTransformOutputSpec
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
+        outputs = self._list_outputs()
+        self.inputs.out_file = outputs['out_file']
         script = """
         infile = '%s';
+        outfile = '%s'
         transform = load('%s');
-        M  = inv(transform.M);
-        img_space = spm_get_space(infile);
-        spm_get_space(infile, M * img_space);
+
+        V = spm_vol(infile);
+        X = spm_read_vols(V);
+        [p n e v] = spm_fileparts(V.fname);
+        V.mat = transform.M * V.mat;
+        V.fname = fullfile(outfile);
+        spm_write_vol(V,X);
+
         """%(self.inputs.in_file,
+             self.inputs.out_file,
              self.inputs.mat)
+                #img_space = spm_get_space(infile);
+        #spm_get_space(infile, transform.M * img_space);
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.in_file)
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        return name + '_trans.nii'
 
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File( exists = True, mandatory=True,
@@ -228,7 +243,7 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         desc='SN SPM deformation file',
         xor=['deformation'])
     interpolation = traits.Range(
-        low=0, hign=7, field='interp',
+        low=0, high=7, field='interp',
         desc='degree of b-spline used for interpolation')
 
     bounding_box = traits.List(
@@ -288,4 +303,152 @@ class ApplyInverseDeformation(SPMCommand):
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             outputs['out_files'].append(os.path.realpath('w%s' % fname))
+        return outputs
+
+
+class ResliceToReferenceInput(SPMCommandInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True), mandatory=True, field='fnames',
+        desc='Files on which deformation is applied')
+    target = File(
+        exists=True,
+        field='comp{1}.id.space',
+        desc='File defining target space')
+    interpolation = traits.Range(
+        low=0, high=7, field='interp',
+        desc='degree of b-spline used for interpolation')
+
+    bounding_box = traits.List(
+        traits.Float(),
+        field='comp{2}.idbbvox.bb',
+        minlen=6, maxlen=6,
+        desc='6-element list (opt)')
+    voxel_sizes = traits.List(
+        traits.Float(),
+        field='comp{2}.idbbvox.vox',
+        minlen=3, maxlen=3,
+        desc='3-element list (opt)')
+
+
+class ResliceToReferenceOutput(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc='Transformed files')
+
+
+class ResliceToReference(SPMCommand):
+    """ Uses spm to reslice a volume to a target image space or to a provided voxel size and bounding box
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> r2ref = spmu.ResliceToReference()
+    >>> r2ref.inputs.in_files = 'functional.nii'
+    >>> r2ref.inputs.target = 'structural.nii'
+    >>> r2ref.run() # doctest: +SKIP
+    """
+
+    input_spec = ResliceToReferenceInput
+    output_spec = ResliceToReferenceOutput
+
+    _jobtype = 'util'
+    _jobname = 'defs'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt == 'target':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'deformation':
+            return np.array([list_to_filename(val)], dtype=object)
+        if opt == 'deformation_field':
+            return np.array([list_to_filename(val)], dtype=object)
+        return val
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_files'] = []
+        for filename in self.inputs.in_files:
+            _, fname = os.path.split(filename)
+            outputs['out_files'].append(os.path.realpath('w%s' % fname))
+        return outputs
+
+class DicomImportInputSpec(SPMCommandInputSpec):
+    in_files = InputMultiPath(
+        File(exists=True),
+        mandatory=True,
+        field='data',
+        desc='dicom files to be converted')
+    output_dir_struct = traits.Enum(
+        'flat', 'series', 'patname', 'patid_date', 'patid', 'date_time',
+        field='root',
+        usedefault=True,
+        desc='directory structure for the output.')
+    output_dir = traits.Str('./converted_dicom',
+        field='outdir',
+        usedefault=True,
+        desc='output directory.')
+    format = traits.Enum(
+        'nii', 'img',
+        field='convopts.format',
+        usedefault=True,
+        desc='output format.')
+    icedims = traits.Bool(False,
+        field='convopts.icedims',
+        usedefault=True,
+        desc='If image sorting fails, one can try using the additional\
+              SIEMENS ICEDims information to create unique filenames.\
+              Use this only if there would be multiple volumes with\
+              exactly the same file names.')
+
+class DicomImportOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc='converted files')
+
+class DicomImport(SPMCommand):
+    """ Uses spm to convert DICOM files to nii or img+hdr.
+
+    Examples
+    --------
+
+    >>> import nipype.interfaces.spm.utils as spmu
+    >>> di = spmu.DicomImport()
+    >>> di.inputs.in_files = ['functional_1.dcm', 'functional_2.dcm']
+    >>> di.run() # doctest: +SKIP
+    """
+
+    input_spec = DicomImportInputSpec
+    output_spec = DicomImportOutputSpec
+
+    _jobtype = 'util'
+    _jobname = 'dicom'
+
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return np.array(val, dtype=object)
+        if opt == 'output_dir':
+            return np.array([val], dtype=object)
+        if opt == 'output_dir':
+            return os.path.abspath(val)
+        if opt == 'icedims':
+            if val:
+                return 1
+            return 0
+        return super(DicomImport, self)._format_arg(opt, spec, val)
+
+    def _run_interface(self, runtime):
+        od = os.path.abspath(self.inputs.output_dir)
+        if not os.path.isdir(od):
+            os.mkdir(od)
+        return super(DicomImport, self)._run_interface(runtime)
+
+    def _list_outputs(self):
+        from glob import glob
+        outputs = self._outputs().get()
+        od = os.path.abspath(self.inputs.output_dir)
+        outputs['out_files'] = glob(os.path.join(od, '*'))
         return outputs

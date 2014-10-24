@@ -36,7 +36,7 @@ display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
 keep_inputs = false
-local_hash_check = false
+local_hash_check = true
 matplotlib_backend = Agg
 plugin = Linear
 remove_node_directories = false
@@ -46,6 +46,8 @@ stop_on_first_crash = false
 stop_on_first_rerun = false
 use_relative_paths = false
 stop_on_unknown_version = false
+write_provenance = false
+parameterize_dirs = true
 
 [check]
 interval = 1209600
@@ -147,3 +149,8 @@ class NipypeConfig(object):
     def update_matplotlib(self):
         import matplotlib
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
+
+    def enable_provenance(self):
+        self._config.set('execution', 'write_provenance', 'true')
+        self._config.set('execution', 'hash_method', 'content')
+

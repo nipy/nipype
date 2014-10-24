@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+"""Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+   >>> os.chdir(datadir)
+"""
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
@@ -10,11 +16,13 @@ import warnings
 from ... import logging
 iflogger = logging.getLogger('interface')
 
+have_dipy = True
 try:
-    package_check('dipy')
-    from dipy.tracking.utils import density_map
+    package_check('dipy', version='0.6.0')
 except Exception, e:
-    warnings.warn('dipy not installed')
+    have_dipy = False
+else:
+    from dipy.tracking.utils import density_map
 
 
 class TrackDensityMapInputSpec(TraitedSpec):

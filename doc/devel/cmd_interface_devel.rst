@@ -14,27 +14,35 @@ inputs.
 
 Defining inputs and outputs
 ===========================
-In Nipype we have decided to use Enthought Traits to define inputs and outputs of the interfaces. 
-This allows to introduce easy type checking. Inputs and outputs are grouped into separate classes 
-(usually suffixed with InputSpec and OutputSpec). For example:
+
+In Nipype we use Enthought Traits to define inputs and outputs of the
+interfaces. This allows to introduce easy type checking. Inputs and outputs are
+grouped into separate classes (usually suffixed with InputSpec and OutputSpec).
+For example:
 
 .. testcode::
 	
 	class ExampleInputSpec(TraitedSpec):
-		input_volume = File(desc = "Input volume", exists = True, mandatory = True)
+		input_volume = File(desc = "Input volume", exists = True,
+		                    mandatory = True)
 		parameter = traits.Int(desc = "some parameter")
 		
 	class ExampleOutputSpec(TraitedSpec):
 		output_volume = File(desc = "Output volume", exists = True)
 		
-For the Traits (and Nipype) to work correctly output and input spec has to be inherited from TraitedSpec 
-(however, this does not have to be direct inheritance). 
+For the Traits (and Nipype) to work correctly output and input spec has to be
+inherited from TraitedSpec (however, this does not have to be direct
+inheritance).
 
-Traits (File, Int etc.) have different parameters (called metadata). In the above example we have used the desc metadata 
-which holds human readable description of the input. mandatory flag forces Nipype to throw an exception if the input was not set.
-exists is a special flag that works only for File traits and checks if the provided file exists.
+Traits (File, Int etc.) have different parameters (called metadata). In the
+above example we have used the ``desc`` metadata which holds human readable
+description of the input. The ``mandatory`` flag forces Nipype to throw an
+exception if the input was not set. ``exists`` is a special flag that works only
+for ``File traits`` and checks if the provided file exists. More details can be
+found at `interface_specs`_.
 
-The input and output specifications have to be connected to the our example interface class:
+The input and output specifications have to be connected to the our example
+interface class:
 
 .. testcode::
 
@@ -42,26 +50,37 @@ The input and output specifications have to be connected to the our example inte
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
 		
-Where the names of the classes grouping inputs and outputs were arbitrary the names of the fields within 
-the interface they are assigned are not (it always has to be input_spec and output_spec). Of course this interface does not do much 
-because we have not specified how to process the inputs and create the outputs. This can be done in many ways.
+Where the names of the classes grouping inputs and outputs were arbitrary the
+names of the fields within the interface they are assigned are not (it always
+has to be input_spec and output_spec). Of course this interface does not do much
+because we have not specified how to process the inputs and create the outputs.
+This can be done in many ways.
  
 Command line executable
 =======================
-As with all interfaces command line wrappers need to have inputs defined. Command line input spec has to inherit from 
-CommandLineInputSpec which adds two extra inputs: environ (a dictionary of environmental variables), and args (a string defining extra flags).
-In addition input spec can define the relation between the inputs and the generated command line. To achieve this we have added two metadata: argstr 
-(string defining how the argument should be formated) and position (number defining the order of the arguments). For example
+
+As with all interfaces command line wrappers need to have inputs defined.
+Command line input spec has to inherit from CommandLineInputSpec which adds two
+extra inputs: environ (a dictionary of environmental variables), and args (a
+string defining extra flags). In addition input spec can define the relation
+between the inputs and the generated command line. To achieve this we have
+added two metadata: ``argstr`` (string defining how the argument should be
+formated) and ``position`` (number defining the order of the arguments).
+For example
  
 .. testcode::
 
 	class ExampleInputSpec(CommandLineSpec):
-		input_volume = File(desc = "Input volume", exists = True, mandatory = True, position = 0, argstr="%s")
+		input_volume = File(desc = "Input volume", exists = True,
+		                    mandatory = True, position = 0, argstr="%s")
 		parameter = traits.Int(desc = "some parameter", argstr = "--param %d")
 		
-As you probably noticed the argstr is a printf type string with formatting symbols. For an input defined in InputSpec to be included into the executed commandline argstr has to be included. Additionally inside the main
-interface class you need to specify the name of the executable by assigning it to the _cmd field. Also the main interface 
-class needs to inherit from CommandLine:
+As you probably noticed the ``argstr`` is a printf type string with formatting
+symbols. For an input defined in InputSpec to be included into the executed
+commandline ``argstr`` has to be included. Additionally inside the main
+interface class you need to specify the name of the executable by assigning it
+to the ``_cmd`` field. Also the main interface class needs to inherit from
+`CommandLine`_:
 
 .. testcode::
 
@@ -70,10 +89,12 @@ class needs to inherit from CommandLine:
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
 		
-There is one more thing we need to take care of. When the executable finishes processing it will presumably create some 
-output files. We need to know which files to look for, check if they exist and expose them to whatever node would like to use them.
-This is done by implementing _list_outputs() method in the main interface class. Basically what it does is assigning the expected output files to the fields of our
-output spec:
+There is one more thing we need to take care of. When the executable finishes
+processing it will presumably create some output files. We need to know which
+files to look for, check if they exist and expose them to whatever node would
+like to use them. This is done by implementing `_list_outputs`_ method in the
+main interface class. Basically what it does is assigning the expected output
+files to the fields of our output spec:
 
 .. testcode::
 
@@ -82,17 +103,23 @@ output spec:
 		outputs['output_volume'] = os.path.abspath('name_of_the_file_this_cmd_made.nii')
 		return outputs
 		
-Sometimes the inputs need extra parsing before turning into command line parameters. For example imagine a parameter selecting between three methods: 
-"old", "standard" and "new". Imagine also that the command line accept this as a parameter "--method=" accepting 0, 1 or 2. Since we
-are aiming to make nipype scripts as informative as possible it's better to define the inputs as following:
+Sometimes the inputs need extra parsing before turning into command line
+parameters. For example imagine a parameter selecting between three methods:
+"old", "standard" and "new". Imagine also that the command line accept this as
+a parameter "--method=" accepting 0, 1 or 2. Since we are aiming to make nipype
+scripts as informative as possible it's better to define the inputs as
+following:
 
 .. testcode::
 
 	class ExampleInputSpec(CommandLineSpec):
-		method = traits.Enum("old", "standard", "new", desc = "method", argstr="--method=%d")
+		method = traits.Enum("old", "standard", "new", desc = "method",
+		                     argstr="--method=%d")
 
-Here we've used the Enum trait which restricts input a few fixed options. If we would leave it as it is it would not work since the argstr is expecting
-numbers. We need to do additional parsing by overloading the following method in the main interface class:
+Here we've used the Enum trait which restricts input a few fixed options. If we
+would leave it as it is it would not work since the argstr is expecting
+numbers. We need to do additional parsing by overloading the following method
+in the main interface class:
 
 .. testcode::
 	
@@ -114,7 +141,7 @@ Here is a minimalistic interface for the gzip command:
 	import os
 	
 	class GZipInputSpec(CommandLineInputSpec):
-	    input_file = File(desc = "File", exists = True, mandatory = True, argstr="%s")
+	    input_file = File(desc="File", exists=True, mandatory=True, argstr="%s")
 	        
 	class GZipOutputSpec(TraitedSpec):
 	    output_file = File(desc = "Zip file", exists = True)
@@ -135,3 +162,58 @@ Here is a minimalistic interface for the gzip command:
 	    print zipper.cmdline
 	    zipper.run()
 
+Creating outputs on the fly
+===========================
+
+In many cases, command line executables will require specifying output file
+names as arguments on the command line. We have simplified this procedure with
+three additional metadata terms: ``name_source``, ``name_template``,
+``keep_extension``.
+
+For example in the :ref:`InvWarp <nipype.interfaces.fsl.InvWarp>` class, the
+``inverse_warp`` parameter is the name of the output file that is created by
+the routine.
+
+.. testcode::
+
+    class InvWarpInputSpec(FSLCommandInputSpec):
+        ...
+        inverse_warp = File(argstr='--out=%s', name_source=['warp'],
+                            hash_files=False, name_template='%s_inverse',
+        ...
+
+we add several metadata to inputspec.
+
+name_source
+    indicates which field to draw from, this field must be the name of a File.
+
+hash_files
+    indicates that the input for this field if provided should not be used in
+    computing the input hash for this interface.
+
+name_template (optional)
+     overrides the default ``_generated`` suffix
+     
+output_name (optional)
+     name of the output (if this is not set same name as the input will be 
+     assumed)
+
+keep_extension (optional - not used)
+     if you want the extension from the input to be kept
+
+In addition one can add functionality to your class or base class, to allow
+changing extensions specific to package or interface
+
+.. testcode::
+
+    def self._overload_extension(self, value):
+        return value #do whatever you want here with the name
+
+Finally, in the outputspec make sure the name matches that of the inputspec.
+
+.. testcode::
+
+    class InvWarpOutputSpec(TraitedSpec):
+        inverse_warp = File(exists=True,
+                            desc=('Name of output file, containing warps that '
+                            'are the "reverse" of those in --warp.'))

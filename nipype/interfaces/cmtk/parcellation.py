@@ -29,7 +29,6 @@ try:
     package_check('cmp')
 except Exception, e:
     have_cmp = False
-    warnings.warn('cmp not installed')
 else:
     import cmp
     from cmp.util import runCmd
@@ -259,7 +258,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
             rois[idx] = int(brv['dn_correspondence_id'])
 
         # store volume eg in ROI_scale33.nii.gz
-        out_roi = op.join(output_dir, 'ROI_%s.nii.gz' % parcellation_name)
+        out_roi = op.abspath('ROI_%s.nii.gz' % parcellation_name)
 
         # update the header
         hdr = aseg.get_header()
@@ -291,7 +290,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
                 rois[xx[j], yy[j], zz[j]] = value
 
         # store volume eg in ROIv_scale33.nii.gz
-        out_roi = op.join(output_dir, 'ROIv_%s.nii.gz' % parcellation_name)
+        out_roi = op.abspath('ROIv_%s.nii.gz' % parcellation_name)
         iflogger.info("Save output image to %s" % out_roi)
         img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
         nb.save(img, out_roi)
@@ -304,7 +303,6 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
-    log = cmp_config.get_logger()
     pgpath = cmp_config._get_lausanne_parcellation(
         'Lausanne2008')[parcellation_name]['node_information_graphml']
     # load ribbon as basis for white matter mask
@@ -423,8 +421,6 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     wmmask[idx] = 1
 
     # check if we should subtract the cortical rois from this parcellation
-    parval = cmp_config._get_lausanne_parcellation(
-        'Lausanne2008')[parcellation_name]
     iflogger.info("Loading %s to subtract cortical ROIs from white matter mask" % ('ROI_%s.nii.gz' % parcellation_name))
     roi = nb.load(op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name))
     roid = roi.get_data()
@@ -444,32 +440,30 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     nb.save(img, wm_out)
 
 
-def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file):
+def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file,dilation):
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
     log = cmp_config.get_logger()
-    pgpath = cmp_config._get_lausanne_parcellation(
-        'Lausanne2008')[parcellation_name]['node_information_graphml']
-    reg_path = out_roi_file
     output_dir = op.abspath(op.curdir)
 
     iflogger.info("Cropping and moving datasets to %s" % output_dir)
     ds = [
-        (op.join(fs_dir, 'mri', 'aseg.nii.gz'), op.join(
-         output_dir, 'aseg.nii.gz')),
-        (op.join(fs_dir, 'mri', 'ribbon.nii.gz'), op.join(
-         output_dir, 'ribbon.nii.gz')),
-        (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'), op.join(
-         output_dir, 'fsmask_1mm.nii.gz')),
+        (op.join(fs_dir, 'mri', 'aseg.nii.gz'),
+         op.abspath('aseg.nii.gz')),
+        (op.join(fs_dir, 'mri', 'ribbon.nii.gz'),
+         op.abspath('ribbon.nii.gz')),
+        (op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz'),
+         op.abspath('fsmask_1mm.nii.gz')),
         (op.join(fs_dir, 'label', 'cc_unknown.nii.gz'),
-         op.join(output_dir, 'cc_unknown.nii.gz'))
+         op.abspath('cc_unknown.nii.gz'))
     ]
 
-    ds.append((op.join(op.curdir, 'ROI_%s.nii.gz' % parcellation_name),
-              op.join(op.curdir, 'ROI_HR_th.nii.gz')))
-    ds.append((op.join(op.curdir, 'ROIv_%s.nii.gz' %
-              parcellation_name), op.join(op.curdir, 'ROIv_HR_th.nii.gz')))
+    ds.append((op.abspath('ROI_%s.nii.gz' % parcellation_name),
+              op.abspath('ROI_HR_th.nii.gz')))
+    if(dilation==True):
+    	ds.append((op.abspath('ROIv_%s.nii.gz' % parcellation_name),
+            op.abspath('ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
         iflogger.info("Processing %s:" % d[0])
@@ -524,14 +518,14 @@ class ParcellateInputSpec(BaseInterfaceInputSpec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory')
     out_roi_file = File(
         genfile=True, desc='Region of Interest file for connectivity mapping')
-    dilation = traits.Bool(False, usedefault=True, 
+    dilation = traits.Bool(False, usedefault=True,
                            desc='Dilate cortical parcels? Useful for fMRI connectivity')
 
 
 class ParcellateOutputSpec(TraitedSpec):
     roi_file = File(
         exists=True, desc='Region of Interest file for connectivity mapping')
-    roiv_file = File(exists=True, desc='Region of Interest file for fMRI connectivity mapping')
+    roiv_file = File(desc='Region of Interest file for fMRI connectivity mapping')
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(
         desc='Image file with regions labelled as unknown cortical structures',
@@ -545,8 +539,7 @@ class ParcellateOutputSpec(TraitedSpec):
         desc='ROI image resliced to the dimensions of the original structural image',
                     exists=True)
     dilated_roi_file_in_structural_space = File(
-        desc='dilated ROI image resliced to the dimensions of the original structural image',
-                    exists=True)
+        desc='dilated ROI image resliced to the dimensions of the original structural image')
 
 
 class Parcellate(BaseInterface):
@@ -583,7 +576,7 @@ class Parcellate(BaseInterface):
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.dilation)
         create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file)
+        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file,self.inputs.dilation)
         return runtime
 
     def _list_outputs(self):
@@ -593,7 +586,8 @@ class Parcellate(BaseInterface):
         else:
             outputs['roi_file'] = op.abspath(
                 self._gen_outfilename('nii.gz', 'ROI'))
-        outputs['roiv_file'] = op.abspath(self._gen_outfilename(
+        if(self.inputs.dilation==True):
+            outputs['roiv_file'] = op.abspath(self._gen_outfilename(
             'nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
@@ -601,8 +595,9 @@ class Parcellate(BaseInterface):
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath(
             'ROI_HR_th.nii.gz')
-        outputs['dilated_roi_file_in_structural_space'] = op.abspath(
-            'ROI_HR_th.nii.gz')
+        if(self.inputs.dilation==True):
+            outputs['dilated_roi_file_in_structural_space'] = op.abspath(
+            'ROIv_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

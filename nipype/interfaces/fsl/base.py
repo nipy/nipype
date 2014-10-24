@@ -29,9 +29,10 @@ from glob import glob
 import os
 import warnings
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, traits, CommandLineInputSpec,
-                                    isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+from ..base import (traits, isdefined,
+                    CommandLine, CommandLineInputSpec, TraitedSpec,
+                    File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -190,6 +191,10 @@ class FSLCommand(CommandLine):
         else:
             raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
+    @property
+    def version(self):
+        return Info.version()
+
     def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
                    ext=None):
         """Generate a filename based on the given parameters.
@@ -236,9 +241,8 @@ class FSLCommand(CommandLine):
                                 use_ext=False, newpath=cwd)
         return fname
 
-    @property
-    def version(self):
-        return Info.version()
+    def _overload_extension(self, value, name=None):
+        return value + Info.output_type_to_ext(self.inputs.output_type)
 
 
 def check_fsl():

@@ -5,6 +5,7 @@ import re
 from cPickle import dumps, loads
 import numpy as np
 import nibabel as nb
+from nipype.external import six
 
 from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
@@ -46,10 +47,18 @@ class IdentityInterface(IOBase):
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
         if fields is None or not fields:
-            raise Exception('Identity Interface fields must be a non-empty list')
+            raise ValueError('Identity Interface fields must be a non-empty list')
+        # Each input must be in the fields.
+        for in_field in inputs:
+            if in_field not in fields:
+                raise ValueError('Identity Interface input is not in the fields: %s' % in_field)
         self._fields = fields
         self._mandatory_inputs = mandatory_inputs
         add_traits(self.inputs, fields)
+        # Adding any traits wipes out all input values set in superclass initialization,
+        # even it the trait is not in the add_traits argument. The work-around is to reset
+        # the values after adding the traits.
+        self.inputs.set(**inputs)
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -135,10 +144,15 @@ class Merge(IOBase):
 class RenameInputSpec(DynamicTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, desc="file to rename")
-    keep_ext = traits.Bool(desc="Keep in_file extension, replace non-extension component of name")
+    keep_ext = traits.Bool(desc=("Keep in_file extension, replace "
+                                 "non-extension component of name"))
     format_string = traits.String(mandatory=True,
-                                  desc="Python formatting string for output template")
-    parse_string = traits.String(desc="Python regexp parse string to define replacement inputs")
+                                  desc=("Python formatting string for output "
+                                        "template"))
+    parse_string = traits.String(desc=("Python regexp parse string to define "
+                                       "replacement inputs"))
+    use_fullpath = traits.Bool(False, usedefault=True,
+                               desc="Use full path as input to regex parser")
 
 
 class RenameOutputSpec(TraitedSpec):
@@ -202,7 +216,12 @@ class Rename(IOBase):
     def _rename(self):
         fmt_dict = dict()
         if isdefined(self.inputs.parse_string):
-            m = re.search(self.inputs.parse_string, os.path.split(self.inputs.in_file)[1])
+            if isdefined(self.inputs.use_fullpath) and self.inputs.use_fullpath:
+                m = re.search(self.inputs.parse_string,
+                              self.inputs.in_file)
+            else:
+                m = re.search(self.inputs.parse_string,
+                              os.path.split(self.inputs.in_file)[1])
             if m:
                 fmt_dict.update(m.groupdict())
         for field in self.fmt_fields:
@@ -210,14 +229,16 @@ class Rename(IOBase):
             if isdefined(val):
                 fmt_dict[field] = getattr(self.inputs, field)
         if self.inputs.keep_ext:
-            fmt_string = "".join([self.inputs.format_string, split_filename(self.inputs.in_file)[2]])
+            fmt_string = "".join([self.inputs.format_string,
+                                  split_filename(self.inputs.in_file)[2]])
         else:
             fmt_string = self.inputs.format_string
         return fmt_string % fmt_dict
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
-        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(), self._rename()))
+        _ = copyfile(self.inputs.in_file, os.path.join(os.getcwd(),
+                                                       self._rename()))
         return runtime
 
     def _list_outputs(self):
@@ -231,6 +252,8 @@ class SplitInputSpec(BaseInterfaceInputSpec):
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
                   desc='Number of outputs in each split - should add to number of inputs')
+    squeeze = traits.Bool(False, usedefault=True,
+                          desc='unfold one-element splits removing the list')
 
 
 class Split(IOBase):
@@ -269,7 +292,10 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                outputs['out%d' % (i + 1)] = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                if self.inputs.squeeze and len(val) == 1:
+                    val = val[0]
+                outputs['out%d' % (i + 1)] = val
         return outputs
 
 
@@ -366,7 +392,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, str):
+            elif isinstance(function, six.string_types):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
@@ -384,7 +410,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, str):
+            elif isinstance(new, six.string_types):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})

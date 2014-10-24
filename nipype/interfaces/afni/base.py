@@ -6,18 +6,12 @@
 import os
 import warnings
 
-from ...utils.filemanip import fname_presuffix, split_filename
+from ...utils.filemanip import split_filename
 from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
-
-###################################
-#
-# NEW_AFNI base class
-#
-###################################
 
 
 class Info(object):
@@ -25,7 +19,7 @@ class Info(object):
     """
     __outputtype = 'AFNI'
     ftypes = {'NIFTI': '.nii',
-              'AFNI': '+orig.BRIK',
+              'AFNI': '',
               'NIFTI_GZ': '.nii.gz'}
 
     @staticmethod
@@ -98,27 +92,28 @@ class Info(object):
         return os.path.join(basedir, img_name)
 
 
-class AFNIBaseCommandInputSpec(CommandLineInputSpec):
+class AFNICommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
                              desc='AFNI output filetype')
-    
-class AFNITraitedSpec(AFNIBaseCommandInputSpec):
-    pass
+    out_file = File(name_template="%s_afni", desc='output image file name',
+                    argstr='-prefix %s',
+                    name_source=["in_file"])
+
+class AFNICommandOutputSpec(TraitedSpec):
+    out_file = File(desc='output file',
+                    exists=True)
 
 
-class AFNIBaseCommand(CommandLine):
-    """General support for AFNI commands. Every AFNI command accepts 'outputtype' input. For example:
-    afni.Threedsetup(outputtype='NIFTI_GZ')
-    """
+class AFNICommand(CommandLine):
 
-    input_spec = AFNIBaseCommandInputSpec
+    input_spec = AFNICommandInputSpec
     _outputtype = None
-    
+
 
     def __init__(self, **inputs):
-        super(AFNIBaseCommand, self).__init__(**inputs)
+        super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')
-        
+
         if self._outputtype is None:
             self._outputtype = Info.outputtype()
 
@@ -149,96 +144,18 @@ class AFNIBaseCommand(CommandLine):
         else:
             raise AttributeError('Invalid AFNI outputtype: %s' % outputtype)
 
-    def _gen_fname(self, basename, cwd=None, suffix='_afni', change_ext=True, prefix=''):
-        """Generate a filename based on the given parameters.
-
-        The filename will take the form: cwd/basename<suffix><ext>.
-        If change_ext is True, it will use the extensions specified in
-        <instance>inputs.outputtype.
-
-        Parameters
-        ----------
-        basename : str
-            Filename to base the new filename on.
-        cwd : str
-            Path to prefix to the new filename. (default is os.getcwd())
-        suffix : str
-            Suffix to add to the `basename`.  (default is '_fsl')
-        change_ext : bool
-            Flag to change the filename extension to the FSL output type.
-            (default True)
-
-        Returns
-        -------
-        fname : str
-            New filename based on given parameters.
-
-        """
-
-        if basename == '':
-            msg = 'Unable to generate filename for command %s. ' % self.cmd
-            msg += 'basename is not set!'
-            raise ValueError(msg)
-        if cwd is None:
-            cwd = os.getcwd()
-        ext = Info.outputtype_to_ext(self.inputs.outputtype)
-        if change_ext:
-            if suffix:
-                suffix = ''.join((suffix, ext))
-            else:
-                suffix = ext
-        fname = fname_presuffix(basename, suffix=suffix,
-                                use_ext=False, newpath=cwd, prefix=prefix)
-        return fname
-
-
-class AFNICommandInputSpec(AFNIBaseCommandInputSpec):
-    out_file = File("%s_afni", desc='output image file name',
-                    argstr='-prefix %s', xor=['out_file', 'prefix', 'suffix'], name_source="in_file", usedefault=True)
-    prefix = traits.Str(
-        desc='output image prefix', deprecated='0.8', new_name="out_file")
-    suffix = traits.Str(
-        desc='output image suffix', deprecated='0.8', new_name="out_file")
-
-
-class AFNICommand(AFNIBaseCommand):
-    input_spec = AFNICommandInputSpec
-
-    def _gen_filename(self, name):
-        trait_spec = self.inputs.trait(name)
-        if name == "out_file" and (isdefined(self.inputs.prefix) or isdefined(self.inputs.suffix)):
-            suffix = ''
-            prefix = ''
-            if isdefined(self.inputs.prefix):
-                prefix = self.inputs.prefix
-            if isdefined(self.inputs.suffix):
-                suffix = self.inputs.suffix
-
-            _, base, _ = split_filename(
-                getattr(self.inputs, trait_spec.name_source))
-            return self._gen_fname(basename=base, prefix=prefix, suffix=suffix, cwd=os.getcwd())
-
-        else:
-            if getattr(self.inputs, name):
-                return os.path.join(
-                    os.getcwd(),super(AFNICommand, self)._gen_filename(name))
-
-    def _overload_extension(self, value):
+    def _overload_extension(self, value, name=None):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
 
     def _list_outputs(self):
+        outputs = super(AFNICommand, self)._list_outputs()
         metadata = dict(name_source=lambda t: t is not None)
         out_names = self.inputs.traits(**metadata).keys()
         if out_names:
-            outputs = self.output_spec().get()
             for name in out_names:
-                out = self._gen_filename(name)
-                if out and isdefined(out):
-                    outputs[name] = os.path.abspath(out)
-            return outputs
-
-
-class AFNICommandOutputSpec(TraitedSpec):
-    out_file = File(desc='output file',
-                    exists=True)
+                if outputs[name]:
+                    _,_,ext = split_filename(outputs[name])
+                    if ext == "":
+                        outputs[name] = outputs[name] + "+orig.BRIK"
+        return outputs

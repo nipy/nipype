@@ -12,6 +12,10 @@ This script demonstrates how to use nipype to analyze a data set.
     python fmri_openfmri.py --datasetdir ds107
 """
 
+from nipype import config
+#config.enable_provenance()
+from nipype.external import six
+
 from glob import glob
 import os
 
@@ -22,8 +26,9 @@ import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
-                                  create_modelfit_workflow,
-                                  create_fixed_effects_flow)
+                                       create_modelfit_workflow,
+                                       create_fixed_effects_flow,
+                                       create_reg_workflow)
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
@@ -82,7 +87,8 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
 
-def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=None):
+def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
+                             task_id=None, output_dir=None, subj_prefix='*'):
     """Analyzes an open fmri dataset
 
     Parameters
@@ -102,6 +108,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     preproc = create_featreg_preproc(whichvol='first')
     modelfit = create_modelfit_workflow()
     fixed_fx = create_fixed_effects_flow()
+    registration = create_reg_workflow()
 
     """
     Remove the plotting connection so that plot iterables don't propagate
@@ -115,19 +122,22 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     Set up openfmri data specific components
     """
 
-    subjects = [path.split(os.path.sep)[-1] for path in
-                glob(os.path.join(data_dir, 'sub*'))]
+    subjects = sorted([path.split(os.path.sep)[-1] for path in
+                       glob(os.path.join(data_dir, subj_prefix))])
 
     infosource = pe.Node(niu.IdentityInterface(fields=['subject_id',
-                                                       'model_id']),
+                                                       'model_id',
+                                                       'task_id']),
                          name='infosource')
-    if subject is None:
+    if len(subject) == 0:
         infosource.iterables = [('subject_id', subjects),
-            ('model_id', [model_id])]
+                                ('model_id', [model_id]),
+                                ('task_id', task_id)]
     else:
         infosource.iterables = [('subject_id',
-                                 [subjects[subjects.index(subject)]]),
-                                ('model_id', [model_id])]
+                                 [subjects[subjects.index(subj)] for subj in subject]),
+                                ('model_id', [model_id]),
+                                ('task_id', task_id)]
 
     subjinfo = pe.Node(niu.Function(input_names=['subject_id', 'base_dir',
                                                  'task_id', 'model_id'],
@@ -141,20 +151,24 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     """
 
     datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
-                                                   'model_id'],
-                                         outfields=['anat', 'bold', 'behav']),
+                                                   'task_id', 'model_id'],
+                                         outfields=['anat', 'bold', 'behav',
+                                                    'contrasts']),
                          name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
     datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
-                                'bold': '%s/BOLD/task001_r*/bold.nii.gz',
-                                'behav': ('%s/model/model%03d/onsets/task001_'
-                                          'run%03d/cond*.txt')}
+                                'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                          'run%03d/cond*.txt'),
+                                'contrasts': ('models/model%03d/'
+                                              'task_contrasts.txt')}
     datasource.inputs.template_args = {'anat': [['subject_id']],
-                                       'bold': [['subject_id']],
+                                       'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
-                                                  'run_id']]}
-    datasource.inputs.sorted = True
+                                                  'task_id', 'run_id']],
+                                       'contrasts': [['model_id']]}
+    datasource.inputs.sort_filelist = True
 
     """
     Create meta workflow
@@ -163,8 +177,10 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     wf = pe.Workflow(name='openfmri')
     wf.connect(infosource, 'subject_id', subjinfo, 'subject_id')
     wf.connect(infosource, 'model_id', subjinfo, 'model_id')
+    wf.connect(infosource, 'task_id', subjinfo, 'task_id')
     wf.connect(infosource, 'subject_id', datasource, 'subject_id')
     wf.connect(infosource, 'model_id', datasource, 'model_id')
+    wf.connect(infosource, 'task_id', datasource, 'task_id')
     wf.connect(subjinfo, 'run_id', datasource, 'run_id')
     wf.connect([(datasource, preproc, [('bold', 'inputspec.func')]),
                 ])
@@ -182,25 +198,29 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     Setup a basic set of contrasts, a t-test per condition
     """
 
-    def get_contrasts(base_dir, model_id, conds):
+    def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
-        import os
-        contrast_file = os.path.join(base_dir, 'models', 'model%03d' % model_id,
-                                     'task_contrasts.txt')
         contrast_def = np.genfromtxt(contrast_file, dtype=object)
+        if len(contrast_def.shape) == 1:
+            contrast_def = contrast_def[None, :]
         contrasts = []
         for row in contrast_def:
-            con = [row[0], 'T', ['cond%03d' % i  for i in range(len(conds))],
-                   row[1:].astype(float).tolist()]
+            if row[0] != 'task%03d' % task_id:
+                continue
+            con = [row[1], 'T', ['cond%03d' % (i + 1)  for i in range(len(conds))],
+                   row[2:].astype(float).tolist()]
+            contrasts.append(con)
+        # add auto contrasts for each column
+        for i, cond in enumerate(conds):
+            con = [cond, 'T', ['cond%03d' % (i + 1)], [1]]
             contrasts.append(con)
         return contrasts
 
-    contrastgen = pe.Node(niu.Function(input_names=['base_dir', 'model_id',
-                                                    'conds'],
+    contrastgen = pe.Node(niu.Function(input_names=['contrast_file',
+                                                    'task_id', 'conds'],
                                        output_names=['contrasts'],
                                        function=get_contrasts),
                           name='contrastgen')
-    contrastgen.inputs.base_dir = data_dir
 
     art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
                                                  use_norm=True,
@@ -216,11 +236,24 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
+    def check_behav_list(behav):
+        from nipype.external import six
+        out_behav = []
+        if isinstance(behav, six.string_types):
+            behav = [behav]
+        for val in behav:
+            if not isinstance(val, list):
+                out_behav.append([val])
+            else:
+                out_behav.append(val)
+        return out_behav
+
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
-    wf.connect(datasource, 'behav', modelspec, 'event_files')
+    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
     wf.connect(subjinfo, 'TR', modelfit, 'inputspec.interscan_interval')
     wf.connect(subjinfo, 'conds', contrastgen, 'conds')
-    wf.connect(infosource, 'model_id', contrastgen, 'model_id')
+    wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    wf.connect(infosource, 'task_id', contrastgen, 'task_id')
     wf.connect(contrastgen, 'contrasts', modelfit, 'inputspec.contrasts')
 
     wf.connect([(preproc, art, [('outputspec.motion_parameters',
@@ -271,21 +304,80 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
                                        ])
                 ])
 
+    wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
+    wf.connect(datasource, 'anat', registration, 'inputspec.anatomical_image')
+    registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
+    registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+    registration.inputs.inputspec.config_file = 'T1_2_MNI152_2mm'
+
+    def merge_files(copes, varcopes, zstats):
+        out_files = []
+        splits = []
+        out_files.extend(copes)
+        splits.append(len(copes))
+        out_files.extend(varcopes)
+        splits.append(len(varcopes))
+        out_files.extend(zstats)
+        splits.append(len(zstats))
+        return out_files, splits
+
+    mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                  'zstats'],
+                                   output_names=['out_files', 'splits'],
+                                   function=merge_files),
+                      name='merge_files')
+    wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
+                                 [('copes', 'copes'),
+                                  ('varcopes', 'varcopes'),
+                                  ('zstats', 'zstats'),
+                                  ])])
+    wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
+
+    def split_files(in_files, splits):
+        copes = in_files[:splits[0]]
+        varcopes = in_files[splits[0]:(splits[0] + splits[1])]
+        zstats = in_files[(splits[0] + splits[1]):]
+        return copes, varcopes, zstats
+
+    splitfunc = pe.Node(niu.Function(input_names=['in_files', 'splits'],
+                                     output_names=['copes', 'varcopes',
+                                                   'zstats'],
+                                     function=split_files),
+                      name='split_files')
+    wf.connect(mergefunc, 'splits', splitfunc, 'splits')
+    wf.connect(registration, 'outputspec.transformed_files',
+               splitfunc, 'in_files')
+
+
     """
     Connect to a datasink
     """
 
-    def get_subs(subject_id, conds):
-        subs = [('_subject_id_%s/' % subject_id, '')]
+    def get_subs(subject_id, conds, model_id, task_id):
+        subs = [('_subject_id_%s_' % subject_id, '')]
+        subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
+        subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
+        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
+        'mean'))
+        subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
+        'affine'))
+
         for i in range(len(conds)):
             subs.append(('_flameo%d/cope1.' % i, 'cope%02d.' % (i + 1)))
             subs.append(('_flameo%d/varcope1.' % i, 'varcope%02d.' % (i + 1)))
             subs.append(('_flameo%d/zstat1.' % i, 'zstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/tstat1.' % i, 'tstat%02d.' % (i + 1)))
             subs.append(('_flameo%d/res4d.' % i, 'res4d%02d.' % (i + 1)))
+            subs.append(('_warpall%d/cope1_warp.' % i,
+                         'cope%02d.' % (i + 1)))
+            subs.append(('_warpall%d/varcope1_warp.' % (len(conds) + i),
+                         'varcope%02d.' % (i + 1)))
+            subs.append(('_warpall%d/zstat1_warp.' % (2 * len(conds) + i),
+                         'zstat%02d.' % (i + 1)))
         return subs
 
-    subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds'],
+    subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds',
+                                                'model_id', 'task_id'],
                                    output_names=['substitutions'],
                                    function=get_subs),
                       name='subsgen')
@@ -294,7 +386,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
                        name="datasink")
     wf.connect(infosource, 'subject_id', datasink, 'container')
     wf.connect(infosource, 'subject_id', subsgen, 'subject_id')
-    wf.connect(subjinfo, 'conds', subsgen, 'conds')
+    wf.connect(infosource, 'model_id', subsgen, 'model_id')
+    wf.connect(infosource, 'task_id', subsgen, 'task_id')
+    wf.connect(contrastgen, 'contrasts', subsgen, 'conds')
     wf.connect(subsgen, 'substitutions', datasink, 'substitutions')
     wf.connect([(fixed_fx.get_node('outputspec'), datasink,
                                  [('res4d', 'res4d'),
@@ -303,13 +397,20 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
                                   ('zstats', 'zstats'),
                                   ('tstats', 'tstats')])
                                  ])
+    wf.connect([(splitfunc, datasink,
+                 [('copes', 'copes.mni'),
+                  ('varcopes', 'varcopes.mni'),
+                  ('zstats', 'zstats.mni'),
+                  ])])
+    wf.connect(registration, 'outputspec.transformed_mean', datasink, 'mean.mni')
+    wf.connect(registration, 'outputspec.func2anat_transform', datasink, 'xfm.mean2anat')
+    wf.connect(registration, 'outputspec.anat2target_transform', datasink, 'xfm.anat2target')
 
     """
     Set processing parameters
     """
 
     hpcutoff = 120.
-    subjinfo.inputs.task_id = 1
     preproc.inputs.inputspec.fwhm = 6.0
     gethighpass.inputs.hpcutoff = hpcutoff
     modelspec.inputs.high_pass_filter_cutoff = hpcutoff
@@ -317,23 +418,52 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None, work_dir=Non
     modelfit.inputs.inputspec.model_serial_correlations = True
     modelfit.inputs.inputspec.film_threshold = 1000
 
-    if work_dir is None:
-        work_dir = os.path.join(os.getcwd(), 'working')
-    wf.base_dir = work_dir
-    datasink.inputs.base_directory = os.path.join(work_dir, 'output')
-    wf.config['execution'] = dict(crashdump_dir=os.path.join(work_dir,
-                                                             'crashdumps'),
-                                  stop_on_first_crash=True)
-    wf.run('MultiProc', plugin_args={'n_procs': 2})
+    datasink.inputs.base_directory = output_dir
+    return wf
 
 if __name__ == '__main__':
     import argparse
+    defstr = ' (default %(default)s)'
     parser = argparse.ArgumentParser(prog='fmri_openfmri.py',
                                      description=__doc__)
-    parser.add_argument('--datasetdir', required=True)
-    parser.add_argument('--subject', default=None)
-    parser.add_argument('--model', default=1)
+    parser.add_argument('-d', '--datasetdir', required=True)
+    parser.add_argument('-s', '--subject', default=[],
+                        nargs='+', type=str,
+                        help="Subject name (e.g. 'sub001')")
+    parser.add_argument('-m', '--model', default=1,
+                        help="Model index" + defstr)
+    parser.add_argument('-x', '--subjectprefix', default='sub*',
+                        help="Subject prefix" + defstr)
+    parser.add_argument('-t', '--task', default=1, #nargs='+',
+                        type=int, help="Task index" + defstr)
+    parser.add_argument("-o", "--output_dir", dest="outdir",
+                        help="Output directory base")
+    parser.add_argument("-w", "--work_dir", dest="work_dir",
+                        help="Working directory base")
+    parser.add_argument("-p", "--plugin", dest="plugin",
+                        default='Linear',
+                        help="Plugin to use")
+    parser.add_argument("--plugin_args", dest="plugin_args",
+                        help="Plugin arguments")
     args = parser.parse_args()
-    analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
+    outdir = args.outdir
+    work_dir = os.getcwd()
+    if args.work_dir:
+        work_dir = os.path.abspath(args.work_dir)
+    if outdir:
+        outdir = os.path.abspath(outdir)
+    else:
+        outdir = os.path.join(work_dir, 'output')
+    outdir = os.path.join(outdir, 'model%02d' % int(args.model),
+                          'task%03d' % int(args.task))
+    wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                              subject=args.subject,
-                             model_id=int(args.model))
+                             model_id=int(args.model),
+                             task_id=[int(args.task)],
+                             subj_prefix=args.subjectprefix,
+                             output_dir=outdir)
+    wf.base_dir = work_dir
+    if args.plugin_args:
+        wf.run(args.plugin, plugin_args=eval(args.plugin_args))
+    else:
+        wf.run(args.plugin)

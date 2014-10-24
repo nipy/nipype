@@ -3,16 +3,17 @@
 """Tests for the engine module
 """
 from copy import deepcopy
+from glob import glob
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_raises, assert_equal, assert_true,
-                            assert_false)
+from nipype.testing import (assert_raises, assert_equal, assert_true, assert_false)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
+from nipype import logging
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -34,8 +35,6 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-
-# Workflow
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
@@ -207,6 +206,129 @@ def test_iterable_expansion():
     wf3._flatgraph = wf3._create_flat_graph()
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
 
+def test_synchronize_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]),('input2',[3,4,5])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input2')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    # Each expanded graph clone has:
+    # 3 node1 expansion nodes and
+    # 1 node2 replicate per node1 replicate
+    # => 2 * 3 = 6 nodes per expanded subgraph
+    # => 18 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
+
+def test_synchronize_tuples_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node2 = pe.Node(TestInterface(),name='node2')
+    node1.iterables = [('input1','input2'), [(1,3), (2,4), (None,5)]]
+    node1.synchronize = True
+    wf1.connect(node1,'output1', node2, 'input2')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+    # Identical to test_synchronize_expansion
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
+
+def test_itersource_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = ('input1',[1,2])
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', 'input1')
+    node3.iterables = [('input1', {1:[3,4], 2:[5,6,7]})]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 3 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
+    # => 3 * 14 = 42 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
+def test_itersource_synchronize1_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]), ('input2',[3,4])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', ['input1', 'input2'])
+    node3.iterables = [('input1', {(1,3):[5,6]}),
+                       ('input2', {(1,3):[7,8], (2,4): [9]})]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 3 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
+    # => 3 * 14 = 42 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
+def test_itersource_synchronize2_expansion():
+    import nipype.pipeline.engine as pe
+    wf1 = pe.Workflow(name='test')
+    node1 = pe.Node(TestInterface(),name='node1')
+    node1.iterables = [('input1',[1,2]), ('input2',[3,4])]
+    node1.synchronize = True
+    node2 = pe.Node(TestInterface(),name='node2')
+    wf1.connect(node1,'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(),name='node3')
+    node3.itersource = ('node1', ['input1', 'input2'])
+    node3.synchronize = True
+    node3.iterables = [('input1', 'input2'),
+                       {(1,3):[(5,7), (6,8)], (2,4):[(None,9)]}]
+    wf1.connect(node2,'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(),name='node4')
+    wf1.connect(node3,'output1', node4, 'input1')
+    wf3 = pe.Workflow(name='group')
+    for i in [0,1,2]:
+        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+    wf3._flatgraph = wf3._create_flat_graph()
+
+    # each expanded graph clone has:
+    # 2 node1 expansion nodes,
+    # 1 node2 per node1 replicate,
+    # 2 node3 replicates for the node1 input1 value 1,
+    # 1 node3 replicates for the node1 input1 value 2 and
+    # 1 node4 successor per node3 replicate
+    # => 2 + 2 + (2 + 1) + 3 = 10 nodes per expanded graph clone
+    # => 3 * 10 = 30 nodes in the group
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 30
+
 def test_disconnect():
     import nipype.pipeline.engine as pe
     from nipype.interfaces.utility import IdentityInterface
@@ -348,6 +470,39 @@ def test_mapnode_iterfield_check():
     yield assert_raises, ValueError, mod1._check_iterfield
 
 
+def test_mapnode_nested():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function
+    def func1(in1):
+        return in1 + 1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 nested=True,
+                 name='n1')
+    n1.inputs.in1 = [[1,[2]],3,[4,5]]
+    n1.run()
+    print n1.get_output('out')
+    yield assert_equal, n1.get_output('out'), [[2,[3]],4,[5,6]]
+
+    n2 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 nested=False,
+                 name='n1')
+    n2.inputs.in1 = [[1,[2]],3,[4,5]]
+    error_raised = False
+    try:
+        n2.run()
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_true, error_raised
+
 def test_node_hash():
     cwd = os.getcwd()
     wd = mkdtemp()
@@ -428,7 +583,7 @@ def test_old_config():
     w1.connect(n1, ('a', modify), n2,'a')
     w1.base_dir = wd
 
-    w1.config = {'crashdump_dir': wd}
+    w1.config['execution']['crashdump_dir'] = wd
     # generate outputs
     error_raised = False
     try:
@@ -437,5 +592,100 @@ def test_old_config():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+
+
+def test_mapnode_json():
+    """Tests that mapnodes don't generate excess jsons
+    """
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function, Workflow
+    def func1(in1):
+        return in1 + 1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 name='n1')
+    n1.inputs.in1 = [1]
+    w1 = Workflow(name='test')
+    w1.base_dir = wd
+    w1.config['execution']['crashdump_dir'] = wd
+    w1.add_nodes([n1])
+    w1.run()
+    n1.inputs.in1 = [2]
+    w1.run()
+    # should rerun
+    n1.inputs.in1 = [1]
+    eg = w1.run()
+
+    node = eg.nodes()[0]
+    outjson = glob(os.path.join(node.output_dir(), '_0x*.json'))
+    yield assert_equal, len(outjson), 1
+
+    # check that multiple json's don't trigger rerun
+    with open(os.path.join(node.output_dir(), 'test.json'), 'wt') as fp:
+        fp.write('dummy file')
+    w1.config['execution'].update(**{'stop_on_first_rerun': True})
+    error_raised = False
+    try:
+        w1.run()
+    except:
+        error_raised = True
+    yield assert_false, error_raised
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_serial_input():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function, Workflow
+    def func1(in1):
+        return in1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 name='n1')
+    n1.inputs.in1 = [1,2,3]
+
+
+    w1 = Workflow(name='test')
+    w1.base_dir = wd
+    w1.add_nodes([n1])
+    # set local check
+    w1.config['execution'] = {'stop_on_first_crash': 'true',
+                              'local_hash_check': 'true',
+                              'crashdump_dir': wd}
+
+    # test output of num_subnodes method when serial is default (False)
+    yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
+
+    # test running the workflow on default conditions
+    error_raised = False
+    try:
+        w1.run(plugin='MultiProc')
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+
+    # test output of num_subnodes method when serial is True
+    n1._serial=True
+    yield assert_equal, n1.num_subnodes(), 1
+
+    # test running the workflow on serial conditions
+    error_raised = False
+    try:
+        w1.run(plugin='MultiProc')
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_false, error_raised
+
     os.chdir(cwd)
     rmtree(wd)

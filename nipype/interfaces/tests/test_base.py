@@ -8,9 +8,10 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                         assert_true, assert_false, with_setup, package_check,
                         skipif)
 import nipype.interfaces.base as nib
+from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
-
+import traits.api as traits
 #test Bunch
 def test_bunch():
     b = nib.Bunch()
@@ -171,6 +172,30 @@ def test_deprecation():
     yield assert_equal, spec_instance.foo, Undefined
     yield assert_equal, spec_instance.bar, 1
 
+def test_namesource():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+    class spec2(nib.CommandLineInputSpec):
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=2)
+        doo = nib.File(exists=True, argstr="%s", position=1)
+        goo = traits.Int(argstr="%d", position=4)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",position=3)
+
+    class TestName(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec2
+    testobj = TestName()
+    testobj.inputs.doo = tmp_infile
+    testobj.inputs.goo = 99
+    yield assert_true, '%s_generated' % nme in testobj.cmdline
+    testobj.inputs.moo = "my_%s_template"
+    yield assert_true, 'my_%s_template' % nme in testobj.cmdline
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
 def checknose():
     """check version of nose for known incompatability"""
     mod = __import__('nose')
@@ -205,19 +230,19 @@ def test_TraitedSpec_withNoFileHashing():
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
     yield assert_equal, hashval[1], '642c326a05add933e9cdc333ce2d0ac2'
-    
+
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True, name_source="doo")
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec3(moo=nme, doo=[tmp_infile])
     hashval1 = infields.get_hashval(hash_method='content')
-    
+
     class spec4(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec4(moo=nme, doo=[tmp_infile])
     hashval2 = infields.get_hashval(hash_method='content')
-    
+
     yield assert_not_equal, hashval1[1],  hashval2[1]
     os.chdir(pwd)
     teardown_file(tmpd)
@@ -245,10 +270,10 @@ def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
     yield assert_equal, nib.BaseInterface._get_filecopy_info(), []
 
-
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
         goo = nib.traits.Int(desc='a random int', mandatory=True)
+        moo = nib.traits.Int(desc='a random int', mandatory=False)
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
         zoo = nib.File(desc='a file', copyfile=False)
         woo = nib.File(desc='a file', copyfile=True)
@@ -258,6 +283,7 @@ def test_BaseInterface():
         input_spec = InputSpec
 
     yield assert_equal, DerivedInterface.help(), None
+    yield assert_true, 'moo' in ''.join(DerivedInterface._inputs_help())
     yield assert_equal, DerivedInterface()._outputs(), None
     yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
     yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']

@@ -9,7 +9,7 @@ available plugins allow local and distributed execution of workflows and
 debugging. Each available plugin is described below.
 
 Current plugins are available for Linear, Multiprocessing, IPython_ distributed
-processing platforms and for direct processing on SGE_, PBS_, HTCondor_, and LSF_. We
+processing platforms and for direct processing on SGE_, PBS_, HTCondor_, LSF_, and SLURM_. We
 anticipate future plugins for the Soma_ workflow.
 
 .. note::
@@ -114,6 +114,7 @@ Optional arguments::
 
   template: custom template file to use
   qsub_args: any other command line args to be passed to qsub.
+  max_jobname_len: (PBS only) maximum length of the job name.  Default 15.
 
 For example, the following snippet executes the workflow on myqueue with
 a custom template::
@@ -173,19 +174,58 @@ Workflow execution with HTCondor DAGMan is done by calling::
        workflow.run(plugin='CondorDAGMan')
 
 Job execution behavior can be tweaked with the following optional plug-in
-arguments::
+arguments. The value of most arguments can be a literal string or a filename,
+where in the latter case the content of the file will be used as the argument
+value::
 
-  template : submit spec template to use for job submission. The template
-             all generated submit specs are appended to this template. This
-             can be a str or a filename.
-  submit_specs : additional submit specs that are appended to the generated
-                 submit specs to allow for overriding or extending the defaults.
-                 This can be a str or a filename.
-  dagman_args : arguments to be prepended to the job execution script in the
-                dagman call
+    submit_template : submit spec template for individual jobs in a DAG (see
+                 CondorDAGManPlugin.default_submit_template for the default.
+    initial_specs : additional submit specs that are prepended to any job's
+                 submit file
+    override_specs : additional submit specs that are appended to any job's
+                 submit file
+    wrapper_cmd : path to an exectuable that will be started instead of a node
+                 script. This is useful for wrapper script that execute certain
+                 functionality prior or after a node runs. If this option is
+                 given the wrapper command is called with the respective Python
+                 exectuable and the path to the node script as final arguments
+    wrapper_args : optional additional arguments to a wrapper command
+    dagman_args : arguments to be prepended to the job execution script in the
+                  dagman call
+    block : if True the plugin call will block until Condor has finished
+            prcoessing the entire workflow (default: False)
 
 Please see the `HTCondor documentation`_ for details on possible configuration
 options and command line arguments.
+
+Using the ``wrapper_cmd`` argument it is possible to combine Nipype workflow
+execution with checkpoint/migration functionality offered by, for example,
+DMTCP_. This is especially useful in the case of workflows with long running
+nodes, such as Freesurfer's recon-all pipeline, where Condor's job
+prioritization algorithm could lead to jobs being evicted from compute
+nodes in order to maximize overall troughput. With checkpoint/migration enabled
+such a job would be checkpointed prior eviction and resume work from the
+checkpointed state after being rescheduled -- instead of restarting from
+scratch.
+
+On a Debian system, executing a workflow with support for checkpoint/migration
+for all nodes could look like this::
+
+  # define common parameters
+  dmtcp_hdr = """
+  should_transfer_files = YES
+  when_to_transfer_output = ON_EXIT_OR_EVICT
+  kill_sig = 2
+  environment = DMTCP_TMPDIR=./;JALIB_STDERR_PATH=/dev/null;DMTCP_PREFIX_ID=$(CLUSTER)_$(PROCESS)
+  """
+  shim_args = "--log %(basename)s.shimlog --stdout %(basename)s.shimout --stderr %(basename)s.shimerr"
+  # run workflow
+  workflow.run(
+        plugin='CondorDAGMan',
+        plugin_args=dict(initial_specs=dmtcp_hdr,
+                         wrapper_cmd='/usr/lib/condor/shim_dmtcp',
+                         wrapper_args=shim_args)
+        )
 
 ``qsub`` emulation
 ~~~~~~~~~~~~~~~~~~
@@ -229,3 +269,6 @@ Optional arguments::
 .. _HTCondor: http://www.cs.wisc.edu/htcondor/
 .. _DAGMan: http://research.cs.wisc.edu/htcondor/dagman/dagman.html
 .. _HTCondor documentation: http://research.cs.wisc.edu/htcondor/manual
+.. _DMTCP: http://dmtcp.sourceforge.net
+.. _SLURM: http://slurm.schedmd.com/
+

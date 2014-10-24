@@ -75,8 +75,14 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
+        try:
+            if node.inputs.terminal_output == 'stream':
+                node.inputs.terminal_output = 'allatonce'
+        except:
+            pass
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
-                                                               (node, updatehash,))
+                                                               (node,
+                                                                updatehash,))
         return self._taskid
 
     def _report_crash(self, node, result=None):

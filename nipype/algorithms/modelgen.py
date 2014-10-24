@@ -30,6 +30,7 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
 from .. import config, logging
+from nipype.external import six
 iflogger = logging.getLogger('interface')
 
 def gcd(a, b):
@@ -149,7 +150,7 @@ def gen_info(run_event_files):
             elif '.txt' in name:
                 name, _ = name.split('.txt')
             runinfo.conditions.append(name)
-            event_info = np.loadtxt(event_file)
+            event_info = np.atleast_2d(np.loadtxt(event_file))
             runinfo.onsets.append(event_info[:, 0].tolist())
             if event_info.shape[1] > 1:
                 runinfo.durations.append(event_info[:, 1].tolist())
@@ -164,25 +165,25 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info', 'event_files'],
           desc=("Bunch or List(Bunch) subject specific condition information. "
                 "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
-                                 xor=['subject_info'],
+                                 xor=['subject_info', 'event_files'],
           desc=('list of event description files 1, 2 or 3 column format '
                 'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
        desc = "Realignment parameters returned by motion correction algorithm",
-                                         filecopy=False)
+                                         copyfile=False)
     outlier_files = InputMultiPath(File(exists=True),
          desc="Files containing scan outlier indices that should be tossed",
-                                filecopy=False)
+                                copyfile=False)
     functional_runs = InputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                    File(exists=True)),
                                      mandatory=True,
             desc="Data files for model. List of 4D files or list of" \
                                       "list of 3D files per session",
-            filecopy=False)
+            copyfile=False)
     input_units = traits.Enum('secs', 'scans', mandatory=True,
              desc = "Units of event onsets and durations (secs or scans)" \
                     "Output units are always in secs")
@@ -422,7 +423,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, str):
+            elif isinstance(f, six.string_types):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:
@@ -743,32 +744,3 @@ class SpecifySparseModel(SpecifyModel):
             outputs['sparse_png_file'] = os.path.join(os.getcwd(), 'sparse.png')
             outputs['sparse_svg_file'] = os.path.join(os.getcwd(), 'sparse.svg')
         return outputs
-
-'''
-
-Need to figure out how this component will work!!! multiple inheritence is causing a big headache
-
-class SpecifySparseSPMModelInputSpec(SpecifySPMModelInputSpec, SpecifySparseModelInputSpec):
-    pass
-
-class SpecifySparseSPMModel(SpecifySparseModel, SpecifySPMModel):
-    """Combines SPM specific options with sparse options
-    """
-    input_spec = SpecifySparseSPMModelInputSpec
-    output_spec = SpecifySparseModelOutputSpec
-
-    def _generate_design(self, infolist=None):
-        raise Exception('not working yet')
-        if (self.inputs.input_units == 'scans') and (self.inputs.output_units == 'secs'):
-            if isdefined(self.inputs.volumes_in_cluster) and (self.inputs.volumes_in_cluster > 1):
-                raise NotImplementedError("Cannot scale timings if times are scans and acquisition is clustered")
-        if isdefined(self.inputs.subject_info):
-            infolist = self.inputs.subject_info
-        else:
-            infolist = gen_info(self.inputs.event_files)
-        clusterlist = self._generate_clustered_design(infolist)
-        if not isdefined(self.inputs.concatenate_runs):
-            super(SpecifySparseSPMModel, self)._generate_design(infolist=clusterlist)
-        else:
-            self._generate_spm_design(infolist=clusterlist)
-'''

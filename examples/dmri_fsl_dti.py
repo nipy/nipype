@@ -120,7 +120,7 @@ datasource.inputs.field_template = dict(dwi='%s/%s.nii.gz',
                                         seed_file="%s.bedpostX/%s.nii.gz",
                                         target_masks="%s.bedpostX/%s.nii.gz")
 datasource.inputs.template_args = info
-
+datasource.inputs.sort_filelist = True
 
 """
 Setup for Diffusion Tensor Computation

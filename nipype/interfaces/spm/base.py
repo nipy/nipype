@@ -1,6 +1,18 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""The spm module provides basic functions for interfacing with SPM  tools."""
+"""The spm module provides basic functions for interfacing with SPM  tools.
+
+In order to use the standalone MCR version of spm, you need to ensure that
+the following commands are executed at the beginning of your script::
+
+   from nipype.interfaces import spm
+   matlab_cmd = '/path/to/run_spm8.sh /path/to/Compiler_Runtime/v713/ script'
+   spm.SPMCommand.set_mlab_paths(matlab_cmd=matlab_cmd, use_mcr=True)
+
+you can test by calling::
+
+   spm.SPMCommand().version
+"""
 
 __docformat__ = 'restructuredtext'
 
@@ -12,6 +24,7 @@ from copy import deepcopy
 from nibabel import load
 import numpy as np
 from scipy.io import savemat
+from nipype.external import six
 
 # Local imports
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
@@ -111,17 +124,23 @@ class Info(object):
     """Handles SPM version information
     """
     @staticmethod
-    def version(matlab_cmd=None):
+    def version(matlab_cmd=None, paths=None, use_mcr=None):
         """Returns the path to the SPM directory in the Matlab path
         If path not found, returns None.
 
         Parameters
         ----------
-        matlab_cmd : String specifying default matlab command
-
-            default None, will look for environment variable MATLABCMD
-            and use if found, otherwise falls back on MatlabCommand
-            default of 'matlab -nodesktop -nosplash'
+        matlab_cmd: str
+            Sets the default matlab command. If None, the value of the
+            environment variable SPMMCRCMD will be used if set and use_mcr
+            is True or the environment variable FORCE_SPMMCR is set.
+            If one of FORCE_SPMMCR or SPMMCRCMD is not set, the existence
+            of the environment variable MATLABCMD is checked and its value
+            is used as the matlab command if possible.
+            If none of the above was successful, the fallback value of
+            'matlab -nodesktop -nosplash' will be used.
+        paths : str
+        use_mcr : bool
 
         Returns
         -------
@@ -129,12 +148,28 @@ class Info(object):
 
             returns None of path not found
         """
+        if use_mcr or 'FORCE_SPMMCR' in os.environ:
+            use_mcr = True
+            if matlab_cmd is None:
+                try:
+                    matlab_cmd = os.environ['SPMMCRCMD']
+                except KeyError:
+                    pass
         if matlab_cmd is None:
             try:
                 matlab_cmd = os.environ['MATLABCMD']
-            except:
+            except KeyError:
                 matlab_cmd = 'matlab -nodesktop -nosplash'
         mlab = MatlabCommand(matlab_cmd=matlab_cmd)
+        mlab.inputs.mfile = False
+        if paths:
+            mlab.inputs.paths = paths
+        if use_mcr:
+            mlab.inputs.nodesktop = Undefined
+            mlab.inputs.nosplash = Undefined
+            mlab.inputs.single_comp_thread = Undefined
+            mlab.inputs.mfile = True
+            mlab.inputs.uses_mcr = True
         mlab.inputs.script = """
 if isempty(which('spm')),
 throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
@@ -144,7 +179,6 @@ spm_path = spm('dir');
 fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, version);
 exit;
         """
-        mlab.inputs.mfile = False
         try:
             out = mlab.run()
         except (IOError, RuntimeError), e:
@@ -178,6 +212,9 @@ class SPMCommandInputSpec(BaseInterfaceInputSpec):
     mfile = traits.Bool(True, desc='Run m-code using m-file',
                         usedefault=True)
     use_mcr = traits.Bool(desc='Run m-code using SPM MCR')
+    use_v8struct = traits.Bool(True, min_ver='8', usedefault=True,
+                               desc=('Generate SPM8 and higher compatible jobs')
+                               )
 
 
 class SPMCommand(BaseInterface):
@@ -186,6 +223,7 @@ class SPMCommand(BaseInterface):
     WARNING: Pseudo prototype class, meant to be subclassed
     """
     input_spec = SPMCommandInputSpec
+    _additional_metadata = ['field']
 
     _jobtype = 'basetype'
     _jobname = 'basename'
@@ -200,6 +238,7 @@ class SPMCommand(BaseInterface):
                                                               'mfile',
                                                               'paths',
                                                               'use_mcr'])
+        self._find_mlab_cmd_defaults()
         self._check_mlab_inputs()
         self._matlab_cmd_update()
 
@@ -209,19 +248,42 @@ class SPMCommand(BaseInterface):
         cls._paths = paths
         cls._use_mcr = use_mcr
 
+    def _find_mlab_cmd_defaults(self):
+        # check if the user has set environment variables to enforce
+        # the standalone (MCR) version of SPM
+        if self._use_mcr or 'FORCE_SPMMCR' in os.environ:
+            self._use_mcr = True
+            if self._matlab_cmd is None:
+                try:
+                    self._matlab_cmd = os.environ['SPMMCRCMD']
+                except KeyError:
+                    pass
+
     def _matlab_cmd_update(self):
         # MatlabCommand has to be created here,
         # because matlab_cmb is not a proper input
         # and can be set only during init
         self.mlab = MatlabCommand(matlab_cmd=self.inputs.matlab_cmd,
                                   mfile=self.inputs.mfile,
-                                  paths=self.inputs.paths,
-                                  uses_mcr=self.inputs.use_mcr)
+                                  paths=self.inputs.paths)
         self.mlab.inputs.script_file = 'pyscript_%s.m' % \
             self.__class__.__name__.split('.')[-1].lower()
         if isdefined(self.inputs.use_mcr) and self.inputs.use_mcr:
             self.mlab.inputs.nodesktop = Undefined
             self.mlab.inputs.nosplash = Undefined
+            self.mlab.inputs.single_comp_thread = Undefined
+            self.mlab.inputs.uses_mcr = True
+            self.mlab.inputs.mfile = True
+
+    @property
+    def version(self):
+        version_dict = Info.version(matlab_cmd=self.inputs.matlab_cmd,
+                                    paths=self.inputs.paths,
+                                    use_mcr=self.inputs.use_mcr)
+        if version_dict:
+            return '.'.join((version_dict['name'].split('SPM')[-1],
+                             version_dict['release']))
+        return version_dict
 
     @property
     def jobtype(self):
@@ -296,9 +358,10 @@ class SPMCommand(BaseInterface):
 
         Examples
         --------
-        >>> a = SPMCommand()._reformat_dict_for_savemat(dict(a=1,b=dict(c=2,d=3)))
-        >>> print a
-        [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
+        >>> a = SPMCommand()._reformat_dict_for_savemat(dict(a=1,
+        ...                                                  b=dict(c=2, d=3)))
+        >>> a == [{'a': 1, 'b': [{'c': 2, 'd': 3}]}]
+        True
 
         """
         newdict = {}
@@ -354,7 +417,7 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
-                    elif isinstance(val, str):
+                    elif isinstance(val, six.string_types):
                         jobstring += '\'%s\';...\n' % (val)
                     else:
                         jobstring += '%s;...\n' % str(val)
@@ -369,7 +432,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, str):
+        if isinstance(contents, six.string_types):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))
@@ -397,48 +460,52 @@ class SPMCommand(BaseInterface):
         mscript = """
         %% Generated by nipype.interfaces.spm
         if isempty(which('spm')),
-             throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
+             throw(MException('SPMCheck:NotFound', 'SPM not in matlab path'));
         end
-        [name, ver] = spm('ver');
-        fprintf('SPM version: %s Release: %s\\n',name, ver);
-        fprintf('SPM path: %s\\n',which('spm'));
+        [name, version] = spm('ver');
+        fprintf('SPM version: %s Release: %s\\n',name, version);
+        fprintf('SPM path: %s\\n', which('spm'));
         spm('Defaults','fMRI');
 
-        if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');end\n
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+           spm_jobman('initcfg');
+           spm_get_defaults('cmdline', 1);
+        end\n
         """
         if self.mlab.inputs.mfile:
-            if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
-                                'fmri_spec', 'fmri_est', 'factorial_design',
-                                'defs']:
-                # parentheses
-                mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
+            if isdefined(self.inputs.use_v8struct) and self.inputs.use_v8struct:
+                mscript += self._generate_job('jobs{1}.spm.%s.%s' %
                                               (self.jobtype, self.jobname),
                                               contents[0])
             else:
-                #curly brackets
-                mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
-                                              (self.jobtype, self.jobname),
-                                              contents[0])
+                if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
+                                'fmri_spec', 'fmri_est', 'factorial_design',
+                                'defs']:
+                    # parentheses
+                    mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
+                                                  (self.jobtype, self.jobname),
+                                                  contents[0])
+                else:
+                    #curly brackets
+                    mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
+                                                  (self.jobtype, self.jobname),
+                                                  contents[0])
         else:
             jobdef = {'jobs': [{self.jobtype:
-                                  [{self.jobname:self.reformat_dict_for_savemat
-                                      (contents[0])}]}]}
+                                [{self.jobname:
+                                  self.reformat_dict_for_savemat(contents[0])}]
+                                }]}
             savemat(os.path.join(cwd, 'pyjobs_%s.mat' % self.jobname), jobdef)
             mscript += "load pyjobs_%s;\n\n" % self.jobname
         mscript += """
-        if strcmp(spm('ver'),'SPM8'),
-           jobs=spm_jobman('spm5tospm8',{jobs});
-        end
-        spm_jobman(\'run_nogui\',jobs);\n
+        spm_jobman(\'run\', jobs);\n
         """
+        if self.inputs.use_mcr:
+            mscript += """
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+            close(\'all\', \'force\');
+        end;
+            """
         if postscript is not None:
             mscript += postscript
         return mscript
-
-    @property
-    def version(self):
-        version_dict = Info.version()
-        if version_dict:
-            return '.'.join((version_dict['name'].split('SPM')[-1],
-                             version_dict['release']))
-        return version_dict

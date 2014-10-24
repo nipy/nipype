@@ -11,6 +11,7 @@
    :maxdepth: 2
 
    install
+   vagrant
 
    interface_tutorial
    caching_tutorial
@@ -28,11 +29,14 @@
    :maxdepth: 1
 
    grabbing_and_sinking
+   select_files
    function_interface
    mapnode_and_iterables
+   joinnode_and_itersource
    model_specification
    saving_workflows
-
+   spmmcr
+   mipav
 
  
 

@@ -95,7 +95,7 @@ Execution
     Perform the hash check on the job submission machine. This option minimizes
     the number of jobs submitted to a cluster engine or a multiprocessing pool
     to only those that need to be rerun. (possible values: ``true`` and
-    ``false``; default value: ``false``)
+    ``false``; default value: ``true``)
 
 *job_finished_timeout*
     When batch jobs are submitted through, SGE/PBS/Condor they could be killed
@@ -113,6 +113,12 @@ Execution
     If this is set to True, an underlying interface will raise an error, when no
     version information is available. Please notify developers or submit a
     patch.
+
+*parameterize_dirs*
+    If this is set to True, the node's output directory will contain full
+    parameterization of any iterable, otherwise parameterizations over 32
+    characters will be replaced by their hash. (possible values: ``true`` and
+	``false``; default value: ``true``)
 
 Example
 ~~~~~~~

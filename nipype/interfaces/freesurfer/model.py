@@ -100,6 +100,7 @@ class MRISPreproc(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outfile = self.inputs.out_file
+        outputs['out_file'] = outfile
         if not isdefined(outfile):
             outputs['out_file'] = os.path.join(os.getcwd(),
                                    'concat_%s_%s.mgz' % (self.inputs.hemi,
@@ -153,9 +154,9 @@ class GLMFitInputSpec(FSTraitedSpec):
                              xor=['weighted_ls'])
     weight_sqrt = traits.Bool(argstr='--w-sqrt', desc='sqrt of weights',
                               xor=['weighted_ls'])
-    fwhm = traits.Float(min=0, argstr='--fwhm %f',
+    fwhm = traits.Range(low=0.0, argstr='--fwhm %f',
                         desc='smooth input by fwhm')
-    var_fwhm = traits.Float(min=0, argstr='--var-fwhm %f',
+    var_fwhm = traits.Range(low=0.0, argstr='--var-fwhm %f',
                             desc='smooth variance by fwhm')
     no_mask_smooth = traits.Bool(argstr='--no-mask-smooth',
                                  desc='do not mask when smoothing')
@@ -341,9 +342,9 @@ class OneSampleTTest(GLMFit):
 class BinarizeInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='--i %s', mandatory=True,
                   copyfile=False, desc='input volume')
-    min = traits.Float(argstr='--min %f',
+    min = traits.Float(argstr='--min %f', xor=['wm_ven_csf'],
                        desc='min thresh')
-    max = traits.Float(argstr='--max %f',
+    max = traits.Float(argstr='--max %f', xor=['wm_ven_csf'],
                        desc='max thresh')
     rmin = traits.Float(argstr='--rmin %f',
                         desc='compute min based on rmin*globalmean')
@@ -355,7 +356,7 @@ class BinarizeInputSpec(FSTraitedSpec):
          desc='set match vals to 2 and 41 (aseg for cerebral WM)')
     ventricles = traits.Bool(argstr='--ventricles',
          desc='set match vals those for aseg ventricles+choroid (not 4th)')
-    wm_ven_csf = traits.Bool(argstr='--wm+vcsf',
+    wm_ven_csf = traits.Bool(argstr='--wm+vcsf', xor=['min', 'max'],
           desc='WM and ventricular CSF, including choroid (not 4th)')
     binary_file = File(argstr='--o %s', genfile=True,
                   desc='binary output volume')
@@ -429,7 +430,7 @@ class Binarize(FSCommand):
                 outfile = fname_presuffix(self.inputs.in_file,
                                           newpath=os.getcwd(),
                                           suffix='_thresh')
-        outputs['binary_file'] = outfile
+        outputs['binary_file'] = os.path.abspath(outfile)
         value = self.inputs.count_file
         if isdefined(value):
             if isinstance(value, bool):
@@ -634,7 +635,7 @@ class SegStats(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['summary_file'] = self.inputs.summary_file
+        outputs['summary_file'] = os.path.abspath(self.inputs.summary_file)
         if not isdefined(outputs['summary_file']):
             outputs['summary_file'] = os.path.join(os.getcwd(), 'summary.stats')
         suffices = dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
@@ -653,7 +654,7 @@ class SegStats(FSCommand):
                                                     newpath=os.getcwd(),
                                                     use_ext=False)
                 else:
-                    outputs[name] = value
+                    outputs[name] = os.path.abspath(value)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -712,7 +713,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     proj = traits.Tuple(traits.Enum('abs', 'frac'), traits.Float,
                         traits.Float, traits.Float,
                         argstr='--proj %s %f %f %f',
-                        requries=('subject_id', 'hemi'),
+                        requires=('subject_id', 'hemi'),
                         desc='project along surface normal')
     subject_id = traits.Str(argstr='--subject %s',
                            desc='subject id')
@@ -780,16 +781,10 @@ class MS_LDAInputSpec(FSTraitedSpec):
                              desc='pair of class labels to optimize')
     weight_file = traits.File(argstr='-weight %s', mandatory=True,
                         desc='filename for the LDA weights (input or output)')
-    output_synth = traits.File(exists=False, argstr='-synth %s',
-                               mandatory=True,
-                               desc='filename for the synthesized output volume',
-                               deprecated='0.8',
-                               new_name='vol_synth_file',
-                               xor=['vol_synth_file', 'output_synth'])
     vol_synth_file = traits.File(exists=False, argstr='-synth %s',
-                               mandatory=True,
-                               desc='filename for the synthesized output volume',
-                               xor=['vol_synth_file', 'output_synth'])
+                                 mandatory=True,
+                                 desc=('filename for the synthesized output '
+                                       'volume'))
     label_file = traits.File(exists=True, argstr='-label %s',
                              desc='filename of the label volume')
     mask_file = traits.File(exists=True, argstr='-mask %s',

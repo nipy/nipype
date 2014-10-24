@@ -11,7 +11,7 @@
 
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath, isdefined
 from nipype.utils.filemanip import split_filename
-import os, os.path as op
+import os.path as op
 
 class MRConvertInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -65,7 +65,11 @@ class MRConvert(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['converted'] = op.abspath(self._gen_outfilename())
+        outputs['converted'] = self.inputs.out_filename
+        if not isdefined(outputs['converted']):
+            outputs['converted'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['converted'] = op.abspath(outputs['converted'])
         return outputs
 
     def _gen_filename(self, name):
@@ -82,19 +86,43 @@ class MRConvert(CommandLine):
         return outname
 
 class DWI2TensorInputSpec(CommandLineInputSpec):
-    in_file = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Diffusion-weighted images')
-    out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output tensor filename')
-    encoding_file = File(argstr='-grad %s', position= 2, desc='Encoding file, , supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix()')
-    ignore_slice_by_volume = traits.List(traits.Int, argstr='-ignoreslices %s', sep=' ', position=2, minlen=2, maxlen=2,
-        desc='Requires two values (i.e. [34 1] for [Slice Volume] Ignores the image slices specified when computing the tensor. Slice here means the z coordinate of the slice to be ignored.')
-    ignore_volumes = traits.List(traits.Int, argstr='-ignorevolumes %s', sep=' ', position=2, minlen=1,
-        desc='Requires two values (i.e. [2 5 6] for [Volumes] Ignores the image volumes specified when computing the tensor.')
-    quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
-    debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
+    in_file = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                             position=-2, desc='Diffusion-weighted images')
+    out_filename = File(name_template="%s_tensor.mif", name_source="in_file",
+                        output_name="tensor", argstr='%s',
+                        desc='Output tensor filename', position=-1)
+    encoding_file = File(argstr='-grad %s', position=2,
+                         desc=('Encoding file supplied as a 4xN text file with '
+                               'each line is in the format [ X Y Z b ], where '
+                               '[ X Y Z ] describe the direction of the applied '
+                               'gradient, and b gives the b-value in units '
+                               '(1000 s/mm^2). See FSL2MRTrix()'))
+    ignore_slice_by_volume = traits.List(traits.Int, argstr='-ignoreslices %s',
+                                         sep=' ', position=2, minlen=2,
+                                         maxlen=2,
+                                         desc=('Requires two values (i.e. [34 '
+                                               '1] for [Slice Volume] Ignores '
+                                               'the image slices specified '
+                                               'when computing the tensor. '
+                                               'Slice here means the z '
+                                               'coordinate of the slice to be '
+                                               'ignored.'))
+    ignore_volumes = traits.List(traits.Int, argstr='-ignorevolumes %s',
+                                 sep=' ', position=2, minlen=1,
+                                 desc=('Requires two values (i.e. [2 5 6] for '
+                                       '[Volumes] Ignores the image volumes '
+                                       'specified when computing the tensor.'))
+    quiet = traits.Bool(argstr='-quiet', position=1,
+                        desc=("Do not display information messages or progress "
+                              "status."))
+    debug = traits.Bool(argstr='-debug', position=1,
+                        desc="Display debugging messages.")
+
 
 class DWI2TensorOutputSpec(TraitedSpec):
-    tensor = File(exists=True, desc='path/name of output diffusion tensor image')
+    tensor = File(exists=True,
+                  desc='path/name of output diffusion tensor image')
+
 
 class DWI2Tensor(CommandLine):
     """
@@ -107,26 +135,14 @@ class DWI2Tensor(CommandLine):
     >>> dwi2tensor = mrt.DWI2Tensor()
     >>> dwi2tensor.inputs.in_file = 'dwi.mif'
     >>> dwi2tensor.inputs.encoding_file = 'encoding.txt'
+    >>> dwi2tensor.cmdline
+    'dwi2tensor -grad encoding.txt dwi.mif dwi_tensor.mif'
     >>> dwi2tensor.run()                                   # doctest: +SKIP
     """
 
     _cmd = 'dwi2tensor'
     input_spec=DWI2TensorInputSpec
     output_spec=DWI2TensorOutputSpec
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['tensor'] = op.abspath(self._gen_outfilename())
-        return outputs
-
-    def _gen_filename(self, name):
-        if name is 'out_filename':
-            return self._gen_outfilename()
-        else:
-            return None
-    def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file[0])
-        return name + '_tensor.mif'
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -157,7 +173,11 @@ class Tensor2Vector(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['vector'] = op.abspath(self._gen_outfilename())
+        outputs['vector'] = self.inputs.out_filename
+        if not isdefined(outputs['vector']):
+            outputs['vector'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['vector'] = op.abspath(outputs['vector'])
         return outputs
 
     def _gen_filename(self, name):
@@ -198,7 +218,11 @@ class Tensor2FractionalAnisotropy(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['FA'] = op.abspath(self._gen_outfilename())
+        outputs['FA'] = self.inputs.out_filename
+        if not isdefined(outputs['FA']):
+            outputs['FA'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['FA'] = op.abspath(outputs['FA'])
         return outputs
 
     def _gen_filename(self, name):
@@ -239,7 +263,11 @@ class Tensor2ApparentDiffusion(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['ADC'] = op.abspath(self._gen_outfilename())
+        outputs['ADC'] = self.inputs.out_filename
+        if not isdefined(outputs['ADC']):
+            outputs['ADC'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['ADC'] = op.abspath(outputs['ADC'])
         return outputs
 
     def _gen_filename(self, name):
@@ -252,8 +280,9 @@ class Tensor2ApparentDiffusion(CommandLine):
         return name + '_ADC.mif'
 
 class MRMultiplyInputSpec(CommandLineInputSpec):
-    in_files = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input images to be multiplied')
+    in_files = InputMultiPath(File(exists=True),
+                              argstr='%s', mandatory=True, position=-2,
+                              desc='Input images to be multiplied')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
@@ -280,7 +309,11 @@ class MRMultiply(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -293,8 +326,9 @@ class MRMultiply(CommandLine):
         return name + '_MRMult.mif'
 
 class MRTrixViewerInputSpec(CommandLineInputSpec):
-    in_files = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input images to be viewed')
+    in_files = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                              position=-2,
+                              desc='Input images to be viewed')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
@@ -421,7 +455,11 @@ class Erode(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -471,7 +509,11 @@ class Threshold(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -512,7 +554,11 @@ class MedianFilter3D(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):
@@ -525,8 +571,9 @@ class MedianFilter3D(CommandLine):
         return name + '_median3D.mif'
 
 class MRTransformInputSpec(CommandLineInputSpec):
-    in_files = InputMultiPath(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input images to be transformed')
+    in_files = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
+                              position=-2,
+                              desc='Input images to be transformed')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image')
     invert = traits.Bool(argstr='-inverse', position=1, desc="Invert the specified transform before using it")
     replace_transform = traits.Bool(argstr='-replace', position=1, desc="replace the current transform by that specified, rather than applying it to the current transform")
@@ -561,7 +608,11 @@ class MRTransform(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        outputs['out_file'] = self.inputs.out_filename
+        if not isdefined(outputs['out_file']):
+            outputs['out_file'] = op.abspath(self._gen_outfilename())
+        else:
+            outputs['out_file'] = op.abspath(outputs['out_file'])
         return outputs
 
     def _gen_filename(self, name):

@@ -17,6 +17,8 @@ conventions documented in the `NIPY Developers Guide
    writing_custom_interfaces
    gitwash/index   
    architecture
+   provenance
+   software_using_nipype
 
 
 .. include:: ../links_names.txt

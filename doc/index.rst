@@ -14,7 +14,7 @@
       to existing neuroimaging software and facilitates interaction between
       these packages within a single workflow. Nipype provides an environment
       that encourages interactive exploration of algorithms from different
-      packages (e.g., SPM_, FSL_, FreeSurfer_, Camino_, MRtrix_, MNE_, AFNI_, 
+      packages (e.g., ANTS_, SPM_, FSL_, FreeSurfer_, Camino_, MRtrix_, MNE_, AFNI_, 
       Slicer_), eases the design of workflows within and between packages, and
       reduces the learning curve necessary to use different packages. Nipype is
       creating a collaborative platform for neuroimaging software development 
@@ -34,7 +34,7 @@
 
    Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML, Ghosh SS.
    (2011). Nipype: a flexible, lightweight and extensible neuroimaging data
-   processing framework in Python. Front. Neuroimform. 5:13. `Download`__
+   processing framework in Python. Front. Neuroinform. 5:13. `Download`__
 
    __ paper_
 

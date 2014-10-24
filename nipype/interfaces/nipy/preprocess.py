@@ -16,14 +16,15 @@ from ...utils.misc import package_check
 from ...utils.filemanip import split_filename, fname_presuffix
 
 
+have_nipy = True
 try:
     package_check('nipy')
 except Exception, e:
-    warnings.warn('nipy not installed')
+    have_nipy = False
 else:
-    from nipy.labs.mask import compute_mask
-    from nipy.algorithms.registration import FmriRealign4d as FR4d
+    import nipy
     from nipy import save_image, load_image
+    nipy_version = nipy.__version__
 
 from ..base import (TraitedSpec, BaseInterface, traits,
                     BaseInterfaceInputSpec, isdefined, File,
@@ -50,7 +51,7 @@ class ComputeMask(BaseInterface):
     output_spec = ComputeMaskOutputSpec
 
     def _run_interface(self, runtime):
-
+        from nipy.labs.mask import compute_mask
         args = {}
         for key in [k for k, _ in self.inputs.items()
                     if k not in BaseInterfaceInputSpec().trait_names()]:
@@ -77,12 +78,12 @@ class ComputeMask(BaseInterface):
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
-    in_file = InputMultiPath(exists=True,
+    in_file = InputMultiPath(File(exists=True),
                              mandatory=True,
                              desc="File to realign")
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
-    slice_order = traits.List(traits.Int(), maxver=0.3,
+    slice_order = traits.List(traits.Int(),
             desc=('0 based slice order. This would be equivalent to entering'
                   'np.argsort(spm_slice_order) for this field. This effects'
                   'interleaved acquisition. This field will be deprecated in'
@@ -146,7 +147,7 @@ class FmriRealign4d(BaseInterface):
     keywords = ['slice timing', 'motion correction']
 
     def _run_interface(self, runtime):
-
+        from nipy.algorithms.registration import FmriRealign4d as FR4d
         all_ims = [load_image(fname) for fname in self.inputs.in_file]
 
         if not isdefined(self.inputs.tr_slices):
@@ -163,6 +164,137 @@ class FmriRealign4d(BaseInterface):
         R.estimate(loops=list(self.inputs.loops),
                    between_loops=list(self.inputs.between_loops),
                    speedup=list(self.inputs.speedup))
+
+        corr_run = R.resample()
+        self._out_file_path = []
+        self._par_file_path = []
+
+        for j, corr in enumerate(corr_run):
+            self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
+                                      (split_filename(self.inputs.in_file[j])[1])))
+            save_image(corr, self._out_file_path[j])
+
+            self._par_file_path.append(os.path.abspath('%s.par' %
+                                      (os.path.split(self.inputs.in_file[j])[1])))
+            mfile = open(self._par_file_path[j], 'w')
+            motion = R._transforms[j]
+            # nipy does not encode euler angles. return in original form of
+            # translation followed by rotation vector see:
+            # http://en.wikipedia.org/wiki/Rodrigues'_rotation_formula
+            for i, mo in enumerate(motion):
+                params = ['%.10f' % item for item in np.hstack((mo.translation,
+                                                                mo.rotation))]
+                string = ' '.join(params) + '\n'
+                mfile.write(string)
+            mfile.close()
+
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self._out_file_path
+        outputs['par_file'] = self._par_file_path
+        return outputs
+
+
+class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
+
+    in_file = InputMultiPath(File(exists=True),
+                             mandatory=True, min_ver='0.4.0.dev',
+                             desc="File to realign")
+    tr = traits.Float(desc="TR in seconds", requires=['slice_times'])
+    slice_times = traits.Either(traits.List(traits.Float()),
+                                traits.Enum('asc_alt_2', 'asc_alt_2_1',
+                                            'asc_alt_half', 'asc_alt_siemens',
+                                            'ascending', 'desc_alt_2',
+                                            'desc_alt_half', 'descending'),
+                                desc=('Actual slice acquisition times.'))
+    slice_info = traits.Either(traits.Int,
+                               traits.List(min_len=2, max_len=2),
+                               desc=('Single integer or length 2 sequence '
+                                     'If int, the axis in `images` that is the '
+                                     'slice axis.  In a 4D image, this will '
+                                     'often be axis = 2.  If a 2 sequence, then'
+                                     ' elements are ``(slice_axis, '
+                                     'slice_direction)``, where ``slice_axis`` '
+                                     'is the slice axis in the image as above, '
+                                     'and ``slice_direction`` is 1 if the '
+                                     'slices were acquired slice 0 first, slice'
+                                     ' -1 last, or -1 if acquired slice -1 '
+                                     'first, slice 0 last.  If `slice_info` is '
+                                     'an int, assume '
+                                     '``slice_direction`` == 1.'),
+                               requires=['slice_times'],
+                               )
+
+
+class SpaceTimeRealignerOutputSpec(TraitedSpec):
+    out_file = OutputMultiPath(File(exists=True),
+                               desc="Realigned files")
+    par_file = OutputMultiPath(File(exists=True),
+                               desc=("Motion parameter files. Angles are not "
+                                     "euler angles"))
+
+
+class SpaceTimeRealigner(BaseInterface):
+    """Simultaneous motion and slice timing correction algorithm
+
+    If slice_times is not specified, this algorithm performs spatial motion
+    correction
+
+    This interface wraps nipy's SpaceTimeRealign algorithm [1]_ or simply the
+    SpatialRealign algorithm when timing info is not provided.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.nipy import SpaceTimeRealigner
+    >>> #Run spatial realignment only
+    >>> realigner = SpaceTimeRealigner()
+    >>> realigner.inputs.in_file = ['functional.nii']
+    >>> res = realigner.run() # doctest: +SKIP
+
+    >>> realigner = SpaceTimeRealigner()
+    >>> realigner.inputs.in_file = ['functional.nii']
+    >>> realigner.inputs.tr = 2
+    >>> realigner.inputs.slice_times = range(0, 3, 67)
+    >>> realigner.inputs.slice_info = 2
+    >>> res = realigner.run() # doctest: +SKIP
+
+
+    References
+    ----------
+    .. [1] Roche A. A four-dimensional registration algorithm with \
+       application to joint correction of motion and slice timing \
+       in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. DOI_.
+
+    .. _DOI: http://dx.doi.org/10.1109/TMI.2011.2131152
+
+    """
+
+    input_spec = SpaceTimeRealignerInputSpec
+    output_spec = SpaceTimeRealignerOutputSpec
+    keywords = ['slice timing', 'motion correction']
+
+    @property
+    def version(self):
+        return nipy_version
+
+    def _run_interface(self, runtime):
+        all_ims = [load_image(fname) for fname in self.inputs.in_file]
+
+        if not isdefined(self.inputs.slice_times):
+            from nipy.algorithms.registration.groupwise_registration import \
+                SpaceRealign
+            R = SpaceRealign(all_ims)
+        else:
+            from nipy.algorithms.registration import SpaceTimeRealign
+            R = SpaceTimeRealign(all_ims,
+                                 tr=self.inputs.tr,
+                                 slice_times=self.inputs.slice_times,
+                                 slice_info=self.inputs.slice_info,
+                                 )
+
+        R.estimate(refscan=None)
 
         corr_run = R.resample()
         self._out_file_path = []

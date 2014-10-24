@@ -4,6 +4,7 @@ import os.path as op
 import glob
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.utils.filemanip import list_to_filename
+from nipype.external import six
 import logging
 
 logging.basicConfig()
@@ -26,7 +27,8 @@ class WatershedBEMInputSpec(FSTraitedSpec):
 
 class WatershedBEMOutputSpec(TraitedSpec):
     mesh_files = OutputMultiPath(File(exists=True),
-                           desc='Paths to the output meshes (brain, inner skull, outer skull, outer skin)')
+                           desc=('Paths to the output meshes (brain, inner '
+                                 'skull, outer skull, outer skin)'))
     brain_surface = File(exists=True, loc='bem/watershed',
                            desc='Brain surface (in Freesurfer format)')
     inner_skull_surface = File(exists=True, loc='bem/watershed',
@@ -37,8 +39,8 @@ class WatershedBEMOutputSpec(TraitedSpec):
                            desc='Outer skin surface (in Freesurfer format)')
     fif_file = File(exists=True, loc='bem', altkey='fif',
                            desc='"fif" format file for EEG processing in MNE')
-    cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws', altkey='COR',
-                           desc='"COR" format files')
+    cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws',
+                                altkey='COR', desc='"COR" format files')
 
 
 class WatershedBEM(FSCommand):
@@ -60,6 +62,7 @@ class WatershedBEM(FSCommand):
     _cmd = 'mne_watershed_bem'
     input_spec = WatershedBEMInputSpec
     output_spec = WatershedBEMOutputSpec
+    _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):
         globsuffix = '*'
@@ -87,7 +90,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, str):
+                    elif isinstance(value_list, six.string_types):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

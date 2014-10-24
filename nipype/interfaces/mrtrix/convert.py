@@ -10,23 +10,29 @@
 """
 
 # -*- coding: utf-8 -*-
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
-                                    File, isdefined, traits)
-from nipype.utils.filemanip import split_filename
-import os, os.path as op
-from nipype.workflows.misc.utils import get_data_dims, get_vox_dims
+import os.path as op
 import nibabel as nb, nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
-from nipype.utils.misc import package_check
+
+from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+                    File, isdefined, traits)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
+from ...workflows.misc.utils import get_data_dims, get_vox_dims
+
 import warnings
+have_dipy = True
 try:
     package_check('dipy')
-    from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
 except Exception, e:
-    warnings.warn('dipy not installed')
+    False
+else:
+    from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
+
 from nibabel.orientations import aff2axcodes
+
 from ... import logging
 iflogger = logging.getLogger('interface')
 
@@ -94,7 +100,10 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         n_streams = 0
         iflogger.info('Reading tracks...')
         while True:
-            n_pts = track_points[n_streams]
+            try:
+                n_pts = track_points[n_streams]
+            except IndexError:
+                break
             pts_str = fileobj.read(n_pts * bytesize)
             nan_str = fileobj.read(bytesize)
             if len(pts_str) < (n_pts * bytesize):

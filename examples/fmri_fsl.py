@@ -539,6 +539,7 @@ datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
+datasource.inputs.sort_filelist = True
 
 """
 Use the get_node function to retrieve an internal node by name. Then set the
@@ -633,7 +634,7 @@ generate any output. To actually run the analysis on the data the
 
 if __name__ == '__main__':
     l1pipeline.write_graph()
-    l1pipeline.run()
+    outgraph = l1pipeline.run()
     #l1pipeline.run(plugin='MultiProc', plugin_args={'n_procs':2})
 
 

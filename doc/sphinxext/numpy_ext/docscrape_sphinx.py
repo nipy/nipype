@@ -1,6 +1,7 @@
 import re, inspect, textwrap, pydoc
 import sphinx
 from docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from nipype.external import six
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
@@ -140,7 +141,7 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self['References']:
             out += self._str_header('References')
-            if isinstance(self['References'], str):
+            if isinstance(self['References'], six.string_types):
                 self['References'] = [self['References']]
             out.extend(self['References'])
             out += ['']
