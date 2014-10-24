@@ -26,6 +26,7 @@ from nibabel import load, funcs, Nifti1Image
 import numpy as np
 from scipy import signal
 import scipy.io as sio
+from nipype.external import six
 
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     OutputMultiPath, TraitedSpec, File,
@@ -279,7 +280,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, str):
+        if isinstance(motionfile, six.string_types):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -350,7 +351,7 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, str):
+        if isinstance(imgfile, six.string_types):
             nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:

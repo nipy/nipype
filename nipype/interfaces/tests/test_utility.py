@@ -113,3 +113,28 @@ def test_function_with_imports():
     finally:
         os.chdir(origdir)
         shutil.rmtree(tempdir)
+
+
+def test_split():
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    try:
+        node = pe.Node(utility.Split(inlist=range(4),
+                                     splits=[1, 3]),
+                       name='split_squeeze')
+        res = node.run()
+        yield assert_equal, res.outputs.out1, [0]
+        yield assert_equal, res.outputs.out2, [1, 2, 3]
+
+        node = pe.Node(utility.Split(inlist=range(4),
+                                     splits=[1, 3],
+                                     squeeze=True),
+                       name='split_squeeze')
+        res = node.run()
+        yield assert_equal, res.outputs.out1, 0
+        yield assert_equal, res.outputs.out2, [1, 2, 3]
+    finally:
+        os.chdir(origdir)
+        shutil.rmtree(tempdir)

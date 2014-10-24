@@ -30,6 +30,7 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
 from .. import config, logging
+from nipype.external import six
 iflogger = logging.getLogger('interface')
 
 def gcd(a, b):
@@ -149,7 +150,7 @@ def gen_info(run_event_files):
             elif '.txt' in name:
                 name, _ = name.split('.txt')
             runinfo.conditions.append(name)
-            event_info = np.loadtxt(event_file)
+            event_info = np.atleast_2d(np.loadtxt(event_file))
             runinfo.onsets.append(event_info[:, 0].tolist())
             if event_info.shape[1] > 1:
                 runinfo.durations.append(event_info[:, 1].tolist())
@@ -164,11 +165,11 @@ def gen_info(run_event_files):
 
 
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
-    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['event_files'],
+    subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info', 'event_files'],
           desc=("Bunch or List(Bunch) subject specific condition information. "
                 "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
-                                 xor=['subject_info'],
+                                 xor=['subject_info', 'event_files'],
           desc=('list of event description files 1, 2 or 3 column format '
                 'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
@@ -422,7 +423,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, str):
+            elif isinstance(f, six.string_types):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:

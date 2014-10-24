@@ -68,6 +68,34 @@ def test_use_mfile():
     yield assert_true, dc.inputs.mfile
 
 
+def test_find_mlab_cmd_defaults():
+    saved_env = dict(os.environ)
+    class TestClass(spm.SPMCommand):
+        pass
+    # test without FORCE_SPMMCR, SPMMCRCMD set
+    for varname in ['FORCE_SPMMCR', 'SPMMCRCMD']:
+        try:
+            del os.environ[varname]
+        except KeyError:
+            pass
+    dc = TestClass()
+    yield assert_equal, dc._use_mcr, None
+    yield assert_equal, dc._matlab_cmd, None
+    # test with only FORCE_SPMMCR set
+    os.environ['FORCE_SPMMCR'] = '1'
+    dc = TestClass()
+    yield assert_equal, dc._use_mcr, True
+    yield assert_equal, dc._matlab_cmd, None
+    # test with both, FORCE_SPMMCR and SPMMCRCMD set
+    os.environ['SPMMCRCMD'] = 'spmcmd'
+    dc = TestClass()
+    yield assert_equal, dc._use_mcr, True
+    yield assert_equal, dc._matlab_cmd, 'spmcmd'
+    # restore environment
+    os.environ.clear();
+    os.environ.update(saved_env)
+
+
 @skipif(no_spm, "SPM not found")
 def test_cmd_update():
     class TestClass(spm.SPMCommand):

@@ -383,6 +383,70 @@ class SurfaceTransform(FSCommand):
         return None
 
 
+class Surface2VolTransformInputSpec(FSTraitedSpec):
+    source_file = File(exists=True, argstr='--surfval %s',
+                      copyfile=False, mandatory=True,
+                      desc='This is the source of the surface values')
+    hemi = traits.Str(argstr='--hemi %s', mandatory=True,
+                      desc='hemisphere of data')
+    transformed_file = File(name_template="%s_asVol.nii", desc='Output volume',
+                            argstr='--outvol %s',
+                            name_source=['source_file'], hash_files=False)
+    reg_file = File(exists=True, argstr='--volreg %s',
+                    mandatory=True,
+                    desc='tkRAS-to-tkRAS matrix   (tkregister2 format)',
+                    xor=['subject_id'])
+    template_file = File(exists=True, argstr='--template %s',
+                      desc='Output template volume')
+    mkmask = traits.Bool(desc='make a mask instead of loading surface values',
+                         argstr='--mkmask')
+    vertexvol_file = File(name_template="%s_asVol_vertex.nii",
+                          desc=('Path name of the vertex output volume, which '
+                                'is the same as output volume except that the '
+                                'value of each voxel is the vertex-id that is '
+                                'mapped to that voxel.'),
+                          argstr='--vtxvol %s', name_source=['source_file'],
+                          hash_files=False)
+    surf_name = traits.Str(argstr='--surf %s',
+                           desc='surfname (default is white)')
+    projfrac = traits.Float(argstr='--projfrac %s', desc='thickness fraction')
+    subjects_dir = traits.Str(argstr='--sd %s',
+                              desc=('freesurfer subjects directory defaults to '
+                                    '$SUBJECTS_DIR'))
+    subject_id = traits.Str(argstr='--identity %s',desc='subject id',
+                            xor=['reg_file'])
+
+
+class Surface2VolTransformOutputSpec(TraitedSpec):
+    transformed_file = File(exists=True,
+                            desc='Path to output file if used normally')
+    vertexvol_file = File(desc='vertex map volume path id. Optional')
+
+
+class Surface2VolTransform(FSCommand):
+    """Use FreeSurfer mri_surf2vol to apply a transform.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.freesurfer import Surface2VolTransform
+    >>> xfm2vol = Surface2VolTransform()
+    >>> xfm2vol.inputs.source_file = 'lh.cope1.mgz'
+    >>> xfm2vol.inputs.reg_file = 'register.mat'
+    >>> xfm2vol.inputs.hemi = 'lh'
+    >>> xfm2vol.inputs.template_file = 'cope1.nii.gz'
+    >>> xfm2vol.inputs.subjects_dir = '.'
+    >>> xfm2vol.cmdline
+    'mri_surf2vol --hemi lh --volreg register.mat --surfval lh.cope1.mgz --sd . --template cope1.nii.gz --outvol lh.cope1_asVol.nii --vtxvol lh.cope1_asVol_vertex.nii'
+    >>> res = xfm2vol.run()# doctest: +SKIP
+
+    """
+
+    _cmd = 'mri_surf2vol'
+    input_spec = Surface2VolTransformInputSpec
+    output_spec = Surface2VolTransformOutputSpec
+
+
 class ApplyMaskInputSpec(FSTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, position=-3, argstr="%s",
@@ -859,6 +923,77 @@ class MRITessellate(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
 
+
+class MRIPretessInputSpec(FSTraitedSpec):
+    in_filled = File(exists=True, mandatory=True, position=-4, argstr='%s',
+                     desc=('filled volume, usually wm.mgz'))
+    label = traits.Either(traits.Str('wm'), traits.Int(1), argstr='%s', default='wm',
+                          mandatory=True, usedefault=True, position=-3,
+                          desc=('label to be picked up, can be a Freesurfer\'s string like '
+                                '\'wm\' or a label value (e.g. 127 for rh or 255 for lh)'))
+    in_norm = File(exists=True, mandatory=True, position=-2, argstr='%s',
+                   desc=('the normalized, brain-extracted T1w image. Usually norm.mgz'))
+    out_file = File(position=-1, argstr='%s', genfile=True,
+                    desc=('the output file after mri_pretess.'))
+
+
+    nocorners = traits.Bool(False, argstr='-nocorners', desc=('do not remove corner configurations'
+                            ' in addition to edge ones.'))
+    keep = traits.Bool(False, argstr='-keep', desc=('keep WM edits'))
+    test = traits.Bool(False, argstr='-test', desc=('adds a voxel that should be removed by '
+                       'mri_pretess. The value of the voxel is set to that of an ON-edited WM, '
+                       'so it should be kept with -keep. The output will NOT be saved.'))
+
+class MRIPretessOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output file after mri_pretess')
+
+
+class MRIPretess(FSCommand):
+    """
+    Uses Freesurfer's mri_pretess to prepare volumes to be tessellated.
+
+    Description
+    -----------
+
+    Changes white matter (WM) segmentation so that the neighbors of all
+    voxels labeled as WM have a face in common - no edges or corners
+    allowed.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.freesurfer as fs
+    >>> pretess = fs.MRIPretess()
+    >>> pretess.inputs.in_filled = 'wm.mgz'
+    >>> pretess.inputs.in_norm = 'norm.mgz'
+    >>> pretess.inputs.nocorners = True
+    >>> pretess.cmdline
+    'mri_pretess -nocorners wm.mgz wm norm.mgz wm_pretesswm.mgz'
+    >>> pretess.run() # doctest: +SKIP
+    """
+    _cmd = 'mri_pretess'
+    input_spec = MRIPretessInputSpec
+    output_spec = MRIPretessOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_file':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        else:
+            _, name, ext = split_filename(self.inputs.in_filled)
+            return name + '_pretess' + str(self.inputs.label) + ext
+
+
 class MRIMarchingCubesInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
@@ -1053,3 +1188,92 @@ class ExtractMainComponent(CommandLine):
     _cmd='mris_extract_main_component'
     input_spec=ExtractMainComponentInputSpec
     output_spec=ExtractMainComponentOutputSpec
+
+
+class Tkregister2InputSpec(FSTraitedSpec):
+    target_image = File(exists=True, argstr="--targ %s",
+                        xor=['fstarg'],
+                        desc='target volume')
+    fstarg = traits.Bool(False, argstr='--fstarg',
+                         xor=['target_image'],
+                         desc='use subject\'s T1 as reference')
+
+    moving_image = File(exists=True, mandatory=True, argstr="--mov %s",
+                        desc='moving volume')
+    fsl_in_matrix = File(exists=True, argstr="--fsl %s",
+                         desc='fsl-style registration input matrix')
+    subject_id = traits.String(argstr="--s %s",
+                               desc='freesurfer subject ID')
+    noedit = traits.Bool(True, argstr="--noedit", usedefault=True,
+                         desc='do not open edit window (exit)')
+    reg_file = File('register.dat', usedefault=True,
+                    mandatory=True, argstr='--reg %s',
+                    desc='freesurfer-style registration file')
+    reg_header = traits.Bool(False, argstr='--regheader',
+                             desc='compute regstration from headers')
+    fstal = traits.Bool(False, argstr='--fstal',
+                        xor=['target_image', 'moving_image'],
+                        desc='set mov to be tal and reg to be tal xfm')
+    movscale = traits.Float(argstr='--movscale %f',
+                            desc='adjust registration matrix to scale mov')
+    xfm = File(exists=True, argstr='--xfm %s',
+               desc='use a matrix in MNI coordinates as initial registration')
+    fsl_out = File(argstr='--fslregout %s',
+                   desc='compute an FSL-compatible resgitration matrix')
+
+
+class Tkregister2OutputSpec(TraitedSpec):
+    reg_file = File(exists=True, desc='freesurfer-style registration file')
+    fsl_file = File(desc='FSL-style registration file')
+
+
+class Tkregister2(FSCommand):
+    """
+
+    Examples
+    --------
+
+    Get transform matrix between orig (*tkRAS*) and native (*scannerRAS*)
+    coordinates in Freesurfer. Implements the first step of mapping surfaces
+    to native space in `this guide
+    <http://surfer.nmr.mgh.harvard.edu/fswiki/FsAnat-to-NativeAnat>`_.
+
+    >>> from nipype.interfaces.freesurfer import Tkregister2
+    >>> tk2 = Tkregister2(reg_file='T1_to_native.dat')
+    >>> tk2.inputs.moving_image = 'T1.mgz'
+    >>> tk2.inputs.target_image = 'structural.nii'
+    >>> tk2.inputs.reg_header = True
+    >>> tk2.cmdline
+    'tkregister2 --mov T1.mgz --noedit --reg T1_to_native.dat --regheader \
+--targ structural.nii'
+    >>> tk2.run() # doctest: +SKIP
+
+    The example below uses tkregister2 without the manual editing
+    stage to convert FSL-style registration matrix (.mat) to
+    FreeSurfer-style registration matrix (.dat)
+
+    >>> from nipype.interfaces.freesurfer import Tkregister2
+    >>> tk2 = Tkregister2()
+    >>> tk2.inputs.moving_image = 'epi.nii'
+    >>> tk2.inputs.fsl_in_matrix = 'flirt.mat'
+    >>> tk2.cmdline
+    'tkregister2 --fsl flirt.mat --mov epi.nii --noedit --reg register.dat'
+    >>> tk2.run() # doctest: +SKIP
+    """
+    _cmd = "tkregister2"
+    input_spec = Tkregister2InputSpec
+    output_spec = Tkregister2OutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
+        if isdefined(self.inputs.fsl_out):
+            outputs['fsl_file'] = op.abspath(self.inputs.fsl_out)
+        return outputs
+
+    def _gen_outfilename(self):
+        if isdefined(self.inputs.out_file):
+            return os.path.abspath(self.inputs.out_file)
+        else:
+            _, name, ext = split_filename(self.inputs.in_file)
+            return os.path.abspath(name + '_smoothed' + ext)

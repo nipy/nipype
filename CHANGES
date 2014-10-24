@@ -1,14 +1,78 @@
 Next release
 ============
 
+
+Release 0.10.0 (October 10, 2014)
+============
+
+* ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
+       to enable parallel processing of very large images.
+* ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still
+       available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu 
+       versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU
+* ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
+* ENH: New dipy interfaces: Denoise, Resample
+* ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format), MRIPretess
+* ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp
+* ENH: New miscelaneous interfaces: AddCSVRow, NormalizeProbabilityMapSet, AddNoise
+* ENH: New AFNI interfaces:  Eval, Means, SVMTest, SVMTrain
+* ENH: FUGUE interface has been refactored to use the name_template system, 3 examples 
+       added to doctests, some bugs solved.
+* API: Interfaces to external packages are no longer available in the top-level
+       ``nipype`` namespace, and must be imported directly (e.g.
+       ``from nipype.interfaces import fsl``).
+* ENH: Support for elastix via a set of new interfaces: Registration, ApplyWarp, 
+       AnalyzeWarp, PointsWarp, and EditTransform
+* ENH: New ANTs interface: ApplyTransformsToPoints, LaplacianThickness
+* ENH: New Diffusion Toolkit interface: TrackMerge
+* ENH: New MRtrix interface: FilterTracks
+* ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap
+       are found in nipype.algorithms.metrics instead of misc. Overlap interface
+       extended to allow files containing multiple ROIs and volume physical units.
+* ENH: New interface in algorithms.metrics: ErrorMap (a voxel-wise diff map).
+* ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()
+* ENH: Deep revision of workflows for correction of dMRI artifacts. New dmri_preprocessing
+       example.
+* ENH: New data grabbing interface that works over SSH connections, SSHDataGrabber
+* ENH: New color mode for write_graph
+* ENH: You can now force MapNodes to be run serially
+* ENH: Added ANTS based openfmri workflow
+* ENH: MapNode now supports flattening of nested lists 
+* ENH: Support for headless mode using Xvfb
+* ENH: nipype_display_crash has a debugging mode
+* FIX: MRTrix tracking algorithms were ignoring mask parameters.
+* FIX: FNIRT registration pathway and associated OpenFMRI example script
+* FIX: spm12b compatibility for Model estimate
+* FIX: Batch scheduler controls the number of maximum jobs properly
+* FIX: Update for FSL 5.0.7 which deprecated Contrast Manager
+
+Release 0.9.2 (January 31, 2014)
+============
+
+* FIX: DataFinder was broken due to a typo
+* FIX: Order of DataFinder outputs was not guaranteed, it's human sorted now
+* ENH: New interfaces: Vnifti2Image, VtoMat
+
+Release 0.9.1 (December 25, 2013)
+============
+
+* FIX: installation issues
+
+Release 0.9.0 (December 20, 2013)
+============
+
 * ENH: SelectFiles: a streamlined version of DataGrabber
-* ENH: New interfaces: spm.ResliceToReference, FuzzyOverlap, afni.AFNItoNIFTI
-       spm.DicomImport, P2PDistance
+* ENH: new tools for defining workflows: JoinNode, synchronize and itersource
 * ENH: W3C PROV support with optional RDF export built into Nipype
 * ENH: Added support for Simple Linux Utility Resource Management (SLURM)
-* ENH: AFNI interfaces refactor, prefix, suffix are replaced by "flexible_%s_templates"
-* ENH: DataGrabber and SelectFiles use human (or natural) sort now
-
+* ENH: AFNI interfaces refactor, prefix, suffix are replaced by
+       "flexible_%s_templates"
+* ENH: New SPM interfaces:
+		- spm.ResliceToReference,
+		- spm.DicomImport
+* ENH: New AFNI interfaces:
+		- afni.AFNItoNIFTI
+		- afni.TCorr1D
 * ENH: Several new interfaces related to Camino were added:
         - camino.SFPICOCalibData
         - camino.Conmat
@@ -17,6 +81,30 @@ Next release
         - camino.SFPeaks
         One outdated interface no longer part of Camino was removed:
         - camino.Conmap
+* ENH: Three new mrtrix interfaces were added:
+        - mrtrix.GenerateDirections
+        - mrtrix.FindShPeaks
+        - mrtrix.Directions2Amplitude
+* ENH: New FSL interfaces:
+		- fsl.PrepareFieldmap
+		- fsl.TOPUP
+		- fsl.ApplyTOPUP
+		- fsl.Eddy
+* ENH: New misc interfaces:
+		- FuzzyOverlap,
+		- P2PDistance
+* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
+* ENH: Added simplified outputname generation for command line interfaces.
+* ENH: Allow ants use a single mask image
+* ENH: Create configuration option for parameterizing directories with hashes
+* ENH: arrange nodes by topological sort with disconnected subgraphs
+* ENH: uses the nidm iri namespace for uuids
+* ENH: remove old reporting webpage
+* ENH: Added support for Vagrant
+
+* API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
+* API: SPM now defaults to SPM8 or SPM12b job format
+* API: DataGrabber and SelectFiles use human (or natural) sort now
 
 * FIX: Several fixes related to Camino interfaces:
         - ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)
@@ -26,29 +114,12 @@ Next release
         - Track input model names were outdated (and would generate an error)
         - Track numpds parameter could not be set for deterministic tractography
         - FA created output files with erroneous extension
-
 * FIX: Deals properly with 3d files in SPM Realign
 * FIX: SPM with MCR fixed
-
-* API: 'name' is now a positional argument for Workflow, Node, and MapNode constructors
-* API: SPM now defaults to SPM8 or SPM12b job format
-
-* ENH: New FSL interfaces: fsl.PrepareFieldmap, fsl.TOPUP, fsl.ApplyTOPUP, fsl.Eddy
-* ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&topup_correction]
-
-* ENH: Added simplified outputname generation for command line interfaces.
 * FIX: Cleaned up input and output spec metadata
-
-* ENH: Allow ants use a single mask image
-* ENH: Create configuration option for parameterizing directories with hashes
-* ENH: arrange nodes by topological sort with disconnected subgraphs
-* ENH: uses the nidm iri namespace for uuids
-* ENH: remove old reporting webpage (this is a WIP i hope to finish in a day or two)
-
 * FIX: example openfmri script now makes the contrast spec a hashed input
 * FIX: FILMGLS compatibility with FSL 5.0.5
 * FIX: Freesurfer recon-all resume now avoids setting inputs
-
 * FIX: File removal from node respects file associations img/hdr/mat, BRIK/HEAD
 
 Release 0.8.0 (May 8, 2013)

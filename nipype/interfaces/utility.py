@@ -5,6 +5,7 @@ import re
 from cPickle import dumps, loads
 import numpy as np
 import nibabel as nb
+from nipype.external import six
 
 from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
@@ -251,6 +252,8 @@ class SplitInputSpec(BaseInterfaceInputSpec):
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
                   desc='Number of outputs in each split - should add to number of inputs')
+    squeeze = traits.Bool(False, usedefault=True,
+                          desc='unfold one-element splits removing the list')
 
 
 class Split(IOBase):
@@ -289,7 +292,10 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                outputs['out%d' % (i + 1)] = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                if self.inputs.squeeze and len(val) == 1:
+                    val = val[0]
+                outputs['out%d' % (i + 1)] = val
         return outputs
 
 
@@ -386,7 +392,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, str):
+            elif isinstance(function, six.string_types):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
@@ -404,7 +410,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, str):
+            elif isinstance(new, six.string_types):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})

@@ -378,30 +378,21 @@ def load_json(filename):
     fp.close()
     return data
 
-
-def loadflat(infile, *args):
-    """Load an npz file into a dict
-    """
-    data = np.load(infile)
-    out = {}
-    if args:
-        outargs = np.setdiff1d(args, data.files)
-        if outargs:
-            raise IOError('File does not contain variables: '+str(outargs))
-    for k in data.files:
-        if k in args or not args:
-            out[k] = [f for f in data[k].flat]
-            if len(out[k]) == 1:
-                out[k] = out[k].pop()
-    return out
-
-
 def loadcrash(infile, *args):
     if '.pkl' in infile:
         return loadpkl(infile)
+    elif '.npz' in infile:
+        DeprecationWarning(('npz files will be deprecated in the next '
+                            'release. you can use numpy to open them.'))
+        data = np.load(infile)
+        out = {}
+        for k in data.files:
+            out[k] = [f for f in data[k].flat]
+            if len(out[k]) == 1:
+                out[k] = out[k].pop()
+        return out
     else:
-        return loadflat(infile, *args)
-
+        raise ValueError('Only pickled crashfiles are supported')
 
 def loadpkl(infile):
     """Load a zipped or plain cPickled file

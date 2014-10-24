@@ -11,6 +11,7 @@
    :maxdepth: 2
 
    install
+   vagrant
 
    interface_tutorial
    caching_tutorial
@@ -35,6 +36,7 @@
    model_specification
    saving_workflows
    spmmcr
+   mipav
 
  
 

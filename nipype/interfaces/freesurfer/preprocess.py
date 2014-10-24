@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""Provides interfaces to various commands provided by freeusrfer
+"""Provides interfaces to various commands provided by FreeSurfer
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -649,8 +649,7 @@ class ReconAll(CommandLine):
         ('nuintensitycor', ['mri/nu.mgz']),
         ('normalization', ['mri/T1.mgz']),
         ('skullstrip',
-         ['mri/transforms/talairach_with_skull.lta',
-          'mri/brainmask.auto.mgz',
+         ['mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
         #autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),
@@ -808,7 +807,7 @@ class BBRegisterInputSpec(FSTraitedSpec):
     init = traits.Enum('spm', 'fsl', 'header', argstr='--init-%s',
                        mandatory=True, xor=['init_reg_file'],
                        desc='initialize registration spm, fsl, header')
-    init_reg_file = File(exists=True,
+    init_reg_file = File(exists=True, argstr='--init-reg %s',
                          desc='existing registration file',
                          xor=['init'], mandatory=True)
     contrast_type = traits.Enum('t1', 't2', argstr='--%s',
@@ -970,7 +969,6 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
                                      'non-linear morph to resample the input '
                                      'volume. To be used by --m3z.'))
 
-
 class ApplyVolTransformOutputSpec(TraitedSpec):
     transformed_file = File(exists=True, desc='Path to output file if used normally')
 
@@ -1020,7 +1018,6 @@ class ApplyVolTransform(FSCommand):
         if name == 'transformed_file':
             return self._get_outfile()
         return None
-
 
 class SmoothInputSpec(FSTraitedSpec):
     in_file = File(exists=True, desc='source volume',
