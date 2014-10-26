@@ -8,7 +8,7 @@ Introduction
 ============
 
 This script, camino_dti_tutorial.py, demonstrates the ability to perform basic diffusion analysis
-in a Nipype pipeline.
+in a Nipype pipeline::
 
     python dmri_camino_dti.py
 

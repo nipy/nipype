@@ -7,7 +7,7 @@ fMRI: OpenfMRI.org data, FSL, ANTS, c3daffine
 =============================================
 
 A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
-This script demonstrates how to use nipype to analyze a data set.
+This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
 """
@@ -47,19 +47,16 @@ def create_reg_workflow(name='registration'):
 
     Parameters
     ----------
-
-    ::
-
         name : name of workflow (default: 'registration')
 
-    Inputs::
+    Inputs:
 
         inputspec.source_files : files (filename or list of filenames to register)
         inputspec.mean_image : reference image to use
         inputspec.anatomical_image : anatomical image to coregister to
         inputspec.target_image : registration target
 
-    Outputs::
+    Outputs:
 
         outputspec.func2anat_transform : FLIRT transform
         outputspec.anat2target_transform : FLIRT+FNIRT transform
@@ -68,7 +65,6 @@ def create_reg_workflow(name='registration'):
 
     Example
     -------
-
     """
 
     register = pe.Workflow(name=name)
@@ -130,6 +126,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
     register.connect(mean2anat, 'out_matrix_file',
                      mean2anatbbr, 'in_matrix_file')
+
     """
     Convert the BBRegister transformation to ANTS ITK format
     """
@@ -197,6 +194,7 @@ def create_reg_workflow(name='registration'):
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = pe.Node(ants.ApplyTransforms(),
                        name='warpmean')
     warpmean.inputs.input_image_type = 3
@@ -237,6 +235,10 @@ def create_reg_workflow(name='registration'):
                      outputnode, 'anat2target_transform')
 
     return register
+
+"""
+Get info for a given subject
+"""
 
 def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     """Get info for a given subject
@@ -291,6 +293,9 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
+"""
+Analyzes an open fmri dataset
+"""
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                              task_id=None, output_dir=None, subj_prefix='*',
@@ -621,6 +626,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Set processing parameters
     """
+
     preproc.inputs.inputspec.fwhm = fwhm
     gethighpass.inputs.hpcutoff = hpcutoff
     modelspec.inputs.high_pass_filter_cutoff = hpcutoff
@@ -633,6 +639,10 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     datasink.inputs.base_directory = output_dir
     return wf
+
+"""
+The following functions run the whole workflow.
+"""
 
 if __name__ == '__main__':
     import argparse
