@@ -5,7 +5,7 @@ sMRI: FreeSurfer
 ================
 
 This script, smri_freesurfer.py, demonstrates the ability to call reconall on
-a set of subjects and then make an average subject.
+a set of subjects and then make an average subject::
 
     python smri_freesurfer.py
 

@@ -6,17 +6,16 @@
 fMRI: NiPy GLM, SPM
 ===================
 
-
 The fmri_nipy_glm.py integrates several interfaces to perform a first level
 analysis on a two-subject data set. It is very similar to the spm_tutorial with
 the difference of using nipy for fitting GLM model and estimating contrasts.
-The tutorial can
-be found in the examples folder. Run the tutorial from inside the
-nipype tutorial directory:
+The tutorial can be found in the examples folder. Run the tutorial from inside
+the nipype tutorial directory::
 
     python fmri_nipy_glm.py
 
 """
+
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
 from nipype.interfaces.nipy.preprocess import ComputeMask
 
