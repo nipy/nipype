@@ -405,7 +405,7 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
     bval = np.loadtxt(in_bval)
     b0s = [im.get_data().astype(np.float32)
-           for im in imgs[np.where(bval <= maxb)]]
+           for im in imgs[np.where(bval <= max_b)]]
     b0 = np.average(np.array(b0s), axis=0)
 
     hdr = imgs[0].get_header().copy()
