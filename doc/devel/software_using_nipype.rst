@@ -23,6 +23,11 @@ BROCCOLI
 
 `BROCCOLI <https://github.com/wanderine/BROCCOLI/>`_ is a piece of software for fast fMRI analysis on many core CPUs and GPUs. It provides Nipype Interfaces.
 
+Forward
+-------
+
+`Forward <http://cyclotronresearchcentre.github.io/forward/>`_ is set of tools simplifying the preparation of accurate electromagnetic head models for EEG forward modeling. It uses Nipype Workflows and Interfaces.
+
 Lyman
 -----
 
