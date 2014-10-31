@@ -467,7 +467,7 @@ class SPMCommand(BaseInterface):
         fprintf('SPM path: %s\\n', which('spm'));
         spm('Defaults','fMRI');
 
-        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12'),
            spm_jobman('initcfg');
            spm_get_defaults('cmdline', 1);
         end\n
@@ -502,7 +502,7 @@ class SPMCommand(BaseInterface):
         """
         if self.inputs.use_mcr:
             mscript += """
-        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12'),
             close(\'all\', \'force\');
         end;
             """
