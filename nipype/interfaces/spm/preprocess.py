@@ -428,7 +428,7 @@ class NormalizeOutputSpec(TraitedSpec):
 class Normalize(SPMCommand):
     """use spm_normalise for warping an image to a template
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=51
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=203
 
     Examples
     --------
@@ -589,7 +589,7 @@ class Segment(SPMCommand):
     """use spm_segment to separate structural images into different
     tissue classes.
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=209
 
     Examples
     --------
@@ -700,7 +700,7 @@ class NewSegment(SPMCommand):
 
     NOTE: This interface currently supports single channel input only
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43
 
     Examples
     --------
@@ -838,7 +838,7 @@ class SmoothOutputSpec(TraitedSpec):
 class Smooth(SPMCommand):
     """Use spm_smooth for 3D Gaussian smoothing of image volumes.
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=57
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=55
 
     Examples
     --------
@@ -924,7 +924,7 @@ class DARTELOutputSpec(TraitedSpec):
 class DARTEL(SPMCommand):
     """Use spm DARTEL to create a template and flow fields
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=197
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185
 
     Examples
     --------
@@ -1017,7 +1017,7 @@ class DARTELNorm2MNIOutputSpec(TraitedSpec):
 class DARTELNorm2MNI(SPMCommand):
     """Use spm DARTEL to normalize data to MNI space
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=200
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=188
 
     Examples
     --------
@@ -1103,7 +1103,7 @@ class CreateWarpedOutputSpec(TraitedSpec):
 class CreateWarped(SPMCommand):
     """Apply a flow field estimated by DARTEL to create warped images
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=202
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=190
 
     Examples
     --------

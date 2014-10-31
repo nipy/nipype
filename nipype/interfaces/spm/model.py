@@ -92,7 +92,7 @@ class Level1DesignOutputSpec(TraitedSpec):
 class Level1Design(SPMCommand):
     """Generate an SPM design matrix
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=61
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=59
 
     Examples
     --------
@@ -182,7 +182,7 @@ class EstimateModelOutputSpec(TraitedSpec):
 class EstimateModel(SPMCommand):
     """Use spm_spm to estimate the parameters of a model
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=71
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=69
 
     Examples
     --------
@@ -744,7 +744,7 @@ class FactorialDesignOutputSpec(TraitedSpec):
 class FactorialDesign(SPMCommand):
     """Base class for factorial designs
 
-    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=79
+    http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=77
 
     """
 
