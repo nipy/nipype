@@ -249,7 +249,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         File(exists=True), argstr='%s', mandatory=True, desc=(''))
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(
-        0.0, argstr='--default-value %d', usedefault=True)
+        0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Enum(
         0, 1, requires=["output_image"], desc=(''))  # TODO: Change to boolean
 
