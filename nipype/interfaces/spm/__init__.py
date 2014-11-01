@@ -4,12 +4,11 @@
 
 from .base import (Info, SPMCommand, logger, no_spm, scans_for_fname,
                    scans_for_fnames)
-from .preprocess import (SliceTiming, Realign, Coregister, Normalize, Normalize12,
-                         Segment, Smooth, NewSegment, DARTEL, DARTELNorm2MNI,
-                         CreateWarped, VBMSegment)
+from .preprocess import (SliceTiming, Realign, Coregister, Normalize,
+                         Normalize12, Segment, Smooth, NewSegment, DARTEL,
+                         DARTELNorm2MNI, CreateWarped, VBMSegment)
 from .model import (Level1Design, EstimateModel, EstimateContrast, Threshold,
                     OneSampleTTestDesign, TwoSampleTTestDesign,
                     PairedTTestDesign, MultipleRegressionDesign)
 from .utils import (Analyze2nii, CalcCoregAffine, ApplyTransform, Reslice,
-                    ApplyInverseDeformation,ResliceToReference,DicomImport)
-
+                    ApplyInverseDeformation, ResliceToReference, DicomImport)
