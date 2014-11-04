@@ -381,9 +381,11 @@ def recompose_xfm(in_bval, in_xfms):
     return out_files
 
 
-def b0_average(in_dwi, in_bval, out_file=None):
+def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     """
     A function that averages the *b0* volumes from a DWI dataset.
+    As current dMRI data are being acquired with all b-values > 0.0,
+    the *lowb* volumes are selected by specifying the parameter max_b.
 
     .. warning:: *b0* should be already registered (head motion artifact should
       be corrected).
@@ -403,7 +405,7 @@ def b0_average(in_dwi, in_bval, out_file=None):
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
     bval = np.loadtxt(in_bval)
     b0s = [im.get_data().astype(np.float32)
-           for im in imgs[np.where(bval == 0)]]
+           for im in imgs[np.where(bval <= max_b)]]
     b0 = np.average(np.array(b0s), axis=0)
 
     hdr = imgs[0].get_header().copy()
