@@ -374,8 +374,8 @@ class NormalizeInputSpec(SPMCommandInputSpec):
                             desc='file to normalize to template',
                             xor=['parameter_file'],
                             mandatory=True, copyfile=True)
-    jobtype = traits.Enum('estwrite', 'est', 'write',
-                          desc='one of: est, write, estwrite estwrite')
+    jobtype = traits.Enum('estwrite', 'est', 'write', usedefault=True,
+                          desc='Estimate, Write or do both')
     apply_to_files = InputMultiPath(traits.Either(File(exists=True),
                                                   traits.List(File(exists=True))),
                                     field='subj.resample',
@@ -527,11 +527,11 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                                     copyfile=True)
     deformation_file = File(field='subj.def', mandatory=True,
                             xor=['image_to_align', 'tpm'],
-                            desc=('file y_*.nii containing 3 deformation fields',
+                            desc=('file y_*.nii containing 3 deformation fields '
                                   'for the deformation in x, y and z dimension'),
                             copyfile=False)
-    jobtype = traits.Enum('estwrite', 'est', 'write',
-                          desc='one of: est, write, estwrite estwrite')
+    jobtype = traits.Enum('estwrite', 'est', 'write', usedefault=True,
+                          desc='Estimate, Write or do Both')
     bias_regularization = traits.Enum(0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1,
                                       10, field='eoptions.biasreg',
                                       desc='no(0) - extremely heavy (10)')
@@ -547,23 +547,23 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                                              desc='mni, size, none')
     warping_regularization = traits.List(traits.Float(), field='eoptions.reg',
                                          minlen=5, maxlen=5,
-                                         desc=('controls balance between',
+                                         desc=('controls balance between '
                                                'parameters and data'))
     smoothness = traits.Float(field='eoptions.fwhm',
-                              desc=('value (in mm) to smooth the data before',
+                              desc=('value (in mm) to smooth the data before '
                                     'normalization'))
     sampling_distance = traits.Float(field='eoptions.samp',
-                                     desc=('Sampling distance on data for',
+                                     desc=('Sampling distance on data for '
                                            'parameter estimation'))
     write_bounding_box = traits.List(traits.List(traits.Float(),
                                                  minlen=3, maxlen=3),
                                      field='woptions.bb', minlen=2, maxlen=2,
-                                     desc=('3x2-element list of lists representing',
+                                     desc=('3x2-element list of lists representing '
                                            'the bounding box (in mm) to be written'))
     write_voxel_sizes = traits.List(traits.Float(), field='woptions.vox',
                                     minlen=3, maxlen=3,
-                                    desc=('3-element list representing the',
-                                          'voxel sizes (in mm) of the written',
+                                    desc=('3-element list representing the '
+                                          'voxel sizes (in mm) of the written '
                                           'normalised images'))
     write_interp = traits.Range(low=0, high=7, field='woptions.interp',
                                 desc='degree of b-spline used for interpolation')
@@ -571,13 +571,13 @@ class Normalize12InputSpec(SPMCommandInputSpec):
 
 class Normalize12OutputSpec(TraitedSpec):
     deformation_field = OutputMultiPath(File(exists=True),
-                                        desc=('NIfTI file containing 3 deformation',
-                                              'fields for the deformation in',
+                                        desc=('NIfTI file containing 3 deformation '
+                                              'fields for the deformation in '
                                               'x, y and z dimension'))
     normalized_image = OutputMultiPath(File(exists=True),
-                                       desc=('Normalized file that needed to',
+                                       desc=('Normalized file that needed to '
                                              'be aligned'))
-    normalized_files = OutputMultiPath(File(exists=True), 
+    normalized_files = OutputMultiPath(File(exists=True),
                                        desc='Normalized other files')
 
 
@@ -621,7 +621,7 @@ class Normalize12(SPMCommand):
                 raise ValueError('%s must have 5 elements' % opt)
         return super(Normalize12, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def _parse_inputs(self, skip=()):
         """validate spm normalize options if set to None ignore
         """
         einputs = super(Normalize12, self)._parse_inputs(skip=('jobtype',
