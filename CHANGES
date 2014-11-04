@@ -1,6 +1,9 @@
 Next release
 ============
 
+* ENH: SPM12 Normalize interface (https://github.com/nipy/nipype/pull/986)
+* FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
+* FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
 
 Release 0.10.0 (October 10, 2014)
 ============
