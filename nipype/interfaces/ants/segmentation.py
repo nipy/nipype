@@ -542,9 +542,8 @@ class antsCorticalThickness(ANTSCommand):
         outputs['CorticalThickness'] = os.path.join(os.getcwd(),
                self.inputs.out_prefix + 'CorticalThickness.' +
                self.inputs.image_suffix)
-        outputs['TemplateToSubject1GenericAffine'] = os.path.join(
-                os.getcwd(),
-                'TemplateToSubject1GenericAffine.mat')
+        outputs['TemplateToSubject1GenericAffine'] = os.path.join(os.getcwd(),
+                self.inputs.out_prefix + 'TemplateToSubject1GenericAffine.mat')
         outputs['TemplateToSubject0Warp'] = os.path.join(os.getcwd(),
                self.inputs.out_prefix + 'TemplateToSubject0Warp.'+
                self.inputs.image_suffix)
@@ -554,6 +553,6 @@ class antsCorticalThickness(ANTSCommand):
         outputs['SubjectToTemplate0GenericAffine'] = os.path.join(os.getcwd(),
                 self.inputs.out_prefix + 'SubjectToTemplate0GenericAffine.mat')
         outputs['TemplateToSubjectLogJacobian'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'subjectToTemplateLogJacobian.'+
+               self.inputs.out_prefix + 'SubjectToTemplateLogJacobian.'+
                self.inputs.image_suffix)
         return outputs
