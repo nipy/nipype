@@ -490,7 +490,7 @@ class antsCorticalThickness(ANTSCommand):
             if priors_directory is not '':
                 retval = "-p %s/BrainSegmentationPrior%%02d" %(priors_directory)
             else:
-                retval = "-p BrainSegmentationPrior%02d" 
+                retval = "-p BrainSegmentationPrior%02d"
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
