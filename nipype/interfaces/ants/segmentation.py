@@ -229,17 +229,16 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                              'coregistered functional)'))
     mask_image = File(argstr='--mask-image %s')
+    weight_image = File(argstr='--weight-image %s')
     output_image = traits.Str(argstr='--output %s',
                               desc=('output file name'), genfile=True,
                               hash_files=False)
-    bspline_fitting_distance = traits.Float(argstr="--bsline-fitting [%g]")
+    bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
+    bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s",
-                               sep="x", requires=['convergence_threshold'],
-                               position=1)
-    convergence_threshold = traits.Float(argstr=",%g]",
-                                         requires=['n_iterations'],
-                                         position=2)
+    n_iterations = traits.List(traits.Int(), argstr="--convergence %s",
+                               requires=['convergence_threshold'])
+    convergence_threshold = traits.Float(requires=['n_iterations'])
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
                                   ' to file.'), xor=['bias_image'])
@@ -315,7 +314,20 @@ class N4BiasFieldCorrection(ANTSCommand):
            (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
             bias_image = self._gen_filename('bias_image')
             output = self._gen_filename('output_image')
-            newval = '[%s,%s]' % (output, bias_image)
+            newval = '[ %s, %s ]' % (output, bias_image)
+            return trait_spec.argstr % newval
+            
+        if name == 'bspline_fitting_distance':
+            if isdefined(self.inputs.bspline_order):
+                newval = '[ %g, %d ]' % (value, self.inputs.bspline_order)
+            else:
+                newval = '[ %g ]' % value
+            return trait_spec.argstr % newval
+            
+        if ((name == 'n_iterations') and
+           (isdefined(self.inputs.convergence_threshold))):
+            newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
+                                     self.inputs.convergence_threshold)
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection,
