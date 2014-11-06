@@ -268,7 +268,8 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     Examples
     --------
-
+	
+	>>> import copy
     >>> from nipype.interfaces.ants import N4BiasFieldCorrection
     >>> n4 = N4BiasFieldCorrection()
     >>> n4.inputs.dimension = 3
@@ -278,15 +279,15 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.n_iterations = [50,50,30,20]
     >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
-    'N4BiasFieldCorrection --bsline-fitting [ 300 ] \
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
 --image-dimension 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
-	>>> n4_2 = n4.clone()
+	>>> n4_2 = copy.deepcopy(n4)
     >>> n4_2.inputs.bspline_order = 5
     >>> n4_2.cmdline
-    'N4BiasFieldCorrection --bsline-fitting [ 300, 5 ] \
+    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
 --image-dimension 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
