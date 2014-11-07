@@ -1,6 +1,8 @@
 Next release
 ============
 
+* ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
+	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
 
 Release 0.10.0 (October 10, 2014)
 ============
