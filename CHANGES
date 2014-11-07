@@ -3,6 +3,9 @@ Next release
 
 * ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
 	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
+* ENH: SPM12 Normalize interface (https://github.com/nipy/nipype/pull/986)
+* FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
+* FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
 
 Release 0.10.0 (October 10, 2014)
 ============
