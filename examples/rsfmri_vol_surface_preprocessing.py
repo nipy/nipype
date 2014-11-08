@@ -1,6 +1,5 @@
+
 #!/usr/bin/env python
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
 ====================================
 rsfMRI: ANTS, FS, FSL, SPM, aCompCor
@@ -41,34 +40,30 @@ specifically the 2mm versions of:
 
 - `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
-"""
 
+"""
 
 import os
 
 from nipype.interfaces.base import CommandLine
 CommandLine.set_default_terminal_output('allatonce')
 
-
+from dcmstack.extract import default_extractor
 from dicom import read_file
 
-from nipype.interfaces import (spm, fsl, Function, ants, freesurfer)
+from nipype.interfaces import (spm, fsl, Function, ants, freesurfer,nipy)
 from nipype.interfaces.c3 import C3dAffineTool
 
-fsl.FSLCommand.set_default_output_type('NIFTI')
+fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
 from nipype import Workflow, Node, MapNode
-from nipype.interfaces import matlab as mlab
-
-mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodisplay")
-# If SPM is not in your MATLAB path you should add it here
-# mlab.MatlabCommand.set_default_paths('/software/matlab/spm12')
 
 from nipype.algorithms.rapidart import ArtifactDetect
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.utility import Rename, Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
 from nipype.interfaces.io import DataSink, FreeSurferSource
+import nipype.interfaces.freesurfer as fs
 
 import numpy as np
 import scipy as sp
@@ -84,7 +79,6 @@ imports = ['import os',
 
 
 def get_info(dicom_files):
-    from dcmstack.extract import default_extractor
     """Given a Siemens dicom file return metadata
 
     Returns
@@ -113,8 +107,6 @@ def median(in_files):
 
     out_file: a 3D Nifti file
     """
-    import numpy as np
-    import nibabel as nb
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
@@ -140,9 +132,6 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
     highpass_freq: cutoff frequency for the high pass filter (in Hz)
     fs: sampling rate (in Hz)
     """
-    from nipype.utils.filemanip import split_filename, list_to_filename
-    import numpy as np
-    import nibabel as nb
     out_files = []
     for filename in filename_to_list(files):
         path, name, ext = split_filename(filename)
@@ -152,10 +141,10 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
         F = np.zeros((timepoints))
         lowidx = timepoints/2 + 1
         if lowpass_freq > 0:
-            lowidx = np.round(lowpass_freq / fs * timepoints)
+            lowidx = np.round(float(lowpass_freq) / fs * timepoints)
         highidx = 0
         if highpass_freq > 0:
-            highidx = np.round(highpass_freq / fs * timepoints)
+            highidx = np.round(float(highpass_freq) / fs * timepoints)
         F[highidx:lowidx] = 1
         F = ((F + F[::-1]) > 0).astype(int)
         data = img.get_data()
@@ -175,7 +164,6 @@ def motion_regressors(motion_params, order=0, derivatives=1):
 
     motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)
     """
-    import numpy as np
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -212,9 +200,6 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
     -------
     components_file: a text file containing all the regressors
     """
-    import numpy as np
-    import nibabel as nb
-    from scipy.special import legendre
     out_files = []
     for idx, filename in enumerate(filename_to_list(motion_params)):
         params = np.genfromtxt(filename)
@@ -256,10 +241,6 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
     -------
     components_file: a text file containing the noise components
     """
-    from scipy.linalg.decomp_svd import svd
-    import numpy as np
-    import nibabel as nb
-    import os
     imgseries = nb.load(realigned_file)
     components = None
     for filename in filename_to_list(mask_file):
@@ -276,7 +257,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
         stdX[np.isnan(stdX)] = 1.
         stdX[np.isinf(stdX)] = 1.
         X = (X - np.mean(X, axis=0))/stdX
-        u, _, _ = svd(X, full_matrices=False)
+        u, _, _ = sp.linalg.svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
         else:
@@ -326,9 +307,6 @@ def extract_subrois(timeseries_file, label_file, indices):
         The first four columns are: freesurfer index, i, j, k positions in the
         label file
     """
-    from nipype.utils.filemanip import split_filename
-    import nibabel as nb
-    import os
     img = nb.load(timeseries_file)
     data = img.get_data()
     roiimg = nb.load(label_file)
@@ -349,8 +327,6 @@ def extract_subrois(timeseries_file, label_file, indices):
 def combine_hemi(left, right):
     """Combine left and right hemisphere time series into a single text file
     """
-    import os
-    import numpy as np
     lh_data = nb.load(left).get_data()
     rh_data = nb.load(right).get_data()
 
@@ -387,6 +363,10 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+
     """
 
     register = Workflow(name=name)
@@ -436,8 +416,12 @@ def create_reg_workflow(name='registration'):
     as FSL appears to be breaking.
     """
 
-    stripper = Node(fsl.BET(), name='stripper')
+    binarize = Node(fs.Binarize(min=0.5, out_type="nii.gz", dilate=1), name="binarize_aparc")
+    register.connect(fssource, ("aparc_aseg", get_aparc_aseg), binarize, "in_file")
+    stripper = Node(fsl.ApplyMask(), name ='stripper')
+    register.connect(binarize, "binary_file", stripper, "mask_file")
     register.connect(convert, 'out_file', stripper, 'in_file')
+
     fast = Node(fsl.FAST(), name='fast')
     register.connect(stripper, 'out_file', fast, 'in_files')
 
@@ -453,7 +437,6 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to take segmentations to functional space
     """
-
     applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
                                                     interp='nearest'),
                        iterfield=['target_file'],
@@ -466,7 +449,6 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
-
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -522,9 +504,10 @@ def create_reg_workflow(name='registration'):
     reg.inputs.args = '--float'
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    #reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
+
 
     """
     Concatenate the affine and ants transforms into a list
@@ -536,10 +519,10 @@ def create_reg_workflow(name='registration'):
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
 
+
     """
     Transform the mean image. First to anatomical and then to target
     """
-
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'BSpline'
@@ -551,6 +534,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode,'target_image', warpmean,'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
+
 
     """
     Assign all the output files
@@ -603,21 +587,17 @@ def create_workflow(files,
     name_unique.inputs.keep_ext = True
     name_unique.inputs.run = range(1, len(files) + 1)
     name_unique.inputs.in_file = files
-
-    realign = Node(interface=spm.Realign(), name="realign")
-    realign.inputs.jobtype = 'estwrite'
-
-    num_slices = len(slice_times)
-    slice_timing = Node(interface=spm.SliceTiming(), name="slice_timing")
-    slice_timing.inputs.num_slices = num_slices
-    slice_timing.inputs.time_repetition = TR
-    slice_timing.inputs.time_acquisition = TR - TR/float(num_slices)
-    slice_timing.inputs.slice_order = (np.argsort(slice_times) + 1).tolist()
-    slice_timing.inputs.ref_slice = int(num_slices/2)
+  
+    realign = Node(nipy.SpaceTimeRealigner(), name="spacetime_realign")
+    realign.inputs.slice_times = slice_times
+    realign.inputs.tr = TR
+    realign.inputs.slice_info = 2
+    
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
-    wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
+    #wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
+    wf.connect(realign,"out_file", tsnr, "in_file") 
 
     # Compute the median image across runs
     calc_median = Node(Function(input_names=['in_files'],
@@ -629,7 +609,6 @@ def create_workflow(files,
 
     """Segment and Register
     """
-
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id
@@ -648,7 +627,7 @@ def create_workflow(files,
     art.inputs.norm_threshold = norm_threshold
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
-    art.inputs.parameter_source = 'SPM'
+    art.inputs.parameter_source = 'NiPy'
 
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
@@ -656,10 +635,11 @@ def create_workflow(files,
     voxel sizes.
     """
 
-    wf.connect([(name_unique, realign, [('out_file', 'in_files')]),
-                (realign, slice_timing, [('realigned_files', 'in_files')]),
-                (slice_timing, art, [('timecorrected_files', 'realigned_files')]),
-                (realign, art, [('realignment_parameters', 'realignment_parameters')]),
+    wf.connect([(name_unique, realign, [('out_file', 'in_file')]),
+                #(gunzip,realign,[("out_file","in_files")]),
+                #(realign, slice_timing, [('realigned_files', 'in_files')]),
+                (realign, art, [('out_file', 'realigned_files')]),
+                (realign, art, [('par_file', 'realignment_parameters')]),
                 ])
 
     def selectindex(files, idx):
@@ -686,7 +666,7 @@ def create_workflow(files,
                            function=motion_regressors,
                            imports=imports),
                   name='getmotionregress')
-    wf.connect(realign, 'realignment_parameters', motreg, 'motion_params')
+    wf.connect(realign, 'par_file', motreg, 'motion_params')
 
     # Create a filter to remove motion and art confounds
     createfilter1 = Node(Function(input_names=['motion_params', 'comp_norm',
@@ -701,14 +681,14 @@ def create_workflow(files,
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
 
-    filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii',
-                              out_pf_name='pF_mcart.nii',
+    filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii.gz',
+                              out_pf_name='pF_mcart.nii.gz',
                               demean=True),
                       iterfield=['in_file', 'design', 'out_res_name'],
                       name='filtermotion')
 
-    wf.connect(slice_timing, 'timecorrected_files', filter1, 'in_file')
-    wf.connect(slice_timing, ('timecorrected_files', rename, '_filtermotart'),
+    wf.connect(realign, 'out_file', filter1, 'in_file')
+    wf.connect(realign, ('out_file', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
 
@@ -729,8 +709,8 @@ def create_workflow(files,
                createfilter2, 'mask_file')
 
 
-    filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
-                              out_pf_name='pF.nii',
+    filter2 = MapNode(fsl.GLM(out_f_name='F.nii.gz',
+                              out_pf_name='pF.nii.gz',
                               demean=True),
                       iterfield=['in_file', 'design', 'out_res_name'],
                       name='filter_noise_nosmooth')
@@ -755,13 +735,13 @@ def create_workflow(files,
     :class:`nipype.interfaces.spm.Smooth`.
     """
 
-    smooth = Node(interface=spm.Smooth(), name="smooth")
+    smooth = MapNode(interface=fsl.IsotropicSmooth(), name="smooth", iterfield=["in_file"])
     smooth.inputs.fwhm = vol_fwhm
 
-    wf.connect(bandpass, 'out_files', smooth, 'in_files')
+    wf.connect(bandpass, 'out_files', smooth, 'in_file')
 
     collector = Node(Merge(2), name='collect_streams')
-    wf.connect(smooth, 'smoothed_files', collector, 'in1')
+    wf.connect(smooth, 'out_file', collector, 'in1')
     wf.connect(bandpass, 'out_files', collector, 'in2')
 
     """
@@ -817,10 +797,11 @@ def create_workflow(files,
         """
         from nipype.utils.filemanip import (split_filename, filename_to_list,
                                             list_to_filename)
+        import os
         out_names = []
         for filename in files:
-            _, name, _ = split_filename(filename)
-            out_names.append(name + suffix)
+            path, name, _ = split_filename(filename)
+            out_names.append(os.path.join(path,name + suffix))
         return list_to_filename(out_names)
 
     wf.connect(collector, ('out', get_names, '_avgwf.txt'),
@@ -886,11 +867,24 @@ def create_workflow(files,
 
     substitutions = [('_target_subject_', ''),
                      ('_filtermotart_cleaned_bp_trans_masked', ''),
-                     ('_filtermotart_cleaned_bp', '')
+                     ('_filtermotart_cleaned_bp', ''),
                      ]
-    regex_subs = [('_ts_masker.*/sar', '/smooth/'),
-                  ('_ts_masker.*/ar', '/unsmooth/'),
-                  ('_combiner.*/sar', '/smooth/'),
+    substitutions += [("_smooth%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_ts_masker%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_getsubcortts%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_combiner%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_filtermotion%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_filter_noise_nosmooth%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_makecompcorfilter%d" % i,"") for i in range(11)[::-1]]
+
+    substitutions += [("T1_out_brain_pve_0_maths_warped","compcor_csf"),
+                      ("T1_out_brain_pve_1_maths_warped","compcor_gm"),
+                      ("T1_out_brain_pve_2_maths_warped", "compcor_wm"),
+                      ("output_warped_image_maths","target_brain_mask"),
+                      ("median_brain_mask","native_brain_mask"),
+                      ("corr_","")]
+
+    regex_subs = [('_combiner.*/sar', '/smooth/'),
                   ('_combiner.*/ar', '/unsmooth/'),
                   ('_aparc_ts.*/sar', '/smooth/'),
                   ('_aparc_ts.*/ar', '/unsmooth/'),
@@ -906,7 +900,7 @@ def create_workflow(files,
     datasink.inputs.container = subject_id
     datasink.inputs.substitutions = substitutions
     datasink.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
-    wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
+    wf.connect(realign, 'par_file', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'resting.qa.art.@outlier_files')
@@ -919,7 +913,7 @@ def create_workflow(files,
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
     wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.@bandpassed')
-    wf.connect(smooth, 'smoothed_files', datasink, 'resting.timeseries.@smoothed')
+    wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files',
                datasink, 'resting.regress.@regressors')
     wf.connect(createfilter2, 'out_files',
@@ -953,6 +947,7 @@ def create_resting_workflow(args, name=None):
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
         slice_times = (np.array(slice_times)/1000.).tolist()
+        #print slice_times
     if name is None:
         name = 'resting_' + args.subject_id
     kwargs = dict(files=[os.path.abspath(filename) for filename in args.files],
