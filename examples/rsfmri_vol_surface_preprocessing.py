@@ -504,7 +504,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.args = '--float'
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
-    #reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
 
@@ -596,7 +596,6 @@ def create_workflow(files,
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
-    #wf.connect(slice_timing, 'timecorrected_files', tsnr, 'in_file')
     wf.connect(realign,"out_file", tsnr, "in_file") 
 
     # Compute the median image across runs
@@ -636,8 +635,6 @@ def create_workflow(files,
     """
 
     wf.connect([(name_unique, realign, [('out_file', 'in_file')]),
-                #(gunzip,realign,[("out_file","in_files")]),
-                #(realign, slice_timing, [('realigned_files', 'in_files')]),
                 (realign, art, [('out_file', 'realigned_files')]),
                 (realign, art, [('par_file', 'realignment_parameters')]),
                 ])
