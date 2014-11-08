@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 """
 ====================================
-rsfMRI: ANTS, FS, FSL, SPM, aCompCor
+rsfMRI: ANTS, FS, FSL, NiPy, aCompCor
 ====================================
 
 
@@ -13,7 +13,7 @@ This workflow makes use of:
 - ANTS
 - FreeSurfer
 - FSL
-- SPM
+- NiPy
 - CompCor
 
 For example::
@@ -51,7 +51,7 @@ CommandLine.set_default_terminal_output('allatonce')
 from dcmstack.extract import default_extractor
 from dicom import read_file
 
-from nipype.interfaces import (spm, fsl, Function, ants, freesurfer,nipy)
+from nipype.interfaces import (fsl, Function, ants, freesurfer,nipy)
 from nipype.interfaces.c3 import C3dAffineTool
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
@@ -412,8 +412,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'subjects_dir', bbregister, 'subjects_dir')
 
     """
-    Estimate the tissue classes from the anatomical image. But use spm's segment
-    as FSL appears to be breaking.
+    Estimate the tissue classes from the anatomical image. But use aparc+aseg's brain mask
     """
 
     binarize = Node(fs.Binarize(min=0.5, out_type="nii.gz", dilate=1), name="binarize_aparc")
@@ -587,16 +586,16 @@ def create_workflow(files,
     name_unique.inputs.keep_ext = True
     name_unique.inputs.run = range(1, len(files) + 1)
     name_unique.inputs.in_file = files
-  
+
     realign = Node(nipy.SpaceTimeRealigner(), name="spacetime_realign")
     realign.inputs.slice_times = slice_times
     realign.inputs.tr = TR
     realign.inputs.slice_info = 2
-    
+
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
-    wf.connect(realign,"out_file", tsnr, "in_file") 
+    wf.connect(realign,"out_file", tsnr, "in_file")
 
     # Compute the median image across runs
     calc_median = Node(Function(input_names=['in_files'],
@@ -729,7 +728,7 @@ def create_workflow(files,
     wf.connect(filter2, 'out_res', bandpass, 'files')
 
     """Smooth the functional data using
-    :class:`nipype.interfaces.spm.Smooth`.
+    :class:`nipype.interfaces.fsl.IsotropicSmooth`.
     """
 
     smooth = MapNode(interface=fsl.IsotropicSmooth(), name="smooth", iterfield=["in_file"])
