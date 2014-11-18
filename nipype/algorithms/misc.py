@@ -1394,22 +1394,22 @@ def merge_rois(in_files, in_idxs, in_ref,
     if ndirs < 300:
         data = np.zeros((npix, ndirs))
         for cname, iname in zip(in_files, in_idxs):
-            with np.load(iname) as f:
-                idxs = np.squeeze(f['arr_0'])
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
             cdata = nb.load(cname).get_data().reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs, )
             try:
                 data[idata, ...] = cdata[0:nels, ...]
             except:
-                print(data.shape, cdata.shape)
+                print(('Consistency between indexes and chunks was '
+                      'lost: data=%s, chunk=%s') % (str(data.shape),
+                      str(cdata.shape)))
                 raise
 
         hdr.set_data_shape(newshape)
-
         nb.Nifti1Image(data.reshape(newshape).astype(dtype),
                        aff, hdr).to_filename(out_file)
-
 
     else:
         hdr.set_data_shape(rsh[:3])
@@ -1420,8 +1420,8 @@ def merge_rois(in_files, in_idxs, in_ref,
             nii.append(fname)
 
         for cname, iname in zip(in_files, in_idxs):
-            with np.load(iname) as f:
-                idxs = np.squeeze(f['arr_0'])
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
 
             for d, fname in enumerate(nii):
                 data = nb.load(fname).get_data().reshape(-1)
@@ -1429,7 +1429,8 @@ def merge_rois(in_files, in_idxs, in_ref,
                 nels = len(idxs)
                 idata = (idxs, )
                 data[idata] = cdata[0:nels]
-                nb.Nifti1Image(data.reshape(rsh[:3]), aff, hdr).to_filename(fname)
+                nb.Nifti1Image(data.reshape(rsh[:3]),
+                               aff, hdr).to_filename(fname)
 
         imgs = [nb.load(im) for im in nii]
         allim = nb.concat_images(imgs)
