@@ -5,9 +5,9 @@ from nipype.interfaces.ants.registration import Registration
 def test_Registration_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    # collapse_linear_transforms_to_fixed_image_header=dict(argstr='%s',
-    # usedefault=True,
-    # ),
+    collapse_linear_transforms_to_fixed_image_header=dict(argstr='%s',
+    usedefault=True,
+    ),
     collapse_output_transforms=dict(argstr='--collapse-output-transforms %d',
     usedefault=True,
     ),
