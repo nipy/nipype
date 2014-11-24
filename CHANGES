@@ -8,6 +8,8 @@ Next release
 * FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
 * FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
 * ENH: Resting state fMRI example with NiPy realignment and no SPM (https://github.com/nipy/nipype/pull/992)
+* FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is 
+	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
 
 Release 0.10.0 (October 10, 2014)
 ============
