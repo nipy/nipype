@@ -89,13 +89,24 @@ def test_normalize_list_outputs():
     yield assert_true, norm._list_outputs()['normalized_files'][0].startswith('w')
     clean_directory(outdir, cwd)
 
+@skipif(no_spm)
 def test_segment():
-    yield assert_equal, spm.Segment._jobtype, 'spatial'
-    yield assert_equal, spm.Segment._jobname, 'preproc'
+    if spm.Info.version()['name'] == "SPM12":
+        yield assert_equal, spm.Segment._jobtype, 'tools'
+        yield assert_equal, spm.Segment._jobname, 'oldseg'
+    else:
+        yield assert_equal, spm.Segment._jobtype, 'spatial'
+        yield assert_equal, spm.Segment._jobname, 'preproc'
 
+@skipif(no_spm)
 def test_newsegment():
-    yield assert_equal, spm.NewSegment._jobtype, 'tools'
-    yield assert_equal, spm.NewSegment._jobname, 'preproc8'
+    if spm.Info.version()['name'] == "SPM12":
+        yield assert_equal, spm.NewSegment._jobtype, 'spatial'
+        yield assert_equal, spm.NewSegment._jobname, 'preproc'
+    else:
+        yield assert_equal, spm.NewSegment._jobtype, 'tools'
+        yield assert_equal, spm.NewSegment._jobname, 'preproc8'
+
 
 def test_smooth():
     yield assert_equal, spm.Smooth._jobtype, 'spatial'

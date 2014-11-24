@@ -39,6 +39,13 @@ class SGEGraphPlugin(GraphPluginBase):
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
+        def make_job_name(jobnumber, nodeslist):
+            """
+            - jobnumber: The index number of the job to create
+            - nodeslist: The name of the node being processed
+            - return: A string representing this job to be displayed by SGE
+            """
+            return 'j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
         with open(submitjobsfile, 'wt') as fp:
@@ -65,20 +72,20 @@ class SGEGraphPlugin(GraphPluginBase):
                 if idx in dependencies:
                     values = ' '
                     for jobid in dependencies[idx]:
-                        values += '${job%05d},' % jobid
+                        values += make_job_name(jobid, nodes)
                     if values != ' ': # i.e. if some jobs were added to dependency list
                         values = values.rstrip(',')
                         deps = '-hold_jid%s' % values
-                jobname = 'job%05d' % (idx)
-                ## Do not use default output locations if they are set in self._qsub_args
+                jobname = make_job_name(idx, nodes)
+                # Do not use default output locations if they are set in self._qsub_args
                 stderrFile = ''
                 if self._qsub_args.count('-e ') == 0:
-                        stderrFile = '-e {errFile}'.format(
-                            errFile=batchscripterrfile)
+                    stderrFile = '-e {errFile}'.format(
+                        errFile=batchscripterrfile)
                 stdoutFile = ''
                 if self._qsub_args.count('-o ') == 0:
-                        stdoutFile = '-o {outFile}'.format(
-                            outFile=batchscriptoutfile)
+                    stdoutFile = '-o {outFile}'.format(
+                        outFile=batchscriptoutfile)
                 full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk \'{{print $3}}\')\n'.format(
                     jobNm=jobname,
                     outFileOption=stdoutFile,

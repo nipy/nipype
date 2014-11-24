@@ -71,9 +71,26 @@ class WarpPoints(BaseInterface):
         return op.abspath('%s_%s.%s' % (fname, suffix, ext))
 
     def _run_interface(self, runtime):
-        from traits.etsconfig.api import ETSConfig  # This is necessary to
-        ETSConfig.toolkit = 'null'  # avoid 'unable to connect display' errors
-        from tvtk.api import tvtk
+        vtk_major = 6
+        try:
+            import vtk
+            vtk_major = vtk.VTK_MAJOR_VERSION
+        except ImportError:
+            iflogger.warn(('python-vtk could not be imported'))
+            pass
+
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface requires tvtk')
+
+        try:
+            from enthought.etsconfig.api import ETSConfig
+            ETSConfig.toolkit = 'null'
+        except ImportError:
+            iflogger.warn(('ETS toolkit could not be imported'))
+            pass
+
         import nibabel as nb
         import numpy as np
         from scipy import ndimage
@@ -107,7 +124,12 @@ class WarpPoints(BaseInterface):
         disps = np.squeeze(np.dstack(warps))
         newpoints = [p+d for p, d in zip(points, disps)]
         mesh.points = newpoints
-        w = tvtk.PolyDataWriter(input=mesh)
+        w = tvtk.PolyDataWriter()
+        if vtk_major <= 5:
+            w.input = mesh
+        else:
+            w.set_input_data_object(mesh)
+
         w.file_name = self._gen_fname(self.inputs.points,
                                       suffix='warped',
                                       ext='.vtk')
@@ -134,10 +156,13 @@ class P2PDistanceInputSpec(BaseInterfaceInputSpec):
                                   '"surface": edge distance is weighted by the'
                                   ' corresponding surface area'))
 
+
 class P2PDistanceOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
 
+
 class P2PDistance(BaseInterface):
+
     """Calculates a point-to-point (p2p) distance between two corresponding
     VTK-readable meshes or contours.
 
@@ -157,41 +182,52 @@ class P2PDistance(BaseInterface):
     output_spec = P2PDistanceOutputSpec
 
     def _triangle_area(self, A, B, C):
-        ABxAC = euclidean(A,B) *  euclidean(A,C)
-        prod = np.dot(np.array(B)-np.array(A),np.array(C)-np.array(A))
-        angle = np.arccos( prod / ABxAC )
-        area = 0.5 * ABxAC * np.sin( angle )
+        ABxAC = euclidean(A, B) * euclidean(A, C)
+        prod = np.dot(np.array(B) - np.array(A), np.array(C) - np.array(A))
+        angle = np.arccos(prod / ABxAC)
+        area = 0.5 * ABxAC * np.sin(angle)
         return area
 
     def _run_interface(self, runtime):
-        from tvtk.api import tvtk
-        r1 = tvtk.PolyDataReader( file_name=self.inputs.surface1 )
-        r2 = tvtk.PolyDataReader( file_name=self.inputs.surface2 )
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface P2PDistance requires tvtk')
+
+        try:
+            from enthought.etsconfig.api import ETSConfig
+            ETSConfig.toolkit = 'null'
+        except ImportError:
+            iflogger.warn(('ETS toolkit could not be imported'))
+            pass
+
+        r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
+        r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
         vtk1 = r1.output
         vtk2 = r2.output
         r1.update()
         r2.update()
-        assert( len(vtk1.points) == len(vtk2.points) )
+        assert(len(vtk1.points) == len(vtk2.points))
         d = 0.0
         totalWeight = 0.0
 
         points = vtk1.points
-        faces = vtk1.polys.to_array().reshape(-1,4).astype(int)[:,1:]
+        faces = vtk1.polys.to_array().reshape(-1, 4).astype(int)[:, 1:]
 
-        for p1,p2 in zip( points, vtk2.points ):
+        for p1, p2 in zip(points, vtk2.points):
             weight = 1.0
             if (self.inputs.weighting == 'surface'):
-                #compute surfaces, set in weight
+                # compute surfaces, set in weight
                 weight = 0.0
-                point_faces = faces[ (faces[:,:]==0).any(axis=1) ]
+                point_faces = faces[(faces[:, :] == 0).any(axis=1)]
 
                 for idset in point_faces:
-                    p1 = points[ int(idset[0]) ]
-                    p2 = points[ int(idset[1]) ]
-                    p3 = points[ int(idset[2]) ]
+                    p1 = points[int(idset[0])]
+                    p2 = points[int(idset[1])]
+                    p3 = points[int(idset[2])]
                     weight = weight + self._triangle_area(p1, p2, p3)
 
-            d+= weight*euclidean( p1, p2 )
+            d += weight * euclidean(p1, p2)
             totalWeight = totalWeight + weight
 
         self._distance = d / totalWeight
@@ -201,4 +237,3 @@ class P2PDistance(BaseInterface):
         outputs = self._outputs().get()
         outputs['distance'] = self._distance
         return outputs
-

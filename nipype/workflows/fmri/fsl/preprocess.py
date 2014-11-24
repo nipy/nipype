@@ -601,7 +601,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     """
     Smooth each run using SUSAN with the brightness threshold set to 75%
-    of the median value for each run and a mask consituting the mean
+    of the median value for each run and a mask constituting the mean
     functional
     """
 
@@ -678,14 +678,9 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
                                                     suffix='_mean'),
                            iterfield=['in_file'],
                           name='meanfunc3')
-    if highpass:
-        featpreproc.connect(highpass, ('out_file', pickfirst), meanfunc3, 'in_file')
-    else:
-        featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
 
+    featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
-
-
     return featpreproc
 
 
@@ -1203,6 +1198,7 @@ def create_reg_workflow(name='registration'):
 
     warpall = pe.MapNode(fsl.ApplyWarp(interp='spline'),
                          iterfield=['in_file'],
+                         nested=True,
                          name='warpall')
     register.connect(inputnode, 'source_files', warpall, 'in_file')
     register.connect(mean2anatbbr, 'out_matrix_file', warpall, 'premat')

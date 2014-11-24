@@ -9,8 +9,9 @@ fMRI: SPM Auditory dataset
 Introduction
 ============
 
-The fmri_spm_auditory.py recreates the classical workflow described in the SPM8 manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf)
-using auditory dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/:
+The fmri_spm_auditory.py recreates the classical workflow described in the
+`SPM8 manual <http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf>`_ using auditory
+dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/auditory/::
 
     python fmri_spm_auditory.py
 
@@ -19,7 +20,8 @@ Import necessary modules from nipype."""
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.matlab as mlab      # how to run matlabimport nipype.interfaces.fsl as fsl          # fsl
+import nipype.interfaces.matlab as mlab      # how to run matlab
+import nipype.interfaces.fsl as fsl          # fsl
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.modelgen as model   # model specification

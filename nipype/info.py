@@ -7,10 +7,10 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 # nipy version information.  An empty _version_extra corresponds to a
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
-_version_major = 0
-_version_minor = 9
-_version_micro = 2
-_version_extra = ''
+_version_major = 1
+_version_minor = 0
+_version_micro = 0
+_version_extra = 'dev'
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
@@ -116,7 +116,7 @@ URL                 = "http://nipy.org/nipype"
 DOWNLOAD_URL        = "http://github.com/nipy/nipype/archives/master"
 LICENSE             = "BSD license"
 CLASSIFIERS         = CLASSIFIERS
-AUTHOR              = "nipype developmers"
+AUTHOR              = "nipype developers"
 AUTHOR_EMAIL        = "nipy-devel@neuroimaging.scipy.org"
 PLATFORMS           = "OS Independent"
 MAJOR               = _version_major

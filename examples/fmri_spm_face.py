@@ -9,10 +9,9 @@ fMRI: Famous vs non-famous faces, SPM
 Introduction
 ============
 
-The fmri_spm_face.py recreates the classical workflow described in the SPM8
-manual (http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf) using auditory dataset
-that can be downloaded from
-http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html::
+The fmri_spm_face.py recreates the classical workflow described in the
+`SPM8 manual <http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf>`_ using face
+dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/::
 
     python fmri_spm.py
 
@@ -271,7 +270,7 @@ necessary to generate an SPM design matrix.
 from nipype.interfaces.base import Bunch
 
 """We're importing the onset times from a mat file (found on
-http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html
+http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/)
 """
 
 from scipy.io.matlab import loadmat

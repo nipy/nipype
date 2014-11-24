@@ -29,7 +29,7 @@ def test_PrepareFieldmap_inputs():
     usedefault=True,
     ),
     out_fieldmap=dict(argstr='%s',
-    position=5,
+    position=4,
     ),
     output_type=dict(),
     scanner=dict(argstr='%s',

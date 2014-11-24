@@ -471,10 +471,12 @@ class FLIRTInputSpec(FSLCommandInputSpec):
                                    desc='do not use blurring on downsampling')
     rigid2D = traits.Bool(argstr='-2D',
                           desc='use 2D rigid body mode - ignores dof')
-
     save_log = traits.Bool(desc='save to log file')
     verbose = traits.Int(argstr='-verbose %d',
                          desc='verbose mode, 0 is least')
+    bgvalue = traits.Float(0, argstr='-setbackground %f',
+                           desc=('use specified background value for points '
+                                 'outside FOV'))
 
     # BBR options
     wm_seg = File(
@@ -530,10 +532,11 @@ class FLIRT(FSLCommand):
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
     >>> flt = fsl.FLIRT(bins=640, cost_func='mutualinfo')
-    >>> flt.inputs.in_file = example_data('structural.nii')
-    >>> flt.inputs.reference = example_data('mni.nii')
+    >>> flt.inputs.in_file = 'structural.nii'
+    >>> flt.inputs.reference = 'mni.nii'
+    >>> flt.inputs.output_type = "NIFTI_GZ"
     >>> flt.cmdline #doctest: +ELLIPSIS
-    'flirt -in .../structural.nii -ref .../mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
+    'flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo'
     >>> res = flt.run() #doctest: +SKIP
 
     """
@@ -941,18 +944,18 @@ class FNIRT(FSLCommand):
 
 class ApplyWarpInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                   mandatory=True,
+                   mandatory=True, position=0,
                    desc='image to be warped')
-    out_file = File(argstr='--out=%s', genfile=True,
+    out_file = File(argstr='--out=%s', genfile=True, position=2,
                     desc='output filename', hash_files=False)
     ref_file = File(exists=True, argstr='--ref=%s',
-                    mandatory=True,
+                    mandatory=True, position=1,
                     desc='reference image')
     field_file = File(exists=True, argstr='--warp=%s',
                       desc='file containing warp field')
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc="treat warp field as absolute: x' = w(x)")
-    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
+    relwarp = traits.Bool(argstr='--rel', xor=['abswarp'], position=-1,
                           desc="treat warp field as relative: x' = x + w(x)")
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr='--datatype=%s',
@@ -969,7 +972,7 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
     mask_file = File(exists=True, argstr='--mask=%s',
                      desc='filename for mask image (in reference space)')
     interp = traits.Enum(
-        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s',
+        'nn', 'trilinear', 'sinc', 'spline', argstr='--interp=%s', position=-2,
         desc='interpolation method')
 
 
@@ -1260,6 +1263,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
@@ -1274,6 +1278,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.mask_file = 'epi_mask.nii'
     >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
     >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
     >>> fugue.run() #doctest: +SKIP
@@ -1288,6 +1293,7 @@ class FUGUE(FSLCommand):
     >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
     >>> fugue.inputs.unwarp_direction = 'y'
     >>> fugue.inputs.save_shift = True
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
     >>> fugue.cmdline #doctest: +ELLIPSIS
     'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
     >>> fugue.run() #doctest: +SKIP

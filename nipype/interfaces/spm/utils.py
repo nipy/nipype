@@ -146,6 +146,8 @@ class ApplyTransform(SPMCommand):
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
+        outputs = self._list_outputs()
+        self.inputs.out_file = outputs['out_file']
         script = """
         infile = '%s';
         outfile = '%s'
@@ -168,16 +170,14 @@ class ApplyTransform(SPMCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            _, name, _ = split_filename(self.inputs.in_file)
-            outputs['out_file'] = os.path.abspath(name + '_trans.nii')
+            outputs['out_file'] = os.path.abspath(self._gen_outfilename())
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._list_outputs()[name]
-        return None
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        return name + '_trans.nii'
 
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File( exists = True, mandatory=True,
