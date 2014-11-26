@@ -285,13 +285,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
-        # 'MultiLabel',
-        # 'Gaussian',
-        # 'BSpline',
-        argstr='%s', usedefault=True)
         # MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
         # Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
         # BSpline[<order=3>]
+        argstr='%s', usedefault=True)
+
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
         default=False, usedefault=True, desc='')
@@ -610,7 +608,7 @@ class Registration(ANTSCommand):
         output_filename = None
         if not inverse:
             if isdefined(self.inputs.output_warped_image) and \
-                self.inputs.output_warped_image:
+                    self.inputs.output_warped_image:
                 output_filename = self.inputs.output_warped_image
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
@@ -619,7 +617,7 @@ class Registration(ANTSCommand):
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
-            self.inputs.output_inverse_warped_image:
+                self.inputs.output_inverse_warped_image:
             inv_output_filename = self.inputs.output_inverse_warped_image
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
