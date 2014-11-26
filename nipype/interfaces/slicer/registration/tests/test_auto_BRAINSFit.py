@@ -148,6 +148,8 @@ def test_BRAINSFit_inputs():
     ),
     writeTransformOnFailure=dict(argstr='--writeTransformOnFailure ',
     ),
+    writeOutputTransformInFloat=dict(argstr='--writeOutputTransformInFloat ',
+    ),
     )
     inputs = BRAINSFit.input_spec()
 

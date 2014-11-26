@@ -617,9 +617,9 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
                                          desc=('Assign the voting weights to '
                                                'each atlas group'))
 
-
 class JointFusionOutputSpec(TraitedSpec):
-    output_label_image = File(exists=True, desc='Output fusion label map image')
+    output_label_image = File(exists=True)
+    # TODO: optional outputs - output_posteriors, output_voting_weights
 
 
 class JointFusion(ANTSCommand):
@@ -633,25 +633,22 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.modalities = 1
     >>> at.inputs.method = 'Joint[0.1,2]'
     >>> at.inputs.output_label_image ='fusion_labelimage_output.nii'
-    >>> at.inputs.warped_intensity_images = ['im1.nii',
-    ...                                      'im2.nii',
-    ...                                      'im3.nii']
-    >>> at.inputs.warped_label_images = ['segmentation0.nii.gz',
-    ...                                  'segmentation1.nii.gz',
-    ...                                  'segmentation1.nii.gz']
-    >>> at.inputs.target_image = 'T1.nii'
-    >>> at.inputs.patch_radius = [3,2,1]
-    >>> at.inputs.search_radius = [1,2,3]
+    >>> at.inputs.warped_intensity_images = ['nipype/testing/data/im1.nii',
+    ...                                      'nipype/testing/data/im2.nii',
+    ...                                      'nipype/testing/data/im3.nii']
+    >>> at.inputs.warped_label_images = ['nipype/testing/data/segmentation0.nii.gz',
+    ...                                  'nipype/testing/data/segmentation1.nii.gz']
+    >>> at.inputs.target_image = 'nipype/testing/data/T1.nii'
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
-
-    Alternately, you can specify the voting method and parameters more 'Pythonically':
+    'jointfusion 3 1 -m Joint[0.1,2] -tg nipype/testing/data/T1.nii -g nipype/testing/data/im1.nii -g nipype/testing/data/im2.nii -g nipype/testing/data/im3.nii -l nipype/testing/data/segmentation0.nii.gz -l nipype/testing/data/segmentation1.nii.gz fusion_labelimage_output.nii'
 
     >>> at.inputs.method = 'Joint'
     >>> at.inputs.alpha = 0.5
     >>> at.inputs.beta = 1
+    >>> at.inputs.patch_radius = [3,2,1]
+    >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.5,1] -tg nipype/testing/data/T1.nii -g nipype/testing/data/im1.nii -g nipype/testing/data/im2.nii -g nipype/testing/data/im3.nii -rp 3x2x1 -rs 1x2x3 -l nipype/testing/data/segmentation0.nii.gz -l nipype/testing/data/segmentation1.nii.gz fusion_labelimage_output.nii'
     """
     input_spec = JointFusionInputSpec
     output_spec = JointFusionOutputSpec
@@ -669,6 +666,11 @@ class JointFusion(ANTSCommand):
             retval = '-rs {0}'.format(self._format_xarray(val))
         else:
             if opt == 'warped_intensity_images':
-                assert len(val) == len(self.inputs.warped_label_images), "Number of intensity images and label maps must be the same"
+                assert len(val) == self.inputs.modalities * len(self.inputs.warped_label_images), "Number of intensity images and label maps must be the same {0}!={1}".format(len(val),len(self.inputs.warped_label_images))
             return super(ANTSCommand, self)._format_arg(opt, spec, val)
         return retval
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output_label_image'] = os.path.abspath(self.inputs.output_label_image)
+        return outputs

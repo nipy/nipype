@@ -112,6 +112,8 @@ class ANTS(ANTSCommand):
         intensityBased = ['CC', 'MI', 'SMI', 'PR', 'SSD', 'MSQ']
         pointSetBased = ['PSE', 'JTB']
         for ii in range(len(self.inputs.moving_image)):
+            print "ii {0}".format(ii)
+            print "ii {0}".format(ii)
             if self.inputs.metric[ii] in intensityBased:
                 retval.append(
                     '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
@@ -295,6 +297,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     # values instead of booleans
     float = traits.Bool(
         argstr='--float %d', default=False,
+        usedefault=True,
         desc=('Use float instead of double for computations.'))
 
     transforms = traits.List(traits.Enum('Rigid', 'Affine', 'CompositeAffine',
@@ -367,8 +370,8 @@ class Registration(ANTSCommand):
     >>> import copy
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
-    >>> reg.inputs.fixed_image = 'fixed1.nii'
-    >>> reg.inputs.moving_image = 'moving1.nii'
+    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg.inputs.output_transform_prefix = "output_"
     >>> reg.inputs.initial_moving_transform = 'trans.mat'
     >>> reg.inputs.invert_initial_moving_transform = True
@@ -466,14 +469,12 @@ class Registration(ANTSCommand):
         ----------
         index: the stage index
         """
-        # The common fixed image.
-        fixed = self.inputs.fixed_image[0]
-        # The common moving image.
-        moving = self.inputs.moving_image[0]
         # The metric name input for the current stage.
         name_input = self.inputs.metric[index]
         # The stage-specific input dictionary.
         stage_inputs = dict(
+            fixed_image=self.inputs.fixed_image[0],
+            moving_image=self.inputs.moving_image[0],
             metric=name_input,
             weight=self.inputs.metric_weight[index],
             radius_or_bins=self.inputs.radius_or_number_of_bins[index],
@@ -502,16 +503,32 @@ class Registration(ANTSCommand):
             # dict-comprehension only works with python 2.7 and up
             #specs = [{k: v[i] for k, v in items} for i in indexes]
             specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
+            specs = list()
+            for i in indexes:
+                temp = dict([(k, v[i]) for k, v in items]) 
+                if i > len( self.inputs.fixed_image ):
+                    temp["fixed_image"] = self.inputs.fixed_image[0]
+                else:
+                    temp["fixed_image"] = self.inputs.fixed_image[i]
+
+                if i > len( self.inputs.moving_image ):
+                    temp["moving_image"] = self.inputs.moving_image[0]
+                else:
+                    temp["moving_image"] = self.inputs.moving_image[i]
+
+                specs.append( temp )
         else:
             specs = [stage_inputs]
 
         # Format the --metric command line metric arguments, one per
         # specification.
-        return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
+        return [self._formatMetricArgument(**spec) for spec in specs]
 
-    def _formatMetricArgument(self, fixed, moving, **kwargs):
+    def _formatMetricArgument(self, **kwargs):
         retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
-                                         fixed, moving, kwargs['weight'],
+                                         kwargs['fixed_image'], 
+                                         kwargs['moving_image'], 
+                                         kwargs['weight'],
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
