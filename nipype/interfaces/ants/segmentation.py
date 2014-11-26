@@ -574,6 +574,7 @@ class antsCorticalThickness(ANTSCommand):
                                                'brainvols.csv')
         return outputs
 
+
 class JointFusionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, 4, argstr='%d', position=0, usedefault=True, mandatory=True,
                             desc='image dimension (2, 3, or 4)')
@@ -588,21 +589,23 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
     patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rp %s', desc='Patch radius for similarity measures, scalar or vector. Default: 2x2x2')
     search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s', desc='Local search radius. Default: 3x3x3')
     exclusion_region = File(exists=True, argstr='-x %s', desc='Specify an exclusion region for the given label.')
-    output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz', argstr='-p %s',
-                                                 desc="Save the posterior maps (probability that each voxel belongs to each " +\
-                                                 "label) as images. The number of images saved equals the number of labels. " +\
-                                                 "The filename pattern must be in C printf format, e.g. posterior%04d.nii.gz")
-    output_voting_weights_name_template = traits.Str('WEIGHTED_%04d.nii.gz', argstr='-w %s', desc="Save the voting weights as " +\
-                                                     "images. The number of images saved equals the number of atlases. The " +\
-                                                     "filename pattern must be in C printf format, e.g. weight%04d.nii.gz")
+    # TODO: These are almost never needed except for debugging
+    # output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz', argstr='-p %s',
+    #                                              desc="Save the posterior maps (probability that each voxel belongs to each " +\
+    #                                              "label) as images. The number of images saved equals the number of labels. " +\
+    #                                              "The filename pattern must be in C printf format, e.g. posterior%04d.nii.gz")
+    # output_voting_weights_name_template = traits.Str('WEIGHTED_%04d.nii.gz', argstr='-w %s', desc="Save the voting weights as " +\
+    #                                                  "images. The number of images saved equals the number of atlases. The " +\
+    #                                                  "filename pattern must be in C printf format, e.g. weight%04d.nii.gz")
     atlas_group_id = traits.ListInt(argstr='-gp %d...', desc='Assign a group ID for each atlas')
     atlas_group_weights = traits.ListInt(argstr='-gpw %d...', desc='Assign the voting weights to each atlas group')
 
 
 class JointFusionOutputSpec(TraitedSpec):
     output_label_image = File(exists=True)
-    # TODO: optional outputs - output_posteriors, output_voting_weights
-
+    # TODO: These are almost never needed except for debugging,
+    #       so delay complicated implementation until a need arises
+    #       optional outputs - output_posteriors, output_voting_weights
 
 class JointFusion(ANTSCommand):
     """
@@ -616,14 +619,16 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.method = 'Joint[0.1,2]'
     >>> at.inputs.output_label_image ='fusion_labelimage_output.nii'
     >>> at.inputs.warped_intensity_images = ['im1.nii',
-    ...                                      'im2.nii']
+    ...                                      'im2.nii',
+    ...                                      'im3.nii']
     >>> at.inputs.warped_label_images = ['segmentation0.nii.gz',
+    ...                                  'segmentation1.nii.gz',
     ...                                  'segmentation1.nii.gz']
     >>> at.inputs.target_image = 'T1.nii'
     >>> at.inputs.patch_radius = [3,2,1]
     >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -l segmentation0.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
 
     Alternately, you can specify the voting method and parameters more 'Pythonically':
 
@@ -631,7 +636,7 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.alpha = 0.5
     >>> at.inputs.beta = 1
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -l segmentation0.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
     """
     input_spec = JointFusionInputSpec
     output_spec = JointFusionOutputSpec
