@@ -14,8 +14,8 @@ This script demonstrates how to use nipype to analyze a data set::
 
 from nipype import config
 config.enable_provenance()
-from nipype.external import six
 
+from nipype.external import six
 
 from glob import glob
 import os
@@ -174,8 +174,8 @@ def create_reg_workflow(name='registration'):
     reg.inputs.winsorize_upper_quantile = 0.995
     reg.inputs.args = '--float'
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
-    reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    reg.inputs.num_threads = 2
+    reg.plugin_args = {'qsub_args': '-pe orte 2'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image_brain', reg,'fixed_image')
 
@@ -361,25 +361,45 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
-
-    datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+    contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
+                                 'task_contrasts.txt')
+    has_contrast = os.path.exists(contrast_file)
+    if has_contrast:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
                                                    'task_id', 'model_id'],
                                          outfields=['anat', 'bold', 'behav',
                                                     'contrasts']),
                          name='datasource')
+    else:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+                                                   'task_id', 'model_id'],
+                                         outfields=['anat', 'bold', 'behav']),
+                         name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
-    datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
-                                'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
-                                'behav': ('%s/model/model%03d/onsets/task%03d_'
-                                          'run%03d/cond*.txt'),
-                                'contrasts': ('models/model%03d/'
-                                              'task_contrasts.txt')}
-    datasource.inputs.template_args = {'anat': [['subject_id']],
+    
+    if has_contrast:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt'),
+                                            'contrasts': ('models/model%03d/'
+                                                          'task_contrasts.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
                                        'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
                                                   'task_id', 'run_id']],
                                        'contrasts': [['model_id']]}
+    else:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
+                                       'bold': [['subject_id', 'task_id']],
+                                       'behav': [['subject_id', 'model_id',
+                                                  'task_id', 'run_id']]}
+
     datasource.inputs.sort_filelist = True
 
     """
@@ -412,9 +432,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
-        contrast_def = np.genfromtxt(contrast_file, dtype=object)
-        if len(contrast_def.shape) == 1:
-            contrast_def = contrast_def[None, :]
+        import os
+        contrast_def = []
+        if os.path.exists(contrast_file):
+            with open(contrast_file, 'rt') as fp:
+                contrast_def.extend([np.array(row.split()) for row in fp.readlines() if row.strip()])
         contrasts = []
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
@@ -448,22 +470,32 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
-    def check_behav_list(behav):
-        out_behav = []
+    def check_behav_list(behav, conds):
+        from nipype.external import six
+        import numpy as np
+        num_conds = len(conds)
         if isinstance(behav, six.string_types):
             behav = [behav]
-        for val in behav:
-            if not isinstance(val, list):
-                out_behav.append([val])
-            else:
-                out_behav.append(val)
-        return out_behav
+        behav_array = np.array(behav).flatten()
+        num_elements = behav_array.shape[0]
+        return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
+
+    reshape_behav = pe.Node(niu.Function(input_names=['behav', 'conds'],
+                                       output_names=['behav'],
+                                       function=check_behav_list),
+                          name='reshape_behav')
 
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
-    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
+    wf.connect(datasource, 'behav', reshape_behav, 'behav')
+    wf.connect(subjinfo, 'conds', reshape_behav, 'conds')
+    wf.connect(reshape_behav, 'behav', modelspec, 'event_files')
+
     wf.connect(subjinfo, 'TR', modelfit, 'inputspec.interscan_interval')
     wf.connect(subjinfo, 'conds', contrastgen, 'conds')
-    wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    if has_contrast:
+        wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    else:
+        contrastgen.inputs.contrast_file = ''
     wf.connect(infosource, 'task_id', contrastgen, 'task_id')
     wf.connect(contrastgen, 'contrasts', modelfit, 'inputspec.contrasts')
 
