@@ -284,7 +284,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     for idx in range(n_tasks):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
-                      in taskinfo[taskidx[0], 2]])
+                      in taskinfo[taskidx[0], 2] if 'junk' not in condition])
         files = sorted(glob(os.path.join(base_dir,
                                          subject_id,
                                          'BOLD',
@@ -520,32 +520,39 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     Reorder the copes so that now it combines across runs
     """
 
-    def sort_copes(files):
-        numelements = len(files[0])
-        outfiles = []
-        for i in range(numelements):
-            outfiles.insert(i, [])
-            for j, elements in enumerate(files):
-                outfiles[i].append(elements[i])
-        return outfiles
+    def sort_copes(copes, varcopes, conds):
+        import numpy as np
+        if not isinstance(copes, list):
+            copes = [copes]
+            varcopes = [varcopes]
+        num_copes = len(conds)
+        n_runs = len(copes)
+        all_copes = np.array(copes).flatten()
+        all_varcopes = np.array(varcopes).flatten()
+        outcopes = all_copes.reshape(len(all_copes)/num_copes, num_copes).T.tolist()
+        outvarcopes = all_varcopes.reshape(len(all_varcopes)/num_copes, num_copes).T.tolist()
+        return outcopes, outvarcopes, n_runs
 
-    def num_copes(files):
-        return len(files)
+    cope_sorter = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                    'conds'],
+                                       output_names=['copes', 'varcopes',
+                                                     'n_runs'],
+                                       function=sort_copes),
+                          name='cope_sorter')
 
     pickfirst = lambda x: x[0]
 
+    wf.connect(subjinfo, 'conds', cope_sorter, 'conds')
     wf.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
                                       'flameo.mask_file')]),
-                (modelfit, fixed_fx, [(('outputspec.copes', sort_copes),
-                                       'inputspec.copes'),
-                                       ('outputspec.dof_file',
+                (modelfit, cope_sorter, [('outputspec.copes', 'copes')]),
+                (modelfit, cope_sorter, [('outputspec.varcopes', 'varcopes')]),
+                (cope_sorter, fixed_fx, [('copes', 'inputspec.copes'),
+                                         ('varcopes', 'inputspec.varcopes'),
+                                         ('n_runs', 'l2model.num_copes')]),
+                (modelfit, fixed_fx, [('outputspec.dof_file',
                                         'inputspec.dof_files'),
-                                       (('outputspec.varcopes',
-                                         sort_copes),
-                                        'inputspec.varcopes'),
-                                       (('outputspec.copes', num_copes),
-                                        'l2model.num_copes'),
-                                       ])
+                                      ])
                 ])
 
     wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
