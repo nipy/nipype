@@ -285,11 +285,12 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
                       in taskinfo[taskidx[0], 2]])
-        files = glob(os.path.join(base_dir,
-                                  subject_id,
-                                  'BOLD',
-                                  'task%03d_run*' % (idx + 1)))
-        run_ids.insert(idx, range(1, len(files) + 1))
+        files = sorted(glob(os.path.join(base_dir,
+                                         subject_id,
+                                         'BOLD',
+                                         'task%03d_run*' % (idx + 1))))
+        runs = [int(val[-3:]) for val in files]
+        run_ids.insert(idx, runs)
     TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
