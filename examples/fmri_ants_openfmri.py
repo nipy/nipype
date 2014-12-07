@@ -284,7 +284,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     for idx in range(n_tasks):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
-                      in taskinfo[taskidx[0], 2] if 'junk' not in condition])
+                      in taskinfo[taskidx[0], 2]]) # if 'junk' not in condition])
         files = sorted(glob(os.path.join(base_dir,
                                          subject_id,
                                          'BOLD',
@@ -471,6 +471,22 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
+    '''
+    def check_behav_list(behav):
+        from nipype.external import six
+        out_behav = []
+        if isinstance(behav, six.string_types):
+            behav = [behav]
+        for val in behav:
+            if not isinstance(val, list):
+                out_behav.append([val])
+            else:
+                out_behav.append(val)
+        return out_behav
+
+    wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
+    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
+    '''
     def check_behav_list(behav, conds):
         from nipype.external import six
         import numpy as np
