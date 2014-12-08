@@ -536,12 +536,12 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     Reorder the copes so that now it combines across runs
     """
 
-    def sort_copes(copes, varcopes, conds):
+    def sort_copes(copes, varcopes, contrasts):
         import numpy as np
         if not isinstance(copes, list):
             copes = [copes]
             varcopes = [varcopes]
-        num_copes = len(conds)
+        num_copes = len(contrasts)
         n_runs = len(copes)
         all_copes = np.array(copes).flatten()
         all_varcopes = np.array(varcopes).flatten()
@@ -550,7 +550,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         return outcopes, outvarcopes, n_runs
 
     cope_sorter = pe.Node(niu.Function(input_names=['copes', 'varcopes',
-                                                    'conds'],
+                                                    'contrasts'],
                                        output_names=['copes', 'varcopes',
                                                      'n_runs'],
                                        function=sort_copes),
@@ -558,7 +558,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     pickfirst = lambda x: x[0]
 
-    wf.connect(subjinfo, 'conds', cope_sorter, 'conds')
+    wf.connect(contrastgen, 'contrasts', cope_sorter, 'contrasts')
     wf.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
                                       'flameo.mask_file')]),
                 (modelfit, cope_sorter, [('outputspec.copes', 'copes')]),
