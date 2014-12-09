@@ -7,7 +7,7 @@
 import os
 import numpy as np
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec
+from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec, getNiftySegPath
 from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
                                     isdefined)
 
@@ -19,7 +19,7 @@ class StatsInput(NIFTYSEGCommandInputSpec):
     
 class StatsCommand(NIFTYSEGCommand):
 
-    _cmd = 'seg_stats'
+    _cmd = getNiftySegPath('seg_stats')
     input_spec = StatsInput
     
 class UnaryStatsInput(StatsInput):

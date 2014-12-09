@@ -93,3 +93,12 @@ def no_niftyseg():
     """Checks if niftyseg is NOT installed
     """
     raise NotImplementedError("Waiting for version fix")
+
+# A custom function for getting specific niftyseg path
+def getNiftySegPath(cmd):
+    try:    
+        specific_dir=os.environ['NIFTYSEGDIR']
+        cmd=os.path.join(specific_dir,cmd)
+        return cmd
+    except KeyError:                
+        return cmd

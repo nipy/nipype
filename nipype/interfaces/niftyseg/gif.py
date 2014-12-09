@@ -11,7 +11,7 @@ import os.path as op
 import warnings
 import glob
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand
+from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand,getNiftySegPath
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, InputMultiPath,
                                     isdefined)
 
@@ -114,7 +114,7 @@ class Gif(NIFTYSEGCommand):
 
     """
 
-    _cmd = 'seg_GIF'
+    _cmd = getNiftySegPath('seg_GIF')
     input_spec = GifInputSpec  
     output_spec = GifOutputSpec
 
