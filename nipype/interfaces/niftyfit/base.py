@@ -90,3 +90,13 @@ def no_niftyfit():
     """Checks if niftyfit is NOT installed
     """
     raise NotImplementedError("Waiting for version fix")
+
+# A custom function for getting specific niftyfit path
+def getNiftyFitPath(cmd):
+    try:    
+        specific_dir=os.environ['NIFTYFITDIR']
+        cmd=os.path.join(specific_dir,cmd)
+        return cmd
+    except KeyError:                
+        return cmd
+

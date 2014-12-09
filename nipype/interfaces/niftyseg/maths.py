@@ -7,7 +7,7 @@
 import os
 import numpy as np
 
-from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec
+from nipype.interfaces.niftyseg.base import NIFTYSEGCommand, NIFTYSEGCommandInputSpec, getNiftySegPath
 from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
                                     isdefined)
 
@@ -28,7 +28,7 @@ class MathsOutput(TraitedSpec):
 
 class MathsCommand(NIFTYSEGCommand):
 
-    _cmd = 'seg_maths'
+    _cmd = getNiftySegPath('seg_maths')
     input_spec = MathsInput
     output_spec = MathsOutput
     _suffix = '_maths'

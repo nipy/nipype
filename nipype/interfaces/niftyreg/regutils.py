@@ -8,7 +8,7 @@ interfaces were written to work with niftyreg version 1.4
 import os
 import warnings
 
-from nipype.interfaces.niftyreg.base import NIFTYREGCommand, NIFTYREGCommandInputSpec
+from nipype.interfaces.niftyreg.base import NIFTYREGCommand, NIFTYREGCommandInputSpec, getNiftyRegPath
 
 from nipype.interfaces.base import (TraitedSpec,
                                     File, 
@@ -79,7 +79,7 @@ class RegResampleOutputSpec(TraitedSpec):
 
 # Resampler class
 class RegResample(NIFTYREGCommand):
-    _cmd = 'reg_resample'
+    _cmd = getNiftyRegPath('reg_resample')
     input_spec = RegResampleInputSpec
     output_spec = RegResampleOutputSpec
 
@@ -120,7 +120,7 @@ class RegJacobianOutputSpec(TraitedSpec):
     
 # Main interface class
 class RegJacobian(NIFTYREGCommand):
-    _cmd = 'reg_jacobian'
+    _cmd = getNiftyRegPath('reg_jacobian')
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
     _suffix = '_jacobian_'
@@ -179,7 +179,7 @@ class RegToolsOutputSpec(TraitedSpec):
 
 # Main interface class
 class RegTools(NIFTYREGCommand):
-    _cmd = 'reg_tools'
+    _cmd = getNiftyRegPath('reg_tools')
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
 
@@ -221,7 +221,7 @@ class RegAverage(NIFTYREGCommand):
     >>> 
 
     """
-    _cmd = 'reg_average'
+    _cmd = getNiftyRegPath('reg_average')
     input_spec = RegAverageInputSpec
     output_spec = RegAverageOutputSpec
     
@@ -526,7 +526,7 @@ class RegTransform(NIFTYREGCommand):
     * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     
     """
-    _cmd = 'reg_transform'
+    _cmd = getNiftyRegPath('reg_transform')
     input_spec = RegTransformInputSpec
     output_spec = RegTransformOutputSpec
     
@@ -709,7 +709,7 @@ class RegF3DOutputSpec(TraitedSpec):
 
 # Main interface class
 class RegF3D(NIFTYREGCommand):
-    _cmd = 'reg_f3d'
+    _cmd = getNiftyRegPath('reg_f3d')
     input_spec = RegF3DInputSpec
     output_spec = RegF3DOutputSpec
     
@@ -757,6 +757,6 @@ class RegMeasureOutputSpec(TraitedSpec):
 
 # Main interface class
 class RegMeasure(NIFTYREGCommand):
-    _cmd = 'reg_measure'
+    _cmd = getNiftyRegPath('reg_measure')
     input_spec = RegMeasureInputSpec
     output_spec = RegMeasureOutputSpec

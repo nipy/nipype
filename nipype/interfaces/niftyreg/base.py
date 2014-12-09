@@ -101,3 +101,13 @@ def no_niftyreg():
     """Checks if niftyreg is NOT installed
     """
     raise NotImplementedError("Waiting for version fix")
+
+# A custom function for getting specific niftyreg path
+def getNiftyRegPath(cmd):
+    try:    
+        specific_dir=os.environ['NIFTYREGDIR']
+        cmd=os.path.join(specific_dir,cmd)
+        return cmd
+    except KeyError:                
+        return cmd
+

@@ -3,7 +3,7 @@
 """The ASL module of niftyfit, which wraps the fitting methods in NiftyFit.
 """
 
-from nipype.interfaces.niftyfit.base import NIFTYFITCommandInputSpec, NIFTYFITCommand
+from nipype.interfaces.niftyfit.base import getNiftyFitPath,NIFTYFITCommandInputSpec, NIFTYFITCommand
 from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
 
 #-----------------------------------------------------------
@@ -111,7 +111,7 @@ class FitAsl(NIFTYFITCommand):
     
     >>> from nipype.interfaces import niftyfit
     """
-    _cmd = 'fit_asl'
+    _cmd = getNiftyFitPath('fit_asl')
     input_spec = FitAslInputSpec
     output_spec = FitAslOutputSpec
     

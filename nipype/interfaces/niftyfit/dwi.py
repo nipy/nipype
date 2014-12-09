@@ -5,7 +5,7 @@
 
 import warnings
 
-from nipype.interfaces.niftyfit.base import NIFTYFITCommandInputSpec, NIFTYFITCommand
+from nipype.interfaces.niftyfit.base import NIFTYFITCommandInputSpec, NIFTYFITCommand,getNiftyFitPath
 
 from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
 
@@ -144,7 +144,7 @@ class FitDwi(NIFTYFITCommand):
     >>> fit_dwi.inputs.rgbmap_file = 'rgb_map.nii.gz' 
     >>> fit_dwi.run()
     """
-    _cmd = 'fit_dwi'
+    _cmd = getNiftyFitPath('fit_dwi')
     input_spec = FitDwiInputSpec
     output_spec = FitDwiOutputSpec
     
@@ -254,7 +254,7 @@ class DwiTool(NIFTYFITCommand):
     >>> dwi_tool.inputs.rgbmap_file = 'rgb_map.nii.gz' 
     >>> dwi_tool.run()
     """
-    _cmd = 'dwi_tool'
+    _cmd = getNiftyFitPath('dwi_tool')
     input_spec = DwiToolInputSpec
     output_spec = DwiToolOutputSpec
     
