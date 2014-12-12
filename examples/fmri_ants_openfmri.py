@@ -471,23 +471,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
-    '''
-    def check_behav_list(behav):
-        from nipype.external import six
-        out_behav = []
-        if isinstance(behav, six.string_types):
-            behav = [behav]
-        for val in behav:
-            if not isinstance(val, list):
-                out_behav.append([val])
-            else:
-                out_behav.append(val)
-        return out_behav
-
-    wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
-    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
-    '''
-    def check_behav_list(behav, conds):
+    def check_behav_list(behav, run_id, conds):
         from nipype.external import six
         import numpy as np
         num_conds = len(conds)
@@ -497,13 +481,14 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         num_elements = behav_array.shape[0]
         return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
 
-    reshape_behav = pe.Node(niu.Function(input_names=['behav', 'conds'],
+    reshape_behav = pe.Node(niu.Function(input_names=['behav', 'run_id', 'conds'],
                                        output_names=['behav'],
                                        function=check_behav_list),
                           name='reshape_behav')
 
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
     wf.connect(datasource, 'behav', reshape_behav, 'behav')
+    wf.connect(subjinfo, 'run_id', reshape_behav, 'run_id')
     wf.connect(subjinfo, 'conds', reshape_behav, 'conds')
     wf.connect(reshape_behav, 'behav', modelspec, 'event_files')
 
