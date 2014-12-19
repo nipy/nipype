@@ -97,7 +97,7 @@ class antsIntroduction(ANTSCommand):
         transmodel = self.inputs.transformation_model
 
         # When transform is set as 'RI'/'RA', no wrap fields will be outputed
-        if transmodel not in ['RI', 'RA']:
+        if isdefined(transmodel) and transmodel not in ['RI', 'RA']:
             outputs['warp_field'] = os.path.join(os.getcwd(),
                                  self.inputs.out_prefix +
                                  'Warp.nii.gz')
