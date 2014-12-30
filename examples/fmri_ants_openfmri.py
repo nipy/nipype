@@ -14,8 +14,8 @@ This script demonstrates how to use nipype to analyze a data set::
 
 from nipype import config
 config.enable_provenance()
-from nipype.external import six
 
+from nipype.external import six
 
 from glob import glob
 import os
@@ -174,8 +174,8 @@ def create_reg_workflow(name='registration'):
     reg.inputs.winsorize_upper_quantile = 0.995
     reg.inputs.args = '--float'
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
-    reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    reg.inputs.num_threads = 2
+    reg.plugin_args = {'qsub_args': '-pe orte 2'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image_brain', reg,'fixed_image')
 
@@ -284,12 +284,13 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     for idx in range(n_tasks):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
-                      in taskinfo[taskidx[0], 2]])
-        files = glob(os.path.join(base_dir,
-                                  subject_id,
-                                  'BOLD',
-                                  'task%03d_run*' % (idx + 1)))
-        run_ids.insert(idx, range(1, len(files) + 1))
+                      in taskinfo[taskidx[0], 2]]) # if 'junk' not in condition])
+        files = sorted(glob(os.path.join(base_dir,
+                                         subject_id,
+                                         'BOLD',
+                                         'task%03d_run*' % (idx + 1))))
+        runs = [int(val[-3:]) for val in files]
+        run_ids.insert(idx, runs)
     TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
@@ -361,25 +362,45 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
-
-    datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+    contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
+                                 'task_contrasts.txt')
+    has_contrast = os.path.exists(contrast_file)
+    if has_contrast:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
                                                    'task_id', 'model_id'],
                                          outfields=['anat', 'bold', 'behav',
                                                     'contrasts']),
                          name='datasource')
+    else:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+                                                   'task_id', 'model_id'],
+                                         outfields=['anat', 'bold', 'behav']),
+                         name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
-    datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
-                                'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
-                                'behav': ('%s/model/model%03d/onsets/task%03d_'
-                                          'run%03d/cond*.txt'),
-                                'contrasts': ('models/model%03d/'
-                                              'task_contrasts.txt')}
-    datasource.inputs.template_args = {'anat': [['subject_id']],
+    
+    if has_contrast:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt'),
+                                            'contrasts': ('models/model%03d/'
+                                                          'task_contrasts.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
                                        'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
                                                   'task_id', 'run_id']],
                                        'contrasts': [['model_id']]}
+    else:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
+                                       'bold': [['subject_id', 'task_id']],
+                                       'behav': [['subject_id', 'model_id',
+                                                  'task_id', 'run_id']]}
+
     datasource.inputs.sort_filelist = True
 
     """
@@ -412,9 +433,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
-        contrast_def = np.genfromtxt(contrast_file, dtype=object)
-        if len(contrast_def.shape) == 1:
-            contrast_def = contrast_def[None, :]
+        import os
+        contrast_def = []
+        if os.path.exists(contrast_file):
+            with open(contrast_file, 'rt') as fp:
+                contrast_def.extend([np.array(row.split()) for row in fp.readlines() if row.strip()])
         contrasts = []
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
@@ -448,22 +471,33 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
-    def check_behav_list(behav):
-        out_behav = []
+    def check_behav_list(behav, run_id, conds):
+        from nipype.external import six
+        import numpy as np
+        num_conds = len(conds)
         if isinstance(behav, six.string_types):
             behav = [behav]
-        for val in behav:
-            if not isinstance(val, list):
-                out_behav.append([val])
-            else:
-                out_behav.append(val)
-        return out_behav
+        behav_array = np.array(behav).flatten()
+        num_elements = behav_array.shape[0]
+        return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
+
+    reshape_behav = pe.Node(niu.Function(input_names=['behav', 'run_id', 'conds'],
+                                       output_names=['behav'],
+                                       function=check_behav_list),
+                          name='reshape_behav')
 
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
-    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
+    wf.connect(datasource, 'behav', reshape_behav, 'behav')
+    wf.connect(subjinfo, 'run_id', reshape_behav, 'run_id')
+    wf.connect(subjinfo, 'conds', reshape_behav, 'conds')
+    wf.connect(reshape_behav, 'behav', modelspec, 'event_files')
+
     wf.connect(subjinfo, 'TR', modelfit, 'inputspec.interscan_interval')
     wf.connect(subjinfo, 'conds', contrastgen, 'conds')
-    wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    if has_contrast:
+        wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    else:
+        contrastgen.inputs.contrast_file = ''
     wf.connect(infosource, 'task_id', contrastgen, 'task_id')
     wf.connect(contrastgen, 'contrasts', modelfit, 'inputspec.contrasts')
 
@@ -487,32 +521,39 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     Reorder the copes so that now it combines across runs
     """
 
-    def sort_copes(files):
-        numelements = len(files[0])
-        outfiles = []
-        for i in range(numelements):
-            outfiles.insert(i, [])
-            for j, elements in enumerate(files):
-                outfiles[i].append(elements[i])
-        return outfiles
+    def sort_copes(copes, varcopes, contrasts):
+        import numpy as np
+        if not isinstance(copes, list):
+            copes = [copes]
+            varcopes = [varcopes]
+        num_copes = len(contrasts)
+        n_runs = len(copes)
+        all_copes = np.array(copes).flatten()
+        all_varcopes = np.array(varcopes).flatten()
+        outcopes = all_copes.reshape(len(all_copes)/num_copes, num_copes).T.tolist()
+        outvarcopes = all_varcopes.reshape(len(all_varcopes)/num_copes, num_copes).T.tolist()
+        return outcopes, outvarcopes, n_runs
 
-    def num_copes(files):
-        return len(files)
+    cope_sorter = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                    'contrasts'],
+                                       output_names=['copes', 'varcopes',
+                                                     'n_runs'],
+                                       function=sort_copes),
+                          name='cope_sorter')
 
     pickfirst = lambda x: x[0]
 
+    wf.connect(contrastgen, 'contrasts', cope_sorter, 'contrasts')
     wf.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
                                       'flameo.mask_file')]),
-                (modelfit, fixed_fx, [(('outputspec.copes', sort_copes),
-                                       'inputspec.copes'),
-                                       ('outputspec.dof_file',
+                (modelfit, cope_sorter, [('outputspec.copes', 'copes')]),
+                (modelfit, cope_sorter, [('outputspec.varcopes', 'varcopes')]),
+                (cope_sorter, fixed_fx, [('copes', 'inputspec.copes'),
+                                         ('varcopes', 'inputspec.varcopes'),
+                                         ('n_runs', 'l2model.num_copes')]),
+                (modelfit, fixed_fx, [('outputspec.dof_file',
                                         'inputspec.dof_files'),
-                                       (('outputspec.varcopes',
-                                         sort_copes),
-                                        'inputspec.varcopes'),
-                                       (('outputspec.copes', num_copes),
-                                        'l2model.num_copes'),
-                                       ])
+                                      ])
                 ])
 
     wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
