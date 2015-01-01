@@ -78,16 +78,15 @@ def test_antsCorticalThickness_outputs():
     output_map = dict(BrainExtractionMask=dict(),
     BrainSegmentation=dict(),
     BrainSegmentationN4=dict(),
-    BrainSegmentationPosteriorsCSF=dict(),
-    BrainSegmentationPosteriorsDGM=dict(),
-    BrainSegmentationPosteriorsGM=dict(),
-    BrainSegmentationPosteriorsWM=dict(),
+    BrainSegmentationPosteriors=dict(),
+    BrainVolumes=dict(),
     CorticalThickness=dict(),
+    CorticalThicknessNormedToTemplate=dict(),
     SubjectToTemplate0GenericAffine=dict(),
     SubjectToTemplate1Warp=dict(),
+    SubjectToTemplateLogJacobian=dict(),
     TemplateToSubject0Warp=dict(),
     TemplateToSubject1GenericAffine=dict(),
-    TemplateToSubjectLogJacobian=dict(),
     )
     outputs = antsCorticalThickness.output_spec()
 

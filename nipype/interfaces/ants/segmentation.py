@@ -447,16 +447,17 @@ class antsCorticalThicknessoutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainSegmentation = File(exists=True, desc='brain segmentaion image')
     BrainSegmentationN4 = File(exists=True, desc='N4 corrected image')
-    BrainSegmentationPosteriorsCSF = File(exists=True, desc='CSF posterior probability image')
-    BrainSegmentationPosteriorsGM = File(exists=True, desc='GM posterior probability image')
-    BrainSegmentationPosteriorsWM = File(exists=True, desc='WM posterior probability image')
-    BrainSegmentationPosteriorsDGM = File(exists=True, desc='DGM posterior probability image')
+    BrainSegmentationPosteriors = OutputMultiPath(File(exists=True),
+                                                  desc='Posterior probability images')
     CorticalThickness = File(exists=True, desc='cortical thickness file')
     TemplateToSubject1GenericAffine = File(exists=True, desc='Template to subject affine')
     TemplateToSubject0Warp = File(exists=True, desc='Template to subject warp')
     SubjectToTemplate1Warp = File(exists=True, desc='Template to subject inverse warp')
     SubjectToTemplate0GenericAffine = File(exists=True, desc='Template to subject inverse affine')
-    TemplateToSubjectLogJacobian = File(exists=True, desc='Template to subject log jacobian')
+    SubjectToTemplateLogJacobian = File(exists=True, desc='Template to subject log jacobian')
+    CorticalThicknessNormedToTemplate = File(exists=True,
+                                             desc='Normalized cortical thickness')
+    BrainVolumes = File(exists=True, desc='Brain volumes as text')
 
 
 class antsCorticalThickness(ANTSCommand):
@@ -496,25 +497,20 @@ class antsCorticalThickness(ANTSCommand):
             retval = '-t %s' % val
             return retval
         if opt == 'segmentation_priors':
-            priors_directory, _, ext = split_filename(self.inputs.segmentation_priors[0])
-            if priors_directory is not '':
-                retval = "-p %s/BrainSegmentationPrior%%02d" % priors_directory
-            else:
-                retval = "-p BrainSegmentationPrior%02d"
-            retval += ext
+            _, _, ext = split_filename(self.inputs.segmentation_priors[0])
+            retval = "-p nipype_priors/BrainSegmentationPrior%02d" + ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
-        priors_directory = os.path.join(os.getcwd(), "priors")
+        priors_directory = os.path.join(os.getcwd(), "nipype_priors")
         if not os.path.exists(priors_directory):
             os.makedirs(priors_directory)
         _, _, ext = split_filename(self.inputs.segmentation_priors[0])
         for i, f in enumerate(self.inputs.segmentation_priors):
             target = os.path.join(priors_directory, 'BrainSegmentationPrior%02d' % (i + 1) + ext)
             if not (os.path.exists(target) and os.path.realpath(target) == os.path.abspath(f)):
-                copyfile(os.path.abspath(f), os.path.join(priors_directory,
-                                                          'BrainSegmentationPrior%02d' % (i + 1) + ext))
+                copyfile(os.path.abspath(f), target)
         runtime = super(antsCorticalThickness, self)._run_interface(runtime)
         return runtime
 
@@ -532,22 +528,13 @@ class antsCorticalThickness(ANTSCommand):
                                                       self.inputs.out_prefix +
                                                       'BrainSegmentation0N4.' +
                                                       self.inputs.image_suffix)
-        outputs['BrainSegmentationPosteriorsCSF'] = os.path.join(os.getcwd(),
-                                                                 self.inputs.out_prefix +
-                                                                 'BrainSegmentationPosteriors01.' +
-                                                                 self.inputs.image_suffix)
-        outputs['BrainSegmentationPosteriorsGM'] = os.path.join(os.getcwd(),
-                                                                self.inputs.out_prefix +
-                                                                'BrainSegmentationPosteriors02.' +
-                                                                self.inputs.image_suffix)
-        outputs['BrainSegmentationPosteriorsWM'] = os.path.join(os.getcwd(),
-                                                                self.inputs.out_prefix +
-                                                                'BrainSegmentationPosteriors03.' +
-                                                                self.inputs.image_suffix)
-        outputs['BrainSegmentationPosteriorsDGM'] = os.path.join(os.getcwd(),
-                                                                 self.inputs.out_prefix +
-                                                                 'BrainSegmentationPosteriors04.' +
-                                                                 self.inputs.image_suffix)
+        posteriors = []
+        for i in range(len(self.inputs.segmentation_priors)):
+            posteriors.append(os.path.join(os.getcwd(),
+                                           self.inputs.out_prefix +
+                                           'BrainSegmentationPosteriors%02d.' % (i + 1) +
+                                           self.inputs.image_suffix))
+        outputs['BrainSegmentationPosteriors'] = posteriors
         outputs['CorticalThickness'] = os.path.join(os.getcwd(),
                                                     self.inputs.out_prefix +
                                                     'CorticalThickness.' +
@@ -565,8 +552,15 @@ class antsCorticalThickness(ANTSCommand):
         outputs['SubjectToTemplate0GenericAffine'] = os.path.join(os.getcwd(),
                                                                   self.inputs.out_prefix +
                                                                   'SubjectToTemplate0GenericAffine.mat')
-        outputs['TemplateToSubjectLogJacobian'] = os.path.join(os.getcwd(),
+        outputs['SubjectToTemplateLogJacobian'] = os.path.join(os.getcwd(),
                                                                self.inputs.out_prefix +
-                                                               'subjectToTemplateLogJacobian.' +
+                                                               'SubjectToTemplateLogJacobian.' +
                                                                self.inputs.image_suffix)
+        outputs['CorticalThicknessNormedToTemplate'] = os.path.join(os.getcwd(),
+                                                    self.inputs.out_prefix +
+                                                    'CorticalThickness.' +
+                                                    self.inputs.image_suffix)
+        outputs['BrainVolumes'] = os.path.join(os.getcwd(),
+                                               self.inputs.out_prefix +
+                                               'brainvols.csv')
         return outputs
