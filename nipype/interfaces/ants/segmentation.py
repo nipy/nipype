@@ -540,6 +540,7 @@ class antsCorticalThickness(ANTSCommand):
                                                     'CorticalThickness.' +
                                                     self.inputs.image_suffix)
         outputs['TemplateToSubject1GenericAffine'] = os.path.join(os.getcwd(),
+                                                                  self.inputs.out_prefix +
                                                                   'TemplateToSubject1GenericAffine.mat')
         outputs['TemplateToSubject0Warp'] = os.path.join(os.getcwd(),
                                                          self.inputs.out_prefix +
