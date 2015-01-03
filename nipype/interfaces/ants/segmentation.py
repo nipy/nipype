@@ -473,7 +473,7 @@ class antsCorticalThickness(ANTSCommand):
     >>> corticalthickness.inputs.segmentation_priors = ['BrainSegmentationPrior01.nii.gz', 'BrainSegmentationPrior02.nii.gz', 'BrainSegmentationPrior03.nii.gz', 'BrainSegmentationPrior04.nii.gz']
     >>> corticalthickness.inputs.t1_registration_template = 'brain_study_template.nii.gz'
     >>> corticalthickness.cmdline
-    'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o antsCT_ -p BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
+    'antsCorticalThickness.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o antsCT_ -p nipype_priors/BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
     """
 
     input_spec = antsCorticalThicknessInputSpec
