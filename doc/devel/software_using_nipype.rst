@@ -28,6 +28,11 @@ Forward
 
 `Forward <http://cyclotronresearchcentre.github.io/forward/>`_ is set of tools simplifying the preparation of accurate electromagnetic head models for EEG forward modeling. It uses Nipype Workflows and Interfaces.
 
+Limbo
+-----
+
+`Limbo <https://github.com/Gilles86/in_limbo>`_ is a toolbox for finding brain regions that are neither significantly active nor inactive, but rather “in limbo”. It was build using custom Nipype Interfaces and Workflows.
+
 Lyman
 -----
 
