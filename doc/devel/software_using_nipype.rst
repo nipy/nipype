@@ -38,6 +38,11 @@ Medimsight
 
 `Medimsight <https://www.medimsight.com>`_ is a commercial service medical imaging cloud platform. It uses Nipype to interface with various neuroimaging software.
 
+MIA
+---
+
+`MIA <http://mia.sourceforge.net>`_ MIA is a a toolkit for gray scale medical image analysis. It provides Nipype interfaces for easy integration with other software.
+
 Mindboggle
 ----------
 
