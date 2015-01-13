@@ -23,7 +23,7 @@ def test_distances():
     dist_ident = m.P2PDistance()
     dist_ident.inputs.surface1 = in_surf
     dist_ident.inputs.surface2 = in_surf
-    dist_ident.inputs.out_file = os.path.join(tmpdir, 'distance.npy')
+    dist_ident.inputs.out_file = os.path.join(tempdir, 'distance.npy')
     res = dist_ident.run()
     yield assert_equal, res.outputs.distance, 0.0
 
