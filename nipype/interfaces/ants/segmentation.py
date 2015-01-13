@@ -268,7 +268,7 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     Examples
     --------
-	
+
 	>>> import copy
     >>> from nipype.interfaces.ants import N4BiasFieldCorrection
     >>> n4 = N4BiasFieldCorrection()
@@ -327,14 +327,14 @@ class N4BiasFieldCorrection(ANTSCommand):
             output = self._gen_filename('output_image')
             newval = '[ %s, %s ]' % (output, bias_image)
             return trait_spec.argstr % newval
-            
+
         if name == 'bspline_fitting_distance':
             if isdefined(self.inputs.bspline_order):
                 newval = '[ %g, %d ]' % (value, self.inputs.bspline_order)
             else:
                 newval = '[ %g ]' % value
             return trait_spec.argstr % newval
-            
+
         if ((name == 'n_iterations') and
            (isdefined(self.inputs.convergence_threshold))):
             newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
