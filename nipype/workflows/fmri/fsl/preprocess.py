@@ -699,7 +699,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
                                                             suffix='_mean'),
                                    iterfield=['in_file'],
                                    name='meanfunc4')
-            
+
             featpreproc.connect(meanscale, 'out_file', meanfunc4, 'in_file')
             addmean = pe.MapNode(interface=fsl.BinaryMaths(operation='add'),
                                  iterfield=['in_file', 'operand_file'],
