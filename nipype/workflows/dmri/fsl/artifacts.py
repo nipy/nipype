@@ -509,12 +509,12 @@ def sdc_fmb(name='fmb_correction',
             bmap_params=dict(delta_te=2.46e-3),
             epi_params=dict(echospacing=0.77e-3,
                             acc_factor=3,
-                            enc_dir='y-')):
+                            enc_dir='AP')):
     """
     SDC stands for susceptibility distortion correction. FMB stands for
     fieldmap-based.
 
-    The fieldmap based method (FMB) implements SDC by using a mapping of the
+    The fieldmap based (FMB) method implements SDC by using a mapping of the
     B0 field as proposed by [Jezzard95]_. This workflow uses the implementation
     of FSL (`FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_). Phase
     unwrapping is performed using `PRELUDE
@@ -522,6 +522,16 @@ def sdc_fmb(name='fmb_correction',
     [Jenkinson03]_. Preparation of the fieldmap is performed reproducing the
     script in FSL `fsl_prepare_fieldmap
     <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data>`_.
+
+    Default settings
+    ----------------
+
+    >>> fugue_params=dict(smooth3d=2.0),
+    >>> bmap_params=dict(delta_te=2.46e-3),
+    >>> epi_params=dict(echospacing=0.77e-3,
+    ...                 acc_factor=3,
+    ...                 enc_dir='AP')
+
 
     Example
     -------
