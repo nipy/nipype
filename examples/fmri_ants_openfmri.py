@@ -378,7 +378,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                          name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
-    
+
     if has_contrast:
         datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
                                             'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
