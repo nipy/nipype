@@ -1802,14 +1802,17 @@ class SSHDataGrabber(DataGrabber):
         client.connect(host['hostname'], username=host['user'], sock=proxy)
         return client
 
+
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='JSON source file')
 
+
 class JSONFileGrabber(IOBase):
+
     """
-    Datagrabber module that loads a json file and generates an output for every
-    first-level object
+    Datagrabber interface that loads a json file and generates an output for 
+    every first-level object
 
     Example
     -------
@@ -1827,7 +1830,6 @@ class JSONFileGrabber(IOBase):
     input_spec = JSONFileGrabberInputSpec
     output_spec = DynamicTraitedSpec
     _always_run = True
-
 
     def _list_outputs(self):
         import json
@@ -1854,6 +1856,7 @@ class JSONFileSinkOutputSpec(TraitedSpec):
 
 
 class JSONFileSink(IOBase):
+
     """ Very simple frontend for storing values into a JSON file.
 
         .. warning::
@@ -1864,7 +1867,8 @@ class JSONFileSink(IOBase):
         Examples
         --------
 
-        >>> jsonsink = JSONFileSink(input_names=['subject_id', 'some_measurement'])
+        >>> jsonsink = JSONFileSink(input_names=['subject_id',
+        ...                         'some_measurement'])
         >>> jsonsink.inputs.subject_id = 's1'
         >>> jsonsink.inputs.some_measurement = 11.4
         >>> jsonsink.run() # doctest: +SKIP
@@ -1897,3 +1901,4 @@ class JSONFileSink(IOBase):
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs
+
