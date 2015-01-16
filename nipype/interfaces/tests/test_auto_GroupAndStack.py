@@ -7,6 +7,8 @@ def test_GroupAndStack_inputs():
     ),
     embed_meta=dict(),
     exclude_regexes=dict(),
+    force_read=dict(usedefault=True,
+    ),
     include_regexes=dict(),
     out_ext=dict(usedefault=True,
     ),

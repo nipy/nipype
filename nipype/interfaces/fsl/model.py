@@ -548,6 +548,19 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='--rn=%s', usedefault=True,
                             desc='directory to store results in')
 
+class FILMGLSInputSpec507(FILMGLSInputSpec505):
+    threshold = traits.Float(default=-1000., argstr='--thr=%f',
+                             position=-1, usedefault=True,
+                             desc='threshold')
+    tcon_file = File(exists=True, argstr='--con=%s',
+                     desc='contrast file containing T-contrasts')
+    fcon_file = File(exists=True, argstr='--fcon=%s',
+                     desc='contrast file containing F-contrasts')
+    mode = traits.Enum('volumetric', 'surface', argstr="--mode=%s",
+                       desc="Type of analysis to be done")
+    surface = File(exists=True, argstr="--in2=%s",
+                   desc=("input surface for autocorr smoothing in "
+                         "surface-based analyses"))
 
 class FILMGLSOutputSpec(TraitedSpec):
     param_estimates = OutputMultiPath(File(exists=True),
@@ -561,8 +574,38 @@ class FILMGLSOutputSpec(TraitedSpec):
                             desc='directory storing model estimation output')
     corrections = File(exists=True,
                        desc='statistical corrections used within FILM modelling')
+    thresholdac = File(exists=True,
+                       desc='The FILM autocorrelation parameters')
     logfile = File(exists=True,
                    desc='FILM run logfile')
+
+
+class FILMGLSOutputSpec507(TraitedSpec):
+    param_estimates = OutputMultiPath(File(exists=True),
+                                      desc='Parameter estimates for each column of the design matrix')
+    residual4d = File(exists=True,
+                      desc='Model fit residual mean-squared error for each time point')
+    dof_file = File(exists=True, desc='degrees of freedom')
+    sigmasquareds = File(
+        exists=True, desc='summary of residuals, See Woolrich, et. al., 2001')
+    results_dir = Directory(exists=True,
+                            desc='directory storing model estimation output')
+    thresholdac = File(exists=True,
+                       desc='The FILM autocorrelation parameters')
+    logfile = File(exists=True,
+                   desc='FILM run logfile')
+    copes = OutputMultiPath(File(exists=True),
+                            desc='Contrast estimates for each contrast')
+    varcopes = OutputMultiPath(File(exists=True),
+                               desc='Variance estimates for each contrast')
+    zstats = OutputMultiPath(File(exists=True),
+                             desc='z-stat file for each contrast')
+    tstats = OutputMultiPath(File(exists=True),
+                             desc='t-stat file for each contrast')
+    fstats = OutputMultiPath(File(exists=True),
+                             desc='f-stat file for each contrast')
+    zfstats = OutputMultiPath(File(exists=True),
+                              desc='z-stat file for each F contrast')
 
 
 class FILMGLS(FSLCommand):
@@ -597,11 +640,16 @@ threshold=10, results_dir='stats')
 
     _cmd = 'film_gls'
 
-    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+        input_spec = FILMGLSInputSpec507
+    elif Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
         input_spec = FILMGLSInputSpec505
     else:
         input_spec = FILMGLSInputSpec
-    output_spec = FILMGLSOutputSpec
+    if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+        output_spec = FILMGLSOutputSpec507
+    else:
+        output_spec = FILMGLSOutputSpec
 
     def _get_pe_files(self, cwd):
         files = None
@@ -618,6 +666,25 @@ threshold=10, results_dir='stats')
             fp.close()
         return files
 
+    def _get_numcons(self):
+        numtcons = 0
+        numfcons = 0
+        if isdefined(self.inputs.tcon_file):
+            fp = open(self.inputs.tcon_file, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumContrasts'):
+                    numtcons = int(line.split()[-1])
+                    break
+            fp.close()
+        if isdefined(self.inputs.fcon_file):
+            fp = open(self.inputs.fcon_file, 'rt')
+            for line in fp.readlines():
+                if line.startswith('/NumContrasts'):
+                    numfcons = int(line.split()[-1])
+                    break
+            fp.close()
+        return numtcons, numfcons
+
     def _list_outputs(self):
         outputs = self._outputs().get()
         cwd = os.getcwd()
@@ -630,11 +697,50 @@ threshold=10, results_dir='stats')
         outputs['dof_file'] = os.path.join(results_dir, 'dof')
         outputs['sigmasquareds'] = self._gen_fname('sigmasquareds.nii',
                                                    cwd=results_dir)
-        outputs['corrections'] = self._gen_fname('corrections.nii',
+        outputs['thresholdac'] = self._gen_fname('threshac1.nii',
                                                  cwd=results_dir)
+        if Info.version() and LooseVersion(Info.version()) < LooseVersion('5.0.7'):
+            outputs['corrections'] = self._gen_fname('corrections.nii',
+                                                     cwd=results_dir)
         outputs['logfile'] = self._gen_fname('logfile',
                                              change_ext=False,
                                              cwd=results_dir)
+
+        if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
+            pth = results_dir
+            numtcons, numfcons = self._get_numcons()
+            base_contrast = 1
+            copes = []
+            varcopes = []
+            zstats = []
+            tstats = []
+            neffs = []
+            for i in range(numtcons):
+                copes.append(self._gen_fname('cope%d.nii' % (base_contrast + i),
+                                             cwd=pth))
+                varcopes.append(
+                    self._gen_fname('varcope%d.nii' % (base_contrast + i),
+                                    cwd=pth))
+                zstats.append(self._gen_fname('zstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+                tstats.append(self._gen_fname('tstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+            if copes:
+                outputs['copes'] = copes
+                outputs['varcopes'] = varcopes
+                outputs['zstats'] = zstats
+                outputs['tstats'] = tstats
+            fstats = []
+            zfstats = []
+            for i in range(numfcons):
+                fstats.append(self._gen_fname('fstat%d.nii' % (base_contrast + i),
+                                              cwd=pth))
+                zfstats.append(
+                    self._gen_fname('zfstat%d.nii' % (base_contrast + i),
+                                    cwd=pth))
+            if fstats:
+                outputs['fstats'] = fstats
+                outputs['zfstats'] = zfstats
         return outputs
 
 
@@ -1376,6 +1482,8 @@ class MELODIC(FSLCommand):
     >>> melodic_setup.inputs.s_des = 'subjectDesign.mat'
     >>> melodic_setup.inputs.s_con = 'subjectDesign.con'
     >>> melodic_setup.inputs.out_dir = 'groupICA.out'
+    >>> melodic_setup.cmdline
+    'melodic -i functional.nii,functional2.nii,functional3.nii -a tica --bgthreshold=10.000000 --mmthresh=0.500000 --nobet -o groupICA.out --Ostats --Scon=subjectDesign.con --Sdes=subjectDesign.mat --Tcon=timeDesign.con --Tdes=timeDesign.mat --tr=1.500000'
     >>> melodic_setup.run() # doctest: +SKIP
 
 

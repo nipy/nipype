@@ -17,6 +17,7 @@ import re
 import dateutil.parser
 import collections
 from collections import defaultdict
+import six
 
 try:
     from rdflib.term import URIRef, BNode
@@ -187,7 +188,7 @@ def _parse_xsd_dateTime(s):
 
 
 def _ensure_datetime(time):
-    if isinstance(time, basestring):
+    if isinstance(time, six.string_types):
         return _parse_xsd_dateTime(time)
     else:
         return time
@@ -232,12 +233,12 @@ def parse_xsd_types(value, datatype):
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = u'"""%s"""' if isinstance(s, basestring) and '\n' in s else u'"%s"'
+    format_str = u'"""%s"""' if isinstance(s, six.string_types) and '\n' in s else u'"%s"'
     return format_str % s
 
 
 def encoding_PROV_N_value(value):
-    if isinstance(value, basestring):
+    if isinstance(value, six.string_types):
         return _ensure_multiline_string_triple_quoted(value)
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
@@ -346,7 +347,7 @@ class Identifier(object):
 
     def json_representation(self):
         return {'$': self._uri, 'type': u'xsd:anyURI'}
-    
+
     def rdf_representation(self):
         return URIRef(self.get_uri())
 
@@ -536,7 +537,7 @@ class ProvRecord(object):
         if isinstance(literal, URIRef):
             return literal
 
-        if isinstance(literal, basestring):
+        if isinstance(literal, six.string_types):
             return unicode(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():
@@ -787,7 +788,7 @@ class ProvRecord(object):
                     pred = attr.rdf_representation()
                 graph.add((subj, pred, obj))
         return graph
-        
+
     def is_asserted(self):
         return self._asserted
 
@@ -802,7 +803,7 @@ class ProvRecord(object):
 class ProvElement(ProvRecord):
     def is_element(self):
         return True
-    
+
     def rdf(self, graph=None):
         if graph is None:
             graph = Graph()
@@ -1568,7 +1569,7 @@ class ProvBundle(ProvEntity):
                          key=lambda tuple_rec: tuple_rec[0])
 
         record_map = {}
-        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, basestring) and value in record_map) else self._decode_json_representation(value)
+        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, six.string_types) and value in record_map) else self._decode_json_representation(value)
         #  Create all the records before setting their attributes
         for (record_type, identifier, content) in records:
             if record_type == PROV_REC_BUNDLE:
@@ -1673,15 +1674,15 @@ class ProvBundle(ProvEntity):
             # graph should not None here
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
-        
+
         for prefix, namespace in self._namespaces.items():
             graph.bind(prefix, namespace.get_uri())
-        
+
         for record in self._records:
             if record.is_asserted():
                 record.rdf(graph)
         return graph
-    
+
     def get_provjson(self, **kw):
         """Return the `PROV-JSON <http://www.w3.org/Submission/prov-json/>`_ representation for the bundle/document.
 

@@ -70,7 +70,7 @@ specs:
 	@echo "Checking specs and autogenerating spec tests"
 	python tools/checkspecs.py
 
-check-before-commit: trailing-spaces html test specs
+check-before-commit: specs trailing-spaces html test
 	@echo "removed spaces"
 	@echo "built docs"
 	@echo "ran test"

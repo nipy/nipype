@@ -9,14 +9,16 @@ fMRI: SPM, FSL
 The fmri_spm.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
 be found in the examples folder.  Run the tutorial from inside the
-nipype tutorial directory:
+nipype tutorial directory::
 
     python fmri_spm.py
 
 Import necessary modules from nipype."""
 
+import os                                    # system functions
+
 from nipype import config
-config.enable_provenance()
+#config.enable_provenance()
 
 from nipype.interfaces import spm, fsl
 
@@ -30,7 +32,7 @@ import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.algorithms.rapidart as ra      # artifact detection
 import nipype.algorithms.modelgen as model   # model specification
-import os                                    # system functions
+import nipype.interfaces.matlab as mlab
 
 """
 
@@ -49,6 +51,9 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 # Set the way matlab should be called
 # import nipype.interfaces.matlab as mlab      # how to run matlab
 # mlab.MatlabCommand.set_default_matlab_cmd("matlab -nodesktop -nosplash")
+
+# In case a different path is required
+# mlab.MatlabCommand.set_default_paths('/software/matlab/spm12b/spm12b_r5918')
 
 """The nipype tutorial contains data for two subjects.  Subject data
 is in two subdirectories, ``s1`` and ``s2``.  Each subject directory
@@ -344,7 +349,8 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
-l2source.inputs.template=os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
+# we use .*i* to capture both .img (SPM8) and .nii (SPM12)
+l2source.inputs.template=os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]
