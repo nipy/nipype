@@ -1811,7 +1811,7 @@ class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class JSONFileGrabber(IOBase):
 
     """
-    Datagrabber interface that loads a json file and generates an output for 
+    Datagrabber interface that loads a json file and generates an output for
     every first-level object
 
     Example
