@@ -9,8 +9,8 @@ This page covers the necessary steps to install Nipype.
 Download
 --------
 
-Release 0.9.2: [`zip <https://github.com/nipy/nipype/archive/0.9.2.zip>`__ `tar.gz
-<https://github.com/nipy/nipype/archive/0.9.1.tar.gz>`__]
+Release 0.10.0: [`zip <https://github.com/nipy/nipype/archive/0.10.0.zip>`__ `tar.gz
+<https://github.com/nipy/nipype/archive/0.10.0.tar.gz>`__]
 
 Development: [`zip <http://github.com/nipy/nipype/zipball/master>`__ `tar.gz
 <http://github.com/nipy/nipype/tarball/master>`__]

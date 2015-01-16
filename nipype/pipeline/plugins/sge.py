@@ -350,8 +350,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
                 instantQstat = kwargs['plugin_args']['qstatProgramPath']
             if 'qstatCachedProgramPath' in kwargs['plugin_args']:
                 cachedQstat = kwargs['plugin_args']['qstatCachedProgramPath']
-            self._refQstatSubstitute = QstatSubstitute(
-                instantQstat, cachedQstat)
+        self._refQstatSubstitute = QstatSubstitute(instantQstat, cachedQstat)
 
         super(SGEPlugin, self).__init__(template, **kwargs)
 

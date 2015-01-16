@@ -13,15 +13,26 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     from nibabel import load
     import numpy as np
     import scipy as sp
-    from scipy.signal import detrend
     imgseries = load(realigned_file)
-    noise_mask = load(noise_mask_file)
-    voxel_timecourses = imgseries.get_data()[np.nonzero(noise_mask.get_data())]
-    for timecourse in voxel_timecourses:
-        timecourse[:] = detrend(timecourse, type='constant')
-    u,s,v = sp.linalg.svd(voxel_timecourses, full_matrices=False)
+    components = None
+    mask = load(noise_mask_file).get_data()
+    voxel_timecourses = imgseries.get_data()[mask > 0]
+    voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+    # remove mean and normalize by variance
+    # voxel_timecourses.shape == [nvoxels, time]
+    X = voxel_timecourses.T
+    stdX = np.std(X, axis=0)
+    stdX[stdX == 0] = 1.
+    stdX[np.isnan(stdX)] = 1.
+    stdX[np.isinf(stdX)] = 1.
+    X = (X - np.mean(X, axis=0))/stdX
+    u, _, _ = sp.linalg.svd(X, full_matrices=False)
+    if components is None:
+        components = u[:, :num_components]
+    else:
+        components = np.hstack((components, u[:, :num_components]))
     components_file = os.path.join(os.getcwd(), 'noise_components.txt')
-    np.savetxt(components_file, v[:num_components, :].T)
+    np.savetxt(components_file, components, fmt="%.10f")
     return components_file
 
 def select_volume(filename, which):

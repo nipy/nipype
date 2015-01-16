@@ -455,17 +455,17 @@ def test_applywarp():
                               field_file = reffile,
                               **{name : settings[1]})
         if name == 'out_file':
-            realcmd = 'applywarp --warp=%s '\
-                      '--in=%s --out=%s '\
-                      '--ref=%s'%(reffile, infile,
+            realcmd = 'applywarp --in=%s '\
+                      '--ref=%s --out=%s '\
+                      '--warp=%s'%(infile, reffile,
                                   settings[1],reffile)
         else:
             outfile = awarp._gen_fname(infile, suffix='_warp')
-            realcmd = 'applywarp --warp=%s '\
-                      '--in=%s --out=%s '\
-                      '%s --ref=%s'%(reffile, infile,
-                                     outfile, settings[0],
-                                     reffile)
+            realcmd = 'applywarp --in=%s '\
+                      '--ref=%s --out=%s '\
+                      '--warp=%s %s'%(infile, reffile,
+                                     outfile, reffile,
+                                     settings[0])
         yield assert_equal, awarp.cmdline, realcmd
 
     awarp = fsl.ApplyWarp(in_file = infile,

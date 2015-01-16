@@ -7,14 +7,14 @@ fMRI: Coregistration - Slicer, BRAINS
 =====================================
 
 This is currently not working and will raise an exception in release 0.3. It
-will be fixed in a later release.
+will be fixed in a later release::
 
     python fmri_slicer_coregistration.py
 
 """
+
 #raise RuntimeWarning, 'Slicer not fully implmented'
 from nipype.interfaces.slicer import BRAINSFit, BRAINSResample
-
 
 
 """Import necessary modules from nipype."""

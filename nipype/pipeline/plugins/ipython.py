@@ -22,6 +22,8 @@ def execute_task(pckld_task, node_config, updatehash):
     from nipype import config, logging
     traceback=None
     result=None
+    import os
+    cwd = os.getcwd()
     try:
         config.update_config(node_config)
         logging.update_logging(config)
@@ -31,6 +33,7 @@ def execute_task(pckld_task, node_config, updatehash):
     except:
         traceback = format_exc()
         result = task.result
+    os.chdir(cwd)
     return result, traceback, gethostname()
 
 class IPythonPlugin(DistributedPluginBase):
@@ -63,6 +66,8 @@ class IPythonPlugin(DistributedPluginBase):
         except Exception, e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
+            if isinstance(e, IOError):
+                raise Exception("ipcluster/ipcontroller has not been started")
             if isinstance(e, ValueError):
                 raise Exception("Ipython kernel not installed")
             raise e
@@ -70,7 +75,7 @@ class IPythonPlugin(DistributedPluginBase):
 
     def _get_result(self, taskid):
         if taskid not in self.taskmap:
-            raise ValueError('Task %d not in pending list'%taskid)
+            raise ValueError('Task %d not in pending list' % taskid)
         if self.taskmap[taskid].ready():
             result, traceback, hostname = self.taskmap[taskid].get()
             result_out = dict(result=None, traceback=None)

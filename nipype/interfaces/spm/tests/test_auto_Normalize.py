@@ -5,7 +5,7 @@ from nipype.interfaces.spm.preprocess import Normalize
 def test_Normalize_inputs():
     input_map = dict(DCT_period_cutoff=dict(field='eoptions.cutoff',
     ),
-    affine_regularization_type=dict(field='eoptions.regype',
+    affine_regularization_type=dict(field='eoptions.regtype',
     ),
     apply_to_files=dict(copyfile=True,
     field='subj.resample',

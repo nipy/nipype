@@ -9,7 +9,7 @@ fMRI: DARTEL, SPM
 The fmri_spm_dartel.py integrates several interfaces to perform a first
 and second level analysis on a two-subject data set.  The tutorial can
 be found in the examples folder.  Run the tutorial from inside the
-nipype tutorial directory:
+nipype tutorial directory::
 
     python fmri_spm_dartel.py
 
@@ -481,7 +481,8 @@ contrasts.
 # collect all the con images for each contrast.
 contrast_ids = range(1,len(contrasts)+1)
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
-l2source.inputs.template=os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.img')
+# we use .*i* to capture both .img (SPM8) and .nii (SPM12)
+l2source.inputs.template=os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]

@@ -6,6 +6,7 @@ This module implements ``test()`` and ``bench()`` functions for NumPy modules.
 """
 import os
 import sys
+from nipype.external import six
 
 def get_package_name(filepath):
     """
@@ -166,7 +167,7 @@ class NoseTester(object):
         '''
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
-            if not isinstance(label, basestring):
+            if not isinstance(label, six.string_types):
                 raise TypeError('Selection label should be a string')
             if label == 'fast':
                 label = 'not slow'
