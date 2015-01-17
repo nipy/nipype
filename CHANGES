@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: New io interfaces for JSON files reading/writing (https://github.com/nipy/nipype/pull/1020)
 * ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
 	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
 	   (https://github.com/nipy/nipype/pull/990/files)
