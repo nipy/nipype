@@ -263,7 +263,7 @@ class DistributedPluginBase(PluginBase):
                                             slots=slots, graph=graph)
             else:
                 logger.debug('Not submitting')
-            sleep(2)
+            sleep(float(self._config['execution']['poll_sleep_duration']))
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
