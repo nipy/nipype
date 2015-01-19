@@ -325,7 +325,7 @@ class DistributedPluginBase(PluginBase):
         return False
 
     def _send_procs_to_workers(self, updatehash=False, slots=None, graph=None):
-        """ Sends jobs to workers using ipython's taskclient interface
+        """ Sends jobs to workers
         """
         while np.any(self.proc_done == False):
             # Check to see if a job is available
@@ -346,8 +346,6 @@ class DistributedPluginBase(PluginBase):
                             self.proc_pending[jobid] = False
                             continue
                         if num_subnodes > 1:
-                            if num_subnodes > (self.max_jobs - len(self.pending_tasks)):
-                                break
                             submit = self._submit_mapnode(jobid)
                             if not submit:
                                 continue
