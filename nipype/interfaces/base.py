@@ -30,7 +30,7 @@ from nipype.external import six
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
                                isdefined, File, Directory,
-                               has_metadata)
+                               has_metadata, BaseTraitedSpec)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
                                hash_timestamp, save_json,
                                split_filename)
@@ -299,6 +299,7 @@ class InterfaceResult(object):
         return self._version
 
 
+'''
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -582,7 +583,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     out = object
         return out
-
+'''
 
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
@@ -619,7 +620,8 @@ class TraitedSpec(BaseTraitedSpec):
 
     This is used in 90% of the cases.
     """
-    _ = traits.Disallow
+    #_ = traits.Disallow
+    pass
 
 
 class Interface(object):
@@ -750,24 +752,21 @@ class BaseInterface(Interface):
 
     @classmethod
     def _get_trait_desc(self, inputs, name, spec):
-        desc = spec.desc
-        xor = spec.xor
-        requires = spec.requires
-        argstr = spec.argstr
+        desc = spec.get_metadata('desc')
+        xor = spec.get_metadata('xor')
+        requires = spec.get_metadata('requires')
+        argstr = spec.get_metadata('argstr')
 
         manhelpstr = ['\t%s' % name]
 
-        try:
-            setattr(inputs, name, None)
-        except TraitError as excp:
-            def_val = ''
-            if getattr(spec, 'usedefault'):
-                def_arg = getattr(spec, 'default_value')()[1]
-                def_val = ', nipype default value: %s' % str(def_arg)
-            line = "(%s%s)" % (excp.info, def_val)
-            manhelpstr = wrap(line, 70,
-                              initial_indent=manhelpstr[0]+': ',
-                              subsequent_indent='\t\t ')
+        def_val = ''
+        if spec.get_metadata('usedefault'):
+            def_arg = getattr(spec, 'default_value')
+            def_val = ', nipype default value: %s' % str(def_arg)
+        line = "(%s%s)" % (spec.info(), def_val)
+        manhelpstr = wrap(line, 70,
+                          initial_indent=manhelpstr[0]+': ',
+                          subsequent_indent='\t\t ')
 
         if desc:
             for line in desc.split('\n'):
@@ -861,32 +860,34 @@ class BaseInterface(Interface):
         metadata = dict(copyfile=lambda t: t is not None)
         for name, spec in sorted(cls.input_spec().traits(**metadata).items()):
             info.append(dict(key=name,
-                             copy=spec.copyfile))
+                             copy=spec.get_metadata('copyfile')))
         return info
 
     def _check_requires(self, spec, name, value):
         """ check if required inputs are satisfied
         """
-        if spec.requires:
+        requires = spec.get_metadata('requires')
+        if requires:
             values = [not isdefined(getattr(self.inputs, field))
-                      for field in spec.requires]
+                      for field in requires]
             if any(values) and isdefined(value):
                 msg = ("%s requires a value for input '%s' because one of %s "
                        "is set. For a list of required inputs, see %s.help()" %
                        (self.__class__.__name__, name,
-                        ', '.join(spec.requires), self.__class__.__name__))
+                        ', '.join(requires), self.__class__.__name__))
                 raise ValueError(msg)
 
     def _check_xor(self, spec, name, value):
         """ check if mutually exclusive inputs are satisfied
         """
-        if spec.xor:
+        xor = spec.get_metadata('xor')
+        if xor:
             values = [isdefined(getattr(self.inputs, field))
-                      for field in spec.xor]
+                      for field in xor]
             if not any(values) and not isdefined(value):
                 msg = ("%s requires a value for one of the inputs '%s'. "
                        "For a list of required inputs, see %s.help()" %
-                       (self.__class__.__name__, ', '.join(spec.xor),
+                       (self.__class__.__name__, ', '.join(xor),
                         self.__class__.__name__))
                 raise ValueError(msg)
 
@@ -896,7 +897,7 @@ class BaseInterface(Interface):
         for name, spec in self.inputs.traits(mandatory=True).items():
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
-            if not isdefined(value) and spec.xor is None:
+            if not isdefined(value) and spec.get_metadata('xor') is None:
                 msg = ("%s requires a value for input '%s'. "
                        "For a list of required inputs, see %s.help()" %
                        (self.__class__.__name__, name, self.__class__.__name__))
@@ -918,7 +919,8 @@ class BaseInterface(Interface):
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
         for name in names:
-            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+            trait = trait_object.traits()[name]
+            min_ver = LooseVersion(str(trait.get_metadata('min_ver')))
             if min_ver > version:
                 unavailable_traits.append(name)
                 if not isdefined(getattr(trait_object, name)):
@@ -930,7 +932,8 @@ class BaseInterface(Interface):
         check = dict(max_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
         for name in names:
-            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+            trait = trait_object.traits()[name]
+            max_ver = LooseVersion(str(trait.get_metadata('max_ver')))
             if max_ver < version:
                 unavailable_traits.append(name)
                 if not isdefined(getattr(trait_object, name)):
@@ -1272,7 +1275,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
-    terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
+    terminal_output = traits.Enum(('stream', 'allatonce', 'file', 'none'),
                                   desc=('Control terminal output: `stream` - '
                                         'displays to terminal immediately, '
                                         '`allatonce` - waits till command is '
@@ -1472,7 +1475,7 @@ class CommandLine(BaseInterface):
 
         Formats a trait containing argstr metadata
         """
-        argstr = trait_spec.argstr
+        argstr = trait_spec.get_metadata('argstr')
         iflogger.debug('%s_%s' % (name, str(value)))
         if trait_spec.is_trait_type(traits.Bool) and "%" not in argstr:
             if value:
@@ -1484,7 +1487,7 @@ class CommandLine(BaseInterface):
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
         elif trait_spec.is_trait_type(traits.List) \
-            or (trait_spec.is_trait_type(traits.TraitCompound)
+            or (trait_spec.is_trait_type(traits.Either)
                 and isinstance(value, list)):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
@@ -1495,7 +1498,7 @@ class CommandLine(BaseInterface):
             # Depending on whether we stick with traitlets, and whether or
             # not we beef up traitlets.List, we may want to put some
             # type-checking code here as well
-            sep = trait_spec.sep
+            sep = trait_spec.get_metadata('sep')
             if sep is None:
                 sep = ' '
             if argstr.endswith('...'):
@@ -1515,21 +1518,22 @@ class CommandLine(BaseInterface):
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
         if not isdefined(retval) or "%s" in retval:
-            if not trait_spec.name_source:
+            name_source = trait_spec.get_metadata('name_source')
+            if not name_source:
                 return retval
             if isdefined(retval) and "%s" in retval:
                 name_template = retval
             else:
-                name_template = trait_spec.name_template
+                name_template = trait_spec.get_metadata('name_template')
             if not name_template:
                 name_template = "%s_generated"
-            if isinstance(trait_spec.name_source, list):
-                for ns in trait_spec.name_source:
+            if isinstance(name_source, list):
+                for ns in name_source:
                     if isdefined(getattr(self.inputs, ns)):
                         name_source = ns
                         break
             else:
-                name_source = trait_spec.name_source
+                name_source = name_source
             source = getattr(self.inputs, name_source)
             while isinstance(source, list):
                 source = source[0]
@@ -1540,7 +1544,7 @@ class CommandLine(BaseInterface):
                 base = source
             retval = name_template % base
             _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
+            if trait_spec.get_metadata('keep_extension') and ext:
                 return retval
             return self._overload_extension(retval, name)
         return retval
@@ -1584,7 +1588,7 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.genfile or spec.name_source:
+            if spec.get_metadata('genfile') or spec.get_metadata('name_source'):
                 value = self._filename_from_source(name)
                 if not isdefined(value):
                     value = self._gen_filename(name)
@@ -1593,7 +1597,7 @@ class CommandLine(BaseInterface):
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
-            pos = spec.position
+            pos = spec.get_metadata('position')
             if pos is not None:
                 if pos >= 0:
                     initial_args[pos] = arg
@@ -1705,7 +1709,7 @@ class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
 
-    def validate(self, object, name, value):
+    def validate(self, object, value):
         if not isdefined(value) or \
                 (isinstance(value, list) and len(value) == 0):
             return Undefined
@@ -1720,12 +1724,12 @@ class MultiPath(traits.List):
                 and value
                 and not isinstance(value[0], list)):
             newvalue = [value]
-        value = super(MultiPath, self).validate(object, name, newvalue)
+        value = super(MultiPath, self).validate(object, newvalue)
 
         if len(value) > 0:
             return value
 
-        self.error(object, name, value)
+        self.error(object, value)
 
 
 class OutputMultiPath(MultiPath):
