@@ -12,6 +12,7 @@ Next release
 	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
+* ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 
 Release 0.10.0 (October 10, 2014)
 ============
