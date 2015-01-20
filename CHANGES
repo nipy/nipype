@@ -11,6 +11,7 @@ Next release
 * FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is 
 	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
+* ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 
 Release 0.10.0 (October 10, 2014)
 ============
