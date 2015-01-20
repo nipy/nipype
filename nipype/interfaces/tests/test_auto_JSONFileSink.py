@@ -6,6 +6,7 @@ def test_JSONFileSink_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    in_dict=dict(),
     out_file=dict(),
     )
     inputs = JSONFileSink.input_spec()

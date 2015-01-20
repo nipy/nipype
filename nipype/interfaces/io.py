@@ -1849,6 +1849,7 @@ class JSONFileGrabber(IOBase):
 
 class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     out_file = File(desc='JSON sink file')
+    in_dict = traits.Dict(desc='input JSON dictionary')
 
 
 class JSONFileSinkOutputSpec(TraitedSpec):
@@ -1873,11 +1874,18 @@ class JSONFileSink(IOBase):
         >>> jsonsink.inputs.some_measurement = 11.4
         >>> jsonsink.run() # doctest: +SKIP
 
+        Using a dictionary as input:
+
+        >>> dictsink = JSONFileSink()
+        >>> dictsink.inputs.in_dict = {'subject_id': 's1',
+        ...                            'some_measurement': 11.4}
+        >>> dictsink.run() # doctest: +SKIP
+
     """
     input_spec = JSONFileSinkInputSpec
     output_spec = JSONFileSinkOutputSpec
 
-    def __init__(self, input_names, **inputs):
+    def __init__(self, input_names=[], **inputs):
         super(JSONFileSink, self).__init__(**inputs)
         self._input_names = filename_to_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
@@ -1891,14 +1899,20 @@ class JSONFileSink(IOBase):
             out_file = self.inputs.out_file
 
         out_dict = dict()
-        for name in self._input_names:
-            val = getattr(self.inputs, name)
-            val = val if isdefined(val) else 'undefined'
-            out_dict[name] = val
+
+        if isdefined(self.inputs.in_dict):
+            if isinstance(self.inputs.in_dict, dict):
+                out_dict = self.inputs.in_dict
+        else:
+            for name in self._input_names:
+                val = getattr(self.inputs, name)
+                val = val if isdefined(val) else 'undefined'
+                out_dict[name] = val
 
         with open(out_file, 'w') as f:
             json.dump(out_dict, f)
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs
+
 
