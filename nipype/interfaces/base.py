@@ -757,17 +757,12 @@ class BaseInterface(Interface):
 
         manhelpstr = ['\t%s' % name]
 
-        try:
-            setattr(inputs, name, None)
-        except TraitError as excp:
-            def_val = ''
-            if getattr(spec, 'usedefault'):
-                def_arg = getattr(spec, 'default_value')()[1]
-                def_val = ', nipype default value: %s' % str(def_arg)
-            line = "(%s%s)" % (excp.info, def_val)
-            manhelpstr = wrap(line, 70,
-                              initial_indent=manhelpstr[0]+': ',
-                              subsequent_indent='\t\t ')
+        type_info = spec.full_info(inputs, name, None) 
+        default = ', nipype default value: %s' % spec.default_value()[1]
+        line = "(%s%s)" % (type_info, default if spec.usedefault else '')
+        manhelpstr = wrap(line, 70, 
+                          initial_indent=manhelpstr[0]+': ',
+                          subsequent_indent='\t\t ')
 
         if desc:
             for line in desc.split('\n'):
