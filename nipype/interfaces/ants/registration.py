@@ -322,7 +322,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
     collapse_linear_transforms_to_fixed_image_header = traits.Bool(
         argstr='%s', default=False, usedefault=True, desc='')
-
+    float_computations = traits.Int(argstr='--float %d', value=0, desc="Use single floating point for computations")
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
