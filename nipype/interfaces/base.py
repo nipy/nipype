@@ -988,7 +988,6 @@ class BaseInterface(Interface):
                     if xvfb_proc.poll() is not None:
                         raise Exception('Error: Xvfb did not start')
 
-                    # old_displaynum = os.getenv('DISPLAY')
                     runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
 
             runtime = self._run_interface(runtime)
