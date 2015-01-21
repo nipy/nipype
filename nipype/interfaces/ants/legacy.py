@@ -96,7 +96,7 @@ class antsIntroduction(ANTSCommand):
         outputs = self._outputs().get()
         transmodel = self.inputs.transformation_model
 
-        # When transform is set as 'RI'/'RA', wrap fields should not be expected 
+        # When transform is set as 'RI'/'RA', wrap fields should not be expected
         # The default transformation is GR, which outputs the wrap fields
         if not isdefined(transmodel) or (isdefined(transmodel) and transmodel not in ['RI', 'RA']):
             outputs['warp_field'] = os.path.join(os.getcwd(),
