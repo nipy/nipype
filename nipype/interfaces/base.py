@@ -758,8 +758,17 @@ class BaseInterface(Interface):
         manhelpstr = ['\t%s' % name]
 
         type_info = spec.full_info(inputs, name, None)
+<<<<<<< HEAD
         default = ', nipype default value: %s' % spec.default_value()[1]
         line = "(%s%s)" % (type_info, default if spec.usedefault else '')
+=======
+        default = ''
+
+        if spec.usedefault:
+            default = ', nipype default value: %s' % str(spec.default_value()[1])
+
+        line = "(%s%s)" % (type_info, default)
+>>>>>>> master
         manhelpstr = wrap(line, 70,
                           initial_indent=manhelpstr[0]+': ',
                           subsequent_indent='\t\t ')
