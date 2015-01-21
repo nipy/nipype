@@ -1,5 +1,7 @@
 Next release
 ============
+
+* FIX: Interfaces redirecting X crashed if $DISPLAY not defined (https://github.com/nipy/nipype/pull/1027)
 * ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
 * ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
 	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
