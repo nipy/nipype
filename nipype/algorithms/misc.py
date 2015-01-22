@@ -34,7 +34,7 @@ import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
-                               DynamicTraitedSpec)
+                               DynamicTraitedSpec, Undefined)
 from nipype.utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
@@ -785,7 +785,8 @@ class AddCSVColumn(BaseInterface):
 
 
 class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
+    in_file = traits.File(mandatory=True,
+                          desc='Input comma-separated value (CSV) files')
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 
     def __setattr__(self, key, value):
@@ -804,13 +805,15 @@ class AddCSVRowOutputSpec(TraitedSpec):
 
 
 class AddCSVRow(BaseInterface):
+
     """Simple interface to add an extra row to a csv file
 
     .. note:: Requires `pandas <http://pandas.pydata.org/>`_
 
     .. warning:: Multi-platform thread-safe execution is possible with
-        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please recall that (1)
-        this module is alpha software; and (2) it should be installed for thread-safe writing.
+        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please
+        recall that (1) this module is alpha software; and (2) it should be
+        installed for thread-safe writing.
         If lockfile is not installed, then the interface is not thread-safe.
 
 
@@ -850,22 +853,26 @@ class AddCSVRow(BaseInterface):
         try:
             import pandas as pd
         except ImportError:
-            raise ImportError('This interface requires pandas (http://pandas.pydata.org/) to run.')
+            raise ImportError(('This interface requires pandas '
+                               '(http://pandas.pydata.org/) to run.'))
 
         try:
             import lockfile as pl
             self._have_lock = True
         except ImportError:
-            import warnings
-            warnings.warn(('Python module lockfile was not found: AddCSVRow will not be thread-safe '
-                          'in multi-processor execution'))
+            from warnings import warn
+            warn(('Python module lockfile was not found: AddCSVRow will not be'
+                  ' thread-safe in multi-processor execution'))
 
         input_dict = {}
         for key, val in self.inputs._outputs.items():
             # expand lists to several columns
+            if key == 'trait_added' and val in self.inputs._outputs.keys():
+                continue
+
             if isinstance(val, list):
-                for i,v in enumerate(val):
-                    input_dict['%s_%d' % (key,i)]=v
+                for i, v in enumerate(val):
+                    input_dict['%s_%d' % (key, i)] = v
             else:
                 input_dict[key] = val
 
