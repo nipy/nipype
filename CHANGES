@@ -1,6 +1,9 @@
 Next release
 ============
 
+* ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
+       New options also include choice of tracker, interpolator, stepsize and 
+       curveinterval for angle threshold (https://github.com/nipy/nipype/pull/1029)
 * FIX: Interfaces redirecting X crashed if $DISPLAY not defined (https://github.com/nipy/nipype/pull/1027)
 * FIX: Bug crashed 'make api' (https://github.com/nipy/nipype/pull/1026)
 * ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
