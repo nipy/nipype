@@ -344,7 +344,6 @@ class SGEPlugin(SGELikeBatchManagerBase):
         """
         self._retry_timeout = 2
         self._max_tries = 2
-        self._login = os.getlogin()
 
         instantQstat = 'qstat'
         cachedQstat = 'qstat'
@@ -358,7 +357,12 @@ class SGEPlugin(SGELikeBatchManagerBase):
                 instant_qstat = kwargs['plugin_args']['qstatProgramPath']
             if 'qstatCachedProgramPath' in kwargs['plugin_args']:
                 cachedQstat = kwargs['plugin_args']['qstatCachedProgramPath']
-        self._refQstatSubstitute = QstatSubstitute(instantQstat, cachedQstat)
+            if 'username' in kwargs['plugin_args']:
+                self._login = kwargs['plugin_args']['username']
+            else:
+                self._login = os.getlogin()
+            self._refQstatSubstitute = QstatSubstitute(
+                instantQstat, cachedQstat, self._login)
 
         super(SGEPlugin, self).__init__(template, **kwargs)
 
