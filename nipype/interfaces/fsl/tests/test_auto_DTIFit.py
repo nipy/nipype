@@ -26,6 +26,8 @@ def test_DTIFit_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
+    gradnonlin=dict(argstr='--gradnonlin=%s',
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
