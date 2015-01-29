@@ -1,6 +1,25 @@
 Next release
 ============
 
+* ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
+* ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
+       New options also include choice of tracker, interpolator, stepsize and 
+       curveinterval for angle threshold (https://github.com/nipy/nipype/pull/1029)
+* FIX: Interfaces redirecting X crashed if $DISPLAY not defined (https://github.com/nipy/nipype/pull/1027)
+* FIX: Bug crashed 'make api' (https://github.com/nipy/nipype/pull/1026)
+* ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
+* ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
+	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
+	   (https://github.com/nipy/nipype/pull/990/files)
+* ENH: SPM12 Normalize interface (https://github.com/nipy/nipype/pull/986)
+* FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
+* FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
+* ENH: Resting state fMRI example with NiPy realignment and no SPM (https://github.com/nipy/nipype/pull/992)
+* FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is 
+	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
+* FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
+* FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
+* ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 
 Release 0.10.0 (October 10, 2014)
 ============

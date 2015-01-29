@@ -23,6 +23,16 @@ BROCCOLI
 
 `BROCCOLI <https://github.com/wanderine/BROCCOLI/>`_ is a piece of software for fast fMRI analysis on many core CPUs and GPUs. It provides Nipype Interfaces.
 
+Forward
+-------
+
+`Forward <http://cyclotronresearchcentre.github.io/forward/>`_ is set of tools simplifying the preparation of accurate electromagnetic head models for EEG forward modeling. It uses Nipype Workflows and Interfaces.
+
+Limbo
+-----
+
+`Limbo <https://github.com/Gilles86/in_limbo>`_ is a toolbox for finding brain regions that are neither significantly active nor inactive, but rather “in limbo”. It was build using custom Nipype Interfaces and Workflows.
+
 Lyman
 -----
 
@@ -32,6 +42,11 @@ Medimsight
 ----------
 
 `Medimsight <https://www.medimsight.com>`_ is a commercial service medical imaging cloud platform. It uses Nipype to interface with various neuroimaging software.
+
+MIA
+---
+
+`MIA <http://mia.sourceforge.net>`_ MIA is a a toolkit for gray scale medical image analysis. It provides Nipype interfaces for easy integration with other software.
 
 Mindboggle
 ----------

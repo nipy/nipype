@@ -7,7 +7,7 @@ fMRI: OpenfMRI.org data, FSL
 ============================
 
 A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
-This script demonstrates how to use nipype to analyze a data set.
+This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_openfmri.py --datasetdir ds107
 """
@@ -420,6 +420,10 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     datasink.inputs.base_directory = output_dir
     return wf
+
+"""
+The following functions run the whole workflow.
+"""
 
 if __name__ == '__main__':
     import argparse

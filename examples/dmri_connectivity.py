@@ -9,7 +9,7 @@ Introduction
 
 This script, connectivity_tutorial.py, demonstrates the ability to perform connectivity mapping
 using Nipype for pipelining, Freesurfer for Reconstruction / Parcellation, Camino for tensor-fitting
-and tractography, and the Connectome Mapping Toolkit (CMTK) for connectivity analysis.
+and tractography, and the Connectome Mapping Toolkit (CMTK) for connectivity analysis::
 
     python connectivity_tutorial.py
 
@@ -26,9 +26,9 @@ A data package containing the outputs of this pipeline can be obtained from here
 
     * http://db.tt/1vx4vLeP
 
-Along with Camino (http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage),
-Camino-Trackvis (http://www.nitrc.org/projects/camino-trackvis/), FSL (http://www.fmrib.ox.ac.uk/fsl/),
-and Freesurfer (http://surfer.nmr.mgh.harvard.edu/), you must also have the Connectome File Format
+Along with `Camino <http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Main.HomePage>`_,
+`Camino-Trackvis <http://www.nitrc.org/projects/camino-trackvis/>`_, `FSL <http://www.fmrib.ox.ac.uk/fsl/>`_,
+and `Freesurfer <http://surfer.nmr.mgh.harvard.edu/>`_, you must also have the Connectome File Format
 library installed as well as the Connectome Mapper.
 
 These are written by Stephan Gerhard and can be obtained from:
@@ -583,7 +583,7 @@ if __name__ == '__main__':
     connectivity.write_graph(format='eps')
 
 """
-The output CFF file of this pipeline can be loaded in the Connectome Viewer (http://www.cmtk.org)
+The output CFF file of this pipeline can be loaded in the `Connectome Viewer <http://www.cmtk.org>`_.
 After loading the network into memory it can be examined in 3D or as a connectivity matrix
 using the default scripts produced by the Code Oracle.
 To compare networks, one must use the MergeCNetworks interface to merge two networks into

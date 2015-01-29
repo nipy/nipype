@@ -85,8 +85,22 @@ def test_normalize_list_outputs():
     filelist, outdir, cwd = create_files_in_directory()
     norm = spm.Normalize(source=filelist[0])
     yield assert_true, norm._list_outputs()['normalized_source'][0].startswith('w')
-    norm = spm.Normalize(source=filelist[0],apply_to_files=filelist[1])
+    norm = spm.Normalize(source=filelist[0], apply_to_files=filelist[1])
     yield assert_true, norm._list_outputs()['normalized_files'][0].startswith('w')
+    clean_directory(outdir, cwd)
+
+def test_normalize12():
+    yield assert_equal, spm.Normalize12._jobtype, 'spatial'
+    yield assert_equal, spm.Normalize12._jobname, 'normalise'
+    yield assert_equal, spm.Normalize12().inputs.jobtype, 'estwrite'
+
+def test_normalize12_list_outputs():
+    filelist, outdir, cwd = create_files_in_directory()
+    norm12 = spm.Normalize12(image_to_align=filelist[0])
+    yield assert_true, norm12._list_outputs()['normalized_image'][0].startswith('w')
+    norm12 = spm.Normalize12(image_to_align=filelist[0],
+                             apply_to_files=filelist[1])
+    yield assert_true, norm12._list_outputs()['normalized_files'][0].startswith('w')
     clean_directory(outdir, cwd)
 
 @skipif(no_spm)
