@@ -254,16 +254,11 @@ class DistributedPluginBase(PluginBase):
             num_jobs = len(self.pending_tasks)
             logger.debug('Number of pending tasks: %d' % num_jobs)
             if num_jobs < self.max_jobs:
-                if np.isinf(self.max_jobs):
-                    slots = None
-                else:
-                    slots = max(0, self.max_jobs - num_jobs)
-                logger.debug('Slots available: %s' % slots)
                 self._send_procs_to_workers(updatehash=updatehash,
-                                            slots=slots, graph=graph)
+                                            graph=graph)
             else:
                 logger.debug('Not submitting')
-            sleep(2)
+            sleep(float(self._config['execution']['poll_sleep_duration']))
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
 
@@ -324,16 +319,21 @@ class DistributedPluginBase(PluginBase):
                                             np.zeros(numnodes, dtype=bool)))
         return False
 
-    def _send_procs_to_workers(self, updatehash=False, slots=None, graph=None):
-        """ Sends jobs to workers using ipython's taskclient interface
+    def _send_procs_to_workers(self, updatehash=False, graph=None):
+        """ Sends jobs to workers
         """
         while np.any(self.proc_done == False):
+            num_jobs = len(self.pending_tasks)
+            if np.isinf(self.max_jobs):
+                slots = None
+            else:
+                slots = max(0, self.max_jobs - num_jobs)
+            logger.debug('Slots available: %s' % slots)
+            if (num_jobs >= self.max_jobs) or (slots == 0):
+                break
             # Check to see if a job is available
             jobids = np.flatnonzero((self.proc_done == False) &
                                     (self.depidx.sum(axis=0) == 0).__array__())
-            num_jobs = len(self.pending_tasks)
-            if num_jobs >= self.max_jobs:
-                break
             if len(jobids) > 0:
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids[:slots]))
@@ -346,8 +346,6 @@ class DistributedPluginBase(PluginBase):
                             self.proc_pending[jobid] = False
                             continue
                         if num_subnodes > 1:
-                            if num_subnodes > (self.max_jobs - len(self.pending_tasks)):
-                                break
                             submit = self._submit_mapnode(jobid)
                             if not submit:
                                 continue

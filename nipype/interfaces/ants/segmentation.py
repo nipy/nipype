@@ -127,7 +127,7 @@ class Atropos(ANTSCommand):
             return retval + "]"
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=[0]):
         if self.inputs.initialization == "PriorProbabilityImages":
             priors_directory = os.path.join(os.getcwd(), "priors")
             if not os.path.exists(priors_directory):
@@ -135,10 +135,10 @@ class Atropos(ANTSCommand):
             _, _, ext = split_filename(self.inputs.prior_probability_images[0])
             for i, f in enumerate(self.inputs.prior_probability_images):
                 target = os.path.join(priors_directory,
-                                         'priorProbImages%02d' % (i + 1) + ext)
+                                      'priorProbImages%02d' % (i + 1) + ext)
                 if not (os.path.exists(target) and os.path.realpath(target) == os.path.abspath(f)):
                     copyfile(os.path.abspath(f), os.path.join(priors_directory,
-                                         'priorProbImages%02d' % (i + 1) + ext))
+                                                              'priorProbImages%02d' % (i + 1) + ext))
         runtime = super(Atropos, self)._run_interface(runtime)
         return runtime
 
@@ -160,13 +160,14 @@ class Atropos(ANTSCommand):
                 outputs['posteriors'].append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
         return outputs
 
+
 class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
     input_wm = File(argstr='%s', mandatory=True, copyfile=True,
-                       desc=('white matter segmentation image'),
-                       position=1)
+                    desc='white matter segmentation image',
+                    position=1)
     input_gm = File(argstr='%s', mandatory=True, copyfile=True,
-                       desc=('gray matter segmentation image'),
-                       position=2)
+                    desc='gray matter segmentation image',
+                    position=2)
     output_image = File(desc='name of output file', argstr='%s', position=3,
                         genfile=True, hash_files=False)
     smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
@@ -229,21 +230,20 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                              'coregistered functional)'))
     mask_image = File(argstr='--mask-image %s')
+    weight_image = File(argstr='--weight-image %s')
     output_image = traits.Str(argstr='--output %s',
-                              desc=('output file name'), genfile=True,
+                              desc='output file name', genfile=True,
                               hash_files=False)
-    bspline_fitting_distance = traits.Float(argstr="--bsline-fitting [%g]")
+    bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
+    bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence [ %s",
-                               sep="x", requires=['convergence_threshold'],
-                               position=1)
-    convergence_threshold = traits.Float(argstr=",%g]",
-                                         requires=['n_iterations'],
-                                         position=2)
+    n_iterations = traits.List(traits.Int(), argstr="--convergence %s",
+                               requires=['convergence_threshold'])
+    convergence_threshold = traits.Float(requires=['n_iterations'])
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
                                   ' to file.'), xor=['bias_image'])
-    bias_image = File(desc=('Filename for the estimated bias.'),
+    bias_image = File(desc='Filename for the estimated bias.',
                       hash_files=False)
 
 
@@ -269,6 +269,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     Examples
     --------
 
+	>>> import copy
     >>> from nipype.interfaces.ants import N4BiasFieldCorrection
     >>> n4 = N4BiasFieldCorrection()
     >>> n4.inputs.dimension = 3
@@ -278,16 +279,25 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.n_iterations = [50,50,30,20]
     >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
-    'N4BiasFieldCorrection --convergence [ 50x50x30x20 ,1e-06] \
---bsline-fitting [300] --image-dimension 3 --input-image structural.nii \
---output structural_corrected.nii --shrink-factor 3'
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
+--image-dimension 3 --input-image structural.nii \
+--convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+--shrink-factor 3'
 
-    >>> n4_2 = N4BiasFieldCorrection()
-    >>> n4_2.inputs.input_image = 'structural.nii'
-    >>> n4_2.inputs.save_bias = True
+	>>> n4_2 = copy.deepcopy(n4)
+    >>> n4_2.inputs.bspline_order = 5
     >>> n4_2.cmdline
+    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
+--image-dimension 3 --input-image structural.nii \
+--convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+--shrink-factor 3'
+
+    >>> n4_3 = N4BiasFieldCorrection()
+    >>> n4_3.inputs.input_image = 'structural.nii'
+    >>> n4_3.inputs.save_bias = True
+    >>> n4_3.cmdline
     'N4BiasFieldCorrection --image-dimension 3 --input-image structural.nii \
---output [structural_corrected.nii,structural_bias.nii]'
+--output [ structural_corrected.nii, structural_bias.nii ]'
     """
 
     _cmd = 'N4BiasFieldCorrection'
@@ -315,7 +325,20 @@ class N4BiasFieldCorrection(ANTSCommand):
            (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
             bias_image = self._gen_filename('bias_image')
             output = self._gen_filename('output_image')
-            newval = '[%s,%s]' % (output, bias_image)
+            newval = '[ %s, %s ]' % (output, bias_image)
+            return trait_spec.argstr % newval
+
+        if name == 'bspline_fitting_distance':
+            if isdefined(self.inputs.bspline_order):
+                newval = '[ %g, %d ]' % (value, self.inputs.bspline_order)
+            else:
+                newval = '[ %g ]' % value
+            return trait_spec.argstr % newval
+
+        if ((name == 'n_iterations') and
+           (isdefined(self.inputs.convergence_threshold))):
+            newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
+                                     self.inputs.convergence_threshold)
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection,
@@ -335,120 +358,106 @@ class N4BiasFieldCorrection(ANTSCommand):
             outputs['bias_image'] = os.path.abspath(self._gen_filename('bias_image'))
         return outputs
 
+
 class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
-    dimension=traits.Enum(3, 2, argstr= '-d %d', usedefault=True,
-                           desc='image dimension (2 or 3)')
-    anatomical_image=File(exists=True,
-                           argstr='-a %s',
-                           desc=('Structural *intensity* image, typically T1.'
-                           'If more than one anatomical image is specified,'
-                           'subsequently specified images are used during the'
-                           'segmentation process. However, only the first'
-                           'image is used in the registration of priors.'
-                           'Our suggestion would be to specify the T1'
-                           'as the first image.'),
-                           mandatory=True)
-    brain_template=File(exists=True,
-            argstr='-e %s',
-            desc=('Anatomical *intensity* template (possibly created using a'
-            'population data set with buildtemplateparallel.sh in ANTs).'
-            'This template is  *not* skull-stripped.'),
-            mandatory=True)
-    brain_probability_mask=File(exists=True,
-            argstr='-m %s', desc='brain probability mask in template space',
-            copyfile=False, mandatory=True)
-    segmentation_priors = InputMultiPath(File(exists=True),
-            argstr='-p %s', mandatory=True)
+    dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
+                            desc='image dimension (2 or 3)')
+    anatomical_image = File(exists=True, argstr='-a %s',
+                            desc=('Structural *intensity* image, typically T1.'
+                                  'If more than one anatomical image is specified,'
+                                  'subsequently specified images are used during the'
+                                  'segmentation process. However, only the first'
+                                  'image is used in the registration of priors.'
+                                  'Our suggestion would be to specify the T1'
+                                  'as the first image.'),
+                            mandatory=True)
+    brain_template = File(exists=True, argstr='-e %s',
+                          desc=('Anatomical *intensity* template (possibly created using a'
+                                'population data set with buildtemplateparallel.sh in ANTs).'
+                                'This template is  *not* skull-stripped.'),
+                          mandatory=True)
+    brain_probability_mask = File(exists=True, argstr='-m %s',
+                                  desc='brain probability mask in template space', copyfile=False, mandatory=True)
+    segmentation_priors = InputMultiPath(File(exists=True), argstr='-p %s', mandatory=True)
     out_prefix = traits.Str('antsCT_', argstr='-o %s', usedefault=True,
-                             desc=('Prefix that is prepended to all output'
-                                   ' files (default = antsCT_)'))
-    image_suffix=traits.Str('nii.gz', desc=('any of standard ITK formats,'
-        ' nii.gz is default'),  argstr='-s %s', usedefault=True)
+                            desc=('Prefix that is prepended to all output'
+                                  ' files (default = antsCT_)'))
+    image_suffix = traits.Str('nii.gz', desc=('any of standard ITK formats,'
+                                              ' nii.gz is default'),
+                              argstr='-s %s', usedefault=True)
     t1_registration_template = File(exists=True,
-            desc = ('Anatomical *intensity* template'
-           '(assumed to be skull-stripped). A common'
-           'case would be where this would be the same'
-           'template as specified in the -e option which'
-           'is not skull stripped.'),
-           argstr='-t %s',
-           mandatory=True)
-    extraction_registration_mask=File(exists=True, argstr='-f %s',
-                        desc=('Mask (defined in the template space) used during'
-                              ' registration for brain extraction.'))
-    keep_temporary_files=traits.Int(argstr='-k %d',
-            desc='Keep brain extraction/segmentation warps, etc (default = 0).')
-    max_iterations=traits.Int(argstr='-i %d',
-            desc=('ANTS registration max iterations'
-            '(default = 100x100x70x20)'))
-    prior_segmentation_weight=traits.Float(argstr='-w %f',
-            desc=('Atropos spatial prior *probability* weight for'
-            'the segmentation'))
-    segmentation_iterations=traits.Int(argstr='-n %d',
-            desc=('N4 -> Atropos -> N4 iterations during segmentation'
-            '(default = 3)'))
-    posterior_formulation=traits.Str(argstr='-b %s',
-            desc=('Atropos posterior formulation and whether or not'
-                'to use mixture model proportions.'
-                   '''e.g 'Socrates[1]' (default) or 'Aristotle[1]'.'''
-                   'Choose the latter if you'
-                   'want use the distance priors (see also the -l option'
-                   'for label propagation control).'))
-    use_floatingpoint_precision=traits.Enum(0, 1, argstr='-j %d',
-            desc='Use floating point precision in registrations (default = 0)')
-    use_random_seeding=traits.Enum(0, 1, argstr='-u %d',
-            desc=('Use random number generated from system clock in Atropos'
-            '(default = 1)'))
-    b_spline_smoothing=traits.Bool(argstr='-v',
-            desc=('Use B-spline SyN for registrations and B-spline'
-            'exponential mapping in DiReCT.'))
-    cortical_label_image=File(exists=True,
-            desc='Cortical ROI labels to use as a prior for ATITH.')
-    label_propagation=traits.Str(argstr='-l %s',
-            desc=('Incorporate a distance prior one the posterior formulation.  Should be'
-              '''of the form 'label[lambda,boundaryProbability]' where label'''
-              'is a value of 1,2,3,... denoting label ID.  The label'
-              'probability for anything outside the current label'
-              '  = boundaryProbability * exp( -lambda * distanceFromBoundary )'
-              'Intuitively, smaller lambda values will increase the spatial capture'
-              'range of the distance prior.  To apply to all label values, simply omit'
-              'specifying the label, i.e. -l [lambda,boundaryProbability].'))
-    quick_registration=traits.Bool(argstr='-q 1',
-            desc=('If = 1, use antsRegistrationSyNQuick.sh as the basis for registration'
-                  'during brain extraction, brain segmentation, and'
-                  '(optional) normalization to a template.'
-                  'Otherwise use antsRegistrationSyN.sh (default = 0).'))
-    debug=traits.Bool(argstr='-z 1',
-            desc=('If > 0, runs a faster version of the script.'
-            'Only for testing. Implies -u 0.'
-            'Requires single thread computation for complete reproducibility.'))
+                                    desc=('Anatomical *intensity* template'
+                                          '(assumed to be skull-stripped). A common'
+                                          'case would be where this would be the same'
+                                          'template as specified in the -e option which'
+                                          'is not skull stripped.'),
+                                    argstr='-t %s', mandatory=True)
+    extraction_registration_mask = File(exists=True, argstr='-f %s',
+                                        desc=('Mask (defined in the template space) used during'
+                                              ' registration for brain extraction.'))
+    keep_temporary_files = traits.Int(argstr='-k %d',
+                                      desc='Keep brain extraction/segmentation warps, etc (default = 0).')
+    max_iterations = traits.Int(argstr='-i %d', desc=('ANTS registration max iterations'
+                                                      '(default = 100x100x70x20)'))
+    prior_segmentation_weight = traits.Float(argstr='-w %f',
+                                             desc=('Atropos spatial prior *probability* weight for'
+                                                   'the segmentation'))
+    segmentation_iterations = traits.Int(argstr='-n %d',
+                                         desc=('N4 -> Atropos -> N4 iterations during segmentation'
+                                               '(default = 3)'))
+    posterior_formulation = traits.Str(argstr='-b %s',
+                                       desc=('Atropos posterior formulation and whether or not'
+                                             'to use mixture model proportions.'
+                                             '''e.g 'Socrates[1]' (default) or 'Aristotle[1]'.'''
+                                             'Choose the latter if you'
+                                             'want use the distance priors (see also the -l option'
+                                             'for label propagation control).'))
+    use_floatingpoint_precision = traits.Enum(0, 1, argstr='-j %d',
+                                              desc=('Use floating point precision '
+                                                    'in registrations (default = 0)'))
+    use_random_seeding = traits.Enum(0, 1, argstr='-u %d',
+                                     desc=('Use random number generated from system clock in Atropos'
+                                           '(default = 1)'))
+    b_spline_smoothing = traits.Bool(argstr='-v',
+                                     desc=('Use B-spline SyN for registrations and B-spline'
+                                           'exponential mapping in DiReCT.'))
+    cortical_label_image = File(exists=True,
+                                desc='Cortical ROI labels to use as a prior for ATITH.')
+    label_propagation = traits.Str(argstr='-l %s',
+                                   desc=('Incorporate a distance prior one the posterior formulation.  Should be'
+                                         '''of the form 'label[lambda,boundaryProbability]' where label'''
+                                         'is a value of 1,2,3,... denoting label ID.  The label'
+                                         'probability for anything outside the current label'
+                                         '  = boundaryProbability * exp( -lambda * distanceFromBoundary )'
+                                         'Intuitively, smaller lambda values will increase the spatial capture'
+                                         'range of the distance prior.  To apply to all label values, simply omit'
+                                         'specifying the label, i.e. -l [lambda,boundaryProbability].'))
+    quick_registration = traits.Bool(argstr='-q 1',
+                                     desc=('If = 1, use antsRegistrationSyNQuick.sh as the basis for registration'
+                                           'during brain extraction, brain segmentation, and'
+                                           '(optional) normalization to a template.'
+                                           'Otherwise use antsRegistrationSyN.sh (default = 0).'))
+    debug = traits.Bool(argstr='-z 1',
+                        desc=('If > 0, runs a faster version of the script.'
+                              'Only for testing. Implies -u 0.'
+                              'Requires single thread computation for complete reproducibility.'))
+
 
 class antsCorticalThicknessoutputSpec(TraitedSpec):
-    BrainExtractionMask=File(exists=True,
-            desc= 'brain extraction mask')
-    BrainSegmentation=File(exists=True,
-            desc='brain segmentaion image')
-    BrainSegmentationN4=File(exists=True,
-            desc='N4 corrected image')
-    BrainSegmentationPosteriorsCSF=File(exists=True,
-            desc='CSF posterior probability image')
-    BrainSegmentationPosteriorsGM=File(exists=True,
-            desc='GM posterior probability image')
-    BrainSegmentationPosteriorsWM=File(exists=True,
-            desc='WM posterior probability image')
-    BrainSegmentationPosteriorsDGM=File(exists=True,
-            desc='DGM posterior probability image')
-    CorticalThickness=File(exists=True,
-            desc='cortical thickness file')
-    TemplateToSubject1GenericAffine=File(exists=True,
-            desc='Template to subject affine')
-    TemplateToSubject0Warp=File(exists=True,
-            desc='Template to subject warp')
-    SubjectToTemplate1Warp=File(exists=True,
-            desc='Template to subject inverse warp')
-    SubjectToTemplate0GenericAffine=File(exists=True,
-            desc='Template to subject inverse affine')
-    TemplateToSubjectLogJacobian=File(exists=True,
-            desc='Template to subject log jacobian')
+    BrainExtractionMask = File(exists=True, desc='brain extraction mask')
+    BrainSegmentation = File(exists=True, desc='brain segmentaion image')
+    BrainSegmentationN4 = File(exists=True, desc='N4 corrected image')
+    BrainSegmentationPosteriorsCSF = File(exists=True, desc='CSF posterior probability image')
+    BrainSegmentationPosteriorsGM = File(exists=True, desc='GM posterior probability image')
+    BrainSegmentationPosteriorsWM = File(exists=True, desc='WM posterior probability image')
+    BrainSegmentationPosteriorsDGM = File(exists=True, desc='DGM posterior probability image')
+    CorticalThickness = File(exists=True, desc='cortical thickness file')
+    TemplateToSubject1GenericAffine = File(exists=True, desc='Template to subject affine')
+    TemplateToSubject0Warp = File(exists=True, desc='Template to subject warp')
+    SubjectToTemplate1Warp = File(exists=True, desc='Template to subject inverse warp')
+    SubjectToTemplate0GenericAffine = File(exists=True, desc='Template to subject inverse affine')
+    TemplateToSubjectLogJacobian = File(exists=True, desc='Template to subject log jacobian')
+
 
 class antsCorticalThickness(ANTSCommand):
     """
@@ -469,91 +478,95 @@ class antsCorticalThickness(ANTSCommand):
     input_spec = antsCorticalThicknessInputSpec
     output_spec = antsCorticalThicknessoutputSpec
     _cmd = 'antsCorticalThickness.sh'
+
     def _format_arg(self, opt, spec, val):
         if opt == 'anatomical_image':
-            retval = '-a %s' %(val)
+            retval = '-a %s' % val
             return retval
         if opt == 'brain_template':
-            retval = '-e %s' %(val)
+            retval = '-e %s' % val
             return retval
         if opt == 'brain_probability_mask':
-            retval = '-m %s' %(val)
+            retval = '-m %s' % val
             return retval
         if opt == 'out_prefix':
-            retval = '-o %s' %(val)
+            retval = '-o %s' % val
             return retval
         if opt == 't1_registration_template':
-            retval = '-t %s' %(val)
+            retval = '-t %s' % val
             return retval
         if opt == 'segmentation_priors':
             priors_directory, _, ext = split_filename(self.inputs.segmentation_priors[0])
             if priors_directory is not '':
-                retval = "-p %s/BrainSegmentationPrior%%02d" %(priors_directory)
+                retval = "-p %s/BrainSegmentationPrior%%02d" % priors_directory
             else:
-                retval = "-p BrainSegmentationPrior%02d" 
+                retval = "-p BrainSegmentationPrior%02d"
             retval += ext
             return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=[0]):
         priors_directory = os.path.join(os.getcwd(), "priors")
         if not os.path.exists(priors_directory):
             os.makedirs(priors_directory)
         _, _, ext = split_filename(self.inputs.segmentation_priors[0])
         for i, f in enumerate(self.inputs.segmentation_priors):
-            target = os.path.join(priors_directory,
-                    'BrainSegmentationPrior%02d' % (i + 1) + ext)
+            target = os.path.join(priors_directory, 'BrainSegmentationPrior%02d' % (i + 1) + ext)
             if not (os.path.exists(target) and os.path.realpath(target) == os.path.abspath(f)):
                 copyfile(os.path.abspath(f), os.path.join(priors_directory,
-                    'BrainSegmentationPrior%02d' % (i + 1) + ext))
+                                                          'BrainSegmentationPrior%02d' % (i + 1) + ext))
         runtime = super(antsCorticalThickness, self)._run_interface(runtime)
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
-                                                        self.inputs.out_prefix +
-                                                        'BrainExtractionMask.'+
-                                                        self.inputs.image_suffix)
+                                                      self.inputs.out_prefix +
+                                                      'BrainExtractionMask.' +
+                                                      self.inputs.image_suffix)
         outputs['BrainSegmentation'] = os.path.join(os.getcwd(),
-                                             self.inputs.out_prefix +
-                                             'BrainSegmentation.' +
-                                             self.inputs.image_suffix)
+                                                    self.inputs.out_prefix +
+                                                    'BrainSegmentation.' +
+                                                    self.inputs.image_suffix)
         outputs['BrainSegmentationN4'] = os.path.join(os.getcwd(),
-                                                     self.inputs.out_prefix +
-                                                     'BrainSegmentation0N4.' +
-                                                     self.inputs.image_suffix)
+                                                      self.inputs.out_prefix +
+                                                      'BrainSegmentation0N4.' +
+                                                      self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsCSF'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_prefix +
-                                                  'BrainSegmentationPosteriors01.' +
-                                                  self.inputs.image_suffix)
+                                                                 self.inputs.out_prefix +
+                                                                 'BrainSegmentationPosteriors01.' +
+                                                                 self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsGM'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_prefix +
-                                                  'BrainSegmentationPosteriors02.' +
-                                                  self.inputs.image_suffix)
+                                                                self.inputs.out_prefix +
+                                                                'BrainSegmentationPosteriors02.' +
+                                                                self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsWM'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_prefix +
-                                                  'BrainSegmentationPosteriors03.' +
-                                                   self.inputs.image_suffix)
+                                                                self.inputs.out_prefix +
+                                                                'BrainSegmentationPosteriors03.' +
+                                                                self.inputs.image_suffix)
         outputs['BrainSegmentationPosteriorsDGM'] = os.path.join(os.getcwd(),
-                                                  self.inputs.out_prefix +
-                                                  'BrainSegmentationPosteriors04.' +
-                                                   self.inputs.image_suffix)
+                                                                 self.inputs.out_prefix +
+                                                                 'BrainSegmentationPosteriors04.' +
+                                                                 self.inputs.image_suffix)
         outputs['CorticalThickness'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'CorticalThickness.' +
-               self.inputs.image_suffix)
-        outputs['TemplateToSubject1GenericAffine'] = os.path.join(
-                os.getcwd(),
-                'TemplateToSubject1GenericAffine.mat')
+                                                    self.inputs.out_prefix +
+                                                    'CorticalThickness.' +
+                                                    self.inputs.image_suffix)
+        outputs['TemplateToSubject1GenericAffine'] = os.path.join(os.getcwd(),
+                                                                  'TemplateToSubject1GenericAffine.mat')
         outputs['TemplateToSubject0Warp'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'TemplateToSubject0Warp.'+
-               self.inputs.image_suffix)
+                                                         self.inputs.out_prefix +
+                                                         'TemplateToSubject0Warp.' +
+                                                         self.inputs.image_suffix)
         outputs['SubjectToTemplate1Warp'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'SubjectToTemplate1Warp' +
-               self.inputs.image_suffix)
+                                                         self.inputs.out_prefix +
+                                                         'SubjectToTemplate1Warp' +
+                                                         self.inputs.image_suffix)
         outputs['SubjectToTemplate0GenericAffine'] = os.path.join(os.getcwd(),
-                self.inputs.out_prefix + 'SubjectToTemplate0GenericAffine.mat')
+                                                                  self.inputs.out_prefix +
+                                                                  'SubjectToTemplate0GenericAffine.mat')
         outputs['TemplateToSubjectLogJacobian'] = os.path.join(os.getcwd(),
-               self.inputs.out_prefix + 'subjectToTemplateLogJacobian.'+
-               self.inputs.image_suffix)
+                                                               self.inputs.out_prefix +
+                                                               'subjectToTemplateLogJacobian.' +
+                                                               self.inputs.image_suffix)
         return outputs
