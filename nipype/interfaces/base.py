@@ -758,12 +758,12 @@ class BaseInterface(Interface):
         manhelpstr = ['\t%s' % name]
 
         type_info = spec.full_info(inputs, name, None)
-        default = ''
 
+        default = ''
         if spec.usedefault:
             default = ', nipype default value: %s' % str(spec.default_value()[1])
-
         line = "(%s%s)" % (type_info, default)
+
         manhelpstr = wrap(line, 70,
                           initial_indent=manhelpstr[0]+': ',
                           subsequent_indent='\t\t ')
@@ -991,7 +991,7 @@ class BaseInterface(Interface):
                     time.sleep(0.2)  # give Xvfb time to start
                     if xvfb_proc.poll() is not None:
                         raise Exception('Error: Xvfb did not start')
-                    old_displaynum = os.environ['DISPLAY']
+
                     runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
 
             runtime = self._run_interface(runtime)
