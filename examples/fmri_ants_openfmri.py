@@ -903,7 +903,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         get_roi_tsnr = pe.MapNode(fs.SegStats(default_color_table=True), 
                                   iterfield=['in_file'], name='get_aparc_tsnr')
         get_roi_tsnr.inputs.avgwf_txt_file = True
-        wf.connect(tsnr, 'detrended_file', get_roi_tsnr, 'in_file')
+        wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
         wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
         
     """
@@ -987,6 +987,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(art, 'intensity_files', datasink, 'qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'qa.art.@outlier_files')
     wf.connect(registration, 'outputspec.anat2target', datasink, 'qa.anat2target')
+    wf.connect(tsnr, 'tsnr_file', datasink, 'qa.tsnr.@map')
     if subjects_dir:
         wf.connect(registration, 'outputspec.min_cost_file', datasink, 'qa.mincost')
         wf.connect([(get_roi_tsnr, datasink, [('avgwf_txt_file', 'qa.tsnr'),
