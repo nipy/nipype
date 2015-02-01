@@ -568,7 +568,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     if os.path.exists(json_info):
         import json
         with open(json_info, 'rt') as fp:
-            data = json.loads(fp)
+            data = json.load(fp)
             TR = data['global']['const']['RepetitionTime']/1000.
     else:
         task_scan_key = os.path.join(base_dir, subject_id, 'BOLD', 
