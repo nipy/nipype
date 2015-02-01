@@ -563,7 +563,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
         runs = [int(val[-3:]) for val in files]
         run_ids.insert(idx, runs)
     json_info = os.path.join(base_dir, subject_id, 'BOLD', 
-                                 'task%03d_run%03d' % (task_id, run_ids[0]), 
+                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]), 
                                  'bold_scaninfo.json')
     if os.path.exists(json_info):
         import json
@@ -572,7 +572,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
             TR = data['global']['const']['RepetitionTime']/1000.
     else:
         task_scan_key = os.path.join(base_dir, subject_id, 'BOLD', 
-                                 'task%03d_run%03d' % (task_id, run_ids[0]), 
+                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]), 
                                  'scan_key.txt')
         if os.path.exists(task_scan_key):
             TR = np.genfromtxt(task_scan_key)[1]
