@@ -562,7 +562,13 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
                                          'task%03d_run*' % (idx + 1))))
         runs = [int(val[-3:]) for val in files]
         run_ids.insert(idx, runs)
-    TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
+    task_scan_key = os.path.join(base_dir, subject_id, 'BOLD', 
+                                 'task%03d_run%03d' % (task_id, run_ids[0]), 
+                                 'scan_key.txt')
+    if os.path.exists(task_scan_key):
+        TR = np.genfromtxt(task_scan_key)[1]
+    else:
+        TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
 """
