@@ -488,6 +488,7 @@ class ErrorMapInputSpec(BaseInterfaceInputSpec):
 
 class ErrorMapOutputSpec(TraitedSpec):
     out_map = File(exists=True, desc="resulting error map")
+    distance = traits.Float(desc="Average distance between volume 1 and 2")
 
 
 class ErrorMap(BaseInterface):
