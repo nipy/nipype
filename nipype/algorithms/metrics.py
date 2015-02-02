@@ -506,12 +506,13 @@ class ErrorMap(BaseInterface):
     _out_file = ''
 
     def _run_interface(self, runtime):
-        from scipy.spatial.distance import cdist, pdist
+        # Get two numpy data matrices
         nii_ref = nb.load(self.inputs.in_ref)
         ref_data = np.squeeze(nii_ref.get_data())
         tst_data = np.squeeze(nb.load(self.inputs.in_tst).get_data())
         assert(ref_data.ndim == tst_data.ndim)
 
+        # Load mask
         comps = 1
         mapshape = ref_data.shape
 
@@ -528,12 +529,14 @@ class ErrorMap(BaseInterface):
         else:
             msk = np.ones(shape=mapshape)
 
+        # Vectorise both volumes and make the pixel differennce
         mskvector = msk.reshape(-1)
         msk_idxs = np.where(mskvector==1)
         refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
 
+        # scale the diffrernce
         if self.inputs.metric == 'sqeuclidean':
             errvector = diffvector**2
         elif self.inputs.metric == 'euclidean':
@@ -547,6 +550,12 @@ class ErrorMap(BaseInterface):
 
         errvectorexp = np.zeros_like(mskvector)
         errvectorexp[msk_idxs] = errvector
+
+        # Get averaged error
+        if self.inputs.metric == 'sqeuclidean':
+            self._distance = np.sqrt(np.sum(errvectorexp))
+        elif self.inputs.metric == 'euclidean':
+            self._distance = np.average(errvectorexp)
 
         errmap = errvectorexp.reshape(mapshape)
 
@@ -567,11 +576,12 @@ class ErrorMap(BaseInterface):
         nb.Nifti1Image(errmap.astype(np.float32), nii_ref.get_affine(),
                        hdr).to_filename(self._out_file)
 
-        return runtime
+        return runtime 
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_map'] = self._out_file
+        outputs['distance'] = self._distance
         return outputs
 
 
