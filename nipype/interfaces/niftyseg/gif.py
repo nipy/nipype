@@ -145,8 +145,8 @@ class Gif(NIFTYSEGCommand):
         outputs['geo_file']    = self._find_file_from_patterns(outputs['out_dir'], basename, 'geo.nii.gz')
         outputs['prior_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'prior.nii.gz')        
         outputs['tiv_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'TIV.nii.gz')
-        outputs['seg_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Brain.nii.gz')
-        outputs['brain_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Segmentation.nii.gz')
+        outputs['brain_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Brain.nii.gz')
+        outputs['seg_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Segmentation.nii.gz')
         outputs['bias_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'BiasCorrected.nii.gz')
 
         return outputs
