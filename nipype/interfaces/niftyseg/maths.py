@@ -52,7 +52,7 @@ class UnaryMathsInput(MathsInput):
                             'otsu', 'lconcomp', 'fill', 'euc', 
                             'tpmax', 'tmean', 'tmin', 'tmax',
                             'splitlab',
-                            'subsamp2', 'lcl', 'range',
+                            'subsamp2', 'scl', 'range',
                             argstr='-%s', position=4, mandatory=True,
                             desc='operation to perform')
 
