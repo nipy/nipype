@@ -8,6 +8,8 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.freesurfer as fs    # freesurfer
 import nipype.interfaces.spm as spm
 
+from nipype import LooseVersion
+
 from ...smri.freesurfer.utils import create_getmask_flow
 
 def getthreshop(thresh):
@@ -415,6 +417,11 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     >>> preproc.run() # doctest: +SKIP
     """
 
+    version = 0
+    if fsl.Info.version() and \
+        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+        version = 507
+
     featpreproc = pe.Workflow(name=name)
 
     """
@@ -658,17 +665,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     featpreproc.connect(medianval, ('out_stat', getmeanscale), meanscale, 'op_string')
 
-    """
-    Perform temporal highpass filtering on the data
-    """
-
-    if highpass:
-        highpass = pe.MapNode(interface=fsl.ImageMaths(suffix='_tempfilt'),
-                              iterfield=['in_file'],
-                              name='highpass')
-        featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
-        featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
-        featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
 
     """
     Generate a mean functional image from the first run
@@ -681,6 +677,37 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
+
+    """
+    Perform temporal highpass filtering on the data
+    """
+
+    if highpass:
+        highpass = pe.MapNode(interface=fsl.ImageMaths(suffix='_tempfilt'),
+                              iterfield=['in_file'],
+                              name='highpass')
+        featpreproc.connect(inputnode, ('highpass', highpass_operand), highpass, 'op_string')
+        featpreproc.connect(meanscale, 'out_file', highpass, 'in_file')
+
+        if version < 507:
+            featpreproc.connect(highpass, 'out_file', outputnode, 'highpassed_files')
+        else:
+            """
+            Add back the mean removed by the highpass filter operation as of FSL 5.0.7
+            """
+            meanfunc4 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
+                                                            suffix='_mean'),
+                                   iterfield=['in_file'],
+                                   name='meanfunc4')
+
+            featpreproc.connect(meanscale, 'out_file', meanfunc4, 'in_file')
+            addmean = pe.MapNode(interface=fsl.BinaryMaths(operation='add'),
+                                 iterfield=['in_file', 'operand_file'],
+                                 name='addmean')
+            featpreproc.connect(highpass, 'out_file', addmean, 'in_file')
+            featpreproc.connect(meanfunc4, 'out_file', addmean, 'operand_file')
+            featpreproc.connect(addmean, 'out_file', outputnode, 'highpassed_files')
+
     return featpreproc
 
 
