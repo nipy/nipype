@@ -25,13 +25,15 @@ workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
 log_to_file = false
-log_directory = %s
+log_directory = {log_directory}
 log_size = 16384000
 log_rotate = 4
+log_format: %%(asctime)s,%%(msecs)d %%(name)-2s %%(levelname)-2s\\n\\t%%(message)s
+log_dateformat = %%y%%m%%d-%%H:%%M:%%S
 
 [execution]
 create_report = true
-crashdump_dir = %s
+crashdump_dir = {crashdump_dir}
 display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
@@ -52,14 +54,14 @@ poll_sleep_duration = 60
 
 [check]
 interval = 1209600
-""" % (homedir, os.getcwd())
+""".format(log_directory=homedir, crashdump_dir=os.getcwd())
 
 class NipypeConfig(object):
     """Base nipype config class
     """
 
     def __init__(self, *args, **kwargs):
-        self._config = ConfigParser.ConfigParser()
+        self._config = ConfigParser.SafeConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)

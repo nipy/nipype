@@ -18,13 +18,15 @@ from .config import NipypeConfig
 class Logging(object):
     """Nipype logging class
     """
-    fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
-           '%(levelname)-2s:\n\t %(message)s')
-    datefmt = '%y%m%d-%H:%M:%S'
     def __init__(self, config):
         self._config = config
-        logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
+        self._fmt = config.get('logging', 'log_format').decode('string-escape') 
+        self._datefmt = config.get('logging', 'log_dateformat').decode('string-escape')
+
+        logging.basicConfig(format=self._fmt,
+                            datefmt=self._datefmt,
                             stream=sys.stdout)
+
         #logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._fmlogger = logging.getLogger('filemanip')
@@ -44,7 +46,7 @@ class Logging(object):
                          maxBytes=int(config.get('logging', 'log_size')),
                          backupCount=int(config.get('logging',
                                                     'log_rotate')))
-        formatter = logging.Formatter(fmt=self.fmt, datefmt=self.datefmt)
+        formatter = logging.Formatter(fmt=self._fmt, datefmt=self._datefmt)
         hdlr.setFormatter(formatter)
         self._logger.addHandler(hdlr)
         self._fmlogger.addHandler(hdlr)
