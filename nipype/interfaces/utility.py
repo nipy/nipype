@@ -491,9 +491,9 @@ class CSVReader(BaseInterface):
     Examples
     --------
 
-    >>> reader = cv.CSVReader()
-    >>> reader.inputs.in_file = 'noHeader.csv'
-    >>> out = reader.run()
+    >>> reader = CSVReader()  # doctest: +SKIP
+    >>> reader.inputs.in_file = 'noHeader.csv'  # doctest: +SKIP
+    >>> out = reader.run()  # doctest: +SKIP
     >>> out.outputs.column_0 == ['foo', 'bar', 'baz']  # doctest: +SKIP
     True
     >>> out.outputs.column_1 == ['hello', 'world', 'goodbye']  # doctest: +SKIP
@@ -501,10 +501,10 @@ class CSVReader(BaseInterface):
     >>> out.outputs.column_2 == ['300.1', '5', '0.3']  # doctest: +SKIP
     True
 
-    >>> reader = cv.CSVReader()
-    >>> reader.inputs.in_file = 'header.csv'
-    >>> reader.inputs.header = True
-    >>> out = reader.run()
+    >>> reader = CSVReader()  # doctest: +SKIP
+    >>> reader.inputs.in_file = 'header.csv'  # doctest: +SKIP
+    >>> reader.inputs.header = True  # doctest: +SKIP
+    >>> out = reader.run()  # doctest: +SKIP
     >>> out.outputs.files == ['foo', 'bar', 'baz']  # doctest: +SKIP
     True
     >>> out.outputs.labels == ['hello', 'world', 'goodbye']  # doctest: +SKIP

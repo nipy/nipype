@@ -23,7 +23,7 @@ Next release
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 * ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
-* ENH: Added csvReader() utility
+* ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 
 Release 0.10.0 (October 10, 2014)
 ============
