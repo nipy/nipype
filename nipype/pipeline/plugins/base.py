@@ -112,11 +112,15 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+
+can_import_matplotlib = True #Silently allow matplotlib to be ignored
 try:
     import matplotlib
     matplotlib.use('%s')
 except ImportError:
+    can_import_matplotlib = False
     pass
+
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
@@ -130,7 +134,9 @@ try:
         from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
-    config.update_matplotlib()
+    ## Only configure matplotlib if it was successfully imported, matplotlib is an optional component to nipype
+    if can_import_matplotlib:
+        config.update_matplotlib()
     logging.update_logging(config)
     traceback=None
     cwd = os.getcwd()
