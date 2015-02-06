@@ -68,6 +68,9 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
                          desc='Jacobian log value for the registration [0.0001]')
     regSL = traits.Bool(argstr = '-regSL',
                          desc='Skip the second Level non-rigid registration')
+    saveGeo = traits.Bool(argstr = '-geo',
+                          desc='Save Geo to output folder',
+                          default=False)
     
 
 class GifOutputSpec(TraitedSpec):
