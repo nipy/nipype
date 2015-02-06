@@ -80,7 +80,7 @@ symbols. For an input defined in InputSpec to be included into the executed
 commandline ``argstr`` has to be included. Additionally inside the main
 interface class you need to specify the name of the executable by assigning it
 to the ``_cmd`` field. Also the main interface class needs to inherit from
-:class:`nipype.interfaces.base.CommandLine`:
+:class:`CommandLine <nipype.interfaces.base.CommandLine>`:
 
 .. testcode::
 
@@ -92,7 +92,7 @@ to the ``_cmd`` field. Also the main interface class needs to inherit from
 There is one more thing we need to take care of. When the executable finishes
 processing it will presumably create some output files. We need to know which
 files to look for, check if they exist and expose them to whatever node would
-like to use them. This is done by implementing ``_list_outputs`` method in the
+like to use them. This is done by implementing :func:`_list_outputs <nipype.interfaces.base.BaseInterface._list_outputs>` method in the
 main interface class. Basically what it does is assigning the expected output
 files to the fields of our output spec:
 
