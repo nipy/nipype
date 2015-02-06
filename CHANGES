@@ -1,6 +1,7 @@
 Next release
 ============
 
+* BUG: matplotlib is supposed to be optional (https://github.com/nipy/nipype/pull/1003)
 * FIX: Fix split_filename behaviour when path has no file component (https://github.com/nipy/nipype/pull/1035)
 * ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
 * ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
@@ -21,6 +22,7 @@ Next release
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
+* ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 
 Release 0.10.0 (October 10, 2014)
 ============
