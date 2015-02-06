@@ -13,7 +13,9 @@ code template, and define approriate inputs and outputs.
 
 .. literalinclude:: matlab_example1.py
 
-:download:`Download the source code of this example <matlab_example1.py>`.
+.. admonition:: Example source code
+
+  You can download :download:`the source code of this example <matlab_example1.py>`.
 
 Example 2
 +++++++++
@@ -22,6 +24,8 @@ By subclassing :class:`nipype.interfaces.matlab.MatlabCommand` for your main cla
 
 .. literalinclude:: matlab_example2.py
 
-:download:`Download the source code of this example <matlab_example2.py>`.
+.. admonition:: Example source code
+
+  You can download :download:`the source code of this example <matlab_example2.py>`.
 
 .. include:: ../links_names.txt
