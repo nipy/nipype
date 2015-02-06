@@ -39,7 +39,7 @@ above example we have used the ``desc`` metadata which holds human readable
 description of the input. The ``mandatory`` flag forces Nipype to throw an
 exception if the input was not set. ``exists`` is a special flag that works only
 for ``File traits`` and checks if the provided file exists. More details can be
-found at `interface_specs`_.
+found at :ref:`interface_specs`.
 
 The input and output specifications have to be connected to the our example
 interface class:
@@ -80,7 +80,7 @@ symbols. For an input defined in InputSpec to be included into the executed
 commandline ``argstr`` has to be included. Additionally inside the main
 interface class you need to specify the name of the executable by assigning it
 to the ``_cmd`` field. Also the main interface class needs to inherit from
-`CommandLine`_:
+:class:`CommandLine <nipype.interfaces.base.CommandLine>`:
 
 .. testcode::
 
@@ -92,7 +92,7 @@ to the ``_cmd`` field. Also the main interface class needs to inherit from
 There is one more thing we need to take care of. When the executable finishes
 processing it will presumably create some output files. We need to know which
 files to look for, check if they exist and expose them to whatever node would
-like to use them. This is done by implementing `_list_outputs`_ method in the
+like to use them. This is done by implementing :func:`_list_outputs <nipype.interfaces.base.BaseInterface._list_outputs>` method in the
 main interface class. Basically what it does is assigning the expected output
 files to the fields of our output spec:
 
