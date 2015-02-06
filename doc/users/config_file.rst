@@ -104,10 +104,10 @@ Execution
     done after a job finish is detected. (float in seconds; default value: 5)
 
 *remove_node_directories (EXPERIMENTAL)*
-	Removes directories whose outputs have already been used
-	up. Doesn't work with IdentiInterface or any node that patches
-	data through (without copying) (possible values: ``true`` and
-	``false``; default value: ``false``)
+    Removes directories whose outputs have already been used
+    up. Doesn't work with IdentiInterface or any node that patches
+    data through (without copying) (possible values: ``true`` and
+    ``false``; default value: ``false``)
 
 *stop_on_unknown_version*
     If this is set to True, an underlying interface will raise an error, when no
@@ -118,7 +118,7 @@ Execution
     If this is set to True, the node's output directory will contain full
     parameterization of any iterable, otherwise parameterizations over 32
     characters will be replaced by their hash. (possible values: ``true`` and
-	``false``; default value: ``true``)
+    ``false``; default value: ``true``)
 
 *poll_sleep_duration*
     This controls how long the job submission loop will sleep between submitting
