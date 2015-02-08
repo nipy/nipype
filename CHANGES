@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Enhanced openfmri script to support freesurfer linkage (https://github.com/nipy/nipype/pull/1037)
 * BUG: matplotlib is supposed to be optional (https://github.com/nipy/nipype/pull/1003)
 * FIX: Fix split_filename behaviour when path has no file component (https://github.com/nipy/nipype/pull/1035)
 * ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
