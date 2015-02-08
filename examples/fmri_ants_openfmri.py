@@ -242,7 +242,7 @@ def create_reg_workflow(name='registration'):
     warpmean = pe.Node(ants.ApplyTransforms(),
                        name='warpmean')
     warpmean.inputs.input_image_type = 3
-    warpmean.inputs.interpolation = 'BSpline'
+    warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
 
@@ -258,7 +258,7 @@ def create_reg_workflow(name='registration'):
                          iterfield=['input_image'],
                          name='warpall')
     warpall.inputs.input_image_type = 3
-    warpall.inputs.interpolation = 'BSpline'
+    warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
 
@@ -450,7 +450,7 @@ def create_fs_reg_workflow(name='registration'):
     """
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
-    warpmean.inputs.interpolation = 'BSpline'
+    warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
     warpmean.inputs.args = '--float'
@@ -465,7 +465,7 @@ def create_fs_reg_workflow(name='registration'):
                          iterfield=['input_image'],
                          name='warpall')
     warpall.inputs.input_image_type = 3
-    warpall.inputs.interpolation = 'BSpline'
+    warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
     warpall.inputs.args = '--float'
@@ -1028,10 +1028,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.high_pass_filter_cutoff = hpcutoff
     modelfit.inputs.inputspec.bases = {'dgamma': {'derivs': use_derivatives}}
     modelfit.inputs.inputspec.model_serial_correlations = True
-    if version < 507:
-        modelfit.inputs.inputspec.film_threshold = 1000
-    else:
-        modelfit.inputs.inputspec.film_threshold = -1000
+    modelfit.inputs.inputspec.film_threshold = 1000
 
     datasink.inputs.base_directory = output_dir
     return wf
