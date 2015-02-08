@@ -23,6 +23,7 @@ Next release
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
+* ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 
 Release 0.10.0 (October 10, 2014)
 ============
