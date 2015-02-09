@@ -362,6 +362,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
+
     contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
                                  'task_contrasts.txt')
     has_contrast = os.path.exists(contrast_file)
