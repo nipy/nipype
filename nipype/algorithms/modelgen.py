@@ -573,7 +573,7 @@ class SpecifySparseModel(SpecifyModel):
         SCANONSET = np.round(self.inputs.scan_onset*1000)
         total_time = TR*(nscans-nvol)/nvol + TA*nvol + SCANONSET
         SILENCE = TR-TA*nvol
-        dt = TA/10.;
+        dt = TA/10.0
         durations  = np.round(np.array(i_durations)*1000)
         if len(durations) == 1:
             durations = durations*np.ones((len(i_onsets)))
@@ -581,11 +581,11 @@ class SpecifySparseModel(SpecifyModel):
         dttemp = gcd(TA, gcd(SILENCE, TR))
         if dt < dttemp:
             if dttemp % dt != 0:
-                dt = gcd(dttemp, dt)
+                dt = float(gcd(dttemp, dt))
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
         iflogger.info("Setting dt = %d ms\n" % dt)
-        npts = int(total_time/dt)
+        npts = int(np.ceil(total_time/dt))
         times = np.arange(0, total_time, dt)*1e-3
         timeline = np.zeros((npts))
         timeline2 = np.zeros((npts))
@@ -605,7 +605,7 @@ class SpecifySparseModel(SpecifyModel):
                 iflogger.info('response sum: %.4f max: %.4f'%(response.sum(), response.max()))
             iflogger.info('reg_scale: %.4f'%reg_scale)
         for i, t in enumerate(onsets):
-            idx = int(t/dt)
+            idx = int(np.round(t/dt))
             if i_amplitudes:
                 if len(i_amplitudes)>1:
                     timeline2[idx] = i_amplitudes[i]
