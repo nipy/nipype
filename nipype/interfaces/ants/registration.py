@@ -320,8 +320,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
-    # collapse_linear_transforms_to_fixed_image_header = traits.Bool(
-    #     argstr='%s', default=False, usedefault=True, desc='')
 
 
 class RegistrationOutputSpec(TraitedSpec):
