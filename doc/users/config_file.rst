@@ -120,6 +120,11 @@ Execution
     characters will be replaced by their hash. (possible values: ``true`` and
 	``false``; default value: ``true``)
 
+*poll_sleep_duration*
+    This controls how long the job submission loop will sleep between submitting
+    all pending jobs and checking for job completion. To be nice to cluster
+    schedulers the default is set to 60 seconds.
+
 Example
 ~~~~~~~
 
