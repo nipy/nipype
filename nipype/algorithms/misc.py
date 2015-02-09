@@ -825,7 +825,7 @@ class AddCSVRow(BaseInterface):
     >>> addrow.inputs.in_file = 'scores.csv'
     >>> addrow.inputs.si = 0.74
     >>> addrow.inputs.di = 0.93
-    >>> addrow.subject_id = 'S400'
+    >>> addrow.inputs.subject_id = 'S400'
     >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
     """
