@@ -20,7 +20,7 @@ For example::
   python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
       -s subj001 -o output -p PBS --plugin_args "dict(qsub_args='-q many')"
 
-  or
+or::
 
   python rsfmri_vol_surface_preprocessing.py -f SUB_1024011/E?/func/rest.nii
       -t OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz --TR 2 -s SUB_1024011
