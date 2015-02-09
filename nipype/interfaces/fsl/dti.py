@@ -49,7 +49,8 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
     little_bit = traits.Bool(desc='only process small area of brain',
                              argstr='--littlebit')
-
+    gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
+                      desc='gradient non linearities')
 
 class DTIFitOutputSpec(TraitedSpec):
     V1 = File(exists=True, desc='path/name of file with the 1st eigenvector')

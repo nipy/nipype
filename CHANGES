@@ -2,6 +2,13 @@ Next release
 ============
 
 * FIX: AddCSVRow problems when using infields (https://github.com/nipy/nipype/pull/1028)
+* ENH: Enhanced openfmri script to support freesurfer linkage (https://github.com/nipy/nipype/pull/1037)
+* BUG: matplotlib is supposed to be optional (https://github.com/nipy/nipype/pull/1003)
+* FIX: Fix split_filename behaviour when path has no file component (https://github.com/nipy/nipype/pull/1035)
+* ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
+* ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
+       New options also include choice of tracker, interpolator, stepsize and 
+       curveinterval for angle threshold (https://github.com/nipy/nipype/pull/1029)
 * FIX: Interfaces redirecting X crashed if $DISPLAY not defined (https://github.com/nipy/nipype/pull/1027)
 * FIX: Bug crashed 'make api' (https://github.com/nipy/nipype/pull/1026)
 * ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
@@ -17,6 +24,7 @@ Next release
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
+* ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 
 Release 0.10.0 (October 10, 2014)
 ============
