@@ -555,20 +555,7 @@ def sdc_fmb(name='fmb_correction',
     """
 
     epi_defaults = {'delta_te': 2.46e-3, 'echospacing': 0.77e-3,
-                    'acc_factor': 3, 'enc_dir': u'AP'}
-
-    def _fix_enc_dir(enc_dir):
-        enc_dir = enc_dir.lower()
-        if enc_dir == 'lr':
-            return 'x-'
-        if enc_dir == 'rl':
-            return 'x'
-
-        if enc_dir == 'ap':
-            return 'y-'
-        if enc_dir == 'pa':
-            return 'y'
-        return enc_dir
+                    'acc_factor': 2, 'enc_dir': u'AP'}
 
     inputnode = pe.Node(niu.IdentityInterface(
         fields=['in_file', 'in_bval', 'in_mask', 'bmap_pha', 'bmap_mag',
@@ -873,6 +860,19 @@ def remove_bias(name='bias_correct'):
 def _eff_t_echo(echospacing, acc_factor):
     eff_echo = echospacing / (1.0 * acc_factor)
     return eff_echo
+
+
+def _fix_enc_dir(enc_dir):
+    enc_dir = enc_dir.lower()
+    if enc_dir == 'lr':
+        return 'x-'
+    if enc_dir == 'rl':
+        return 'x'
+    if enc_dir == 'ap':
+        return 'y-'
+    if enc_dir == 'pa':
+        return 'y'
+    return enc_dir
 
 
 def _checkrnum(ref_num):
