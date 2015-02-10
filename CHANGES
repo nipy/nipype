@@ -1,6 +1,7 @@
 Next release
 ============
 
+* FIX: remove unused mandatory flag from spm normalize (https://github.com/nipy/nipype/pull/1048)
 * ENH: Update ANTSCorticalThickness interface (https://github.com/nipy/nipype/pull/1013)
 * FIX: Edge case with sparsemodels and PEP8 cleanup (https://github.com/nipy/nipype/pull/1046)
 * ENH: New io interfaces for JSON files reading/writing (https://github.com/nipy/nipype/pull/1020)
