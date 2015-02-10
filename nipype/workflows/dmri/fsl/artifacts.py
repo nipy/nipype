@@ -537,6 +537,7 @@ def sdc_fmb(name='fmb_correction',
     >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
     >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
     >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'
+    >>> fmb.inputs.inputnode.settings = 'epi_param.txt'
     >>> fmb.run() # doctest: +SKIP
 
     .. warning:: Only SIEMENS format fieldmaps are supported.
