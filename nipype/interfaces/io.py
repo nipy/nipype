@@ -1804,8 +1804,9 @@ class SSHDataGrabber(DataGrabber):
 
 
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='JSON source file')
+    in_file = File(exists=True, desc='JSON source file')
+    defaults = traits.Dict(desc=('JSON dictionary that sets default output'
+                                'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):
@@ -1819,12 +1820,15 @@ class JSONFileGrabber(IOBase):
 
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
+    >>> res = jsonSource.run()
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param1': u'overrideMe'}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> print res.outputs.param1
-    exampleStr
-    >>> print res.outputs.param2
-    4
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
+
 
     """
     input_spec = JSONFileGrabberInputSpec
@@ -1834,15 +1838,22 @@ class JSONFileGrabber(IOBase):
     def _list_outputs(self):
         import json
 
-        with open(self.inputs.in_file, 'r') as f:
-            data = json.load(f)
-
-        if not isinstance(data, dict):
-            raise RuntimeError('JSON input has no dictionary structure')
-
         outputs = {}
-        for key, value in data.iteritems():
-            outputs[key] = value
+        if isdefined(self.inputs.in_file):
+            with open(self.inputs.in_file, 'r') as f:
+                data = json.load(f)
+
+            if not isinstance(data, dict):
+                raise RuntimeError('JSON input has no dictionary structure')
+
+            for key, value in data.iteritems():
+                outputs[key] = value
+
+        if isdefined(self.inputs.defaults):
+            defaults = self.inputs.defaults
+            for key, value in defaults.iteritems():
+                if key not in outputs.keys():
+                    outputs[key] = value
 
         return outputs
 

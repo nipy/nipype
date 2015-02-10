@@ -554,10 +554,8 @@ def sdc_fmb(name='fmb_correction',
 
     """
 
-    defaults = dict(delta_te=2.46e-3, echospacing=0.77e-3, acc_factor=3,
-                    enc_dir='AP')
-
-    delta_te = epi_params['echospacing'] / (1.0 * epi_params['acc_factor'])
+    epi_defaults = {'delta_te': 2.46e-3, 'echospacing': 0.77e-3,
+                    'acc_factor': 3, 'enc_dir': u'AP'}
 
     def _fix_enc_dir(enc_dir):
         enc_dir = enc_dir.lower()
@@ -579,7 +577,8 @@ def sdc_fmb(name='fmb_correction',
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file', 'out_vsm', 'out_warp']), name='outputnode')
 
-    r_params = pe.Node(JSONFileGrabber(), name='SettingsGrabber')
+    r_params = pe.Node(JSONFileGrabber(defaults=epi_defaults),
+                       name='SettingsGrabber')
     eff_echo = pe.Node(niu.Function(function=_eff_t_echo,
                                     input_names=['echospacing', 'acc_factor'],
                                     output_names=['eff_echo']), name='EffEcho')
