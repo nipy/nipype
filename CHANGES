@@ -1,6 +1,14 @@
 Next release
 ============
 * FIX: Amend create_tbss_non_fa() workflow to match FSL's tbss_non_fa command. (https://github.com/nipy/nipype/pull/1033)
+* FIX: remove unused mandatory flag from spm normalize (https://github.com/nipy/nipype/pull/1048)
+* ENH: Update ANTSCorticalThickness interface (https://github.com/nipy/nipype/pull/1013)
+* FIX: Edge case with sparsemodels and PEP8 cleanup (https://github.com/nipy/nipype/pull/1046)
+* ENH: New io interfaces for JSON files reading/writing (https://github.com/nipy/nipype/pull/1020)
+* ENH: Enhanced openfmri script to support freesurfer linkage (https://github.com/nipy/nipype/pull/1037)
+* BUG: matplotlib is supposed to be optional (https://github.com/nipy/nipype/pull/1003)
+* FIX: Fix split_filename behaviour when path has no file component (https://github.com/nipy/nipype/pull/1035)
+* ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
 * ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
        New options also include choice of tracker, interpolator, stepsize and 
        curveinterval for angle threshold (https://github.com/nipy/nipype/pull/1029)
