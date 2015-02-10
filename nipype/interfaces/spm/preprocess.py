@@ -544,7 +544,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                             desc='FWHM of Gaussian smoothness of bias')
     tpm = File(exists=True, field='eoptions.tpm',
                desc='template in form of tissue probablitiy maps to normalize to',
-               mandatory=False, xor=['deformation_file'],
+               xor=['deformation_file'],
                copyfile=False)
     affine_regularization_type = traits.Enum('mni', 'size', 'none',
                                              field='eoptions.affreg',
