@@ -48,6 +48,7 @@ use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
+poll_sleep_duration = 60
 
 [check]
 interval = 1209600
