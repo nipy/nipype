@@ -1101,11 +1101,12 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                 subresult = InterfaceResult(result.interface[idx],
                                             runtime, outputs={})
                 if result.inputs:
-                    subresult.inputs = result.inputs[idx]
+                    if idx < len(result.inputs):
+                        subresult.inputs = result.inputs[idx]
                 if result.outputs:
                     for key, value in result.outputs.items():
                         values = getattr(result.outputs, key)
-                        if isdefined(values):
+                        if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
                 sub_bundle = ProvStore().add_results(subresult)
                 ps.g = merge_bundles(ps.g, sub_bundle)

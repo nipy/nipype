@@ -94,16 +94,21 @@ class antsIntroduction(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
+        transmodel = self.inputs.transformation_model
+
+        # When transform is set as 'RI'/'RA', wrap fields should not be expected
+        # The default transformation is GR, which outputs the wrap fields
+        if not isdefined(transmodel) or (isdefined(transmodel) and transmodel not in ['RI', 'RA']):
+            outputs['warp_field'] = os.path.join(os.getcwd(),
+                                 self.inputs.out_prefix +
+                                 'Warp.nii.gz')
+            outputs['inverse_warp_field'] = os.path.join(os.getcwd(),
+                                     self.inputs.out_prefix +
+                                     'InverseWarp.nii.gz')
 
         outputs['affine_transformation'] = os.path.join(os.getcwd(),
                                                         self.inputs.out_prefix +
                                                         'Affine.txt')
-        outputs['warp_field'] = os.path.join(os.getcwd(),
-                                             self.inputs.out_prefix +
-                                             'Warp.nii.gz')
-        outputs['inverse_warp_field'] = os.path.join(os.getcwd(),
-                                                     self.inputs.out_prefix +
-                                                     'InverseWarp.nii.gz')
         outputs['input_file'] = os.path.join(os.getcwd(),
                                              self.inputs.out_prefix +
                                              'repaired.nii.gz')
