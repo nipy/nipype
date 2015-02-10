@@ -643,7 +643,6 @@ def sdc_fmb(name='fmb_correction',
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
     unwarp = pe.MapNode(fsl.FUGUE(icorr=True, forward_warping=False),
                         iterfield=['in_file'], name='UnwarpDWIs')
-    unwarp.inputs.unwarp_direction = epi_params['enc_dir']
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
     vsm2dfm = vsm2warp()
@@ -692,9 +691,12 @@ def sdc_fmb(name='fmb_correction',
         (inputnode,   split,      [('in_file', 'in_file')]),
         (split,       unwarp,     [('out_files', 'in_file')]),
         (vsm,         unwarp,     [('shift_out_file', 'shift_in_file')]),
+        (r_params,    unwarp,     [
+            (('enc_dir', _fix_enc_dir), 'unwarp_direction')]),
         (unwarp,      thres,      [('unwarped_file', 'in_file')]),
         (thres,       merge,      [('out_file', 'in_files')]),
-        (r_params,    vsm2dfm,    [(('enc_dir', _fix_enc_dir), 'enc_dir')]),
+        (r_params,    vsm2dfm,    [
+            (('enc_dir', _fix_enc_dir), 'inputnode.enc_dir')]),
         (merge,       vsm2dfm,    [('merged_file', 'inputnode.in_ref')]),
         (vsm,         vsm2dfm,    [('shift_out_file', 'inputnode.in_vsm')]),
         (merge,       outputnode, [('merged_file', 'out_file')]),
