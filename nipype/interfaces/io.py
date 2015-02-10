@@ -1820,14 +1820,14 @@ class JSONFileGrabber(IOBase):
 
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
-    >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
+    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
     >>> res.outputs.get()
-    {'param1': 'overrideMe', 'param3': 1.0 }
+    {'param3': 1.0, 'param1': u'overrideMe'}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> res.outputs.get()
-    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
+    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
 
 
     """
