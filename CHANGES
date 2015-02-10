@@ -1,6 +1,6 @@
 Next release
 ============
-
+* FIX: Amend create_tbss_non_fa to match inputs used in tbss_skeleton command when invoking the tbss_non_fa FSL command (https://github.com/nipy/nipype/pull/1033)
 * FIX: Edge case with sparsemodels and PEP8 cleanup (https://github.com/nipy/nipype/pull/1046)
 * ENH: New io interfaces for JSON files reading/writing (https://github.com/nipy/nipype/pull/1020)
 * ENH: Enhanced openfmri script to support freesurfer linkage (https://github.com/nipy/nipype/pull/1037)
