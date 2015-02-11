@@ -174,9 +174,6 @@ Slicer_
 Nipy_
   0.1.2+20110404 or later
 
-ANTS_
-  ANTS version 2.1 or later
-
 Nitime_
   (optional)
 
