@@ -20,6 +20,7 @@ from .. import logging
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
+from warnings import warn
 iflogger = logging.getLogger('interface')
 
 
@@ -87,7 +88,7 @@ class ComputeMeshWarp(BaseInterface):
     def _run_interface(self, runtime):
         from numpy import linalg as nla
         try:
-            from tvtk.api import tvtk, write_data
+            from tvtk.api import tvtk
         except ImportError:
             raise ImportError('Interface ComputeMeshWarp requires tvtk')
 
@@ -173,6 +174,6 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 1.0,"
-                       " please use nipype.algorithms.metrics.Distance"),
-                      DeprecationWarning)
+        warn(('This interface has been deprecated since 1.0, please use '
+              'ComputeMeshWarp'),
+             DeprecationWarning)
