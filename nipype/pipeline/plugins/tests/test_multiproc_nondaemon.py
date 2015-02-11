@@ -106,7 +106,9 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
     pipe.base_dir = os.getcwd()
     f1.inputs.insum = 0
 
-    pipe.config = {'execution': {'stop_on_first_crash': True}}
+    pipe.config['execution']['stop_on_first_crash'] = True
+    pipe.config['execution']['poll_sleep_duration'] = 2
+
     # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs
     execgraph = pipe.run(plugin="MultiProc",

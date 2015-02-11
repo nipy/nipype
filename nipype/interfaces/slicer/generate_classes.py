@@ -101,7 +101,7 @@ if __name__ == '__main__':
             f.close()
 
 
-def generate_all_classes(modules_list=[], launcher=[]):
+def generate_all_classes(modules_list=[], launcher=[], redirect_x=False, mipav_hacks=False):
     """ modules_list contains all the SEM compliant tools that should have wrappers created for them.
         launcher containtains the command line prefix wrapper arugments needed to prepare
         a proper environment for each of the modules.
@@ -111,7 +111,7 @@ def generate_all_classes(modules_list=[], launcher=[]):
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code = generate_class(module, launcher)
+        package, code, module = generate_class(module, launcher, redirect_x = redirect_x, mipav_hacks=mipav_hacks)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -126,8 +126,12 @@ def generate_all_classes(modules_list=[], launcher=[]):
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher):
-    dom = grab_xml(module, launcher)
+def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x = False, mipav_hacks=False):
+    dom = grab_xml(module, launcher, mipav_hacks=mipav_hacks)
+    if strip_module_name_prefix:
+        module_name = module.split(".")[-1]
+    else:
+        module_name = module
     inputTraits = []
     outputTraits = []
     outputs_filenames = {}
@@ -140,11 +144,10 @@ def generate_class(module, launcher):
                      'documentation-url', 'license', 'contributor',
                      'acknowledgements']:
         el = dom.getElementsByTagName(desc_str)
-        if el and el[0].firstChild:
-            class_string += desc_str + ": " + el[
-                0].firstChild.nodeValue + "\n\n"
+        if el and el[0].firstChild and el[0].firstChild.nodeValue.strip():
+            class_string += desc_str + ": " + el[0].firstChild.nodeValue.strip() + "\n\n"
         if desc_str == 'category':
-            category = el[0].firstChild.nodeValue
+            category = el[0].firstChild.nodeValue.strip()
     class_string += "\"\"\""
 
     for paramGroup in dom.getElementsByTagName("parameters"):
@@ -213,7 +216,7 @@ def generate_class(module, launcher):
 
             if param.nodeName.endswith('-enumeration'):
                 type = "traits.Enum"
-                values = ['"%s"' % el.firstChild.nodeValue for el in param.getElementsByTagName('element')]
+                values = ['"%s"' % str(el.firstChild.nodeValue).replace('"', '') for el in param.getElementsByTagName('element')]
             elif param.nodeName.endswith('-vector'):
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
@@ -221,7 +224,10 @@ def generate_class(module, launcher):
                               param.nodeName.replace('-vector', '')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector', '')]]
-                traitsParams["sep"] = ','
+                if mipav_hacks == True:
+                    traitsParams["sep"] = ";"
+                else:
+                    traitsParams["sep"] = ','
             elif param.getAttribute('multiple') == "true":
                 type = "InputMultiPath"
                 if param.nodeName in ['file', 'directory', 'image', 'geometry', 'transform', 'table']:
@@ -264,11 +270,20 @@ def generate_class(module, launcher):
                 inputTraits.append("%s = %s(%s%s)" % (name, type, parse_values(
                     values), parse_params(traitsParams)))
 
-    input_spec_code = "class " + module + "InputSpec(CommandLineInputSpec):\n"
+    if mipav_hacks:
+        blacklisted_inputs = ["maxMemoryUsage"]
+        inputTraits = [trait for trait in inputTraits if trait.split()[0] not in blacklisted_inputs]
+
+        compulsory_inputs = ['xDefaultMem = traits.Int(desc="Set default maximum heap size", argstr="-xDefaultMem %d")',
+                             'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
+        inputTraits += compulsory_inputs
+
+
+    input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
         input_spec_code += "    " + trait + "\n"
 
-    output_spec_code = "class " + module + "OutputSpec(TraitedSpec):\n"
+    output_spec_code = "class " + module_name + "OutputSpec(TraitedSpec):\n"
     if not outputTraits:
         output_spec_code += "    pass\n"
     else:
@@ -283,20 +298,22 @@ def generate_class(module, launcher):
     input_spec_code += "\n\n"
     output_spec_code += "\n\n"
 
-    template = """class %name%(SEMLikeCommandLine):
+    template = """class %module_name%(SEMLikeCommandLine):
     %class_str%
 
-    input_spec = %name%InputSpec
-    output_spec = %name%OutputSpec
+    input_spec = %module_name%InputSpec
+    output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
-
-    main_class = template.replace('%class_str%', class_string).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
-
-    return category, input_spec_code + output_spec_code + main_class
+    template += "    _redirect_x = {0}\n".format(str(redirect_x))
 
 
-def grab_xml(module, launcher):
+    main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
+
+    return category, input_spec_code + output_spec_code + main_class, module_name
+
+
+def grab_xml(module, launcher, mipav_hacks=False):
 #        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
 #        ret = cmd.run()
     command_list = launcher[:]  # force copy to preserve original
@@ -304,7 +321,33 @@ def grab_xml(module, launcher):
     final_command = " ".join(command_list)
     xmlReturnValue = subprocess.Popen(
         final_command, stdout=subprocess.PIPE, shell=True).communicate()[0]
-    return xml.dom.minidom.parseString(xmlReturnValue)
+    if mipav_hacks:
+        #workaround for a jist bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7234&group_id=228&atid=942
+        new_xml = ""
+        replace_closing_tag = False
+        for line in xmlReturnValue.splitlines():
+            if line.strip() == "<file collection: semi-colon delimited list>":
+                new_xml += "<file-vector>\n"
+                replace_closing_tag = True
+            elif replace_closing_tag and line.strip() == "</file>":
+                new_xml += "</file-vector>\n"
+                replace_closing_tag = False
+            else:
+                new_xml += line + "\n"
+
+        xmlReturnValue = new_xml
+
+        #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
+        if xmlReturnValue.strip().endswith("XML"):
+            xmlReturnValue = xmlReturnValue.strip()[:-3]
+        if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
+            xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
+    try:
+        dom = xml.dom.minidom.parseString(xmlReturnValue.strip())
+    except Exception, e:
+        print xmlReturnValue.strip()
+        raise e
+    return dom
 #        if ret.runtime.returncode == 0:
 #            return xml.dom.minidom.parseString(ret.runtime.stdout)
 #        else:

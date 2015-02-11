@@ -5,7 +5,7 @@ from nipype.interfaces.ants.resampling import ApplyTransforms
 def test_ApplyTransforms_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    default_value=dict(argstr='--default-value %d',
+    default_value=dict(argstr='--default-value %g',
     usedefault=True,
     ),
     dimension=dict(argstr='--dimensionality %d',

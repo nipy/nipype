@@ -8,7 +8,7 @@ Introduction
 ============
 
 This script, dmri_mrtrix_dti.py, demonstrates the ability to perform advanced diffusion analysis
-in a Nipype pipeline.
+in a Nipype pipeline::
 
     python dmri_mrtrix_dti.py
 

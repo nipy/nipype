@@ -984,7 +984,7 @@ class FreeSurferSource(IOBase):
             key = altkey
         globpattern = os.path.join(
             keydir, ''.join((globprefix, key, globsuffix)))
-        return glob.glob(globpattern)
+        return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
@@ -1801,3 +1801,118 @@ class SSHDataGrabber(DataGrabber):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(host['hostname'], username=host['user'], sock=proxy)
         return client
+
+
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='JSON source file')
+
+
+class JSONFileGrabber(IOBase):
+
+    """
+    Datagrabber interface that loads a json file and generates an output for
+    every first-level object
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.io import JSONFileGrabber
+    >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
+    >>> res = jsonSource.run()
+    >>> print res.outputs.param1
+    exampleStr
+    >>> print res.outputs.param2
+    4
+
+    """
+    input_spec = JSONFileGrabberInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def _list_outputs(self):
+        import json
+
+        with open(self.inputs.in_file, 'r') as f:
+            data = json.load(f)
+
+        if not isinstance(data, dict):
+            raise RuntimeError('JSON input has no dictionary structure')
+
+        outputs = {}
+        for key, value in data.iteritems():
+            outputs[key] = value
+
+        return outputs
+
+
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    out_file = File(desc='JSON sink file')
+    in_dict = traits.Dict(desc='input JSON dictionary')
+
+
+class JSONFileSinkOutputSpec(TraitedSpec):
+    out_file = File(desc='JSON sink file')
+
+
+class JSONFileSink(IOBase):
+
+    """ Very simple frontend for storing values into a JSON file.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        Examples
+        --------
+
+        >>> jsonsink = JSONFileSink(input_names=['subject_id',
+        ...                         'some_measurement'])
+        >>> jsonsink.inputs.subject_id = 's1'
+        >>> jsonsink.inputs.some_measurement = 11.4
+        >>> jsonsink.run() # doctest: +SKIP
+
+        Using a dictionary as input:
+
+        >>> dictsink = JSONFileSink()
+        >>> dictsink.inputs.in_dict = {'subject_id': 's1',
+        ...                            'some_measurement': 11.4}
+        >>> dictsink.run() # doctest: +SKIP
+
+    """
+    input_spec = JSONFileSinkInputSpec
+    output_spec = JSONFileSinkOutputSpec
+
+    def __init__(self, input_names=[], **inputs):
+        super(JSONFileSink, self).__init__(**inputs)
+        self._input_names = filename_to_list(input_names)
+        add_traits(self.inputs, [name for name in self._input_names])
+
+    def _list_outputs(self):
+        import json
+        import os.path as op
+        if not isdefined(self.inputs.out_file):
+            out_file = op.abspath('datasink.json')
+        else:
+            out_file = self.inputs.out_file
+
+        out_dict = dict()
+
+        if isdefined(self.inputs.in_dict):
+            if isinstance(self.inputs.in_dict, dict):
+                out_dict = self.inputs.in_dict
+        else:
+            for name in self._input_names:
+                val = getattr(self.inputs, name)
+                val = val if isdefined(val) else 'undefined'
+                out_dict[name] = val
+
+        with open(out_file, 'w') as f:
+            json.dump(out_dict, f)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = out_file
+        return outputs
+
+

@@ -92,6 +92,11 @@ is almost the same as running
 	
 It is a rarely used feature, but you can sometimes find it useful.
 
+In more advanced applications it is useful to be able to iterate over items
+of nested lists (for example [[1,2],[3,4]]). MapNode allows you to do this
+with the "nested=True" parameter. Outputs will preserve the same nested
+structure as the inputs.
+
 Iterables
 =========
 

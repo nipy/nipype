@@ -85,7 +85,7 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
                                   "any default exclude filters")
     include_regexes = traits.List(desc="Meta data to include, overriding any "
                                   "exclude filters")
-    force_read = traits.Bool(True, usedefault=True, 
+    force_read = traits.Bool(True, usedefault=True,
                              desc=('Force reading files without DICM marker'))
 
 

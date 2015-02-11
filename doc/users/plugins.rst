@@ -140,7 +140,7 @@ particular node might use more resources than other nodes in a workflow.
 LSF
 ---
 
-Submitting via LSF is almost identical to SGE above:
+Submitting via LSF is almost identical to SGE above above except for the optional arguments field:
 
        workflow.run(plugin='LSF')
 
@@ -148,6 +148,18 @@ Optional arguments::
 
   template: custom template file to use
   bsub_args: any other command line args to be passed to bsub.
+
+SLURM
+-----
+
+Submitting via SLURM is almost identical to SGE above except for the optional arguments field:
+
+       workflow.run(plugin='SLURM')
+
+Optional arguments::
+
+  template: custom template file to use
+  sbatch_args: any other command line args to be passed to bsub.
 
 HTCondor
 --------

@@ -215,6 +215,7 @@ class ModifyAffine(BaseInterface):
                 self._gen_output_filename(fname))
         return outputs
 
+
 class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(
@@ -421,7 +422,7 @@ class Matlab2CSV(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.misc as misc
+    >>> from nipype.algorithms import misc
     >>> mat2csv = misc.Matlab2CSV()
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
     >>> mat2csv.run() # doctest: +SKIP
@@ -615,7 +616,7 @@ class MergeCSVFiles(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.misc as misc
+    >>> from nipype.algorithms import misc
     >>> mat2csv = misc.MergeCSVFiles()
     >>> mat2csv.inputs.in_files = ['degree.mat','clustering.mat']
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
@@ -744,7 +745,7 @@ class AddCSVColumn(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.misc as misc
+    >>> from nipype.algorithms import misc
     >>> addcol = misc.AddCSVColumn()
     >>> addcol.inputs.in_file = 'degree.csv'
     >>> addcol.inputs.extra_column_heading = 'group'
@@ -797,8 +798,10 @@ class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                 self._outputs[key] = value
             super(AddCSVRowInputSpec, self).__setattr__(key, value)
 
+
 class AddCSVRowOutputSpec(TraitedSpec):
     csv_file = File(desc='Output CSV file containing rows ')
+
 
 class AddCSVRow(BaseInterface):
     """Simple interface to add an extra row to a csv file
@@ -814,7 +817,7 @@ class AddCSVRow(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.misc as misc
+    >>> from nipype.algorithms import misc
     >>> addrow = misc.AddCSVRow()
     >>> addrow.inputs.in_file = 'scores.csv'
     >>> addrow.inputs.si = 0.74
@@ -919,7 +922,7 @@ class CalculateNormalizedMoments(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.misc as misc
+    >>> from nipype.algorithms import misc
     >>> skew = misc.CalculateNormalizedMoments()
     >>> skew.inputs.moment = 3
     >>> skew.inputs.timeseries_file = 'timeseries.txt'
@@ -978,15 +981,16 @@ class AddNoise(BaseInterface):
     """
     Corrupts with noise the input image
 
+
     Example
     -------
-
     >>> from nipype.algorithms.misc import AddNoise
     >>> noise = AddNoise()
     >>> noise.inputs.in_file = 'T1.nii'
     >>> noise.inputs.in_mask = 'mask.nii'
     >>> noise.snr = 30.0
     >>> noise.run() # doctest: +SKIP
+
     """
     input_spec = AddNoiseInputSpec
     output_spec = AddNoiseOutputSpec
@@ -1032,24 +1036,24 @@ class AddNoise(BaseInterface):
         if mask is None:
             mask = np.ones_like(image)
         else:
-            mask[mask>0] = 1
-            mask[mask<1] = 0
+            mask[mask > 0] = 1
+            mask[mask < 1] = 0
 
             if mask.ndim < image.ndim:
-                mask = np.rollaxis(np.array([mask]*image.shape[3]),0, 4)
+                mask = np.rollaxis(np.array([mask]*image.shape[3]), 0, 4)
 
-        signal = image[mask>0].reshape(-1)
+        signal = image[mask > 0].reshape(-1)
 
         if dist == 'normal':
             signal = signal - signal.mean()
             sigma_n = sqrt(signal.var()/snr)
             noise = np.random.normal(size=image.shape, scale=sigma_n)
 
-            if (np.any(mask==0)) and (bg_dist == 'rayleigh'):
+            if (np.any(mask == 0)) and (bg_dist == 'rayleigh'):
                 bg_noise = np.random.rayleigh(size=image.shape, scale=sigma_n)
-                noise[mask==0] = bg_noise[mask==0]
+                noise[mask == 0] = bg_noise[mask == 0]
 
-            im_noise = image +  noise
+            im_noise = image + noise
 
         elif dist == 'rician':
             sigma_n = signal.mean()/snr
@@ -1067,9 +1071,10 @@ class AddNoise(BaseInterface):
 
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
-                    desc='The tpms to be normalized') )
+                              desc='The tpms to be normalized'))
     in_mask = File(exists=True,
-                    desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
+                   desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
+
 
 class NormalizeProbabilityMapSetOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
@@ -1082,9 +1087,14 @@ class NormalizeProbabilityMapSet(BaseInterface):
 
     .. note:: Please recall this is not a spatial normalization algorithm
 
-    >>> import nipype.algorithms.misc as misc
+
+    Example
+    -------
+
+    >>> from nipype.algorithms import misc
     >>> normalize = misc.NormalizeProbabilityMapSet()
-    >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', 'tpm_02.nii.gz' ]
+    >>> normalize.inputs.in_files = [ 'tpm_00.nii.gz', 'tpm_01.nii.gz', \
+'tpm_02.nii.gz' ]
     >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
     >>> normalize.run() # doctest: +SKIP
     """
@@ -1103,6 +1113,105 @@ class NormalizeProbabilityMapSet(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_files'] = self._out_filenames
+        return outputs
+
+
+class SplitROIsInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='file to be splitted')
+    in_mask = File(exists=True, desc='only process files inside mask')
+    roi_size = traits.Tuple(traits.Int, traits.Int, traits.Int,
+                            desc='desired ROI size')
+
+
+class SplitROIsOutputSpec(TraitedSpec):
+    out_files = OutputMultiPath(File(exists=True),
+                                desc='the resulting ROIs')
+    out_masks = OutputMultiPath(File(exists=True),
+                                desc='a mask indicating valid values')
+    out_index = OutputMultiPath(File(exists=True),
+                                desc='arrays keeping original locations')
+
+
+class SplitROIs(BaseInterface):
+    """
+    Splits a 3D image in small chunks to enable parallel processing.
+    ROIs keep time series structure in 4D images.
+    >>> from nipype.algorithms import misc
+    >>> rois = misc.SplitROIs()
+    >>> rois.inputs.in_file = 'diffusion.nii'
+    >>> rois.inputs.in_mask = 'mask.nii'
+    >>> rois.run() # doctest: +SKIP
+
+    """
+    input_spec = SplitROIsInputSpec
+    output_spec = SplitROIsOutputSpec
+
+    def _run_interface(self, runtime):
+        mask = None
+        roisize = None
+        self._outnames = {}
+
+        if isdefined(self.inputs.in_mask):
+            mask = self.inputs.in_mask
+        if isdefined(self.inputs.roi_size):
+            roisize = self.inputs.roi_size
+
+        res = split_rois(self.inputs.in_file,
+                         mask, roisize)
+        self._outnames['out_files'] = res[0]
+        self._outnames['out_masks'] = res[1]
+        self._outnames['out_index'] = res[2]
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        for k, v in self._outnames.iteritems():
+            outputs[k] = v
+        return outputs
+
+
+class MergeROIsInputSpec(TraitedSpec):
+    in_files = InputMultiPath(File(exists=True, mandatory=True,
+                                   desc='files to be re-merged'))
+    in_index = InputMultiPath(File(exists=True, mandatory=True),
+                              desc='array keeping original locations')
+    in_reference = File(exists=True, desc='reference file')
+
+
+class MergeROIsOutputSpec(TraitedSpec):
+    merged_file = File(exists=True, desc='the recomposed file')
+
+
+class MergeROIs(BaseInterface):
+    """
+    Splits a 3D image in small chunks to enable parallel processing.
+    ROIs keep time series structure in 4D images.
+
+    Example
+    -------
+
+    >>> from nipype.algorithms import misc
+    >>> rois = misc.MergeROIs()
+    >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in xrange(1, 6)]
+    >>> rois.inputs.in_reference = 'mask.nii'
+    >>> rois.inputs.in_index = ['roi%02d_idx.npz' % i for i in xrange(1, 6)]
+    >>> rois.run() # doctest: +SKIP
+
+    """
+    input_spec = MergeROIsInputSpec
+    output_spec = MergeROIsOutputSpec
+
+    def _run_interface(self, runtime):
+        res = merge_rois(self.inputs.in_files,
+                         self.inputs.in_index,
+                         self.inputs.in_reference)
+        self._merged = res
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['merged_file'] = self._merged
         return outputs
 
 
@@ -1165,7 +1274,173 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     return out_files
 
 
-# Deprecated interfaces ---------------------------------------------------------
+def split_rois(in_file, mask=None, roishape=None):
+    """
+    Splits an image in ROIs for parallel processing
+    """
+    import nibabel as nb
+    import numpy as np
+    from math import sqrt, ceil
+    import os.path as op
+
+    if roishape is None:
+        roishape = (10, 10, 1)
+
+    im = nb.load(in_file)
+    imshape = im.get_shape()
+    dshape = imshape[:3]
+    nvols = imshape[-1]
+    roisize = roishape[0] * roishape[1] * roishape[2]
+    droishape = (roishape[0], roishape[1], roishape[2], nvols)
+
+    if mask is not None:
+        mask = nb.load(mask).get_data()
+        mask[mask > 0] = 1
+        mask[mask < 1] = 0
+    else:
+        mask = np.ones(dshape)
+
+    mask = mask.reshape(-1).astype(np.uint8)
+    nzels = np.nonzero(mask)
+    els = np.sum(mask)
+    nrois = int(ceil(els/roisize))
+
+    data = im.get_data().reshape((mask.size, -1))
+    data = np.squeeze(data.take(nzels, axis=0))
+    nvols = data.shape[-1]
+
+    roidefname = op.abspath('onesmask.nii.gz')
+    nb.Nifti1Image(np.ones(roishape, dtype=np.uint8), None,
+                   None).to_filename(roidefname)
+
+    out_files = []
+    out_mask = []
+    out_idxs = []
+
+    for i in xrange(nrois):
+        first = i * roisize
+        last = (i+1) * roisize
+        fill = 0
+
+        if last > els:
+            fill = last - els
+            last = els
+
+        droi = data[first:last, ...]
+        iname = op.abspath('roi%010d_idx' % i)
+        out_idxs.append(iname+'.npz')
+        np.savez(iname, (nzels[0][first:last],))
+
+        if fill > 0:
+            droi = np.vstack((droi, np.zeros((fill, nvols), dtype=np.float32)))
+            partialmsk = np.ones((roisize,), dtype=np.uint8)
+            partialmsk[-fill:] = 0
+            partname = op.abspath('partialmask.nii.gz')
+            nb.Nifti1Image(partialmsk.reshape(roishape), None,
+                           None).to_filename(partname)
+            out_mask.append(partname)
+        else:
+            out_mask.append(roidefname)
+
+        fname = op.abspath('roi%010d.nii.gz' % i)
+        nb.Nifti1Image(droi.reshape(droishape),
+                       None, None).to_filename(fname)
+        out_files.append(fname)
+    return out_files, out_mask, out_idxs
+
+
+def merge_rois(in_files, in_idxs, in_ref,
+               dtype=None, out_file=None):
+    """
+    Re-builds an image resulting from a parallelized processing
+    """
+    import nibabel as nb
+    import numpy as np
+    import os.path as op
+    import subprocess as sp
+
+    if out_file is None:
+        out_file = op.abspath('merged.nii.gz')
+
+    if dtype is None:
+        dtype = np.float32
+
+    # if file is compressed, uncompress using os
+    # to avoid memory errors
+    if op.splitext(in_ref)[1] == '.gz':
+        try:
+            iflogger.info('uncompress %i' % in_ref)
+            sp.check_call(['gunzip', in_ref], stdout=sp.PIPE, shell=True)
+            in_ref = op.splitext(in_ref)[0]
+        except:
+            pass
+
+    ref = nb.load(in_ref)
+    aff = ref.get_affine()
+    hdr = ref.get_header().copy()
+    rsh = ref.get_shape()
+    del ref
+    npix = rsh[0] * rsh[1] * rsh[2]
+    fcdata = nb.load(in_files[0]).get_data()
+
+    if fcdata.ndim == 4:
+        ndirs = fcdata.shape[-1]
+    else:
+        ndirs = 1
+    newshape = (rsh[0], rsh[1], rsh[2], ndirs)
+    hdr.set_data_dtype(dtype)
+    hdr.set_xyzt_units('mm', 'sec')
+
+    if ndirs < 300:
+        data = np.zeros((npix, ndirs))
+        for cname, iname in zip(in_files, in_idxs):
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
+            cdata = nb.load(cname).get_data().reshape(-1, ndirs)
+            nels = len(idxs)
+            idata = (idxs, )
+            try:
+                data[idata, ...] = cdata[0:nels, ...]
+            except:
+                print(('Consistency between indexes and chunks was '
+                      'lost: data=%s, chunk=%s') % (str(data.shape),
+                      str(cdata.shape)))
+                raise
+
+        hdr.set_data_shape(newshape)
+        nb.Nifti1Image(data.reshape(newshape).astype(dtype),
+                       aff, hdr).to_filename(out_file)
+
+    else:
+        hdr.set_data_shape(rsh[:3])
+        nii = []
+        for d in xrange(ndirs):
+            fname = op.abspath('vol%06d.nii' % d)
+            nb.Nifti1Image(np.zeros(rsh[:3]), aff, hdr).to_filename(fname)
+            nii.append(fname)
+
+        for cname, iname in zip(in_files, in_idxs):
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
+
+            for d, fname in enumerate(nii):
+                data = nb.load(fname).get_data().reshape(-1)
+                cdata = nb.load(cname).get_data().reshape(-1, ndirs)[:, d]
+                nels = len(idxs)
+                idata = (idxs, )
+                data[idata] = cdata[0:nels]
+                nb.Nifti1Image(data.reshape(rsh[:3]),
+                               aff, hdr).to_filename(fname)
+
+        imgs = [nb.load(im) for im in nii]
+        allim = nb.concat_images(imgs)
+        allim.to_filename(out_file)
+
+    return out_file
+
+
+# Deprecated interfaces ------------------------------------------------------
+
 class Distance(nam.Distance):
     """Calculates distance between two volumes.
 
@@ -1177,6 +1452,7 @@ class Distance(nam.Distance):
         warnings.warn(("This interface has been deprecated since 0.10.0,"
                       " please use nipype.algorithms.metrics.Distance"),
                       DeprecationWarning)
+
 
 class Overlap(nam.Overlap):
     """Calculates various overlap measures between two maps.

@@ -9,7 +9,7 @@ Introduction
 
 This script, connectivity_tutorial_advanced.py, demonstrates the ability to perform connectivity mapping
 using Nipype for pipelining, Freesurfer for Reconstruction / Segmentation, MRtrix for spherical deconvolution
-and tractography, and the Connectome Mapping Toolkit (CMTK) for further parcellation and connectivity analysis.
+and tractography, and the Connectome Mapping Toolkit (CMTK) for further parcellation and connectivity analysis::
 
     python connectivity_tutorial_advanced.py
 

@@ -1,5 +1,3 @@
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft = python sts = 4 ts = 4 sw = 4 et:
 """ANTS Apply Transforms interface
 
    Change directory to provide relative paths for doctests
@@ -249,7 +247,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         File(exists=True), argstr='%s', mandatory=True, desc=(''))
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(
-        0.0, argstr='--default-value %d', usedefault=True)
+        0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Enum(
         0, 1, requires=["output_image"], desc=(''))  # TODO: Change to boolean
 

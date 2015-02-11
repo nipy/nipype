@@ -38,6 +38,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
+import random, time, fnmatch
 
 nipype_version = LooseVersion(__version__)
 
@@ -45,6 +46,25 @@ iflogger = logging.getLogger('interface')
 
 
 __docformat__ = 'restructuredtext'
+
+def _lock_files():
+    tmpdir = '/tmp'
+    pattern = '.X*-lock'
+    names = fnmatch.filter(os.listdir(tmpdir), pattern)
+    ls = [os.path.join(tmpdir, child) for child in names]
+    ls = [p for p in ls if os.path.isfile(p)]
+    return ls
+
+def _search_for_free_display():
+    ls = [int(x.split('X')[1].split('-')[0]) for x in _lock_files()]
+    min_display_num = 1000
+    if len(ls):
+        display_num = max(min_display_num, max(ls) + 1)
+    else:
+        display_num = min_display_num
+    random.seed()
+    display_num += random.randint(0, 100)
+    return display_num
 
 
 def load_template(name):
@@ -701,6 +721,7 @@ class BaseInterface(Interface):
     input_spec = BaseInterfaceInputSpec
     _version = None
     _additional_metadata = []
+    _redirect_x = False
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -736,17 +757,16 @@ class BaseInterface(Interface):
 
         manhelpstr = ['\t%s' % name]
 
-        try:
-            setattr(inputs, name, None)
-        except TraitError as excp:
-            def_val = ''
-            if getattr(spec, 'usedefault'):
-                def_arg = getattr(spec, 'default_value')()[1]
-                def_val = ', nipype default value: %s' % str(def_arg)
-            line = "(%s%s)" % (excp.info, def_val)
-            manhelpstr = wrap(line, 70,
-                              initial_indent=manhelpstr[0]+': ',
-                              subsequent_indent='\t\t ')
+        type_info = spec.full_info(inputs, name, None)
+
+        default = ''
+        if spec.usedefault:
+            default = ', nipype default value: %s' % str(spec.default_value()[1])
+        line = "(%s%s)" % (type_info, default)
+
+        manhelpstr = wrap(line, 70,
+                          initial_indent=manhelpstr[0]+': ',
+                          subsequent_indent='\t\t ')
 
         if desc:
             for line in desc.split('\n'):
@@ -956,7 +976,30 @@ class BaseInterface(Interface):
                         hostname=getfqdn(),
                         version=self.version)
         try:
+            if self._redirect_x:
+                exist_val, _ = self._exists_in_path('Xvfb',
+                                                    runtime.environ)
+                if not exist_val:
+                    raise IOError("Xvfb could not be found on host %s" %
+                                  (runtime.hostname))
+                else:
+                    vdisplay_num = _search_for_free_display()
+                    xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
+                    xvfb_proc = subprocess.Popen(xvfb_cmd,
+                                                 stdout=open(os.devnull),
+                                                 stderr=open(os.devnull))
+                    time.sleep(0.2)  # give Xvfb time to start
+                    if xvfb_proc.poll() is not None:
+                        raise Exception('Error: Xvfb did not start')
+
+                    runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
+
             runtime = self._run_interface(runtime)
+
+            if self._redirect_x:
+                xvfb_proc.kill()
+                xvfb_proc.wait()
+
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -1344,11 +1387,12 @@ class CommandLine(BaseInterface):
 
     def _get_environ(self):
         out_environ = {}
-        try:
-            display_var = config.get('execution', 'display_variable')
-            out_environ = {'DISPLAY': display_var}
-        except NoOptionError:
-            pass
+        if not self._redirect_x:
+            try:
+                display_var = config.get('execution', 'display_variable')
+                out_environ = {'DISPLAY': display_var}
+            except NoOptionError:
+                pass
         iflogger.debug(out_environ)
         if isdefined(self.inputs.environ):
             out_environ.update(self.inputs.environ)

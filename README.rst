@@ -63,29 +63,31 @@ documentation.
 Website
 -------
 
-Information specific to NIPYPE is located here::
+Information specific to Nipype is located here::
 	    
     http://nipy.org/nipype
 
 
-Mailing Lists
--------------
+Support and Communication
+-------------------------
 
-For core NIPYPE related issues, please see the developer's list here::
+If you have a problem or would like to ask a question about how to do something in Nipype please submit a question
+to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
+
+       http://neurostars.org/t/nipype/
+	   
+
+To participate in the Nipype development related discussion please use the following mailing list::
        
        http://projects.scipy.org/mailman/listinfo/nipy-devel
-
-For user NIPYPE related issues, please see the user's list here::
-
-       http://groups.google.com/group/nipy-user
-
-For NIPYPE related issues, please add *NIPYPE* to the subject line
+	   
+Please add *[nipype]* to the subject line when posting on the mailing list.
 
 
-NIPYPE structure
+Nipype structure
 ----------------
 
-Currently NIPYPE consists of the following files and directories:
+Currently Nipype consists of the following files and directories:
 
   INSTALL
     NIPYPE prerequisites, installation, development, testing, and 

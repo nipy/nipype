@@ -15,7 +15,7 @@ logger = logging.getLogger('interface')
 #  the computer (when running MultiProc) by forcing everything to
 #  single threaded.  This can be a severe penalty for registration
 #  performance.
-LOCAL_DEFAULT_NUMBER_OF_THREADS=-1
+LOCAL_DEFAULT_NUMBER_OF_THREADS=1
 # -Using NSLOTS has the same behavior as ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS
 #  as long as ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS is not set.  Otherwise
 #  ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS takes precidence.
@@ -28,8 +28,8 @@ class ANTSCommandInputSpec(CommandLineInputSpec):
     """Base Input Specification for all ANTS Commands
     """
 
-    num_threads = traits.Int(LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True, nohash=True,
-                             desc="Number of ITK threads to use")
+    num_threads = traits.Int(LOCAL_DEFAULT_NUMBER_OF_THREADS, usedefault=True,
+                             nohash=True, desc="Number of ITK threads to use")
 
 
 class ANTSCommand(CommandLine):
@@ -67,6 +67,11 @@ class ANTSCommand(CommandLine):
         else:
             self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
                                             '%s' % self.inputs.num_threads})
+
+    @staticmethod
+    def _format_xarray(val):
+        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
+        return 'x'.join([str(x) for x in val])
 
     @classmethod
     def set_default_num_threads(cls, num_threads):

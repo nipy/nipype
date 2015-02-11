@@ -3,7 +3,8 @@
 from nipype.testing import assert_equal, assert_true, assert_false
 
 from nipype.utils.misc import (container_to_string, getsource,
-                               create_function_from_source, str2bool)
+                               create_function_from_source, str2bool, flatten,
+    unflatten)
 
 def test_cont_to_str():
     # list
@@ -51,3 +52,21 @@ def test_str2bool():
     yield assert_false, str2bool("f")
     yield assert_false, str2bool("0")
 
+def test_flatten():
+    in_list = [[1,2,3],[4],[[5,6],7],8]
+
+    flat = flatten(in_list)
+    yield assert_equal, flat, [1,2,3,4,5,6,7,8]
+
+    back = unflatten(flat, in_list)
+    yield assert_equal, in_list, back
+
+    new_list = [2,3,4,5,6,7,8,9]
+    back = unflatten(new_list, in_list)
+    yield assert_equal, back, [[2,3,4],[5],[[6,7],8],9]
+
+    flat = flatten([])
+    yield assert_equal, flat, []
+
+    back = unflatten([], [])
+    yield assert_equal, back, []
