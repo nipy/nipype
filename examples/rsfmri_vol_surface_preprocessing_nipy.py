@@ -945,7 +945,7 @@ def create_resting_workflow(args, name=None):
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
         slice_times = (np.array(slice_times)/1000.).tolist()
-        
+
     if name is None:
         name = 'resting_' + args.subject_id
     kwargs = dict(files=[os.path.abspath(filename) for filename in args.files],
