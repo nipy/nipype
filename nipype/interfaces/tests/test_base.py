@@ -172,11 +172,13 @@ def test_deprecation():
     yield assert_equal, spec_instance.foo, Undefined
     yield assert_equal, spec_instance.bar, 1
 
+
 def test_namesource():
     tmp_infile = setup_file()
     tmpd, nme, ext = split_filename(tmp_infile)
     pwd = os.getcwd()
     os.chdir(tmpd)
+
     class spec2(nib.CommandLineInputSpec):
         moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
                        position=2)
@@ -195,6 +197,33 @@ def test_namesource():
     yield assert_true, 'my_%s_template' % nme in testobj.cmdline
     os.chdir(pwd)
     teardown_file(tmpd)
+
+
+def test_chained_namesource():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+
+    class spec2(nib.CommandLineInputSpec):
+        doo = nib.File(exists=True, argstr="%s", position=1)
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=2, name_template='%s_mootpl')
+        poo = nib.File(name_source=['moo'], hash_files=False,
+                       argstr="%s", position=3)
+
+    class TestName(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec2
+
+    testobj = TestName()
+    testobj.inputs.doo = tmp_infile
+    yield assert_true, '%s_mootpl' % nme in testobj.cmdline
+    yield assert_true, '%s_mootpl_generated' % nme in testobj.cmdline
+
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
 
 def checknose():
     """check version of nose for known incompatability"""
