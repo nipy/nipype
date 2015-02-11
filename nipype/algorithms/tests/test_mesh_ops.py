@@ -23,6 +23,7 @@ except ImportError:
     pass
 
 
+@skipif(notvtk)
 def test_ident_distances():
     tempdir = mkdtemp()
     curdir = os.getcwd()
