@@ -23,47 +23,59 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
 iflogger = logging.getLogger('interface')
 
 
-class P2PDistanceInputSpec(BaseInterfaceInputSpec):
+class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
     surface1 = File(exists=True, mandatory=True,
-                    desc=("Reference surface (vtk format) to which compute "
-                          "distance."))
+                    desc=('Reference surface (vtk format) to which compute '
+                          'distance.'))
     surface2 = File(exists=True, mandatory=True,
-                    desc=("Test surface (vtk format) from which compute "
-                          "distance."))
+                    desc=('Test surface (vtk format) from which compute '
+                          'distance.'))
+    metric = traits.Enum('euclidean', 'sqeuclidean', usedefault=True,
+                         desc=('norm used to report distance'))
     weighting = traits.Enum(
-        "none", "area", usedefault=True,
-        desc=('"none": no weighting is performed, "area": vertex distances are'
-              'weighted by the total area of faces corresponding to the '
-              'vertex'))
+        'none', 'area', usedefault=True,
+        desc=('"none": no weighting is performed, surface": edge distance is '
+              'weighted by the corresponding surface area'))
+    out_warp = File('surfwarp.vtk', usedefault=True,
+                    desc='vtk file based on surface1 and warpings mapping it '
+                    'to surface2')
     out_file = File('distance.npy', usedefault=True,
                     desc='numpy file keeping computed distances and weights')
 
 
-class P2PDistanceOutputSpec(TraitedSpec):
+class ComputeMeshWarpOutputSpec(TraitedSpec):
     distance = traits.Float(desc="computed distance")
+    out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
+                                       'mapping of surface1 to surface2'))
     out_file = File(exists=True,
                     desc='numpy file keeping computed distances and weights')
 
 
-class P2PDistance(BaseInterface):
+class ComputeMeshWarp(BaseInterface):
 
-    """Calculates a point-to-point (p2p) distance between two corresponding
-    VTK-readable meshes or contours.
+    """
+    Calculates a the vertex-wise warping to get surface2 from surface1.
+    It also reports the average distance of vertices, using the norm specified
+    as input.
 
-    A point-to-point correspondence between nodes is required
+    .. warning:
+
+      A point-to-point correspondence between surfaces is required
+
 
     Example
     -------
 
     >>> import nipype.algorithms.mesh as mesh
-    >>> dist = mesh.P2PDistance()
+    >>> dist = mesh.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
     >>> res = dist.run() # doctest: +SKIP
+
     """
 
-    input_spec = P2PDistanceInputSpec
-    output_spec = P2PDistanceOutputSpec
+    input_spec = ComputeMeshWarpInputSpec
+    output_spec = ComputeMeshWarpOutputSpec
 
     def _triangle_area(self, A, B, C):
         ABxAC = euclidean(A, B) * euclidean(A, C)
@@ -73,10 +85,11 @@ class P2PDistance(BaseInterface):
         return area
 
     def _run_interface(self, runtime):
+        from numpy import linalg as nla
         try:
-            from tvtk.api import tvtk
+            from tvtk.api import tvtk, write_data
         except ImportError:
-            raise ImportError('Interface P2PDistance requires tvtk')
+            raise ImportError('Interface ComputeMeshWarp requires tvtk')
 
         try:
             from enthought.etsconfig.api import ETSConfig
@@ -99,8 +112,12 @@ class P2PDistance(BaseInterface):
         points1 = np.array(vtk1.points)
         points2 = np.array(vtk2.points)
 
-        diff = np.linalg.norm(points1 - points2, axis=1)
+        diff = points2 - points1
         weights = np.ones(len(diff))
+
+        errvector = nla.norm(diff, axis=1)
+        if self.inputs.metric == 'sqeuclidean':
+            errvector = errvector ** 2
 
         if (self.inputs.weighting == 'area'):
             faces = vtk1.polys.to_array().reshape(-1, 4).astype(int)[:, 1:]
@@ -117,10 +134,17 @@ class P2PDistance(BaseInterface):
                     w += self._triangle_area(fp1, fp2, fp3)
                 weights[i] = w
 
-        result = np.vstack([diff, weights])
+        result = np.vstack([errvector, weights])
         np.save(op.abspath(self.inputs.out_file), result.transpose())
 
-        self._distance = np.average(diff, weights=weights)
+        out_mesh = tvtk.PolyData()
+        out_mesh.points = vtk1.points
+        out_mesh.polys = vtk1.polys
+        out_mesh.point_data.warpings = [tuple(d) for d in diff]
+
+        write_data(out_mesh, op.abspath(self.inputs.out_warp))
+
+        self._distance = np.average(errvector, weights=weights)
         return runtime
 
     def _list_outputs(self):
@@ -128,3 +152,22 @@ class P2PDistance(BaseInterface):
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         outputs['distance'] = self._distance
         return outputs
+
+
+class P2PDistance(ComputeMeshWarp):
+
+    """
+    Calculates a point-to-point (p2p) distance between two corresponding
+    VTK-readable meshes or contours.
+
+    A point-to-point correspondence between nodes is required
+
+    .. deprecated:: 1.0-dev
+       Use :py:class:`ComputeMeshWarp` instead.
+    """
+
+    def __init__(self, **inputs):
+        super(P2PDistance, self).__init__(**inputs)
+        warnings.warn(("This interface has been deprecated since 1.0,"
+                       " please use nipype.algorithms.metrics.Distance"),
+                      DeprecationWarning)
