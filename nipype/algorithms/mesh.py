@@ -66,8 +66,8 @@ class ComputeMeshWarp(BaseInterface):
     Example
     -------
 
-    >>> import nipype.algorithms.mesh as mesh
-    >>> dist = mesh.ComputeMeshWarp()
+    >>> import nipype.algorithms.mesh as m
+    >>> dist = m.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
     >>> res = dist.run() # doctest: +SKIP
@@ -140,9 +140,13 @@ class ComputeMeshWarp(BaseInterface):
         out_mesh = tvtk.PolyData()
         out_mesh.points = vtk1.points
         out_mesh.polys = vtk1.polys
-        out_mesh.point_data.warpings = [tuple(d) for d in diff]
-
-        write_data(out_mesh, op.abspath(self.inputs.out_warp))
+        out_mesh.point_data.vectors = diff
+        out_mesh.point_data.vectors.name = 'warpings'
+        writer = tvtk.PolyDataWriter(
+            file_name=op.abspath(self.inputs.out_warp))
+        writer.set_input_data(out_mesh)
+        writer.write()
+        #write_data(out_mesh, op.abspath(self.inputs.out_warp))
 
         self._distance = np.average(errvector, weights=weights)
         return runtime
@@ -150,6 +154,7 @@ class ComputeMeshWarp(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
+        outputs['out_warp'] = op.abspath(self.inputs.out_warp)
         outputs['distance'] = self._distance
         return outputs
 
