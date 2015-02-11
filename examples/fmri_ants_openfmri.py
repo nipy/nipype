@@ -281,7 +281,6 @@ def create_reg_workflow(name='registration'):
 
     return register
 
-
 def get_aparc_aseg(files):
     """
     Return the aparc+aseg.mgz file

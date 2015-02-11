@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import shutil
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
 
 import numpy as np
 from nipype.testing import assert_equal, assert_true, assert_raises
@@ -138,3 +138,30 @@ def test_split():
     finally:
         os.chdir(origdir)
         shutil.rmtree(tempdir)
+
+
+def test_csvReader():
+    header = "files,labels,erosion\n"
+    lines = ["foo,hello,300.1\n",
+             "bar,world,5\n",
+             "baz,goodbye,0.3\n"]
+    for x in range(2):
+        fd, name = mkstemp(suffix=".csv")
+        with open(name, 'w+b') as fid:
+            reader = utility.CSVReader()
+            if x % 2 == 0:
+                fid.write(header)
+                reader.inputs.header = True
+            fid.writelines(lines)
+            fid.flush()
+            reader.inputs.in_file = name
+            out = reader.run()
+            if x % 2 == 0:
+                yield assert_equal, out.outputs.files, ['foo', 'bar', 'baz']
+                yield assert_equal, out.outputs.labels, ['hello', 'world', 'goodbye']
+                yield assert_equal, out.outputs.erosion, ['300.1', '5', '0.3']
+            else:
+                yield assert_equal, out.outputs.column_0, ['foo', 'bar', 'baz']
+                yield assert_equal, out.outputs.column_1, ['hello', 'world', 'goodbye']
+                yield assert_equal, out.outputs.column_2, ['300.1', '5', '0.3']
+        os.unlink(name)
