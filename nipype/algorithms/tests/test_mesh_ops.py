@@ -6,7 +6,7 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal, assert_raises,
+from nipype.testing import (assert_equal, assert_raises, skipif,
                             assert_almost_equal, example_data)
 
 import numpy as np
@@ -34,11 +34,11 @@ def test_ident_distances():
     dist_ident.inputs.surface2 = in_surf
     dist_ident.inputs.out_file = os.path.join(tempdir, 'distance.npy')
     res = dist_ident.run()
-    yield assert_equal, res.outputs.distance == 0.0
+    yield assert_equal, res.outputs.distance, 0.0
 
     dist_ident.inputs.weighting = 'area'
     res = dist_ident.run()
-    yield assert_equal, res.outputs.distance == 0.0
+    yield assert_equal, res.outputs.distance, 0.0
 
     os.chdir(curdir)
     rmtree(tempdir)
@@ -68,10 +68,10 @@ def test_trans_distances():
     dist.inputs.surface2 = warped_surf
     dist.inputs.out_file = os.path.join(tempdir, 'distance.npy')
     res = dist.run()
-    yield assert_equal, np.isclose(res.outputs.distance, np.norm(inc))
-    dist_ident.inputs.weighting = 'area'
-    res = dist_ident.run()
-    yield assert_equal, np.isclose(res.outputs.distance, np.norm(inc))
+    yield assert_almost_equal, res.outputs.distance, np.linalg.norm(inc), 4
+    dist.inputs.weighting = 'area'
+    res = dist.run()
+    yield assert_almost_equal, res.outputs.distance, np.linalg.norm(inc), 4
 
     os.chdir(curdir)
     rmtree(tempdir)
