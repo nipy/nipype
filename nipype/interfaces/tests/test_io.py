@@ -259,7 +259,7 @@ def test_jsonsink():
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
     res = js.run()
 
-    with open(res.outputs['out_file'], 'r') as f:
+    with open(res.outputs.out_file, 'r') as f:
         data = json.load(f)
     yield assert_true, data == {"contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
 
@@ -269,7 +269,7 @@ def test_jsonsink():
     setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
     res = js.run()
 
-    with open(res.outputs['out_file'], 'r') as f:
+    with open(res.outputs.out_file, 'r') as f:
         data = json.load(f)
     yield assert_true, data == {"test": "testInfields", "contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
 
