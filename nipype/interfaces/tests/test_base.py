@@ -218,8 +218,49 @@ def test_chained_namesource():
 
     testobj = TestName()
     testobj.inputs.doo = tmp_infile
-    yield assert_true, '%s_mootpl' % nme in testobj.cmdline
-    yield assert_true, '%s_mootpl_generated' % nme in testobj.cmdline
+    res = testobj.cmdline
+    yield assert_true, '%s' % tmp_infile in res
+    yield assert_true, '%s_mootpl ' % nme in res
+    yield assert_true, '%s_mootpl_generated' % nme in res
+
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
+
+def test_cycle_namesource():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+
+    from unittest import TestCase
+
+    class spec3(nib.CommandLineInputSpec):
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=1, name_template='%s_mootpl')
+        poo = nib.File(name_source=['moo'], hash_files=False,
+                       argstr="%s", position=2)
+        doo = nib.File(name_source=['poo'], hash_files=False,
+                       argstr="%s", position=3)
+
+    class TestCycle(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec3
+
+        def get_cmd(self):
+            return self.cmdline
+
+    # Check that an exception is raised
+    to0 = TestCycle()
+    yield assert_raises, nib.NipypeInterfaceError, to0.get_cmd
+
+    # Check that loop can be broken by setting one of the inputs
+    to1 = TestCycle()
+    to1.inputs.poo = tmp_infile
+    res = to1.cmdline
+    yield assert_true, '%s' % tmp_infile in res
+    yield assert_true, '%s_generated ' % nme in res
+    yield assert_true, '%s_generated_mootpl' % nme in res
 
     os.chdir(pwd)
     teardown_file(tmpd)

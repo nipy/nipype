@@ -358,6 +358,9 @@ CommandLine
 ``name_source``
     Indicates the list of input fields from which the value of the current File
     output variable will be drawn. This input field must be the name of a File.
+    Chaining is allowed, meaning that an input field can point to another as
+    ``name_source``, which also points as ``name_source`` to a third field.
+    In this situation, the templates for substitutions are also accumulated.
 
 ``name_template``
     By default a ``%s_generated`` template is used to create the output

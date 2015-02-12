@@ -47,6 +47,12 @@ iflogger = logging.getLogger('interface')
 
 __docformat__ = 'restructuredtext'
 
+class NipypeInterfaceError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 def _lock_files():
     tmpdir = '/tmp'
     pattern = '.X*-lock'
@@ -1510,7 +1516,10 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
-    def _filename_from_source(self, name):
+    def _filename_from_source(self, name, chain=None):
+        if chain is None:
+            chain = []
+
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
 
@@ -1546,8 +1555,13 @@ class CommandLine(BaseInterface):
                 except AttributeError:
                     base = source
             else:
-                base = self._filename_from_source(ns)
+                if name in chain:
+                    raise NipypeInterfaceError('Mutually pointing name_sources')
 
+                chain.append(name)
+                base = self._filename_from_source(ns, chain)
+
+            chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
