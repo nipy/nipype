@@ -894,6 +894,13 @@ class AddCSVRow(BaseInterface):
         if self._have_lock:
             self._lock.release()
 
+        # Using nipype.external.portalocker this might be something like:
+        # with pl.Lock(self.inputs.in_file, timeout=1) as fh:
+        #     if op.exists(fh):
+        #         formerdf = pd.read_csv(fh, index_col=0)
+        #         df = pd.concat([formerdf, df], ignore_index=True)
+        #         df.to_csv(fh)
+
         return runtime
 
     def _list_outputs(self):
