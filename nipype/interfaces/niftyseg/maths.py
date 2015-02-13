@@ -118,16 +118,15 @@ class UnaryMaths(MathsCommand):
 class BinaryMathsInput(MathsInput):
 
     operation = traits.Enum('add', 'sub', 'mul', 'div', 'pow', 'thr', 'uthr', 'smo',
-                            'equal', 'dil', 'ero',
+                            'equal',
                             'geo',
-                            'tp',
                             'llsnorm', 'hdr_copy',
                             mandatory=True, argstr='-%s', position=4,
                             desc='operation to perform')
     operand_file = File(exists=True, argstr='%s', mandatory=True, position=5, xor=['operand_value'],
                         desc='second image to perform operation with')
     operand_value = traits.Float(argstr='%.8f', mandatory=True, position=5, xor=['operand_file'],
-                                 desc='value to perform operation with')
+                                 desc='float value to perform operation with')
 
 
 class BinaryMaths(MathsCommand):
@@ -179,4 +178,18 @@ class BinaryMaths(MathsCommand):
     """
 
     input_spec = BinaryMathsInput
+
+class BinaryMathsInputInteger(MathsInput):
+
+    operation = traits.Enum('dil', 'ero','tp',
+                            mandatory=True, argstr='-%s', position=4,
+                            desc='operation to perform')
+    operand_file = File(exists=True, argstr='%s', mandatory=True, position=5, xor=['operand_value'],
+                        desc='second image to perform operation with')
+    operand_value = traits.Int(argstr='%s', mandatory=True, position=5, xor=['operand_file'],
+                                 desc='float value to perform operation with')
+
+class BinaryMathsInteger(MathsCommand):
+    input_spec = BinaryMathsInputInteger
+
 

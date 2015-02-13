@@ -7,6 +7,6 @@ Top-level namespace for niftyseg.
 """
 
 from .base import (NIFTYSEGCommand, Info, no_niftyseg)
-from .maths import ( UnaryMaths, BinaryMaths)
+from .maths import ( UnaryMaths, BinaryMaths, BinaryMathsInteger)
 from .stats import ( UnaryStats, BinaryStats)
 from .gif import ( Gif )
