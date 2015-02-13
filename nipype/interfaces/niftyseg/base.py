@@ -102,3 +102,4 @@ def getNiftySegPath(cmd):
         return cmd
     except KeyError:                
         return cmd
+
