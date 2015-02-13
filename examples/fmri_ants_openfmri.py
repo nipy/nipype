@@ -10,6 +10,12 @@ A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
 This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
+
+This workflow also requires 2mm subcortical templates that are available from
+`MindBoggle <http://mindboggle.info/data.html>`_.
+Specifically the 2mm version of the `MNI template <http://mindboggle.info/data/templates/atropos/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_.
+
+Import necessary modules from nipype.
 """
 
 from nipype import config
@@ -672,7 +678,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     datasource.inputs.template = '*'
 
     if has_contrast:
-        datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
                                             'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
                                             'behav': ('%s/model/model%03d/onsets/task%03d_'
                                                       'run%03d/cond*.txt'),
