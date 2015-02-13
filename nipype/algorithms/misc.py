@@ -867,7 +867,7 @@ class AddCSVRow(BaseInterface):
         input_dict = {}
         for key, val in self.inputs._outputs.items():
             # expand lists to several columns
-            if key == 'trait_added' and val in self.inputs._outputs.keys():
+            if key == 'trait_added' and val in self.inputs.copyable_trait_names():
                 continue
 
             if isinstance(val, list):
