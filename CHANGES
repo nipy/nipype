@@ -1,6 +1,7 @@
 Next release
 ============
 
+* FIX: AddCSVRow problems when using infields (https://github.com/nipy/nipype/pull/1028)
 * FIX: Removed unused ANTS registration flag (https://github.com/nipy/nipype/pull/999)
 * FIX: Amend create_tbss_non_fa() workflow to match FSL's tbss_non_fa command. (https://github.com/nipy/nipype/pull/1033)
 * FIX: remove unused mandatory flag from spm normalize (https://github.com/nipy/nipype/pull/1048)
