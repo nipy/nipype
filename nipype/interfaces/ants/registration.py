@@ -709,7 +709,7 @@ class Registration(ANTSCommand):
                 outputs[
                     'reverse_invert_flags'].insert(0, reverseInverseMode)
                 transformCount += 1
-        else:
+        elif not self.inputs.write_composite_transform:
             transformCount = 0
             isLinear = [any(self._linear_transform_names == t)
                         for t in self.inputs.transforms]
