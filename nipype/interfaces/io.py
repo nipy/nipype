@@ -1804,8 +1804,9 @@ class SSHDataGrabber(DataGrabber):
 
 
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = File(exists=True, mandatory=True,
-                   desc='JSON source file')
+    in_file = File(exists=True, desc='JSON source file')
+    defaults = traits.Dict(desc=('JSON dictionary that sets default output'
+                                'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):
@@ -1819,12 +1820,15 @@ class JSONFileGrabber(IOBase):
 
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
+    >>> res = jsonSource.run()
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param1': u'overrideMe'}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> print res.outputs.param1
-    exampleStr
-    >>> print res.outputs.param2
-    4
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
+
 
     """
     input_spec = JSONFileGrabberInputSpec
@@ -1834,22 +1838,41 @@ class JSONFileGrabber(IOBase):
     def _list_outputs(self):
         import json
 
-        with open(self.inputs.in_file, 'r') as f:
-            data = json.load(f)
-
-        if not isinstance(data, dict):
-            raise RuntimeError('JSON input has no dictionary structure')
-
         outputs = {}
-        for key, value in data.iteritems():
-            outputs[key] = value
+        if isdefined(self.inputs.in_file):
+            with open(self.inputs.in_file, 'r') as f:
+                data = json.load(f)
+
+            if not isinstance(data, dict):
+                raise RuntimeError('JSON input has no dictionary structure')
+
+            for key, value in data.iteritems():
+                outputs[key] = value
+
+        if isdefined(self.inputs.defaults):
+            defaults = self.inputs.defaults
+            for key, value in defaults.iteritems():
+                if key not in outputs.keys():
+                    outputs[key] = value
 
         return outputs
 
 
 class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     out_file = File(desc='JSON sink file')
-    in_dict = traits.Dict(desc='input JSON dictionary')
+    in_dict = traits.Dict(value={}, usedefault=True,
+                          desc='input JSON dictionary')
+    _outputs = traits.Dict(value={}, usedefault=True)
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(JSONFileSinkInputSpec, self).__setattr__(key, value)
 
 
 class JSONFileSinkOutputSpec(TraitedSpec):
@@ -1858,7 +1881,10 @@ class JSONFileSinkOutputSpec(TraitedSpec):
 
 class JSONFileSink(IOBase):
 
-    """ Very simple frontend for storing values into a JSON file.
+    """
+    Very simple frontend for storing values into a JSON file.
+    Entries already existing in in_dict will be overridden by matching
+    entries dynamically added as inputs.
 
         .. warning::
 
@@ -1885,34 +1911,52 @@ class JSONFileSink(IOBase):
     input_spec = JSONFileSinkInputSpec
     output_spec = JSONFileSinkOutputSpec
 
-    def __init__(self, input_names=[], **inputs):
+    def __init__(self, infields=[], force_run=True, **inputs):
         super(JSONFileSink, self).__init__(**inputs)
-        self._input_names = filename_to_list(input_names)
-        add_traits(self.inputs, [name for name in self._input_names])
+        self._input_names = infields
+
+        undefined_traits = {}
+        for key in infields:
+            self.inputs.add_trait(key, traits.Any)
+            self.inputs._outputs[key] = Undefined
+            undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+        if force_run:
+            self._always_run = True
+
+    def _process_name(self, name, val):
+        if '.' in name:
+            newkeys = name.split('.')
+            name = newkeys.pop(0)
+            nested_dict = {newkeys.pop(): val}
+
+            for nk in reversed(newkeys):
+                nested_dict = {nk: nested_dict}
+            val = nested_dict
+
+        return name, val
 
     def _list_outputs(self):
         import json
         import os.path as op
+
         if not isdefined(self.inputs.out_file):
             out_file = op.abspath('datasink.json')
         else:
             out_file = self.inputs.out_file
 
-        out_dict = dict()
+        out_dict = self.inputs.in_dict
 
-        if isdefined(self.inputs.in_dict):
-            if isinstance(self.inputs.in_dict, dict):
-                out_dict = self.inputs.in_dict
-        else:
-            for name in self._input_names:
-                val = getattr(self.inputs, name)
-                val = val if isdefined(val) else 'undefined'
-                out_dict[name] = val
+        # Overwrite in_dict entries automatically
+        for key, val in self.inputs._outputs.items():
+            if not isdefined(val) or key == 'trait_added':
+                continue
+            key, val = self._process_name(key, val)
+            out_dict[key] = val
 
         with open(out_file, 'w') as f:
             json.dump(out_dict, f)
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs
-
-
