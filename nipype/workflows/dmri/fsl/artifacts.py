@@ -35,12 +35,13 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     >>> allcorr.inputs.inputnode.in_bvec = 'diffusion.bvec'
     >>> allcorr.inputs.inputnode.bmap_mag = 'magnitude.nii'
     >>> allcorr.inputs.inputnode.bmap_pha = 'phase.nii'
+    >>> allcorr.inputs.inputnode.epi_param = 'epi_param.txt'
     >>> allcorr.run() # doctest: +SKIP
 
     """
     inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bvec', 'in_bval', 'bmap_pha', 'bmap_mag']),
-        name='inputnode')
+        fields=['in_file', 'in_bvec', 'in_bval', 'bmap_pha', 'bmap_mag',
+                'epi_param']), name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
@@ -75,7 +76,8 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
         (bet_dwi0,  sdc,        [('mask_file', 'inputnode.in_mask')]),
         (inputnode, sdc,        [('in_bval', 'inputnode.in_bval'),
                                  ('bmap_pha', 'inputnode.bmap_pha'),
-                                 ('bmap_mag', 'inputnode.bmap_mag')]),
+                                 ('bmap_mag', 'inputnode.bmap_mag'),
+                                 ('epi_param', 'inputnode.settings')]),
         (hmc,       ecc,        [
          ('outputnode.out_xfms', 'inputnode.in_xfms')]),
         (inputnode, ecc,        [('in_file', 'inputnode.in_file'),
