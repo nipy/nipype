@@ -541,22 +541,19 @@ class ErrorMap(BaseInterface):
         if self.inputs.metric == 'sqeuclidean':
             errvector = diffvector**2
         elif self.inputs.metric == 'euclidean':
-            X = np.hstack((refvector, tstvector))
-            errvector = np.linalg.norm(X, axis=1)
+            #X = np.hstack((refvector, tstvector))
+            errvector = np.linalg.norm(diffvector, axis=1)
 
         if (comps > 1):
             errvector = np.sum(errvector, axis=1)
         else:
             errvector = np.squeeze(errvector)
 
-        errvectorexp = np.zeros_like(mskvector)
+        errvectorexp = np.zeros_like(mskvector, dtype=np.float32) # The default type is uint8
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        if self.inputs.metric == 'sqeuclidean':
-            self._distance = np.sqrt(np.sum(errvectorexp))
-        elif self.inputs.metric == 'euclidean':
-            self._distance = np.average(errvectorexp)
+        self._distance = np.average(errvectorexp)
 
         errmap = errvectorexp.reshape(mapshape)
 
