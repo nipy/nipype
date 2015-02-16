@@ -47,6 +47,12 @@ iflogger = logging.getLogger('interface')
 
 __docformat__ = 'restructuredtext'
 
+class NipypeInterfaceError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
 def _lock_files():
     tmpdir = '/tmp'
     pattern = '.X*-lock'
@@ -1510,9 +1516,13 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
-    def _filename_from_source(self, name):
+    def _filename_from_source(self, name, chain=None):
+        if chain is None:
+            chain = []
+
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
+
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
@@ -1522,26 +1532,42 @@ class CommandLine(BaseInterface):
                 name_template = trait_spec.name_template
             if not name_template:
                 name_template = "%s_generated"
-            if isinstance(trait_spec.name_source, list):
-                for ns in trait_spec.name_source:
-                    if isdefined(getattr(self.inputs, ns)):
-                        name_source = ns
-                        break
+
+            ns = trait_spec.name_source
+            while isinstance(ns, list):
+                if len(ns) > 1:
+                    iflogger.warn('Only one name_source per trait is allowed')
+                ns = ns[0]
+
+            if not isinstance(ns, six.string_types):
+                raise ValueError(('name_source of \'%s\' trait sould be an '
+                                 'input trait name') % name)
+
+            if isdefined(getattr(self.inputs, ns)):
+                name_source = ns
+                source = getattr(self.inputs, name_source)
+                while isinstance(source, list):
+                    source = source[0]
+
+                # special treatment for files
+                try:
+                    _, base, _ = split_filename(source)
+                except AttributeError:
+                    base = source
             else:
-                name_source = trait_spec.name_source
-            source = getattr(self.inputs, name_source)
-            while isinstance(source, list):
-                source = source[0]
-            #special treatment for files
-            try:
-                _, base, _ = split_filename(source)
-            except AttributeError:
-                base = source
+                if name in chain:
+                    raise NipypeInterfaceError('Mutually pointing name_sources')
+
+                chain.append(name)
+                base = self._filename_from_source(ns, chain)
+
+            chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval
             return self._overload_extension(retval, name)
+
         return retval
 
     def _gen_filename(self, name):
@@ -1557,7 +1583,7 @@ class CommandLine(BaseInterface):
             outputs = self.output_spec().get()
             for name, trait_spec in traits.iteritems():
                 out_name = name
-                if trait_spec.output_name != None:
+                if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
                 outputs[out_name] = \
                     os.path.abspath(self._filename_from_source(name))

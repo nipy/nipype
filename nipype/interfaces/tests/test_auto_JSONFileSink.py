@@ -3,10 +3,13 @@ from nipype.testing import assert_equal
 from nipype.interfaces.io import JSONFileSink
 
 def test_JSONFileSink_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(_outputs=dict(usedefault=True,
+    ),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    in_dict=dict(),
+    in_dict=dict(usedefault=True,
+    ),
     out_file=dict(),
     )
     inputs = JSONFileSink.input_spec()
