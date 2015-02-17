@@ -506,7 +506,7 @@ head-motion correction)
     return wf
 
 
-def sdc_fmb(name='fmb_correction',
+def sdc_fmb(name='fmb_correction', interp='Linear',
             fugue_params=dict(smooth3d=2.0)):
     """
     SDC stands for susceptibility distortion correction. FMB stands for
@@ -607,7 +607,7 @@ def sdc_fmb(name='fmb_correction',
     fmm2b0.inputs.winsorize_upper_quantile = 0.995
 
     applyxfm = pe.Node(ants.ApplyTransforms(
-        dimension=3, interpolation='BSpline'), name='FMp_to_B0')
+        dimension=3, interpolation=interp), name='FMp_to_B0')
 
     pre_fugue = pe.Node(fsl.FUGUE(save_fmap=True), name='PreliminaryFugue')
     demean = pe.Node(niu.Function(
