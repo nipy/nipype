@@ -7,8 +7,11 @@ http://stackoverflow.com/a/8963618/1183453
 """
 
 from multiprocessing import Process, Pool, cpu_count, pool
+import portalocker as pl
 from traceback import format_exception
 import sys
+import time
+import os.path as op
 
 from .base import (DistributedPluginBase, report_crash)
 
@@ -53,6 +56,8 @@ class MultiProcPlugin(DistributedPluginBase):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
+        self._livetasks = 0
+        self._lockfile = op.abspath('.MultiProcLock')
         non_daemon = True
         n_procs = cpu_count()
         if plugin_args:
@@ -71,15 +76,34 @@ class MultiProcPlugin(DistributedPluginBase):
             raise RuntimeError('Multiproc task %d not found'%taskid)
         if not self._taskresult[taskid].ready():
             return None
+        self._livetasks -= 1
         return self._taskresult[taskid].get()
 
     def _submit_job(self, node, updatehash=False):
+        allworkers = False
+        try:
+            allworkers = node._allworkers
+        except:
+            pass
+
+        if allworkers:
+            with pl.Lock(self._lockfile) as f:
+                while self._livetasks > 0:
+                    print 'Waiting other %d worker(s) to finish' % self._livetasks
+                    time.sleep(5)
+                return self.run_job(node, updatehash)
+
+        return self.run_job(node, updatehash)
+
+    def _run_job(self, node, updatehash=False):
         self._taskid += 1
         try:
             if node.inputs.terminal_output == 'stream':
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
+
+        self._livetasks += 1
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
                                                                (node,
                                                                 updatehash,))
