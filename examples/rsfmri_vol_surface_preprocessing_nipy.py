@@ -217,7 +217,7 @@ def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
             out_params = np.hstack((out_params, outlier_vector))
         if detrend_poly:
             timepoints = out_params.shape[0]
-            X = np.ones((timepoints, 1))
+            X = np.empty((timepoints, 0))
             for i in range(detrend_poly):
                 X = np.hstack((X, legendre(
                     i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
