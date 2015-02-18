@@ -996,9 +996,11 @@ if __name__ == "__main__":
     parser.add_argument('--surf_fwhm', default=15., dest='surf_fwhm',
                         type=float, help="Spatial FWHM" + defstr)
     parser.add_argument("-l", "--lowpass_freq", dest="lowpass_freq",
-                        default=0.1, help="Low pass frequency (Hz)" + defstr)
+                        default=0.1, type=float,
+                        help="Low pass frequency (Hz)" + defstr)
     parser.add_argument("-u", "--highpass_freq", dest="highpass_freq",
-                        default=0.01, help="High pass frequency (Hz)" + defstr)
+                        default=0.01, type=float,
+                        help="High pass frequency (Hz)" + defstr)
     parser.add_argument("-o", "--output_dir", dest="sink",
                         help="Output directory base", required=True)
     parser.add_argument("-w", "--work_dir", dest="work_dir",
