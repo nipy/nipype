@@ -542,7 +542,7 @@ def create_reg_workflow(name='registration'):
 
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
-    warpmean.inputs.interpolation = 'BSpline'
+    warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
     warpmean.inputs.args = '--float'
@@ -771,7 +771,7 @@ def create_workflow(files,
     warpall = MapNode(ants.ApplyTransforms(), iterfield=['input_image'],
                       name='warpall')
     warpall.inputs.input_image_type = 3
-    warpall.inputs.interpolation = 'BSpline'
+    warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
     warpall.inputs.reference_image = target_file
