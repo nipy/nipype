@@ -1205,7 +1205,6 @@ class Node(WorkflowBase):
         self._interface = interface
         self.name = name
         self._result = None
-        self._allworkers = False
         self.iterables = iterables
         self.synchronize = synchronize
         self.itersource = itersource
