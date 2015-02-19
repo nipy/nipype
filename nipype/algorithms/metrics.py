@@ -530,30 +530,29 @@ class ErrorMap(BaseInterface):
         else:
             msk = np.ones(shape=mapshape)
 
-        # Vectorise both volumes and make the pixel differennce
+        # Flatten both volumes and make the pixel differennce
         mskvector = msk.reshape(-1)
         msk_idxs = np.where(mskvector==1)
         refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
 
-        # scale the diffrernce
+        # Scale the diffrernce
         if self.inputs.metric == 'sqeuclidean':
             errvector = diffvector**2
+            if (comps > 1):
+                errvector = np.sum(errvector, axis=1)
+            else:
+                errvector = np.squeeze(errvector)
         elif self.inputs.metric == 'euclidean':
             #X = np.hstack((refvector, tstvector))
             errvector = np.linalg.norm(diffvector, axis=1)
-
-        if (comps > 1):
-            errvector = np.sum(errvector, axis=1)
-        else:
-            errvector = np.squeeze(errvector)
 
         errvectorexp = np.zeros_like(mskvector, dtype=np.float32) # The default type is uint8
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        self._distance = np.average(errvector)
+        self._distance = np.average(errvector) # Only average the masked voxels
 
         errmap = errvectorexp.reshape(mapshape)
 

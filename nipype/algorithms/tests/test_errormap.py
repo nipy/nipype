@@ -30,6 +30,7 @@ def test_errormap():
 	errmap = ErrorMap()
 	errmap.inputs.in_tst = os.path.join(tempdir, 'von.nii.gz')
 	errmap.inputs.in_ref = os.path.join(tempdir, 'alan.nii.gz')
+	errmap.out_map = os.path.join(tempdir, 'out_map.nii.gz')
 	result = errmap.run()
 	yield assert_equal, result.outputs.distance, 1.125 
 
@@ -57,19 +58,19 @@ def test_errormap():
 	msimg1 = nib.Nifti1Image(msvolume1, np.eye(4))
 
 	msvolume2 = np.zeros(shape=(2,2,2,2))
-	msvolume2[:,:,:,0] = volume2
-	msvolume2[:,:,:,1] = volume3
+	msvolume2[:,:,:,0] = volume3
+	msvolume2[:,:,:,1] = volume1
 	msimg2 = nib.Nifti1Image(msvolume2, np.eye(4))
 
-	nib.save(img1, os.path.join(tempdir, 'von-ray.nii.gz'))
-	nib.save(img2, os.path.join(tempdir, 'alan-ray.nii.gz'))
+	nib.save(msimg1, os.path.join(tempdir, 'von-ray.nii.gz'))
+	nib.save(msimg2, os.path.join(tempdir, 'alan-ray.nii.gz'))
 
 	errmap.inputs.in_tst = os.path.join(tempdir, 'von-ray.nii.gz')
 	errmap.inputs.in_ref = os.path.join(tempdir, 'alan-ray.nii.gz')
 	errmap.inputs.metric = 'sqeuclidean'
 	result = errmap.run()
-	yield assert_equal, result.outputs.distance, 7.0
+	yield assert_equal, result.outputs.distance, 5.5
 
 	errmap.inputs.metric = 'euclidean'
 	result = errmap.run()
-	yield assert_equal, result.outputs.distance, 2**0.5 + 6
+	yield assert_equal, result.outputs.distance, np.float32(1.25 * (2**0.5))
