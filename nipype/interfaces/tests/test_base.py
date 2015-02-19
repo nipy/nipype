@@ -172,11 +172,13 @@ def test_deprecation():
     yield assert_equal, spec_instance.foo, Undefined
     yield assert_equal, spec_instance.bar, 1
 
+
 def test_namesource():
     tmp_infile = setup_file()
     tmpd, nme, ext = split_filename(tmp_infile)
     pwd = os.getcwd()
     os.chdir(tmpd)
+
     class spec2(nib.CommandLineInputSpec):
         moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
                        position=2)
@@ -195,6 +197,104 @@ def test_namesource():
     yield assert_true, 'my_%s_template' % nme in testobj.cmdline
     os.chdir(pwd)
     teardown_file(tmpd)
+
+
+def test_chained_namesource():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+
+    class spec2(nib.CommandLineInputSpec):
+        doo = nib.File(exists=True, argstr="%s", position=1)
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=2, name_template='%s_mootpl')
+        poo = nib.File(name_source=['moo'], hash_files=False,
+                       argstr="%s", position=3)
+
+    class TestName(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec2
+
+    testobj = TestName()
+    testobj.inputs.doo = tmp_infile
+    res = testobj.cmdline
+    yield assert_true, '%s' % tmp_infile in res
+    yield assert_true, '%s_mootpl ' % nme in res
+    yield assert_true, '%s_mootpl_generated' % nme in res
+
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
+
+def test_cycle_namesource1():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+
+    class spec3(nib.CommandLineInputSpec):
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=1, name_template='%s_mootpl')
+        poo = nib.File(name_source=['moo'], hash_files=False,
+                       argstr="%s", position=2)
+        doo = nib.File(name_source=['poo'], hash_files=False,
+                       argstr="%s", position=3)
+
+    class TestCycle(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec3
+
+    # Check that an exception is raised
+    to0 = TestCycle()
+    not_raised = True
+    try:
+        to0.cmdline
+    except nib.NipypeInterfaceError:
+        not_raised = False
+    yield assert_false, not_raised
+
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
+def test_cycle_namesource2():
+    tmp_infile = setup_file()
+    tmpd, nme, ext = split_filename(tmp_infile)
+    pwd = os.getcwd()
+    os.chdir(tmpd)
+
+
+    class spec3(nib.CommandLineInputSpec):
+        moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
+                       position=1, name_template='%s_mootpl')
+        poo = nib.File(name_source=['moo'], hash_files=False,
+                       argstr="%s", position=2)
+        doo = nib.File(name_source=['poo'], hash_files=False,
+                       argstr="%s", position=3)
+
+    class TestCycle(nib.CommandLine):
+        _cmd = "mycommand"
+        input_spec = spec3
+
+    # Check that loop can be broken by setting one of the inputs
+    to1 = TestCycle()
+    to1.inputs.poo = tmp_infile
+
+    not_raised = True
+    try:
+        res = to1.cmdline
+    except nib.NipypeInterfaceError:
+        not_raised = False
+    print res
+
+    yield assert_true, not_raised
+    yield assert_true, '%s' % tmp_infile in res
+    yield assert_true, '%s_generated' % nme in res
+    yield assert_true, '%s_generated_mootpl' % nme in res
+
+    os.chdir(pwd)
+    teardown_file(tmpd)
+
 
 def checknose():
     """check version of nose for known incompatability"""
