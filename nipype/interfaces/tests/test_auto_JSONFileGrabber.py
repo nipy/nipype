@@ -3,11 +3,11 @@ from nipype.testing import assert_equal
 from nipype.interfaces.io import JSONFileGrabber
 
 def test_JSONFileGrabber_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(defaults=dict(),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    in_file=dict(mandatory=True,
-    ),
+    in_file=dict(),
     )
     inputs = JSONFileGrabber.input_spec()
 

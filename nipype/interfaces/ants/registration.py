@@ -394,8 +394,15 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
-    >>> reg4.aggregate_outputs() #doctest: +SKIP
+    {'reverse_invert_flags': [], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': []}
+    
+    >>> # Test collapse transforms flag
+    >>> reg4b = copy.deepcopy(reg4)
+    >>> reg4b.inputs.write_composite_transform = False
+    >>> outputs = reg4b._list_outputs()
+    >>> print outputs #doctest: +ELLIPSIS
+    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': <undefined>, 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'composite_transform': <undefined>, 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
+    >>> reg4b.aggregate_outputs() #doctest: +SKIP
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
@@ -709,7 +716,7 @@ class Registration(ANTSCommand):
                 outputs[
                     'reverse_invert_flags'].insert(0, reverseInverseMode)
                 transformCount += 1
-        else:
+        elif not self.inputs.write_composite_transform:
             transformCount = 0
             isLinear = [any(self._linear_transform_names == t)
                         for t in self.inputs.transforms]
