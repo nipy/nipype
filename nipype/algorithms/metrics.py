@@ -553,7 +553,7 @@ class ErrorMap(BaseInterface):
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        self._distance = np.average(errvectorexp)
+        self._distance = np.average(errvector)
 
         errmap = errvectorexp.reshape(mapshape)
 
