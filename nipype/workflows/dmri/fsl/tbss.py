@@ -504,6 +504,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     >>> tbss_MD.inputs.inputnode.groupmask = './xxx'
     >>> tbss_MD.inputs.inputnode.meanfa_file = './xxx'
     >>> tbss_MD.inputs.inputnode.distance_map = []
+    >>> tbss_MD.inputs.inputnode.all_FA_file = './xxx'
 
     Inputs::
 
@@ -513,6 +514,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
         inputnode.groupmask
         inputnode.meanfa_file
         inputnode.distance_map
+        inputnode.all_FA_file
 
     Outputs::
 
@@ -526,7 +528,8 @@ def create_tbss_non_FA(name='tbss_non_FA'):
                                                                  'skeleton_thresh',
                                                                  'groupmask',
                                                                  'meanfa_file',
-                                                                 'distance_map']),
+                                                                 'distance_map',
+                                                                 'all_FA_file']),
                         name='inputnode')
 
     # Apply the warpfield to the non FA image
@@ -560,10 +563,11 @@ def create_tbss_non_FA(name='tbss_non_FA'):
 
                     (inputnode, maskgroup, [('groupmask', 'in_file2')]),
 
-                    (maskgroup, projectfa, [('out_file', 'data_file')]),
+                    (maskgroup, projectfa, [('out_file', 'alt_data_file')]),
                     (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
                                             ("meanfa_file", "in_file"),
                                             ("distance_map", "distance_map"),
+                                             ("all_FA_file", 'data_file')
                                             ]),
                 ])
 

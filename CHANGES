@@ -1,27 +1,40 @@
 Next release
 ============
 
+* ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
+* ENH: Improve JSON interfaces: default settings when reading and consistent output creation
+       when writing (https://github.com/nipy/nipype/pull/1047)
+* FIX: AddCSVRow problems when using infields (https://github.com/nipy/nipype/pull/1028)
+* FIX: Removed unused ANTS registration flag (https://github.com/nipy/nipype/pull/999)
+* FIX: Amend create_tbss_non_fa() workflow to match FSL's tbss_non_fa command. (https://github.com/nipy/nipype/pull/1033)
+* FIX: remove unused mandatory flag from spm normalize (https://github.com/nipy/nipype/pull/1048)
+* ENH: Update ANTSCorticalThickness interface (https://github.com/nipy/nipype/pull/1013)
+* FIX: Edge case with sparsemodels and PEP8 cleanup (https://github.com/nipy/nipype/pull/1046)
+* ENH: New io interfaces for JSON files reading/writing (https://github.com/nipy/nipype/pull/1020)
+* ENH: Enhanced openfmri script to support freesurfer linkage (https://github.com/nipy/nipype/pull/1037)
 * BUG: matplotlib is supposed to be optional (https://github.com/nipy/nipype/pull/1003)
 * FIX: Fix split_filename behaviour when path has no file component (https://github.com/nipy/nipype/pull/1035)
 * ENH: Updated FSL dtifit to include option for grad non-linearities (https://github.com/nipy/nipype/pull/1032)
 * ENH: Updated Camino tracking interfaces, which can now use FSL bedpostx output.
-       New options also include choice of tracker, interpolator, stepsize and 
+       New options also include choice of tracker, interpolator, stepsize and
        curveinterval for angle threshold (https://github.com/nipy/nipype/pull/1029)
 * FIX: Interfaces redirecting X crashed if $DISPLAY not defined (https://github.com/nipy/nipype/pull/1027)
 * FIX: Bug crashed 'make api' (https://github.com/nipy/nipype/pull/1026)
 * ENH: Updated antsIntroduction to handle RA and RI registrations (https://github.com/nipy/nipype/pull/1009)
-* ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made 
+* ENH: Updated N4BiasCorrection input spec to include weight image and spline order. Made
 	   argument formatting consistent. Cleaned ants.segmentation according to PEP8.
 	   (https://github.com/nipy/nipype/pull/990/files)
 * ENH: SPM12 Normalize interface (https://github.com/nipy/nipype/pull/986)
 * FIX: Utility interface test dir (https://github.com/nipy/nipype/pull/986)
 * FIX: IPython engine directory reset after crash (https://github.com/nipy/nipype/pull/987)
 * ENH: Resting state fMRI example with NiPy realignment and no SPM (https://github.com/nipy/nipype/pull/992)
-* FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is 
+* FIX: Corrected Freesurfer SegStats _list_outputs to avoid error if summary_file is
 	   undefined (issue #994)(https://https://github.com/nipy/nipype/pull/996)
 * FIX: OpenfMRI support and FSL 5.0.7 changes (https://github.com/nipy/nipype/pull/1006)
 * FIX: Output prefix in SPM Normalize with modulation (https://github.com/nipy/nipype/pull/1023)
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
+* ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
+* ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 
 Release 0.10.0 (October 10, 2014)
 ============
@@ -29,7 +42,7 @@ Release 0.10.0 (October 10, 2014)
 * ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)
        to enable parallel processing of very large images.
 * ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still
-       available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu 
+       available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu
        versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU
 * ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins
 * ENH: New dipy interfaces: Denoise, Resample
@@ -37,12 +50,12 @@ Release 0.10.0 (October 10, 2014)
 * ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp
 * ENH: New miscelaneous interfaces: AddCSVRow, NormalizeProbabilityMapSet, AddNoise
 * ENH: New AFNI interfaces:  Eval, Means, SVMTest, SVMTrain
-* ENH: FUGUE interface has been refactored to use the name_template system, 3 examples 
+* ENH: FUGUE interface has been refactored to use the name_template system, 3 examples
        added to doctests, some bugs solved.
 * API: Interfaces to external packages are no longer available in the top-level
        ``nipype`` namespace, and must be imported directly (e.g.
        ``from nipype.interfaces import fsl``).
-* ENH: Support for elastix via a set of new interfaces: Registration, ApplyWarp, 
+* ENH: Support for elastix via a set of new interfaces: Registration, ApplyWarp,
        AnalyzeWarp, PointsWarp, and EditTransform
 * ENH: New ANTs interface: ApplyTransformsToPoints, LaplacianThickness
 * ENH: New Diffusion Toolkit interface: TrackMerge
@@ -58,7 +71,7 @@ Release 0.10.0 (October 10, 2014)
 * ENH: New color mode for write_graph
 * ENH: You can now force MapNodes to be run serially
 * ENH: Added ANTS based openfmri workflow
-* ENH: MapNode now supports flattening of nested lists 
+* ENH: MapNode now supports flattening of nested lists
 * ENH: Support for headless mode using Xvfb
 * ENH: nipype_display_crash has a debugging mode
 * FIX: MRTrix tracking algorithms were ignoring mask parameters.
