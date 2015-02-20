@@ -1,6 +1,6 @@
 Next release
 ============
-
+* ENH: Add the average distance to ErrorMap (https://github.com/nipy/nipype/pull/1039)
 * ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
 * ENH: Improve JSON interfaces: default settings when reading and consistent output creation
        when writing (https://github.com/nipy/nipype/pull/1047)
