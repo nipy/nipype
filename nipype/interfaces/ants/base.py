@@ -68,6 +68,11 @@ class ANTSCommand(CommandLine):
             self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
                                             '%s' % self.inputs.num_threads})
 
+    @staticmethod
+    def _format_xarray(val):
+        """ Convenience method for converting input arrays [1,2,3] to commandline format '1x2x3' """
+        return 'x'.join([str(x) for x in val])
+
     @classmethod
     def set_default_num_threads(cls, num_threads):
         """Set the default number of threads for ITK calls

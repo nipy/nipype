@@ -37,7 +37,6 @@ def test_Normalize12_inputs():
     ),
     tpm=dict(copyfile=False,
     field='eoptions.tpm',
-    mandatory=False,
     xor=['deformation_file'],
     ),
     use_mcr=dict(),
