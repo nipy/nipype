@@ -537,7 +537,7 @@ class ErrorMap(BaseInterface):
         tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
 
-        # Scale the diffrernce
+        # Scale the difference
         if self.inputs.metric == 'sqeuclidean':
             errvector = diffvector**2
             if (comps > 1):
@@ -545,7 +545,6 @@ class ErrorMap(BaseInterface):
             else:
                 errvector = np.squeeze(errvector)
         elif self.inputs.metric == 'euclidean':
-            #X = np.hstack((refvector, tstvector))
             errvector = np.linalg.norm(diffvector, axis=1)
 
         errvectorexp = np.zeros_like(mskvector, dtype=np.float32) # The default type is uint8
