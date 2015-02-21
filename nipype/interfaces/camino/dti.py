@@ -549,7 +549,11 @@ class Track(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tracked'] = os.path.abspath(self._gen_outfilename())
+        if isdefined(self.inputs.out_file):
+            out_file_path = os.path.abspath(self.inputs.out_file)
+        else:
+            out_file_path = os.path.abspath(self._gen_outfilename())
+        outputs['tracked'] = out_file_path
         return outputs
 
     def _gen_filename(self, name):
