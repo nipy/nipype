@@ -7,7 +7,6 @@ http://stackoverflow.com/a/8963618/1183453
 """
 
 from multiprocessing import Process, Pool, cpu_count, pool, Lock
-import portalocker as pl
 from traceback import format_exception
 import sys
 import time
@@ -64,17 +63,9 @@ class MultiProcPlugin(DistributedPluginBase):
                 self._n_procs = plugin_args['n_procs']
             if 'non_daemon' in plugin_args:
                 self._non_daemon = plugin_args['non_daemon']
-
-        if self._non_daemon:
-            # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=self._n_procs)
-        else:
-            self.pool = Pool(processes=self._n_procs)
+        self._renew_pool()
 
     def _renew_pool(self):
-        self.pool.close()
-        self.pool.join()
-
         if self._non_daemon:
             # run the execution using the non-daemon pool subclass
             self.pool = NonDaemonPool(processes=self._n_procs)
@@ -89,6 +80,13 @@ class MultiProcPlugin(DistributedPluginBase):
         return self._taskresult[taskid].get()
 
     def _submit_job(self, node, updatehash=False):
+        self._taskid += 1
+        try:
+            if node.inputs.terminal_output == 'stream':
+                node.inputs.terminal_output = 'allatonce'
+        except:
+            pass
+
         allworkers = False
         try:
             allworkers = not node._interface._singleworker
@@ -97,22 +95,16 @@ class MultiProcPlugin(DistributedPluginBase):
 
         if allworkers:
             self._lock.acquire(True)
+            self.pool.close()
+            self.pool.join()
+            self._taskresult[self._taskid] = run_node(node, updatehash)
             self._renew_pool()
-
-        self._taskid += 1
-        try:
-            if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'allatonce'
-        except:
-            pass
+            self._lock.release()
+            return self._taskid
 
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
                                                                (node,
                                                                 updatehash,))
-        if allworkers:
-            self._renew_pool()
-            self._lock.release()
-            
         return self._taskid
 
     def _report_crash(self, node, result=None):
