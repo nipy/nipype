@@ -71,16 +71,24 @@ class MultiProcPlugin(DistributedPluginBase):
         self._lock = Lock()
         self._non_daemon = True
         self._n_procs = cpu_count()
+
+        maxtasks = None
         if plugin_args:
             if 'n_procs' in plugin_args:
                 self._n_procs = plugin_args['n_procs']
             if 'non_daemon' in plugin_args:
                 self._non_daemon = plugin_args['non_daemon']
+            if 'maxtasksperchild' in plugin_args:
+                maxtasks = plugin_args['maxtasksperchild']
+
+        # set maxtasksperchild 5 to refresh workers with that frequency
         if self._non_daemon:
             # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=self._n_procs)
+            self.pool = NonDaemonPool(processes=self._n_procs,
+                                      maxtasksperchild=maxtasks)
         else:
-            self.pool = Pool(processes=self._n_procs)
+            self.pool = Pool(processes=self._n_procs,
+                             maxtasksperchild=maxtasks)
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
@@ -103,9 +111,12 @@ class MultiProcPlugin(DistributedPluginBase):
         except:
             pass
 
-        lock = self._lock if allworkers else None
-        self._taskresult[self._taskid] = self.pool.apply_async(
-            run_node, (node, updatehash, lock,))
+        if allworkers:
+            self._taskresult[self._taskid] = self.pool.apply(
+                run_node, (node, updatehash, self._lock))
+        else:
+            self._taskresult[self._taskid] = self.pool.apply_async(
+                run_node, (node, updatehash, None))
         return self._taskid
 
     def _report_crash(self, node, result=None):
