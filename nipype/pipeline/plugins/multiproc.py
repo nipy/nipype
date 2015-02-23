@@ -14,7 +14,10 @@ import signal
 import time
 import os.path as op
 from .base import (DistributedPluginBase, report_crash)
-
+from ..engine import (MapNode, str2bool)
+import numpy as np
+from ... import logging
+logger = logging.getLogger('workflow')
 
 def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
@@ -194,9 +197,9 @@ class MultiProcPlugin(DistributedPluginBase):
                                  str(continue_with_submission))
                     if continue_with_submission:
                         sworker = getattr(self.procs[jobid]._interface,
-                                          '_singleworker', False)
+                                          '_singleworker', True)
 
-                        if sworker:
+                        if not sworker:
                             logger.info('Node %s claimed all workers' %
                                         self.procs[jobid])
                             self._wait_pool()
