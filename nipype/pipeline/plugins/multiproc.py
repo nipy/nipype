@@ -8,6 +8,7 @@ http://stackoverflow.com/a/8963618/1183453
 """
 
 from multiprocessing import Process, Pool, cpu_count, pool, Lock
+from copy import deepcopy
 from traceback import format_exception
 import sys
 import signal
