@@ -23,7 +23,8 @@ def test_ErrorMap_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_ErrorMap_outputs():
-    output_map = dict(out_map=dict(),
+    output_map = dict(distance=dict(),
+    out_map=dict(),
     )
     outputs = ErrorMap.output_spec()
 

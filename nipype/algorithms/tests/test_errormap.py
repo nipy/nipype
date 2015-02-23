@@ -32,7 +32,7 @@ def test_errormap():
 	errmap.inputs.in_ref = os.path.join(tempdir, 'alan.nii.gz')
 	errmap.out_map = os.path.join(tempdir, 'out_map.nii.gz')
 	result = errmap.run()
-	yield assert_equal, result.outputs.distance, 1.125 
+	yield assert_equal, result.outputs.distance, 1.125
 
 	# Square metric
 	errmap.inputs.metric = 'sqeuclidean'
@@ -42,9 +42,9 @@ def test_errormap():
 	# Linear metric
 	errmap.inputs.metric = 'euclidean'
 	result = errmap.run()
-	yield assert_equal, result.outputs.distance, 0.875 
+	yield assert_equal, result.outputs.distance, 0.875
 
-	# Masked 
+	# Masked
 	errmap.inputs.mask = os.path.join(tempdir, 'mask.nii.gz')
 	result = errmap.run()
 	yield assert_equal, result.outputs.distance, 1.0
