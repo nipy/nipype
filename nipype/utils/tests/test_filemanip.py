@@ -24,6 +24,8 @@ def test_split_filename():
     yield assert_equal, res, ('../usr/local', 'foo', '.nii')
     res = split_filename('/usr/local/foo.a.b.c.d')
     yield assert_equal, res, ('/usr/local', 'foo.a.b.c', '.d')
+    res = split_filename('/usr/local/')
+    yield assert_equal, res, ('/usr/local', '', '')
 
 def test_fname_presuffix():
     fname = 'foo.nii'

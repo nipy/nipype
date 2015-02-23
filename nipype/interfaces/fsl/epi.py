@@ -495,8 +495,8 @@ class Eddy(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_corrected'] = '%s.nii.gz' % self.inputs.out_base
-        outputs['out_parameter'] = '%s.eddy_parameters' % self.inputs.out_base
+        outputs['out_corrected'] = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
+        outputs['out_parameter'] = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
         return outputs
 
 

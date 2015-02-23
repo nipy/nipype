@@ -305,7 +305,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
     output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
-    template += "    _redirect_x = True\n"
+    template += "    _redirect_x = {0}\n".format(str(redirect_x))
 
 
     main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))

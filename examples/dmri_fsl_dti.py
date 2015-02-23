@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-===============
-dMRI [DTI, FSL]
-===============
+==============
+dMRI: DTI, FSL
+==============
 
 A pipeline example that uses several interfaces to perform analysis on
 diffusion weighted images using FSL FDT tools.

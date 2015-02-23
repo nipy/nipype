@@ -238,3 +238,41 @@ def test_freesurfersource():
     yield assert_equal, fss.inputs.hemi, 'both'
     yield assert_equal, fss.inputs.subject_id, Undefined
     yield assert_equal, fss.inputs.subjects_dir, Undefined
+
+
+def test_jsonsink():
+    import json
+    import os
+
+    ds = nio.JSONFileSink()
+    yield assert_equal, ds.inputs._outputs, {}
+    ds = nio.JSONFileSink(in_dict={'foo': 'var'})
+    yield assert_equal, ds.inputs.in_dict, {'foo': 'var'}
+    ds = nio.JSONFileSink(infields=['test'])
+    yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+
+    curdir = os.getcwd()
+    outdir = mkdtemp()
+    os.chdir(outdir)
+    js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
+    js.inputs.new_entry = 'someValue'
+    setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
+    res = js.run()
+
+    with open(res.outputs.out_file, 'r') as f:
+        data = json.load(f)
+    yield assert_true, data == {"contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
+
+    js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
+    js.inputs.new_entry = 'someValue'
+    js.inputs.test = 'testInfields'
+    setattr(js.inputs, 'contrasts.alt', 'someNestedValue')
+    res = js.run()
+
+    with open(res.outputs.out_file, 'r') as f:
+        data = json.load(f)
+    yield assert_true, data == {"test": "testInfields", "contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
+
+    os.chdir(curdir)
+    shutil.rmtree(outdir)
+
