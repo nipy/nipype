@@ -7,7 +7,7 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Process, Pool, cpu_count, pool, Lock
+from multiprocessing import Process, Pool, cpu_count, pool
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -19,6 +19,7 @@ from ..engine import (MapNode, str2bool)
 import numpy as np
 from ... import logging
 logger = logging.getLogger('workflow')
+
 
 def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
@@ -72,7 +73,6 @@ class MultiProcPlugin(DistributedPluginBase):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
-        self._lock = Lock()
         self._non_daemon = True
         self._n_procs = cpu_count()
 
