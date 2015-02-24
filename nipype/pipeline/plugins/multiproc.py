@@ -268,8 +268,9 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                         else:
-                            tid = self._submit_job(deepcopy(self.procs[jobid]),
-                                                   updatehash=updatehash)
+                            tid = self._submit_job(
+                                jobid, deepcopy(self.procs[jobid]),
+                                updatehash=updatehash)
                             if tid is None:
                                 self.proc_done[jobid] = False
                                 self.proc_pending[jobid] = False
