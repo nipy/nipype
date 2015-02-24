@@ -120,10 +120,9 @@ class MultiProcPlugin(DistributedPluginBase):
 
         if error:
             self.pool.terminate()
-        else:
-            self.pool.join()
+            logger.info('Pool terminated, with %d remaining tasks' %
+                        len(self._inpool))
 
-        logger.info('Pool joined, with %d remaining tasks' % len(self._inpool))
         return self._inpool
 
     def _get_result(self, taskid):
@@ -199,7 +198,7 @@ class MultiProcPlugin(DistributedPluginBase):
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
-            jobids = np.flatnonzero((self.proc_done == False) &
+            jobids = np.flatnonzero(np.logical_not(self.proc_done) &
                                     (self.depidx.sum(axis=0) == 0).__array__())
             if len(jobids) > 0:
                 # send all available jobs
@@ -256,37 +255,47 @@ class MultiProcPlugin(DistributedPluginBase):
                     if continue_with_submission:
                         sworker = getattr(self.procs[jobid]._interface,
                                           '_singleworker', True)
+                        nosubmit = getattr(
+                            self.procs[jobid].run_without_submitting, False)
 
-                        if not sworker:
-                            logger.info('Node %s claimed all workers' %
-                                        self.procs[jobid])
-                            self._wait_pool()
-                            logger.info(('All workers clean, running %s on '
-                                         'master thread') % self.procs[jobid])
-                            try:
-                                self.procs[jobid].run()
-                            except Exception:
-                                self._clean_queue(jobid, graph)
-                            self._task_finished_cb(jobid)
-                            self._remove_node_dirs()
-                            self._start_pool()
-                        elif self.procs[jobid].run_without_submitting:
-                            logger.info('Running node %s on master thread' %
-                                        self.procs[jobid])
-                            try:
-                                self.procs[jobid].run()
-                            except Exception:
-                                self._clean_queue(jobid, graph)
-                            self._task_finished_cb(jobid)
-                            self._remove_node_dirs()
+                        if sworker and not nosubmit:
+                            self._bulk_submit(jobid, updatehash)
                         else:
-                            tid = self._submit_job(
-                                jobid, deepcopy(self.procs[jobid]),
-                                updatehash=updatehash)
-                            if tid is None:
-                                self.proc_done[jobid] = False
-                                self.proc_pending[jobid] = False
-                            else:
-                                self.pending_tasks.insert(0, (tid, jobid))
+                            if not sworker:
+                                logger.info('Node %s claimed all workers' %
+                                            self.procs[jobid])
+                                killedjobs = self._wait_pool()
+                                logger.info(
+                                    ('All workers clean, running %s on '
+                                     'master thread') % self.procs[jobid])
+
+                            self._run_main(jobid, updatehash)
+
+                            if not sworker:
+                                self._start_pool()
+                                self._bulk_submit(killedjobs, updatehash)
             else:
                 break
+
+    def _run_main(self, jobid, updatehash):
+        logger.info('Running node %s (%d) on master thread' %
+                    (self.procs[jobid], jobid))
+        try:
+            self.procs[jobid].run()
+        except Exception:
+            self._clean_queue(jobid, graph)
+        self._task_finished_cb(jobid)
+        self._remove_node_dirs()
+
+    def _bulk_submit(self, joblist, updatehash):
+        joblist = np.atleast_1d(joblist).tolist()
+
+        for jobid in joblist:
+            tid = self._submit_job(
+                jobid, deepcopy(self.procs[jobid]),
+                updatehash=updatehash)
+            if tid is None:
+                self.proc_done[jobid] = False
+                self.proc_pending[jobid] = False
+            else:
+                self.pending_tasks.insert(0, (tid, jobid))
