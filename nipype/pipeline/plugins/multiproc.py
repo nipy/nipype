@@ -225,22 +225,28 @@ class MultiProcPlugin(DistributedPluginBase):
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
+                            overwrite = getattr(self.procs[jobid],
+                                                'overwrite', False)
+                            always_run = getattr(self.procs[jobid]._interface,
+                                                 'always_run', False)
                             logger.info('Hash exists %s' % str(hash_exists))
-                            if (hash_exists and
-                                    (self.procs[jobid].overwrite == False or
-                                     (self.procs[jobid].overwrite == None and
-                                      not self.procs[jobid]._interface.always_run)
-                                     )
-                                ):
+
+                            if (hash_exists and not overwrite
+                                    and not always_run):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
+
+                                logger.info(('Node %s (%d) is cached or does'
+                                             ' not require be run') %
+                                            (self.procs[jobid], jobid))
                         except Exception:
                             self._clean_queue(jobid, graph)
                             self.proc_pending[jobid] = False
                             continue_with_submission = False
-                    logger.info('Finished checking hash %s' %
-                                str(continue_with_submission))
+                            logger.info(('Node %s (%d) raised exception') %
+                                        (self.procs[jobid], jobid))
+
                     if continue_with_submission:
                         sworker = getattr(self.procs[jobid]._interface,
                                           '_singleworker', True)
