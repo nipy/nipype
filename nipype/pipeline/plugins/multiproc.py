@@ -161,6 +161,11 @@ class MultiProcPlugin(DistributedPluginBase):
             run_node, (self._taskid, nodeid, node, updatehash,),
             callback=self._job_callback)
         self._inpool.append(self._taskid)
+
+        logger.info('Submitted node ID %d with tID %d' %
+                    (nodeid, self._taskid))
+        logger.info('Current pool is %s' %
+                    str(self._inpool))
         return self._taskid
 
     def _report_crash(self, node, result=None):
