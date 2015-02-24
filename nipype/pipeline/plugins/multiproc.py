@@ -108,16 +108,22 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _wait_pool(self):
         self.pool.close()
-        logger.info('Waiting for pending tasks, IDs %s' % str(self._inpool))
-
-        for p in self.pool._processes:
+        error = False
+        for taskid in self._inpool:
             try:
-                p.wait(30)
+                logger.info('Waiting for task ID %d' % taskid)
+                self._taskresult[taskid].wait(30)
             except TimeoutError:
-                logger.info('TimeoutError raised waiting for task to finish')
+                logger.info(
+                    'TimeoutError raised waiting for task %d' % taskid)
+                error = True
 
-        self.pool.join()
-        logger.info('Tasks still pending, IDs %s' % str(self._inpool))
+        if error:
+            self.pool.terminate()
+        else:
+            self.pool.join()
+
+        logger.info('Pool joined, with %d remaining tasks' % len(self._inpool))
         return self._inpool
 
     def _get_result(self, taskid):
@@ -238,7 +244,7 @@ class MultiProcPlugin(DistributedPluginBase):
                                 self._remove_node_dirs()
 
                                 logger.info(('Node %s (%d) is cached or does'
-                                             ' not require be run') %
+                                             ' not require being run') %
                                             (self.procs[jobid], jobid))
                         except Exception:
                             self._clean_queue(jobid, graph)
