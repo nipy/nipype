@@ -7,7 +7,7 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Process, Pool, cpu_count, pool
+from multiprocessing import Process, Pool, cpu_count, pool, TimeoutError
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -21,8 +21,8 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(node, updatehash):
-    result = dict(result=None, traceback=None)
+def run_node(taskid, node, updatehash):
+    result = dict(result=None, traceback=None, taskid=taskid)
     try:
         result['result'] = node.run(updatehash=updatehash)
     except:
@@ -33,8 +33,10 @@ def run_node(node, updatehash):
 
 
 class NonDaemonProcess(Process):
+
     """A non-daemon process to support internal multiprocessing.
     """
+
     def _get_daemon(self):
         return False
 
@@ -45,12 +47,14 @@ class NonDaemonProcess(Process):
 
 
 class NonDaemonPool(pool.Pool):
+
     """A process pool with non-daemon processes.
     """
     Process = NonDaemonProcess
 
 
 class MultiProcPlugin(DistributedPluginBase):
+
     """
     Execute workflow with multiprocessing
 
@@ -72,6 +76,7 @@ class MultiProcPlugin(DistributedPluginBase):
     def __init__(self, plugin_args=None):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
+        self._inpool = []
         self._taskid = 0
         self._non_daemon = True
         self._n_procs = cpu_count()
@@ -102,14 +107,43 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _wait_pool(self):
         self.pool.close()
+        logger.info('Waiting for pending tasks, IDs %s' % str(self._inpool))
+
+        for p in self.pool._processes:
+            try:
+                p.wait(30)
+            except TimeoutError:
+                logger.info('TimeoutError raised waiting for task to finish')
+
         self.pool.join()
+        logger.info('Tasks still pending, IDs %s' % str(self._inpool))
+        return self._inpool
 
     def _get_result(self, taskid):
+        logger.info('Getting result of task ID %d' % taskid)
+        result = None
+
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found' % taskid)
+
         if not self._taskresult[taskid].ready():
             return None
-        return self._taskresult[taskid].get()
+
+        try:
+            result = self._taskresult[taskid].get(30)
+        except TimeoutError:
+            logger.info('TimeoutError raised getting result of ID %d' % taskid)
+
+        return result
+
+    def _job_callback(self, result):
+        taskid = result['taskid']
+        logger.info('Called callback of job ID %d' % taskid)
+
+        if taskid in self._inpool:
+            self._inpool.remove(taskid)
+        else:
+            logger.info('Job ID %d was not in pool' % taskid)
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
@@ -120,7 +154,9 @@ class MultiProcPlugin(DistributedPluginBase):
             pass
 
         self._taskresult[self._taskid] = self.pool.apply_async(
-            run_node, (node, updatehash,))
+            run_node, (self._taskid, node, updatehash,)
+            callback=self._job_callback)
+        self._inpool.append(self._taskid)
         return self._taskid
 
     def _report_crash(self, node, result=None):
@@ -144,7 +180,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 slots = None
             else:
                 slots = max(0, self.max_jobs - num_jobs)
-            logger.debug('Slots available: %s' % slots)
+            logger.info('Slots available: %s' % slots)
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
@@ -176,17 +212,17 @@ class MultiProcPlugin(DistributedPluginBase):
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
                                 ['local_hash_check']):
-                        logger.debug('checking hash locally')
+                        logger.info('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
-                            logger.debug('Hash exists %s' % str(hash_exists))
+                            logger.info('Hash exists %s' % str(hash_exists))
                             if (hash_exists and
                                     (self.procs[jobid].overwrite == False or
                                      (self.procs[jobid].overwrite == None and
-                                              not self.procs[jobid]._interface.always_run)
+                                      not self.procs[jobid]._interface.always_run)
                                      )
-                                    ):
+                                ):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -194,8 +230,8 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._clean_queue(jobid, graph)
                             self.proc_pending[jobid] = False
                             continue_with_submission = False
-                    logger.debug('Finished checking hash %s' %
-                                 str(continue_with_submission))
+                    logger.info('Finished checking hash %s' %
+                                str(continue_with_submission))
                     if continue_with_submission:
                         sworker = getattr(self.procs[jobid]._interface,
                                           '_singleworker', True)
@@ -205,7 +241,7 @@ class MultiProcPlugin(DistributedPluginBase):
                                         self.procs[jobid])
                             self._wait_pool()
                             logger.info(('All workers clean, running %s on '
-                                        'master thread') % self.procs[jobid])
+                                         'master thread') % self.procs[jobid])
                             try:
                                 self.procs[jobid].run()
                             except Exception:
@@ -214,8 +250,8 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._remove_node_dirs()
                             self._start_pool()
                         elif self.procs[jobid].run_without_submitting:
-                            logger.debug('Running node %s on master thread' %
-                                         self.procs[jobid])
+                            logger.info('Running node %s on master thread' %
+                                        self.procs[jobid])
                             try:
                                 self.procs[jobid].run()
                             except Exception:
