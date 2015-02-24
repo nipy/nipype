@@ -109,6 +109,8 @@ class MultiProcPlugin(DistributedPluginBase):
     def _wait_pool(self):
         self.pool.close()
         error = False
+
+        killedjobs = []
         for taskid in self._inpool:
             try:
                 logger.info('Waiting for task ID %d' % taskid)
@@ -117,13 +119,15 @@ class MultiProcPlugin(DistributedPluginBase):
                 logger.info(
                     'TimeoutError raised waiting for task %d' % taskid)
                 error = True
+                killedjobs.append(taskid)
 
         if error:
             self.pool.terminate()
             logger.info('Pool terminated, with %d remaining tasks' %
-                        len(self._inpool))
+                        killedjobs)
 
-        return self._inpool
+        self._inpool = []
+        return killedjobs
 
     def _get_result(self, taskid):
         logger.info('Getting result of task ID %d' % taskid)
