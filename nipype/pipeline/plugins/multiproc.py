@@ -120,6 +120,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     'TimeoutError, killing task %d' % taskid)
                 error = True
                 killedjobs.append(taskid)
+                del self._taskresult[taskid]
 
         if error:
             self.pool.terminate()
@@ -152,24 +153,27 @@ class MultiProcPlugin(DistributedPluginBase):
             logger.debug('Node ID %d (tID=%d) was not in pool' %
                         (nodeid, taskid))
 
-    def _submit_job(self, nodeid, node, updatehash=False):
-        self._taskid += 1
+    def _submit_job(self, nodeid, node, updatehash=False, taskid=None):
+        if taskid is None:
+            self._taskid += 1
+            taskid = self._taskid
+
         try:
             if node.inputs.terminal_output == 'stream':
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
 
-        self._taskresult[self._taskid] = self.pool.apply_async(
-            run_node, (self._taskid, nodeid, node, updatehash,),
+        self._taskresult[taskid] = self.pool.apply_async(
+            run_node, (taskid, nodeid, node, updatehash,),
             callback=self._job_callback)
-        self._inpool.append(self._taskid)
+        self._inpool.append(taskid)
 
         logger.info('Submitted node ID %d with tID %d' %
-                    (nodeid, self._taskid))
+                    (nodeid, taskid))
         logger.debug('Current pool is %s' %
                      str(self._inpool))
-        return self._taskid
+        return taskid
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -271,11 +275,13 @@ class MultiProcPlugin(DistributedPluginBase):
 
                             if not sworker:
                                 self._start_pool()
-                                self._bulk_submit(killedjobs, updatehash)
+                                self._resubmit_tasks(
+                                    killedjobs,
+                                    updatehash=updatehash)
             else:
                 break
 
-    def _run_main(self, jobid, updatehash):
+    def _run_main(self, jobid, updatehash=False):
         logger.info('Running node %s (%d) on master thread' %
                     (self.procs[jobid], jobid))
         try:
@@ -285,7 +291,17 @@ class MultiProcPlugin(DistributedPluginBase):
         self._task_finished_cb(jobid)
         self._remove_node_dirs()
 
-    def _bulk_submit(self, joblist, updatehash):
+    def _resubmit_tasks(self, taskslist, updatehash=False):
+        pt = np.array(self.pending_tasks)
+        for tid in taskslist:
+            jobid = np.atleast_1d(pt[pt[:, 0] == tid][1])[0]
+            logger.info('Resubmitting jobid %d with taskid %d' %
+                        (jobid, tid))
+            self._submit_job(jobid, deepcopy(self.procs[jobid]),
+                             updatehash=updatehash,
+                             taskid=tid)
+
+    def _bulk_submit(self, joblist, updatehash=False):
         joblist = np.atleast_1d(joblist).tolist()
 
         for jobid in joblist:
