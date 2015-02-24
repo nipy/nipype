@@ -259,8 +259,8 @@ class MultiProcPlugin(DistributedPluginBase):
                     if continue_with_submission:
                         sworker = getattr(self.procs[jobid]._interface,
                                           '_singleworker', True)
-                        nosubmit = getattr(
-                            self.procs[jobid].run_without_submitting, False)
+                        nosubmit = getattr(self.procs[jobid],
+                                           'run_without_submitting', False)
 
                         if sworker and not nosubmit:
                             self._bulk_submit(jobid, updatehash)
