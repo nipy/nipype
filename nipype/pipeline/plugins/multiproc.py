@@ -21,8 +21,9 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(taskid, node, updatehash):
-    result = dict(result=None, traceback=None, taskid=taskid)
+def run_node(taskid, nodeid, node, updatehash):
+    result = dict(result=None, traceback=None,
+                  taskid=taskid, nodeid=nodeid)
     try:
         result['result'] = node.run(updatehash=updatehash)
     except:
@@ -138,14 +139,17 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _job_callback(self, result):
         taskid = result['taskid']
-        logger.info('Called callback of job ID %d' % taskid)
+        nodeid = result['nodeid']
+        logger.info('Called callback of node ID %d with tID %d' %
+                    (nodeid, taskid))
 
         if taskid in self._inpool:
             self._inpool.remove(taskid)
         else:
-            logger.info('Job ID %d was not in pool' % taskid)
+            logger.info('Node ID %d (tID=%d) was not in pool' %
+                        (nodeid, taskid))
 
-    def _submit_job(self, node, updatehash=False):
+    def _submit_job(self, nodeid, node, updatehash=False):
         self._taskid += 1
         try:
             if node.inputs.terminal_output == 'stream':
@@ -154,7 +158,7 @@ class MultiProcPlugin(DistributedPluginBase):
             pass
 
         self._taskresult[self._taskid] = self.pool.apply_async(
-            run_node, (self._taskid, node, updatehash,)
+            run_node, (self._taskid, nodeid, node, updatehash,),
             callback=self._job_callback)
         self._inpool.append(self._taskid)
         return self._taskid
