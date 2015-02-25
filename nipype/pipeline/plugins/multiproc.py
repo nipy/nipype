@@ -80,31 +80,33 @@ class MultiProcPlugin(DistributedPluginBase):
         self._inpool = []
         self._taskid = 0
         self._non_daemon = True
-        self._n_procs = cpu_count()
+
+        self._poolcfg = dict(processes=cpu_count(),
+                             initializer=self._init_worker,
+                             maxtasksperchild=None)
 
         self._maxtasks = None
         if plugin_args:
             if 'n_procs' in plugin_args:
-                self._n_procs = plugin_args['n_procs']
+                self._poolcfg['processes'] = plugin_args['n_procs']
             if 'non_daemon' in plugin_args:
                 self._non_daemon = plugin_args['non_daemon']
             if 'maxtasksperchild' in plugin_args:
-                self._maxtasks = plugin_args['maxtasksperchild']
+                self._poolcfg['maxtasksperchild'] = plugin_args[
+                    'maxtasksperchild']
         self._start_pool()
 
     def _start_pool(self):
-        logger.debug('Starting %s pool' % 'non-daemon'
-                     if self._non_daemon else 'daemon')
-        # set maxtasksperchild 5 to refresh workers with that frequency
-        if self._non_daemon:
-            # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=self._n_procs,
-                                      maxtasksperchild=self._maxtasks,
-                                      initializer=self._init_worker)
-        else:
-            self.pool = Pool(processes=self._n_procs,
-                             maxtasksperchild=self._maxtasks,
-                             initializer=self._init_worker)
+        try:
+            # run the execution using the appropriate pool subclass
+            self.pool = NonDaemonPool(**self._poolcfg) \
+                if self._non_daemon else Pool(**self.poolcfg)
+
+            logger.debug('Started new %s pool' % 'non-daemon'
+                         if self._non_daemon else 'daemon')
+        except TypeError:
+            del self._poolcfg['maxtasksperchild']
+            self._start_pool(self)
 
     def _wait_pool(self):
         self.pool.close()
