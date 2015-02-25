@@ -116,7 +116,7 @@ class MultiProcPlugin(DistributedPluginBase):
         for taskid in self._inpool:
             try:
                 logger.debug('Waiting for task ID %d' % taskid)
-                self._taskresult[taskid].wait(30)
+                self._taskresult[taskid].wait()
             except TimeoutError:
                 logger.warn(
                     'TimeoutError, killing task %d' % taskid)
@@ -139,6 +139,7 @@ class MultiProcPlugin(DistributedPluginBase):
             raise RuntimeError('Multiproc task %d not found' % taskid)
 
         if not self._taskresult[taskid].ready():
+            logger.debug('Task %d not ready' % taskid)
             return None
 
         return self._taskresult[taskid].get()
@@ -206,8 +207,9 @@ class MultiProcPlugin(DistributedPluginBase):
             undone = np.logical_not(self.proc_done).astype(np.uint8)
             jobids = np.flatnonzero(undone * jobdeps)
 
-            logger.info('Slots available: %s. Jobs available=%d, undone=%d' %
-                        (slots, len(jobids), np.sum(undone)))
+            logger.info(('Slots available: %s. Jobs avail./undone/total='
+                         '%d/%d/%d') % (slots, len(jobids), undone.sum(),
+                                        len(self.proc_done)))
 
             if len(jobids) > 0:
                 # send all available jobs
@@ -339,6 +341,9 @@ class MultiProcPlugin(DistributedPluginBase):
         notrun = []
         it = 0
         while (not np.all(self.proc_done) or np.any(self.proc_pending)):
+            logger.debug(('All processes done: %r. Any process is pending: '
+                          '%r.') % (np.all(self.proc_done),
+                                    np.any(self.proc_pending)))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
