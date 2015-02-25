@@ -134,26 +134,21 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _get_result(self, taskid):
         logger.info('Getting result of task ID %d' % taskid)
-
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found' % taskid)
-
-        if not self._taskresult[taskid].ready():
-            logger.info('Get not ready tid=%d' % taskid)
-            return None
-
         return self._taskresult[taskid].get()
 
     def _job_callback(self, result):
         taskid = result['taskid']
         jobid = result['jobid']
-        logger.info('Called callback: jid, tid = (%d, %d)' %
-                    (jobid, taskid))
 
-        if self._taskresult[taskid].ready():
+        if result['traceback'] is None:
             self._task_finished_cb(jobid)
             self._remove_node_dirs()
             self._clear_task(taskid)
+
+            logger.info('Callback processed: jid, tid = (%d, %d)' %
+                        (jobid, taskid))
 
             if taskid in self._inpool:
                 self._inpool.remove(taskid)
@@ -161,8 +156,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 logger.info('Callback (jid, tid) = (%d, %d) was not in pool' %
                             (jobid, taskid))
         else:
-            logger.info('Callback not ready: jid, tid = (%d, %d)' %
-                        (jobid, taskid))
+            logger.info('Callback with errors: jid, tid = (%d, %d), %s' %
+                        (jobid, taskid, result['traceback']))
 
     def _submit_job(self, jobid, node, updatehash=False, taskid=None):
         if taskid is None:
