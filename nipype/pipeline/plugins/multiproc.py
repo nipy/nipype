@@ -21,9 +21,9 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(taskid, nodeid, node, updatehash):
+def run_node(taskid, jobid, node, updatehash):
     result = dict(result=None, traceback=None,
-                  taskid=taskid, nodeid=nodeid)
+                  taskid=taskid, jobid=jobid)
     try:
         result['result'] = node.run(updatehash=updatehash)
     except:
@@ -102,8 +102,8 @@ class MultiProcPlugin(DistributedPluginBase):
             self.pool = NonDaemonPool(**self._poolcfg) \
                 if self._non_daemon else Pool(**self.poolcfg)
 
-            logger.debug('Started new %s pool' % 'non-daemon'
-                         if self._non_daemon else 'daemon')
+            logger.info('Started new %s pool' % 'non-daemon'
+                        if self._non_daemon else 'daemon')
         except TypeError:
             del self._poolcfg['maxtasksperchild']
             self._start_pool()
@@ -115,7 +115,7 @@ class MultiProcPlugin(DistributedPluginBase):
         killedjobs = []
         for taskid in self._inpool:
             try:
-                logger.debug('Waiting for task ID %d' % taskid)
+                logger.info('Waiting for task ID %d' % taskid)
                 self._taskresult[taskid].wait()
             except TimeoutError:
                 logger.warn(
@@ -126,37 +126,45 @@ class MultiProcPlugin(DistributedPluginBase):
 
         if error:
             self.pool.terminate()
-            logger.debug('Pool terminated, with %d remaining tasks' %
-                         killedjobs)
+            logger.info('Pool terminated, with %d remaining tasks' %
+                        killedjobs)
 
         self._inpool = []
         return killedjobs
 
     def _get_result(self, taskid):
-        logger.debug('Getting result of task ID %d' % taskid)
+        logger.info('Getting result of task ID %d' % taskid)
 
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found' % taskid)
 
         if not self._taskresult[taskid].ready():
-            logger.debug('Task %d not ready' % taskid)
+            logger.info('Get not ready tid=%d' % taskid)
             return None
 
         return self._taskresult[taskid].get()
 
     def _job_callback(self, result):
         taskid = result['taskid']
-        nodeid = result['nodeid']
-        logger.debug('Called callback of node ID %d with tID %d' %
-                     (nodeid, taskid))
+        jobid = result['jobid']
+        logger.info('Called callback: jid, tid = (%d, %d)' %
+                    (jobid, taskid))
 
-        if taskid in self._inpool:
-            self._inpool.remove(taskid)
+        if self._taskresult[taskid].ready():
+            self._task_finished_cb(jobid)
+            self._remove_node_dirs()
+            self._clear_task(taskid)
+
+            if taskid in self._inpool:
+                self._inpool.remove(taskid)
+            else:
+                logger.info('Callback (jid, tid) = (%d, %d) was not in pool' %
+                            (jobid, taskid))
         else:
-            logger.debug('Node ID %d (tID=%d) was not in pool' %
-                         (nodeid, taskid))
+            logger.info('Callback not ready: jid, tid = (%d, %d)' %
+                        (jobid, taskid))
 
-    def _submit_job(self, nodeid, node, updatehash=False, taskid=None):
+    def _submit_job(self, jobid, node, updatehash=False, taskid=None):
         if taskid is None:
             self._taskid += 1
             taskid = self._taskid
@@ -168,14 +176,14 @@ class MultiProcPlugin(DistributedPluginBase):
             pass
 
         self._taskresult[taskid] = self.pool.apply_async(
-            run_node, (taskid, nodeid, node, updatehash,),
+            run_node, (taskid, jobid, node, updatehash,),
             callback=self._job_callback)
         self._inpool.append(taskid)
 
         logger.info('Submitted node ID %d with tID %d' %
-                    (nodeid, taskid))
-        logger.debug('Current pool is %s' %
-                     str(self._inpool))
+                    (jobid, taskid))
+        logger.info('Current pool is %s' %
+                    str(self._inpool))
         return taskid
 
     def _report_crash(self, node, result=None):
@@ -237,7 +245,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
                                 ['local_hash_check']):
-                        logger.debug('checking hash locally')
+                        logger.info('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
@@ -245,7 +253,7 @@ class MultiProcPlugin(DistributedPluginBase):
                                                 'overwrite', False)
                             always_run = getattr(self.procs[jobid]._interface,
                                                  'always_run', False)
-                            logger.debug('Hash exists %s' % str(hash_exists))
+                            logger.info('Hash exists %s' % str(hash_exists))
 
                             if (hash_exists and not overwrite
                                     and not always_run):
@@ -273,10 +281,10 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._bulk_submit(jobid, updatehash)
                         else:
                             if not sworker:
-                                logger.debug('Node %s claimed all workers' %
-                                             self.procs[jobid])
+                                logger.info('Node %s claimed all workers' %
+                                            self.procs[jobid])
                                 killedjobs = self._wait_pool()
-                                logger.debug(
+                                logger.info(
                                     ('All workers clean, running %s on '
                                      'master thread') % self.procs[jobid])
 
@@ -341,43 +349,42 @@ class MultiProcPlugin(DistributedPluginBase):
         notrun = []
         it = 0
         while (not np.all(self.proc_done) or np.any(self.proc_pending)):
-            logger.debug(('All processes done: %r. Any process is pending: '
-                          '%r.') % (np.all(self.proc_done),
-                                    np.any(self.proc_pending)))
+            logger.info(('All processes done: %r. Any process is pending: '
+                         '%r.') % (np.all(self.proc_done),
+                                   np.any(self.proc_pending)))
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
                 taskid, jobid = self.pending_tasks.pop()
-                logger.debug('Processing job %s (jid=%d, tid=%d)' %
-                             (self.procs[jobid], jobid, taskid))
+                logger.info('Getting result (jid=%d, tid=%d): %s' %
+                            (jobid, taskid, self.procs[jobid]))
                 try:
                     result = self._get_result(taskid)
-                    if result:
-                        if result['traceback']:
-                            notrun.append(self._clean_queue(jobid, graph,
-                                                            result=result))
-                        else:
-                            self._task_finished_cb(jobid)
-                            self._remove_node_dirs()
-                        self._clear_task(taskid)
-                    else:
-                        logger.info('Inserting job %s (jid=%d, tid=%d)' %
-                                    (self.procs[jobid], jobid, taskid))
-                        toappend.insert(0, (taskid, jobid))
                 except Exception:
-                    result = {'result': None,
-                              'traceback': format_exc()}
-                    notrun.append(self._clean_queue(jobid, graph,
-                                                    result=result))
+                    result = {'traceback': format_exc()}
+
+                if result is None:
+                    logger.info('Inserting (jid=%d, tid=%d): %s' %
+                                (jobid, taskid, self.procs[jobid]))
+                    toappend.insert(0, (taskid, jobid))
+                else:
+                    if result['traceback'] is not None:
+                        notrun.append(self._clean_queue(jobid, graph,
+                                                        result=result))
+                        logger.info(('Node (jid=%d, tid=%d will not be run, '
+                                     'reason: %s') % (jobid, taskid,
+                                                      result['traceback']))
+
             if toappend:
                 self.pending_tasks.extend(toappend)
+
             num_jobs = len(self.pending_tasks)
             logger.info('Number of pending tasks: %d' % num_jobs)
             if num_jobs < self.max_jobs:
                 self._send_procs_to_workers(updatehash=updatehash,
                                             graph=graph)
             else:
-                logger.debug('Not submitting')
+                logger.info('Not submitting')
 
             undone = self.proc_done.astype(np.uint8).sum()
             pending = self.proc_pending.astype(np.uint8).sum()
