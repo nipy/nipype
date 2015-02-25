@@ -136,6 +136,10 @@ class MultiProcPlugin(DistributedPluginBase):
         logger.info('Getting result of task ID %d' % taskid)
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found' % taskid)
+
+        if taskid in self._inpool:
+            return None
+
         return self._taskresult[taskid].get()
 
     def _job_callback(self, result):
@@ -365,7 +369,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     if result['traceback'] is not None:
                         notrun.append(self._clean_queue(jobid, graph,
                                                         result=result))
-                        logger.info(('Node (jid=%d, tid=%d will not be run, '
+                        logger.info(('Node (jid=%d, tid=%d) will not be run, '
                                      'reason: %s') % (jobid, taskid,
                                                       result['traceback']))
 
