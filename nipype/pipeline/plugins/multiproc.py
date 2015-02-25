@@ -325,7 +325,7 @@ class MultiProcPlugin(DistributedPluginBase):
         """
         Executes a pre-defined pipeline using distributed approaches
         """
-        logger.info('Running in parallel %d nodes.' % len(self.proc_done))
+        logger.info('Running in parallel.')
         self._config = config
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
@@ -335,6 +335,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self.mapnodesubids = {}
         # setup polling - TODO: change to threaded model
         notrun = []
+        it = 0
         while (not np.all(self.proc_done) or np.any(self.proc_pending)):
             toappend = []
             # trigger callbacks for any pending results
@@ -370,7 +371,17 @@ class MultiProcPlugin(DistributedPluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
+
+            undone = self.proc_done.astype(np.uint8).sum()
+            pending = self.proc_pending.astype(np.uint8).sum()
+
+            logger.info(('Polling processes [%02d]: Undone=%d/%d; '
+                         'Pending=%d/%d') % (it,
+                                             undone, len(self.proc_done),
+                                             pending, len(self.proc_pending)))
+
             sleep(float(self._config['execution']['poll_sleep_duration']))
+            it += 1
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
