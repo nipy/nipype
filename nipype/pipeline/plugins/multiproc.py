@@ -120,7 +120,7 @@ class MultiProcPlugin(DistributedPluginBase):
                     'TimeoutError, killing task %d' % taskid)
                 error = True
                 killedjobs.append(taskid)
-                del self._taskresult[taskid]
+                self._clear_task(taskid)
 
         if error:
             self.pool.terminate()
@@ -196,12 +196,16 @@ class MultiProcPlugin(DistributedPluginBase):
                 slots = None
             else:
                 slots = max(0, self.max_jobs - num_jobs)
-            logger.info('Slots available: %s' % slots)
+
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
             jobids = np.flatnonzero(np.logical_not(self.proc_done) &
                                     (self.depidx.sum(axis=0) == 0).__array__())
+
+            logger.info('Slots available: %s. Jobs available: %d' %
+                        (slots, len(jobids)))
+
             if len(jobids) > 0:
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids[:slots]))
@@ -292,6 +296,7 @@ class MultiProcPlugin(DistributedPluginBase):
         self._remove_node_dirs()
 
     def _resubmit_tasks(self, taskslist, updatehash=False):
+        taskslist = np.atleast_1d(taskslist).tolist()
         pt = np.array(self.pending_tasks)
         for tid in taskslist:
             jobid = np.atleast_1d(pt[pt[:, 0] == tid][1])[0]
@@ -313,3 +318,55 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.proc_pending[jobid] = False
             else:
                 self.pending_tasks.insert(0, (tid, jobid))
+
+    def run(self, graph, config, updatehash=False):
+        """Executes a pre-defined pipeline using distributed approaches
+        """
+        logger.info("Running in parallel.")
+        self._config = config
+        # Generate appropriate structures for worker-manager model
+        self._generate_dependency_list(graph)
+        self.pending_tasks = []
+        self.readytorun = []
+        self.mapnodes = []
+        self.mapnodesubids = {}
+        # setup polling - TODO: change to threaded model
+        notrun = []
+        while (not np.all(self.proc_done) or np.any(self.proc_pending)):
+            toappend = []
+            # trigger callbacks for any pending results
+            while self.pending_tasks:
+                taskid, jobid = self.pending_tasks.pop()
+                logger.debug('Processing job %d with taskid %d' %
+                             (taskid, jobid))
+                try:
+                    result = self._get_result(taskid)
+                    if result:
+                        if result['traceback']:
+                            notrun.append(self._clean_queue(jobid, graph,
+                                                            result=result))
+                        else:
+                            self._task_finished_cb(jobid)
+                            self._remove_node_dirs()
+                        self._clear_task(taskid)
+                    else:
+                        logger.info('Inserting job %d with taskid %d' %
+                                    (taskid, jobid))
+                        toappend.insert(0, (taskid, jobid))
+                except Exception:
+                    result = {'result': None,
+                              'traceback': format_exc()}
+                    notrun.append(self._clean_queue(jobid, graph,
+                                                    result=result))
+            if toappend:
+                self.pending_tasks.extend(toappend)
+            num_jobs = len(self.pending_tasks)
+            logger.info('Number of pending tasks: %d' % num_jobs)
+            if num_jobs < self.max_jobs:
+                self._send_procs_to_workers(updatehash=updatehash,
+                                            graph=graph)
+            else:
+                logger.debug('Not submitting')
+            sleep(float(self._config['execution']['poll_sleep_duration']))
+        self._remove_node_dirs()
+        report_nodes_not_run(notrun)
