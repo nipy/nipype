@@ -7,7 +7,8 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import Process, Pool, cpu_count, pool, TimeoutError
+from multiprocessing import (Process, Pool, cpu_count, pool, TimeoutError,
+                             Semaphore)
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -25,6 +26,8 @@ def run_node(taskid, jobid, node, updatehash):
     result = dict(result=None, traceback=None,
                   taskid=taskid, jobid=jobid)
     try:
+        logger.info('Execute node (tid=%d, jid=%d): %s' %
+                    (taskid, jobid, node._id))
         result['result'] = node.run(updatehash=updatehash)
     except:
         etype, eval, etr = sys.exc_info()
@@ -80,7 +83,6 @@ class MultiProcPlugin(DistributedPluginBase):
         self._inpool = []
         self._taskid = 0
         self._non_daemon = True
-
         self._poolcfg = dict(processes=cpu_count(),
                              initializer=self._init_worker,
                              maxtasksperchild=None)
@@ -95,6 +97,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 self._poolcfg['maxtasksperchild'] = plugin_args[
                     'maxtasksperchild']
         self._start_pool()
+        self._sem = Semaphore(2 * self._poolcfg['processes'])
 
     def _start_pool(self):
         try:
@@ -159,7 +162,12 @@ class MultiProcPlugin(DistributedPluginBase):
             logger.info('Callback with errors: jid, tid = (%d, %d), %s' %
                         (jobid, taskid, result['traceback']))
 
+        self._sem.release()
+
     def _submit_job(self, jobid, node, updatehash=False, taskid=None):
+        logger.info('Acquiring semaphore')
+        self._sem.acquire()
+
         if taskid is None:
             self._taskid += 1
             taskid = self._taskid
