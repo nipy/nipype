@@ -106,7 +106,7 @@ class MultiProcPlugin(DistributedPluginBase):
                          if self._non_daemon else 'daemon')
         except TypeError:
             del self._poolcfg['maxtasksperchild']
-            self._start_pool(self)
+            self._start_pool()
 
     def _wait_pool(self):
         self.pool.close()
