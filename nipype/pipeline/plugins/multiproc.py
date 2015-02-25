@@ -143,10 +143,6 @@ class MultiProcPlugin(DistributedPluginBase):
         jobid = result['jobid']
 
         if result['traceback'] is None:
-            self._task_finished_cb(jobid)
-            self._remove_node_dirs()
-            self._clear_task(taskid)
-
             logger.info('Callback processed: jid, tid = (%d, %d)' %
                         (jobid, taskid))
 
@@ -206,8 +202,8 @@ class MultiProcPlugin(DistributedPluginBase):
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
-            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
             undone = np.logical_not(self.proc_done).astype(np.uint8)
+            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
             jobids = np.flatnonzero(undone * jobdeps)
 
             logger.info(('Slots available: %s. Jobs avail./undone/total='
@@ -363,6 +359,9 @@ class MultiProcPlugin(DistributedPluginBase):
                                 (jobid, taskid, self.procs[jobid]))
                     toappend.insert(0, (taskid, jobid))
                 else:
+                    self._task_finished_cb(jobid)
+                    self._remove_node_dirs()
+                    self._clear_task(taskid)
                     if result['traceback'] is not None:
                         notrun.append(self._clean_queue(jobid, graph,
                                                         result=result))
