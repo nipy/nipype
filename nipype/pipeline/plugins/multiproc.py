@@ -8,7 +8,7 @@ http://stackoverflow.com/a/8963618/1183453
 """
 
 from multiprocessing import (Process, Pool, cpu_count, pool, TimeoutError,
-                             Semaphore)
+                             Semaphore, Manager)
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -81,6 +81,10 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        self._manager = Manager()
+        self._results = m.dict()
+        # TODO: remove _taskresult dict,
+        # http://stackoverflow.com/questions/25071910/multiprocessing-pool-calling-helper-functions-when-using-apply-asyncs-callback
         self._taskresult = {}
         self._inpool = []
         self._taskid = 0
