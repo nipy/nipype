@@ -29,6 +29,8 @@ def run_node(taskid, jobid, node, updatehash):
         logger.info('Execute node (tid=%d, jid=%d): %s' %
                     (taskid, jobid, node._id))
         result['result'] = node.run(updatehash=updatehash)
+        logger.info('Finished node (tid=%d, jid=%d): %s' %
+                    (taskid, jobid, node._id))
     except:
         etype, eval, etr = sys.exc_info()
         result['traceback'] = format_exception(etype, eval, etr)
