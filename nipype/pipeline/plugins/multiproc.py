@@ -145,13 +145,13 @@ class MultiProcPlugin(DistributedPluginBase):
         taskid = result['taskid']
         nodeid = result['nodeid']
         logger.debug('Called callback of node ID %d with tID %d' %
-                    (nodeid, taskid))
+                     (nodeid, taskid))
 
         if taskid in self._inpool:
             self._inpool.remove(taskid)
         else:
             logger.debug('Node ID %d (tID=%d) was not in pool' %
-                        (nodeid, taskid))
+                         (nodeid, taskid))
 
     def _submit_job(self, nodeid, node, updatehash=False, taskid=None):
         if taskid is None:
@@ -200,11 +200,12 @@ class MultiProcPlugin(DistributedPluginBase):
             if (num_jobs >= self.max_jobs) or (slots == 0):
                 break
             # Check to see if a job is available
-            jobids = np.flatnonzero(np.logical_not(self.proc_done) &
-                                    (self.depidx.sum(axis=0) == 0).__array__())
+            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
+            undone = np.logical_not(self.proc_done).astype(np.uint8)
+            jobids = np.flatnonzero(undone * jobdeps)
 
-            logger.info('Slots available: %s. Jobs available: %d' %
-                        (slots, len(jobids)))
+            logger.info('Slots available: %s. Jobs available=%d, undone=%d' %
+                        (slots, len(jobids), np.sum(undone)))
 
             if len(jobids) > 0:
                 # send all available jobs
@@ -298,6 +299,7 @@ class MultiProcPlugin(DistributedPluginBase):
     def _resubmit_tasks(self, taskslist, updatehash=False):
         taskslist = np.atleast_1d(taskslist).tolist()
         pt = np.array(self.pending_tasks)
+        logger.info('Resubmit taskslist %s' % str(taskslist))
         for tid in taskslist:
             jobid = np.atleast_1d(pt[pt[:, 0] == tid][1])[0]
             logger.info('Resubmitting jobid %d with taskid %d' %
@@ -320,9 +322,10 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.pending_tasks.insert(0, (tid, jobid))
 
     def run(self, graph, config, updatehash=False):
-        """Executes a pre-defined pipeline using distributed approaches
         """
-        logger.info("Running in parallel.")
+        Executes a pre-defined pipeline using distributed approaches
+        """
+        logger.info('Running in parallel %d nodes.' % len(self.proc_done))
         self._config = config
         # Generate appropriate structures for worker-manager model
         self._generate_dependency_list(graph)
@@ -337,8 +340,8 @@ class MultiProcPlugin(DistributedPluginBase):
             # trigger callbacks for any pending results
             while self.pending_tasks:
                 taskid, jobid = self.pending_tasks.pop()
-                logger.debug('Processing job %d with taskid %d' %
-                             (taskid, jobid))
+                logger.debug('Processing job %s (jid=%d, tid=%d)' %
+                             (self.procs[jobid], jobid, taskid))
                 try:
                     result = self._get_result(taskid)
                     if result:
@@ -350,8 +353,8 @@ class MultiProcPlugin(DistributedPluginBase):
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
-                        logger.info('Inserting job %d with taskid %d' %
-                                    (taskid, jobid))
+                        logger.info('Inserting job %s (jid=%d, tid=%d)' %
+                                    (self.procs[jobid], jobid, taskid))
                         toappend.insert(0, (taskid, jobid))
                 except Exception:
                     result = {'result': None,
@@ -368,5 +371,6 @@ class MultiProcPlugin(DistributedPluginBase):
             else:
                 logger.debug('Not submitting')
             sleep(float(self._config['execution']['poll_sleep_duration']))
+
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
