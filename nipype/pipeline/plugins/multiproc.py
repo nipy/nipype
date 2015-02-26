@@ -108,7 +108,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
 
         self._manager = Manager()  # Use safe dicts
         self._results = self._manager.dict()   # Save results here
-        self._active =  self._manager.dict()    # Save active tasks here (AsyncResult)
+        self._active = self._manager.dict()    # Save active tasks here (AsyncResult)
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
@@ -125,25 +125,24 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._start_pool()
 
     def _submit_job(self, jobid, node, updatehash=False):
-        logger.info('Acquiring semaphore')
-        self._sem.acquire()
-
         try:
             if node.inputs.terminal_output == 'stream':
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
 
+        logger.info('Acquiring semaphore')
+        self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
             run_node, (self._results, self._active, jobid, node,
                        updatehash,),
-            callback=self._job_callback)
+            callback=self._sem_release)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active.keys()))
         return self._active[jobid]
 
-    def _job_callback(self, r):
+    def _sem_release(self):
         self._sem.release()
 
     def _report_crash(self, node, result=None):
