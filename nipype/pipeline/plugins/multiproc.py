@@ -7,7 +7,8 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import (Process, Pool, cpu_count, pool, TimeoutError)
+from multiprocessing import (Process, Pool, cpu_count, pool,
+                             Manager, TimeoutError)
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -100,8 +101,9 @@ class MultiProcPlugin(DistributedPluginBase):
 calling-helper-functions-when-using-apply-asyncs-callback
         """
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-        self._results = dict()   # Save results here
-        self._active = dict()    # Save active tasks here (AsyncResult)
+        m = Manager()
+        self._results = m.dict()   # Save results here
+        self._active = m.dict()    # Save active tasks here (AsyncResult)
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
@@ -112,10 +114,9 @@ calling-helper-functions-when-using-apply-asyncs-callback
             initializer=self._init_worker,
             maxtasksperchild=plugin_args.get('maxtasksperchild', 5))
         self._non_daemon = plugin_args.get('non_daemon', True)
-
+        self._start_pool()
         # Do not allow the _active queue grow too much
         # self._sem = Semaphore(2 * self._poolcfg['processes'])
-        self._start_pool()
 
     def _submit_job(self, jobid, node, updatehash=False):
         if jobid in self._results.keys():
