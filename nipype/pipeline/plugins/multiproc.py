@@ -21,24 +21,18 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(results, active, jobid, node, updatehash):
-    jobdict = dict(result=None, traceback=None)
+def run_node(jobid, node, updatehash):
+    jres = dict(result=None, traceback=None, jobid=jobid)
     logging.info('[Starting] Job %d' % jobid)
     try:
-        jobdict['result'] = node.run(updatehash=updatehash)
+        jres['result'] = node.run(updatehash=updatehash)
+        logging.info('[Terminated] Job %d' % jobid)
     except:
         etype, eval, etr = sys.exc_info()
-        jobdict['traceback'] = format_exception(etype, eval, etr)
-        jobdict['result'] = node.result
-
-    if jobid in results:
-        logging.warn('Overwritting result for job %d' % jobid)
-
-    if active.pop(jobid, None) is not None:
-        logging.warn('Job %d was not in active list' % jobid)
-
-    results[jobid] = jobdict
-    logging.info('[Terminated] Job %d' % jobid)
+        jres['traceback'] = format_exception(etype, eval, etr)
+        jres['result'] = node.result
+        logging.info('[Error] Job %d' % jobid)
+    return jres
 
 
 class NonDaemonProcess(Process):
@@ -139,9 +133,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
         # logger.info('Acquiring semaphore')
         # self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
-            run_node, (self._results, self._active, jobid, node,
-                       updatehash,))
-            # callback=self._sem_release)
+            run_node, (jobid, node, updatehash,),
+            callback=self._job_callback)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active.keys()))
@@ -331,6 +324,10 @@ calling-helper-functions-when-using-apply-asyncs-callback
 
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
+
+    def _job_callback(self, result):
+        self._results[jobid] = result
+        del self._active[jobid]
 
     def _get_result(self, jobid):
         if jobid in self._active:
