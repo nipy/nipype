@@ -22,17 +22,22 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(jobid, node, updatehash):
-    jres = dict(result=None, traceback=None, jobid=jobid)
-    logging.info('[Starting] Job %d' % jobid)
+def run_node(args):
+    jobid = args[0]
+    node = args[1]
+    updatehash = args[2]
+
+    jres = dict()
+    jres[jobid] = dict(result=None, traceback=None)
+    logger.info('[Starting] Job %d' % jobid)
     try:
-        jres['result'] = node.run(updatehash=updatehash)
-        logging.info('[Terminated] Job %d' % jobid)
+        jres[jobid]['result'] = node.run(updatehash=updatehash)
+        logger.info('[Terminated] Job %d' % jobid)
     except:
         etype, eval, etr = sys.exc_info()
-        jres['traceback'] = format_exception(etype, eval, etr)
-        jres['result'] = node.result
-        logging.info('[Error] Job %d' % jobid)
+        jres[jobid]['traceback'] = format_exception(etype, eval, etr)
+        jres[jobid]['result'] = node.result
+        logger.info('[Error] Job %d' % jobid)
     return jres
 
 
@@ -138,9 +143,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
         #    callback=self._job_callback)
         self._active.append(jobid)
         self._results[jobid] = None
-        self.pool.map_async(
-            run_node, [(jobid, node, updatehash,)],
-            callback=self._job_callback)
+        self.pool.map_async(run_node, [(jobid, node, updatehash,)],
+                            callback=self._job_callback)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active))
@@ -332,8 +336,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
         report_nodes_not_run(notrun)
 
     def _job_callback(self, result):
-        jobid = result['jobid']
-        self._results[jobid] = result['result']
+        jobid = result.keys()[0]
+        self._results[jobid] = result[jobid]['result']
         self._active.remove(jobid)
 
     def _get_result(self, jobid):
