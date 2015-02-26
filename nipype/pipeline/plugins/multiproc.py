@@ -101,9 +101,9 @@ class MultiProcPlugin(DistributedPluginBase):
 calling-helper-functions-when-using-apply-asyncs-callback
         """
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-        m = Manager()
-        self._results = m.dict()   # Save results here
-        self._active = m.dict()    # Save active tasks here (AsyncResult)
+        # m = Manager()
+        self._results = {}   # Save results here
+        self._active = []    # Save active tasks here (AsyncResult)
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
@@ -122,9 +122,9 @@ calling-helper-functions-when-using-apply-asyncs-callback
         if jobid in self._results.keys():
             logger.info('Job %d is already processed')
             return self._results[jobid]
-        if jobid in self._active.keys():
+        if jobid in self._active:
             logger.info('Job %d is currently being processed')
-            return self._active[jobid]
+            return True
         try:
             if node.inputs.terminal_output == 'stream':
                 node.inputs.terminal_output = 'allatonce'
@@ -133,13 +133,18 @@ calling-helper-functions-when-using-apply-asyncs-callback
 
         # logger.info('Acquiring semaphore')
         # self._sem.acquire()
-        self._active[jobid] = self.pool.apply_async(
-            run_node, (jobid, node, updatehash,),
+        #self._active[jobid] = self.pool.apply_async(
+        #    run_node, (jobid, node, updatehash,),
+        #    callback=self._job_callback)
+        self._active.append(jobid)
+        self._results[jobid] = None
+        self.pool.map_async(
+            run_node, [(jobid, node, updatehash,)],
             callback=self._job_callback)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
-        logger.info('Current pool is %s' % str(self._active.keys()))
-        return self._active[jobid]
+        logger.info('Current pool is %s' % str(self._active))
+        return True
 
     # def _sem_release(self):
     #     self._sem.release()
@@ -327,8 +332,9 @@ calling-helper-functions-when-using-apply-asyncs-callback
         report_nodes_not_run(notrun)
 
     def _job_callback(self, result):
-        self._results[jobid] = result
-        del self._active[jobid]
+        jobid = result['jobid']
+        self._results[jobid] = result['result']
+        self._active.remove(jobid)
 
     def _get_result(self, jobid):
         if jobid in self._active:
