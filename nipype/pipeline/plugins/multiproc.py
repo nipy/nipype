@@ -123,28 +123,31 @@ calling-helper-functions-when-using-apply-asyncs-callback
         # Do not allow the _active queue grow too much
         # self._sem = Semaphore(2 * self._poolcfg['processes'])
 
-    def _submit_job(self, jobid, node, updatehash=False):
-        if jobid in self._results.keys():
-            logger.info('Job %d is already processed')
-            return self._results[jobid]
-        if jobid in self._active:
-            logger.info('Job %d is currently being processed')
-            return True
-        try:
-            if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'allatonce'
-        except:
-            pass
+    def _submit_jobs(self, jobids, updatehash=False):
+        jobids = np.atleast_1d(jobids).tolist()
 
-        # logger.info('Acquiring semaphore')
-        # self._sem.acquire()
-        #self._active[jobid] = self.pool.apply_async(
-        #    run_node, (jobid, node, updatehash,),
-        #    callback=self._job_callback)
-        self._active.append(jobid)
-        self._results[jobid] = None
-        self.pool.map_async(run_node, [(jobid, node, updatehash,)],
-                            callback=self._job_callback)
+        jobargs = []
+        for jobid in jobids:
+            if jobid in self._results.keys():
+                logger.info('Job %d is already processed')
+            elif jobid in self._active:
+                logger.info('Job %d is currently being processed')
+            else:
+                self._results[jobid] = None
+                self.pending_tasks.insert(0, jobid)
+                node = deepcopy(self.procs[jobid])
+                try:
+                    if node.inputs.terminal_output == 'stream':
+                        node.inputs.terminal_output = 'allatonce'
+                except:
+                    pass
+
+                jobargs.append((jobid, node, updatehash,))
+                self._active.append(jobid)
+
+        self._results = dict(
+            self._results.items() +
+            self.pool.map(run_node, jobargs).items())
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active))
@@ -185,6 +188,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
                                         len(self.proc_done)))
 
             if len(jobids) > 0:
+                joblist = []
+
                 # send all available jobs
                 logger.info('Submitting %d jobs' % len(jobids[:slots]))
                 for jobid in jobids[:slots]:
@@ -243,7 +248,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
                                            'run_without_submitting', False)
 
                         if sworker and not nosubmit:
-                            self._batch_submit(jobid, updatehash=updatehash)
+                            joblist.append(jobid)
                         else:
                             if not sworker:
                                 logger.info('Node %s claimed all workers' %
@@ -257,11 +262,9 @@ calling-helper-functions-when-using-apply-asyncs-callback
 
                             if not sworker:
                                 self._start_pool()
+                                joblist = list(set(joblist.extend(killedjobs)))
 
-                                logger.info('Resubmit jobids %s' %
-                                            str(killedjobs))
-                                self._batch_submit(killedjobs,
-                                                   updatehash=updatehash)
+                    self._submit_jobs(joblist)
             else:
                 break
 
@@ -361,18 +364,6 @@ calling-helper-functions-when-using-apply-asyncs-callback
             self._clean_queue(jobid, graph)
         self._task_finished_cb(jobid)
         self._remove_node_dirs()
-
-    def _batch_submit(self, jobids, updatehash=False):
-        jobids = np.atleast_1d(jobids).tolist()
-        for jobid in jobids:
-            async_task = self._submit_job(
-                jobid, deepcopy(self.procs[jobid]),
-                updatehash=updatehash)
-            if async_task is None:
-                self.proc_done[jobid] = False
-                self.proc_pending[jobid] = False
-            else:
-                self.pending_tasks.insert(0, jobid)
 
     def _wait_pool(self):
         self.pool.close()
