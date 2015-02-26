@@ -22,7 +22,7 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(results, active, jobid, node, sem, updatehash):
+def run_node(results, active, jobid, node, updatehash):
     jobdict = dict(result=None, traceback=None)
     logging.info('[Starting] Job %d' % jobid)
     try:
@@ -40,7 +40,6 @@ def run_node(results, active, jobid, node, sem, updatehash):
 
     results[jobid] = jobdict
     logging.info('[Terminated] Job %d' % jobid)
-    sem.release()
 
 
 class NonDaemonProcess(Process):
@@ -144,15 +143,15 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
             run_node, (self._results, self._active, jobid, node,
-                       self._sem, updatehash,))
-        #    callback=self._sem_release)
+                       updatehash,),
+            callback=self._sem_release)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active.keys()))
         return self._active[jobid]
 
-    # def _sem_release(self):
-    #     self._sem.release()
+    def _sem_release(self):
+        self._sem.release()
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
