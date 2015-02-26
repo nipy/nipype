@@ -27,18 +27,17 @@ def run_node(args):
     node = args[1]
     updatehash = args[2]
 
-    jres = dict()
-    jres[jobid] = dict(result=None, traceback=None)
-    logger.info('[Starting] Job %d' % jobid)
+    jres = dict(result=None, traceback=None)
+    logger.info('[Starting] Job %d %s' % (jobid, str(node._id)))
     try:
-        jres[jobid]['result'] = node.run(updatehash=updatehash)
-        logger.info('[Terminated] Job %d' % jobid)
+        jres['result'] = node.run(updatehash=updatehash)
+        logger.info('[Terminated] Job %d %s' % (jobid, str(node._id)))
     except:
         etype, eval, etr = sys.exc_info()
-        jres[jobid]['traceback'] = format_exception(etype, eval, etr)
-        jres[jobid]['result'] = node.result
-        logger.info('[Error] Job %d' % jobid)
-    return jres
+        jres['traceback'] = format_exception(etype, eval, etr)
+        jres['result'] = node.result
+        logger.info('[Error] Job %d: %s' % (jobid, jres['traceback']))
+    return (jobid, jres)
 
 
 class NonDaemonProcess(Process):
@@ -93,8 +92,9 @@ class MultiProcPlugin(DistributedPluginBase):
             # run the execution using the appropriate pool subclass
             self.pool = NonDaemonPool(**self._poolcfg) \
                 if self._non_daemon else Pool(**self.poolcfg)
-            logger.info('Started new %s pool' % 'non-daemon'
-                        if self._non_daemon else 'daemon')
+            logger.info('Started new %s pool with %d processes' %
+                        ('non-daemon' if self._non_daemon else 'daemon',
+                         self._poolcfg['processes']))
         except TypeError:
             del self._poolcfg['maxtasksperchild']
             self._start_pool()
@@ -108,50 +108,56 @@ calling-helper-functions-when-using-apply-asyncs-callback
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         # m = Manager()
         self._results = {}   # Save results here
-        self._active = []    # Save active tasks here (AsyncResult)
+        self._notrun = []    # Gather errored nodes here
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
             plugin_args = {}
 
         self._poolcfg = dict(
-            processes=plugin_args.get('n_procs', cpu_count()),
+            processes=plugin_args.get('n_proc', cpu_count()),
             initializer=self._init_worker,
             maxtasksperchild=plugin_args.get('maxtasksperchild', 5))
         self._non_daemon = plugin_args.get('non_daemon', True)
         self._start_pool()
-        # Do not allow the _active queue grow too much
         # self._sem = Semaphore(2 * self._poolcfg['processes'])
 
     def _submit_jobs(self, jobids, updatehash=False):
         jobids = np.atleast_1d(jobids).tolist()
 
+        logger.info('Submitting %s' % str(jobids))
         jobargs = []
+        active = []
         for jobid in jobids:
-            if jobid in self._results.keys():
-                logger.info('Job %d is already processed')
-            elif jobid in self._active:
-                logger.info('Job %d is currently being processed')
-            else:
-                self._results[jobid] = None
-                self.pending_tasks.insert(0, jobid)
+            if jobid not in self._results.keys():
                 node = deepcopy(self.procs[jobid])
                 try:
                     if node.inputs.terminal_output == 'stream':
                         node.inputs.terminal_output = 'allatonce'
                 except:
                     pass
-
+                active.append(jobid)
                 jobargs.append((jobid, node, updatehash,))
-                self._active.append(jobid)
 
-        self._results = dict(
-            self._results.items() +
-            self.pool.map(run_node, jobargs).items())
+        logger.info('Current pool is %s' % str(active))
+        cur_batch = self.pool.map(run_node, jobargs)
 
-        logger.info('Submitted job %d %s' % (jobid, node._id))
-        logger.info('Current pool is %s' % str(self._active))
-        return True
+        processed = []
+        notrun = []
+        for el in cur_batch:
+            jobid = el[0]
+            if el[1]['traceback'] is not None:
+                notrun.append(jobid)
+            else:
+                processed.append(jobid)
+
+            self.proc_done[jobid] = True
+            self.pending_tasks.remove(jobid)
+            self._results[jobid] = el[1]
+            self._task_finished_cb(jobid)
+            self._remove_node_dirs()
+
+        return (processed, notrun)
 
     # def _sem_release(self):
     #     self._sem.release()
@@ -165,108 +171,82 @@ calling-helper-functions-when-using-apply-asyncs-callback
         else:
             return report_crash(node)
 
-    def _send_procs_to_workers(self, updatehash=False, graph=None):
+    def _send_procs_to_workers(self, jobids, updatehash=False, graph=None):
         """
         Sends jobs to workers
         """
-        while not np.all(self.proc_done):
-            num_jobs = len(self.pending_tasks)
-            if np.isinf(self.max_jobs):
-                slots = None
-            else:
-                slots = max(0, self.max_jobs - num_jobs)
+        jobids = np.atleast_1d(jobids).tolist()
+        forkjids = []
+        num_jobs = len(jobids)
+        if np.isinf(self.max_jobs):
+            slots = None
+        else:
+            slots = max(0, self.max_jobs - num_jobs)
 
-            if (num_jobs >= self.max_jobs) or (slots == 0):
-                break
-            # Check to see if a job is available
-            undone = np.logical_not(self.proc_done).astype(np.uint8)
-            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
-            jobids = np.flatnonzero(undone * jobdeps)
-
-            logger.info(('Slots available: %s. Jobs avail./undone/total='
-                         '%d/%d/%d') % (slots, len(jobids), undone.sum(),
-                                        len(self.proc_done)))
-
-            if len(jobids) > 0:
-                joblist = []
-
-                # send all available jobs
-                logger.info('Submitting %d jobs' % len(jobids[:slots]))
-                for jobid in jobids[:slots]:
-                    if isinstance(self.procs[jobid], MapNode):
-                        try:
-                            num_subnodes = self.procs[jobid].num_subnodes()
-                        except Exception:
-                            self._clean_queue(jobid, graph)
-                            self.proc_pending[jobid] = False
+        if num_jobs > 0:
+            # send all available jobs
+            logger.info('Check %d jobs and submit' % len(jobids[:slots]))
+            for jobid in jobids[:slots]:
+                if isinstance(self.procs[jobid], MapNode):
+                    try:
+                        num_subnodes = self.procs[jobid].num_subnodes()
+                    except Exception:
+                        self._clean_queue(jobid, graph)
+                        self.proc_pending[jobid] = False
+                        continue
+                    if num_subnodes > 1:
+                        submit = self._submit_mapnode(jobid)
+                        if not submit:
                             continue
-                        if num_subnodes > 1:
-                            submit = self._submit_mapnode(jobid)
-                            if not submit:
-                                continue
-                    # change job status in appropriate queues
-                    self.proc_done[jobid] = True
-                    self.proc_pending[jobid] = True
-                    # Send job to task manager and add to pending tasks
-                    logger.info('Executing: %s ID: %d' %
-                                (self.procs[jobid]._id, jobid))
-                    if self._status_callback:
-                        self._status_callback(self.procs[jobid], 'start')
-                    continue_with_submission = True
-                    if str2bool(self.procs[jobid].config['execution']
-                                ['local_hash_check']):
+                # change job status in appropriate queues
+                self.proc_pending[jobid] = True
+                # Send job to task manager and add to pending tasks
+                if self._status_callback:
+                    self._status_callback(self.procs[jobid], 'start')
+                continue_with_submission = True
+                if str2bool(self.procs[jobid].config['execution']
+                            ['local_hash_check']):
+                    try:
                         logger.info('checking hash locally')
-                        try:
-                            hash_exists, _, _, _ = self.procs[
-                                jobid].hash_exists()
-                            overwrite = getattr(self.procs[jobid],
-                                                'overwrite', False)
-                            always_run = getattr(self.procs[jobid]._interface,
-                                                 'always_run', False)
-                            logger.info('Hash exists %s' % str(hash_exists))
+                        hash_exists, _, _, _ = self.procs[
+                            jobid].hash_exists()
+                        overwrite = getattr(
+                            self.procs[jobid], 'overwrite', False)
+                        always_run = getattr(
+                            self.procs[jobid]._interface, 'always_run', False)
 
-                            if (hash_exists and not overwrite
-                                    and not always_run):
-                                continue_with_submission = False
-                                self._task_finished_cb(jobid)
-                                self._remove_node_dirs()
-
-                                logger.info(('Node %s (%d) is cached or does'
-                                             ' not require being run') %
-                                            (self.procs[jobid], jobid))
-                        except Exception:
-                            self._clean_queue(jobid, graph)
-                            self.proc_pending[jobid] = False
+                        # Is cached and run enforced
+                        if (hash_exists and not overwrite and not always_run):
                             continue_with_submission = False
-                            logger.warn(('Node %s (%d) raised exception') %
+                            self.proc_done[jobid] = True
+                            self._task_finished_cb(jobid)
+                            self._remove_node_dirs()
+                            logger.info(('Node %s (%d) is cached or does'
+                                         ' not require being run') %
                                         (self.procs[jobid], jobid))
+                    except Exception:
+                        self._clean_queue(jobid, graph)
+                        self.proc_pending[jobid] = False
+                        continue_with_submission = False
+                        logger.warn(('Node %s (%d) raised exception') %
+                                    (self.procs[jobid], jobid))
 
-                    if continue_with_submission:
-                        sworker = getattr(self.procs[jobid]._interface,
-                                          '_singleworker', True)
-                        nosubmit = getattr(self.procs[jobid],
-                                           'run_without_submitting', False)
+                if continue_with_submission:
+                    self.pending_tasks.insert(0, jobid)
+                    sworker = getattr(self.procs[jobid]._interface,
+                                      '_singleworker', True)
+                    nosubmit = getattr(self.procs[jobid],
+                                       'run_without_submitting', False)
+                    if sworker and not nosubmit:
+                        forkjids.append(jobid)
+                    else:
+                        self._run_mthread(jobid, updatehash)
 
-                        if sworker and not nosubmit:
-                            joblist.append(jobid)
-                        else:
-                            if not sworker:
-                                logger.info('Node %s claimed all workers' %
-                                            self.procs[jobid])
-                                killedjobs = self._wait_pool()
-                                logger.info(
-                                    ('All workers clean, running %s on '
-                                     'master thread') % self.procs[jobid])
+        if len(forkjids) > 0:
+            p, n = self._submit_jobs(forkjids)
 
-                            self._run_mthread(jobid, updatehash)
-
-                            if not sworker:
-                                self._start_pool()
-                                joblist = list(set(joblist.extend(killedjobs)))
-
-                    self._submit_jobs(joblist)
-            else:
-                break
+            for jid in n:
+                self._notrun.append(self._clean_queue(jid, graph))
 
     def run(self, graph, config, updatehash=False):
         """
@@ -280,73 +260,36 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self.readytorun = []
         self.mapnodes = []
         self.mapnodesubids = {}
-        # setup polling - TODO: change to threaded model
-        notrun = []
+
         it = 0
-        while (not np.all(self.proc_done) or np.any(self.proc_pending)):
-            logger.info(('All processes done: %r. Any process is pending: '
-                         '%r.') % (np.all(self.proc_done),
-                                   np.any(self.proc_pending)))
-            toappend = []
-            # trigger callbacks for any pending results
-            while self.pending_tasks:
-                jobid = self.pending_tasks.pop()
-                logger.info('Getting result %d: %s' %
-                            (jobid, self.procs[jobid]))
-                try:
-                    result = self._get_result(jobid)
-                except Exception:
-                    result = {'traceback': format_exc()}
+        while not np.all(self.proc_done):
+            # Check to see if there are jobs available
+            undone = np.logical_not(self.proc_done).astype(np.uint8)
+            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
+            jobids = np.flatnonzero(undone * jobdeps)
+            logger.info(('Polling enter [%02d] - Jobs ready/remaining/total='
+                         '%d/%d/%d') % (it, len(jobids), undone.sum(),
+                                        len(self.proc_done)))
 
-                if result is None:
-                    logger.info('Inserting %d: %s' %
-                                (jobid, self.procs[jobid]))
-                    toappend.insert(0, jobid)
-                else:
-                    self._task_finished_cb(jobid)
-                    self._remove_node_dirs()
+            if len(jobids) >= self.max_jobs:
+                jobids = jobids[:self.max_jobs]
 
-                    if result['traceback'] is not None:
-                        notrun.append(self._clean_queue(jobid, graph,
-                                                        result=result))
-                        logger.info(('Node %d will not be run, '
-                                     'reason: %s') % (jobid,
-                                                      result['traceback']))
+            if len(jobids) == 0:
+                logger.info('No more ready jobs, exit')
+                break
 
-            if toappend:
-                self.pending_tasks.extend(toappend)
-
-            num_jobs = len(self.pending_tasks)
-            logger.info('Number of pending tasks: %d' % num_jobs)
-            if num_jobs < self.max_jobs:
-                self._send_procs_to_workers(updatehash=updatehash,
-                                            graph=graph)
-            else:
-                logger.info('Not submitting')
-
-            undone = self.proc_done.astype(np.uint8).sum()
-            pending = self.proc_pending.astype(np.uint8).sum()
-
-            logger.info(('Polling processes [%02d]: Undone=%d/%d; '
-                         'Pending=%d/%d') % (it,
-                                             undone, len(self.proc_done),
-                                             pending, len(self.proc_pending)))
-
-            sleep(float(self._config['execution']['poll_sleep_duration']))
+            self._send_procs_to_workers(jobids, updatehash=updatehash,
+                                        graph=graph)
             it += 1
 
         self._remove_node_dirs()
-        report_nodes_not_run(notrun)
+        report_nodes_not_run(self._notrun)
 
     def _job_callback(self, result):
         jobid = result.keys()[0]
         self._results[jobid] = result[jobid]['result']
-        self._active.remove(jobid)
 
     def _get_result(self, jobid):
-        if jobid in self._active:
-            return None
-
         return self._results.get(jobid,
                                  {'result': None,
                                   'traceback': 'Result not found',
@@ -358,36 +301,11 @@ calling-helper-functions-when-using-apply-asyncs-callback
         """
         logger.info('Running node %s (%d) on master thread' %
                     (self.procs[jobid], jobid))
+
         try:
             self.procs[jobid].run()
         except Exception:
-            self._clean_queue(jobid, graph)
+            self._notrun.append(self._clean_queue(jobid, graph))
+        self.pending_tasks.remove(jobid)
         self._task_finished_cb(jobid)
         self._remove_node_dirs()
-
-    def _wait_pool(self):
-        self.pool.close()
-        error = False
-
-        killedjobs = []
-        for jobid, task in self._active.iteritems():
-            try:
-                logger.info('Waiting for job %d' % jobid)
-                task.wait()
-            except TimeoutError:
-                logger.warn(
-                    'TimeoutError, killing job %d' % jobid)
-                # self._sem.release()
-                error = True
-                killedjobs.append(jobid)
-                del self._active[jobid]
-
-        if error:
-            self.pool.terminate()
-            logger.info('Pool terminated, killed jobs: %s' %
-                        str(killedjobs))
-
-        if len(self._active) > 0:
-            logger.warn('Some elements remain active after wait')
-
-        return killedjobs
