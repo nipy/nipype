@@ -283,11 +283,14 @@ calling-helper-functions-when-using-apply-asyncs-callback
                                             graph=graph)
                 it += 1
 
-            self._remove_node_dirs()
-            report_nodes_not_run(self._notrun)
         except KeyboardInterrupt:
             logger.info('User interrupt')
+            self._notrun.extend([self._clean_queue(jid, graph) for jid, v in
+                                 enumerate(self.proc_done) if not v])
             self.pool.terminate()
+
+        self._remove_node_dirs()
+        report_nodes_not_run(self._notrun)
 
     def _job_callback(self, result):
         jobid = result.keys()[0]
