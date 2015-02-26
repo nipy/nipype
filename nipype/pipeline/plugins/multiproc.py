@@ -117,14 +117,11 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._poolcfg = dict(
             processes=plugin_args.get('n_proc', cpu_count()),
             initializer=self._init_worker,
-            maxtasksperchild=plugin_args.get('maxtasksperchild', 5))
+            maxtasksperchild=plugin_args.get('maxtasksperchild', 50))
         self._non_daemon = plugin_args.get('non_daemon', True)
-        self._start_pool()
-        # self._sem = Semaphore(2 * self._poolcfg['processes'])
 
     def _submit_jobs(self, jobids, updatehash=False):
         jobids = np.atleast_1d(jobids).tolist()
-
         logger.info('Submitting %s' % str(jobids))
         jobargs = []
         active = []
@@ -140,7 +137,11 @@ calling-helper-functions-when-using-apply-asyncs-callback
                 jobargs.append((jobid, node, updatehash,))
 
         logger.info('Current pool is %s' % str(active))
+        self._start_pool()
         cur_batch = self.pool.map(run_node, jobargs)
+        self.pool.close()
+        self.pool.terminate()
+        del self.pool
 
         processed = []
         notrun = []
