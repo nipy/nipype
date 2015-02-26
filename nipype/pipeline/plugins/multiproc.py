@@ -123,7 +123,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._non_daemon = plugin_args.get('non_daemon', True)
 
         # Do not allow the _active queue grow too much
-        self._sem = Semaphore(2 * self._poolcfg['processes'])
+        # self._sem = Semaphore(2 * self._poolcfg['processes'])
         self._start_pool()
 
     def _submit_job(self, jobid, node, updatehash=False):
@@ -140,18 +140,18 @@ calling-helper-functions-when-using-apply-asyncs-callback
             pass
 
         logger.info('Acquiring semaphore')
-        self._sem.acquire()
+        # self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
             run_node, (self._results, self._active, jobid, node,
-                       updatehash,),
-            callback=self._sem_release)
+                       updatehash,))
+            # callback=self._sem_release)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
         logger.info('Current pool is %s' % str(self._active.keys()))
         return self._active[jobid]
 
-    def _sem_release(self):
-        self._sem.release()
+    # def _sem_release(self):
+    #     self._sem.release()
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -381,7 +381,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
             except TimeoutError:
                 logger.warn(
                     'TimeoutError, killing job %d' % jobid)
-                self._sem.release()
+                # self._sem.release()
                 error = True
                 killedjobs.append(jobid)
                 del self._active[jobid]
