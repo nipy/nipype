@@ -7,8 +7,7 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import (Process, Pool, cpu_count, pool, TimeoutError,
-                             Semaphore, Manager)
+from multiprocessing import (Process, Pool, cpu_count, pool, TimeoutError)
 from copy import deepcopy
 from traceback import format_exception
 import sys
@@ -107,8 +106,6 @@ class MultiProcPlugin(DistributedPluginBase):
 calling-helper-functions-when-using-apply-asyncs-callback
         """
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-
-        self._manager = Manager()  # Use safe dicts
         self._results = dict()   # Save results here
         self._active = dict()    # Save active tasks here (AsyncResult)
 
@@ -139,7 +136,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
         except:
             pass
 
-        logger.info('Acquiring semaphore')
+        # logger.info('Acquiring semaphore')
         # self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
             run_node, (self._results, self._active, jobid, node,
