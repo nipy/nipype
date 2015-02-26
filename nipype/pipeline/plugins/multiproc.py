@@ -22,7 +22,7 @@ from ... import logging
 logger = logging.getLogger('workflow')
 
 
-def run_node(results, active, jobid, node, updatehash):
+def run_node(results, active, jobid, node, sem, updatehash):
     jobdict = dict(result=None, traceback=None)
     try:
         jobdict['result'] = node.run(updatehash=updatehash)
@@ -38,6 +38,8 @@ def run_node(results, active, jobid, node, updatehash):
         logging.warn('Job %d was not in active list' % jobid)
 
     results[jobid] = jobdict
+    logging.info('[Terminated] Job %d' % jobid)
+    sem.release()
 
 
 class NonDaemonProcess(Process):
@@ -121,21 +123,27 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._non_daemon = plugin_args.get('non_daemon', True)
 
         # Do not allow the _active queue grow too much
-        # self._sem = Semaphore(2 * self._poolcfg['processes'])
+        self._sem = Semaphore(2 * self._poolcfg['processes'])
         self._start_pool()
 
     def _submit_job(self, jobid, node, updatehash=False):
+        if jobid in self._results.keys():
+            logger.info('Job %d is already processed')
+            return self._results[jobid]
+        if jobid in self._active.keys():
+            logger.info('Job %d is currently being processed')
+            return self._active[jobid]
         try:
             if node.inputs.terminal_output == 'stream':
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
 
-        # logger.info('Acquiring semaphore')
-        # self._sem.acquire()
+        logger.info('Acquiring semaphore')
+        self._sem.acquire()
         self._active[jobid] = self.pool.apply_async(
             run_node, (self._results, self._active, jobid, node,
-                       updatehash,))
+                       self._sem, updatehash,))
         #    callback=self._sem_release)
 
         logger.info('Submitted job %d %s' % (jobid, node._id))
@@ -373,7 +381,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
             except TimeoutError:
                 logger.warn(
                     'TimeoutError, killing job %d' % jobid)
-                # self._sem_release()
+                self._sem.release()
                 error = True
                 killedjobs.append(jobid)
                 del self._active[jobid]
