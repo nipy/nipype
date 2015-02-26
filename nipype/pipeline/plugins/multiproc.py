@@ -24,6 +24,7 @@ logger = logging.getLogger('workflow')
 
 def run_node(results, active, jobid, node, sem, updatehash):
     jobdict = dict(result=None, traceback=None)
+    logging.info('[Starting] Job %d' % jobid)
     try:
         jobdict['result'] = node.run(updatehash=updatehash)
     except:
@@ -109,8 +110,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
 
         self._manager = Manager()  # Use safe dicts
-        self._results = self._manager.dict()   # Save results here
-        self._active = self._manager.dict()    # Save active tasks here (AsyncResult)
+        self._results = dict()   # Save results here
+        self._active = dict()    # Save active tasks here (AsyncResult)
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
