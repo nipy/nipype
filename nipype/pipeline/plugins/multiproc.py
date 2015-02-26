@@ -106,11 +106,10 @@ class MultiProcPlugin(DistributedPluginBase):
 calling-helper-functions-when-using-apply-asyncs-callback
         """
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-        self._start_pool()
 
         self._manager = Manager()  # Use safe dicts
-        self._results = m.dict()   # Save results here
-        self._active = m.dict()    # Save active tasks here (AsyncResult)
+        self._results = self._manager.dict()   # Save results here
+        self._active =  self._manager.dict()    # Save active tasks here (AsyncResult)
 
         # Initialize settings, using dic.get we define defaults
         if plugin_args is None:
