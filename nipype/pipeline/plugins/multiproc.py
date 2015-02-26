@@ -252,38 +252,42 @@ calling-helper-functions-when-using-apply-asyncs-callback
         """
         Executes a pre-defined pipeline using distributed approaches
         """
-        logger.info('Running in parallel.')
-        self._config = config
-        # Generate appropriate structures for worker-manager model
-        self._generate_dependency_list(graph)
-        self.pending_tasks = []
-        self.readytorun = []
-        self.mapnodes = []
-        self.mapnodesubids = {}
+        try:
+            logger.info('Running in parallel.')
+            self._config = config
+            # Generate appropriate structures for worker-manager model
+            self._generate_dependency_list(graph)
+            self.pending_tasks = []
+            self.readytorun = []
+            self.mapnodes = []
+            self.mapnodesubids = {}
 
-        it = 0
-        while not np.all(self.proc_done):
-            # Check to see if there are jobs available
-            undone = np.logical_not(self.proc_done).astype(np.uint8)
-            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
-            jobids = np.flatnonzero(undone * jobdeps)
-            logger.info(('Polling enter [%02d] - Jobs ready/remaining/total='
-                         '%d/%d/%d') % (it, len(jobids), undone.sum(),
-                                        len(self.proc_done)))
+            it = 0
+            while not np.all(self.proc_done):
+                # Check to see if there are jobs available
+                undone = np.logical_not(self.proc_done).astype(np.uint8)
+                jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
+                jobids = np.flatnonzero(undone * jobdeps)
+                logger.info(('Polling [%02d]: Jobs ready/remaining/total='
+                             '%d/%d/%d') % (it, len(jobids), undone.sum(),
+                                            len(self.proc_done)))
 
-            if len(jobids) >= self.max_jobs:
-                jobids = jobids[:self.max_jobs]
+                if len(jobids) >= self.max_jobs:
+                    jobids = jobids[:self.max_jobs]
 
-            if len(jobids) == 0:
-                logger.info('No more ready jobs, exit')
-                break
+                if len(jobids) == 0:
+                    logger.info('No more ready jobs, exit')
+                    break
 
-            self._send_procs_to_workers(jobids, updatehash=updatehash,
-                                        graph=graph)
-            it += 1
+                self._send_procs_to_workers(jobids, updatehash=updatehash,
+                                            graph=graph)
+                it += 1
 
-        self._remove_node_dirs()
-        report_nodes_not_run(self._notrun)
+            self._remove_node_dirs()
+            report_nodes_not_run(self._notrun)
+        except KeyboardInterrupt:
+            logger.info('User interrupt')
+            self.pool.terminate()
 
     def _job_callback(self, result):
         jobid = result.keys()[0]
