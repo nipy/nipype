@@ -7,7 +7,7 @@
 """
 
 from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, File)
+    TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File)
 from nipype.utils.filemanip import split_filename
 import os.path as op
 import nibabel as nb
@@ -29,14 +29,58 @@ else:
                                  all_tensor_evecs)
 
 
-class SimulateDWIInputSpec(BaseInterfaceInputSpec):
+class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     fibers = InputMultiPath(File(exists=True), mandatory=True,
                             desc='list of fibers principal directions')
     vfractions = File(exists=True, mandatory=True,
                       desc='volume fractions')
-    S0 = File(exists=True, mandatory=True, desc='baseline T2 signal')
-    out_file = File('sim_dwi.nii.gz', usedefault=True,
-                    desc='output file with fractions to be simluated')
+    baseline = File(exists=True, mandatory=True, desc='baseline T2 signal')
     gradients = File(exists=True, desc='gradients file')
     bvec = File(exists=True, desc='bvecs file')
     bval = File(exists=True, desc='bvals file')
+    out_file = File('sim_dwi.nii.gz', usedefault=True,
+                    desc='output file with fractions to be simluated')
+
+
+class SimulateMultiTensorOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class SimulateMultiTensor(BaseInterface):
+
+    """
+    Interface to MultiTensor model simulator in dipy
+    http://nipy.org/dipy/examples_built/simulate_multi_tensor.html
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.dipy as dipy
+    >>> sim = dipy.SimulateMultiTensor()
+    >>> sim.inputs.fibers = 'fibers.nii'
+    >>> sim.inputs.vfractions = 'fractions.nii'
+    >>> sim.inputs.baseline = 'S0.nii'
+    >>> sim.inputs.bvecs = 'bvecs'
+    >>> sim.inputs.bvals = 'bvals'
+    >>> sim.run()                                   # doctest: +SKIP
+    """
+    input_spec = SimulateMultiTensorInputSpec
+    output_spec = SimulateMultiTensorOutputSpec
+
+    def _run_interface(self, runtime):
+        # Load the 4D image files
+        img = nb.load(self.inputs.fibers)
+        fibers = img.get_data()
+        fractions = nb.load(self.inputs.vfractions).get_data()
+        affine = img.get_affine()
+
+        # Load the baseline b0 signal
+        b0 = nb.load(self.inputs.baseline).get_data()
+
+        # Load the gradient strengths and directions
+        bvals = np.loadtxt(self.inputs.bvals)
+        gradients = np.loadtxt(self.inputs.bvecs).T
+
+        # Place in Dipy's preferred format
+        gtab = GradientTable(gradients)
+        gtab.bvals = bvals
