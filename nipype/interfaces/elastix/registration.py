@@ -11,9 +11,8 @@ displacement maps to images and points.
 import os.path as op
 import re
 
-from ..base import (CommandLine, CommandLineInputSpec, isdefined,
-                    TraitedSpec, File, traits, InputMultiPath)
-from base import ElastixBaseInputSpec
+from ..base import (CommandLine, TraitedSpec, File, traits, InputMultiPath)
+from base import ElastixBaseInputSpec, ElastixBaseInterface
 
 from ... import logging
 logger = logging.getLogger('interface')
