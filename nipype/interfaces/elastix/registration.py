@@ -41,7 +41,7 @@ class RegistrationOutputSpec(TraitedSpec):
                                     desc='flag indicating if warped image was generated')
 
 
-class Registration(CommandLine):
+class Registration(ElastixBaseInterface):
     """
     Elastix nonlinear registration interface
 

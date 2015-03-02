@@ -15,13 +15,11 @@ from ..base import (CommandLine, CommandLineInputSpec, isdefined,
 from ... import logging
 logger = logging.getLogger('interface')
 
-from multiprocessing import cpu_count
-
 
 class ElastixBaseInputSpec(CommandLineInputSpec):
     output_path = Directory('./', exists=True, mandatory=True, usedefault=True,
                             argstr='-out %s', desc='output directory')
-    num_threads = traits.Int(cpu_count(), argstr='-threads %01d', usedefault=True,
+    num_threads = traits.Int(1, argstr='-threads %01d', usedefault=True,
                              desc='set the maximum number of threads of elastix')
 
 
