@@ -34,7 +34,7 @@ import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
-                               DynamicTraitedSpec)
+                               DynamicTraitedSpec, Undefined)
 from nipype.utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
@@ -785,7 +785,8 @@ class AddCSVColumn(BaseInterface):
 
 
 class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    in_file = traits.File(mandatory=True, desc='Input comma-separated value (CSV) files')
+    in_file = traits.File(mandatory=True,
+                          desc='Input comma-separated value (CSV) files')
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 
     def __setattr__(self, key, value):
@@ -804,13 +805,15 @@ class AddCSVRowOutputSpec(TraitedSpec):
 
 
 class AddCSVRow(BaseInterface):
+
     """Simple interface to add an extra row to a csv file
 
     .. note:: Requires `pandas <http://pandas.pydata.org/>`_
 
     .. warning:: Multi-platform thread-safe execution is possible with
-        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please recall that (1)
-        this module is alpha software; and (2) it should be installed for thread-safe writing.
+        `lockfile <https://pythonhosted.org/lockfile/lockfile.html>`_. Please
+        recall that (1) this module is alpha software; and (2) it should be
+        installed for thread-safe writing.
         If lockfile is not installed, then the interface is not thread-safe.
 
 
@@ -822,7 +825,7 @@ class AddCSVRow(BaseInterface):
     >>> addrow.inputs.in_file = 'scores.csv'
     >>> addrow.inputs.si = 0.74
     >>> addrow.inputs.di = 0.93
-    >>> addrow.subject_id = 'S400'
+    >>> addrow.inputs.subject_id = 'S400'
     >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
     """
@@ -850,22 +853,26 @@ class AddCSVRow(BaseInterface):
         try:
             import pandas as pd
         except ImportError:
-            raise ImportError('This interface requires pandas (http://pandas.pydata.org/) to run.')
+            raise ImportError(('This interface requires pandas '
+                               '(http://pandas.pydata.org/) to run.'))
 
         try:
             import lockfile as pl
             self._have_lock = True
         except ImportError:
-            import warnings
-            warnings.warn(('Python module lockfile was not found: AddCSVRow will not be thread-safe '
-                          'in multi-processor execution'))
+            from warnings import warn
+            warn(('Python module lockfile was not found: AddCSVRow will not be'
+                  ' thread-safe in multi-processor execution'))
 
         input_dict = {}
         for key, val in self.inputs._outputs.items():
             # expand lists to several columns
+            if key == 'trait_added' and val in self.inputs.copyable_trait_names():
+                continue
+
             if isinstance(val, list):
-                for i,v in enumerate(val):
-                    input_dict['%s_%d' % (key,i)]=v
+                for i, v in enumerate(val):
+                    input_dict['%s_%d' % (key, i)] = v
             else:
                 input_dict[key] = val
 
@@ -886,6 +893,13 @@ class AddCSVRow(BaseInterface):
 
         if self._have_lock:
             self._lock.release()
+
+        # Using nipype.external.portalocker this might be something like:
+        # with pl.Lock(self.inputs.in_file, timeout=1) as fh:
+        #     if op.exists(fh):
+        #         formerdf = pd.read_csv(fh, index_col=0)
+        #         df = pd.concat([formerdf, df], ignore_index=True)
+        #         df.to_csv(fh)
 
         return runtime
 
@@ -1394,22 +1408,22 @@ def merge_rois(in_files, in_idxs, in_ref,
     if ndirs < 300:
         data = np.zeros((npix, ndirs))
         for cname, iname in zip(in_files, in_idxs):
-            with np.load(iname) as f:
-                idxs = np.squeeze(f['arr_0'])
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
             cdata = nb.load(cname).get_data().reshape(-1, ndirs)
             nels = len(idxs)
             idata = (idxs, )
             try:
                 data[idata, ...] = cdata[0:nels, ...]
             except:
-                print(data.shape, cdata.shape)
+                print(('Consistency between indexes and chunks was '
+                      'lost: data=%s, chunk=%s') % (str(data.shape),
+                      str(cdata.shape)))
                 raise
 
         hdr.set_data_shape(newshape)
-
         nb.Nifti1Image(data.reshape(newshape).astype(dtype),
                        aff, hdr).to_filename(out_file)
-
 
     else:
         hdr.set_data_shape(rsh[:3])
@@ -1420,8 +1434,8 @@ def merge_rois(in_files, in_idxs, in_ref,
             nii.append(fname)
 
         for cname, iname in zip(in_files, in_idxs):
-            with np.load(iname) as f:
-                idxs = np.squeeze(f['arr_0'])
+            f = np.load(iname)
+            idxs = np.squeeze(f['arr_0'])
 
             for d, fname in enumerate(nii):
                 data = nb.load(fname).get_data().reshape(-1)
@@ -1429,7 +1443,8 @@ def merge_rois(in_files, in_idxs, in_ref,
                 nels = len(idxs)
                 idata = (idxs, )
                 data[idata] = cdata[0:nels]
-                nb.Nifti1Image(data.reshape(rsh[:3]), aff, hdr).to_filename(fname)
+                nb.Nifti1Image(data.reshape(rsh[:3]),
+                               aff, hdr).to_filename(fname)
 
         imgs = [nb.load(im) for im in nii]
         allim = nb.concat_images(imgs)

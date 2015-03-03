@@ -90,6 +90,9 @@ class WarpPoints(BaseInterface):
         except ImportError:
             iflogger.warn(('ETS toolkit could not be imported'))
             pass
+        except ValueError:
+            iflogger.warn(('ETS toolkit could not be set to null'))
+            pass
 
         import nibabel as nb
         import numpy as np
