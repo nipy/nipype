@@ -115,7 +115,7 @@ def create_pyscript(node, updatehash=False, store_exception=True):
 import sys
 
 can_import_matplotlib = True #Silently allow matplotlib to be ignored
-can_import_ets = True #Silently allow ets to be ignored
+can_import_ets = False #Silently allow ets to be ignored
 try:
     import matplotlib
     matplotlib.use('%s')
@@ -126,12 +126,23 @@ except
 
 try:
     from enthought.etsconfig.api import ETSConfig
-    ETSConfig.toolkit = '%s'
+    can_import_ets = True
 except ImportError:
-    can_import_ets = False
     pass
-except ValueError:
-    pass
+
+if not can_import_ets:
+    try:
+        from traits.etsconfig.etsconfig import ETSConfig
+        can_import_ets = True
+    except ImportError:
+        pass
+
+if can_import_ets:
+    try:
+        ETSConfig.toolkit = '%s'
+    except ValueError:
+        pass
+
 
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl

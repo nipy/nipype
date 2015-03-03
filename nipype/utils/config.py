@@ -154,15 +154,25 @@ class NipypeConfig(object):
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
 
     def update_ets(self):
+        can_import_ets = False
         try:
             from enthought.etsconfig.api import ETSConfig
-            ETSConfig.toolkit = self.get('execution', 'ets_toolkit')
+            can_import_ets = True
         except ImportError:
-            warn('ETS toolkit could not be imported')
             pass
-        except ValueError as e:
-            warn(e.msg)
-            pass
+
+        if not can_import_ets:
+            try:
+                from traits.etsconfig.etsconfig import ETSConfig
+                can_import_ets = True
+            except ImportError:
+                pass
+
+        if can_import_ets:
+            try:
+                ETSConfig.toolkit = '%s'
+            except ValueError:
+                pass
 
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
