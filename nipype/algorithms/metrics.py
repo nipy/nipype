@@ -572,7 +572,7 @@ class ErrorMap(BaseInterface):
         nb.Nifti1Image(errmap.astype(np.float32), nii_ref.get_affine(),
                        hdr).to_filename(self._out_file)
 
-        return runtime 
+        return runtime
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
