@@ -13,7 +13,7 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
 
 import numpy as np
-from numpy.linalg import norm
+from numpy import linalg as nla
 import os.path as op
 from nipype.external import six
 
@@ -83,7 +83,7 @@ class ComputeMeshWarp(BaseInterface):
         A = np.array(A)
         B = np.array(B)
         C = np.array(C)
-        ABxAC = norm(A - B) * norm(A - C)
+        ABxAC = nla.norm(A - B) * nla.norm(A - C)
         prod = np.dot(B - A, C - A)
         angle = np.arccos(prod / ABxAC)
         area = 0.5 * ABxAC * np.sin(angle)
@@ -119,7 +119,12 @@ class ComputeMeshWarp(BaseInterface):
         diff = points2 - points1
         weights = np.ones(len(diff))
 
-        errvector = norm(diff, axis=1)
+        try:
+            errvector = nla.norm(diff, axis=1)
+        except TypeError:  # numpy < 1.9
+            errvector = np.apply_along_axis(nla.norm, 1, diff)
+            pass
+
         if self.inputs.metric == 'sqeuclidean':
             errvector = errvector ** 2
 
