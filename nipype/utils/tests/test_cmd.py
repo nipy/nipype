@@ -27,8 +27,8 @@ class TestNipypeCMD(unittest.TestCase):
         self.assertEqual(exit_exception.code, 2)
         
         self.assertEqual(stderr.getvalue(), 
-"""usage: runfiles.py [-h] module interface
-runfiles.py: error: too few arguments
+"""usage: nipype_cmd [-h] module interface
+nipype_cmd: error: too few arguments
 """)
         self.assertEqual(stdout.getvalue(), '')
         
@@ -42,7 +42,9 @@ runfiles.py: error: too few arguments
         
         self.assertEqual(stderr.getvalue(), '')
         self.assertEqual(stdout.getvalue(),
-"""usage: runfiles.py [-h] module interface\n\nNipype interface runner
+"""usage: nipype_cmd [-h] module interface
+
+Nipype interface runner
 
 positional arguments:
   module      Module name

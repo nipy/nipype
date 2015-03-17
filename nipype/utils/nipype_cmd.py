@@ -48,7 +48,7 @@ def main(argv):
         listClasses(argv[1])
         sys.exit(0)
     
-    parser = argparse.ArgumentParser(description='Nipype interface runner')
+    parser = argparse.ArgumentParser(description='Nipype interface runner', prog=argv[0])
     parser.add_argument("module", type=str, help="Module name")
     parser.add_argument("interface", type=str, help="Interface name")
     parsed = parser.parse_args(args=argv[1:3])
