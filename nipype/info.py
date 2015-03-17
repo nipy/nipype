@@ -126,5 +126,5 @@ ISRELEASE           = _version_extra == ''
 VERSION             = __version__
 REQUIRES            = ["nibabel>=1.0", "networkx>=1.0", "numpy>=1.3",
                        "python-dateutil>1.0", "scipy>=0.7", "traits>=4.0",
-                       "nose>=1.0"]
+                       "nose>=1.0", "argparse>=1.1.0"]
 STATUS              = 'stable'
