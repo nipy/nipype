@@ -29,7 +29,6 @@ install:
   - pip install nibabel --use-mirrors
   - pip install python-coveralls --use-mirrors
   - pip install nose-cov --use-mirrors
-  - pip install argparse
   - pip install https://github.com/RDFLib/rdflib/archive/master.zip
   - pip install https://github.com/trungdong/prov/archive/rdf.zip
   - python setup.py install
