@@ -21,8 +21,7 @@ def test_MedianImageFilter_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MedianImageFilter.input_spec()

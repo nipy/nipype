@@ -31,8 +31,7 @@ def test_Fim_inputs():
     name_template='%s_fim',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Fim.input_spec()

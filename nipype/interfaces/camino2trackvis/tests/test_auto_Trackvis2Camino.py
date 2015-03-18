@@ -22,8 +22,7 @@ def test_Trackvis2Camino_inputs():
     genfile=True,
     position=2,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Trackvis2Camino.input_spec()
