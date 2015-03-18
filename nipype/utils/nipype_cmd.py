@@ -33,10 +33,19 @@ def run_instance(interface, options):
         print "setting function inputs"
         for input_name, _ in interface.inputs.items():
             if getattr(options, input_name) != None:
-                str_value = getattr(options, input_name)
-                casted_value = getattr(interface.inputs, input_name)(str_value)
-                setattr(interface.inputs, input_name,
-                        casted_value)
+                value = getattr(options, input_name)
+                #traits cannot cast from string to float or int
+                try:
+                    value = float(value)
+                except:
+                    pass
+
+                try:
+                    setattr(interface.inputs, input_name,
+                            value)
+                except ValueError, e:
+                    print "Error when setting the value of %s: '%s'"%(input_name, str(e))
+                    
         print interface.inputs
         res = interface.run()
         print res.outputs    
