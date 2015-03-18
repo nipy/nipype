@@ -21,8 +21,7 @@ def test_FindTheBiggest_inputs():
     position=2,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FindTheBiggest.input_spec()

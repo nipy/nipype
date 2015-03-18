@@ -44,8 +44,7 @@ def test_LaplacianThickness_inputs():
     sulcus_prior=dict(argstr='use-sulcus-prior',
     position=7,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LaplacianThickness.input_spec()

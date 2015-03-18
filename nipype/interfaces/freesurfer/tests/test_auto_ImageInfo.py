@@ -15,8 +15,7 @@ def test_ImageInfo_inputs():
     position=1,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageInfo.input_spec()

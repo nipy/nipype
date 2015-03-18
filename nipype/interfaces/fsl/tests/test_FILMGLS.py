@@ -38,7 +38,7 @@ def test_filmgls():
                      output_type = dict(),
                      results_dir = dict(argstr='--rn=%s',usedefault=True,),
                      smooth_autocorr = dict(argstr='--sa',),
-                     terminal_output = dict(mandatory=True,),
+                     terminal_output = dict(),
                      threshold = dict(usedefault=True,argstr='--thr=%f',),
     tukey_window = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='--tukey=%d',),
     use_pava = dict(argstr='--pava',),

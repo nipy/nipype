@@ -1,6 +1,6 @@
 Next release
 ============
-
+* FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * FIX: Fixed Camino output naming (https://github.com/nipy/nipype/pull/1061)
 * ENH: Add the average distance to ErrorMap (https://github.com/nipy/nipype/pull/1039)
 * ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
