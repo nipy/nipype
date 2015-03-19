@@ -105,7 +105,6 @@ nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
         self.assertEqual(exit_exception.code, 0)
         
         self.assertEqual(stderr.getvalue(), '')
-        self.assertTrue("loops used to realign different runs" in stdout.getvalue())
         self.assertTrue("Run FmriRealign4d" in stdout.getvalue())
 
 if __name__ == '__main__':
