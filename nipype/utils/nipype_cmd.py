@@ -19,18 +19,21 @@ def add_options(parser=None, module=None, function=None):
     if parser and module and function:
         __import__(module)
         interface = getattr(sys.modules[module],function)()
-
-        for k,v in interface.inputs.items():
-            if hasattr(v, "mandatory") and v.mandatory:
-                parser.add_argument(k, help=v.desc)
+        
+        inputs = interface.input_spec()
+        for name, spec in sorted(interface.inputs.traits(transient=None).items()):
+            desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:]
+            if hasattr(spec, "mandatory") and spec.mandatory:
+                parser.add_argument(name, help=desc)
             else:
-                parser.add_argument("--%s"%k, dest=k,
-                                help=v.desc)
+                parser.add_argument("--%s"%name, dest=name,
+                                    help=desc)
     return parser, interface
 
 def run_instance(interface, options):
     if interface:
         print "setting function inputs"
+            
         for input_name, _ in interface.inputs.items():
             if getattr(options, input_name) != None:
                 value = getattr(options, input_name)

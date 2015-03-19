@@ -120,31 +120,40 @@ nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
 Run FmriRealign4d
 
 positional arguments:
-  in_file               File to realign
-  tr                    TR in seconds
+  in_file               (a list of items which are an existing file name) File
+                        to realign
+  tr                    (a float) TR in seconds
 
 optional arguments:
   -h, --help            show this help message and exit
   --between_loops BETWEEN_LOOPS
-                        loops used to realign different runs
+                        (a list of items which are an integer, nipype default
+                        value: [5]) loops used to realign different runs
   --ignore_exception IGNORE_EXCEPTION
-                        Print an error message instead of throwing an
-                        exception in case the interface fails to run
-  --loops LOOPS         loops within each run
+                        (a boolean, nipype default value: False) Print an
+                        error message instead of throwing an exception in case
+                        the interface fails to run
+  --loops LOOPS         (a list of items which are an integer, nipype default
+                        value: [5]) loops within each run
   --slice_order SLICE_ORDER
-                        0 based slice order. This would be equivalent to
+                        (a list of items which are an integer) 0 based slice
+                        order. This would be equivalent to
                         enteringnp.argsort(spm_slice_order) for this field.
                         This effectsinterleaved acquisition. This field will
                         be deprecated infuture Nipy releases and be replaced
-                        by actual sliceacquisition times.
-  --speedup SPEEDUP     successive image sub-sampling factors for acceleration
-  --start START         time offset into TR to align slices to
+                        by actual sliceacquisition times. requires:
+                        time_interp
+  --speedup SPEEDUP     (a list of items which are an integer, nipype default
+                        value: [5]) successive image sub-sampling factors for
+                        acceleration
+  --start START         (a float, nipype default value: 0.0) time offset into
+                        TR to align slices to
   --time_interp TIME_INTERP
-                        Assume smooth changes across time e.g., fmri series.
-                        If you don't want slice timing correction set this to
-                        undefined
+                        (True) Assume smooth changes across time e.g., fmri
+                        series. If you don't want slice timing correction set
+                        this to undefined requires: slice_order
   --tr_slices TR_SLICES
-                        TR slices
+                        (a float) TR slices requires: time_interp
 """)
 
 
