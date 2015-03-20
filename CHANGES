@@ -3,6 +3,10 @@ Next release
 
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
+* ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
+* FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
+* ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
+* FIX: Fixed Camino output naming (https://github.com/nipy/nipype/pull/1061)
 * ENH: Add the average distance to ErrorMap (https://github.com/nipy/nipype/pull/1039)
 * ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
 * ENH: Improve JSON interfaces: default settings when reading and consistent output creation

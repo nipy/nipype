@@ -107,7 +107,7 @@ recommendations.
 Must Have
 ~~~~~~~~~
 
-Python_ 2.6 - 2.7
+Python_ 2.7
 
 Nibabel_ 1.0 - 1.4
   Neuroimaging file i/o library
