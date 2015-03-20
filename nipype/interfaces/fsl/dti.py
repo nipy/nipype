@@ -222,7 +222,7 @@ class FSLXCommand(FSLCommand):
         for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(self.inputs.n_fibres + 1):
+       for i in xrange(1, self.inputs.n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                        cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
