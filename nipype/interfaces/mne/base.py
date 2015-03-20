@@ -4,6 +4,7 @@ import os.path as op
 import glob
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.utils.filemanip import list_to_filename
+from nipype.external import six
 import logging
 
 logging.basicConfig()
@@ -89,7 +90,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, str):
+                    elif isinstance(value_list, six.string_types):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

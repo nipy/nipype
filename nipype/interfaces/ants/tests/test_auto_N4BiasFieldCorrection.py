@@ -5,11 +5,13 @@ from nipype.interfaces.ants.segmentation import N4BiasFieldCorrection
 def test_N4BiasFieldCorrection_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    bspline_fitting_distance=dict(argstr='--bsline-fitting [%g]',
+    bias_image=dict(hash_files=False,
     ),
-    convergence_threshold=dict(argstr=',%g]',
-    position=2,
-    requires=['n_iterations'],
+    bspline_fitting_distance=dict(argstr='--bspline-fitting %s',
+    ),
+    bspline_order=dict(requires=['bspline_fitting_distance'],
+    ),
+    convergence_threshold=dict(requires=['n_iterations'],
     ),
     dimension=dict(argstr='--image-dimension %d',
     usedefault=True,
@@ -25,10 +27,8 @@ def test_N4BiasFieldCorrection_inputs():
     ),
     mask_image=dict(argstr='--mask-image %s',
     ),
-    n_iterations=dict(argstr='--convergence [ %s',
-    position=1,
+    n_iterations=dict(argstr='--convergence %s',
     requires=['convergence_threshold'],
-    sep='x',
     ),
     num_threads=dict(nohash=True,
     usedefault=True,
@@ -37,10 +37,15 @@ def test_N4BiasFieldCorrection_inputs():
     genfile=True,
     hash_files=False,
     ),
+    save_bias=dict(mandatory=True,
+    usedefault=True,
+    xor=['bias_image'],
+    ),
     shrink_factor=dict(argstr='--shrink-factor %d',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
+    ),
+    weight_image=dict(argstr='--weight-image %s',
     ),
     )
     inputs = N4BiasFieldCorrection.input_spec()
@@ -50,7 +55,8 @@ def test_N4BiasFieldCorrection_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_N4BiasFieldCorrection_outputs():
-    output_map = dict(output_image=dict(),
+    output_map = dict(bias_image=dict(),
+    output_image=dict(),
     )
     outputs = N4BiasFieldCorrection.output_spec()
 

@@ -25,8 +25,7 @@ def test_Smooth_inputs():
     hash_files=False,
     position=2,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Smooth.input_spec()

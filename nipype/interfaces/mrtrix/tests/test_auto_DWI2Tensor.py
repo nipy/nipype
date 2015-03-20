@@ -38,8 +38,7 @@ def test_DWI2Tensor_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWI2Tensor.input_spec()

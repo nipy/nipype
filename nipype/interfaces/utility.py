@@ -1,10 +1,20 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Various utilities
+
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
+"""
+
 import os
 import re
 from cPickle import dumps, loads
 import numpy as np
 import nibabel as nb
+from nipype.external import six
 
 from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
@@ -251,6 +261,8 @@ class SplitInputSpec(BaseInterfaceInputSpec):
                   desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
                   desc='Number of outputs in each split - should add to number of inputs')
+    squeeze = traits.Bool(False, usedefault=True,
+                          desc='unfold one-element splits removing the list')
 
 
 class Split(IOBase):
@@ -289,7 +301,10 @@ class Split(IOBase):
             splits.extend(self.inputs.splits)
             splits = np.cumsum(splits)
             for i in range(len(splits) - 1):
-                outputs['out%d' % (i + 1)] = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
+                if self.inputs.squeeze and len(val) == 1:
+                    val = val[0]
+                outputs['out%d' % (i + 1)] = val
         return outputs
 
 
@@ -386,7 +401,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, str):
+            elif isinstance(function, six.string_types):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')
@@ -404,7 +419,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, str):
+            elif isinstance(new, six.string_types):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
@@ -464,6 +479,7 @@ class AssertEqual(BaseInterface):
         assert_equal(data1, data2)
 
         return runtime
+
 
 class CollateInterfaceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
@@ -617,5 +633,85 @@ class MultipleSelectInterface(IOBase):
             val = getattr(self.inputs, key)
             if isdefined(val):
                 outputs[key] = np.squeeze(np.array(val)[np.array(self.inputs.index)]).tolist()
+        return outputs
+
+
+class CSVReaderInputSpec(DynamicTraitedSpec, TraitedSpec):
+    in_file = File(exists=True, mandatory=True, desc='Input comma-seperated value (CSV) file')
+    header = traits.Bool(False, usedefault=True, desc='True if the first line is a column header')
+
+
+class CSVReader(BaseInterface):
+    """
+    Examples
+    --------
+
+    >>> reader = CSVReader()  # doctest: +SKIP
+    >>> reader.inputs.in_file = 'noHeader.csv'  # doctest: +SKIP
+    >>> out = reader.run()  # doctest: +SKIP
+    >>> out.outputs.column_0 == ['foo', 'bar', 'baz']  # doctest: +SKIP
+    True
+    >>> out.outputs.column_1 == ['hello', 'world', 'goodbye']  # doctest: +SKIP
+    True
+    >>> out.outputs.column_2 == ['300.1', '5', '0.3']  # doctest: +SKIP
+    True
+
+    >>> reader = CSVReader()  # doctest: +SKIP
+    >>> reader.inputs.in_file = 'header.csv'  # doctest: +SKIP
+    >>> reader.inputs.header = True  # doctest: +SKIP
+    >>> out = reader.run()  # doctest: +SKIP
+    >>> out.outputs.files == ['foo', 'bar', 'baz']  # doctest: +SKIP
+    True
+    >>> out.outputs.labels == ['hello', 'world', 'goodbye']  # doctest: +SKIP
+    True
+    >>> out.outputs.erosion == ['300.1', '5', '0.3']  # doctest: +SKIP
+    True
+
+    """
+    input_spec = CSVReaderInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def _append_entry(self, outputs, entry):
+        for key, value in zip(self._outfields, entry):
+            outputs[key].append(value)
+        return outputs
+
+    def _parse_line(self, line):
+        line = line.replace('\n', '')
+        entry = [x.strip() for x in line.split(',')]
+        return entry
+
+    def _get_outfields(self):
+        with open(self.inputs.in_file, 'r') as fid:
+            entry = self._parse_line(fid.readline())
+            if self.inputs.header:
+                self._outfields = tuple(entry)
+            else:
+                self._outfields = tuple(['column_' + str(x) for x in range(len(entry))])
+        return self._outfields
+
+    def _run_interface(self, runtime):
+        self._get_outfields()
+        return runtime
+
+    def _outputs(self):
+        return self._add_output_traits(super(CSVReader, self)._outputs())
+
+    def _add_output_traits(self, base):
+        return add_traits(base, self._get_outfields())
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        isHeader = True
+        for key in self._outfields:
+            outputs[key] = []  # initialize outfields
+        with open(self.inputs.in_file, 'r') as fid:
+            for line in fid.readlines():
+                if self.inputs.header and isHeader:  # skip header line
+                    isHeader = False
+                    continue
+                entry = self._parse_line(line)
+                outputs = self._append_entry(outputs, entry)
         return outputs
 

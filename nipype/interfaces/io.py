@@ -30,6 +30,7 @@ from warnings import warn
 
 import sqlite3
 from nipype.utils.misc import human_order_sorted
+from nipype.external import six
 
 try:
     import pyxnat
@@ -520,7 +521,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -531,7 +532,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -786,7 +787,7 @@ class DataFinder(IOBase):
 
     def _run_interface(self, runtime):
         #Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, str):
+        if isinstance(self.inputs.root_paths, six.string_types):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -983,7 +984,7 @@ class FreeSurferSource(IOBase):
             key = altkey
         globpattern = os.path.join(
             keydir, ''.join((globprefix, key, globsuffix)))
-        return glob.glob(globpattern)
+        return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
     def _list_outputs(self):
         subjects_dir = self.inputs.subjects_dir
@@ -1155,7 +1156,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1168,7 +1169,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and \
+                        if isinstance(arg, six.string_types) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -1548,12 +1549,9 @@ class MySQLSink(IOBase):
         return None
 
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
-    hostname = traits.Str(mandatory=True,
-                               desc='Server hostname.')
-    username = traits.Str(mandatory=False,
-                                desc='Server username.')
-    password = traits.Password(mandatory=False,
-                                desc='Server password.')
+    hostname = traits.Str(mandatory=True, desc='Server hostname.')
+    username = traits.Str(desc='Server username.')
+    password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
                                     desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
@@ -1728,7 +1726,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, str) and hasattr(self.inputs, arg):
+                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1739,7 +1737,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, str) and hasattr(self.inputs, arg):
+                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1803,3 +1801,162 @@ class SSHDataGrabber(DataGrabber):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(host['hostname'], username=host['user'], sock=proxy)
         return client
+
+
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    in_file = File(exists=True, desc='JSON source file')
+    defaults = traits.Dict(desc=('JSON dictionary that sets default output'
+                                'values, overridden by values found in in_file'))
+
+
+class JSONFileGrabber(IOBase):
+
+    """
+    Datagrabber interface that loads a json file and generates an output for
+    every first-level object
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.io import JSONFileGrabber
+    >>> jsonSource = JSONFileGrabber()
+    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
+    >>> res = jsonSource.run()
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param1': u'overrideMe'}
+    >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
+    >>> res = jsonSource.run()
+    >>> res.outputs.get()
+    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
+
+
+    """
+    input_spec = JSONFileGrabberInputSpec
+    output_spec = DynamicTraitedSpec
+    _always_run = True
+
+    def _list_outputs(self):
+        import json
+
+        outputs = {}
+        if isdefined(self.inputs.in_file):
+            with open(self.inputs.in_file, 'r') as f:
+                data = json.load(f)
+
+            if not isinstance(data, dict):
+                raise RuntimeError('JSON input has no dictionary structure')
+
+            for key, value in data.iteritems():
+                outputs[key] = value
+
+        if isdefined(self.inputs.defaults):
+            defaults = self.inputs.defaults
+            for key, value in defaults.iteritems():
+                if key not in outputs.keys():
+                    outputs[key] = value
+
+        return outputs
+
+
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    out_file = File(desc='JSON sink file')
+    in_dict = traits.Dict(value={}, usedefault=True,
+                          desc='input JSON dictionary')
+    _outputs = traits.Dict(value={}, usedefault=True)
+
+    def __setattr__(self, key, value):
+        if key not in self.copyable_trait_names():
+            if not isdefined(value):
+                super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+            self._outputs[key] = value
+        else:
+            if key in self._outputs:
+                self._outputs[key] = value
+            super(JSONFileSinkInputSpec, self).__setattr__(key, value)
+
+
+class JSONFileSinkOutputSpec(TraitedSpec):
+    out_file = File(desc='JSON sink file')
+
+
+class JSONFileSink(IOBase):
+
+    """
+    Very simple frontend for storing values into a JSON file.
+    Entries already existing in in_dict will be overridden by matching
+    entries dynamically added as inputs.
+
+        .. warning::
+
+            This is not a thread-safe node because it can write to a common
+            shared location. It will not complain when it overwrites a file.
+
+        Examples
+        --------
+
+        >>> jsonsink = JSONFileSink(input_names=['subject_id',
+        ...                         'some_measurement'])
+        >>> jsonsink.inputs.subject_id = 's1'
+        >>> jsonsink.inputs.some_measurement = 11.4
+        >>> jsonsink.run() # doctest: +SKIP
+
+        Using a dictionary as input:
+
+        >>> dictsink = JSONFileSink()
+        >>> dictsink.inputs.in_dict = {'subject_id': 's1',
+        ...                            'some_measurement': 11.4}
+        >>> dictsink.run() # doctest: +SKIP
+
+    """
+    input_spec = JSONFileSinkInputSpec
+    output_spec = JSONFileSinkOutputSpec
+
+    def __init__(self, infields=[], force_run=True, **inputs):
+        super(JSONFileSink, self).__init__(**inputs)
+        self._input_names = infields
+
+        undefined_traits = {}
+        for key in infields:
+            self.inputs.add_trait(key, traits.Any)
+            self.inputs._outputs[key] = Undefined
+            undefined_traits[key] = Undefined
+        self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
+
+        if force_run:
+            self._always_run = True
+
+    def _process_name(self, name, val):
+        if '.' in name:
+            newkeys = name.split('.')
+            name = newkeys.pop(0)
+            nested_dict = {newkeys.pop(): val}
+
+            for nk in reversed(newkeys):
+                nested_dict = {nk: nested_dict}
+            val = nested_dict
+
+        return name, val
+
+    def _list_outputs(self):
+        import json
+        import os.path as op
+
+        if not isdefined(self.inputs.out_file):
+            out_file = op.abspath('datasink.json')
+        else:
+            out_file = self.inputs.out_file
+
+        out_dict = self.inputs.in_dict
+
+        # Overwrite in_dict entries automatically
+        for key, val in self.inputs._outputs.items():
+            if not isdefined(val) or key == 'trait_added':
+                continue
+            key, val = self._process_name(key, val)
+            out_dict[key] = val
+
+        with open(out_file, 'w') as f:
+            json.dump(out_dict, f)
+        outputs = self.output_spec().get()
+        outputs['out_file'] = out_file
+        return outputs

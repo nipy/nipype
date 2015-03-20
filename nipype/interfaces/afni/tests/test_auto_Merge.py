@@ -26,8 +26,7 @@ def test_Merge_inputs():
     name_template='%s_merge',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Merge.input_spec()

@@ -16,8 +16,7 @@ def test_FEAT_inputs():
     usedefault=True,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FEAT.input_spec()

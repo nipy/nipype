@@ -12,8 +12,7 @@ def test_SlicerCommandLine_inputs():
     usedefault=True,
     ),
     module=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SlicerCommandLine.input_spec()

@@ -29,15 +29,14 @@ def test_PrepareFieldmap_inputs():
     usedefault=True,
     ),
     out_fieldmap=dict(argstr='%s',
-    position=5,
+    position=4,
     ),
     output_type=dict(),
     scanner=dict(argstr='%s',
     position=1,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PrepareFieldmap.input_spec()

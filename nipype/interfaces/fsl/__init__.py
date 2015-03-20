@@ -16,14 +16,16 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     ImageStats, FilterRegressor, Overlay, Slicer,
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
                     SwapDimensions, PowerSpectrum, Reorient2Std,
-                    Complex, InvWarp, WarpUtils, ConvertWarp)
+                    Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints, WarpPointsToStd)
 
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
-                  SigLoss, EddyCorrect)
+                  SigLoss, EddyCorrect, EpiReg)
 
-from .dti import (BEDPOSTX, DTIFit, ProbTrackX, ProbTrackX2,
+from .dti import (BEDPOSTX, XFibres, DTIFit,
+                  ProbTrackX, ProbTrackX2,
                   VecReg, ProjThresh, FindTheBiggest, DistanceMap,
-                  TractSkeleton, XFibres, MakeDyadicVectors)
+                  TractSkeleton, MakeDyadicVectors, BEDPOSTX5, XFibres5,
+                  BEDPOSTX4, XFibres4)
 from .maths import (ChangeDataType, Threshold, MeanImage, ApplyMask,
                     IsotropicSmooth, TemporalFilter, DilateImage, ErodeImage,
                     SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths)

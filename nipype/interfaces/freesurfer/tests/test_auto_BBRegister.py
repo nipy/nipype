@@ -20,7 +20,8 @@ def test_BBRegister_inputs():
     mandatory=True,
     xor=['init_reg_file'],
     ),
-    init_reg_file=dict(mandatory=True,
+    init_reg_file=dict(argstr='--init-reg %s',
+    mandatory=True,
     xor=['init'],
     ),
     intermediate_file=dict(argstr='--int %s',
@@ -48,8 +49,7 @@ def test_BBRegister_inputs():
     mandatory=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BBRegister.input_spec()

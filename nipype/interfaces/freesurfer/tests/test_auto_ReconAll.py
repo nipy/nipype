@@ -33,8 +33,7 @@ def test_ReconAll_inputs():
     genfile=True,
     hash_files=False,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ReconAll.input_spec()

@@ -470,6 +470,39 @@ def test_mapnode_iterfield_check():
     yield assert_raises, ValueError, mod1._check_iterfield
 
 
+def test_mapnode_nested():
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    from nipype import MapNode, Function
+    def func1(in1):
+        return in1 + 1
+    n1 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 nested=True,
+                 name='n1')
+    n1.inputs.in1 = [[1,[2]],3,[4,5]]
+    n1.run()
+    print n1.get_output('out')
+    yield assert_equal, n1.get_output('out'), [[2,[3]],4,[5,6]]
+
+    n2 = MapNode(Function(input_names=['in1'],
+                          output_names=['out'],
+                          function=func1),
+                 iterfield=['in1'],
+                 nested=False,
+                 name='n1')
+    n2.inputs.in1 = [[1,[2]],3,[4,5]]
+    error_raised = False
+    try:
+        n2.run()
+    except Exception, e:
+        pe.logger.info('Exception: %s' % str(e))
+        error_raised = True
+    yield assert_true, error_raised
+
 def test_node_hash():
     cwd = os.getcwd()
     wd = mkdtemp()
@@ -619,19 +652,20 @@ def test_serial_input():
                  iterfield=['in1'],
                  name='n1')
     n1.inputs.in1 = [1,2,3]
-    
-    
+
+
     w1 = Workflow(name='test')
     w1.base_dir = wd
     w1.add_nodes([n1])
     # set local check
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
-                              'crashdump_dir': wd}
-    
+                              'crashdump_dir': wd,
+                              'poll_sleep_duration': 2}
+
     # test output of num_subnodes method when serial is default (False)
     yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
-    
+
     # test running the workflow on default conditions
     error_raised = False
     try:
@@ -640,11 +674,11 @@ def test_serial_input():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
-    
+
     # test output of num_subnodes method when serial is True
     n1._serial=True
     yield assert_equal, n1.num_subnodes(), 1
-    
+
     # test running the workflow on serial conditions
     error_raised = False
     try:
@@ -653,6 +687,6 @@ def test_serial_input():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
-    
+
     os.chdir(cwd)
     rmtree(wd)

@@ -33,8 +33,7 @@ def test_QBallMX_inputs():
     smoothingsigma=dict(argstr='-smoothingsigma %f',
     units='NA',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = QBallMX.input_spec()

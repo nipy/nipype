@@ -42,8 +42,7 @@ def test_BSplineDeformableRegistration_inputs():
     ),
     spatialsamples=dict(argstr='--spatialsamples %d',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BSplineDeformableRegistration.input_spec()

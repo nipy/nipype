@@ -358,6 +358,9 @@ CommandLine
 ``name_source``
     Indicates the list of input fields from which the value of the current File
     output variable will be drawn. This input field must be the name of a File.
+    Chaining is allowed, meaning that an input field can point to another as
+    ``name_source``, which also points as ``name_source`` to a third field.
+    In this situation, the templates for substitutions are also accumulated.
 
 ``name_template``
     By default a ``%s_generated`` template is used to create the output
@@ -403,6 +406,9 @@ If you used genfile:
 * ``_gen_filename(name)``:  Generate filename, used for filenames that nipype generates as a convenience for users.  This is for parameters that are required by the wrapped package, but we're generating from some other parameter. For example, ``BET.inputs.outfile`` is required by BET but we can generate the name from ``BET.inputs.infile``.  Override this method in subclass to handle.
 
 And optionally:
+
+* ``_redirect_x``: If set to True it will make Nipype start Xvfb before running the interface and redirect X output to it. This is useful for
+commandlines that spawn a graphical user interface.
 
 * ``_format_arg(name, spec, value)``: For extra formatting of the input values before passing them to generic ``_parse_inputs()`` method.
 

@@ -19,8 +19,7 @@ def test_Reorient2Std_inputs():
     hash_files=False,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Reorient2Std.input_spec()
