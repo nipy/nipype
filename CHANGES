@@ -1,5 +1,6 @@
 Next release
 ============
+* FIX: In the FSLXcommand _list_outputs function fixed for loop range (https://github.com/nipy/nipype/pull/1071)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
 * FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
