@@ -1,5 +1,8 @@
 Next release
 ============
+
+* ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
+       (https://github.com/nipy/nipype/pull/1019)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
 * FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
