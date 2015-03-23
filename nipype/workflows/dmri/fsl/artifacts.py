@@ -46,12 +46,17 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     outputnode = pe.Node(niu.IdentityInterface(
         fields=['out_file', 'out_mask', 'out_bvec']), name='outputnode')
 
+    list_b0 = pe.Node(niu.Function(
+        input_names=['in_bval'], output_names=['out_idx'],
+        function=b0_indices), name='B0indices')
+
     avg_b0_0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_pre')
+        input_names=['in_file', 'index'], output_names=['out_file'],
+        function=time_avg), name='b0_avg_pre')
     avg_b0_1 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg_post')
+        input_names=['in_file', 'index'], output_names=['out_file'],
+        function=time_avg), name='b0_avg_post')
+
     bet_dwi0 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
                        name='bet_dwi_pre')
     bet_dwi1 = pe.Node(fsl.BET(frac=0.3, mask=True, robust=True),
@@ -67,24 +72,25 @@ def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
         (inputnode, hmc,        [('in_file', 'inputnode.in_file'),
                                  ('in_bvec', 'inputnode.in_bvec'),
                                  ('in_bval', 'inputnode.in_bval')]),
-        (inputnode, avg_b0_0,   [('in_file', 'in_dwi'),
-                                 ('in_bval', 'in_bval')]),
+        (inputnode, list_b0,    [('in_bval', 'in_bval')]),
+        (inputnode, avg_b0_0,   [('in_file', 'in_file')]),
+        (list_b0,   avg_b0_0,   [('out_idx', 'index')]),
         (avg_b0_0,  bet_dwi0,   [('out_file', 'in_file')]),
         (bet_dwi0,  hmc,        [('mask_file', 'inputnode.in_mask')]),
         (hmc,       sdc,        [
          ('outputnode.out_file', 'inputnode.in_file')]),
         (bet_dwi0,  sdc,        [('mask_file', 'inputnode.in_mask')]),
-        (inputnode, sdc,        [('in_bval', 'inputnode.in_bval'),
-                                 ('bmap_pha', 'inputnode.bmap_pha'),
+        (inputnode, sdc,        [('bmap_pha', 'inputnode.bmap_pha'),
                                  ('bmap_mag', 'inputnode.bmap_mag'),
                                  ('epi_param', 'inputnode.settings')]),
+        (list_b0,   sdc,        [('out_idx', 'inputnode.in_ref')]),
         (hmc,       ecc,        [
          ('outputnode.out_xfms', 'inputnode.in_xfms')]),
         (inputnode, ecc,        [('in_file', 'inputnode.in_file'),
                                  ('in_bval', 'inputnode.in_bval')]),
         (bet_dwi0,  ecc,        [('mask_file', 'inputnode.in_mask')]),
-        (ecc,       avg_b0_1,   [('outputnode.out_file', 'in_dwi')]),
-        (inputnode, avg_b0_1,   [('in_bval', 'in_bval')]),
+        (ecc,       avg_b0_1,   [('outputnode.out_file', 'in_file')]),
+        (list_b0,   avg_b0_1,   [('out_idx', 'index')]),
         (avg_b0_1,  bet_dwi1,   [('out_file', 'in_file')]),
         (inputnode, unwarp,     [('in_file', 'inputnode.in_dwi')]),
         (hmc,       unwarp,     [('outputnode.out_xfms', 'inputnode.in_hmc')]),
@@ -529,7 +535,7 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
     >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
     >>> fmb = sdc_fmb()
     >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
-    >>> fmb.inputs.inputnode.in_bval = 'diffusion.bval'
+    >>> fmb.inputs.inputnode.in_ref = range(0, 30, 6)
     >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
     >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
     >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'
@@ -555,7 +561,7 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
                     'acc_factor': 2, 'enc_dir': u'AP'}
 
     inputnode = pe.Node(niu.IdentityInterface(
-        fields=['in_file', 'in_bval', 'in_mask', 'bmap_pha', 'bmap_mag',
+        fields=['in_file', 'in_ref', 'in_mask', 'bmap_pha', 'bmap_mag',
                 'settings']), name='inputnode')
 
     outputnode = pe.Node(niu.IdentityInterface(
@@ -580,9 +586,9 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
         input_names=['in_file', 'delta_te'], output_names=['out_file'],
         function=rads2radsec), name='ToRadSec')
 
-    avg_b0 = pe.Node(niu.Function(
-        input_names=['in_dwi', 'in_bval'], output_names=['out_file'],
-        function=b0_average), name='b0_avg')
+    baseline = pe.Node(niu.Function(
+        input_names=['in_file', 'index'], output_names=['out_file'],
+        function=time_avg), name='Baseline')
 
     fmm2b0 = pe.Node(ants.Registration(output_warped_image=True),
                      name="FMm_to_B0")
@@ -639,8 +645,8 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
                                    ('acc_factor', 'acc_factor')]),
         (inputnode,   pha2rads,   [('bmap_pha', 'in_file')]),
         (inputnode,   firstmag,   [('bmap_mag', 'in_file')]),
-        (inputnode,   avg_b0,     [('in_file', 'in_dwi'),
-                                   ('in_bval', 'in_bval')]),
+        (inputnode,   baseline,   [('in_file', 'in_file'),
+                                   ('in_ref', 'index')]),
         (firstmag,    n4,         [('roi_file', 'input_image')]),
         (n4,          bet,        [('output_image', 'in_file')]),
         (bet,         dilate,     [('mask_file', 'in_file')]),
@@ -650,12 +656,12 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
         (r_params,    rad2rsec,   [('delta_te', 'delta_te')]),
         (prelude,     rad2rsec,   [('unwrapped_phase_file', 'in_file')]),
 
-        (avg_b0,      fmm2b0,     [('out_file', 'fixed_image')]),
+        (baseline,    fmm2b0,     [('out_file', 'fixed_image')]),
         (n4,          fmm2b0,     [('output_image', 'moving_image')]),
         (inputnode,   fmm2b0,     [('in_mask', 'fixed_image_mask')]),
         (dilate,      fmm2b0,     [('out_file', 'moving_image_mask')]),
 
-        (avg_b0,      applyxfm,   [('out_file', 'reference_image')]),
+        (baseline,    applyxfm,   [('out_file', 'reference_image')]),
         (rad2rsec,    applyxfm,   [('out_file', 'input_image')]),
         (fmm2b0,      applyxfm, [
             ('forward_transforms', 'transforms'),
