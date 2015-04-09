@@ -40,8 +40,7 @@ def test_IsotropicSmooth_inputs():
     position=4,
     xor=['fwhm'],
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = IsotropicSmooth.input_spec()

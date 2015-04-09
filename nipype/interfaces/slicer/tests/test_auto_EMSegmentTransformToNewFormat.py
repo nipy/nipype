@@ -18,8 +18,7 @@ def test_EMSegmentTransformToNewFormat_inputs():
     ),
     templateFlag=dict(argstr='--templateFlag ',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = EMSegmentTransformToNewFormat.input_spec()

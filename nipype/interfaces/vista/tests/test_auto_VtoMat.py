@@ -22,8 +22,7 @@ def test_VtoMat_inputs():
     name_template='%s.mat',
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = VtoMat.input_spec()

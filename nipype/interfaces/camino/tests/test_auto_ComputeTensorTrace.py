@@ -28,8 +28,7 @@ def test_ComputeTensorTrace_inputs():
     scheme_file=dict(argstr='%s',
     position=2,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ComputeTensorTrace.input_spec()

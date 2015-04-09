@@ -23,8 +23,7 @@ def test_DT2NIfTI_inputs():
     genfile=True,
     position=2,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DT2NIfTI.input_spec()

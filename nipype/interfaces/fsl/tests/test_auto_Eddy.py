@@ -53,8 +53,7 @@ def test_Eddy_inputs():
     ),
     session=dict(argstr='--session=%s',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Eddy.input_spec()

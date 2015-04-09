@@ -21,8 +21,7 @@ def test_Copy_inputs():
     name_template='%s_copy',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Copy.input_spec()

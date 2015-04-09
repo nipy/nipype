@@ -37,6 +37,7 @@
    saving_workflows
    spmmcr
    mipav
+   nipypecmd
 
  
 

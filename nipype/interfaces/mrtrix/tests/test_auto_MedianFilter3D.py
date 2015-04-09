@@ -25,8 +25,7 @@ def test_MedianFilter3D_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MedianFilter3D.input_spec()

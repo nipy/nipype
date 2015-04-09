@@ -29,8 +29,7 @@ def test_GenerateWhiteMatterMask_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateWhiteMatterMask.input_spec()

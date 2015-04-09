@@ -381,6 +381,51 @@ def recompose_xfm(in_bval, in_xfms):
     return out_files
 
 
+def time_avg(in_file, index=[0], out_file=None):
+    """
+    Average the input time-series, selecting the indices given in index
+
+    .. warning:: time steps should be already registered (corrected for
+      head motion artifacts).
+
+    """
+    import numpy as np
+    import nibabel as nb
+    import os.path as op
+
+    if out_file is None:
+        fname, ext = op.splitext(op.basename(in_file))
+        if ext == ".gz":
+            fname, ext2 = op.splitext(fname)
+            ext = ext2 + ext
+        out_file = op.abspath("%s_baseline%s" % (fname, ext))
+
+    index = np.atleast_1d(index).tolist()
+
+    imgs = np.array(nb.four_to_three(nb.load(in_file)))[index]
+    if len(index) == 1:
+        data = imgs[0].get_data().astype(np.float32)
+    else:
+        data = np.average(np.array([im.get_data().astype(np.float32) for im in imgs]),
+                         axis=0)
+
+    hdr = imgs[0].get_header().copy()
+    hdr.set_data_shape(data.shape)
+    hdr.set_xyzt_units('mm')
+    hdr.set_data_dtype(np.float32)
+    nb.Nifti1Image(data, imgs[0].get_affine(), hdr).to_filename(out_file)
+    return out_file
+
+
+def b0_indices(in_bval, max_b=10.0):
+    """
+    Extract the indices of slices in a b-values file with a low b value
+    """
+    import numpy as np
+    bval = np.loadtxt(in_bval)
+    return np.argwhere(bval <= max_b).flatten().tolist()
+
+
 def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     """
     A function that averages the *b0* volumes from a DWI dataset.
@@ -403,9 +448,9 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
         out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
 
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
-    bval = np.loadtxt(in_bval)
+    index = b0_indices(in_bval, max_b=max_b)
     b0s = [im.get_data().astype(np.float32)
-           for im in imgs[np.where(bval <= max_b)]]
+           for im in imgs[index]]
     b0 = np.average(np.array(b0s), axis=0)
 
     hdr = imgs[0].get_header().copy()
