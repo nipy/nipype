@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Add an option not to resubmit Nodes that finished running when using SGEGraph (https://github.com/nipy/nipype/pull/1002)
 * FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
