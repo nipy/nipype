@@ -149,7 +149,7 @@ class SampleToSurface(FSCommand):
 
     """
     _cmd = "mri_vol2surf"
-    # testing 
+    # testing
     input_spec = SampleToSurfaceInputSpec
     output_spec = SampleToSurfaceOutputSpec
 
