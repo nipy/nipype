@@ -9,6 +9,7 @@ from .convert import (Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines,
                       Shredder)
 from .dti import (DTIFit, ModelFit, DTLUTGen, PicoPDFs, Track, TrackPICo,
                   TrackBayesDirac, TrackDT, TrackBallStick, TrackBootstrap,
+                  TrackBedpostxDeter, TrackBedpostxProba,
                   ComputeFractionalAnisotropy, ComputeMeanDiffusivity,
                   ComputeTensorTrace,  ComputeEigensystem, DTMetric)
 from .calib import (SFPICOCalibData, SFLUTGen)

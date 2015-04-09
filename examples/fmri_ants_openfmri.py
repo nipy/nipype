@@ -7,15 +7,15 @@ fMRI: OpenfMRI.org data, FSL, ANTS, c3daffine
 =============================================
 
 A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
-This script demonstrates how to use nipype to analyze a data set.
+This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
 """
 
 from nipype import config
 config.enable_provenance()
-from nipype.external import six
 
+from nipype.external import six
 
 from glob import glob
 import os
@@ -25,6 +25,7 @@ import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.ants as ants
+from nipype.algorithms.misc import TSNR
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
@@ -33,6 +34,13 @@ from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_fixed_effects_flow)
 
 from nipype import LooseVersion
+from nipype import Workflow, Node, MapNode
+from nipype.interfaces import (fsl, Function, ants, freesurfer)
+
+from nipype.interfaces.utility import Rename, Merge, IdentityInterface
+from nipype.utils.filemanip import filename_to_list
+from nipype.interfaces.io import DataSink, FreeSurferSource
+import nipype.interfaces.freesurfer as fs
 
 version = 0
 if fsl.Info.version() and \
@@ -41,25 +49,57 @@ if fsl.Info.version() and \
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
 
+imports = ['import os',
+           'import nibabel as nb',
+           'import numpy as np',
+           'import scipy as sp',
+           'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
+           'from scipy.special import legendre'
+           ]
+
+def median(in_files):
+    """Computes an average of the median of each realigned timeseries
+
+    Parameters
+    ----------
+
+    in_files: one or more realigned Nifti 4D time series
+
+    Returns
+    -------
+
+    out_file: a 3D Nifti file
+    """
+    average = None
+    for idx, filename in enumerate(filename_to_list(in_files)):
+        img = nb.load(filename)
+        data = np.median(img.get_data(), axis=3)
+        if average is None:
+            average = data
+        else:
+            average = average + data
+    median_img = nb.Nifti1Image(average/float(idx + 1),
+                                img.get_affine(), img.get_header())
+    filename = os.path.join(os.getcwd(), 'median.nii.gz')
+    median_img.to_filename(filename)
+    return filename
+
 
 def create_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow together with freesurfer
 
     Parameters
     ----------
-
-    ::
-
         name : name of workflow (default: 'registration')
 
-    Inputs::
+    Inputs:
 
         inputspec.source_files : files (filename or list of filenames to register)
         inputspec.mean_image : reference image to use
         inputspec.anatomical_image : anatomical image to coregister to
         inputspec.target_image : registration target
 
-    Outputs::
+    Outputs:
 
         outputspec.func2anat_transform : FLIRT transform
         outputspec.anat2target_transform : FLIRT+FNIRT transform
@@ -68,7 +108,6 @@ def create_reg_workflow(name='registration'):
 
     Example
     -------
-
     """
 
     register = pe.Workflow(name=name)
@@ -81,11 +120,12 @@ def create_reg_workflow(name='registration'):
                                                                  'config_file']),
                         name='inputspec')
     outputnode = pe.Node(interface=niu.IdentityInterface(fields=['func2anat_transform',
-                                                              'anat2target_transform',
-                                                              'transformed_files',
-                                                              'transformed_mean',
-                                                              ]),
-                     name='outputspec')
+                                                                 'anat2target_transform',
+                                                                 'transformed_files',
+                                                                 'transformed_mean',
+                                                                 'anat2target',
+                                                                 ]),
+                         name='outputspec')
 
     """
     Estimate the tissue classes from the anatomical image. But use spm's segment
@@ -130,6 +170,7 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
     register.connect(mean2anat, 'out_matrix_file',
                      mean2anatbbr, 'in_matrix_file')
+
     """
     Convert the BBRegister transformation to ANTS ITK format
     """
@@ -155,7 +196,6 @@ def create_reg_workflow(name='registration'):
     reg.inputs.output_transform_prefix = "output_"
     reg.inputs.transforms = ['Rigid', 'Affine', 'SyN']
     reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.2, 3.0, 0.0)]
-    #reg.inputs.number_of_iterations = ([[10000, 111110, 11110]] * 2 + [[100, 50, 30]])
     reg.inputs.number_of_iterations = [[10000, 11110, 11110]] * 2 + [[100, 30, 20]]
     reg.inputs.dimension = 3
     reg.inputs.write_composite_transform = True
@@ -178,7 +218,8 @@ def create_reg_workflow(name='registration'):
     reg.inputs.args = '--float'
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    reg.plugin_args = {'qsub_args': '-pe orte 4',
+                       'sbatch_args': '--mem=6G -c 4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image_brain', reg,'fixed_image')
 
@@ -197,10 +238,11 @@ def create_reg_workflow(name='registration'):
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = pe.Node(ants.ApplyTransforms(),
                        name='warpmean')
-    warpmean.inputs.input_image_type = 3
-    warpmean.inputs.interpolation = 'BSpline'
+    warpmean.inputs.input_image_type = 0
+    warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
 
@@ -215,8 +257,8 @@ def create_reg_workflow(name='registration'):
     warpall = pe.MapNode(ants.ApplyTransforms(),
                          iterfield=['input_image'],
                          name='warpall')
-    warpall.inputs.input_image_type = 3
-    warpall.inputs.interpolation = 'BSpline'
+    warpall.inputs.input_image_type = 0
+    warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
 
@@ -229,6 +271,7 @@ def create_reg_workflow(name='registration'):
     Assign all the output files
     """
 
+    register.connect(reg, 'warped_image', outputnode, 'anat2target')
     register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
     register.connect(warpall, 'output_image', outputnode, 'transformed_files')
     register.connect(mean2anatbbr, 'out_matrix_file',
@@ -237,6 +280,236 @@ def create_reg_workflow(name='registration'):
                      outputnode, 'anat2target_transform')
 
     return register
+
+def get_aparc_aseg(files):
+    """Return the aparc+aseg.mgz file"""
+    for name in files:
+        if 'aparc+aseg.mgz' in name:
+            return name
+    raise ValueError('aparc+aseg.mgz not found')
+
+def create_fs_reg_workflow(name='registration'):
+    """Create a FEAT preprocessing workflow together with freesurfer
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: 'registration')
+
+    Inputs::
+
+        inputspec.source_files : files (filename or list of filenames to register)
+        inputspec.mean_image : reference image to use
+        inputspec.target_image : registration target
+
+    Outputs::
+
+        outputspec.func2anat_transform : FLIRT transform
+        outputspec.anat2target_transform : FLIRT+FNIRT transform
+        outputspec.transformed_files : transformed files in target space
+        outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+
+    """
+
+    register = Workflow(name=name)
+
+    inputnode = Node(interface=IdentityInterface(fields=['source_files',
+                                                         'mean_image',
+                                                         'subject_id',
+                                                         'subjects_dir',
+                                                         'target_image']),
+                     name='inputspec')
+
+    outputnode = Node(interface=IdentityInterface(fields=['func2anat_transform',
+                                                          'out_reg_file',
+                                                          'anat2target_transform',
+                                                          'transforms',
+                                                          'transformed_mean',
+                                                          'transformed_files',
+                                                          'min_cost_file',
+                                                          'anat2target',
+                                                          'aparc'
+                                                          ]),
+                      name='outputspec')
+
+    # Get the subject's freesurfer source directory
+    fssource = Node(FreeSurferSource(),
+                    name='fssource')
+    fssource.run_without_submitting = True
+    register.connect(inputnode, 'subject_id', fssource, 'subject_id')
+    register.connect(inputnode, 'subjects_dir', fssource, 'subjects_dir')
+
+    convert = Node(freesurfer.MRIConvert(out_type='nii'),
+                   name="convert")
+    register.connect(fssource, 'T1', convert, 'in_file')
+
+    # Coregister the median to the surface
+    bbregister = Node(freesurfer.BBRegister(),
+                    name='bbregister')
+    bbregister.inputs.init = 'fsl'
+    bbregister.inputs.contrast_type = 't2'
+    bbregister.inputs.out_fsl_file = True
+    bbregister.inputs.epi_mask = True
+    register.connect(inputnode, 'subject_id', bbregister, 'subject_id')
+    register.connect(inputnode, 'mean_image', bbregister, 'source_file')
+    register.connect(inputnode, 'subjects_dir', bbregister, 'subjects_dir')
+
+    """
+    use aparc+aseg's brain mask
+    """
+
+    binarize = Node(fs.Binarize(min=0.5, out_type="nii.gz", dilate=1), name="binarize_aparc")
+    register.connect(fssource, ("aparc_aseg", get_aparc_aseg), binarize, "in_file")
+
+    stripper = Node(fsl.ApplyMask(), name ='stripper')
+    register.connect(binarize, "binary_file", stripper, "mask_file")
+    register.connect(convert, 'out_file', stripper, 'in_file')
+
+    """
+    Apply inverse transform to aparc file
+    """
+    aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
+                                                 interp='nearest'),
+                    name='aparc_inverse_transform')
+    register.connect(inputnode, 'subjects_dir', aparcxfm, 'subjects_dir')
+    register.connect(bbregister, 'out_reg_file', aparcxfm, 'reg_file')
+    register.connect(fssource, ('aparc_aseg', get_aparc_aseg),
+                     aparcxfm, 'target_file')
+    register.connect(inputnode, 'mean_image', aparcxfm, 'source_file')
+
+    """
+    Convert the BBRegister transformation to ANTS ITK format
+    """
+
+    convert2itk = Node(C3dAffineTool(), name='convert2itk')
+    convert2itk.inputs.fsl2ras = True
+    convert2itk.inputs.itk_transform = True
+    register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
+    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(stripper, 'out_file', convert2itk, 'reference_file')
+
+    """
+    Compute registration between the subject's structural and MNI template
+    This is currently set to perform a very quick registration. However, the
+    registration can be made significantly more accurate for cortical
+    structures by increasing the number of iterations
+    All parameters are set using the example from:
+    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+    """
+
+    reg = Node(ants.Registration(), name='antsRegister')
+    reg.inputs.output_transform_prefix = "output_"
+    reg.inputs.transforms = ['Rigid', 'Affine', 'SyN']
+    reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.2, 3.0, 0.0)]
+    reg.inputs.number_of_iterations = [[10000, 11110, 11110]] * 2 + [[100, 30, 20]]
+    reg.inputs.dimension = 3
+    reg.inputs.write_composite_transform = True
+    reg.inputs.collapse_output_transforms = True
+    reg.inputs.initial_moving_transform_com = True
+    reg.inputs.metric = ['Mattes'] * 2 + [['Mattes', 'CC']]
+    reg.inputs.metric_weight = [1] * 2 + [[0.5, 0.5]]
+    reg.inputs.radius_or_number_of_bins = [32] * 2 + [[32, 4]]
+    reg.inputs.sampling_strategy = ['Regular'] * 2 + [[None, None]]
+    reg.inputs.sampling_percentage = [0.3] * 2 + [[None, None]]
+    reg.inputs.convergence_threshold = [1.e-8] * 2 + [-0.01]
+    reg.inputs.convergence_window_size = [20] * 2 + [5]
+    reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 2 + [[1, 0.5, 0]]
+    reg.inputs.sigma_units = ['vox'] * 3
+    reg.inputs.shrink_factors = [[3, 2, 1]]*2 + [[4, 2, 1]]
+    reg.inputs.use_estimate_learning_rate_once = [True] * 3
+    reg.inputs.use_histogram_matching = [False] * 2 + [True]
+    reg.inputs.winsorize_lower_quantile = 0.005
+    reg.inputs.winsorize_upper_quantile = 0.995
+    reg.inputs.args = '--float'
+    reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
+    reg.inputs.num_threads = 4
+    reg.plugin_args = {'qsub_args': '-pe orte 4',
+                       'sbatch_args': '--mem=6G -c 4'}
+    register.connect(stripper, 'out_file', reg, 'moving_image')
+    register.connect(inputnode,'target_image', reg,'fixed_image')
+
+
+    """
+    Concatenate the affine and ants transforms into a list
+    """
+
+    pickfirst = lambda x: x[0]
+
+    merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
+    register.connect(convert2itk, 'itk_transform', merge, 'in2')
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+
+
+    """
+    Transform the mean image. First to anatomical and then to target
+    """
+    warpmean = Node(ants.ApplyTransforms(), name='warpmean')
+    warpmean.inputs.input_image_type = 0
+    warpmean.inputs.interpolation = 'Linear'
+    warpmean.inputs.invert_transform_flags = [False, False]
+    warpmean.inputs.terminal_output = 'file'
+    warpmean.inputs.args = '--float'
+    #warpmean.inputs.num_threads = 4
+    #warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
+
+    """
+    Transform the remaining images. First to anatomical and then to target
+    """
+
+    warpall = pe.MapNode(ants.ApplyTransforms(),
+                         iterfield=['input_image'],
+                         name='warpall')
+    warpall.inputs.input_image_type = 0
+    warpall.inputs.interpolation = 'Linear'
+    warpall.inputs.invert_transform_flags = [False, False]
+    warpall.inputs.terminal_output = 'file'
+    warpall.inputs.args = '--float'
+    warpall.inputs.num_threads = 2
+    warpall.plugin_args = {'sbatch_args': '--mem=6G -c 2'}
+
+    """
+    Assign all the output files
+    """
+
+    register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
+    register.connect(warpall, 'output_image', outputnode, 'transformed_files')
+
+    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'mean_image', warpmean, 'input_image')
+    register.connect(merge, 'out', warpmean, 'transforms')
+    register.connect(inputnode,'target_image', warpall,'reference_image')
+    register.connect(inputnode,'source_files', warpall, 'input_image')
+    register.connect(merge, 'out', warpall, 'transforms')
+
+
+    """
+    Assign all the output files
+    """
+
+    register.connect(reg, 'warped_image', outputnode, 'anat2target')
+    register.connect(aparcxfm, 'transformed_file',
+                     outputnode, 'aparc')
+    register.connect(bbregister, 'out_fsl_file',
+                     outputnode, 'func2anat_transform')
+    register.connect(bbregister, 'out_reg_file',
+                     outputnode, 'out_reg_file')
+    register.connect(bbregister, 'min_cost_file',
+                     outputnode, 'min_cost_file')
+    register.connect(reg, 'composite_transform',
+                     outputnode, 'anat2target_transform')
+    register.connect(merge, 'out', outputnode, 'transforms')
+
+    return register
+
+
+"""
+Get info for a given subject
+"""
 
 def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     """Get info for a given subject
@@ -282,20 +555,39 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     for idx in range(n_tasks):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
-                      in taskinfo[taskidx[0], 2]])
-        files = glob(os.path.join(base_dir,
-                                  subject_id,
-                                  'BOLD',
-                                  'task%03d_run*' % (idx + 1)))
-        run_ids.insert(idx, range(1, len(files) + 1))
-    TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
+                      in taskinfo[taskidx[0], 2]]) # if 'junk' not in condition])
+        files = sorted(glob(os.path.join(base_dir,
+                                         subject_id,
+                                         'BOLD',
+                                         'task%03d_run*' % (idx + 1))))
+        runs = [int(val[-3:]) for val in files]
+        run_ids.insert(idx, runs)
+    json_info = os.path.join(base_dir, subject_id, 'BOLD',
+                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
+                                 'bold_scaninfo.json')
+    if os.path.exists(json_info):
+        import json
+        with open(json_info, 'rt') as fp:
+            data = json.load(fp)
+            TR = data['global']['const']['RepetitionTime']/1000.
+    else:
+        task_scan_key = os.path.join(base_dir, subject_id, 'BOLD',
+                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
+                                 'scan_key.txt')
+        if os.path.exists(task_scan_key):
+            TR = np.genfromtxt(task_scan_key)[1]
+        else:
+            TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
+"""
+Analyzes an open fmri dataset
+"""
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                              task_id=None, output_dir=None, subj_prefix='*',
                              hpcutoff=120., use_derivatives=True,
-                             fwhm=6.0):
+                             fwhm=6.0, subjects_dir=None, target=None):
     """Analyzes an open fmri dataset
 
     Parameters
@@ -315,7 +607,10 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     preproc = create_featreg_preproc(whichvol='first')
     modelfit = create_modelfit_workflow()
     fixed_fx = create_fixed_effects_flow()
-    registration = create_reg_workflow()
+    if subjects_dir:
+        registration = create_fs_reg_workflow()
+    else:
+        registration = create_reg_workflow()
 
     """
     Remove the plotting connection so that plot iterables don't propagate
@@ -356,25 +651,45 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
-
-    datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+    contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
+                                 'task_contrasts.txt')
+    has_contrast = os.path.exists(contrast_file)
+    if has_contrast:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
                                                    'task_id', 'model_id'],
                                          outfields=['anat', 'bold', 'behav',
                                                     'contrasts']),
                          name='datasource')
+    else:
+        datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
+                                                   'task_id', 'model_id'],
+                                         outfields=['anat', 'bold', 'behav']),
+                         name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
-    datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
-                                'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
-                                'behav': ('%s/model/model%03d/onsets/task%03d_'
-                                          'run%03d/cond*.txt'),
-                                'contrasts': ('models/model%03d/'
-                                              'task_contrasts.txt')}
-    datasource.inputs.template_args = {'anat': [['subject_id']],
+
+    if has_contrast:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt'),
+                                            'contrasts': ('models/model%03d/'
+                                                          'task_contrasts.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
                                        'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
                                                   'task_id', 'run_id']],
                                        'contrasts': [['model_id']]}
+    else:
+        datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
+                                            'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                            'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                      'run%03d/cond*.txt')}
+        datasource.inputs.template_args = {'anat': [['subject_id']],
+                                       'bold': [['subject_id', 'task_id']],
+                                       'behav': [['subject_id', 'model_id',
+                                                  'task_id', 'run_id']]}
+
     datasource.inputs.sort_filelist = True
 
     """
@@ -407,9 +722,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def get_contrasts(contrast_file, task_id, conds):
         import numpy as np
-        contrast_def = np.genfromtxt(contrast_file, dtype=object)
-        if len(contrast_def.shape) == 1:
-            contrast_def = contrast_def[None, :]
+        import os
+        contrast_def = []
+        if os.path.exists(contrast_file):
+            with open(contrast_file, 'rt') as fp:
+                contrast_def.extend([np.array(row.split()) for row in fp.readlines() if row.strip()])
         contrasts = []
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
@@ -443,22 +760,33 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                            name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
-    def check_behav_list(behav):
-        out_behav = []
+    def check_behav_list(behav, run_id, conds):
+        from nipype.external import six
+        import numpy as np
+        num_conds = len(conds)
         if isinstance(behav, six.string_types):
             behav = [behav]
-        for val in behav:
-            if not isinstance(val, list):
-                out_behav.append([val])
-            else:
-                out_behav.append(val)
-        return out_behav
+        behav_array = np.array(behav).flatten()
+        num_elements = behav_array.shape[0]
+        return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
+
+    reshape_behav = pe.Node(niu.Function(input_names=['behav', 'run_id', 'conds'],
+                                       output_names=['behav'],
+                                       function=check_behav_list),
+                          name='reshape_behav')
 
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
-    wf.connect(datasource, ('behav', check_behav_list), modelspec, 'event_files')
+    wf.connect(datasource, 'behav', reshape_behav, 'behav')
+    wf.connect(subjinfo, 'run_id', reshape_behav, 'run_id')
+    wf.connect(subjinfo, 'conds', reshape_behav, 'conds')
+    wf.connect(reshape_behav, 'behav', modelspec, 'event_files')
+
     wf.connect(subjinfo, 'TR', modelfit, 'inputspec.interscan_interval')
     wf.connect(subjinfo, 'conds', contrastgen, 'conds')
-    wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    if has_contrast:
+        wf.connect(datasource, 'contrasts', contrastgen, 'contrast_file')
+    else:
+        contrastgen.inputs.contrast_file = ''
     wf.connect(infosource, 'task_id', contrastgen, 'task_id')
     wf.connect(contrastgen, 'contrasts', modelfit, 'inputspec.contrasts')
 
@@ -478,43 +806,69 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                       'inputspec.functional_data')])
                 ])
 
+    # Comute TSNR on realigned data regressing polynomials upto order 2
+    tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
+    wf.connect(preproc, "outputspec.realigned_files", tsnr, "in_file")
+
+    # Compute the median image across runs
+    calc_median = Node(Function(input_names=['in_files'],
+                                output_names=['median_file'],
+                                function=median,
+                                imports=imports),
+                       name='median')
+    wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
+
     """
     Reorder the copes so that now it combines across runs
     """
 
-    def sort_copes(files):
-        numelements = len(files[0])
-        outfiles = []
-        for i in range(numelements):
-            outfiles.insert(i, [])
-            for j, elements in enumerate(files):
-                outfiles[i].append(elements[i])
-        return outfiles
+    def sort_copes(copes, varcopes, contrasts):
+        import numpy as np
+        if not isinstance(copes, list):
+            copes = [copes]
+            varcopes = [varcopes]
+        num_copes = len(contrasts)
+        n_runs = len(copes)
+        all_copes = np.array(copes).flatten()
+        all_varcopes = np.array(varcopes).flatten()
+        outcopes = all_copes.reshape(len(all_copes)/num_copes, num_copes).T.tolist()
+        outvarcopes = all_varcopes.reshape(len(all_varcopes)/num_copes, num_copes).T.tolist()
+        return outcopes, outvarcopes, n_runs
 
-    def num_copes(files):
-        return len(files)
+    cope_sorter = pe.Node(niu.Function(input_names=['copes', 'varcopes',
+                                                    'contrasts'],
+                                       output_names=['copes', 'varcopes',
+                                                     'n_runs'],
+                                       function=sort_copes),
+                          name='cope_sorter')
 
     pickfirst = lambda x: x[0]
 
+    wf.connect(contrastgen, 'contrasts', cope_sorter, 'contrasts')
     wf.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
                                       'flameo.mask_file')]),
-                (modelfit, fixed_fx, [(('outputspec.copes', sort_copes),
-                                       'inputspec.copes'),
-                                       ('outputspec.dof_file',
+                (modelfit, cope_sorter, [('outputspec.copes', 'copes')]),
+                (modelfit, cope_sorter, [('outputspec.varcopes', 'varcopes')]),
+                (cope_sorter, fixed_fx, [('copes', 'inputspec.copes'),
+                                         ('varcopes', 'inputspec.varcopes'),
+                                         ('n_runs', 'l2model.num_copes')]),
+                (modelfit, fixed_fx, [('outputspec.dof_file',
                                         'inputspec.dof_files'),
-                                       (('outputspec.varcopes',
-                                         sort_copes),
-                                        'inputspec.varcopes'),
-                                       (('outputspec.copes', num_copes),
-                                        'l2model.num_copes'),
-                                       ])
+                                      ])
                 ])
 
-    wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
-    wf.connect(datasource, 'anat', registration, 'inputspec.anatomical_image')
-    registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
-    registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
-    registration.inputs.inputspec.config_file = 'T1_2_MNI152_2mm'
+    wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
+    if subjects_dir:
+        wf.connect(infosource, 'subject_id', registration, 'inputspec.subject_id')
+        registration.inputs.inputspec.subjects_dir = subjects_dir
+        registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+        if target:
+            registration.inputs.inputspec.target_image = target
+    else:
+        wf.connect(datasource, 'anat', registration, 'inputspec.anatomical_image')
+        registration.inputs.inputspec.target_image = fsl.Info.standard_image('MNI152_T1_2mm.nii.gz')
+        registration.inputs.inputspec.target_image_brain = fsl.Info.standard_image('MNI152_T1_2mm_brain.nii.gz')
+        registration.inputs.inputspec.config_file = 'T1_2_MNI152_2mm'
 
     def merge_files(copes, varcopes, zstats):
         out_files = []
@@ -554,12 +908,24 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(registration, 'outputspec.transformed_files',
                splitfunc, 'in_files')
 
+    if subjects_dir:
+        get_roi_mean = pe.MapNode(fs.SegStats(default_color_table=True),
+                                  iterfield=['in_file'], name='get_aparc_means')
+        get_roi_mean.inputs.avgwf_txt_file = True
+        wf.connect(fixed_fx.get_node('outputspec'), 'copes', get_roi_mean, 'in_file')
+        wf.connect(registration, 'outputspec.aparc', get_roi_mean, 'segmentation_file')
+
+        get_roi_tsnr = pe.MapNode(fs.SegStats(default_color_table=True),
+                                  iterfield=['in_file'], name='get_aparc_tsnr')
+        get_roi_tsnr.inputs.avgwf_txt_file = True
+        wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
+        wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
 
     """
     Connect to a datasink
     """
 
-    def get_subs(subject_id, conds, model_id, task_id):
+    def get_subs(subject_id, conds, run_id, model_id, task_id):
         subs = [('_subject_id_%s_' % subject_id, '')]
         subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
@@ -586,13 +952,26 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                          'varcope%02d.' % (i + 1)))
             subs.append(('_warpall%d/zstat1_trans.' % (2 * len(conds) + i),
                          'zstat%02d.' % (i + 1)))
+            subs.append(('__get_aparc_means%d/' % i, '/cope%02d_' % (i + 1)))
+
+        for i, run_num in enumerate(run_id):
+            subs.append(('__get_aparc_tsnr%d/' % i, '/run%02d_' % run_num))
+            subs.append(('__art%d/' % i, '/run%02d_' % run_num))
+            subs.append(('__dilatemask%d/' % i, '/run%02d_' % run_num))
+            subs.append(('__realign%d/' % i, '/run%02d_' % run_num))
+            subs.append(('__modelgen%d/' % i, '/run%02d_' % run_num))
+        subs.append(('/model%03d/task%03d/' % (model_id, task_id), '/'))
+        subs.append(('/model%03d/task%03d_' % (model_id, task_id), '/'))
+        subs.append(('_bold_dtype_mcf_bet_thresh_dil', '_mask'))
+        subs.append(('_output_warped_image', '_anat2target'))
         return subs
 
-    subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds',
+    subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds', 'run_id',
                                                 'model_id', 'task_id'],
                                    output_names=['substitutions'],
                                    function=get_subs),
                       name='subsgen')
+    wf.connect(subjinfo, 'run_id', subsgen, 'run_id')
 
     datasink = pe.Node(interface=nio.DataSink(),
                        name="datasink")
@@ -609,11 +988,33 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                   ('zstats', 'zstats'),
                                   ('tstats', 'tstats')])
                                  ])
+    wf.connect([(modelfit.get_node('modelgen'), datasink,
+                                 [('design_cov', 'qa.model'),
+                                  ('design_image', 'qa.model.@matrix_image'),
+                                  ('design_file', 'qa.model.@matrix'),
+                                 ])])
+    wf.connect([(preproc, datasink, [('outputspec.motion_parameters',
+                                      'qa.motion'),
+                                     ('outputspec.motion_plots',
+                                      'qa.motion.plots'),
+                                     ('outputspec.mask', 'qa.mask')])])
+    wf.connect(art, 'norm_files', datasink, 'qa.art.@norm')
+    wf.connect(art, 'intensity_files', datasink, 'qa.art.@intensity')
+    wf.connect(art, 'outlier_files', datasink, 'qa.art.@outlier_files')
+    wf.connect(registration, 'outputspec.anat2target', datasink, 'qa.anat2target')
+    wf.connect(tsnr, 'tsnr_file', datasink, 'qa.tsnr.@map')
+    if subjects_dir:
+        wf.connect(registration, 'outputspec.min_cost_file', datasink, 'qa.mincost')
+        wf.connect([(get_roi_tsnr, datasink, [('avgwf_txt_file', 'qa.tsnr'),
+                                              ('summary_file', 'qa.tsnr.@summary')])])
+        wf.connect([(get_roi_mean, datasink, [('avgwf_txt_file', 'copes.roi'),
+                                              ('summary_file', 'copes.roi.@summary')])])
     wf.connect([(splitfunc, datasink,
                  [('copes', 'copes.mni'),
                   ('varcopes', 'varcopes.mni'),
                   ('zstats', 'zstats.mni'),
                   ])])
+    wf.connect(calc_median, 'median_file', datasink, 'mean')
     wf.connect(registration, 'outputspec.transformed_mean', datasink, 'mean.mni')
     wf.connect(registration, 'outputspec.func2anat_transform', datasink, 'xfm.mean2anat')
     wf.connect(registration, 'outputspec.anat2target_transform', datasink, 'xfm.anat2target')
@@ -621,18 +1022,20 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Set processing parameters
     """
+
     preproc.inputs.inputspec.fwhm = fwhm
     gethighpass.inputs.hpcutoff = hpcutoff
     modelspec.inputs.high_pass_filter_cutoff = hpcutoff
     modelfit.inputs.inputspec.bases = {'dgamma': {'derivs': use_derivatives}}
     modelfit.inputs.inputspec.model_serial_correlations = True
-    if version < 507:
-        modelfit.inputs.inputspec.film_threshold = 1000
-    else:
-        modelfit.inputs.inputspec.film_threshold = -1000
+    modelfit.inputs.inputspec.film_threshold = 1000
 
     datasink.inputs.base_directory = output_dir
     return wf
+
+"""
+The following functions run the whole workflow.
+"""
 
 if __name__ == '__main__':
     import argparse
@@ -664,6 +1067,12 @@ if __name__ == '__main__':
                         help="Plugin to use")
     parser.add_argument("--plugin_args", dest="plugin_args",
                         help="Plugin arguments")
+    parser.add_argument("--sd", dest="subjects_dir",
+                        help="FreeSurfer subjects directory (if available)")
+    parser.add_argument("--target", dest="target_file",
+                        help=("Target in MNI space. Best to use the MindBoggle "
+                              "template - only used with FreeSurfer"
+                              "OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz"))
     args = parser.parse_args()
     outdir = args.outdir
     work_dir = os.getcwd()
@@ -679,14 +1088,18 @@ if __name__ == '__main__':
     if derivatives is None:
        derivatives = False
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
-                             subject=args.subject,
-                             model_id=int(args.model),
-                             task_id=[int(args.task)],
-                             subj_prefix=args.subjectprefix,
-                             output_dir=outdir,
-                             hpcutoff=args.hpfilter,
-                             use_derivatives=derivatives,
-                             fwhm=args.fwhm)
+                                  subject=args.subject,
+                                  model_id=int(args.model),
+                                  task_id=[int(args.task)],
+                                  subj_prefix=args.subjectprefix,
+                                  output_dir=outdir,
+                                  hpcutoff=args.hpfilter,
+                                  use_derivatives=derivatives,
+                                  fwhm=args.fwhm,
+                                  subjects_dir=args.subjects_dir,
+                                  target=args.target_file)
+    #wf.config['execution']['remove_unnecessary_outputs'] = False
+
     wf.base_dir = work_dir
     if args.plugin_args:
         wf.run(args.plugin, plugin_args=eval(args.plugin_args))

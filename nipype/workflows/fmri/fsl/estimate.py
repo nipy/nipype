@@ -250,7 +250,10 @@ def create_fixed_effects_flow(name='fixedfx'):
         import nibabel as nb
         import numpy as np
         img = nb.load(cope_files[0])
-        out_data = np.zeros(img.get_shape())
+        if len(img.get_shape()) > 3:
+            out_data = np.zeros(img.get_shape())
+        else:
+            out_data = np.zeros(list(img.get_shape()) + [1])
         for i in range(out_data.shape[-1]):
             dof = np.loadtxt(dof_files[i])
             out_data[:, :, :, i] = dof

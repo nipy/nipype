@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
 
-The `Pipeline` class provides core functionality for batch processing.
+The `Workflow` class provides core functionality for batch processing.
 
    Change directory to provide relative paths for doctests
    >>> import os

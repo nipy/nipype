@@ -41,8 +41,7 @@ def test_MESD_inputs():
     scheme_file=dict(argstr='-schemefile %s',
     mandatory=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MESD.input_spec()

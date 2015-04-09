@@ -25,8 +25,7 @@ def test_Tensor2FractionalAnisotropy_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Tensor2FractionalAnisotropy.input_spec()

@@ -11,8 +11,7 @@ def test_SEMLikeCommandLine_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SEMLikeCommandLine.input_spec()

@@ -660,7 +660,8 @@ def test_serial_input():
     # set local check
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
-                              'crashdump_dir': wd}
+                              'crashdump_dir': wd,
+                              'poll_sleep_duration': 2}
 
     # test output of num_subnodes method when serial is default (False)
     yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)

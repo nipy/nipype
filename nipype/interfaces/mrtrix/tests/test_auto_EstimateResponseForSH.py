@@ -35,8 +35,7 @@ def test_EstimateResponseForSH_inputs():
     ),
     quiet=dict(argstr='-quiet',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = EstimateResponseForSH.input_spec()
