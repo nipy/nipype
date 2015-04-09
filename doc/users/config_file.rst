@@ -125,6 +125,12 @@ Execution
     all pending jobs and checking for job completion. To be nice to cluster
     schedulers the default is set to 60 seconds.
 
+*ets_toolkit*
+    This sets the backend for the Enthought traits (should be ``'null'`` in headless
+    settings).
+
+*matplotlib_backend*
+
 Example
 ~~~~~~~
 

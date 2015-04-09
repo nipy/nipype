@@ -122,7 +122,6 @@ try:
 except ImportError:
     can_import_matplotlib = False
     pass
-except
 
 try:
     from enthought.etsconfig.api import ETSConfig
