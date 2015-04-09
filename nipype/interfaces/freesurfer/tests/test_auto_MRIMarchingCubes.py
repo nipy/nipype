@@ -28,8 +28,7 @@ def test_MRIMarchingCubes_inputs():
     position=-2,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MRIMarchingCubes.input_spec()

@@ -1,14 +1,6 @@
 fprintf(1,'Executing %s at %s:\n',mfilename,datestr(now));
 ver,
-try,
-if isempty(which('spm')),
-throw(MException('SPMCheck:NotFound','SPM not in matlab path'));
-end;
-spm_path = spm('dir');
-[name, version] = spm('ver');
-fprintf(1, 'NIPYPE path:%s|name:%s|release:%s', spm_path, name, version);
-exit;
-        
+try,a=1;
 ,catch ME,
 fprintf(2,'MATLAB code threw an exception:\n');
 fprintf(2,'%s\n',ME.message);

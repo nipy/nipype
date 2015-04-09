@@ -38,8 +38,7 @@ def test_PicoPDFs_inputs():
     position=4,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PicoPDFs.input_spec()

@@ -23,8 +23,7 @@ def test_ImageLabelCombine_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageLabelCombine.input_spec()

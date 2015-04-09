@@ -20,8 +20,7 @@ def test_ACPCTransform_inputs():
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ACPCTransform.input_spec()

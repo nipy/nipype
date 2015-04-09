@@ -43,8 +43,7 @@ def test_SurfaceTransform_inputs():
     ),
     target_type=dict(argstr='--tfmt %s',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SurfaceTransform.input_spec()

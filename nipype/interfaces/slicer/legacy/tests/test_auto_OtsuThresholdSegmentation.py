@@ -26,8 +26,7 @@ def test_OtsuThresholdSegmentation_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = OtsuThresholdSegmentation.input_spec()

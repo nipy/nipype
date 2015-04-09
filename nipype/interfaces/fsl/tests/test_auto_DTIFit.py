@@ -26,6 +26,8 @@ def test_DTIFit_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
+    gradnonlin=dict(argstr='--gradnonlin=%s',
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
@@ -52,8 +54,7 @@ def test_DTIFit_inputs():
     ),
     sse=dict(argstr='--sse',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTIFit.input_spec()

@@ -38,8 +38,7 @@ def test_BlurInMask_inputs():
     outputtype=dict(),
     preserve=dict(argstr='-preserve',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BlurInMask.input_spec()
