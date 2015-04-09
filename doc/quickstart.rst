@@ -54,9 +54,6 @@ Developer guides
 Useful links for beginners
 ===========================
 
-.. toctree::
-   :maxdepth: 1
-   
-   Getting started with Python - Tutorials. `Available here`__
+Getting started with Python - Tutorials. `Available here`__
    
    __ http://www.codecademy.com/en/tracks/python
