@@ -136,13 +136,28 @@ particular node might use more resources than other nodes in a workflow.
   this local configuration::
 
      node.plugin_args = {'qsub_args': '-l nodes=1:ppn=3', 'overwrite': True}
+	 
+SGEGraph
+~~~~~~~~
+SGEGraph_ is a exuction plugin working with Sun Grid Engine that allows for
+submitting entire graph of dependent jobs at once. This way Nipype does not 
+need to run a monitoring process - SGE takes care of this.
+
+.. note::
+
+  When rerunning unfinished workflows using SGEGraph you may decide not to 
+  submit jobs for Nodes that previously finished running. This can speed up
+  execution, but new or modified inputs that would previously trigger a Node
+  to rerun will be ignored. The following option turns on this functionality::
+
+     workflow.run(plugin='SGEGraph', plugin_args = {'dont_resubmit_completed_jobs': True})
 
 LSF
 ---
 
-Submitting via LSF is almost identical to SGE above:
+Submitting via LSF is almost identical to SGE above::
 
-       workflow.run(plugin='LSF')
+    workflow.run(plugin='LSF')
 
 Optional arguments::
 
@@ -156,7 +171,7 @@ DAGMan
 ~~~~~~
 
 With its DAGMan_ component HTCondor_ (previously Condor) allows for submitting
-entire graphs of dependent jobs at once. With the ``CondorDAGMan`` plug-in
+entire graphs of dependent jobs at once (similar to SGEGraph_). With the ``CondorDAGMan`` plug-in
 Nipype can utilize this functionality to submit complete workflows directly and
 in a single step.  Consequently, and in contrast to other plug-ins, workflow
 execution returns almost instantaneously -- Nipype is only used to generate the

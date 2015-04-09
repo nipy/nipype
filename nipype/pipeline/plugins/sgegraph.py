@@ -55,6 +55,10 @@ class SGEGraphPlugin(GraphPluginBase):
                     self._template = open(self._template).read()
             if 'qsub_args' in plugin_args:
                 self._qsub_args = plugin_args['qsub_args']
+            if 'dont_resubmit_completed_jobs' in plugin_args:
+                self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
+            else:
+                self._dont_resubmit_completed_jobs = False
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
@@ -72,7 +76,7 @@ class SGEGraphPlugin(GraphPluginBase):
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
 
         cache_doneness_per_node = dict()
-        if True: ## A future parameter for controlling this behavior could be added here
+        if self._dont_resubmit_completed_jobs: ## A future parameter for controlling this behavior could be added here
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)

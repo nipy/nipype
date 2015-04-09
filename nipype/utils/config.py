@@ -48,6 +48,7 @@ use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
+sge_dont_resubmit_completed_jobs = false
 
 [check]
 interval = 1209600
