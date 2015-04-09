@@ -1,6 +1,7 @@
 Next release
 ============
 
+* FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
