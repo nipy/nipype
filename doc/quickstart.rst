@@ -16,7 +16,7 @@ Downloading and installing
 Beginner's guide
 ================
 
-Beginner's tutorials (IPython Notebooks). `Availible here`__
+Beginner's tutorials (IPython Notebooks). `Available here`__
 
 Michael Notter's Nipype guide. `Available here`__
 
