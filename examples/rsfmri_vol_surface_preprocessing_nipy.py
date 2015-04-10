@@ -558,6 +558,103 @@ def create_reg_workflow(name='registration'):
     return register
 
 
+def create_unwarp_workflow(name='unwarping'):
+    """Creates a workflow for unwarping the EPI data prior to
+    coregistration with Siemens fieldmaps.
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: 'unwarping')
+
+    Inputs::
+
+        inputspec.realigned_file : realigned time series to unwarp
+        inputspec.mean_image : mean or median of time series
+        inputspec.fmap_mag : fieldmap magnitude image
+        inputspec.fmap_phase : fieldmap phase image
+        inputspec.delta_te : echo time difference of the fieldmap sequence [ms]
+        inputspec.pedir : phase encoding direction [x/y/z/x-/y-/z-]
+        inputspec.echospacing : effective EPI echo spacing (dwell time) [sec]
+
+    Outputs::
+        outputspec.unwarped_mean
+        outputspec.unwarped_file : unwarped time series
+
+    """
+    unwarp = Workflow(name=name)
+
+    inputnode = Node(interface=IdentityInterface(fields=['realigned_file',
+                                                         'mean_image',
+                                                         'fmap_mag',
+                                                         'fmap_phase',
+                                                         'delta_te',
+                                                         'pedir',
+                                                         'echospacing']),
+                     name='inputspec')
+
+    outputnode = Node(interface=IdentityInterface(fields=['unwarped_file',
+                                                          'unwarped_mean']),
+                      name='outputspec')
+    
+    # split first magnitude image from mag input file
+    split = Node(fsl.ExtractROI(t_min=0,
+                                t_size=1),
+                 name='split')
+    unwarp.connect(inputnode, 'fmap_mag', split, 'in_file')
+    
+    # skullstrip magnitude image and erode further to get rid of noisy edge voxels
+    bet = Node(fsl.BET(frac=0.5),
+               name='bet')
+    unwarp.connect(split,'roi_file', bet,'in_file')
+    
+    erode = Node(fsl.maths.ErodeImage(kernel_shape='sphere',
+                                     kernel_size=5),
+                 name='erode')
+    unwarp.connect(bet,'out_file', erode, 'in_file')
+    
+    # prepare fieldmap
+    prep_fmap = Node(fsl.epi.PrepareFieldmap(),
+                     name='prepare_fieldmap')
+    unwarp.connect([(erode, prep_fmap, [('out_file', 'in_magnitude')]),
+                    (inputnode, prep_fmap, [('fmap_phase', 'in_phase'),
+                                            ('delta_te', 'delta_TE')])
+                    ])
+    
+    # unmask fieldmap to avoid edge effects
+    fmap_mask = Node(fsl.maths.MathsCommand(args='-abs -bin -fillh'),
+                     name='fmap_mask')
+    
+    unmask = Node(fsl.FUGUE(save_unmasked_fmap=True),
+                 name='unmask')
+    
+    unwarp.connect([(prep_fmap, fmap_mask, [('out_fieldmap', 'in_file')]),
+                    (fmap_mask, unmask, [('out_file', 'mask_file')]),
+                    (prep_fmap, unmask,[('out_fieldmap','fmap_in_file')]),
+                    (inputnode, unmask, [('pedir', 'unwarp_direction')])
+                    ])
+    
+    # unwarp epi mean and time series with fieldmap
+    unwarp_mean = Node(fsl.FUGUE(save_shift=True),name='unwarp_mean')
+    unwarp_ts = Node(fsl.FUGUE(save_shift=True),name='unwarp_ts')
+
+    unwarp.connect([(inputnode, unwarp_mean, [('mean_image', 'in_file'),
+                                              ('echospacing', 'dwell_time'),
+                                              ('pedir', 'unwarp_direction')]),
+                    (unmask, unwarp_mean, [('fmap_out_file', 'fmap_in_file')]),
+                    (fmap_mask, unwarp_mean, [('out_file','mask_file')]),
+                    (inputnode, unwarp_ts, [('realigned_file', 'in_file'),
+                                            ('echospacing', 'dwell_time'),
+                                            ('pedir', 'unwarp_direction')]),
+                    (unmask, unwarp_ts, [('fmap_out_file', 'fmap_in_file')]),
+                    (fmap_mask, unwarp_ts, [('out_file','mask_file')]),
+                    (unwarp_mean, outputnode, [('unwarped_file', 'unwarped_mean')]),
+                    (unwarp_ts, outputnode, [('unwarped_file', 'unwarped_file')])])
+    
+    return unwarp
+
 """
 Creates the main preprocessing workflow
 """
@@ -577,6 +674,12 @@ def create_workflow(files,
                     subjects_dir=None,
                     sink_directory=os.getcwd(),
                     target_subject=['fsaverage3', 'fsaverage4'],
+                    do_unwarp=False,
+                    fmap_mag=None,
+                    fmap_phase=None,
+                    delta_te=None,
+                    pedir=None,
+                    echospacing=None,
                     name='resting'):
 
     wf = Workflow(name=name)
@@ -767,7 +870,33 @@ def create_workflow(files,
     maskts = MapNode(fsl.ApplyMask(), iterfield=['in_file'], name='ts_masker')
     wf.connect(warpall, 'output_image', maskts, 'in_file')
     wf.connect(mask_target, 'out_file', maskts, 'mask_file')
-
+    
+    
+    """
+    Rewire for optional fieldmap unwarping
+    """
+    if do_unwarp:
+        unwarping = create_unwarp_workflow(name='unwarping')
+        unwarping.inputs.inputspec.fmap_mag=fmap_mag
+        unwarping.inputs.inputspec.fmap_phase=fmap_phase
+        unwarping.inputs.inputspec.pedir=pedir
+        unwarping.inputs.inputspec.delta_te=delta_te
+        unwarping.inputs.inputspec.echospacing=echospacing
+    
+        wf.disconnect([(calc_median, registration, [('median_file', 'inputspec.mean_image')]),
+                       (realign, art, [('out_file', 'realigned_files')]),
+                       (realign, filter1, [('out_file', 'in_file'),
+                                           (('out_file', rename, '_filtermotart'),
+                                            'out_res_name')])])
+        wf.connect([(realign, unwarping, [('out_file', 'inputspec.realigned_file')]),
+                    (calc_median, unwarping, [('median_file', 'inputspec.mean_image')]),
+                    (unwarping, registration, [('outputspec.unwarped_mean', 'inputspec.mean_image')]),
+                    (unwarping, art, [('outputspec.unwarped_file', 'realigned_files')]),
+                    (unwarping, filter1, [('outputspec.unwarped_file', 'in_file'),
+                                           (('outputspec.unwarped_file', rename, '_filtermotart'),
+                                              'out_res_name')])])
+    
+    
     # map to surface
     # extract aparc+aseg ROIs
     # extract subcortical ROIs
@@ -945,6 +1074,12 @@ def create_resting_workflow(args, name=None):
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
         slice_times = (np.array(slice_times)/1000.).tolist()
+    if args.do_unwarp:
+        fmap_mag=os.path.abspath(args.fmap_mag)
+        fmap_phase=os.path.abspath(args.fmap_phase)
+    else:
+        fmap_mag=None
+        fmap_phase=None
 
     if name is None:
         name = 'resting_' + args.subject_id
@@ -961,6 +1096,12 @@ def create_resting_workflow(args, name=None):
                   lowpass_freq=args.lowpass_freq,
                   highpass_freq=args.highpass_freq,
                   sink_directory=os.path.abspath(args.sink),
+                  do_unwarp=args.do_unwarp,
+                  fmap_mag=fmap_mag,
+                  fmap_phase=fmap_phase,
+                  delta_te=args.delta_te,
+                  pedir=args.pedir,
+                  echospacing=args.echospacing,
                   name=name)
     wf = create_workflow(**kwargs)
     return wf
@@ -1010,6 +1151,21 @@ if __name__ == "__main__":
                         help="Plugin to use")
     parser.add_argument("--plugin_args", dest="plugin_args",
                         help="Plugin arguments")
+    parser.add_argument("--do_unwarp", dest="do_unwarp",
+                        default=False, 
+                        help="Whether fieldmap unwarping should be used")
+    parser.add_argument("--fmap_mag", dest="fmap_mag", default=None,
+                        help="fieldmap magnitude image")
+    parser.add_argument("--fmap_phase", dest="fmap_phase", default=None,
+                        help="fieldmap phase image")
+    parser.add_argument("--delta_te", dest="delta_te",
+                        default=None, type=float,
+                        help="echo time difference of the fieldmap sequence [ms]")
+    parser.add_argument("--pedir", dest="pedir", default=None,
+                        help="phase encoding direction [x/y/z/x-/y-/z-]")
+    parser.add_argument("--echospacing", dest="echospacing",
+                        default=None, type=float,
+                        help="echo time difference of the fieldmap sequence [ms]")
     args = parser.parse_args()
 
     wf = create_resting_workflow(args)
