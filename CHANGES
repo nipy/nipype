@@ -49,6 +49,7 @@ Next release
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 * ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
+* FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 
 Release 0.10.0 (October 10, 2014)
 ============
