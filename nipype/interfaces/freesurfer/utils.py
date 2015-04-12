@@ -1268,7 +1268,7 @@ class Tkregister2(FSCommand):
         outputs = self._outputs().get()
         outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = op.abspath(self.inputs.fsl_out)
+            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
         return outputs
 
     def _gen_outfilename(self):
