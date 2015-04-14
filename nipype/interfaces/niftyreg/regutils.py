@@ -57,18 +57,18 @@ class RegResampleInputSpec(NIFTYREGCommandInputSpec):
                       argstr='-trans %s', mandatory=False)
     # Output file name
     res_file = File(desc='The output filename of the transformed image',
-                    argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
-    # Deformaed grid file name
+                    argstr='-res %s', name_source=['flo_file'], name_template='%s_res')
+    # Deformed grid file name
     blank_file = File(desc='The output filename of resampled blank grid',
                       argstr='-blank %s')
     # Interpolation type
-    inter_val = traits.Enum('NN', 'LIN', 'CUB', desc = 'Interpolation type',
+    inter_val = traits.Enum('NN', 'LIN', 'CUB', 'SINC', desc='Interpolation type',
                             argstr='-inter %d')
     # Padding value
-    pad_val = traits.Float(desc = 'Padding value', argstr='-pad %f')
+    pad_val = traits.Float(desc='Padding value', argstr='-pad %f')
     # Verbosity off?
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
-
+    # Tensor flag
     tensor_flag = traits.Bool(desc='Resample Tensor Map', 
                               argstr='-tensor ')
 
@@ -76,6 +76,7 @@ class RegResampleInputSpec(NIFTYREGCommandInputSpec):
 class RegResampleOutputSpec(TraitedSpec):
     res_file = File(desc='The output filename of the transformed image')
     blank_file = File(desc='The output filename of resampled blank grid (if generated)')
+
 
 # Resampler class
 class RegResample(NIFTYREGCommand):
@@ -86,7 +87,7 @@ class RegResample(NIFTYREGCommand):
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
         if name == 'inter_val':
-            return spec.argstr%{'NN':0, 'LIN':1, 'CUB':2}[value]
+            return spec.argstr%{'NN':0, 'LIN':1, 'CUB':3, 'SINC':5}[value]
         else:
             return super(RegResample, self)._format_arg(name, spec, value)        
 
@@ -173,9 +174,11 @@ class RegToolsInputSpec(NIFTYREGCommandInputSpec):
                              desc = 'Smooth the input image using a Gaussian kernel',
                              argstr='-smoG %f %f %f')
 
+
 # Output spec    
 class RegToolsOutputSpec(TraitedSpec):
     out_file = File(desc='The output file', exists = True)
+
 
 # Main interface class
 class RegTools(NIFTYREGCommand):
@@ -183,32 +186,47 @@ class RegTools(NIFTYREGCommand):
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
 
-#-----------------------------------------------------------
+
+# -----------------------------------------------------------
 # reg_average wrapper interface
-#-----------------------------------------------------------
+# -----------------------------------------------------------
 class RegAverageInputSpec(NIFTYREGCommandInputSpec):
 
     out_file = File(position=0, desc='Output file name', argstr='%s', genfile=True)
 
     # If only images/transformation files are passed, do a straight average
-    # of all the files in the string (shoudl this be a list of files?)
-    in_files = InputMultiPath(position = 1, argstr='-avg %s', sep=' ',
-                              desc='Averaging of images/affine transformations', xor=['demean_files'])
+    # of all the files in the string (should this be a list of files?)
+    in_files = InputMultiPath(position=1, argstr='-avg %s', sep=' ',
+                              desc='Averaging of images/affine transformations',
+                              xor=['demean_files', 'avg_lts_file'])
+
+    avg_lts_file = InputMultiPath(position=1, argstr='-avg_lts %s', sep=' ',
+                                  desc='Robust average of affine transformations',
+                                  xor=['demean_files', 'in_files'])
 
     # To tidy up the interface to reg_average, have an xor over the
     # different demeaning types with the reference file adjacent
-    avg_tran_ref_file = File(position = 1, argstr=' -avg_tran %s', xor=['demean1_ref_file','demean2_ref_file','demean3_ref_file'], 
+    avg_tran_ref_file = File(position=1, argstr=' -avg_tran %s',
+                             xor=['demean1_ref_file', 'demean2_ref_file', 'demean3_ref_file'],
                              desc='All input images are resampled into the space of <reference image> and averaged. A cubic spline interpolation scheme is used for resampling')
-    demean1_ref_file = File(position = 1, argstr=' -demean1 %s ', xor=['avg_tran_ref_file','demean2_ref_file','demean3_ref_file'], desc='Average images and demean average image that have affine transformations to a common space')
-    demean2_ref_file = File(position = 1, argstr=' -demean2 %s ', xor=['avg_tran_ref_file','demean1_ref_file','demean3_ref_file'], desc='Average images and demean average image that have non-rigid transformations to a common space' )
-    demean3_ref_file = File(position = 1, argstr=' -demean3 %s ', xor=['avg_tran_ref_file','demean1_ref_file','demean2_ref_file'], desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
+    demean1_ref_file = File(position=1, argstr=' -demean1 %s ',
+                            xor=['avg_tran_ref_file', 'demean2_ref_file', 'demean3_ref_file'],
+                            desc='Average images and demean average image that have affine transformations to a common space')
+    demean2_ref_file = File(position=1, argstr=' -demean2 %s ',
+                            xor=['avg_tran_ref_file', 'demean1_ref_file', 'demean3_ref_file'],
+                            desc='Average images and demean average image that have non-rigid transformations to a common space' )
+    demean3_ref_file = File(position=1, argstr=' -demean3 %s ',
+                            xor=['avg_tran_ref_file', 'demean1_ref_file', 'demean2_ref_file'],
+                            desc='Average images and demean average image that have linear and non-rigid transformations to a common space')
     # If we do not have a list of files beginning with avg, must be a demean
-    demean_files = traits.List(traits.Str, position =-1, argstr=' %s ', sep=' ',
-                               desc='transformation files and floating image pairs/triplets to the reference space', xor=['in_file'])
+    demean_files = traits.List(traits.Str, position=-1, argstr=' %s ', sep=' ',
+                               desc='transformation files and floating image pairs/triplets to the reference space',
+                               xor=['in_file', 'avg_lts_file'])
 
 
 class RegAverageOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Output file name')
+
 
 class RegAverage(NIFTYREGCommand):
     """ Use RegAverage to average a set of transformations, images or both.
@@ -227,7 +245,7 @@ class RegAverage(NIFTYREGCommand):
     
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname('average_output' , ext='.nii.gz')
+            return self._gen_fname('average_output', ext='.nii.gz')
         return None
             
     def _list_outputs(self):
