@@ -26,8 +26,7 @@ def test_BrickStat_inputs():
     name_template='%s_afni',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BrickStat.input_spec()

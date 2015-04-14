@@ -25,8 +25,7 @@ def test_Vnifti2Image_inputs():
     name_template='%s.v',
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Vnifti2Image.input_spec()

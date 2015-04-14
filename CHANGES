@@ -1,6 +1,18 @@
 Next release
 ============
 
+* ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
+       (https://github.com/nipy/nipype/pull/1016)
+* FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
+       fix bug in area weighted distance, and added optimizations
+       (https://github.com/nipy/nipype/pull/1016)
+* ENH: Add an option not to resubmit Nodes that finished running when using SGEGraph (https://github.com/nipy/nipype/pull/1002)
+* FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
+* ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
+       (https://github.com/nipy/nipype/pull/1019)
+* ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
+* FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
+* ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
 * FIX: Fixed Camino output naming (https://github.com/nipy/nipype/pull/1061)
 * ENH: Add the average distance to ErrorMap (https://github.com/nipy/nipype/pull/1039)
 * ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
@@ -37,6 +49,7 @@ Next release
 * ENH: Usability improvements in cluster environments (https://github.com/nipy/nipype/pull/1025)
 * ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
+* FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 
 Release 0.10.0 (October 10, 2014)
 ============

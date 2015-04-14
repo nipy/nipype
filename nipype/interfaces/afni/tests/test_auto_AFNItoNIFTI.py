@@ -21,8 +21,7 @@ def test_AFNItoNIFTI_inputs():
     name_template='%s.nii',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AFNItoNIFTI.input_spec()

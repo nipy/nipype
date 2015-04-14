@@ -31,8 +31,7 @@ def test_Shredder_inputs():
     position=3,
     units='NA',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Shredder.input_spec()

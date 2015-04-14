@@ -20,8 +20,7 @@ def test_OrientScalarVolume_inputs():
     hash_files=False,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = OrientScalarVolume.input_spec()
