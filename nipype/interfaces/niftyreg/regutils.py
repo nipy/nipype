@@ -18,6 +18,7 @@ from nipype.interfaces.base import (TraitedSpec,
 
 
 from nipype.interfaces.niftyreg.base import Info
+from nipype.utils.filemanip import split_filename
 
 
 warn = warnings.warn
@@ -560,20 +561,11 @@ class RegTransform(NIFTYREGCommand):
     def _gen_filename(self, name):
         if name == 'out_file':
             input_to_use = self._find_input()
-            if isdefined(self.inputs.inv_aff_input) or \
-                isdefined(self.inputs.aff_2_rig_input) or \
-                isdefined(self.inputs.flirt_2_nr_input) or \
-                ( isdefined(self.inputs.comp_input) and \
-                  isdefined(self.inputs.comp_input2) and \
-                  self.inputs.comp_input[-4:] == '.txt' and \
-                  self.inputs.comp_input2[-4:] == '.txt' ):
-                return self._gen_fname(input_to_use,
-                                       suffix=self._suffix,
-                                       change_ext=True,
-                                       ext='.txt')
-            else:
-                return self._gen_fname(input_to_use,
-                                       suffix=self._suffix)
+            _, base, ext = split_filename(input_to_use)
+            return self._gen_fname(input_to_use,
+                                   suffix=self._suffix,
+                                   change_ext=True,
+                                   ext=ext)
         return None
                 
     def _list_outputs(self):
