@@ -180,6 +180,20 @@ class SimulateMultiTensor(BaseInterface):
 
 
 def _compute_voxel(args):
+    """
+    Simulate DW signal for one voxel. Uses the multi-tensor model and
+    three isotropic compartments.
+
+    Apparent diffusivity tensors are taken from [Alexander2002]_
+    and [Pierpaoli1996]_.
+
+    .. [Alexander2002] Alexander et al., Detection and modeling of non-Gaussian
+      apparent diffusion coefficient profiles in human brain data, MRM
+      48(2):331-340, 2002, doi: `10.1002/mrm.10209
+      <http://dx.doi.org/10.1002/mrm.10209>`_.
+    .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
+      of the human brain, Radiology 201:637-648. 1996.
+    """
     D_ball = [3000e-6, 960e-6, 680e-6]
     sf_evals = [1700e-6, 200e-6, 200e-6]
 
