@@ -29,7 +29,7 @@ except Exception, e:
     have_dipy = False
 else:
     import numpy as np
-    from dipy.sims.voxel import (multi_tensor,
+    from dipy.sims.voxel import (multi_tensor, add_noise,
                                  all_tensor_evecs)
     from dipy.core.gradients import gradient_table
 
@@ -60,6 +60,7 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
                     desc='file with the mask simulated')
     out_bvec = File('bvec.sim', usedefault=True, desc='simulated b vectors')
     out_bval = File('bval.sim', usedefault=True, desc='simulated b values')
+    snr = traits.Int(30, usedefault=True, desc='signal-to-noise ratio (dB)')
 
 
 class SimulateMultiTensorOutputSpec(TraitedSpec):
@@ -143,7 +144,8 @@ class SimulateMultiTensor(BaseInterface):
         np.savetxt(op.abspath(self.inputs.out_bvec), gtab.bvecs.T)
         np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals.T)
 
-        args = [tuple(np.hstack((r, gtab))) for r in args]
+        snr = self.inputs.snr
+        args = [tuple(np.hstack((r, gtab, snr))) for r in args]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -154,7 +156,8 @@ class SimulateMultiTensor(BaseInterface):
         except TypeError:
             pool = Pool(processes=n_proc)
 
-        iflogger.info('Starting simulation of %d voxels' % len(args))
+        iflogger.info(('Starting simulation of %d voxels, %d diffusion'
+                       ' directions.') % (len(args), len(gtab.bvals)))
         result = pool.map(_compute_voxel, args)
         ndirs = np.shape(result)[1]
 
@@ -228,6 +231,9 @@ def _compute_voxel(args):
         snr = args[17]
     except IndexError:
         pass
+
+    if snr is not None and snr >= 0:
+        signal[1:] = add_noise(signal[1:], snr, 1)
 
     return signal * S0
 
