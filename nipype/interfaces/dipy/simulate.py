@@ -7,7 +7,7 @@
 """
 
 from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File,
+    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File,
     InputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
 import os.path as op
@@ -15,6 +15,9 @@ import nibabel as nb
 import numpy as np
 from nipype.utils.misc import package_check
 import warnings
+
+from multiprocessing import (Process, Pool, cpu_count, pool,
+                             Manager, TimeoutError)
 
 from ... import logging
 iflogger = logging.getLogger('interface')
@@ -28,7 +31,7 @@ else:
     import numpy as np
     from dipy.sims.voxel import (multi_tensor,
                                  all_tensor_evecs)
-    from dipy.core.gradients import GradientTable
+    from dipy.core.gradients import gradient_table
 
 
 class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
@@ -40,19 +43,30 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
                              desc='volume fraction map')
     in_mask = File(exists=True, desc='mask to simulate data')
 
+    n_proc = traits.Int(0, usedefault=True, desc='number of processes')
     baseline = File(exists=True, mandatory=True, desc='baseline T2 signal')
     gradients = File(exists=True, desc='gradients file')
-    bvec = File(exists=True, mandatory=True, desc='bvecs file')
-    bval = File(exists=True, mandatory=True, desc='bvals file')
+    bvec = File(exists=True, desc='bvecs file')
+    bval = File(exists=True, desc='bvals file')
+    num_dirs = traits.Int(32, usedefault=True,
+                          desc=('number of gradient directions (when table '
+                                'is automatically generated)'))
+    bvalues = traits.List(traits.Int, value=[1000, 3000], usedefault=True,
+                          desc=('list of b-values (when table '
+                                'is automatically generated)'))
     out_file = File('sim_dwi.nii.gz', usedefault=True,
                     desc='output file with fractions to be simluated')
     out_mask = File('sim_msk.nii.gz', usedefault=True,
                     desc='file with the mask simulated')
+    out_bvec = File('bvec.sim', usedefault=True, desc='simulated b vectors')
+    out_bval = File('bval.sim', usedefault=True, desc='simulated b values')
 
 
 class SimulateMultiTensorOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='simulated DWIs')
     out_mask = File(exists=True, desc='mask file')
+    out_bvec = File(exists=True, desc='simulated b vectors')
+    out_bval = File(exists=True, desc='simulated b values')
 
 
 class SimulateMultiTensor(BaseInterface):
@@ -82,17 +96,12 @@ class SimulateMultiTensor(BaseInterface):
         hdr = b0_im.get_header()
         shape = b0_im.get_shape()
         aff = b0_im.get_affine()
-        b0 = b0_im.get_data().reshape(-1)
 
         ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
         ffs = np.squeeze(ffsim.get_data())  # fiber fractions
 
         vfsim = nb.concat_images([nb.load(f) for f in self.inputs.in_vfms])
         vfs = np.squeeze(vfsim.get_data())  # volume fractions
-
-        # Load structural files
-        thetas = []
-        phis = []
 
         total_ff = np.sum(ffs, axis=3)
         total_vf = np.sum(vfs, axis=3)
@@ -111,23 +120,52 @@ class SimulateMultiTensor(BaseInterface):
         nb.Nifti1Image(msk, aff, mhdr).to_filename(
             op.abspath(self.inputs.out_mask))
 
+        args = np.hstack((vfs[msk > 0], ffs[msk > 0]))
+
         for f in self.inputs.in_dirs:
             fd = nb.load(f).get_data()
-            x = fd[msk > 0][..., 0]
-            y = fd[msk > 0][..., 1]
-            z = fd[msk > 0][..., 2]
-            th = np.arccos(z / np.sqrt(x ** 2 + y ** 2 + z ** 2))
-            ph = np.arctan2(y, x)
-            thetas.append(th)
-            phis.append(ph)
+            args = np.hstack((args, fd[msk > 0]))
 
-        # Load the gradient strengths and directions
-        bvals = np.loadtxt(self.inputs.bval)
-        gradients = np.loadtxt(self.inputs.bvec).T
+        b0 = np.array([b0_im.get_data()[msk > 0]]).T
+        args = np.hstack((args, b0))
 
-        # Place in Dipy's preferred format
-        gtab = GradientTable(gradients)
-        gtab.bvals = bvals
+        if isdefined(self.inputs.bval) and isdefined(self.inputs.bvec):
+            # Load the gradient strengths and directions
+            bvals = np.loadtxt(self.inputs.bval)
+            bvecs = np.loadtxt(self.inputs.bvec).T
+
+            # Place in Dipy's preferred format
+            gtab = gradient_table(bvals, bvecs)
+        else:
+            gtab = _generate_gradients(self.inputs.num_dirs,
+                                       self.inputs.bvalues)
+
+        np.savetxt(op.abspath(self.inputs.out_bvec), gtab.bvecs.T)
+        np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals.T)
+
+        args = [tuple(np.hstack((r, gtab))) for r in args]
+
+        n_proc = self.inputs.n_proc
+        if n_proc == 0:
+            n_proc = cpu_count()
+
+        try:
+            pool = Pool(processes=n_proc, maxtasksperchild=50)
+        except TypeError:
+            pool = Pool(processes=n_proc)
+
+        iflogger.info('Starting simulation of %d voxels' % len(args))
+        result = pool.map(_compute_voxel, args)
+        ndirs = np.shape(result)[1]
+
+        simulated = np.zeros((shape[0], shape[1], shape[2], ndirs))
+        simulated[msk > 0] = result
+
+        simhdr = hdr.copy()
+        simhdr.set_data_dtype(np.float32)
+        simhdr.set_xyzt_units('mm', 'sec')
+        nb.Nifti1Image(simulated.astype(np.float32), aff,
+                       simhdr).to_filename(op.abspath(self.inputs.out_file))
 
         return runtime
 
@@ -135,26 +173,80 @@ class SimulateMultiTensor(BaseInterface):
         outputs = self._outputs().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         outputs['out_mask'] = op.abspath(self.inputs.out_mask)
+        outputs['out_bvec'] = op.abspath(self.inputs.out_bvec)
+        outputs['out_bval'] = op.abspath(self.inputs.out_bval)
+
         return outputs
 
 
-def _compute_voxel(vfs, ffs, ths, phs, S0, gtab, snr=None,
-                   csf_evals=[0.0015, 0.0015, 0.0015],
-                   gm_evals=[0.0007, 0.0007, 0.0007],
-                   wm_evals=[0.0015, 0.0003, 0.0003]):
+def _compute_voxel(args):
+    D_ball = [3000e-6, 960e-6, 680e-6]
+    sf_evals = [1700e-6, 200e-6, 200e-6]
+
+    vfs = [args[0], args[1], args[2]]
+    ffs = [args[3], args[4], args[5]]  # single fiber fractions
+    sticks = [(args[6], args[7], args[8]),
+              (args[8], args[10], args[11]),
+              (args[12], args[13], args[14])]
+
+    S0 = args[15]
+    gtab = args[16]
 
     nf = len(ffs)
-    total_ff = np.sum(ffs)
+    mevals = [sf_evals] * nf
+    sf_vf = np.sum(ffs)
+    ffs = ((np.array(ffs) / sf_vf) * 100)
 
-    gm_vf = vfs[1] * (1 - total_ff) / (vfs[0] + vfs[1])
-    ffs.insert(0, gm_vf)
-    csf_vf = vfs[0] * (1 - total_ff) / (vfs[0] + vfs[1])
-    ffs.insert(0, csf_vf)
-    angles = [(0, 0), (0, 0)]  # angles of gm and csf
-    angles += [(th, ph) for ph, th in zip(ths, phs)]
+    # Simulate sticks
+    signal, _ = multi_tensor(gtab, np.array(mevals), S0=1,
+                             angles=sticks, fractions=ffs, snr=None)
+    signal *= sf_vf
 
-    mevals = np.array([csf_evals, gm_evals] + [wm_evals] * nf)
-    ffs = np.array(ffs) * 100
-    signal, sticks = multi_tensor(gtab, mevals, S0=S0, angles=angles,
-                                  fractions=ffs, snr=snr)
-    return signal, sticks
+    # Simulate balls
+    r = 1.0 - sf_vf
+    if r > 1.0e-3:
+        for vf, d in zip(vfs, D_ball):
+            f0 = vf * r
+            signal += f0 * np.exp(-gtab.bvals * d)
+
+    snr = None
+    try:
+        snr = args[17]
+    except IndexError:
+        pass
+
+    return signal * S0
+
+
+def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
+    """
+    Automatically generate a `gradient table
+    <http://nipy.org/dipy/examples_built/gradients_spheres.html#example-gradients-spheres>`_
+
+    """
+    import numpy as np
+    from dipy.core.sphere import (disperse_charges, Sphere, HemiSphere)
+    from dipy.core.gradients import gradient_table
+
+    theta = np.pi * np.random.rand(ndirs)
+    phi = 2 * np.pi * np.random.rand(ndirs)
+    hsph_initial = HemiSphere(theta=theta, phi=phi)
+    hsph_updated, potential = disperse_charges(hsph_initial, 5000)
+
+    values = np.atleast_1d(values).tolist()
+    vertices = hsph_updated.vertices
+    bvecs = vertices.copy()
+    bvals = np.ones(vertices.shape[0]) * values[0]
+
+    for v in values[1:]:
+        bvecs = np.vstack((bvecs, vertices))
+        bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
+
+    for i in xrange(0, nb0s):
+        bvals = bvals.tolist()
+        bvals.insert(0, 0)
+
+        bvecs = bvecs.tolist()
+        bvecs.insert(0, np.zeros(3))
+
+    return gradient_table(bvals, bvecs)
