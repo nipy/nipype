@@ -5,14 +5,14 @@ from nipype.interfaces.dipy.simulate import SimulateMultiTensor
 def test_SimulateMultiTensor_inputs():
     input_map = dict(baseline=dict(mandatory=True,
     ),
-    bval=dict(),
     bvalues=dict(usedefault=True,
     ),
-    bvec=dict(),
     gradients=dict(),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    in_bval=dict(),
+    in_bvec=dict(),
     in_dirs=dict(mandatory=True,
     ),
     in_frac=dict(mandatory=True,
@@ -31,6 +31,8 @@ def test_SimulateMultiTensor_inputs():
     out_file=dict(usedefault=True,
     ),
     out_mask=dict(usedefault=True,
+    ),
+    snr=dict(usedefault=True,
     ),
     )
     inputs = SimulateMultiTensor.input_spec()

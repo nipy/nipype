@@ -46,8 +46,8 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     n_proc = traits.Int(0, usedefault=True, desc='number of processes')
     baseline = File(exists=True, mandatory=True, desc='baseline T2 signal')
     gradients = File(exists=True, desc='gradients file')
-    bvec = File(exists=True, desc='bvecs file')
-    bval = File(exists=True, desc='bvals file')
+    in_bvec = File(exists=True, desc='input bvecs file')
+    in_bval = File(exists=True, desc='input bvals file')
     num_dirs = traits.Int(32, usedefault=True,
                           desc=('number of gradient directions (when table '
                                 'is automatically generated)'))
@@ -81,11 +81,13 @@ class SimulateMultiTensor(BaseInterface):
 
     >>> import nipype.interfaces.dipy as dipy
     >>> sim = dipy.SimulateMultiTensor()
-    >>> sim.inputs.in_dirs = 'fibers.nii'
-    >>> sim.inputs.in_frac = 'fractions.nii'
-    >>> sim.inputs.baseline = 'S0.nii'
-    >>> sim.inputs.bvecs = 'bvecs'
-    >>> sim.inputs.bvals = 'bvals'
+    >>> sim.inputs.in_dirs = ['fdir00.nii', 'fdir01.nii']
+    >>> sim.inputs.in_frac = ['ffra00.nii', 'ffra01.nii']
+    >>> sim.inputs.in_vfms = ['tpm_00.nii.gz', 'tpm_01.nii.gz',
+    ...                       'tpm_02.nii.gz']
+    >>> sim.inputs.baseline = 'b0.nii'
+    >>> sim.inputs.in_bvec = 'bvecs'
+    >>> sim.inputs.in_bval = 'bvals'
     >>> sim.run()                                   # doctest: +SKIP
     """
     input_spec = SimulateMultiTensorInputSpec
