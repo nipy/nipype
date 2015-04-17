@@ -1,6 +1,8 @@
 Next release
 ============
 
+* ENH: Added interface to simulate DWIs using the multi-tensor model
+       (https://github.com/nipy/nipype/pull/1085)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
        (https://github.com/nipy/nipype/pull/1016)
 * FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
