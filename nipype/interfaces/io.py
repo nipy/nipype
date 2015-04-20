@@ -1775,13 +1775,20 @@ class SSHDataGrabber(DataGrabber):
                         outputs[key].append(list_to_filename(outfiles))
                         if self.inputs.download_files:
                             for f in outfiles:
-                                sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                try:
+                                    sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                except IOError:
+                                    iflogger.info('remote file %s not found' % f)
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
+
+        for k, v in outputs.items():
+            outputs[k] = os.path.join(os.getcwd(), v)
+
         return outputs
 
     def _get_ssh_client(self):
