@@ -387,7 +387,8 @@ def create_reg_workflow(name='registration'):
                                                           'transformed_mean',
                                                           'segmentation_files',
                                                           'anat2target',
-                                                          'aparc'
+                                                          'aparc',
+                                                          'min_cost_file'
                                                           ]),
                       name='outputspec')
 
@@ -554,6 +555,8 @@ def create_reg_workflow(name='registration'):
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
+    register.connect(bbregister, 'min_cost_file',
+                     outputnode, 'min_cost_file')
 
     return register
 
@@ -615,6 +618,13 @@ def create_workflow(files,
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
+    """Quantify TSNR in each freesurfer ROI
+    """
+    get_roi_tsnr = pe.MapNode(fs.SegStats(default_color_table=True),
+                              iterfield=['in_file'], name='get_aparc_tsnr')
+    get_roi_tsnr.inputs.avgwf_txt_file = True
+    wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
+    wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
 
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
@@ -910,6 +920,10 @@ def create_workflow(files,
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
+    wf.connect(registration, 'outputspec.min_cost_file', datasink, 'resting.qa.mincost')
+    wf.connect([(get_roi_tsnr, datasink, [('avgwf_txt_file', 'resting.qa.tsnr'),
+                                          ('summary_file', 'resting.qa.tsnr.@summary')])])
+
     wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.@bandpassed')
     wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files',
