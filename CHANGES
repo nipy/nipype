@@ -1,6 +1,8 @@
 Next release
 ============
 
+* ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
+       (https://github.com/nipy/nipype/pull/1090)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
        (https://github.com/nipy/nipype/pull/1016)
 * FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
