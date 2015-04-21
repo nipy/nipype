@@ -42,12 +42,15 @@ def sanitize_path_comp(path_comp):
             result.append(char)
     return ''.join(result)
 
+
 class NiftiGeneratorBaseInputSpec(TraitedSpec):
     out_format = traits.Str(desc="String which can be formatted with "
                             "meta data to create the output filename(s)")
-    out_ext = traits.Str('.nii.gz',
-                         usedefault=True,
+    out_ext = traits.Str('.nii.gz', usedefault=True,
                          desc="Determines output file type")
+    use_cwd = traits.Bool(True, usedefault=True,
+                          desc='use interface\'s current working directory')
+
 
 class NiftiGeneratorBase(BaseInterface):
     '''Base class for interfaces that produce Nifti files, potentially with
@@ -73,7 +76,12 @@ class NiftiGeneratorBase(BaseInterface):
             out_fmt = '-'.join(out_fmt)
         out_fn = (out_fmt % meta) + self.inputs.out_ext
         out_fn = sanitize_path_comp(out_fn)
-        return path.join(os.getcwd(), out_fn)
+
+        if self.inputs.use_cwd:
+            return path.join(os.getcwd(), out_fn)
+        else:
+            return path.abspath(out_fn)
+
 
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     dicom_files = traits.Either(InputMultiPath(File(exists=True)),
