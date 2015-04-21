@@ -12,7 +12,7 @@ from nipype.interfaces.base import (
 from nipype.utils.filemanip import split_filename
 import os.path as op
 import nibabel as nb
-import nibabel.trackvis as trk
+import nibabel.trackvis as nbt
 from nipype.utils.misc import package_check
 import warnings
 
