@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Improved TrackDensityMap of dipy (https://github.com/nipy/nipype/pull/1091)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
        (https://github.com/nipy/nipype/pull/1016)
 * FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
