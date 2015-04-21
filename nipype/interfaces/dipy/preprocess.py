@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
+"""
+Change directory to provide relative paths for doctests
    >>> import os
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
@@ -36,8 +37,9 @@ class ResampleInputSpec(TraitedSpec):
                                   ' is set, then isotropic regridding will '
                                   'be performed, with spacing equal to the '
                                   'smallest current zoom.'))
-    interp = traits.Int(1, mandatory=True, usedefault=True, desc=('order of '
-                        'the interpolator (0 = nearest, 1 = linear, etc.'))
+    interp = traits.Int(
+        1, mandatory=True, usedefault=True,
+        desc=('order of the interpolator (0 = nearest, 1 = linear, etc.'))
 
 
 class ResampleOutputSpec(TraitedSpec):
@@ -45,6 +47,7 @@ class ResampleOutputSpec(TraitedSpec):
 
 
 class Resample(BaseInterface):
+
     """
     An interface to reslicing diffusion datasets.
     See
@@ -106,6 +109,7 @@ class DenoiseOutputSpec(TraitedSpec):
 
 
 class Denoise(BaseInterface):
+
     """
     An interface to denoising diffusion datasets [Coupe2008]_.
     See
@@ -152,7 +156,7 @@ class Denoise(BaseInterface):
                              noise_mask=noise_mask,
                              out_file=out_file)
         iflogger.info(('Denoised image saved as {i}, estimated '
-                      'sigma={s}').format(i=out_file, s=s))
+                       'sigma={s}').format(i=out_file, s=s))
         return runtime
 
     def _list_outputs(self):

@@ -44,6 +44,7 @@ class TensorModeOutputSpec(TraitedSpec):
 
 
 class TensorMode(BaseInterface):
+
     """
     Creates a map of the mode of the diffusion tensors given a set of
     diffusion-weighted images, as well as their associated b-values and
@@ -69,31 +70,31 @@ class TensorMode(BaseInterface):
     output_spec = TensorModeOutputSpec
 
     def _run_interface(self, runtime):
-        ## Load the 4D image files
+        # Load the 4D image files
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         affine = img.get_affine()
 
-        ## Load the gradient strengths and directions
+        # Load the gradient strengths and directions
         bvals = np.loadtxt(self.inputs.bvals)
         gradients = np.loadtxt(self.inputs.bvecs).T
 
-        ## Place in Dipy's preferred format
+        # Place in Dipy's preferred format
         gtab = GradientTable(gradients)
         gtab.bvals = bvals
 
-        ## Mask the data so that tensors are not fit for
-        ## unnecessary voxels
+        # Mask the data so that tensors are not fit for
+        # unnecessary voxels
         mask = data[..., 0] > 50
 
-        ## Fit the tensors to the data
+        # Fit the tensors to the data
         tenmodel = dti.TensorModel(gtab)
         tenfit = tenmodel.fit(data, mask)
 
-        ## Calculate the mode of each voxel's tensor
+        # Calculate the mode of each voxel's tensor
         mode_data = tenfit.mode
 
-        ## Write as a 3D Nifti image with the original affine
+        # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(mode_data, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
