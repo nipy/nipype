@@ -139,8 +139,8 @@ class StreamlineTractography(BaseInterface):
     Example
     -------
 
-    >>> import pysdcev.interfaces.reconstruction as pir
-    >>> track = pir.StreamlineTractography()
+    >>> from nipype.interfaces import dipy as ndp
+    >>> track = ndp.StreamlineTractography()
     >>> track.inputs.in_file = '4d_dwi.nii'
     >>> track.inputs.in_model = 'model.pklz'
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'

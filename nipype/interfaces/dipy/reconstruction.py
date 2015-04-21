@@ -57,8 +57,8 @@ class RESTORE(DipyBaseInterface):
     Example
     -------
 
-    >>> import pysdcev.interfaces.reconstruction as pir
-    >>> dti = pir.RESTORE()
+    >>> from nipype.interfaces import dipy as ndp
+    >>> dti = ndp.RESTORE()
     >>> dti.inputs.in_file = '4d_dwi.nii'
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.inputs.in_bvec = 'bvecs'
@@ -185,8 +185,8 @@ class EstimateResponseSH(DipyBaseInterface):
     Example
     -------
 
-    >>> import pysdcev.interfaces.reconstruction as pir
-    >>> dti = pir.EstimateResponseSH()
+    >>> from nipype.interfaces import dipy as ndp
+    >>> dti = ndp.EstimateResponseSH()
     >>> dti.inputs.in_file = '4d_dwi.nii'
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.inputs.in_bvec = 'bvecs'
@@ -304,8 +304,8 @@ class CSD(DipyBaseInterface):
     Example
     -------
 
-    >>> import pysdcev.interfaces.reconstruction as pir
-    >>> csd = pir.CSD()
+    >>> from nipype.interfaces import dipy as ndp
+    >>> csd = ndp.CSD()
     >>> csd.inputs.in_file = '4d_dwi.nii'
     >>> csd.inputs.in_bval = 'bvals'
     >>> csd.inputs.in_bvec = 'bvecs'
