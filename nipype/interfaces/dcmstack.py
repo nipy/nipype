@@ -81,7 +81,7 @@ class NiftiGeneratorBase(BaseInterface):
             return path.join(os.getcwd(), out_fn)
         else:
             return path.abspath(out_fn)
-        
+
 
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
     dicom_files = traits.Either(InputMultiPath(File(exists=True)),

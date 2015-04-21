@@ -13,6 +13,8 @@ def test_GroupAndStack_inputs():
     out_ext=dict(usedefault=True,
     ),
     out_format=dict(),
+    use_cwd=dict(usedefault=True,
+    ),
     )
     inputs = GroupAndStack.input_spec()
 
