@@ -15,7 +15,7 @@ from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     traits)
 from nipype.utils.filemanip import split_filename, fname_presuffix
 
-from .base import DipyBaseInterface
+from .base import DipyBaseInterface, DipyBaseInterfaceInputSpec
 
 from nipype import logging
 iflogger = logging.getLogger('interface')
@@ -39,7 +39,6 @@ class RESTOREOutputSpec(TraitedSpec):
                        'fitted DTI'))
     evals = File(desc=('output the eigenvalues of the fitted DTI'))
     evecs = File(desc=('output the eigenvectors of the fitted DTI'))
-    # out_dti = File(desc=('output DTI file'))
 
 
 class RESTORE(DipyBaseInterface):
@@ -60,9 +59,9 @@ class RESTORE(DipyBaseInterface):
 
     >>> import pysdcev.interfaces.reconstruction as pir
     >>> dti = pir.RESTORE()
-    >>> dti.inputs.in_file = 'dwi.nii'
-    >>> dti.inputs.in_bval = 'bval.txt'
-    >>> dti.inputs.in_bvec = 'bvec.txt'
+    >>> dti.inputs.in_file = '4d_dwi.nii'
+    >>> dti.inputs.in_bval = 'bvals'
+    >>> dti.inputs.in_bvec = 'bvecs'
     >>> res = dti.run() # doctest: +SKIP
 
 
@@ -188,9 +187,9 @@ class EstimateResponseSH(DipyBaseInterface):
 
     >>> import pysdcev.interfaces.reconstruction as pir
     >>> dti = pir.EstimateResponseSH()
-    >>> dti.inputs.in_file = 'dwi.nii'
-    >>> dti.inputs.in_bval = 'bval.txt'
-    >>> dti.inputs.in_bvec = 'bvec.txt'
+    >>> dti.inputs.in_file = '4d_dwi.nii'
+    >>> dti.inputs.in_bval = 'bvals'
+    >>> dti.inputs.in_bvec = 'bvecs'
     >>> dti.inputs.in_evals = 'dwi_evals.nii'
     >>> res = dti.run() # doctest: +SKIP
 
@@ -307,9 +306,9 @@ class CSD(DipyBaseInterface):
 
     >>> import pysdcev.interfaces.reconstruction as pir
     >>> csd = pir.CSD()
-    >>> csd.inputs.in_file = 'dwi.nii'
-    >>> csd.inputs.in_bval = 'bval.txt'
-    >>> csd.inputs.in_bvec = 'bvec.txt'
+    >>> csd.inputs.in_file = '4d_dwi.nii'
+    >>> csd.inputs.in_bval = 'bvals'
+    >>> csd.inputs.in_bvec = 'bvecs'
     >>> res = csd.run() # doctest: +SKIP
     """
     input_spec = CSDInputSpec

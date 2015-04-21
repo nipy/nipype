@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from nipype.interfaces.base import (traits, File, isdefined,
+                                    BaseInterface, BaseInterfaceInputSpec)
 
 
 class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
