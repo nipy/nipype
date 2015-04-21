@@ -132,10 +132,10 @@ class SimulateMultiTensor(BaseInterface):
         b0 = np.array([b0_im.get_data()[msk > 0]]).T
         args = np.hstack((args, b0))
 
-        if isdefined(self.inputs.bval) and isdefined(self.inputs.bvec):
+        if isdefined(self.inputs.in_bval) and isdefined(self.inputs.in_bvec):
             # Load the gradient strengths and directions
-            bvals = np.loadtxt(self.inputs.bval)
-            bvecs = np.loadtxt(self.inputs.bvec).T
+            bvals = np.loadtxt(self.inputs.in_bval)
+            bvecs = np.loadtxt(self.inputs.in_bvec).T
 
             # Place in Dipy's preferred format
             gtab = gradient_table(bvals, bvecs)
@@ -144,7 +144,7 @@ class SimulateMultiTensor(BaseInterface):
                                        self.inputs.bvalues)
 
         np.savetxt(op.abspath(self.inputs.out_bvec), gtab.bvecs.T)
-        np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals.T)
+        np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
 
         snr = self.inputs.snr
         args = [tuple(np.hstack((r, gtab, snr))) for r in args]
