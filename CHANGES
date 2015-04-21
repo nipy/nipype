@@ -1,6 +1,12 @@
 Next release
 ============
 
+* FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089)
+* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets.
+* ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions
+       in EPI seqs. (https://github.com/nipy/nipype/pull/1019)
+* ENH: Added interface to simulate DWIs using the multi-tensor model
+       (https://github.com/nipy/nipype/pull/1085)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
        (https://github.com/nipy/nipype/pull/1016)
 * FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
