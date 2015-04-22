@@ -10,6 +10,8 @@ def test_MergeNifti_inputs():
     ),
     out_format=dict(),
     sort_order=dict(),
+    use_cwd=dict(usedefault=True,
+    ),
     )
     inputs = MergeNifti.input_spec()
 

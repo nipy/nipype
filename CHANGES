@@ -1,6 +1,10 @@
 Next release
 ============
 
+* FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089)
+* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets.
+* ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions
+       in EPI seqs. (https://github.com/nipy/nipype/pull/1019)
 * ENH: Added interface to simulate DWIs using the multi-tensor model
        (https://github.com/nipy/nipype/pull/1085)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
@@ -52,6 +56,7 @@ Next release
 * ENH: ANTs JointFusion() (https://github.com/nipy/nipype/pull/1042)
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 * FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
+* FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
 
 Release 0.10.0 (October 10, 2014)
 ============
