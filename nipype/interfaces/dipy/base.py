@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import numpy as np
+import os.path as op
 from nipype.interfaces.base import (traits, File, isdefined,
                                     BaseInterface, BaseInterfaceInputSpec)
 
