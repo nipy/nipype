@@ -7,6 +7,7 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_bval = File(exists=True, mandatory=True, desc=('input b-values table'))
     in_bvec = File(exists=True, mandatory=True, desc=('input b-vectors table'))
+    b0_thres = traits.Int(700, usedefault=True, desc=('b0 threshold'))
     out_prefix = traits.Str(desc=('output prefix for file names'))
 
 
@@ -18,9 +19,17 @@ class DipyBaseInterface(BaseInterface):
     input_spec = DipyBaseInterfaceInputSpec
 
     def _get_gradient_table(self):
-        gtab = GradientTable(np.loadtxt(self.inputs.in_bvec).T)
-        gtab.b0_threshold = 700
-        gtab.bvals = np.loadtxt(self.inputs.in_bval)
+        bval = np.loadtxt(self.inputs.in_bval)
+        bvec = np.loadtxt(self.inputs.in_bvec).T
+        try:
+            from dipy.data import GradientTable
+            gtab = GradientTable(bvec)
+            gtab.bvals = bval
+        except NameError:
+            from dipy.core.gradients import gradient_table
+            gtab = gradient_table(bval, bvec)
+
+        gtab.b0_threshold = self.inputs.b0_thres
         return gtab
 
     def _gen_filename(self, name, ext=None):
