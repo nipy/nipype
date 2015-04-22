@@ -28,8 +28,7 @@ def test_DWIJointRicianLMMSEFilter_inputs():
     rf=dict(argstr='--rf %s',
     sep=',',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWIJointRicianLMMSEFilter.input_spec()

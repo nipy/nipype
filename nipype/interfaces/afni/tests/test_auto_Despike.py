@@ -21,8 +21,7 @@ def test_Despike_inputs():
     name_template='%s_despike',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Despike.input_spec()

@@ -25,8 +25,7 @@ def test_TStat_inputs():
     name_template='%s_tstat',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = TStat.input_spec()

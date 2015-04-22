@@ -920,7 +920,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 
 
 def format_dot(dotfilename, format=None):
-    cmd = 'dot -T%s -O %s' % (format, dotfilename)
+    cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
     CommandLine(cmd).run()
     logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
 

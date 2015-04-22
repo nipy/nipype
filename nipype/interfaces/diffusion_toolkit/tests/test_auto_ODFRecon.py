@@ -50,8 +50,7 @@ def test_ODFRecon_inputs():
     ),
     subtract_background=dict(argstr='-bg',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ODFRecon.input_spec()

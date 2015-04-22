@@ -241,7 +241,7 @@ def create_reg_workflow(name='registration'):
 
     warpmean = pe.Node(ants.ApplyTransforms(),
                        name='warpmean')
-    warpmean.inputs.input_image_type = 3
+    warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
@@ -257,7 +257,7 @@ def create_reg_workflow(name='registration'):
     warpall = pe.MapNode(ants.ApplyTransforms(),
                          iterfield=['input_image'],
                          name='warpall')
-    warpall.inputs.input_image_type = 3
+    warpall.inputs.input_image_type = 0
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
@@ -449,7 +449,7 @@ def create_fs_reg_workflow(name='registration'):
     Transform the mean image. First to anatomical and then to target
     """
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
-    warpmean.inputs.input_image_type = 3
+    warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
@@ -464,7 +464,7 @@ def create_fs_reg_workflow(name='registration'):
     warpall = pe.MapNode(ants.ApplyTransforms(),
                          iterfield=['input_image'],
                          name='warpall')
-    warpall.inputs.input_image_type = 3
+    warpall.inputs.input_image_type = 0
     warpall.inputs.interpolation = 'Linear'
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'

@@ -28,8 +28,7 @@ def test_DTMetric_inputs():
     outputfile=dict(argstr='-outputfile %s',
     genfile=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTMetric.input_spec()
