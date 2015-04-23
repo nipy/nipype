@@ -163,7 +163,7 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
         exists=True, desc=('input mask in which we find single fibers'))
     fa_thresh = traits.Float(
         0.7, usedefault=True, desc=('default FA threshold'))
-    save_glyph = traits.Bool(True, mandatory=True, usedefault=True,
+    save_glyph = traits.Bool(False, usedefault=True,
                              desc=('save a png file of the response'))
     response = File(desc=('the output response file'))
 
@@ -236,7 +236,7 @@ class EstimateResponseSH(DipyBaseInterface):
         np.savetxt(self._gen_outname(),
                    np.array(respev.tolist() + [S0]).reshape(-1))
 
-        if isdefined(self.inputs.save_glyph) and self.inputs.save_glyph:
+        if self.inputs.save_glyph:
             from dipy.viz import fvtk
             from dipy.data import get_sphere
             from dipy.sims.voxel import single_tensor_odf
