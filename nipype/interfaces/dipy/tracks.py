@@ -150,11 +150,11 @@ class StreamlineTractography(BaseInterface):
     output_spec = StreamlineTractographyOutputSpec
 
     def _run_interface(self, runtime):
-        from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
         from dipy.reconst.peaks import peaks_from_model
         from dipy.tracking.eudx import EuDX
         from dipy.data import get_sphere
-        import cPickle as pickle
+        import marshal as pickle
+        # import cPickle as pickle
         import gzip
 
         if (not (isdefined(self.inputs.in_model) or
