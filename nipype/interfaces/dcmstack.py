@@ -48,8 +48,7 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
                             "meta data to create the output filename(s)")
     out_ext = traits.Str('.nii.gz', usedefault=True,
                          desc="Determines output file type")
-    use_cwd = traits.Bool(True, usedefault=True,
-                          desc='use interface\'s current working directory')
+    out_path = Directory(desc='output path, current working directory if not set')
 
 
 class NiftiGeneratorBase(BaseInterface):
@@ -77,10 +76,11 @@ class NiftiGeneratorBase(BaseInterface):
         out_fn = (out_fmt % meta) + self.inputs.out_ext
         out_fn = sanitize_path_comp(out_fn)
 
-        if self.inputs.use_cwd:
-            return path.join(os.getcwd(), out_fn)
-        else:
-            return path.abspath(out_fn)
+        out_path = os.getcwd()
+        if isdefined(self.inputs.out_path):
+            out_path = path.abspath(self.inputs.out_path)
+        return path.join(out_path, out_fn)
+
 
 
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
