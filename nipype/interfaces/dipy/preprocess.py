@@ -230,7 +230,10 @@ def nlmeans_proxy(in_file, settings,
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:
-        nmask = np.array([noise_mask] * data.shape[-1])
+        nmask = nb.load(noise_mask).get_data()
+        if nmask.ndim != data.ndim:
+            nmask = np.array([nmask] * data.shape[-1])
+
         nmask[nmask > 0] = 1
 
     sigma = np.std(data[nmask == 1])
