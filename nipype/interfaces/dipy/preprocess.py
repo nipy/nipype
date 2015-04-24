@@ -230,9 +230,8 @@ def nlmeans_proxy(in_file, settings,
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:
-        nmask = nb.load(noise_mask).get_data()
-        if nmask.ndim != data.ndim:
-            nmask = np.array([nmask] * data.shape[-1])
+        if noise_mask.ndim != data.ndim:
+            nmask = np.array([noise_mask] * data.shape[-1])
 
         nmask[nmask > 0] = 1
 
