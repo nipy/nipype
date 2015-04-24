@@ -85,7 +85,7 @@ class NiftiGeneratorBase(BaseInterface):
 
             # now, mkdir -p $out_path
             try:
-                op.makedirs(out_path)
+                os.makedirs(out_path)
             except OSError as exc:  # Python >2.5
                 if exc.errno == errno.EEXIST and op.isdir(out_path):
                     pass
@@ -250,13 +250,13 @@ class LookupMeta(BaseInterface):
             outputs.add_trait(out_name, traits.Any)
             undefined_traits[out_name] = Undefined
         outputs.trait_set(trait_change_notify=False, **undefined_traits)
-        #Not sure why this is needed
+        # Not sure why this is needed
         for out_name in self._meta_keys.values():
             _ = getattr(outputs, out_name)
         return outputs
 
     def _run_interface(self, runtime):
-        #If the 'meta_keys' input is a list, covert it to a dict
+        # If the 'meta_keys' input is a list, covert it to a dict
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
