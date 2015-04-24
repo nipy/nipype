@@ -9,8 +9,10 @@
 """
 
 from __future__ import absolute_import
-import os, string
-from os import path
+import os
+import string
+import errno
+from os import path as op
 from glob import glob
 from nipype.interfaces.base import (TraitedSpec,
                                     DynamicTraitedSpec,
@@ -32,6 +34,7 @@ try:
     from dcmstack.dcmmeta import NiftiWrapper
 except ImportError:
     have_dcmstack = False
+
 
 def sanitize_path_comp(path_comp):
     result = []
@@ -78,9 +81,18 @@ class NiftiGeneratorBase(BaseInterface):
 
         out_path = os.getcwd()
         if isdefined(self.inputs.out_path):
-            out_path = path.abspath(self.inputs.out_path)
-        return path.join(out_path, out_fn)
+            out_path = op.abspath(self.inputs.out_path)
 
+            # now, mkdir -p $out_path
+            try:
+                op.makedirs(out_path)
+            except OSError as exc:  # Python >2.5
+                if exc.errno == errno.EEXIST and op.isdir(out_path):
+                    pass
+                else:
+                    raise
+
+        return op.join(out_path, out_fn)
 
 
 class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
@@ -99,6 +111,7 @@ class DcmStackInputSpec(NiftiGeneratorBaseInputSpec):
 
 class DcmStackOutputSpec(TraitedSpec):
     out_file = File(exists=True)
+
 
 class DcmStack(NiftiGeneratorBase):
     '''Create one Nifti file from a set of DICOM files. Can optionally embed
@@ -119,8 +132,8 @@ class DcmStack(NiftiGeneratorBase):
 
     def _get_filelist(self, trait_input):
         if isinstance(trait_input, six.string_types):
-            if path.isdir(trait_input):
-                return glob(path.join(trait_input, '*.dcm'))
+            if op.isdir(trait_input):
+                return glob(op.join(trait_input, '*.dcm'))
             else:
                 return glob(trait_input)
 
@@ -155,8 +168,10 @@ class DcmStack(NiftiGeneratorBase):
         outputs["out_file"] = self.out_path
         return outputs
 
+
 class GroupAndStackOutputSpec(TraitedSpec):
     out_list = traits.List(desc="List of output nifti files")
+
 
 class GroupAndStack(DcmStack):
     '''Create (potentially) multiple Nifti files for a set of DICOM files.
@@ -185,6 +200,7 @@ class GroupAndStack(DcmStack):
         outputs["out_list"] = self.out_list
         return outputs
 
+
 class LookupMetaInputSpec(TraitedSpec):
     in_file = File(mandatory=True,
                    exists=True,
@@ -196,6 +212,7 @@ class LookupMetaInputSpec(TraitedSpec):
                               "dict where keys specify the meta data keys to "
                               "lookup and the values specify the output names")
                              )
+
 
 class LookupMeta(BaseInterface):
     '''Lookup meta data values from a Nifti with embeded meta data.
@@ -253,6 +270,7 @@ class LookupMeta(BaseInterface):
         outputs.update(self.result)
         return outputs
 
+
 class CopyMetaInputSpec(TraitedSpec):
     src_file = File(mandatory=True, exists=True)
     dest_file = File(mandatory=True, exists=True)
@@ -262,8 +280,10 @@ class CopyMetaInputSpec(TraitedSpec):
     exclude_classes = traits.List(desc="List of meta data "
                                   "classifications to exclude")
 
+
 class CopyMetaOutputSpec(TraitedSpec):
     dest_file = File(exists=True)
+
 
 class CopyMeta(BaseInterface):
     '''Copy meta data from one Nifti file to another. Useful for preserving
@@ -296,8 +316,8 @@ class CopyMeta(BaseInterface):
         dest.meta_ext.slice_dim = src.meta_ext.slice_dim
         dest.meta_ext.shape = src.meta_ext.shape
 
-        self.out_path = path.join(os.getcwd(),
-                                  path.basename(self.inputs.dest_file))
+        self.out_path = op.join(os.getcwd(),
+                                  op.basename(self.inputs.dest_file))
         dest.to_filename(self.out_path)
 
         return runtime
@@ -306,6 +326,7 @@ class CopyMeta(BaseInterface):
         outputs = self._outputs().get()
         outputs['dest_file'] = self.out_path
         return outputs
+
 
 class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     in_files = traits.List(mandatory=True,
@@ -318,8 +339,10 @@ class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
                            "specified, the last singular or "
                            "non-existant dimension is used.")
 
+
 class MergeNiftiOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="Merged Nifti file")
+
 
 def make_key_func(meta_keys, index=None):
     def key_func(src_nii):
@@ -327,6 +350,7 @@ def make_key_func(meta_keys, index=None):
         return result
 
     return key_func
+
 
 class MergeNifti(NiftiGeneratorBase):
     '''Merge multiple Nifti files into one. Merges together meta data
@@ -361,18 +385,23 @@ class MergeNifti(NiftiGeneratorBase):
         outputs['out_file'] = self.out_path
         return outputs
 
+
 class SplitNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc="Nifti file to split")
     split_dim = traits.Int(desc="Dimension to split along. If not "
                            "specified, the last dimension is used.")
 
+
 class SplitNiftiOutputSpec(TraitedSpec):
     out_list = traits.List(File(exists=True),
                            desc="Split Nifti files")
 
+
 class SplitNifti(NiftiGeneratorBase):
-    '''Split one Nifti file into many along the specified dimension. Each
-    result has an updated meta data extension as well.'''
+    '''
+    Split one Nifti file into many along the specified dimension. Each
+    result has an updated meta data extension as well.
+    '''
     input_spec = SplitNiftiInputSpec
     output_spec = SplitNiftiOutputSpec
 
