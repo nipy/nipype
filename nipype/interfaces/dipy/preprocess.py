@@ -230,7 +230,8 @@ def nlmeans_proxy(in_file, settings,
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:
-        nmask = noise_mask > 0
+        nmask = np.array([noise_mask] * data.shape[-1])
+        nmask[nmask > 0] = 1
 
     sigma = np.std(data[nmask == 1])
     den = nlmeans(data, sigma, **settings)
