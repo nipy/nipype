@@ -230,12 +230,13 @@ def nlmeans_proxy(in_file, settings,
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:
-        if noise_mask.ndim != data.ndim:
-            nmask = np.array([noise_mask] * data.shape[-1])
+        noise_mask = np.squeeze(noise_mask)
+        nmask = np.zeros_like(noise_mask)
+        nmask[noise_mask > 0] = 1
+        if nmask.ndim != data.ndim:
+            nmask = np.array([nmask] * data.shape[-1])
 
-        nmask[nmask > 0] = 1
-
-    sigma = np.std(data[nmask == 1])
+    sigma = np.std(data[nmask > 0])
     den = nlmeans(data, sigma, **settings)
 
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
