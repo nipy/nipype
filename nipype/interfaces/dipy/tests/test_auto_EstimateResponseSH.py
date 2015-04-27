@@ -3,7 +3,9 @@ from nipype.testing import assert_equal
 from nipype.interfaces.dipy.reconstruction import EstimateResponseSH
 
 def test_EstimateResponseSH_inputs():
-    input_map = dict(fa_thresh=dict(usedefault=True,
+    input_map = dict(b0_thres=dict(usedefault=True,
+    ),
+    fa_thresh=dict(usedefault=True,
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -19,8 +21,7 @@ def test_EstimateResponseSH_inputs():
     in_mask=dict(),
     out_prefix=dict(),
     response=dict(),
-    save_glyph=dict(mandatory=True,
-    usedefault=True,
+    save_glyph=dict(usedefault=True,
     ),
     )
     inputs = EstimateResponseSH.input_spec()

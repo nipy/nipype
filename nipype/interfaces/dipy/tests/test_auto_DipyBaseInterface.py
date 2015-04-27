@@ -3,7 +3,9 @@ from nipype.testing import assert_equal
 from nipype.interfaces.dipy.base import DipyBaseInterface
 
 def test_DipyBaseInterface_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(b0_thres=dict(usedefault=True,
+    ),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_bval=dict(mandatory=True,

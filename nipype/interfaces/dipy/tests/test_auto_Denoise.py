@@ -12,6 +12,7 @@ def test_Denoise_inputs():
     usedefault=True,
     ),
     patch_radius=dict(),
+    signal_mask=dict(),
     )
     inputs = Denoise.input_spec()
 

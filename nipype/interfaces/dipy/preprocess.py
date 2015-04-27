@@ -98,6 +98,8 @@ class DenoiseInputSpec(TraitedSpec):
     noise_model = traits.Enum('rician', 'gaussian', mandatory=True,
                               usedefault=True,
                               desc=('noise distribution model'))
+    signal_mask = File(desc=('mask in which the mean signal '
+                             'will be computed'), exists=True)
     noise_mask = File(desc=('mask in which the standard deviation of noise '
                             'will be computed'), exists=True)
     patch_radius = traits.Int(1, desc='patch radius')
@@ -147,16 +149,19 @@ class Denoise(BaseInterface):
         if isdefined(self.inputs.block_radius):
             settings['block_radius'] = self.inputs.block_radius
 
+        signal_mask = None
+        if isdefined(self.inputs.signal_mask):
+            signal_mask = nb.load(self.inputs.signal_mask).get_data()
         noise_mask = None
-        if isdefined(self.inputs.in_mask):
+        if isdefined(self.inputs.noise_mask):
             noise_mask = nb.load(self.inputs.noise_mask).get_data()
 
-        _, s = nlmeans_proxy(self.inputs.in_file,
-                             settings,
-                             noise_mask=noise_mask,
+        _, s = nlmeans_proxy(self.inputs.in_file, settings,
+                             smask=signal_mask,
+                             nmask=noise_mask,
                              out_file=out_file)
         iflogger.info(('Denoised image saved as {i}, estimated '
-                       'sigma={s}').format(i=out_file, s=s))
+                       'SNR={s}').format(i=out_file, s=str(s)))
         return runtime
 
     def _list_outputs(self):
@@ -209,7 +214,9 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
 
 
 def nlmeans_proxy(in_file, settings,
-                  noise_mask=None, out_file=None):
+                  smask=None,
+                  nmask=None,
+                  out_file=None):
     """
     Uses non-local means to denoise 4D datasets
     """
@@ -228,17 +235,35 @@ def nlmeans_proxy(in_file, settings,
     data = img.get_data()
     aff = img.get_affine()
 
-    nmask = data[..., 0] > 80
-    if noise_mask is not None:
-        noise_mask = np.squeeze(noise_mask)
-        nmask = np.zeros_like(noise_mask)
-        nmask[noise_mask > 0] = 1
-        if nmask.ndim != data.ndim:
-            nmask = np.array([nmask] * data.shape[-1])
+    if data.ndims < 4:
+        data = data[..., np.newaxis]
+    b0 = data[..., 0]
 
-    sigma = np.std(data[nmask > 0])
-    den = nlmeans(data, sigma, **settings)
+    if smask is None:
+        smask = np.zeros_like(b0)
+        smask[b0 > np.percentile(b0, 0.85)] = 1
 
+    if nmask is None:
+        nmask = np.zeros_like(b0)
+        try:
+            bmask = settings['mask']
+            nmask[~bmask] = 1
+        except AttributeError:
+            nmask[b0 < np.percentile(b0, 0.15)] = 1
+    else:
+        nmask = np.squeeze(nmask)
+        nmask[nmask > 0] = 1
+
+    den = np.zeros_like(data)
+    snr = []
+    for i in range(data.shape[-1]):
+        d = data[..., i]
+        s = np.mean(d[smask > 0])
+        n = np.std(d[nmask > 0])
+        snr.append(s/n)
+        den[..., i] = nlmeans(d, s/n, **settings)
+
+    den = np.squeeze(den)
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
                    hdr).to_filename(out_file)
-    return out_file, sigma
+    return out_file, snr
