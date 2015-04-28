@@ -279,7 +279,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
---image-dimension 3 --input-image structural.nii \
+-d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
@@ -287,7 +287,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_2.inputs.bspline_order = 5
     >>> n4_2.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
---image-dimension 3 --input-image structural.nii \
+--d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
@@ -295,7 +295,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_3.inputs.input_image = 'structural.nii'
     >>> n4_3.inputs.save_bias = True
     >>> n4_3.cmdline
-    'N4BiasFieldCorrection --image-dimension 3 --input-image structural.nii \
+    'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
     """
 
