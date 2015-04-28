@@ -74,7 +74,6 @@ if __name__ == "__main__":
                         default=None,
                         help='Directory to run the node in' + defstr)
     args = parser.parse_args()
-    print args.debug, args.ipydebug
     debug = 'ipython' if args.ipydebug else args.debug
     if debug == 'ipython':
         import sys

@@ -7,7 +7,7 @@
 
 """
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
-                                    TraitedSpec, File, StdOutCommandLine,
+                                    TraitedSpec, File, Directory, StdOutCommandLine,
                                     StdOutCommandLineInputSpec, isdefined,
                                     InputMultiPath)
 from nipype.utils.filemanip import split_filename
@@ -393,47 +393,135 @@ class PicoPDFs(StdOutCommandLine):
         return name + '_pdfs.Bdouble'
 
 class TrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1, desc='input data file')
+    in_file = File(exists=True, argstr='-inputfile %s', position=1,
+                   desc='input data file')
 
-    seed_file = File(exists=True, argstr='-seedfile %s', position=2, desc='seed file')
+    seed_file = File(exists=True, argstr='-seedfile %s', position=2,
+                     desc='seed file')
 
-    inputmodel = traits.Enum('dt', 'multitensor', 'sfpeak', 'pico', 'repbs_dt', 'repbs_multitensor', 'ballstick', 'wildbs_dt', 'bayesdirac', 'bayesdirac_dt',
-        argstr='-inputmodel %s', desc='input model type', usedefault=True)
+    inputmodel = traits.Enum('dt', 'multitensor', 'sfpeak', 'pico', 'repbs_dt',
+                             'repbs_multitensor', 'ballstick', 'wildbs_dt',
+                             'bayesdirac', 'bayesdirac_dt','bedpostx_dyad',
+                             'bedpostx', argstr='-inputmodel %s',
+                             desc='input model type', usedefault=True)
 
-    inputdatatype = traits.Enum('float', 'double', argstr='-inputdatatype %s', desc='input file type')
+    tracker = traits.Enum('fact', 'euler', 'rk4', argstr='-tracker %s',
+                          desc=("The tracking algorithm controls streamlines are "
+                                "generated from the data. The choices are: "
+                                "- FACT, which follows the local fibre orientation "
+                                "in each voxel. No interpolation is used."
+                                "- EULER, which uses a fixed step size along the "
+                                "local fibre orientation. With nearest-neighbour "
+                                "interpolation, this method may be very similar to "
+                                "FACT, except that the step size is fixed, whereas "
+                                "FACT steps extend to the boundary of the next voxel "
+                                "(distance variable depending on the entry and exit "
+                                "points to the voxel)."
+                                "- RK4: Fourth-order Runge-Kutta method. The step "
+                                "size is fixed, however the eventual direction of "
+                                "the step is determined by taking and averaging a "
+                                "series of partial steps."), usedefault=True)
+
+    interpolator = traits.Enum('nn', 'prob_nn', 'linear', argstr='-interpolator %s',
+                               desc=("The interpolation algorithm determines how "
+                                     "the fiber orientation(s) are defined at a given "
+                                     "continuous point within the input image. "
+                                     "Interpolators are only used when the tracking "
+                                     "algorithm is not FACT. The choices are: "
+                                     "- NN: Nearest-neighbour interpolation, just "
+                                     "uses the local voxel data directly."
+                                     "- PROB_NN: Probabilistic nearest-neighbor "
+                                     "interpolation,  similar  to the method pro- "
+                                     "posed by Behrens et al [Magnetic Resonance "
+                                     "in Medicine, 50:1077-1088, 2003]. The data "
+                                     "is not interpolated, but at each point we "
+                                     "randomly choose one of the 8 voxels sur- "
+                                     "rounding a point. The probability of choosing "
+                                     "a particular voxel is based on how close the "
+                                     "point is to the centre of that voxel."
+                                     "- LINEAR: Linear interpolation of the vector "
+                                     "field containing the principal directions at "
+                                     "each point."))
+
+    stepsize = traits.Float(argstr='-stepsize %f', requires=['tracker'],
+                            desc=('Step size for EULER and RK4 tracking. '
+                                  'The default is 1mm.'))
+
+    inputdatatype = traits.Enum('float', 'double', argstr='-inputdatatype %s',
+                                desc='input file type')
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
-        desc="The maximum number of tensor components in a voxel. This determines the size of the input file and does not say anything about the voxel classification. The default is 2 if the input model is multitensor and 1 if the input model is dt.")
+                               desc=("The maximum number of tensor components in a "
+                                     "voxel. This determines the size of the input "
+                                     "file and does not say anything about the "
+                                     "voxel classification. The default is 2 if "
+                                     "the input model is multitensor and 1 if the "
+                                     "input model is dt."))
 
-    numpds = traits.Int(argstr='-numpds %d', units='NA', desc="The maximum number of PDs in a voxel for input models sfpeak and pico. The default is 3 for input model sfpeak and 1 for input model pico. This option determines the size of the voxels in the input file and does not affect tracking. For tensor data, use the -maxcomponents option.")
+    numpds = traits.Int(argstr='-numpds %d', units='NA',
+                        desc=("The maximum number of PDs in a voxel for input "
+                              "models sfpeak and pico. The default is 3 for input "
+                              "model sfpeak and 1 for input model pico. This option "
+                              "determines the size of the voxels in the input file "
+                              "and does not affect tracking. For tensor data, use "
+                              "the -maxcomponents option."))
 
     data_dims = traits.List(traits.Int, desc='data dimensions in voxels',
-        argstr='-datadims %s', minlen=3, maxlen=3,
-        units='voxels')
+                            argstr='-datadims %s', minlen=3, maxlen=3,
+                            units='voxels')
 
     voxel_dims = traits.List(traits.Float, desc='voxel dimensions in mm',
-        argstr='-voxeldims %s', minlen=3, maxlen=3,
-        units='mm')
+                             argstr='-voxeldims %s', minlen=3, maxlen=3,
+                             units='mm')
 
-    ipthresh = traits.Float(argstr='-ipthresh %f', desc='Curvature threshold for tracking, expressed as the minimum dot product between two streamline orientations calculated over the length of a voxel. If the dot product between the previous and current directions is less than this threshold, then the streamline terminates. The default setting will terminate fibres that curve by more than 80 degrees. Set this to -1.0 to disable curvature checking completely.')
+    ipthresh = traits.Float(argstr='-ipthresh %f',
+                            desc=('Curvature threshold for tracking, expressed as '
+                                  'the minimum dot product between two streamline '
+                                  'orientations calculated over the length of a '
+                                  'voxel. If the dot product between the previous '
+                                  'and current directions is less than this '
+                                  'threshold, then the streamline terminates. The '
+                                  'default setting will terminate fibres that curve '
+                                  'by more than 80 degrees. Set this to -1.0 to '
+                                  'disable curvature checking completely.'))
 
-    curvethresh = traits.Float(argstr='-curvethresh %f', desc='Curvature threshold for tracking, expressed as the maximum angle (in degrees) between between two streamline orientations calculated over the length of a voxel. If the angle is greater than this, then the streamline terminates.')
+    curvethresh = traits.Float(argstr='-curvethresh %f',
+                               desc=('Curvature threshold for tracking, expressed '
+                                     'as the maximum angle (in degrees) between '
+                                     'between two streamline orientations '
+                                     'calculated over the length of a voxel. If '
+                                     'the angle is greater than this, then the '
+                                     'streamline terminates.'))
 
-    anisthresh = traits.Float(argstr='-anisthresh %f', desc='Terminate fibres that enter a voxel with lower anisotropy than the threshold.')
+    curveinterval = traits.Float(argstr='-curveinterval %f', requires=['curvethresh'],
+                                 desc=('Interval over which the curvature threshold '
+                                       'should be evaluated, in mm. The default is '
+                                       '5mm. When using the default curvature '
+                                       'threshold of 90 degrees, this means that '
+                                       'streamlines will terminate if they curve by '
+                                       'more than  90  degrees over a path length '
+                                       'of 5mm.'))
 
-    anisfile = File(argstr='-anisfile %s', exists=True, desc='File containing the anisotropy map. This is required to apply an anisotropy threshold with non tensor data. If the map issupplied it is always used, even in tensor data.')
+    anisthresh = traits.Float(argstr='-anisthresh %f',
+                              desc=('Terminate fibres that enter a voxel with lower '
+                                    'anisotropy than the threshold.'))
 
-    outputtracts = traits.Enum('float', 'double', 'oogl', argstr='-outputtracts %s', desc='output tract file type')
+    anisfile = File(argstr='-anisfile %s', exists=True,
+                    desc=('File containing the anisotropy map. This is required to '
+                          'apply an anisotropy threshold with non tensor data. If '
+                          'the map issupplied it is always used, even in tensor '
+                          'data.'))
 
-    out_file = File(argstr='-outputfile %s',
-        position= -1, genfile=True,
-        desc='output data file')
+    outputtracts = traits.Enum('float', 'double', 'oogl', argstr='-outputtracts %s',
+                               desc='output tract file type')
 
-    output_root = File(exists=False, argstr='-outputroot %s',
-        position= -1,
-        desc='root directory for output')
+    out_file = File(argstr='-outputfile %s', position= -1, genfile=True,
+                    desc='output data file')
+
+    output_root = File(exists=False, argstr='-outputroot %s', position= -1,
+                       desc='root directory for output')
 
 class TrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
@@ -461,7 +549,11 @@ class Track(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tracked'] = os.path.abspath(self._gen_outfilename())
+        if isdefined(self.inputs.out_file):
+            out_file_path = os.path.abspath(self.inputs.out_file)
+        else:
+            out_file_path = os.path.abspath(self._gen_outfilename())
+        outputs['tracked'] = out_file_path
         return outputs
 
     def _gen_filename(self, name):
@@ -471,7 +563,11 @@ class Track(CommandLine):
             return None
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        # Currently in_file is only undefined for bedpostx input
+        if not isdefined(self.inputs.in_file):
+            name = 'bedpostx'
+        else:
+            _, name , _ = split_filename(self.inputs.in_file)
         return name + '_tracked'
 
 class TrackDT(Track):
@@ -516,6 +612,93 @@ class TrackPICo(Track):
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "pico"
         return super(TrackPICo, self).__init__(command, **inputs)
+
+class TrackBedpostxDeterInputSpec(TrackInputSpec):
+    bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
+                       desc=('Directory containing bedpostx output'))
+
+    min_vol_frac = traits.Float(argstr='-bedpostxminf %d', units='NA',
+                                desc=("Zeros out compartments in bedpostx data "
+                                      "with a mean volume fraction f of less than "
+                                      "min_vol_frac.  The default is 0.01."))
+
+class TrackBedpostxDeter(Track):
+    """
+    Data from FSL's bedpostx can be imported into Camino for deterministic tracking.
+    (Use TrackBedpostxProba for bedpostx probabilistic tractography.)
+
+    The tracking is based on the vector images dyads1.nii.gz, ... , dyadsN.nii.gz,
+    where there are a maximum of N compartments (corresponding to each fiber
+    population) in each voxel.
+
+    It also uses the N images mean_f1samples.nii.gz, ..., mean_fNsamples.nii.gz,
+    normalized such that the sum of all compartments is 1. Compartments where the
+    mean_f is less than a threshold are discarded and not used for tracking.
+    The default value is 0.01. This can be changed with the min_vol_frac option.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cam
+    >>> track = cam.TrackBedpostxDeter()
+    >>> track.inputs.bedpostxdir = 'bedpostxout'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.run()                  # doctest: +SKIP
+    """
+
+    input_spec = TrackBedpostxDeterInputSpec
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "bedpostx_dyad"
+        return super(TrackBedpostxDeter, self).__init__(command, **inputs)
+
+class TrackBedpostxProbaInputSpec(TrackInputSpec):
+    bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
+                       desc=('Directory containing bedpostx output'))
+
+    min_vol_frac = traits.Float(argstr='-bedpostxminf %d', units='NA',
+                                desc=("Zeros out compartments in bedpostx data "
+                                      "with a mean volume fraction f of less than "
+                                      "min_vol_frac.  The default is 0.01."))
+
+    iterations = traits.Int(argstr='-iterations %d', units='NA',
+                            desc=("Number of streamlines to generate at each "
+                                  "seed point. The default is 1."))
+
+class TrackBedpostxProba(Track):
+    """
+    Data from FSL's bedpostx can be imported into Camino for probabilistic tracking.
+    (Use TrackBedpostxDeter for bedpostx deterministic tractography.)
+
+    The tracking uses the files merged_th1samples.nii.gz, merged_ph1samples.nii.gz,
+    ... , merged_thNsamples.nii.gz, merged_phNsamples.nii.gz where there are a
+    maximum of N compartments (corresponding to each fiber population) in each
+    voxel. These images contain M samples of theta and phi, the polar coordinates
+    describing the "stick" for each compartment. At each iteration, a random number
+    X between 1 and M is drawn and the Xth samples of theta and phi become the
+    principal directions in the voxel.
+
+    It also uses the N images mean_f1samples.nii.gz, ..., mean_fNsamples.nii.gz,
+    normalized such that the sum of all compartments is 1. Compartments where the
+    mean_f is less than a threshold are discarded and not used for tracking.
+    The default value is 0.01. This can be changed with the min_vol_frac option.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.camino as cam
+    >>> track = cam.TrackBedpostxProba()
+    >>> track.inputs.bedpostxdir = 'bedpostxout'
+    >>> track.inputs.seed_file = 'seed_mask.nii'
+    >>> track.inputs.iterations = 100
+    >>> track.run()                  # doctest: +SKIP
+    """
+
+    input_spec = TrackBedpostxProbaInputSpec
+
+    def __init__(self, command=None, **inputs):
+        inputs["inputmodel"] = "bedpostx_dyad"
+        return super(TrackBedpostxProba, self).__init__(command, **inputs)
 
 class TrackBayesDiracInputSpec(TrackInputSpec):
     scheme_file = File(argstr='-schemefile %s', mandatory=True, exists=True,

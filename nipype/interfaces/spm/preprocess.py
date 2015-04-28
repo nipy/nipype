@@ -497,20 +497,24 @@ class Normalize(SPMCommand):
                 outputs['normalized_files'] = self.inputs.apply_to_files
             outputs['normalized_source'] = self.inputs.source
         elif 'write' in self.inputs.jobtype:
+            if isdefined(self.inputs.write_preserve) and self.inputs.write_preserve:
+                prefixNorm = ''.join(['m', self.inputs.out_prefix])
+            else:
+                prefixNorm = self.inputs.out_prefix
             outputs['normalized_files'] = []
             if isdefined(self.inputs.apply_to_files):
                 filelist = filename_to_list(self.inputs.apply_to_files)
                 for f in filelist:
                     if isinstance(f, list):
-                        run = [fname_presuffix(in_f, prefix=self.inputs.out_prefix) for in_f in f]
+                        run = [fname_presuffix(in_f, prefix=prefixNorm) for in_f in f]
                     else:
-                        run = [fname_presuffix(f, prefix=self.inputs.out_prefix)]
+                        run = [fname_presuffix(f, prefix=prefixNorm)]
                     outputs['normalized_files'].extend(run)
             if isdefined(self.inputs.source):
                 outputs['normalized_source'] = []
                 for imgf in filename_to_list(self.inputs.source):
                     outputs['normalized_source'].append(fname_presuffix(imgf,
-                                                        prefix=self.inputs.out_prefix))
+                                                        prefix=prefixNorm))
 
         return outputs
 
@@ -540,7 +544,7 @@ class Normalize12InputSpec(SPMCommandInputSpec):
                             desc='FWHM of Gaussian smoothness of bias')
     tpm = File(exists=True, field='eoptions.tpm',
                desc='template in form of tissue probablitiy maps to normalize to',
-               mandatory=False, xor=['deformation_file'],
+               xor=['deformation_file'],
                copyfile=False)
     affine_regularization_type = traits.Enum('mni', 'size', 'none',
                                              field='eoptions.affreg',

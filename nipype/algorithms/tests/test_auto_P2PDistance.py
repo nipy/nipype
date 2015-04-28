@@ -6,6 +6,12 @@ def test_P2PDistance_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    metric=dict(usedefault=True,
+    ),
+    out_file=dict(usedefault=True,
+    ),
+    out_warp=dict(usedefault=True,
+    ),
     surface1=dict(mandatory=True,
     ),
     surface2=dict(mandatory=True,
@@ -21,6 +27,8 @@ def test_P2PDistance_inputs():
 
 def test_P2PDistance_outputs():
     output_map = dict(distance=dict(),
+    out_file=dict(),
+    out_warp=dict(),
     )
     outputs = P2PDistance.output_spec()
 

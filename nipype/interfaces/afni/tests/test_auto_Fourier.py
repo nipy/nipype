@@ -29,8 +29,7 @@ def test_Fourier_inputs():
     name_template='%s_fourier',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Fourier.input_spec()

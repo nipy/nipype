@@ -23,8 +23,7 @@ def test_Split_inputs():
     position=1,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Split.input_spec()

@@ -21,8 +21,7 @@ def test_MRTrixViewer_inputs():
     quiet=dict(argstr='-quiet',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MRTrixViewer.input_spec()

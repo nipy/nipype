@@ -20,8 +20,7 @@ def test_GaussianBlurImageFilter_inputs():
     ),
     sigma=dict(argstr='--sigma %f',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GaussianBlurImageFilter.input_spec()
