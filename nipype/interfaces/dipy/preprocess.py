@@ -222,6 +222,8 @@ def nlmeans_proxy(in_file, settings,
     """
     package_check('dipy', version='0.8.0.dev')
     from dipy.denoise.nlmeans import nlmeans
+    from scipy.ndimage.morphology import binary_erosion
+    from scipy import ndimage
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -235,24 +237,42 @@ def nlmeans_proxy(in_file, settings,
     data = img.get_data()
     aff = img.get_affine()
 
-    if data.ndims < 4:
+    if data.ndim < 4:
         data = data[..., np.newaxis]
     b0 = data[..., 0]
 
     if smask is None:
         smask = np.zeros_like(b0)
-        smask[b0 > np.percentile(b0, 0.85)] = 1
+        smask[b0 > np.percentile(b0, 85.)] = 1
+
+    smask = binary_erosion(smask.astype(np.uint8), iterations=2).astype(np.uint8)
 
     if nmask is None:
-        nmask = np.zeros_like(b0)
-        try:
-            bmask = settings['mask']
-            nmask[~bmask] = 1
-        except AttributeError:
-            nmask[b0 < np.percentile(b0, 0.15)] = 1
+        nmask = np.ones_like(b0, dtype=np.uint8)
+        bmask = settings['mask']
+        if bmask is None:
+            bmask = np.zeros_like(b0)
+            bmask[b0 > np.percentile(b0, 55)] = 1
+            label_im, nb_labels = ndimage.label(bmask)
+            sizes = ndimage.sum(bmask, label_im, range(nb_labels + 1))
+            maxidx = np.argmax(sizes)
+            bmask = np.zeros_like(b0, dtype=np.uint8)
+            bmask[label_im == maxidx] = 1
+
+        nb.Nifti1Image(bmask, aff,
+                       None).to_filename('bmask.nii.gz')
+        nmask[bmask > 0] = 0
     else:
         nmask = np.squeeze(nmask)
-        nmask[nmask > 0] = 1
+        nmask[nmask > 0.0] = 1
+        nmask[nmask < 1] = 0
+        nmask = nmask.astype(bool)
+
+    nmask = binary_erosion(nmask, iterations=1).astype(np.uint8)
+
+    nb.Nifti1Image(smask.astype(np.uint8), aff,
+                   None).to_filename('smask.nii.gz')
+
 
     den = np.zeros_like(data)
     snr = []
