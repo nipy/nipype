@@ -223,7 +223,7 @@ class LaplacianThickness(ANTSCommand):
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--image-dimension %d',
+    dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input-image %s', mandatory=True,
@@ -237,8 +237,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
     bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence %s",
-                               requires=['convergence_threshold'])
+    n_iterations = traits.List(traits.Int(), argstr="--convergence %s")
     convergence_threshold = traits.Float(requires=['n_iterations'])
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
