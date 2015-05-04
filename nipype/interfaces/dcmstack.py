@@ -1,4 +1,4 @@
-"""Provides interfaces to various commands provided by FreeSurfer
+"""Provides interfaces to various commands provided by dcmstack
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -56,7 +56,7 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
 
 class NiftiGeneratorBase(BaseInterface):
     '''Base class for interfaces that produce Nifti files, potentially with
-    embeded meta data.'''
+    embedded meta data.'''
     def _get_out_path(self, meta, idx=None):
         '''Return the output path for the gernerated Nifti.'''
         if self.inputs.out_format:
@@ -215,7 +215,7 @@ class LookupMetaInputSpec(TraitedSpec):
 
 
 class LookupMeta(BaseInterface):
-    '''Lookup meta data values from a Nifti with embeded meta data.
+    '''Lookup meta data values from a Nifti with embedded meta data.
 
     Example
     -------
