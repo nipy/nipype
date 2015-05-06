@@ -104,6 +104,7 @@ class DenoiseInputSpec(TraitedSpec):
                             'will be computed'), exists=True)
     patch_radius = traits.Int(1, desc='patch radius')
     block_radius = traits.Int(5, desc='block_radius')
+    snr = traits.Float(desc='manually set an SNR')
 
 
 class DenoiseOutputSpec(TraitedSpec):
@@ -239,28 +240,37 @@ def nlmeans_proxy(in_file, settings,
 
     if data.ndim < 4:
         data = data[..., np.newaxis]
+
+    data = np.nan_to_num(data)
+
+    if data.max() < 1.0e-4:
+        raise RuntimeError('There is no signal in the image')
+
+    df = 1.0
+    if data.max() < 1000.0:
+        df = 1000. / data.max()
+        data *= df
+
     b0 = data[..., 0]
 
     if smask is None:
         smask = np.zeros_like(b0)
         smask[b0 > np.percentile(b0, 85.)] = 1
 
-    smask = binary_erosion(smask.astype(np.uint8), iterations=2).astype(np.uint8)
+    smask = binary_erosion(
+        smask.astype(np.uint8), iterations=2).astype(np.uint8)
 
     if nmask is None:
         nmask = np.ones_like(b0, dtype=np.uint8)
         bmask = settings['mask']
         if bmask is None:
             bmask = np.zeros_like(b0)
-            bmask[b0 > np.percentile(b0, 55)] = 1
+            bmask[b0 > np.percentile(b0[b0 > 0], 10)] = 1
             label_im, nb_labels = ndimage.label(bmask)
             sizes = ndimage.sum(bmask, label_im, range(nb_labels + 1))
             maxidx = np.argmax(sizes)
             bmask = np.zeros_like(b0, dtype=np.uint8)
             bmask[label_im == maxidx] = 1
-
-        nb.Nifti1Image(bmask, aff,
-                       None).to_filename('bmask.nii.gz')
         nmask[bmask > 0] = 0
     else:
         nmask = np.squeeze(nmask)
@@ -270,20 +280,26 @@ def nlmeans_proxy(in_file, settings,
 
     nmask = binary_erosion(nmask, iterations=1).astype(np.uint8)
 
-    nb.Nifti1Image(smask.astype(np.uint8), aff,
-                   None).to_filename('smask.nii.gz')
-
-
     den = np.zeros_like(data)
     snr = []
+
+    est_snr = True
+    if isdefined(self.inputs.snr):
+        snr = [self.inputs.snr] * data.shape[-1]
+        est_snr = False
+
     for i in range(data.shape[-1]):
         d = data[..., i]
-        s = np.mean(d[smask > 0])
-        n = np.std(d[nmask > 0])
-        snr.append(s/n)
-        den[..., i] = nlmeans(d, s/n, **settings)
+        if est_snr:
+            s = np.mean(d[smask > 0])
+            n = np.std(d[nmask > 0])
+            snr.append(s / n)
+
+        den[..., i] = nlmeans(d, snr[i], **settings)
 
     den = np.squeeze(den)
+    den /= df
+
     nb.Nifti1Image(den.astype(hdr.get_data_dtype()), aff,
                    hdr).to_filename(out_file)
     return out_file, snr
