@@ -150,6 +150,10 @@ class Denoise(BaseInterface):
         if isdefined(self.inputs.block_radius):
             settings['block_radius'] = self.inputs.block_radius
 
+        snr = None
+        if isdefined(self.inputs.snr):
+            snr = self.inputs.snr
+
         signal_mask = None
         if isdefined(self.inputs.signal_mask):
             signal_mask = nb.load(self.inputs.signal_mask).get_data()
@@ -158,6 +162,7 @@ class Denoise(BaseInterface):
             noise_mask = nb.load(self.inputs.noise_mask).get_data()
 
         _, s = nlmeans_proxy(self.inputs.in_file, settings,
+                             snr=snr,
                              smask=signal_mask,
                              nmask=noise_mask,
                              out_file=out_file)
@@ -215,6 +220,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
 
 
 def nlmeans_proxy(in_file, settings,
+                  snr=None,
                   smask=None,
                   nmask=None,
                   out_file=None):
@@ -281,12 +287,13 @@ def nlmeans_proxy(in_file, settings,
     nmask = binary_erosion(nmask, iterations=1).astype(np.uint8)
 
     den = np.zeros_like(data)
-    snr = []
 
     est_snr = True
-    if isdefined(self.inputs.snr):
+    if snr is not None:
         snr = [self.inputs.snr] * data.shape[-1]
         est_snr = False
+    else:
+        snr = []
 
     for i in range(data.shape[-1]):
         d = data[..., i]
