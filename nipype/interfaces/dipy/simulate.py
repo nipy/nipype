@@ -110,7 +110,7 @@ class SimulateMultiTensor(BaseInterface):
         total_vf = np.sum(vfs, axis=3)
 
         msk = np.zeros(shape, dtype=np.uint8)
-        msk[(total_vf > 0.0) & (total_ff > 0.0)] = 1
+        msk[(total_vf > 0.0)] = 1
 
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
