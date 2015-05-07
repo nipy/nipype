@@ -153,8 +153,8 @@ class StreamlineTractography(BaseInterface):
         from dipy.reconst.peaks import peaks_from_model
         from dipy.tracking.eudx import EuDX
         from dipy.data import get_sphere
-        import marshal as pickle
-        # import cPickle as pickle
+        # import marshal as pickle
+        import cPickle as pickle
         import gzip
 
         if (not (isdefined(self.inputs.in_model) or

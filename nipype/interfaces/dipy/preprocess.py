@@ -290,7 +290,7 @@ def nlmeans_proxy(in_file, settings,
 
     est_snr = True
     if snr is not None:
-        snr = [self.inputs.snr] * data.shape[-1]
+        snr = [snr] * data.shape[-1]
         est_snr = False
     else:
         snr = []

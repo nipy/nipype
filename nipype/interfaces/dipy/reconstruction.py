@@ -316,8 +316,8 @@ class CSD(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel
         from dipy.data import get_sphere
-        import marshal as pickle
-        # import cPickle as pickle
+        # import marshal as pickle
+        import cPickle as pickle
         import gzip
 
         img = nb.load(self.inputs.in_file)
