@@ -40,7 +40,8 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     in_frac = InputMultiPath(File(exists=True), mandatory=True,
                              desc=('volume fraction of each fiber'))
     in_vfms = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='volume fraction map')
+                             desc=('volume fractions of isotropic '
+                                   'compartiments'))
     in_mask = File(exists=True, desc='mask to simulate data')
 
     n_proc = traits.Int(0, usedefault=True, desc='number of processes')
@@ -60,7 +61,7 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
                     desc='file with the mask simulated')
     out_bvec = File('bvec.sim', usedefault=True, desc='simulated b vectors')
     out_bval = File('bval.sim', usedefault=True, desc='simulated b values')
-    snr = traits.Int(30, usedefault=True, desc='signal-to-noise ratio (dB)')
+    snr = traits.Int(0, usedefault=True, desc='signal-to-noise ratio (dB)')
 
 
 class SimulateMultiTensorOutputSpec(TraitedSpec):
@@ -100,22 +101,32 @@ class SimulateMultiTensor(BaseInterface):
         shape = b0_im.get_shape()
         aff = b0_im.get_affine()
 
+        # Check and load sticks and their volume fractions
+        nsticks = len(self.inputs.in_dirs)
+        if len(self.inputs.in_frac) != nsticks:
+            raise RuntimeError(('Number of sticks and their volume fractions'
+                                ' must match.'))
+
         ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
         ffs = np.squeeze(ffsim.get_data())  # fiber fractions
+        if nsticks == 1:
+            ffs = ffs[..., np.newaxis]
 
+        # Volume fractions of isotropic compartiments
         vfsim = nb.concat_images([nb.load(f) for f in self.inputs.in_vfms])
         vfs = np.squeeze(vfsim.get_data())  # volume fractions
 
         total_ff = np.sum(ffs, axis=3)
         total_vf = np.sum(vfs, axis=3)
 
-        msk = np.zeros(shape, dtype=np.uint8)
-        msk[(total_vf > 0.0)] = 1
-
+        # Generate a mask
         if isdefined(self.inputs.in_mask):
             msk = nb.load(self.inputs.in_mask).get_data()
             msk[msk > 0.0] = 1.0
             msk[msk < 1.0] = 0.0
+        else:
+            msk = np.zeros(shape, dtype=np.uint8)
+            msk[total_vf > 0.0] = 1
 
         mhdr = hdr.copy()
         mhdr.set_data_dtype(np.uint8)
@@ -123,14 +134,13 @@ class SimulateMultiTensor(BaseInterface):
         nb.Nifti1Image(msk, aff, mhdr).to_filename(
             op.abspath(self.inputs.out_mask))
 
+        # Initialize stack of args
         args = np.hstack((vfs[msk > 0], ffs[msk > 0]))
 
+        # Stack directions
         for f in self.inputs.in_dirs:
             fd = nb.load(f).get_data()
             args = np.hstack((args, fd[msk > 0]))
-
-        b0 = np.array([b0_im.get_data()[msk > 0]]).T
-        args = np.hstack((args, b0))
 
         if isdefined(self.inputs.in_bval) and isdefined(self.inputs.in_bvec):
             # Load the gradient strengths and directions
@@ -147,7 +157,7 @@ class SimulateMultiTensor(BaseInterface):
         np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
 
         snr = self.inputs.snr
-        args = [tuple(np.hstack((r, gtab, snr))) for r in args]
+        args = [tuple([nsticks, gtab, snr] + r.tolist()) for r in args]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -160,11 +170,21 @@ class SimulateMultiTensor(BaseInterface):
 
         iflogger.info(('Starting simulation of %d voxels, %d diffusion'
                        ' directions.') % (len(args), len(gtab.bvals)))
-        result = pool.map(_compute_voxel, args)
-        ndirs = np.shape(result)[1]
+
+        result = np.array(pool.map(_compute_voxel, args))
+
+        ndirs = len(gtab.bvals)
+        if np.shape(result)[1] != ndirs:
+            raise RuntimeError(('Computed directions do not match number'
+                                'of b-values.'))
 
         simulated = np.zeros((shape[0], shape[1], shape[2], ndirs))
         simulated[msk > 0] = result
+
+        # S0
+        b0 = b0_im.get_data()
+        for i in xrange(ndirs):
+            simulated[..., i] *= b0
 
         simhdr = hdr.copy()
         simhdr.set_data_dtype(np.float32)
@@ -202,42 +222,41 @@ def _compute_voxel(args):
     D_ball = [3000e-6, 960e-6, 680e-6]
     sf_evals = [1700e-6, 200e-6, 200e-6]
 
-    vfs = [args[0], args[1], args[2]]
-    ffs = [args[3], args[4], args[5]]  # single fiber fractions
-    sticks = [(args[6], args[7], args[8]),
-              (args[8], args[10], args[11]),
-              (args[12], args[13], args[14])]
+    nf = args[0]  # number of fibers
+    gtab = args[1]  # gradient table
+    snr = args[2]
+    vfs = args[3:6]
 
-    S0 = args[15]
-    gtab = args[16]
+    vfs = (np.array(vfs) / np.sum(vfs))
 
-    nf = len(ffs)
+    sst = 6 + nf
+    ffs = args[6:sst]  # single fiber fractions
+
+    sticks = [tuple(args[sst + i * 3:sst + 3 + i * 3])
+              for i in range(0, nf)]
+
     mevals = [sf_evals] * nf
     sf_vf = np.sum(ffs)
-    ffs = ((np.array(ffs) / sf_vf) * 100)
 
     # Simulate sticks
-    signal, _ = multi_tensor(gtab, np.array(mevals), S0=1,
-                             angles=sticks, fractions=ffs, snr=None)
-    signal *= sf_vf
+    if sf_vf > 1.0e-3:
+        ffs = ((np.array(ffs) / sf_vf) * 100)
+        signal, _ = multi_tensor(gtab, np.array(mevals), S0=1.0,
+                                 angles=sticks, fractions=ffs, snr=None)
+    else:
+        signal = np.zeros_like(gtab.bvals, dtype=np.float32)
+
+    signal *= vfs[2] * sf_vf
 
     # Simulate balls
-    r = 1.0 - sf_vf
-    if r > 1.0e-3:
-        for vf, d in zip(vfs, D_ball):
-            f0 = vf * r
-            signal += f0 * np.exp(-gtab.bvals * d)
+    vfs[2] *= (1 - sf_vf)
+    for f0, d in zip(vfs, D_ball):
+        signal += f0 * np.exp(-gtab.bvals * d)
 
-    snr = None
-    try:
-        snr = args[17]
-    except IndexError:
-        pass
+    if snr > 0:
+        signal = add_noise(signal, snr, 1)
 
-    if snr is not None and snr >= 0:
-        signal[1:] = add_noise(signal[1:], snr, 1)
-
-    return signal * S0
+    return signal.tolist()
 
 
 def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
