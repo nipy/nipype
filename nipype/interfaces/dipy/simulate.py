@@ -109,15 +109,41 @@ class SimulateMultiTensor(BaseInterface):
 
         ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
         ffs = np.squeeze(ffsim.get_data())  # fiber fractions
+        ffs[ffs > 1.0] = 1.0
+        ffs[ffs < 0.0] = 0.0
+
         if nsticks == 1:
             ffs = ffs[..., np.newaxis]
+
+        total_ff = np.sum(ffs, axis=3)
+
+        # Fix incongruencies in fiber fractions
+        for i in range(1, nsticks):
+            if np.any(total_ff > 1.0):
+                errors = np.zeros_like(total_ff)
+                errors[total_ff > 1.0] = total_ff[total_ff > 1.0] - 1.0
+                ffs[..., i] -= errors
+                ffs[ffs < 0.0] = 0.0
+            total_ff = np.sum(ffs, axis=3)
 
         # Volume fractions of isotropic compartiments
         vfsim = nb.concat_images([nb.load(f) for f in self.inputs.in_vfms])
         vfs = np.squeeze(vfsim.get_data())  # volume fractions
 
-        total_ff = np.sum(ffs, axis=3)
+        for i in range(vfs.shape[-1]):
+            vfs[..., i] -= total_ff
+        vfs[vfs < 0.0] = 0
         total_vf = np.sum(vfs, axis=3)
+
+        newhdr = hdr.copy()
+        newhdr.set_data_dtype(np.float32)
+        for i in range(vfs.shape[-1]):
+            nb.Nifti1Image(vfs[..., i].astype(np.float32), aff,
+                           newhdr).to_filename('vf_iso%02d.nii.gz' % i)
+
+        for i in range(ffs.shape[-1]):
+            nb.Nifti1Image(ffs[..., i].astype(np.float32), aff,
+                           newhdr).to_filename('vf_ani%02d.nii.gz' % i)
 
         # Generate a mask
         if isdefined(self.inputs.in_mask):
@@ -135,7 +161,7 @@ class SimulateMultiTensor(BaseInterface):
             op.abspath(self.inputs.out_mask))
 
         # Initialize stack of args
-        args = np.hstack((vfs[msk > 0], ffs[msk > 0]))
+        args = ffs[msk > 0].copy()
 
         # Stack directions
         for f in self.inputs.in_dirs:
@@ -157,7 +183,7 @@ class SimulateMultiTensor(BaseInterface):
         np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
 
         snr = self.inputs.snr
-        args = [tuple([nsticks, gtab, snr] + r.tolist()) for r in args]
+        args = [tuple([nsticks, gtab] + r.tolist()) for r in args]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -171,6 +197,7 @@ class SimulateMultiTensor(BaseInterface):
         iflogger.info(('Starting simulation of %d voxels, %d diffusion'
                        ' directions.') % (len(args), len(gtab.bvals)))
 
+        # Simulate sticks using dipy
         result = np.array(pool.map(_compute_voxel, args))
 
         ndirs = len(gtab.bvals)
@@ -178,18 +205,28 @@ class SimulateMultiTensor(BaseInterface):
             raise RuntimeError(('Computed directions do not match number'
                                 'of b-values.'))
 
-        simulated = np.zeros((shape[0], shape[1], shape[2], ndirs))
-        simulated[msk > 0] = result
+        signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
+        signal[msk > 0] = result
+
+        # Simulate balls
+        D_ball = [3000e-6, 960e-6, 680e-6]
+
+        for i in range(ndirs):
+            for f0, d in zip(vfs, D_ball):
+                signal += f0 * np.exp(-gtab.bvals * d)
+
+        if snr > 0:
+            signal[msk > 0] = add_noise(signal[msk > 0], snr, 1)
 
         # S0
         b0 = b0_im.get_data()
         for i in xrange(ndirs):
-            simulated[..., i] *= b0
+            signal[..., i] *= b0
 
         simhdr = hdr.copy()
         simhdr.set_data_dtype(np.float32)
         simhdr.set_xyzt_units('mm', 'sec')
-        nb.Nifti1Image(simulated.astype(np.float32), aff,
+        nb.Nifti1Image(signal.astype(np.float32), aff,
                        simhdr).to_filename(op.abspath(self.inputs.out_file))
 
         return runtime
@@ -219,18 +256,13 @@ def _compute_voxel(args):
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """
-    D_ball = [3000e-6, 960e-6, 680e-6]
     sf_evals = [1700e-6, 200e-6, 200e-6]
 
     nf = args[0]  # number of fibers
     gtab = args[1]  # gradient table
-    snr = args[2]
-    vfs = args[3:6]
 
-    vfs = (np.array(vfs) / np.sum(vfs))
-
-    sst = 6 + nf
-    ffs = args[6:sst]  # single fiber fractions
+    sst = 2 + nf
+    ffs = args[2:sst]  # single fiber fractions
 
     sticks = [tuple(args[sst + i * 3:sst + 3 + i * 3])
               for i in range(0, nf)]
@@ -245,16 +277,6 @@ def _compute_voxel(args):
                                  angles=sticks, fractions=ffs, snr=None)
     else:
         signal = np.zeros_like(gtab.bvals, dtype=np.float32)
-
-    signal *= vfs[2] * sf_vf
-
-    # Simulate balls
-    vfs[2] *= (1 - sf_vf)
-    for f0, d in zip(vfs, D_ball):
-        signal += f0 * np.exp(-gtab.bvals * d)
-
-    if snr > 0:
-        signal = add_noise(signal, snr, 1)
 
     return signal.tolist()
 
