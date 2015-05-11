@@ -44,6 +44,14 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
                                    'compartiments'))
     in_mask = File(exists=True, desc='mask to simulate data')
 
+    diff_iso = traits.List(
+        traits.Float, default=[3000e-6, 960e-6, 680e-6], usedefault=True,
+        desc='Diffusivity of isotropic compartments')
+    diff_sf = traits.Tuple(
+        traits.Float, traits.Float, traits.Float,
+        default=(1700e-6, 200e-6, 200e-6), usedefault=True,
+        desc='Single fiber tensor')
+
     n_proc = traits.Int(0, usedefault=True, desc='number of processes')
     baseline = File(exists=True, mandatory=True, desc='baseline T2 signal')
     gradients = File(exists=True, desc='gradients file')
@@ -129,21 +137,15 @@ class SimulateMultiTensor(BaseInterface):
         # Volume fractions of isotropic compartiments
         vfsim = nb.concat_images([nb.load(f) for f in self.inputs.in_vfms])
         vfs = np.squeeze(vfsim.get_data())  # volume fractions
+        total_vf = np.sum(vfs, axis=3)
 
         for i in range(vfs.shape[-1]):
             vfs[..., i] -= total_ff
+
         vfs[vfs < 0.0] = 0
-        total_vf = np.sum(vfs, axis=3)
 
         newhdr = hdr.copy()
         newhdr.set_data_dtype(np.float32)
-        for i in range(vfs.shape[-1]):
-            nb.Nifti1Image(vfs[..., i].astype(np.float32), aff,
-                           newhdr).to_filename('vf_iso%02d.nii.gz' % i)
-
-        for i in range(ffs.shape[-1]):
-            nb.Nifti1Image(ffs[..., i].astype(np.float32), aff,
-                           newhdr).to_filename('vf_ani%02d.nii.gz' % i)
 
         # Generate a mask
         if isdefined(self.inputs.in_mask):
@@ -183,7 +185,8 @@ class SimulateMultiTensor(BaseInterface):
         np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
 
         snr = self.inputs.snr
-        args = [tuple([nsticks, gtab] + r.tolist()) for r in args]
+        sf_evals = list(self.inputs.diff_sf)
+        args = [tuple([nsticks, gtab] + sf_evals + r.tolist()) for r in args]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -194,26 +197,27 @@ class SimulateMultiTensor(BaseInterface):
         except TypeError:
             pool = Pool(processes=n_proc)
 
+        ndirs = len(gtab.bvals)
         iflogger.info(('Starting simulation of %d voxels, %d diffusion'
-                       ' directions.') % (len(args), len(gtab.bvals)))
+                       ' directions.') % (len(args), ndirs))
+
+        signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
+
+        # Simulate balls
+        for i, d in enumerate(self.inputs.diff_iso):
+            f0 = vfs[..., i]
+            comp = f0[..., np.newaxis] * np.exp(-gtab.bvals * d)
+            signal += f0[..., np.newaxis] * np.exp(-gtab.bvals * d)
 
         # Simulate sticks using dipy
         result = np.array(pool.map(_compute_voxel, args))
-
-        ndirs = len(gtab.bvals)
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'
                                 'of b-values.'))
+        fibers = np.zeros((shape[0], shape[1], shape[2], ndirs))
+        fibers[msk > 0] += result
 
-        signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
-        signal[msk > 0] = result
-
-        # Simulate balls
-        D_ball = [3000e-6, 960e-6, 680e-6]
-
-        for i in range(ndirs):
-            for f0, d in zip(vfs, D_ball):
-                signal += f0 * np.exp(-gtab.bvals * d)
+        signal += total_ff[..., np.newaxis] * fibers
 
         if snr > 0:
             signal[msk > 0] = add_noise(signal[msk > 0], snr, 1)
@@ -256,13 +260,12 @@ def _compute_voxel(args):
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """
-    sf_evals = [1700e-6, 200e-6, 200e-6]
-
     nf = args[0]  # number of fibers
     gtab = args[1]  # gradient table
+    sf_evals = args[2:5]  # single fiber eigenvalues
 
-    sst = 2 + nf
-    ffs = args[2:sst]  # single fiber fractions
+    sst = 5 + nf
+    ffs = args[5:sst]  # single fiber fractions
 
     sticks = [tuple(args[sst + i * 3:sst + 3 + i * 3])
               for i in range(0, nf)]
