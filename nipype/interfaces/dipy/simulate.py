@@ -103,6 +103,19 @@ class SimulateMultiTensor(BaseInterface):
     output_spec = SimulateMultiTensorOutputSpec
 
     def _run_interface(self, runtime):
+        # Gradient table
+        if isdefined(self.inputs.in_bval) and isdefined(self.inputs.in_bvec):
+            # Load the gradient strengths and directions
+            bvals = np.loadtxt(self.inputs.in_bval)
+            bvecs = np.loadtxt(self.inputs.in_bvec).T
+            gtab = gradient_table(bvals, bvecs)
+        else:
+            gtab = _generate_gradients(self.inputs.num_dirs,
+                                       self.inputs.bvalues)
+        ndirs = len(gtab.bvals)
+        np.savetxt(op.abspath(self.inputs.out_bvec), gtab.bvecs.T)
+        np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
+
         # Load the baseline b0 signal
         b0_im = nb.load(self.inputs.baseline)
         hdr = b0_im.get_header()
@@ -135,17 +148,20 @@ class SimulateMultiTensor(BaseInterface):
             total_ff = np.sum(ffs, axis=3)
 
         # Volume fractions of isotropic compartiments
-        vfsim = nb.concat_images([nb.load(f) for f in self.inputs.in_vfms])
-        vfs = np.squeeze(vfsim.get_data())  # volume fractions
-        total_vf = np.sum(vfs, axis=3)
+        nballs = len(self.inputs.in_vfms)
+        vfs = np.squeeze(nb.concat_images([nb.load(f) for f in self.inputs.in_vfms]).get_data())
+        if nsticks == 1:
+            vfs = vfs[..., np.newaxis]        
+        
 
         for i in range(vfs.shape[-1]):
             vfs[..., i] -= total_ff
-
         vfs[vfs < 0.0] = 0
 
-        newhdr = hdr.copy()
-        newhdr.set_data_dtype(np.float32)
+        fractions = np.concatenate((ffs, vfs), axis=3)
+        total_vf = np.sum(fractions, axis=3)
+        nb.Nifti1Image(fractions, aff, None).to_filename('fractions.nii.gz')
+        nb.Nifti1Image(total_vf, aff, None).to_filename('total_vf.nii.gz')
 
         # Generate a mask
         if isdefined(self.inputs.in_mask):
@@ -156,6 +172,8 @@ class SimulateMultiTensor(BaseInterface):
             msk = np.zeros(shape, dtype=np.uint8)
             msk[total_vf > 0.0] = 1
 
+        nvox = len(mask[mask > 0])
+
         mhdr = hdr.copy()
         mhdr.set_data_dtype(np.uint8)
         mhdr.set_xyzt_units('mm', 'sec')
@@ -163,30 +181,31 @@ class SimulateMultiTensor(BaseInterface):
             op.abspath(self.inputs.out_mask))
 
         # Initialize stack of args
-        args = ffs[msk > 0].copy()
+        fracs = fractions[msk > 0]
 
         # Stack directions
+        dirs = None
         for f in self.inputs.in_dirs:
             fd = nb.load(f).get_data()
-            args = np.hstack((args, fd[msk > 0]))
+            if dirs is None:
+                dirs = fd[msk > 0].copy()
+            else:
+                dirs = np.hstack((dirs, fd[msk > 0]))
 
-        if isdefined(self.inputs.in_bval) and isdefined(self.inputs.in_bvec):
-            # Load the gradient strengths and directions
-            bvals = np.loadtxt(self.inputs.in_bval)
-            bvecs = np.loadtxt(self.inputs.in_bvec).T
 
-            # Place in Dipy's preferred format
-            gtab = gradient_table(bvals, bvecs)
-        else:
-            gtab = _generate_gradients(self.inputs.num_dirs,
-                                       self.inputs.bvalues)
-
-        np.savetxt(op.abspath(self.inputs.out_bvec), gtab.bvecs.T)
-        np.savetxt(op.abspath(self.inputs.out_bval), gtab.bvals)
-
-        snr = self.inputs.snr
         sf_evals = list(self.inputs.diff_sf)
-        args = [tuple([nsticks, gtab] + sf_evals + r.tolist()) for r in args]
+        ba_evals = self.inputs.diff_iso
+
+        args = []
+        for i in range(nvox):
+            args.append(
+                {'fractions': fracs[i, ...].tolist(),
+                 'sticks': [(1.0, 0.0, 0.0)] * nballs + dirs[i, ...].tolist(),
+                 'gradients': gtab,
+                 'mevals': [[ba_evals[d]*3] for d in range(nballs)] + [sf_evals] * nsticks
+                })
+
+        print args[:5]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -197,30 +216,20 @@ class SimulateMultiTensor(BaseInterface):
         except TypeError:
             pool = Pool(processes=n_proc)
 
-        ndirs = len(gtab.bvals)
-        iflogger.info(('Starting simulation of %d voxels, %d diffusion'
-                       ' directions.') % (len(args), ndirs))
-
-        signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
-
-        # Simulate balls
-        for i, d in enumerate(self.inputs.diff_iso):
-            f0 = vfs[..., i]
-            comp = f0[..., np.newaxis] * np.exp(-gtab.bvals * d)
-            signal += f0[..., np.newaxis] * np.exp(-gtab.bvals * d)
-
         # Simulate sticks using dipy
+        iflogger.info(('Starting simulation of %d voxels, %d diffusion'
+               ' directions.') % (len(args), ndirs))
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'
                                 'of b-values.'))
-        fibers = np.zeros((shape[0], shape[1], shape[2], ndirs))
-        fibers[msk > 0] += result
 
-        signal += total_ff[..., np.newaxis] * fibers
+        signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
+        signal[msk > 0] += result
 
-        if snr > 0:
-            signal[msk > 0] = add_noise(signal[msk > 0], snr, 1)
+        # Add noise
+        if self.inputs.snr > 0:
+            signal[msk > 0] = add_noise(signal[msk > 0], self.inputs.snr, 1)
 
         # S0
         b0 = b0_im.get_data()
@@ -260,24 +269,19 @@ def _compute_voxel(args):
     .. [Pierpaoli1996] Pierpaoli et al., Diffusion tensor MR imaging
       of the human brain, Radiology 201:637-648. 1996.
     """
-    nf = args[0]  # number of fibers
-    gtab = args[1]  # gradient table
-    sf_evals = args[2:5]  # single fiber eigenvalues
 
-    sst = 5 + nf
-    ffs = args[5:sst]  # single fiber fractions
+    ffs = args['fractions']
+    gtab = args['gradients']
 
-    sticks = [tuple(args[sst + i * 3:sst + 3 + i * 3])
-              for i in range(0, nf)]
-
-    mevals = [sf_evals] * nf
     sf_vf = np.sum(ffs)
 
     # Simulate sticks
     if sf_vf > 1.0e-3:
         ffs = ((np.array(ffs) / sf_vf) * 100)
-        signal, _ = multi_tensor(gtab, np.array(mevals), S0=1.0,
-                                 angles=sticks, fractions=ffs, snr=None)
+        signal, _ = multi_tensor(gtab, args['mevals'], S0=1.0,
+                                 angles=args['sticks'],
+                                 fractions=ffs,
+                                 snr=None)
     else:
         signal = np.zeros_like(gtab.bvals, dtype=np.float32)
 
