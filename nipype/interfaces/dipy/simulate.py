@@ -45,11 +45,11 @@ class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
     in_mask = File(exists=True, desc='mask to simulate data')
 
     diff_iso = traits.List(
-        traits.Float, default=[3000e-6, 960e-6, 680e-6], usedefault=True,
+        [3000e-6, 960e-6, 680e-6], traits.Float, usedefault=True,
         desc='Diffusivity of isotropic compartments')
     diff_sf = traits.Tuple(
-        traits.Float, traits.Float, traits.Float,
-        default=(1700e-6, 200e-6, 200e-6), usedefault=True,
+        (1700e-6, 200e-6, 200e-6),
+        traits.Float, traits.Float, traits.Float, usedefault=True,
         desc='Single fiber tensor')
 
     n_proc = traits.Int(0, usedefault=True, desc='number of processes')
@@ -128,13 +128,34 @@ class SimulateMultiTensor(BaseInterface):
             raise RuntimeError(('Number of sticks and their volume fractions'
                                 ' must match.'))
 
-        ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
-        ffs = np.squeeze(ffsim.get_data())  # fiber fractions
-        ffs[ffs > 1.0] = 1.0
-        ffs[ffs < 0.0] = 0.0
+        # Volume fractions of isotropic compartments
+        nballs = len(self.inputs.in_vfms)
+        vfs = np.squeeze(nb.concat_images([nb.load(f) for f in self.inputs.in_vfms]).get_data())
+        if nballs == 1:
+            vfs = vfs[..., np.newaxis]
+        total_vf = np.sum(vfs, axis=3)
 
+        # Generate a mask
+        if isdefined(self.inputs.in_mask):
+            msk = nb.load(self.inputs.in_mask).get_data()
+            msk[msk > 0.0] = 1.0
+            msk[msk < 1.0] = 0.0
+        else:
+            msk = np.zeros(shape)
+            msk[total_vf > 0.0] = 1.0
+
+        msk = np.clip(msk, 0.0, 1.0)
+        nvox = len(msk[msk > 0])
+
+        # Fiber fractions
+        ffsim = nb.concat_images([nb.load(f) for f in self.inputs.in_frac])
+        ffs = np.nan_to_num(np.squeeze(ffsim.get_data()))  # fiber fractions
+        ffs = np.clip(ffs, 0., 1.)
         if nsticks == 1:
             ffs = ffs[..., np.newaxis]
+
+        for i in range(nsticks):
+            ffs[..., i] *= msk
 
         total_ff = np.sum(ffs, axis=3)
 
@@ -147,32 +168,13 @@ class SimulateMultiTensor(BaseInterface):
                 ffs[ffs < 0.0] = 0.0
             total_ff = np.sum(ffs, axis=3)
 
-        # Volume fractions of isotropic compartiments
-        nballs = len(self.inputs.in_vfms)
-        vfs = np.squeeze(nb.concat_images([nb.load(f) for f in self.inputs.in_vfms]).get_data())
-        if nsticks == 1:
-            vfs = vfs[..., np.newaxis]        
-        
-
         for i in range(vfs.shape[-1]):
             vfs[..., i] -= total_ff
-        vfs[vfs < 0.0] = 0
+        vfs = np.clip(vfs, 0., 1.)
 
         fractions = np.concatenate((ffs, vfs), axis=3)
-        total_vf = np.sum(fractions, axis=3)
         nb.Nifti1Image(fractions, aff, None).to_filename('fractions.nii.gz')
         nb.Nifti1Image(total_vf, aff, None).to_filename('total_vf.nii.gz')
-
-        # Generate a mask
-        if isdefined(self.inputs.in_mask):
-            msk = nb.load(self.inputs.in_mask).get_data()
-            msk[msk > 0.0] = 1.0
-            msk[msk < 1.0] = 0.0
-        else:
-            msk = np.zeros(shape, dtype=np.uint8)
-            msk[total_vf > 0.0] = 1
-
-        nvox = len(mask[mask > 0])
 
         mhdr = hdr.copy()
         mhdr.set_data_dtype(np.uint8)
@@ -194,18 +196,17 @@ class SimulateMultiTensor(BaseInterface):
 
 
         sf_evals = list(self.inputs.diff_sf)
-        ba_evals = self.inputs.diff_iso
+        ba_evals = list(self.inputs.diff_iso)
 
+        mevals = [sf_evals] * nsticks + [[ba_evals[d]]*3 for d in range(nballs)]
         args = []
         for i in range(nvox):
             args.append(
                 {'fractions': fracs[i, ...].tolist(),
-                 'sticks': [(1.0, 0.0, 0.0)] * nballs + dirs[i, ...].tolist(),
+                 'sticks': [tuple(dirs[i, j:j+3]) for j in range(nsticks)] + [(1.0, 0.0, 0.0)] * nballs,
                  'gradients': gtab,
-                 'mevals': [[ba_evals[d]*3] for d in range(nballs)] + [sf_evals] * nsticks
+                 'mevals': mevals
                 })
-
-        print args[:5]
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
