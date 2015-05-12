@@ -130,7 +130,8 @@ class SimulateMultiTensor(BaseInterface):
 
         # Volume fractions of isotropic compartments
         nballs = len(self.inputs.in_vfms)
-        vfs = np.squeeze(nb.concat_images([nb.load(f) for f in self.inputs.in_vfms]).get_data())
+        vfs = np.squeeze(nb.concat_images(
+            [nb.load(f) for f in self.inputs.in_vfms]).get_data())
         if nballs == 1:
             vfs = vfs[..., np.newaxis]
         total_vf = np.sum(vfs, axis=3)
@@ -194,19 +195,25 @@ class SimulateMultiTensor(BaseInterface):
             else:
                 dirs = np.hstack((dirs, fd[msk > 0]))
 
-
         sf_evals = list(self.inputs.diff_sf)
         ba_evals = list(self.inputs.diff_iso)
 
-        mevals = [sf_evals] * nsticks + [[ba_evals[d]]*3 for d in range(nballs)]
+        mevals = [sf_evals] * nsticks + \
+            [[ba_evals[d]] * 3 for d in range(nballs)]
+        ba_sticks = [(1.0, 0.0, 0.0)] * nballs
+        b0 = b0_im.get_data()[msk > 0]
+
         args = []
         for i in range(nvox):
             args.append(
                 {'fractions': fracs[i, ...].tolist(),
-                 'sticks': [tuple(dirs[i, j:j+3]) for j in range(nsticks)] + [(1.0, 0.0, 0.0)] * nballs,
+                 'sticks': [tuple(dirs[i, j:j + 3])
+                            for j in range(nsticks)] + ba_sticks,
                  'gradients': gtab,
-                 'mevals': mevals
-                })
+                 'mevals': mevals,
+                 'S0': b0[i],
+                 'snr': self.inputs.snr
+                 })
 
         n_proc = self.inputs.n_proc
         if n_proc == 0:
@@ -219,23 +226,14 @@ class SimulateMultiTensor(BaseInterface):
 
         # Simulate sticks using dipy
         iflogger.info(('Starting simulation of %d voxels, %d diffusion'
-               ' directions.') % (len(args), ndirs))
+                       ' directions.') % (len(args), ndirs))
         result = np.array(pool.map(_compute_voxel, args))
         if np.shape(result)[1] != ndirs:
             raise RuntimeError(('Computed directions do not match number'
                                 'of b-values.'))
 
         signal = np.zeros((shape[0], shape[1], shape[2], ndirs))
-        signal[msk > 0] += result
-
-        # Add noise
-        if self.inputs.snr > 0:
-            signal[msk > 0] = add_noise(signal[msk > 0], self.inputs.snr, 1)
-
-        # S0
-        b0 = b0_im.get_data()
-        for i in xrange(ndirs):
-            signal[..., i] *= b0
+        signal[msk > 0] = result
 
         simhdr = hdr.copy()
         simhdr.set_data_dtype(np.float32)
@@ -279,10 +277,12 @@ def _compute_voxel(args):
     # Simulate sticks
     if sf_vf > 1.0e-3:
         ffs = ((np.array(ffs) / sf_vf) * 100)
-        signal, _ = multi_tensor(gtab, args['mevals'], S0=1.0,
+        snr = args['snr'] if args['snr'] > 0 else None
+        signal, _ = multi_tensor(gtab, args['mevals'],
+                                 S0=args['S0'],
                                  angles=args['sticks'],
                                  fractions=ffs,
-                                 snr=None)
+                                 snr=snr)
     else:
         signal = np.zeros_like(gtab.bvals, dtype=np.float32)
 
