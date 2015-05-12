@@ -271,20 +271,21 @@ def _compute_voxel(args):
 
     ffs = args['fractions']
     gtab = args['gradients']
+    signal = np.zeros_like(gtab.bvals, dtype=np.float32)
 
+    # Simulate dwi signal
     sf_vf = np.sum(ffs)
-
-    # Simulate sticks
-    if sf_vf > 1.0e-3:
+    if sf_vf > 0.0:
         ffs = ((np.array(ffs) / sf_vf) * 100)
         snr = args['snr'] if args['snr'] > 0 else None
-        signal, _ = multi_tensor(gtab, args['mevals'],
-                                 S0=args['S0'],
-                                 angles=args['sticks'],
-                                 fractions=ffs,
-                                 snr=snr)
-    else:
-        signal = np.zeros_like(gtab.bvals, dtype=np.float32)
+
+        try:
+            signal, _ = multi_tensor(
+                gtab, args['mevals'], S0=args['S0'],
+                angles=args['sticks'], fractions=ffs, snr=snr)
+        except Exception as e:
+            pass
+            # iflogger.warn('Exception simulating dwi signal: %s' % e)
 
     return signal.tolist()
 
