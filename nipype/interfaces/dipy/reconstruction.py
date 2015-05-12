@@ -163,14 +163,17 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
         exists=True, desc=('input mask in which we find single fibers'))
     fa_thresh = traits.Float(
         0.7, usedefault=True, desc=('default FA threshold'))
-    save_glyph = traits.Bool(False, usedefault=True,
-                             desc=('save a png file of the response'))
-    response = File(desc=('the output response file'))
+    recursive = traits.Bool(
+        False, usedefault=True,
+        desc='use the recursive response estimator from dipy')
+    response = File(
+        'response.txt', usedefault=True, desc=('the output response file'))
+    out_mask = File('wm_mask.nii.gz', usedefault=True, desc='computed wm mask')
 
 
 class EstimateResponseSHOutputSpec(TraitedSpec):
-    response = File(desc=('the response file'))
-    glyph_file = File(desc='graphical representation of the response')
+    response = File(exists=True, desc=('the response file'))
+    out_mask = File(exists=True, desc=('output wm mask'))
 
 
 class EstimateResponseSH(DipyBaseInterface):
@@ -199,7 +202,8 @@ class EstimateResponseSH(DipyBaseInterface):
 
     def _run_interface(self, runtime):
         from dipy.core.gradients import GradientTable
-        from dipy.reconst.csdeconv import fractional_anisotropy
+        from dipy.reconst.dti import fractional_anisotropy, mean_diffusivity
+        from dipy.reconst.csdeconv import recursive_response
 
         img = nb.load(self.inputs.in_file)
         affine = img.get_affine()
@@ -215,61 +219,46 @@ class EstimateResponseSH(DipyBaseInterface):
         gtab = self._get_gradient_table()
 
         evals = nb.load(self.inputs.in_evals).get_data()
-        FA = fractional_anisotropy(evals)
-        FA[np.isnan(FA)] = 0
-        FA[msk != 1] = 0
+        FA = np.nan_to_num(fractional_anisotropy(evals)) * msk
 
-        indices = np.where(FA > self.inputs.fa_thresh)
+        if not self.inputs.recursive:
+            indices = np.where(FA > self.inputs.fa_thresh)
+            lambdas = evals[indices][:, :2]
+            S0s = data[indices][:, np.nonzero(gtab.b0s_mask)[0]]
+            S0 = np.mean(S0s)
+            l01 = np.mean(lambdas, axis=0)
+            respev = np.array([l01[0], l01[1], l01[1]])
+            response = np.array(respev.tolist() + [S0]).reshape(-1)
 
-        lambdas = evals[indices][:, :2]
-        S0s = data[indices][:, np.nonzero(gtab.b0s_mask)[0]]
-        S0 = np.mean(S0s)
-        l01 = np.mean(lambdas, axis=0)
-        respev = np.array([l01[0], l01[1], l01[1]])
-        response = (respev, S0)
-        ratio = respev[1] / respev[0]
-
-        if abs(ratio - 0.2) > 0.1:
-            iflogger.warn(('Estimated response is not prolate enough. '
-                           'Ratio=%0.3f.') % ratio)
-
-        np.savetxt(self._gen_outname(),
-                   np.array(respev.tolist() + [S0]).reshape(-1))
-
-        if self.inputs.save_glyph:
-            from dipy.viz import fvtk
-            from dipy.data import get_sphere
-            from dipy.sims.voxel import single_tensor_odf
-
-            ren = fvtk.ren()
-            evecs = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]]).T
-            sphere = get_sphere('symmetric724')
-            response_odf = single_tensor_odf(sphere.vertices, respev, evecs)
-            response_actor = fvtk.sphere_funcs(response_odf, sphere)
-            fvtk.add(ren, response_actor)
-            fvtk.record(ren, out_path=self._gen_outname() + '.png',
-                        size=(200, 200))
-            fvtk.rm(ren, response_actor)
-        return runtime
-
-    def _gen_outname(self):
-        if isdefined(self.inputs.response):
-            return self.inputs.response
+            ratio = abs(respev[1] / respev[0])
+            if ratio > 0.25:
+                iflogger.warn(('Estimated response is not prolate enough. '
+                               'Ratio=%0.3f.') % ratio)
         else:
-            fname, fext = op.splitext(op.basename(self.inputs.in_file))
-            if fext == '.gz':
-                fname, fext2 = op.splitext(fname)
-                fext = fext2 + fext
-            return op.abspath(fname) + '_response.txt'
-        return out_file
+            MD = np.nan_to_num(mean_diffusivity(evals)) * msk
+            indices = np.logical_or(
+                FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011)))
+            data = nb.load(self.inputs.in_file).get_data()
+            response = recursive_response(gtab, data, mask=indices, sh_order=8,
+                                          peak_thr=0.01, init_fa=0.08,
+                                          init_trace=0.0021, iter=8,
+                                          convergence=0.001,
+                                          parallel=True)
+
+        np.savetxt(op.abspath(self.inputs.response), response)
+
+        wm_mask = np.zeros_like(FA)
+        wm_mask[indices] = 1
+        nb.Nifti1Image(
+            wm_mask.astype(np.uint8), affine,
+            None).to_filename(op.abspath(self.inputs.out_mask))
+
+        return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['response'] = self._gen_outname()
-
-        if isdefined(self.inputs.save_glyph) and self.inputs.save_glyph:
-            outputs['glyph_file'] = self._gen_outname() + '.png'
-
+        outputs['response'] = op.abspath(self.inputs.response)
+        outputs['out_mask'] = op.abspath(self.inputs.out_mask)
         return outputs
 
 
