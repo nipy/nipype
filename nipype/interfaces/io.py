@@ -1951,7 +1951,7 @@ class JSONFileSink(IOBase):
         if not isdefined(self.inputs.out_file):
             out_file = op.abspath('datasink.json')
         else:
-            out_file = self.inputs.out_file
+            out_file = op.abspath(self.inputs.out_file)
 
         out_dict = self.inputs.in_dict
 
