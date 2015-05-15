@@ -6,7 +6,6 @@
 from copy import deepcopy
 from glob import glob
 import os
-import pickle
 import pwd
 import shutil
 from socket import gethostname
@@ -23,8 +22,6 @@ from ..utils import (nx, dfs_preorder, topological_sort)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
-from nipype.interfaces.utility import Function
-
 
 from ... import logging
 logger = logging.getLogger('workflow')
