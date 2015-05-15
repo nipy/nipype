@@ -552,7 +552,7 @@ class RegTransform(NIFTYREGCommand):
     _suffix = '_reg_transform'
 
     def _find_input(self):
-        inputs = [self.inputs.def_input, self.inputs.disp_input, self.inputs.flow_input, self.inputs.comp_input2, self.inputs.upd_s_form_input2, self.inputs.inv_aff_input, self.inputs.inv_nrr_input, self.inputs.half_input, self.inputs.make_aff_input, self.inputs.aff_2_rig_input, self.inputs.flirt_2_nr_input]
+        inputs = [self.inputs.def_input, self.inputs.disp_input, self.inputs.flow_input, self.inputs.comp_input, self.inputs.comp_input2, self.inputs.upd_s_form_input2, self.inputs.inv_aff_input, self.inputs.inv_nrr_input, self.inputs.half_input, self.inputs.make_aff_input, self.inputs.aff_2_rig_input, self.inputs.flirt_2_nr_input]
         for entry in inputs:
             if isdefined(entry):
                 return entry
