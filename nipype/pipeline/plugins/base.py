@@ -6,7 +6,7 @@
 from copy import deepcopy
 from glob import glob
 import os
-import pwd
+import getpass
 import shutil
 from socket import gethostname
 import sys
@@ -52,7 +52,7 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_value,
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
-    login_name = pwd.getpwuid(os.geteuid())[0]
+    login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
                                         login_name,
                                         name)
