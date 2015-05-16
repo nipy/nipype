@@ -18,7 +18,8 @@ from warnings import warn
 
 from ..external import portalocker
 
-homedir = os.environ['HOME']
+# Get home directory in platform-agnostic way
+homedir = os.path.expanduser('~')
 default_cfg = """
 [logging]
 workflow_level = INFO
