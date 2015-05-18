@@ -45,6 +45,12 @@ class STEPSInputSpec(NIFTYSEGCommandInputSpec):
     out_file = File(argstr='-out %s', genfile=True,
                     desc='Output consensus segmentation')
 
+    prob_flag = traits.Bool(desc='Probabilistic/Fuzzy segmented image',
+                           argstr='-outProb')
+
+    probUpdate_flag = traits.Bool(desc='Update label proportions at each iteration',
+                           argstr='-prop_update')
+
 
 class STEPSOutputSpec(TraitedSpec):
 
