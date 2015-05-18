@@ -83,6 +83,7 @@ class GifOutputSpec(TraitedSpec):
     seg_file = File(desc='Segmentation file')
     brain_file = File(desc='Brain file')
     bias_file = File(desc='Bias Corrected file')
+    synth_file = File(desc='Synthetic file')
 
 class Gif(NIFTYSEGCommand):
 
@@ -151,6 +152,7 @@ class Gif(NIFTYSEGCommand):
         outputs['brain_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Brain.nii.gz')
         outputs['seg_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'Segmentation.nii.gz')
         outputs['bias_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, 'BiasCorrected.nii.gz')
+        outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, '.nii.gz')
 
         return outputs
         
