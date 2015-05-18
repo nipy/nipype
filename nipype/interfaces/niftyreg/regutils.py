@@ -238,7 +238,6 @@ class RegAverage(NIFTYREGCommand):
     >>> from nipype.interfaces import niftyreg
     >>> reg_average = niftyreg.RegAverage()
     >>> 
-
     """
     _cmd = getNiftyRegPath('reg_average')
     input_spec = RegAverageInputSpec
@@ -303,8 +302,11 @@ class RegAladinInputSpec(NIFTYREGCommandInputSpec):
     smoo_f_val = traits.Float(desc='Amount of smoothing to apply to floating image',
                               argstr='-smooF %f')
     # Use nifti header to initialise transformation
-    nac_flag = traits.Bool(desc='Use nifti header to initialise transformaiton',
+    nac_flag = traits.Bool(desc='Use nifti header to initialise transformation',
                            argstr='-nac')
+    # Use the input masks centre of mass to initialise the transformation
+    cog_flag = traits.Bool(desc='Use the input masks centre of mass to initialise the transformation',
+                           argstr='-cog')
     # Percent of blocks that are considered active.
     v_val = PositiveInt(desc='Percent of blocks that are active', argstr='-pv %d')
     # Percent of inlier blocks
@@ -342,7 +344,7 @@ class RegAladin(NIFTYREGCommand):
     >>> aladin.inputs.flo_image = "floating_image.nii.gz"
     >>> aladin.inputs.ref_image = "reference_image.nii.gz"
     """
-    _cmd = 'reg_aladin'
+    _cmd = getNiftyRegPath('reg_aladin')
     input_spec = RegAladinInputSpec
     output_spec = RegAladinOutputSpec
 
