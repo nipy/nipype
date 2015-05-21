@@ -18,8 +18,8 @@ __docformat__ = 'restructuredtext'
 import os
 
 from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, Directory,
-                                    CommandLineInputSpec, isdefined)
+from nipype.interfaces.base import (CommandLine, Directory, TraitedSpec,
+                                    CommandLineInputSpec, File, isdefined)
 
 
 class Info(object):
@@ -35,11 +35,21 @@ class Info(object):
     """
 
     @staticmethod
-    def version():
-        """Check for freesurfer version on system
+    def home():
+        """ Return which freesurfer is being used
 
-        Find which freesurfer is being used....and get version from
-        /path/to/freesurfer/build-stamp.txt
+        Returns
+        -------
+        home : string
+           equivalent to os.getenv('FREESURFER_HOME')
+
+        """
+        home = os.getenv('FREESURFER_HOME')
+        return home
+
+    @staticmethod
+    def version():
+        """ Check for freesurfer version on system from /path/to/freesurfer/build-stamp.txt
 
         Returns
         -------
@@ -49,16 +59,51 @@ class Info(object):
            or None if freesurfer version not found
 
         """
-        fs_home = os.getenv('FREESURFER_HOME')
+        fs_home = Info.home()
         if fs_home is None:
             return None
         versionfile = os.path.join(fs_home, 'build-stamp.txt')
         if not os.path.exists(versionfile):
             return None
-        fid = open(versionfile, 'rt')
-        version = fid.readline()
-        fid.close()
-        return version
+        try:
+            fid = open(versionfile, 'rt')
+            version = fid.readline().strip()
+        except:
+            raise
+        finally:
+            fid.close()
+        return version.split("-")[-1]
+
+    @staticmethod
+    def versiontype():
+        """ Return if freesurfer is release or development version
+
+        Returns
+        -------
+        versiontype : string
+           versiontype as string ('stable' or 'development')
+           or None if freesurfer version not found
+        """
+        version = Info.version()
+        if version.startswith('v'):
+            return 'release'
+        else:
+            return 'development'
+
+    @staticmethod
+    def major():
+        """ Return major version if freesurfer is a release version, date if development
+
+        Returns
+        -------
+        major : string
+        """
+        version = Info.version()
+        if Info.versiontype() == 'release':
+            sep = '.'
+            return version.split(sep)[0][1:]
+        else:
+            return version
 
     @classmethod
     def subjectsdir(cls):
@@ -94,7 +139,7 @@ class FSCommand(CommandLine):
 
     input_spec = FSTraitedSpec
 
-    _subjects_dir = None
+    _subjects_dir = Info.subjectsdir()
 
     def __init__(self, **inputs):
         super(FSCommand, self).__init__(**inputs)
@@ -107,8 +152,7 @@ class FSCommand(CommandLine):
 
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
-            self.inputs.environ.update({'SUBJECTS_DIR':
-                                            self.inputs.subjects_dir})
+            self.inputs.environ.update({'SUBJECTS_DIR': self.inputs.subjects_dir})
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):
@@ -151,11 +195,28 @@ class FSCommand(CommandLine):
                                 use_ext=use_ext, newpath=cwd)
         return fname
 
-    @property
-    def version(self):
-        ver = Info.version()
-        if ver:
-            if 'dev' in ver:
-                return ver.rstrip().split('-')[-1] + '.dev'
-            else:
-                return ver.rstrip().split('-v')[-1]
+
+class FSScriptCommand(FSCommand):
+    """ Support for Freesurfer script commands with log inputs.terminal_output """
+    _terminal_output = 'file'
+    _always_run = False
+
+    def __init__(self, **inputs):
+        super(FSScriptCommand, self).__init__(**inputs)
+        self.set_default_terminal_output(self._terminal_output)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['log_file'] = os.path.abspath('stdout.nipype')
+        return outputs
+
+
+class FSScriptOutputSpec(TraitedSpec):
+    log_file = File('stdout.nipype', usedefault=True, exists=True, desc="The output log")
+
+    # def get(self, cwd=None, **kwargs):
+    #     if cwd is None:
+    #         cwd = os.getcwd()
+    #     outputs = super(FSScriptOutputSpec, self).get(cwd=cwd, **kwargs)
+    #     outputs['log_file'] = os.path.join(cwd, outputs['log_file'])
+    #     return outputs

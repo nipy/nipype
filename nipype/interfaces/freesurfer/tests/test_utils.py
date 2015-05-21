@@ -13,12 +13,8 @@ from nipype.testing import (assert_equal, assert_not_equal,
 from nipype.interfaces.base import TraitError
 
 import nipype.interfaces.freesurfer as fs
+from nipype.interfaces.freesurfer.tests import no_freesurfer
 
-def no_freesurfer():
-    if fs.Info().version is None:
-        return True
-    else:
-        return False
 
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
@@ -241,3 +237,33 @@ def test_surfshots():
 
     # Clean up our mess
     clean_directory(cwd, oldwd)
+
+@skipif(no_freesurfer)
+def test_addxformtoheader():
+    adder = fs.AddXFormToHeader()
+
+    filelist, testdir, origdir = create_files_in_directory()
+
+    # Test underlying command
+    yield assert_equal, adder.cmd, "mri_add_xform_to_header"
+
+    # Test exception with mandatory args absent
+    yield assert_raises, ValueError, adder.run
+    for input in ["in_file", "xfm_file"]:
+        indict = {input:filelist[0]}
+        willbreak = fs.AddXFormToHeader(**indict)
+        yield assert_raises, ValueError, willbreak.run
+
+    # Now test a basic command line
+    adder.inputs.xfm_file = filelist[0]
+    adder.inputs.in_file = filelist[1]
+    outfile = os.path.join(testdir, "b_output.nii")
+    yield assert_equal, adder.cmdline, "mri_add_xform_to_header a.nii b.nii %s" % outfile
+    # Now test that optional inputs get formatted properly
+    adder.inputs.copy_name = True
+    yield assert_equal, adder.cmdline, "mri_add_xform_to_header -c a.nii b.nii %s" % outfile
+    adder.inputs.verbose
+    yield assert_equal, adder.cmdline, "mri_add_xform_to_header -c -v a.nii b.nii %s" % outfile
+
+    # Now clean up
+    clean_directory(testdir, origdir)
