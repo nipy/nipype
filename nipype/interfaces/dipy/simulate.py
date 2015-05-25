@@ -174,8 +174,10 @@ class SimulateMultiTensor(BaseInterface):
         vfs = np.clip(vfs, 0., 1.)
 
         fractions = np.concatenate((ffs, vfs), axis=3)
+
         nb.Nifti1Image(fractions, aff, None).to_filename('fractions.nii.gz')
-        nb.Nifti1Image(total_vf, aff, None).to_filename('total_vf.nii.gz')
+        nb.Nifti1Image(np.sum(fractions, axis=3), aff, None).to_filename(
+            'total_vf.nii.gz')
 
         mhdr = hdr.copy()
         mhdr.set_data_dtype(np.uint8)
@@ -188,27 +190,39 @@ class SimulateMultiTensor(BaseInterface):
 
         # Stack directions
         dirs = None
-        for f in self.inputs.in_dirs:
-            fd = nb.load(f).get_data()
+        for i in range(nsticks):
+            f = self.inputs.in_dirs[i]
+            fd = np.nan_to_num(nb.load(f).get_data())
+            w = np.linalg.norm(fd, axis=3)[..., np.newaxis]
+            w[w < np.finfo(float).eps] = 1.0
+            fd /= w
             if dirs is None:
                 dirs = fd[msk > 0].copy()
             else:
                 dirs = np.hstack((dirs, fd[msk > 0]))
+
+        # Add random directions for isotropic components
+        for d in range(nballs):
+            fd = np.random.randn(nvox, 3)
+            w = np.linalg.norm(fd, axis=1)
+            fd[w < np.finfo(float).eps, ...] = np.array([1., 0., 0.])
+            w[w < np.finfo(float).eps] = 1.0
+            fd /= w[..., np.newaxis]
+            dirs = np.hstack((dirs, fd))
 
         sf_evals = list(self.inputs.diff_sf)
         ba_evals = list(self.inputs.diff_iso)
 
         mevals = [sf_evals] * nsticks + \
             [[ba_evals[d]] * 3 for d in range(nballs)]
-        ba_sticks = [(1.0, 0.0, 0.0)] * nballs
-        b0 = b0_im.get_data()[msk > 0]
 
+        b0 = b0_im.get_data()[msk > 0]
         args = []
         for i in range(nvox):
             args.append(
                 {'fractions': fracs[i, ...].tolist(),
                  'sticks': [tuple(dirs[i, j:j + 3])
-                            for j in range(nsticks)] + ba_sticks,
+                            for j in range(nsticks + nballs)],
                  'gradients': gtab,
                  'mevals': mevals,
                  'S0': b0[i],
