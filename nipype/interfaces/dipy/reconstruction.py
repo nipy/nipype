@@ -162,9 +162,14 @@ class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(
         exists=True, desc=('input mask in which we find single fibers'))
     fa_thresh = traits.Float(
-        0.7, usedefault=True, desc=('default FA threshold'))
+        0.7, usedefault=True, desc=('FA threshold'))
+    roi_radius = traits.Int(
+        10, usedefault=True, desc=('ROI radius to be used in auto_response'))
+    auto = traits.Bool(
+        True, usedefault=True, xor=['recursive'],
+        desc='use the auto_response estimator from dipy')
     recursive = traits.Bool(
-        False, usedefault=True,
+        False, usedefault=True, xor=['auto'],
         desc='use the recursive response estimator from dipy')
     response = File(
         'response.txt', usedefault=True, desc=('the output response file'))
@@ -203,7 +208,7 @@ class EstimateResponseSH(DipyBaseInterface):
     def _run_interface(self, runtime):
         from dipy.core.gradients import GradientTable
         from dipy.reconst.dti import fractional_anisotropy, mean_diffusivity
-        from dipy.reconst.csdeconv import recursive_response
+        from dipy.reconst.csdeconv import recursive_response, auto_response
 
         img = nb.load(self.inputs.in_file)
         affine = img.get_affine()
@@ -218,23 +223,18 @@ class EstimateResponseSH(DipyBaseInterface):
         data = img.get_data().astype(np.float32)
         gtab = self._get_gradient_table()
 
-        evals = nb.load(self.inputs.in_evals).get_data()
+        evals = np.nan_to_num(nb.load(self.inputs.in_evals).get_data())
         FA = np.nan_to_num(fractional_anisotropy(evals)) * msk
+        indices = np.where(FA > self.inputs.fa_thresh)
+        S0s = data[indices][:, np.nonzero(gtab.b0s_mask)[0]]
+        S0 = np.mean(S0s)
 
-        if not self.inputs.recursive:
-            indices = np.where(FA > self.inputs.fa_thresh)
-            lambdas = evals[indices][:, :2]
-            S0s = data[indices][:, np.nonzero(gtab.b0s_mask)[0]]
-            S0 = np.mean(S0s)
-            l01 = np.mean(lambdas, axis=0)
-            respev = np.array([l01[0], l01[1], l01[1]])
-            response = np.array(respev.tolist() + [S0]).reshape(-1)
-
-            ratio = abs(respev[1] / respev[0])
-            if ratio > 0.25:
-                iflogger.warn(('Estimated response is not prolate enough. '
-                               'Ratio=%0.3f.') % ratio)
-        else:
+        if self.inputs.auto:
+            response, ratio = auto_response(gtab, data,
+                                            roi_radius=self.inputs.roi_radius,
+                                            fa_thr=self.inputs.fa_thresh)
+            response = response[0].tolist() + [S0]
+        elif self.inputs.recursive:
             MD = np.nan_to_num(mean_diffusivity(evals)) * msk
             indices = np.logical_or(
                 FA >= 0.4, (np.logical_and(FA >= 0.15, MD >= 0.0011)))
@@ -244,6 +244,23 @@ class EstimateResponseSH(DipyBaseInterface):
                                           init_trace=0.0021, iter=8,
                                           convergence=0.001,
                                           parallel=True)
+            ratio = abs(response[1] / response[0])
+        else:
+            lambdas = evals[indices]
+            l01 = np.sort(np.mean(lambdas, axis=0))
+
+            response = np.array([l01[-1], l01[-2], l01[-2], S0])
+            ratio = abs(response[1] / response[0])
+
+        if ratio > 0.25:
+            iflogger.warn(('Estimated response is not prolate enough. '
+                           'Ratio=%0.3f.') % ratio)
+        elif ratio < 1.e-5 or np.any(np.isnan(response)):
+            response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
+            iflogger.warn(
+                ('Estimated response is not valid, using a default one'))
+        else:
+            iflogger.info(('Estimated response: %s') % str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
@@ -252,7 +269,6 @@ class EstimateResponseSH(DipyBaseInterface):
         nb.Nifti1Image(
             wm_mask.astype(np.uint8), affine,
             None).to_filename(op.abspath(self.inputs.out_mask))
-
         return runtime
 
     def _list_outputs(self):
