@@ -8,8 +8,9 @@ import os
 import warnings
 
 from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand, getNiftySegPath
-from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
-
+from nipype.interfaces.base import (TraitedSpec, File, traits, OutputMultiPath, isdefined)
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
@@ -48,7 +49,7 @@ class STEPSInputSpec(NIFTYSEGCommandInputSpec):
     prob_flag = traits.Bool(desc='Probabilistic/Fuzzy segmented image',
                            argstr='-outProb')
 
-    probUpdate_flag = traits.Bool(desc='Update label proportions at each iteration',
+    prob_update_flag = traits.Bool(desc='Update label proportions at each iteration',
                            argstr='-prop_update')
 
 
@@ -76,4 +77,58 @@ class STEPS(NIFTYSEGCommand):
         if name == 'out_file':
             return self._list_outputs()['out_file']
         return None
+
+class CalcTopNCCInputSpec(NIFTYSEGCommandInputSpec):
+
+    in_file = File(argstr='-target %s', exists=True, mandatory=True,
+                   desc='Target file',
+                   position=1)
+
+    num_templates = traits.Int(argstr='-templates %s', mandatory=True, position=2,
+                               desc='Number of Templates')
+
+    in_templates = traits.List(File(exists=True), argstr="%s", position=3,
+                               mandatory=True)
+
+    top_templates = traits.Int(argstr='-n %s', mandatory=True, position=4,
+                               desc='Number of Top Templates')
+
+    mask_file = File(argstr='-mask %s', exists=True, mandatory=False,
+                     desc='Filename of the ROI for label fusion')
+
+
+class CalcTopNCCOutputSpec(TraitedSpec):
+
+    out_files = traits.Any(File(exists=True))
+
+
+class CalcTopNCC(NIFTYSEGCommand):
+    _cmd = getNiftySegPath('seg_CalcTopNCC')
+    _suffix = '_topNCC'
+    input_spec = CalcTopNCCInputSpec
+    output_spec = CalcTopNCCOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+        outputs = self._outputs()
+        # local caching for backward compatibility
+        outfile = os.path.join(os.getcwd(), 'CalcTopNCC.json')
+        if runtime is None:
+            try:
+                out_stat = load_json(outfile)['files']
+            except IOError:
+                return self.run().outputs
+        else:
+            out_files = []
+            for line in runtime.stdout.split('\n'):
+                if line:
+                    values = line.split()
+                    if len(values) > 1:
+                        out_files.append([str(val) for val in values])
+                    else:
+                        out_files.extend([str(val) for val in values])
+            if len(out_files) == 1:
+                out_files = out_files[0]
+            save_json(outfile, dict(files=out_files))
+        outputs.out_files = out_files
+        return outputs
 

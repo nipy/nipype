@@ -37,7 +37,10 @@ class MathsCommand(NIFTYSEGCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+            if isdefined(self.inputs.operation) and self.inputs.operation=='hdr_copy':
+                outputs['out_file'] = self._gen_fname(self.inputs.operand_file, suffix=self._suffix)
+            else:
+                outputs['out_file'] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
