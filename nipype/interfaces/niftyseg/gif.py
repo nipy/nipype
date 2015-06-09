@@ -71,7 +71,13 @@ class GifInputSpec(NIFTYSEGCommandInputSpec):
     saveGeo = traits.Bool(argstr = '-geo',
                           desc='Save Geo to output folder',
                           default=False)
-    
+    verbose = traits.Int(1,
+                         argstr='-v %d',
+                         mandatory=False,
+                         desc='The verbose level (0, 1 or 2), default is 1',
+                         type=int,
+                         usedefault=True)
+
 
 class GifOutputSpec(TraitedSpec):
 
