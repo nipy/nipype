@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">JoinNode, synchronize and itersource</a><ul>
+<li><a class="reference internal" href="#joinnode-joinsource-and-joinfield">JoinNode, joinsource and joinfield</a></li>
+<li><a class="reference internal" href="#synchronize">synchronize</a></li>
+<li><a class="reference internal" href="#itersource">itersource</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="joinnode-synchronize-and-itersource">
+<span id="joinnode-and-itersource"></span><h1>JoinNode, synchronize and itersource<a class="headerlink" href="#joinnode-synchronize-and-itersource" title="Permalink to this headline">¶</a></h1>
+<p>The previous <a class="reference internal" href="mapnode_and_iterables.html"><em>MapNode, iterfield, and iterables explained</em></a> chapter described how to
+fork and join nodes using MapNode and iterables. In this chapter, we
+introduce features which build on these concepts to add workflow
+flexibility.</p>
+<div class="section" id="joinnode-joinsource-and-joinfield">
+<h2>JoinNode, joinsource and joinfield<a class="headerlink" href="#joinnode-joinsource-and-joinfield" title="Permalink to this headline">¶</a></h2>
+<p>A <a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.JoinNode" title="nipype.pipeline.engine.JoinNode"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.JoinNode</span></tt></a> generalizes MapNode to
+operate in conjunction with an upstream iterable node to reassemble
+downstream results, e.g.:</p>
+<p class="graphviz">
+<img src="../_images/graphviz-22410be71789d23c182acba3aa4f59801941d283.png" alt="digraph joinnode_ex {
+&quot;A&quot; -&gt; &quot;B1&quot; -&gt; &quot;C1&quot; -&gt; &quot;D&quot;;
+&quot;A&quot; -&gt; &quot;B2&quot; -&gt; &quot;C2&quot; -&gt; &quot;D&quot;;
+&quot;A&quot; -&gt; &quot;B3&quot; -&gt; &quot;C3&quot; -&gt; &quot;D&quot;;
+}" />
+</p>
+<p>The code to achieve this is as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">A</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">B</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;in_file&quot;</span><span class="p">,</span> <span class="n">images</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">C</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;c&quot;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">JoinNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">D</span><span class="p">(),</span> <span class="n">joinsource</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">joinfield</span><span class="o">=</span><span class="s">&quot;in_files&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+
+<span class="n">my_workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;my_workflow&quot;</span><span class="p">)</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,[(</span><span class="s">&#39;subject&#39;</span><span class="p">,</span><span class="s">&#39;subject&#39;</span><span class="p">)]),</span>
+                     <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)])</span>
+                     <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;in_files&#39;</span><span class="p">)])</span>
+                     <span class="p">])</span>
+</pre></div>
+</div>
+<p>This example assumes that interface &#8220;A&#8221; has one output <em>subject</em>,
+interface &#8220;B&#8221; has two inputs <em>subject</em> and <em>in_file</em> and one output
+<em>out_file</em>, interface &#8220;C&#8221; has one input <em>in_file</em> and one output
+<em>out_file</em>, and interface D has one list input <em>in_files</em>. The
+<em>images</em> variable is a list of three input image file names.</p>
+<p>As with <em>iterables</em> and the MapNode <em>iterfield</em>, the <em>joinfield</em>
+can be a list of fields. Thus, the declaration in the previous example
+is equivalent to the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">JoinNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">D</span><span class="p">(),</span> <span class="n">joinsource</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">joinfield</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;in_files&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <em>joinfield</em> defaults to all of the JoinNode input fields, so the
+declaration is also equivalent to the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">JoinNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">D</span><span class="p">(),</span> <span class="n">joinsource</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, the node &#8220;c&#8221; <em>out_file</em> outputs are collected into
+the JoinNode &#8220;d&#8221; <em>in_files</em> input list. The <em>in_files</em> order is the
+same as the upstream &#8220;b&#8221; node iterables order.</p>
+<p>The JoinNode input can be filtered for unique values by specifying
+the <em>unique</em> flag, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">JoinNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">D</span><span class="p">(),</span> <span class="n">joinsource</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="synchronize">
+<h2>synchronize<a class="headerlink" href="#synchronize" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></tt></a> <em>iterables</em> parameter can be
+be a single field or a list of fields. If it is a list, then execution
+is performed over all permutations of the list items. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">b</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="s">&quot;n&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])]</span>
+</pre></div>
+</div>
+<p>results in the execution graph:</p>
+<p class="graphviz">
+<img src="../_images/graphviz-d8a03809a2996d89f2eb085be07ee8bec5ca7937.png" alt="digraph multiple_iterables_ex {
+&quot;A&quot; -&gt; &quot;B13&quot; -&gt; &quot;C&quot;;
+&quot;A&quot; -&gt; &quot;B14&quot; -&gt; &quot;C&quot;;
+&quot;A&quot; -&gt; &quot;B23&quot; -&gt; &quot;C&quot;;
+&quot;A&quot; -&gt; &quot;B24&quot; -&gt; &quot;C&quot;;
+}" />
+</p>
+<p>where &#8220;B13&#8221; has inputs <em>m</em> = 1, <em>n</em> = 3, &#8220;B14&#8221; has inputs  <em>m</em> = 1,
+<em>n</em> = 4, etc.</p>
+<p>The <em>synchronize</em> parameter synchronizes the iterables lists, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">b</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="p">(</span><span class="s">&quot;n&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])]</span>
+<span class="n">b</span><span class="o">.</span><span class="n">synchronize</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>results in the execution graph:</p>
+<p class="graphviz">
+<img src="../_images/graphviz-f760e8301415974f915af0a8dc964c37754ffbc9.png" alt="digraph synchronize_ex {
+&quot;A&quot; -&gt; &quot;B13&quot; -&gt; &quot;C&quot;;
+&quot;A&quot; -&gt; &quot;B24&quot; -&gt; &quot;C&quot;;
+}" />
+</p>
+<p>where the iterable inputs are selected in lock-step by index, i.e.:</p>
+<p>(<em>m</em>, <em>n</em>) = (1, 3) and (2, 4)</p>
+<p>for &#8220;B13&#8221; and &#8220;B24&#8221;, resp.</p>
+</div>
+<div class="section" id="itersource">
+<h2>itersource<a class="headerlink" href="#itersource" title="Permalink to this headline">¶</a></h2>
+<p>The <em>itersource</em> feature allows you to expand a downstream iterable
+based on a mapping of an upstream iterable. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">A</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">B</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">b</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;m&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">C</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;c&quot;</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">D</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">itersource</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;b&quot;</span><span class="p">,</span> <span class="s">&quot;m&quot;</span><span class="p">)</span>
+<span class="n">d</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&quot;n&quot;</span><span class="p">,</span> <span class="p">{</span><span class="mi">1</span><span class="p">:[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="mi">2</span><span class="p">:[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]})]</span>
+<span class="n">my_workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;my_workflow&quot;</span><span class="p">)</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)]),</span>
+                     <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)])</span>
+                     <span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">,[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)])</span>
+                     <span class="p">])</span>
+</pre></div>
+</div>
+<p>results in the execution graph:</p>
+<p class="graphviz">
+<img src="../_images/graphviz-9030931fdf042b7ed479914f31b61b55dd6c9c44.png" alt="digraph itersource_ex {
+&quot;A&quot; -&gt; &quot;B1&quot; -&gt; &quot;C1&quot; -&gt; &quot;D13&quot;;
+&quot;C1&quot; -&gt; &quot;D14&quot;;
+&quot;A&quot; -&gt; &quot;B2&quot; -&gt; &quot;C2&quot; -&gt; &quot;D25&quot;;
+&quot;C2&quot; -&gt; &quot;D26&quot;;
+}" />
+</p>
+<p>In this example, all interfaces have input <em>in_file</em> and output
+<em>out_file</em>. In addition, interface &#8220;B&#8221; has input <em>m</em> and interface &#8220;D&#8221;
+has input <em>n</em>. A Python dictionary associates the &#8220;b&#8221; node input
+value with the downstream &#8220;d&#8221; node <em>n</em> iterable values.</p>
+<p>This example can be extended with a summary JoinNode:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">e</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">JoinNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">E</span><span class="p">(),</span> <span class="n">joinsource</span><span class="o">=</span><span class="s">&quot;d&quot;</span><span class="p">,</span>
+              <span class="n">joinfield</span><span class="o">=</span><span class="s">&quot;in_files&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;e&quot;</span><span class="p">)</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span>
+                    <span class="n">e</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>resulting in the graph:</p>
+<p class="graphviz">
+<img src="../_images/graphviz-ea7e6e625078a4a95f66a996ff23bef2e5e179f6.png" alt="digraph itersource_with_join_ex {
+&quot;A&quot; -&gt; &quot;B1&quot; -&gt; &quot;C1&quot; -&gt; &quot;D13&quot; -&gt; &quot;E&quot;;
+&quot;C1&quot; -&gt; &quot;D14&quot; -&gt; &quot;E&quot;;
+&quot;A&quot; -&gt; &quot;B2&quot; -&gt; &quot;C2&quot; -&gt; &quot;D25&quot; -&gt; &quot;E&quot;;
+&quot;C2&quot; -&gt; &quot;D26&quot; -&gt; &quot;E&quot;;
+}" />
+</p>
+<p>The combination of iterables, MapNode, JoinNode, synchronize and
+itersource enables the creation of arbitrarily complex workflow graphs.
+The astute workflow builder will recognize that this flexibility is
+both a blessing and a curse. These advanced features are handy additions
+to the Nipype toolkit when used judiciously.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

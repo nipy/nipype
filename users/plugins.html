@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using Nipype Plugins</a><ul>
+<li><a class="reference internal" href="#id1">Plugins</a><ul>
+<li><a class="reference internal" href="#debug">Debug</a></li>
+<li><a class="reference internal" href="#linear">Linear</a></li>
+<li><a class="reference internal" href="#multiproc">MultiProc</a></li>
+<li><a class="reference internal" href="#ipython">IPython</a></li>
+<li><a class="reference internal" href="#sge-pbs">SGE/PBS</a><ul>
+<li><a class="reference internal" href="#sgegraph">SGEGraph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#lsf">LSF</a></li>
+<li><a class="reference internal" href="#slurm">SLURM</a></li>
+<li><a class="reference internal" href="#htcondor">HTCondor</a><ul>
+<li><a class="reference internal" href="#dagman">DAGMan</a></li>
+<li><a class="reference internal" href="#qsub-emulation"><tt class="docutils literal"><span class="pre">qsub</span></tt> emulation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-nipype-plugins">
+<span id="plugins"></span><h1>Using Nipype Plugins<a class="headerlink" href="#using-nipype-plugins" title="Permalink to this headline">¶</a></h1>
+<p>The workflow engine supports a plugin architecture for workflow execution. The
+available plugins allow local and distributed execution of workflows and
+debugging. Each available plugin is described below.</p>
+<p>Current plugins are available for Linear, Multiprocessing, <a class="reference external" href="http://ipython.scipy.org">IPython</a> distributed
+processing platforms and for direct processing on <a class="reference external" href="http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html">SGE</a>, <a class="reference external" href="http://www.clusterresources.com/products/torque-resource-manager.php">PBS</a>, <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a>, <a class="reference external" href="http://www.platform.com/Products/platform-lsf">LSF</a>, and <a class="reference external" href="http://slurm.schedmd.com/">SLURM</a>. We
+anticipate future plugins for the <a class="reference external" href="http://brainvisa.info/soma/soma-workflow/">Soma</a> workflow.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The current distributed processing plugins rely on the availability of a
+shared filesystem across computational nodes.</p>
+<p class="last">A variety of config options can control how execution behaves in this
+distributed context. These are listed later on in this page.</p>
+</div>
+<p>All plugins can be executed with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="n">PLUGIN_NAME</span><span class="p">,</span> <span class="n">plugin_args</span><span class="o">=</span><span class="n">ARGS_DICT</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>status_callback : a function handle
+max_jobs : maximum number of concurrent jobs
+max_tries : number of times to try submitting a job
+retry_timeout : amount of time to wait between tries
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Except for the status_callback, the remaining arguments only apply to the
+distributed plugins: MultiProc/IPython(X)/SGE/PBS/HTCondor/HTCondorDAGMan/LSF</p>
+</div>
+<p>For example:</p>
+<div class="section" id="id1">
+<h2>Plugins<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="debug">
+<h3>Debug<a class="headerlink" href="#debug" title="Permalink to this headline">¶</a></h3>
+<p>This plugin provides a simple mechanism to debug certain components of a
+workflow without executing any node.</p>
+<p>Mandatory arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>callable :  A function handle that receives as arguments a node and a graph
+</pre></div>
+</div>
+<p>The function callable will called for every node from a topological sort of the
+execution graph.</p>
+</div>
+<div class="section" id="linear">
+<h3>Linear<a class="headerlink" href="#linear" title="Permalink to this headline">¶</a></h3>
+<p>This plugin runs the workflow one node at a time in a single process locally.
+The order of the nodes is determined by a topological sort of the workflow:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;Linear&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiproc">
+<h3>MultiProc<a class="headerlink" href="#multiproc" title="Permalink to this headline">¶</a></h3>
+<p>Uses the <a class="reference external" href="http://www.python.org">Python</a> multiprocessing library to distribute jobs as new processes on
+a local system.</p>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>n_procs :  Number of processes to launch in parallel, if not set number of
+processors/threads will be automatically detected
+</pre></div>
+</div>
+<p>To distribute processing on a multicore machine, simply call:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;MultiProc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will use all available CPUs. If on the other hand you would like to restrict
+the number of used resources (to say 2 CPUs), you can call:</p>
+<div class="highlight-python"><div class="highlight"><pre>workflow.run(plugin=&#39;MultiProc&#39;, plugin_args={&#39;n_procs&#39; : 2}
+</pre></div>
+</div>
+</div>
+<div class="section" id="ipython">
+<h3>IPython<a class="headerlink" href="#ipython" title="Permalink to this headline">¶</a></h3>
+<p>This plugin provide access to distributed computing using <a class="reference external" href="http://ipython.scipy.org">IPython</a> parallel
+machinery.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>We provide backward compatibility with <a class="reference external" href="http://ipython.scipy.org">IPython</a> versions earlier than
+0.10.1 using the IPythonX plugin.</p>
+<p class="last">Please read the <a class="reference external" href="http://ipython.scipy.org">IPython</a> documentation to determine how to setup your cluster
+for distributed processing. This typically involves calling ipcluster.</p>
+</div>
+<p>Once the clients have been started, any pipeline executed with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;IPython&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sge-pbs">
+<h3>SGE/PBS<a class="headerlink" href="#sge-pbs" title="Permalink to this headline">¶</a></h3>
+<p>In order to use nipype with <a class="reference external" href="http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html">SGE</a> or <a class="reference external" href="http://www.clusterresources.com/products/torque-resource-manager.php">PBS</a> you simply need to call:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;SGE&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;PBS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>template: custom template file to use
+qsub_args: any other command line args to be passed to qsub.
+max_jobname_len: (PBS only) maximum length of the job name.  Default 15.
+</pre></div>
+</div>
+<p>For example, the following snippet executes the workflow on myqueue with
+a custom template:</p>
+<div class="highlight-python"><div class="highlight"><pre>workflow.run(plugin=&#39;SGE&#39;,
+   plugin_args=dict(template=&#39;mytemplate.sh&#39;, qsub_args=&#39;-q myqueue&#39;)
+</pre></div>
+</div>
+<p>In addition to overall workflow configuration, you can use node level
+configuration for PBS/SGE:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">node</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-l nodes=1:ppn=3&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>this would apply only to the node and is useful in situations, where a
+particular node might use more resources than other nodes in a workflow.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Setting the keyword <cite>overwrite</cite> would overwrite any global configuration with
+this local configuration:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">node</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-l nodes=1:ppn=3&#39;</span><span class="p">,</span> <span class="s">&#39;overwrite&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sgegraph">
+<h4>SGEGraph<a class="headerlink" href="#sgegraph" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference internal" href="#sgegraph">SGEGraph</a> is a exuction plugin working with Sun Grid Engine that allows for
+submitting entire graph of dependent jobs at once. This way Nipype does not
+need to run a monitoring process - SGE takes care of this.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>When rerunning unfinished workflows using SGEGraph you may decide not to
+submit jobs for Nodes that previously finished running. This can speed up
+execution, but new or modified inputs that would previously trigger a Node
+to rerun will be ignored. The following option turns on this functionality:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;SGEGraph&#39;</span><span class="p">,</span> <span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;dont_resubmit_completed_jobs&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="lsf">
+<h3>LSF<a class="headerlink" href="#lsf" title="Permalink to this headline">¶</a></h3>
+<p>Submitting via LSF is almost identical to SGE above above except for the optional arguments field:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;LSF&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>template: custom template file to use
+bsub_args: any other command line args to be passed to bsub.
+</pre></div>
+</div>
+</div>
+<div class="section" id="slurm">
+<h3>SLURM<a class="headerlink" href="#slurm" title="Permalink to this headline">¶</a></h3>
+<p>Submitting via SLURM is almost identical to SGE above except for the optional arguments field:</p>
+<blockquote>
+<div>workflow.run(plugin=&#8217;SLURM&#8217;)</div></blockquote>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>template: custom template file to use
+sbatch_args: any other command line args to be passed to bsub.
+</pre></div>
+</div>
+</div>
+<div class="section" id="htcondor">
+<h3>HTCondor<a class="headerlink" href="#htcondor" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="dagman">
+<h4>DAGMan<a class="headerlink" href="#dagman" title="Permalink to this headline">¶</a></h4>
+<p>With its <a class="reference external" href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGMan</a> component <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a> (previously Condor) allows for submitting
+entire graphs of dependent jobs at once (similar to <a class="reference internal" href="#sgegraph">SGEGraph</a>). With the <tt class="docutils literal"><span class="pre">CondorDAGMan</span></tt> plug-in
+Nipype can utilize this functionality to submit complete workflows directly and
+in a single step.  Consequently, and in contrast to other plug-ins, workflow
+execution returns almost instantaneously &#8211; Nipype is only used to generate the
+workflow graph, while job scheduling and dependency resolution are entirely
+managed by <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a>.</p>
+<p>Please note that although <a class="reference external" href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGMan</a> supports specification of data dependencies
+as well as data provisioning on compute nodes this functionality is currently
+not supported by this plug-in. As with all other batch systems supported by
+Nipype, only HTCondor pools with a shared file system can be used to process
+Nipype workflows.</p>
+<p>Workflow execution with HTCondor DAGMan is done by calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;CondorDAGMan&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Job execution behavior can be tweaked with the following optional plug-in
+arguments. The value of most arguments can be a literal string or a filename,
+where in the latter case the content of the file will be used as the argument
+value:</p>
+<div class="highlight-python"><div class="highlight"><pre>submit_template : submit spec template for individual jobs in a DAG (see
+             CondorDAGManPlugin.default_submit_template for the default.
+initial_specs : additional submit specs that are prepended to any job&#39;s
+             submit file
+override_specs : additional submit specs that are appended to any job&#39;s
+             submit file
+wrapper_cmd : path to an exectuable that will be started instead of a node
+             script. This is useful for wrapper script that execute certain
+             functionality prior or after a node runs. If this option is
+             given the wrapper command is called with the respective Python
+             exectuable and the path to the node script as final arguments
+wrapper_args : optional additional arguments to a wrapper command
+dagman_args : arguments to be prepended to the job execution script in the
+              dagman call
+block : if True the plugin call will block until Condor has finished
+        prcoessing the entire workflow (default: False)
+</pre></div>
+</div>
+<p>Please see the <a class="reference external" href="http://research.cs.wisc.edu/htcondor/manual">HTCondor documentation</a> for details on possible configuration
+options and command line arguments.</p>
+<p>Using the <tt class="docutils literal"><span class="pre">wrapper_cmd</span></tt> argument it is possible to combine Nipype workflow
+execution with checkpoint/migration functionality offered by, for example,
+<a class="reference external" href="http://dmtcp.sourceforge.net">DMTCP</a>. This is especially useful in the case of workflows with long running
+nodes, such as Freesurfer&#8217;s recon-all pipeline, where Condor&#8217;s job
+prioritization algorithm could lead to jobs being evicted from compute
+nodes in order to maximize overall troughput. With checkpoint/migration enabled
+such a job would be checkpointed prior eviction and resume work from the
+checkpointed state after being rescheduled &#8211; instead of restarting from
+scratch.</p>
+<p>On a Debian system, executing a workflow with support for checkpoint/migration
+for all nodes could look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># define common parameters</span>
+<span class="n">dmtcp_hdr</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">should_transfer_files = YES</span>
+<span class="s">when_to_transfer_output = ON_EXIT_OR_EVICT</span>
+<span class="s">kill_sig = 2</span>
+<span class="s">environment = DMTCP_TMPDIR=./;JALIB_STDERR_PATH=/dev/null;DMTCP_PREFIX_ID=$(CLUSTER)_$(PROCESS)</span>
+<span class="s">&quot;&quot;&quot;</span>
+<span class="n">shim_args</span> <span class="o">=</span> <span class="s">&quot;--log </span><span class="si">%(basename)s</span><span class="s">.shimlog --stdout </span><span class="si">%(basename)s</span><span class="s">.shimout --stderr </span><span class="si">%(basename)s</span><span class="s">.shimerr&quot;</span>
+<span class="c"># run workflow</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+      <span class="n">plugin</span><span class="o">=</span><span class="s">&#39;CondorDAGMan&#39;</span><span class="p">,</span>
+      <span class="n">plugin_args</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">initial_specs</span><span class="o">=</span><span class="n">dmtcp_hdr</span><span class="p">,</span>
+                       <span class="n">wrapper_cmd</span><span class="o">=</span><span class="s">&#39;/usr/lib/condor/shim_dmtcp&#39;</span><span class="p">,</span>
+                       <span class="n">wrapper_args</span><span class="o">=</span><span class="n">shim_args</span><span class="p">)</span>
+      <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="qsub-emulation">
+<h4><tt class="docutils literal"><span class="pre">qsub</span></tt> emulation<a class="headerlink" href="#qsub-emulation" title="Permalink to this headline">¶</a></h4>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This plug-in is deprecated and users should migrate to the more robust and
+more versatile <tt class="docutils literal"><span class="pre">CondorDAGMan</span></tt> plug-in.</p>
+</div>
+<p>Despite the differences between HTCondor and SGE-like batch systems the plugin
+usage (incl. supported arguments) is almost identical. The HTCondor plugin relies
+on a <tt class="docutils literal"><span class="pre">qsub</span></tt> emulation script for HTCondor, called <tt class="docutils literal"><span class="pre">condor_qsub</span></tt> that can be
+obtained from a <a class="reference external" href="http://anonscm.debian.org/gitweb/?p=pkg-exppsy/condor.git;a=blob_plain;f=debian/condor_qsub;hb=HEAD">Git repository on git.debian.org</a>. This script is currently
+not shipped with a standard HTCondor distribution, but is included in the HTCondor
+package from <a class="reference external" href="http://neuro.debian.net">http://neuro.debian.net</a>. It is sufficient to download this script
+and install it in any location on a system that is included in the <tt class="docutils literal"><span class="pre">PATH</span></tt>
+configuration.</p>
+<p>Running a workflow in a HTCondor pool is done by calling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;Condor&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The plugin supports a limited set of qsub arguments (<tt class="docutils literal"><span class="pre">qsub_args</span></tt>) that cover
+the most common use cases. The <tt class="docutils literal"><span class="pre">condor_qsub</span></tt> emulation script translates qsub
+arguments into the corresponding HTCondor terminology and handles the actual job
+submission. For details on supported options see the manpage of <tt class="docutils literal"><span class="pre">condor_qsub</span></tt>.</p>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>qsub_args: any other command line args to be passed to condor_qsub.
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -1,0 +1,1231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rsfmri-ants-fs-fsl-nipy-acompcor">
+<span id="example-rsfmri-vol-surface-preprocessing-nipy"></span><h1>rsfMRI: ANTS, FS, FSL, NiPy, aCompCor<a class="headerlink" href="#rsfmri-ants-fs-fsl-nipy-acompcor" title="Permalink to this headline">¶</a></h1>
+<p>A preprocessing workflow for Siemens resting state data.</p>
+<p>This workflow makes use of:</p>
+<ul class="simple">
+<li>ANTS</li>
+<li>FreeSurfer</li>
+<li>FSL</li>
+<li>NiPy</li>
+<li>CompCor</li>
+</ul>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre>python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
+    -s subj001 -o output -p PBS --plugin_args &quot;dict(qsub_args=&#39;-q many&#39;)&quot;
+
+or
+
+python rsfmri_vol_surface_preprocessing.py -f SUB_1024011/E?/func/rest.nii
+    -t OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz --TR 2 -s SUB_1024011
+    --subjects_dir fsdata --slice_times 0 17 1 18 2 19 3 20 4 21 5 22 6 23
+    7 24 8 25 9 26 10 27 11 28 12 29 13 30 14 31 15 32 16 -o .
+</pre></div>
+</div>
+<p>This workflow takes resting timeseries and a Siemens dicom file corresponding
+to it and preprocesses it to produce timeseries coordinates or grayordinates.</p>
+<p>For non-Siemens dicoms, provide slice times instead, since the dicom extractor is not guaranteed to work.</p>
+<p>This workflow also requires 2mm subcortical atlas and templates that are
+available from:</p>
+<p><a class="reference external" href="http://mindboggle.info/data.html">http://mindboggle.info/data.html</a></p>
+<p>specifically the 2mm versions of:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz">Joint Fusion Atlas</a></li>
+<li><a class="reference external" href="http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz">MNI template</a></li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre>import os
+
+from nipype.interfaces.base import CommandLine
+CommandLine.set_default_terminal_output(&#39;allatonce&#39;)
+
+from dcmstack.extract import default_extractor
+from dicom import read_file
+
+from nipype.interfaces import (fsl, Function, ants, freesurfer,nipy)
+from nipype.interfaces.c3 import C3dAffineTool
+
+fsl.FSLCommand.set_default_output_type(&#39;NIFTI_GZ&#39;)
+
+from nipype import Workflow, Node, MapNode
+
+from nipype.algorithms.rapidart import ArtifactDetect
+from nipype.algorithms.misc import TSNR
+from nipype.interfaces.utility import Rename, Merge, IdentityInterface
+from nipype.utils.filemanip import filename_to_list
+from nipype.interfaces.io import DataSink, FreeSurferSource
+import nipype.interfaces.freesurfer as fs
+
+import numpy as np
+import scipy as sp
+import nibabel as nb
+
+imports = [&#39;import os&#39;,
+           &#39;import nibabel as nb&#39;,
+           &#39;import numpy as np&#39;,
+           &#39;import scipy as sp&#39;,
+           &#39;from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename&#39;,
+           &#39;from scipy.special import legendre&#39;
+           ]
+
+
+def get_info(dicom_files):
+    &quot;&quot;&quot;Given a Siemens dicom file return metadata
+
+    Returns
+    -------
+    RepetitionTime
+    Slice Acquisition Times
+    Spacing between slices
+    &quot;&quot;&quot;
+    meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
+                                       stop_before_pixels=True,
+                                       force=True))
+    return (meta[&#39;RepetitionTime&#39;]/1000., meta[&#39;CsaImage.MosaicRefAcqTimes&#39;],
+            meta[&#39;SpacingBetweenSlices&#39;])
+
+
+def median(in_files):
+    &quot;&quot;&quot;Computes an average of the median of each realigned timeseries
+
+    Parameters
+    ----------
+
+    in_files: one or more realigned Nifti 4D time series
+
+    Returns
+    -------
+
+    out_file: a 3D Nifti file
+    &quot;&quot;&quot;
+    average = None
+    for idx, filename in enumerate(filename_to_list(in_files)):
+        img = nb.load(filename)
+        data = np.median(img.get_data(), axis=3)
+        if average is None:
+            average = data
+        else:
+            average = average + data
+    median_img = nb.Nifti1Image(average/float(idx + 1),
+                                img.get_affine(), img.get_header())
+    filename = os.path.join(os.getcwd(), &#39;median.nii.gz&#39;)
+    median_img.to_filename(filename)
+    return filename
+
+
+def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
+    &quot;&quot;&quot;Bandpass filter the input files
+
+    Parameters
+    ----------
+    files: list of 4d nifti files
+    lowpass_freq: cutoff frequency for the low pass filter (in Hz)
+    highpass_freq: cutoff frequency for the high pass filter (in Hz)
+    fs: sampling rate (in Hz)
+    &quot;&quot;&quot;
+    out_files = []
+    for filename in filename_to_list(files):
+        path, name, ext = split_filename(filename)
+        out_file = os.path.join(os.getcwd(), name + &#39;_bp&#39; + ext)
+        img = nb.load(filename)
+        timepoints = img.shape[-1]
+        F = np.zeros((timepoints))
+        lowidx = timepoints/2 + 1
+        if lowpass_freq &gt; 0:
+            lowidx = np.round(float(lowpass_freq) / fs * timepoints)
+        highidx = 0
+        if highpass_freq &gt; 0:
+            highidx = np.round(float(highpass_freq) / fs * timepoints)
+        F[highidx:lowidx] = 1
+        F = ((F + F[::-1]) &gt; 0).astype(int)
+        data = img.get_data()
+        if np.all(F == 1):
+            filtered_data = data
+        else:
+            filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
+        img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
+                                 img.get_header())
+        img_out.to_filename(out_file)
+        out_files.append(out_file)
+    return list_to_filename(out_files)
+
+
+def motion_regressors(motion_params, order=0, derivatives=1):
+    &quot;&quot;&quot;Compute motion regressors upto given order and derivative
+
+    motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)
+    &quot;&quot;&quot;
+    out_files = []
+    for idx, filename in enumerate(filename_to_list(motion_params)):
+        params = np.genfromtxt(filename)
+        out_params = params
+        for d in range(1, derivatives + 1):
+            cparams = np.vstack((np.repeat(params[0, :][None, :], d, axis=0),
+                                 params))
+            out_params = np.hstack((out_params, np.diff(cparams, d, axis=0)))
+        out_params2 = out_params
+        for i in range(2, order + 1):
+            out_params2 = np.hstack((out_params2, np.power(out_params, i)))
+        filename = os.path.join(os.getcwd(), &quot;motion_regressor%02d.txt&quot; % idx)
+        np.savetxt(filename, out_params2, fmt=&quot;%.10f&quot;)
+        out_files.append(filename)
+    return out_files
+
+
+def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
+    &quot;&quot;&quot;Builds a regressor set comprisong motion parameters, composite norm and
+    outliers
+
+    The outliers are added as a single time point column for each outlier
+
+
+    Parameters
+    ----------
+
+    motion_params: a text file containing motion parameters and its derivatives
+    comp_norm: a text file containing the composite norm
+    outliers: a text file containing 0-based outlier indices
+    detrend_poly: number of polynomials to add to detrend
+
+    Returns
+    -------
+    components_file: a text file containing all the regressors
+    &quot;&quot;&quot;
+    out_files = []
+    for idx, filename in enumerate(filename_to_list(motion_params)):
+        params = np.genfromtxt(filename)
+        norm_val = np.genfromtxt(filename_to_list(comp_norm)[idx])
+        out_params = np.hstack((params, norm_val[:, None]))
+        try:
+            outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
+        except IOError:
+            outlier_val = np.empty((0))
+        for index in np.atleast_1d(outlier_val):
+            outlier_vector = np.zeros((out_params.shape[0], 1))
+            outlier_vector[index] = 1
+            out_params = np.hstack((out_params, outlier_vector))
+        if detrend_poly:
+            timepoints = out_params.shape[0]
+            X = np.empty((timepoints, 0))
+            for i in range(detrend_poly):
+                X = np.hstack((X, legendre(
+                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
+            out_params = np.hstack((out_params, X))
+        filename = os.path.join(os.getcwd(), &quot;filter_regressor%02d.txt&quot; % idx)
+        np.savetxt(filename, out_params, fmt=&quot;%.10f&quot;)
+        out_files.append(filename)
+    return out_files
+
+
+def extract_noise_components(realigned_file, mask_file, num_components=5,
+                             extra_regressors=None):
+    &quot;&quot;&quot;Derive components most reflective of physiological noise
+
+    Parameters
+    ----------
+    realigned_file: a 4D Nifti file containing realigned volumes
+    mask_file: a 3D Nifti file containing white matter + ventricular masks
+    num_components: number of components to use for noise decomposition
+    extra_regressors: additional regressors to add
+
+    Returns
+    -------
+    components_file: a text file containing the noise components
+    &quot;&quot;&quot;
+    imgseries = nb.load(realigned_file)
+    components = None
+    for filename in filename_to_list(mask_file):
+        mask = nb.load(filename).get_data()
+        if len(np.nonzero(mask &gt; 0)[0]) == 0:
+            continue
+        voxel_timecourses = imgseries.get_data()[mask &gt; 0]
+        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
+        # remove mean and normalize by variance
+        # voxel_timecourses.shape == [nvoxels, time]
+        X = voxel_timecourses.T
+        stdX = np.std(X, axis=0)
+        stdX[stdX == 0] = 1.
+        stdX[np.isnan(stdX)] = 1.
+        stdX[np.isinf(stdX)] = 1.
+        X = (X - np.mean(X, axis=0))/stdX
+        u, _, _ = sp.linalg.svd(X, full_matrices=False)
+        if components is None:
+            components = u[:, :num_components]
+        else:
+            components = np.hstack((components, u[:, :num_components]))
+    if extra_regressors:
+        regressors = np.genfromtxt(extra_regressors)
+        components = np.hstack((components, regressors))
+    components_file = os.path.join(os.getcwd(), &#39;noise_components.txt&#39;)
+    np.savetxt(components_file, components, fmt=&quot;%.10f&quot;)
+    return components_file
+
+
+def rename(in_files, suffix=None):
+    from nipype.utils.filemanip import (filename_to_list, split_filename,
+                                        list_to_filename)
+    out_files = []
+    for idx, filename in enumerate(filename_to_list(in_files)):
+        _, name, ext = split_filename(filename)
+        if suffix is None:
+            out_files.append(name + (&#39;_%03d&#39; % idx) + ext)
+        else:
+            out_files.append(name + suffix + ext)
+    return list_to_filename(out_files)
+
+
+def get_aparc_aseg(files):
+    &quot;&quot;&quot;Return the aparc+aseg.mgz file&quot;&quot;&quot;
+    for name in files:
+        if &#39;aparc+aseg.mgz&#39; in name:
+            return name
+    raise ValueError(&#39;aparc+aseg.mgz not found&#39;)
+
+
+def extract_subrois(timeseries_file, label_file, indices):
+    &quot;&quot;&quot;Extract voxel time courses for each subcortical roi index
+
+    Parameters
+    ----------
+
+    timeseries_file: a 4D Nifti file
+    label_file: a 3D file containing rois in the same space/size of the 4D file
+    indices: a list of indices for ROIs to extract.
+
+    Returns
+    -------
+    out_file: a text file containing time courses for each voxel of each roi
+        The first four columns are: freesurfer index, i, j, k positions in the
+        label file
+    &quot;&quot;&quot;
+    img = nb.load(timeseries_file)
+    data = img.get_data()
+    roiimg = nb.load(label_file)
+    rois = roiimg.get_data()
+    prefix = split_filename(timeseries_file)[1]
+    out_ts_file = os.path.join(os.getcwd(), &#39;%s_subcortical_ts.txt&#39; % prefix)
+    with open(out_ts_file, &#39;wt&#39;) as fp:
+        for fsindex in indices:
+            ijk = np.nonzero(rois == fsindex)
+            ts = data[ijk]
+            for i0, row in enumerate(ts):
+                fp.write(&#39;%d,%d,%d,%d,&#39; % (fsindex, ijk[0][i0],
+                                           ijk[1][i0], ijk[2][i0]) +
+                         &#39;,&#39;.join([&#39;%.10f&#39; % val for val in row]) + &#39;\n&#39;)
+    return out_ts_file
+
+
+def combine_hemi(left, right):
+    &quot;&quot;&quot;Combine left and right hemisphere time series into a single text file
+    &quot;&quot;&quot;
+    lh_data = nb.load(left).get_data()
+    rh_data = nb.load(right).get_data()
+
+    indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
+                         2000000 + np.arange(0, rh_data.shape[0])[:, None]))
+    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
+                                              rh_data.squeeze()))))
+    filename = left.split(&#39;.&#39;)[1] + &#39;_combined.txt&#39;
+    np.savetxt(filename, all_data,
+               fmt=&#39;,&#39;.join([&#39;%d&#39;] + [&#39;%.10f&#39;] * (all_data.shape[1] - 1)))
+    return os.path.abspath(filename)
+
+
+def create_reg_workflow(name=&#39;registration&#39;):
+    &quot;&quot;&quot;Create a FEAT preprocessing workflow together with freesurfer
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: &#39;registration&#39;)
+
+    Inputs::
+
+        inputspec.source_files : files (filename or list of filenames to register)
+        inputspec.mean_image : reference image to use
+        inputspec.anatomical_image : anatomical image to coregister to
+        inputspec.target_image : registration target
+
+    Outputs::
+
+        outputspec.func2anat_transform : FLIRT transform
+        outputspec.anat2target_transform : FLIRT+FNIRT transform
+        outputspec.transformed_files : transformed files in target space
+        outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+</pre></div>
+</div>
+<p>register = Workflow(name=name)
+inputnode = Node(interface=IdentityInterface(fields=[&#8216;source_files&#8217;,</p>
+<blockquote>
+<div><blockquote>
+<div>&#8216;mean_image&#8217;,
+&#8216;subject_id&#8217;,
+&#8216;subjects_dir&#8217;,
+&#8216;target_image&#8217;]),</div></blockquote>
+<p>name=&#8217;inputspec&#8217;)</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>outputnode = Node(interface=IdentityInterface(fields=[&#8216;func2anat_transform&#8217;,</dt>
+<dd><blockquote class="first">
+<div>&#8216;out_reg_file&#8217;,
+&#8216;anat2target_transform&#8217;,
+&#8216;transforms&#8217;,
+&#8216;transformed_mean&#8217;,
+&#8216;segmentation_files&#8217;,
+&#8216;anat2target&#8217;,
+&#8216;aparc&#8217;,
+&#8216;min_cost_file&#8217;
+]),</div></blockquote>
+<p class="last">name=&#8217;outputspec&#8217;)</p>
+</dd>
+</dl>
+<p># Get the subject&#8217;s freesurfer source directory
+fssource = Node(FreeSurferSource(),</p>
+<blockquote>
+<div>name=&#8217;fssource&#8217;)</div></blockquote>
+<p>fssource.run_without_submitting = True
+register.connect(inputnode, &#8216;subject_id&#8217;, fssource, &#8216;subject_id&#8217;)
+register.connect(inputnode, &#8216;subjects_dir&#8217;, fssource, &#8216;subjects_dir&#8217;)
+convert = Node(freesurfer.MRIConvert(out_type=&#8217;nii&#8217;),</p>
+<blockquote>
+<div>name=&#8221;convert&#8221;)</div></blockquote>
+<p>register.connect(fssource, &#8216;T1&#8217;, convert, &#8216;in_file&#8217;)
+# Coregister the median to the surface
+bbregister = Node(freesurfer.BBRegister(),</p>
+<blockquote>
+<div>name=&#8217;bbregister&#8217;)</div></blockquote>
+<p>bbregister.inputs.init = &#8216;fsl&#8217;
+bbregister.inputs.contrast_type = &#8216;t2&#8217;
+bbregister.inputs.out_fsl_file = True
+bbregister.inputs.epi_mask = True
+register.connect(inputnode, &#8216;subject_id&#8217;, bbregister, &#8216;subject_id&#8217;)
+register.connect(inputnode, &#8216;mean_image&#8217;, bbregister, &#8216;source_file&#8217;)
+register.connect(inputnode, &#8216;subjects_dir&#8217;, bbregister, &#8216;subjects_dir&#8217;)</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">Estimate the tissue classes from the anatomical image. But use aparc+aseg&#8217;s brain mask
+&#8220;&#8221;&#8220;</p>
+<p>binarize = Node(fs.Binarize(min=0.5, out_type=&#8221;nii.gz&#8221;, dilate=1), name=&#8221;binarize_aparc&#8221;)
+register.connect(fssource, (&#8220;aparc_aseg&#8221;, get_aparc_aseg), binarize, &#8220;in_file&#8221;)
+stripper = Node(fsl.ApplyMask(), name =&#8217;stripper&#8217;)
+register.connect(binarize, &#8220;binary_file&#8221;, stripper, &#8220;mask_file&#8221;)
+register.connect(convert, &#8216;out_file&#8217;, stripper, &#8216;in_file&#8217;)</p>
+<p class="last">fast = Node(fsl.FAST(), name=&#8217;fast&#8217;)
+register.connect(stripper, &#8216;out_file&#8217;, fast, &#8216;in_files&#8217;)</p>
+</dd>
+</dl>
+<p>Binarize the segmentation</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">binarize</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(</span><span class="n">op_string</span><span class="o">=</span><span class="s">&#39;-nan -thr 0.9 -ero -bin&#39;</span><span class="p">),</span>
+                   <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;binarize&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fast</span><span class="p">,</span> <span class="s">&#39;partial_volume_files&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Apply inverse transform to take segmentations to functional space</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><dl class="first docutils">
+<dt>applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,</dt>
+<dd><blockquote class="first">
+<div>interp=&#8217;nearest&#8217;),</div></blockquote>
+<p class="last">iterfield=[&#8216;target_file&#8217;],
+name=&#8217;inverse_transform&#8217;)</p>
+</dd>
+</dl>
+<p class="last">register.connect(inputnode, &#8216;subjects_dir&#8217;, applyxfm, &#8216;subjects_dir&#8217;)
+register.connect(bbregister, &#8216;out_reg_file&#8217;, applyxfm, &#8216;reg_file&#8217;)
+register.connect(binarize, &#8216;out_file&#8217;, applyxfm, &#8216;target_file&#8217;)
+register.connect(inputnode, &#8216;mean_image&#8217;, applyxfm, &#8216;source_file&#8217;)</p>
+</dd>
+</dl>
+<p>Apply inverse transform to aparc file</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><dl class="first docutils">
+<dt>aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,</dt>
+<dd><blockquote class="first">
+<div>interp=&#8217;nearest&#8217;),</div></blockquote>
+<p class="last">name=&#8217;aparc_inverse_transform&#8217;)</p>
+</dd>
+</dl>
+<p>register.connect(inputnode, &#8216;subjects_dir&#8217;, aparcxfm, &#8216;subjects_dir&#8217;)
+register.connect(bbregister, &#8216;out_reg_file&#8217;, aparcxfm, &#8216;reg_file&#8217;)
+register.connect(fssource, (&#8216;aparc_aseg&#8217;, get_aparc_aseg),</p>
+<blockquote>
+<div>aparcxfm, &#8216;target_file&#8217;)</div></blockquote>
+<p class="last">register.connect(inputnode, &#8216;mean_image&#8217;, aparcxfm, &#8216;source_file&#8217;)</p>
+</dd>
+</dl>
+<p>Convert the BBRegister transformation to ANTS ITK format</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">convert2itk</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">C3dAffineTool</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2itk&#39;</span><span class="p">)</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fsl2ras</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_fsl_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;transform_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;reference_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute registration between the subject&#8217;s structural and MNI template
+This is currently set to perform a very quick registration. However, the
+registration can be made significantly more accurate for cortical
+structures by increasing the number of iterations
+All parameters are set using the example from:
+#https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">reg</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">Registration</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;antsRegister&#39;</span><span class="p">)</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_transform_prefix</span> <span class="o">=</span> <span class="s">&quot;output_&quot;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Rigid&#39;</span><span class="p">,</span> <span class="s">&#39;Affine&#39;</span><span class="p">,</span> <span class="s">&#39;SyN&#39;</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transform_parameters</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">number_of_iterations</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">11110</span><span class="p">,</span> <span class="mi">11110</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">write_composite_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">collapse_output_transforms</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform_com</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="s">&#39;Mattes&#39;</span><span class="p">,</span> <span class="s">&#39;CC&#39;</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_strategy</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Regular&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_percentage</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_threshold</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e-8</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_window_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smoothing_sigmas</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sigma_units</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;vox&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">shrink_factors</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_estimate_learning_rate_once</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;-c</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="mi">4</span><span class="p">}</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="s">&#39;moving_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span><span class="s">&#39;fixed_image&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Concatenate the affine and ants transforms into a list</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform the mean image. First to anatomical and then to target</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">warpmean = Node(ants.ApplyTransforms(), name=&#8217;warpmean&#8217;)
+warpmean.inputs.input_image_type = 3
+warpmean.inputs.interpolation = &#8216;Linear&#8217;
+warpmean.inputs.invert_transform_flags = [False, False]
+warpmean.inputs.terminal_output = &#8216;file&#8217;
+warpmean.inputs.args = &#8216;&#8211;float&#8217;
+warpmean.inputs.num_threads = 4
+warpmean.plugin_args = {&#8216;sbatch_args&#8217;: &#8216;-c%d&#8217; % 4}</p>
+<p class="last">register.connect(inputnode,&#8217;target_image&#8217;, warpmean,&#8217;reference_image&#8217;)
+register.connect(inputnode, &#8216;mean_image&#8217;, warpmean, &#8216;input_image&#8217;)
+register.connect(merge, &#8216;out&#8217;, warpmean, &#8216;transforms&#8217;)</p>
+</dd>
+</dl>
+<p>Assign all the output files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;warped_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;output_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transformed_mean&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">applyxfm</span><span class="p">,</span> <span class="s">&#39;transformed_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;segmentation_files&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;transformed_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;aparc&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_fsl_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;func2anat_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">register</span>
+</pre></div>
+</div>
+<p>Creates the main preprocessing workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">create_workflow</span><span class="p">(</span><span class="n">files</span><span class="p">,</span>
+                    <span class="n">target_file</span><span class="p">,</span>
+                    <span class="n">subject_id</span><span class="p">,</span>
+                    <span class="n">TR</span><span class="p">,</span>
+                    <span class="n">slice_times</span><span class="p">,</span>
+                    <span class="n">norm_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">num_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                    <span class="n">vol_fwhm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">surf_fwhm</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">lowpass_freq</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">highpass_freq</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">subjects_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                    <span class="n">sink_directory</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span>
+                    <span class="n">target_subject</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;fsaverage3&#39;</span><span class="p">,</span> <span class="s">&#39;fsaverage4&#39;</span><span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;resting&#39;</span><span class="p">):</span>
+
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># Rename files in case they are named identically</span>
+    <span class="n">name_unique</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">Rename</span><span class="p">(</span><span class="n">format_string</span><span class="o">=</span><span class="s">&#39;rest_</span><span class="si">%(run)02d</span><span class="s">&#39;</span><span class="p">),</span>
+                          <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;run&#39;</span><span class="p">],</span>
+                          <span class="n">name</span><span class="o">=</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="n">name_unique</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep_ext</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">name_unique</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">name_unique</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">files</span>
+
+    <span class="n">realign</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">nipy</span><span class="o">.</span><span class="n">SpaceTimeRealigner</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;spacetime_realign&quot;</span><span class="p">)</span>
+    <span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">slice_times</span> <span class="o">=</span> <span class="n">slice_times</span>
+    <span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tr</span> <span class="o">=</span> <span class="n">TR</span>
+    <span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">slice_info</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">realign</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;-c</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="mi">4</span><span class="p">}</span>
+
+
+    <span class="c"># Comute TSNR on realigned data regressing polynomials upto order 2</span>
+    <span class="n">tsnr</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">TSNR</span><span class="p">(</span><span class="n">regress_poly</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;tsnr&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realign</span><span class="p">,</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span> <span class="n">tsnr</span><span class="p">,</span> <span class="s">&quot;in_file&quot;</span><span class="p">)</span>
+
+    <span class="c"># Compute the median image across runs</span>
+    <span class="n">calc_median</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_files&#39;</span><span class="p">],</span>
+                                <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;median_file&#39;</span><span class="p">],</span>
+                                <span class="n">function</span><span class="o">=</span><span class="n">median</span><span class="p">,</span>
+                                <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                       <span class="n">name</span><span class="o">=</span><span class="s">&#39;median&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;detrended_file&#39;</span><span class="p">,</span> <span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Segment and Register</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>registration = create_reg_workflow(name=&#8217;registration&#8217;)
+wf.connect(calc_median, &#8216;median_file&#8217;, registration, &#8216;inputspec.mean_image&#8217;)
+registration.inputs.inputspec.subject_id = subject_id
+registration.inputs.inputspec.subjects_dir = subjects_dir
+registration.inputs.inputspec.target_image = target_file</dd>
+</dl>
+<p>Quantify TSNR in each freesurfer ROI</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><dl class="first docutils">
+<dt>get_roi_tsnr = MapNode(fs.SegStats(default_color_table=True),</dt>
+<dd>iterfield=[&#8216;in_file&#8217;], name=&#8217;get_aparc_tsnr&#8217;)</dd>
+</dl>
+<p class="last">get_roi_tsnr.inputs.avgwf_txt_file = True
+wf.connect(tsnr, &#8216;tsnr_file&#8217;, get_roi_tsnr, &#8216;in_file&#8217;)
+wf.connect(registration, &#8216;outputspec.aparc&#8217;, get_roi_tsnr, &#8216;segmentation_file&#8217;)</p>
+</dd>
+</dl>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></tt> to determine which of the
+images in the functional series are outliers based on deviations in
+intensity or movement.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_differences</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">]</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_norm</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">norm_threshold</span> <span class="o">=</span> <span class="n">norm_threshold</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zintensity_threshold</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_type</span> <span class="o">=</span> <span class="s">&#39;spm_global&#39;</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">parameter_source</span> <span class="o">=</span> <span class="s">&#39;NiPy&#39;</span>
+</pre></div>
+</div>
+<p>Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
+to use 4D. Also <cite>get_vox_dims</cite> function is passed along the input volume of normalise to set the optimal
+voxel sizes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">name_unique</span><span class="p">,</span> <span class="n">realign</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">art</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;realigned_files&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">art</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;par_file&#39;</span><span class="p">,</span> <span class="s">&#39;realignment_parameters&#39;</span><span class="p">)]),</span>
+            <span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">selectindex</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">filename_to_list</span><span class="p">,</span> <span class="n">list_to_filename</span>
+    <span class="k">return</span> <span class="n">list_to_filename</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">files</span><span class="p">))[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+<span class="n">mask</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;getmask&#39;</span><span class="p">)</span>
+<span class="n">mask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;median_file&#39;</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="c"># get segmentation in normalized functional space</span>
+
+<span class="k">def</span> <span class="nf">merge_files</span><span class="p">(</span><span class="n">in1</span><span class="p">,</span> <span class="n">in2</span><span class="p">):</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">in1</span><span class="p">)</span>
+    <span class="n">out_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out_files</span>
+
+<span class="c"># filter some noise</span>
+
+<span class="c"># Compute motion regressors</span>
+<span class="n">motreg</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;motion_params&#39;</span><span class="p">,</span> <span class="s">&#39;order&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;derivatives&#39;</span><span class="p">],</span>
+                       <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_files&#39;</span><span class="p">],</span>
+                       <span class="n">function</span><span class="o">=</span><span class="n">motion_regressors</span><span class="p">,</span>
+                       <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+              <span class="n">name</span><span class="o">=</span><span class="s">&#39;getmotionregress&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="s">&#39;par_file&#39;</span><span class="p">,</span> <span class="n">motreg</span><span class="p">,</span> <span class="s">&#39;motion_params&#39;</span><span class="p">)</span>
+
+<span class="c"># Create a filter to remove motion and art confounds</span>
+<span class="n">createfilter1</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;motion_params&#39;</span><span class="p">,</span> <span class="s">&#39;comp_norm&#39;</span><span class="p">,</span>
+                                           <span class="s">&#39;outliers&#39;</span><span class="p">,</span> <span class="s">&#39;detrend_poly&#39;</span><span class="p">],</span>
+                              <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_files&#39;</span><span class="p">],</span>
+                              <span class="n">function</span><span class="o">=</span><span class="n">build_filter1</span><span class="p">,</span>
+                              <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;makemotionbasedfilter&#39;</span><span class="p">)</span>
+<span class="n">createfilter1</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">detrend_poly</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">motreg</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;motion_params&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;norm_files&#39;</span><span class="p">,</span> <span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;comp_norm&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;outlier_files&#39;</span><span class="p">,</span> <span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;outliers&#39;</span><span class="p">)</span>
+
+
+<span class="n">filter1</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">GLM</span><span class="p">(</span><span class="n">out_f_name</span><span class="o">=</span><span class="s">&#39;F_mcart.nii.gz&#39;</span><span class="p">,</span>
+                          <span class="n">out_pf_name</span><span class="o">=</span><span class="s">&#39;pF_mcart.nii.gz&#39;</span><span class="p">,</span>
+                          <span class="n">demean</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                  <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;design&#39;</span><span class="p">,</span> <span class="s">&#39;out_res_name&#39;</span><span class="p">],</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;filtermotion&#39;</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">rename</span><span class="p">,</span> <span class="s">&#39;_filtermotart&#39;</span><span class="p">),</span>
+           <span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;out_res_name&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;design&#39;</span><span class="p">)</span>
+
+
+<span class="n">createfilter2</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;realigned_file&#39;</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;num_components&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;extra_regressors&#39;</span><span class="p">],</span>
+                                 <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_files&#39;</span><span class="p">],</span>
+                                 <span class="n">function</span><span class="o">=</span><span class="n">extract_noise_components</span><span class="p">,</span>
+                                 <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;realigned_file&#39;</span><span class="p">,</span> <span class="s">&#39;extra_regressors&#39;</span><span class="p">],</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s">&#39;makecompcorrfilter&#39;</span><span class="p">)</span>
+<span class="n">createfilter2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_components</span> <span class="o">=</span> <span class="n">num_components</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">createfilter2</span><span class="p">,</span> <span class="s">&#39;extra_regressors&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;out_res&#39;</span><span class="p">,</span> <span class="n">createfilter2</span><span class="p">,</span> <span class="s">&#39;realigned_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;outputspec.segmentation_files&#39;</span><span class="p">,</span> <span class="n">selectindex</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span>
+           <span class="n">createfilter2</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">)</span>
+
+
+<span class="n">filter2</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">GLM</span><span class="p">(</span><span class="n">out_f_name</span><span class="o">=</span><span class="s">&#39;F.nii.gz&#39;</span><span class="p">,</span>
+                          <span class="n">out_pf_name</span><span class="o">=</span><span class="s">&#39;pF.nii.gz&#39;</span><span class="p">,</span>
+                          <span class="n">demean</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                  <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;design&#39;</span><span class="p">,</span> <span class="s">&#39;out_res_name&#39;</span><span class="p">],</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;filter_noise_nosmooth&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;out_res&#39;</span><span class="p">,</span> <span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter1</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;out_res&#39;</span><span class="p">,</span> <span class="n">rename</span><span class="p">,</span> <span class="s">&#39;_cleaned&#39;</span><span class="p">),</span>
+           <span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;out_res_name&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">createfilter2</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;design&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">,</span> <span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;mask&#39;</span><span class="p">)</span>
+
+<span class="n">bandpass</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;files&#39;</span><span class="p">,</span> <span class="s">&#39;lowpass_freq&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;highpass_freq&#39;</span><span class="p">,</span> <span class="s">&#39;fs&#39;</span><span class="p">],</span>
+                          <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_files&#39;</span><span class="p">],</span>
+                          <span class="n">function</span><span class="o">=</span><span class="n">bandpass_filter</span><span class="p">,</span>
+                          <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s">&#39;bandpass_unsmooth&#39;</span><span class="p">)</span>
+<span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">TR</span>
+<span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">highpass_freq</span> <span class="o">=</span> <span class="n">highpass_freq</span>
+<span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lowpass_freq</span> <span class="o">=</span> <span class="n">lowpass_freq</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;out_res&#39;</span><span class="p">,</span> <span class="n">bandpass</span><span class="p">,</span> <span class="s">&#39;files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Smooth the functional data using
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.IsotropicSmooth</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">smooth</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">IsotropicSmooth</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;smooth&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;in_file&quot;</span><span class="p">])</span>
+<span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="n">vol_fwhm</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandpass</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+
+<span class="n">collector</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;collect_streams&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">smooth</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandpass</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">collector</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform the remaining images. First to anatomical and then to target</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpall</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;input_image&#39;</span><span class="p">],</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpall&#39;</span><span class="p">)</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span> <span class="o">=</span> <span class="n">target_file</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;-c</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="mi">2</span><span class="p">}</span>
+
+<span class="c"># transform to target</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.transforms&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+
+<span class="n">mask_target</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(</span><span class="n">op_string</span><span class="o">=</span><span class="s">&#39;-bin&#39;</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;target_mask&#39;</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.anat2target&#39;</span><span class="p">,</span> <span class="n">mask_target</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+
+<span class="n">maskts</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ApplyMask</span><span class="p">(),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;ts_masker&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;output_image&#39;</span><span class="p">,</span> <span class="n">maskts</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mask_target</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">maskts</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">)</span>
+
+<span class="c"># map to surface</span>
+<span class="c"># extract aparc+aseg ROIs</span>
+<span class="c"># extract subcortical ROIs</span>
+<span class="c"># extract target space ROIs</span>
+<span class="c"># combine subcortical and cortical rois into a single cifti file</span>
+
+<span class="c">#######</span>
+<span class="c"># Convert aparc to subject functional space</span>
+
+<span class="c"># Sample the average time series in aparc ROIs</span>
+<span class="n">sampleaparc</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">SegStats</span><span class="p">(</span><span class="n">default_color_table</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                      <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;summary_file&#39;</span><span class="p">,</span>
+                                 <span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">],</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;aparc_ts&#39;</span><span class="p">)</span>
+<span class="n">sampleaparc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">segment_id</span> <span class="o">=</span> <span class="p">([</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">47</span><span class="p">]</span> <span class="o">+</span>
+                                 <span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">58</span><span class="p">]</span> <span class="o">+</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1001</span><span class="p">,</span> <span class="mi">1036</span><span class="p">)</span> <span class="o">+</span>
+                                 <span class="nb">range</span><span class="p">(</span><span class="mi">2001</span><span class="p">,</span> <span class="mi">2036</span><span class="p">))</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.aparc&#39;</span><span class="p">,</span>
+           <span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;segmentation_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_names</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate appropriate names for output files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="p">(</span><span class="n">split_filename</span><span class="p">,</span> <span class="n">filename_to_list</span><span class="p">,</span>
+                                        <span class="n">list_to_filename</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="n">out_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">out_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">name</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">list_to_filename</span><span class="p">(</span><span class="n">out_names</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">get_names</span><span class="p">,</span> <span class="s">&#39;_avgwf.txt&#39;</span><span class="p">),</span>
+           <span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">get_names</span><span class="p">,</span> <span class="s">&#39;_summary.stats&#39;</span><span class="p">),</span>
+           <span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;summary_file&#39;</span><span class="p">)</span>
+
+<span class="c"># Sample the time series onto the surface of the target surface. Performs</span>
+<span class="c"># sampling into left and right hemisphere</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;target_subject&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;target&#39;</span><span class="p">)</span>
+<span class="n">target</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;target_subject&#39;</span><span class="p">,</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">target_subject</span><span class="p">))</span>
+
+<span class="n">samplerlh</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">SampleToSurface</span><span class="p">(),</span>
+                    <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;source_file&#39;</span><span class="p">],</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;sampler_lh&#39;</span><span class="p">)</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_method</span> <span class="o">=</span> <span class="s">&quot;average&quot;</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_units</span> <span class="o">=</span> <span class="s">&quot;frac&quot;</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interp_method</span> <span class="o">=</span> <span class="s">&quot;trilinear&quot;</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smooth_surf</span> <span class="o">=</span> <span class="n">surf_fwhm</span>
+<span class="c">#samplerlh.inputs.cortex_mask = True</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_type</span> <span class="o">=</span> <span class="s">&#39;niigz&#39;</span>
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">subjects_dir</span>
+
+<span class="n">samplerrh</span> <span class="o">=</span> <span class="n">samplerlh</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="s">&#39;sampler_rh&#39;</span><span class="p">)</span>
+
+<span class="n">samplerlh</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hemi</span> <span class="o">=</span> <span class="s">&#39;lh&#39;</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">samplerlh</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.out_reg_file&#39;</span><span class="p">,</span> <span class="n">samplerlh</span><span class="p">,</span> <span class="s">&#39;reg_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s">&#39;target_subject&#39;</span><span class="p">,</span> <span class="n">samplerlh</span><span class="p">,</span> <span class="s">&#39;target_subject&#39;</span><span class="p">)</span>
+
+<span class="n">samplerrh</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="s">&#39;hemi&#39;</span><span class="p">,</span> <span class="s">&#39;rh&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">collector</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">samplerrh</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.out_reg_file&#39;</span><span class="p">,</span> <span class="n">samplerrh</span><span class="p">,</span> <span class="s">&#39;reg_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s">&#39;target_subject&#39;</span><span class="p">,</span> <span class="n">samplerrh</span><span class="p">,</span> <span class="s">&#39;target_subject&#39;</span><span class="p">)</span>
+
+<span class="c"># Combine left and right hemisphere to text file</span>
+<span class="n">combiner</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">],</span>
+                            <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_file&#39;</span><span class="p">],</span>
+                            <span class="n">function</span><span class="o">=</span><span class="n">combine_hemi</span><span class="p">,</span>
+                            <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                   <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;left&#39;</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">],</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&quot;combiner&quot;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">samplerlh</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">combiner</span><span class="p">,</span> <span class="s">&#39;left&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">samplerrh</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">combiner</span><span class="p">,</span> <span class="s">&#39;right&#39;</span><span class="p">)</span>
+
+<span class="c"># Sample the time series file for each subcortical roi</span>
+<span class="n">ts2txt</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;timeseries_file&#39;</span><span class="p">,</span> <span class="s">&#39;label_file&#39;</span><span class="p">,</span>
+                                       <span class="s">&#39;indices&#39;</span><span class="p">],</span>
+                          <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_file&#39;</span><span class="p">],</span>
+                          <span class="n">function</span><span class="o">=</span><span class="n">extract_subrois</span><span class="p">,</span>
+                          <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                 <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;timeseries_file&#39;</span><span class="p">],</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s">&#39;getsubcortts&#39;</span><span class="p">)</span>
+<span class="n">ts2txt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">47</span><span class="p">]</span> <span class="o">+</span>\
+                        <span class="nb">range</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="mi">58</span><span class="p">]</span>
+<span class="n">ts2txt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">label_file</span> <span class="o">=</span> \
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">((</span><span class="s">&#39;OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_&#39;</span>
+                     <span class="s">&#39;2mm_v2.nii.gz&#39;</span><span class="p">))</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">maskts</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">ts2txt</span><span class="p">,</span> <span class="s">&#39;timeseries_file&#39;</span><span class="p">)</span>
+
+<span class="c">######</span>
+
+<span class="n">substitutions</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;_target_subject_&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s">&#39;_filtermotart_cleaned_bp_trans_masked&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+                 <span class="p">(</span><span class="s">&#39;_filtermotart_cleaned_bp&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+                 <span class="p">]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_smooth</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_ts_masker</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_getsubcortts</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_combiner</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_filtermotion</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_filter_noise_nosmooth</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_makecompcorfilter</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span><span class="s">&quot;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;_get_aparc_tsnr</span><span class="si">%d</span><span class="s">/&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&quot;run</span><span class="si">%d</span><span class="s">_&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+<span class="n">substitutions</span> <span class="o">+=</span> <span class="p">[(</span><span class="s">&quot;T1_out_brain_pve_0_maths_warped&quot;</span><span class="p">,</span> <span class="s">&quot;compcor_csf&quot;</span><span class="p">),</span>
+                  <span class="p">(</span><span class="s">&quot;T1_out_brain_pve_1_maths_warped&quot;</span><span class="p">,</span> <span class="s">&quot;compcor_gm&quot;</span><span class="p">),</span>
+                  <span class="p">(</span><span class="s">&quot;T1_out_brain_pve_2_maths_warped&quot;</span><span class="p">,</span> <span class="s">&quot;compcor_wm&quot;</span><span class="p">),</span>
+                  <span class="p">(</span><span class="s">&quot;output_warped_image_maths&quot;</span><span class="p">,</span> <span class="s">&quot;target_brain_mask&quot;</span><span class="p">),</span>
+                  <span class="p">(</span><span class="s">&quot;median_brain_mask&quot;</span><span class="p">,</span> <span class="s">&quot;native_brain_mask&quot;</span><span class="p">),</span>
+                  <span class="p">(</span><span class="s">&quot;corr_&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)]</span>
+
+<span class="n">regex_subs</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;_combiner.*/sar&#39;</span><span class="p">,</span> <span class="s">&#39;/smooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_combiner.*/ar&#39;</span><span class="p">,</span> <span class="s">&#39;/unsmooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_aparc_ts.*/sar&#39;</span><span class="p">,</span> <span class="s">&#39;/smooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_aparc_ts.*/ar&#39;</span><span class="p">,</span> <span class="s">&#39;/unsmooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_getsubcortts.*/sar&#39;</span><span class="p">,</span> <span class="s">&#39;/smooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_getsubcortts.*/ar&#39;</span><span class="p">,</span> <span class="s">&#39;/unsmooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;series/sar&#39;</span><span class="p">,</span> <span class="s">&#39;series/smooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;series/ar&#39;</span><span class="p">,</span> <span class="s">&#39;series/unsmooth/&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;_inverse_transform./&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+              <span class="p">]</span>
+<span class="c"># Save the relevant data into an output directory</span>
+<span class="n">datasink</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">DataSink</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasink&quot;</span><span class="p">)</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">sink_directory</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">subject_id</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="n">substitutions</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">regexp_substitutions</span> <span class="o">=</span> <span class="n">regex_subs</span> <span class="c">#(r&#39;(/_.*(\d+/))&#39;, r&#39;/run\2&#39;)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="s">&#39;par_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.motion&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;norm_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.art.@norm&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;intensity_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.art.@intensity&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;outlier_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.art.@outlier_files&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.segmentation_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.mask_files&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.anat2target&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.ants&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.mask_files.@brainmask&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mask_target</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.mask_files.target&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;out_f&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.compmaps.@mc_F&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter1</span><span class="p">,</span> <span class="s">&#39;out_pf&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.compmaps.@mc_pF&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;out_f&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.compmaps&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filter2</span><span class="p">,</span> <span class="s">&#39;out_pf&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.compmaps.@p&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.min_cost_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.mincost&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;tsnr_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.qa.tsnr.@map&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">,</span> <span class="s">&#39;resting.qa.tsnr&#39;</span><span class="p">),</span>
+                                      <span class="p">(</span><span class="s">&#39;summary_file&#39;</span><span class="p">,</span> <span class="s">&#39;resting.qa.tsnr.@summary&#39;</span><span class="p">)])])</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bandpass</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.timeseries.@bandpassed&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">smooth</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.timeseries.@smoothed&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">createfilter1</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span>
+           <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.regress.@regressors&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">createfilter2</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span>
+           <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.regress.@compcorr&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">maskts</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.timeseries.target&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;summary_file&#39;</span><span class="p">,</span>
+           <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.parcellations.aparc&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">sampleaparc</span><span class="p">,</span> <span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">,</span>
+           <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.parcellations.aparc.@avgwf&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">ts2txt</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span>
+           <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;resting.parcellations.grayo.@subcortical&#39;</span><span class="p">)</span>
+
+<span class="n">datasink2</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">DataSink</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasink2&quot;</span><span class="p">)</span>
+<span class="n">datasink2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">sink_directory</span>
+<span class="n">datasink2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">subject_id</span>
+<span class="n">datasink2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="n">substitutions</span>
+<span class="n">datasink2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">regexp_substitutions</span> <span class="o">=</span> <span class="n">regex_subs</span> <span class="c">#(r&#39;(/_.*(\d+/))&#39;, r&#39;/run\2&#39;)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">combiner</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span>
+           <span class="n">datasink2</span><span class="p">,</span> <span class="s">&#39;resting.parcellations.grayo.@surface&#39;</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">wf</span>
+</pre></div>
+</div>
+<p>Creates the full workflow including getting information from dicom files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">create_resting_workflow</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">TR</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">TR</span>
+    <span class="n">slice_times</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">slice_times</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dicom_file</span><span class="p">:</span>
+        <span class="n">TR</span><span class="p">,</span> <span class="n">slice_times</span><span class="p">,</span> <span class="n">slice_thickness</span> <span class="o">=</span> <span class="n">get_info</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dicom_file</span><span class="p">)</span>
+        <span class="n">slice_times</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">slice_times</span><span class="p">)</span><span class="o">/</span><span class="mf">1000.</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;resting_&#39;</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">subject_id</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">files</span><span class="o">=</span><span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">],</span>
+                  <span class="n">target_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target_file</span><span class="p">),</span>
+                  <span class="n">subject_id</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">subject_id</span><span class="p">,</span>
+                  <span class="n">TR</span><span class="o">=</span><span class="n">TR</span><span class="p">,</span>
+                  <span class="n">slice_times</span><span class="o">=</span><span class="n">slice_times</span><span class="p">,</span>
+                  <span class="n">vol_fwhm</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">vol_fwhm</span><span class="p">,</span>
+                  <span class="n">surf_fwhm</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">surf_fwhm</span><span class="p">,</span>
+                  <span class="n">norm_threshold</span><span class="o">=</span><span class="mf">2.</span><span class="p">,</span>
+                  <span class="n">subjects_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">fsdir</span><span class="p">),</span>
+                  <span class="n">target_subject</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">target_surfs</span><span class="p">,</span>
+                  <span class="n">lowpass_freq</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">lowpass_freq</span><span class="p">,</span>
+                  <span class="n">highpass_freq</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">highpass_freq</span><span class="p">,</span>
+                  <span class="n">sink_directory</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">sink</span><span class="p">),</span>
+                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">create_workflow</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wf</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">argparse</span> <span class="kn">import</span> <span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">RawTextHelpFormatter</span>
+    <span class="n">defstr</span> <span class="o">=</span> <span class="s">&#39; (default </span><span class="si">%(default)s</span><span class="s">)&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">__doc__</span><span class="p">,</span>
+                            <span class="n">formatter_class</span><span class="o">=</span><span class="n">RawTextHelpFormatter</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-d&quot;</span><span class="p">,</span> <span class="s">&quot;--dicom_file&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;dicom_file&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;a SIEMENS example dicom file from the resting series&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-f&quot;</span><span class="p">,</span> <span class="s">&quot;--files&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;files&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&quot;+&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;4d nifti files for resting state&quot;</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-t&quot;</span><span class="p">,</span> <span class="s">&quot;--target&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;target_file&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;Target in MNI space. Best to use the MindBoggle &quot;</span>
+                              <span class="s">&quot;template - &quot;</span>
+                              <span class="s">&quot;OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz&quot;</span><span class="p">),</span>
+                        <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-s&quot;</span><span class="p">,</span> <span class="s">&quot;--subject_id&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;subject_id&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;FreeSurfer subject id&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--subjects_dir&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;fsdir&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;FreeSurfer subject directory&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--target_surfaces&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;target_surfs&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&quot;+&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;fsaverage5&#39;</span><span class="p">],</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;FreeSurfer target surfaces&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--TR&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;TR&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;TR if dicom not provided in seconds&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--slice_times&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;slice_times&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&quot;+&quot;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Slice onset times in seconds&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--vol_fwhm&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">6.</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;vol_fwhm&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Spatial FWHM&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--surf_fwhm&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">15.</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;surf_fwhm&#39;</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Spatial FWHM&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-l&quot;</span><span class="p">,</span> <span class="s">&quot;--lowpass_freq&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;lowpass_freq&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Low pass frequency (Hz)&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-u&quot;</span><span class="p">,</span> <span class="s">&quot;--highpass_freq&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;highpass_freq&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;High pass frequency (Hz)&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span> <span class="s">&quot;--output_dir&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;sink&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Output directory base&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-w&quot;</span><span class="p">,</span> <span class="s">&quot;--work_dir&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;work_dir&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Output directory base&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-p&quot;</span><span class="p">,</span> <span class="s">&quot;--plugin&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;plugin&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s">&#39;Linear&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Plugin to use&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--plugin_args&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;plugin_args&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Plugin arguments&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">create_resting_workflow</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">work_dir</span><span class="p">:</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">work_dir</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+    <span class="n">wf</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">work_dir</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">plugin_args</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="n">plugin_args</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin_args</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/rsfmri_vol_surface_preprocessing_nipy.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+This same script is also included in the Nipype source distribution under the
+<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

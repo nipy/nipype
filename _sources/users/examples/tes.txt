@@ -1,0 +1,23 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+.. _example_tes:
+
+
+Created on 22 Oct 2014
+
+@author: filo
+
+::
+  a = 6
+  b = a +7
+
+.. include:: ../../links_names.txt
+
+
+        
+.. admonition:: Example source code
+
+   You can download :download:`the full source code of this example <../../../examples/tes.py>`.
+   This same script is also included in the Nipype source distribution under the
+   :file:`examples` directory.
+

@@ -1,0 +1,1962 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.fsl.utils
+====================
+
+
+.. _nipype.interfaces.fsl.utils.AvScale:
+
+
+.. index:: AvScale
+
+AvScale
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L554>`__
+
+Wraps command **avscale**
+
+Use FSL avscale command to extract info from mat file output of FLIRT
+
+Examples
+~~~~~~~~
+
+>>> avscale = AvScale()
+>>> avscale.inputs.mat_file = 'flirt.mat'
+>>> res = avscale.run()  # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mat_file: (an existing file name)
+                mat file to read
+                flag: %s, position: 0
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        average_scaling: (any value)
+                Average Scaling
+        backward_half_transform: (any value)
+                Backwards Half Transform
+        determinant: (any value)
+                Determinant
+        forward_half_transform: (any value)
+                Forward Half Transform
+        left_right_orientation_preserved: (a boolean)
+                True if LR orientation preserved
+        rotation_translation_matrix: (any value)
+                Rotation and Translation Matrix
+        scales: (any value)
+                Scales (x,y,z)
+        skews: (any value)
+                Skews
+
+.. _nipype.interfaces.fsl.utils.Complex:
+
+
+.. index:: Complex
+
+Complex
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1434>`__
+
+Wraps command **fslcomplex**
+
+fslcomplex is a tool for converting complex data
+
+Examples
+~~~~~~~~
+
+>>> cplx = Complex()
+>>> cplx.inputs.complex_in_file = "complex.nii"
+>>> cplx.real_polar = True
+>>> res = cplx.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        complex_cartesian: (a boolean)
+                flag: -complex, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        complex_in_file: (an existing file name)
+                flag: %s, position: 2
+        complex_in_file2: (an existing file name)
+                flag: %s, position: 3
+        complex_merge: (a boolean)
+                flag: -complexmerge, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge, start_vol, end_vol
+        complex_out_file: (a file name)
+                flag: %s, position: -3
+                mutually_exclusive: complex_out_file, magnitude_out_file,
+                 phase_out_file, real_out_file, imaginary_out_file, real_polar,
+                 real_cartesian
+        complex_polar: (a boolean)
+                flag: -complexpolar, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        complex_split: (a boolean)
+                flag: -complexsplit, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        end_vol: (an integer)
+                flag: %d, position: -1
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        imaginary_in_file: (an existing file name)
+                flag: %s, position: 3
+        imaginary_out_file: (a file name)
+                flag: %s, position: -3
+                mutually_exclusive: complex_out_file, magnitude_out_file,
+                 phase_out_file, real_polar, complex_cartesian, complex_polar,
+                 complex_split, complex_merge
+        magnitude_in_file: (an existing file name)
+                flag: %s, position: 2
+        magnitude_out_file: (a file name)
+                flag: %s, position: -4
+                mutually_exclusive: complex_out_file, real_out_file,
+                 imaginary_out_file, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        phase_in_file: (an existing file name)
+                flag: %s, position: 3
+        phase_out_file: (a file name)
+                flag: %s, position: -3
+                mutually_exclusive: complex_out_file, real_out_file,
+                 imaginary_out_file, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        real_cartesian: (a boolean)
+                flag: -realcartesian, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        real_in_file: (an existing file name)
+                flag: %s, position: 2
+        real_out_file: (a file name)
+                flag: %s, position: -4
+                mutually_exclusive: complex_out_file, magnitude_out_file,
+                 phase_out_file, real_polar, complex_cartesian, complex_polar,
+                 complex_split, complex_merge
+        real_polar: (a boolean)
+                flag: -realpolar, position: 1
+                mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+                 complex_polar, complex_split, complex_merge
+        start_vol: (an integer)
+                flag: %d, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        complex_out_file: (a file name)
+        imaginary_out_file: (a file name)
+        magnitude_out_file: (a file name)
+        phase_out_file: (a file name)
+        real_out_file: (a file name)
+
+.. _nipype.interfaces.fsl.utils.ConvertWarp:
+
+
+.. index:: ConvertWarp
+
+ConvertWarp
+-----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1698>`__
+
+Wraps command **convertwarp**
+
+Use FSL `convertwarp <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
+for combining multiple transforms into one.
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import ConvertWarp
+>>> warputils = ConvertWarp()
+>>> warputils.inputs.warp1 = "warpfield.nii"
+>>> warputils.inputs.reference = "T1.nii"
+>>> warputils.inputs.relwarp = True
+>>> warputils.inputs.output_type = "NIFTI_GZ"
+>>> warputils.cmdline # doctest: +ELLIPSIS
+'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
+>>> res = invwarp.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        reference: (an existing file name)
+                Name of a file in target space of the full transform.
+                flag: --ref=%s, position: 1
+
+        [Optional]
+        abswarp: (a boolean)
+                If set it indicates that the warps in --warp1 and --warp2 should be
+                interpreted as absolute. I.e. the values in --warp1/2 are the
+                coordinates in the next space, rather than displacements. This flag
+                is ignored if --warp1/2 was created by fnirt, which always creates
+                relative displacements.
+                flag: --abs
+                mutually_exclusive: relwarp
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        cons_jacobian: (a boolean)
+                Constrain the Jacobian of the warpfield to lie within specified
+                min/max limits.
+                flag: --constrainj
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        jacobian_max: (a float)
+                Maximum acceptable Jacobian value for constraint (default 100.0)
+                flag: --jmax=%f
+        jacobian_min: (a float)
+                Minimum acceptable Jacobian value for constraint (default 0.01)
+                flag: --jmin=%f
+        midmat: (an existing file name)
+                Name of file containing mid-warp-affine transform
+                flag: --midmat=%s
+        out_abswarp: (a boolean)
+                If set it indicates that the warps in --out should be absolute, i.e.
+                the values in --out are displacements from the coordinates in --ref.
+                flag: --absout
+                mutually_exclusive: out_relwarp
+        out_file: (a file name)
+                Name of output file, containing warps that are the combination of
+                all those given as arguments. The format of this will be a field-
+                file (rather than spline coefficients) with any affine components
+                included.
+                flag: --out=%s, position: -1
+        out_relwarp: (a boolean)
+                If set it indicates that the warps in --out should be relative, i.e.
+                the values in --out are displacements from the coordinates in --ref.
+                flag: --relout
+                mutually_exclusive: out_abswarp
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        postmat: (an existing file name)
+                Name of file containing an affine transform (applied last). It could
+                e.g. be an affine transform that maps the MNI152-space into a better
+                approximation to the Talairach-space (if indeed there is one).
+                flag: --postmat=%s
+        premat: (an existing file name)
+                filename for pre-transform (affine matrix)
+                flag: --premat=%s
+        relwarp: (a boolean)
+                If set it indicates that the warps in --warp1/2 should be
+                interpreted as relative. I.e. the values in --warp1/2 are
+                displacements from the coordinates in the next space.
+                flag: --rel
+                mutually_exclusive: abswarp
+        shift_direction: ('y-' or 'y' or 'x' or 'x-' or 'z' or 'z-')
+                Indicates the direction that the distortions from --shiftmap goes.
+                It depends on the direction and polarity of the phase-encoding in
+                the EPI sequence.
+                flag: --shiftdir=%s
+                requires: shift_in_file
+        shift_in_file: (an existing file name)
+                Name of file containing a "shiftmap", a non-linear transform with
+                displacements only in one direction (applied first, before premat).
+                This would typically be a fieldmap that has been pre-processed using
+                fugue that maps a subjects functional (EPI) data onto an undistorted
+                space (i.e. a space that corresponds to his/her true anatomy).
+                flag: --shiftmap=%s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        warp1: (an existing file name)
+                Name of file containing initial warp-fields/coefficients (follows
+                premat). This could e.g. be a fnirt-transform from a subjects
+                structural scan to an average of a group of subjects.
+                flag: --warp1=%s
+        warp2: (an existing file name)
+                Name of file containing secondary warp-fields/coefficients (after
+                warp1/midmat but before postmat). This could e.g. be a fnirt-
+                transform from the average of a group of subjects to some standard
+                space (e.g. MNI152).
+                flag: --warp2=%s
+
+Outputs::
+
+        out_file: (an existing file name)
+                Name of output file, containing the warp as field or coefficients.
+
+.. _nipype.interfaces.fsl.utils.ConvertXFM:
+
+
+.. index:: ConvertXFM
+
+ConvertXFM
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1050>`__
+
+Wraps command **convert_xfm**
+
+Use the FSL utility convert_xfm to modify FLIRT transformation matrices.
+
+Examples
+~~~~~~~~
+
+>>> import nipype.interfaces.fsl as fsl
+>>> invt = fsl.ConvertXFM()
+>>> invt.inputs.in_file = "flirt.mat"
+>>> invt.inputs.invert_xfm = True
+>>> invt.inputs.out_file = 'flirt_inv.mat'
+>>> invt.cmdline
+'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input transformation matrix
+                flag: %s, position: -1
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        concat_xfm: (a boolean)
+                write joint transformation of two input matrices
+                flag: -concat, position: -3
+                mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+                requires: in_file2
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fix_scale_skew: (a boolean)
+                use secondary matrix to fix scale and skew
+                flag: -fixscaleskew, position: -3
+                mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+                requires: in_file2
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        in_file2: (an existing file name)
+                second input matrix (for use with fix_scale_skew or concat_xfm
+                flag: %s, position: -2
+        invert_xfm: (a boolean)
+                invert input transformation
+                flag: -inverse, position: -3
+                mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+        out_file: (a file name)
+                final transformation matrix
+                flag: -omat %s, position: 1
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+                output transformation matrix
+
+.. _nipype.interfaces.fsl.utils.ExtractROI:
+
+
+.. index:: ExtractROI
+
+ExtractROI
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L217>`__
+
+Wraps command **fslroi**
+
+Uses FSL Fslroi command to extract region of interest (ROI)
+from an image.
+
+You can a) take a 3D ROI from a 3D data set (or if it is 4D, the
+same ROI is taken from each time point and a new 4D data set is
+created), b) extract just some time points from a 4D data set, or
+c) control time and space limits to the ROI.  Note that the
+arguments are minimum index and size (not maximum index).  So to
+extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
+10 and 12).
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import ExtractROI
+>>> from nipype.testing import anatfile
+>>> fslroi = ExtractROI(in_file=anatfile, roi_file='bar.nii', t_min=0,
+...                     t_size=1)
+>>> fslroi.cmdline == 'fslroi %s bar.nii 0 1' % anatfile
+True
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input file
+                flag: %s, position: 0
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        crop_list: (a list of items which are a tuple of the form: (an
+                 integer, an integer))
+                list of two tuples specifying crop options
+                flag: %s, position: 2
+                mutually_exclusive: x_min, x_size, y_min, y_size, z_min, z_size,
+                 t_min, t_size
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        roi_file: (a file name)
+                output file
+                flag: %s, position: 1
+        t_min: (an integer)
+                flag: %d, position: 8
+        t_size: (an integer)
+                flag: %d, position: 9
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        x_min: (an integer)
+                flag: %d, position: 2
+        x_size: (an integer)
+                flag: %d, position: 3
+        y_min: (an integer)
+                flag: %d, position: 4
+        y_size: (an integer)
+                flag: %d, position: 5
+        z_min: (an integer)
+                flag: %d, position: 6
+        z_size: (an integer)
+                flag: %d, position: 7
+
+Outputs::
+
+        roi_file: (an existing file name)
+
+.. _nipype.interfaces.fsl.utils.FilterRegressor:
+
+
+.. index:: FilterRegressor
+
+FilterRegressor
+---------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L422>`__
+
+Wraps command **fsl_regfilt**
+
+Data de-noising by regressing out part of a design matrix
+
+Uses simple OLS regression on 4D images
+
+Inputs::
+
+        [Mandatory]
+        design_file: (an existing file name)
+                name of the matrix with time courses (e.g. GLM design or MELODIC
+                mixing matrix)
+                flag: -d %s, position: 3
+        filter_all: (a boolean)
+                use all columns in the design file in denoising
+                flag: -f '%s', position: 4
+                mutually_exclusive: filter_columns
+        filter_columns: (a list of items which are an integer)
+                (1-based) column indices to filter out of the data
+                flag: -f '%s', position: 4
+                mutually_exclusive: filter_all
+        in_file: (an existing file name)
+                input file name (4D image)
+                flag: -i %s, position: 1
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mask: (an existing file name)
+                mask image file name
+                flag: -m %s
+        out_file: (a file name)
+                output file name for the filtered data
+                flag: -o %s, position: 2
+        out_vnscales: (a boolean)
+                output scaling factors for variance normalization
+                flag: --out_vnscales
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        var_norm: (a boolean)
+                perform variance-normalization on data
+                flag: --vn
+
+Outputs::
+
+        out_file: (an existing file name)
+                output file name for the filtered data
+
+.. _nipype.interfaces.fsl.utils.ImageMaths:
+
+
+.. index:: ImageMaths
+
+ImageMaths
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L348>`__
+
+Wraps command **fslmaths**
+
+Use FSL fslmaths command to allow mathematical manipulation of images
+`FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces import fsl
+>>> from nipype.testing import anatfile
+>>> maths = fsl.ImageMaths(in_file=anatfile, op_string= '-add 5',
+...                        out_file='foo_maths.nii')
+>>> maths.cmdline == 'fslmaths %s -add 5 foo_maths.nii' % anatfile
+True
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                flag: %s, position: 1
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        in_file2: (an existing file name)
+                flag: %s, position: 3
+        op_string: (a string)
+                string defining the operation, i. e. -add
+                flag: %s, position: 2
+        out_data_type: ('char' or 'short' or 'int' or 'float' or 'double' or
+                 'input')
+                output datatype, one of (char, short, int, float, double, input)
+                flag: -odt %s, position: 5
+        out_file: (a file name)
+                flag: %s, position: 4
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        suffix: (a string)
+                out_file suffix
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+
+.. _nipype.interfaces.fsl.utils.ImageMeants:
+
+
+.. index:: ImageMeants
+
+ImageMeants
+-----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L64>`__
+
+Wraps command **fslmeants**
+
+Use fslmeants for printing the average timeseries (intensities) to
+the screen (or saves to a file). The average is taken over all voxels in
+the mask (or all voxels in the image if no mask is specified)
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input file for computing the average timeseries
+                flag: -i %s, position: 0
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        eig: (a boolean)
+                calculate Eigenvariate(s) instead of mean (output will have 0 mean)
+                flag: --eig
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mask: (an existing file name)
+                input 3D mask
+                flag: -m %s
+        nobin: (a boolean)
+                do not binarise the mask for calculation of Eigenvariates
+                flag: --no_bin
+        order: (an integer, nipype default value: 1)
+                select number of Eigenvariates
+                flag: --order=%d
+        out_file: (a file name)
+                name of output text matrix
+                flag: -o %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        show_all: (a boolean)
+                show all voxel time series (within mask) instead of averaging
+                flag: --showall
+        spatial_coord: (a list of items which are an integer)
+                <x y z> requested spatial coordinate (instead of mask)
+                flag: -c %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        transpose: (a boolean)
+                output results in transpose format (one row per voxel/mean)
+                flag: --transpose
+        use_mm: (a boolean)
+                use mm instead of voxel coordinates (for -c option)
+                flag: --usemm
+
+Outputs::
+
+        out_file: (an existing file name)
+                path/name of output text matrix
+
+.. _nipype.interfaces.fsl.utils.ImageStats:
+
+
+.. index:: ImageStats
+
+ImageStats
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L477>`__
+
+Wraps command **fslstats**
+
+Use FSL fslstats command to calculate stats from images
+`FSL info
+<http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import ImageStats
+>>> from nipype.testing import funcfile
+>>> stats = ImageStats(in_file=funcfile, op_string= '-M')
+>>> stats.cmdline == 'fslstats %s -M'%funcfile
+True
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input file to generate stats of
+                flag: %s, position: 2
+        op_string: (a string)
+                string defining the operation, options are applied in order, e.g. -M
+                -l 10 -M will report the non-zero mean, apply a threshold and then
+                report the new nonzero mean
+                flag: %s, position: 3
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mask_file: (an existing file name)
+                mask file used for option -k %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        split_4d: (a boolean)
+                give a separate output line for each 3D volume of a 4D timeseries
+                flag: -t, position: 1
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_stat: (any value)
+                stats output
+
+.. _nipype.interfaces.fsl.utils.InvWarp:
+
+
+.. index:: InvWarp
+
+InvWarp
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1350>`__
+
+Wraps command **invwarp**
+
+Use FSL Invwarp to invert a FNIRT warp
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import InvWarp
+>>> invwarp = InvWarp()
+>>> invwarp.inputs.warp = "struct2mni.nii"
+>>> invwarp.inputs.reference = "anatomical.nii"
+>>> invwarp.inputs.output_type = "NIFTI_GZ"
+>>> invwarp.cmdline
+'invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii'
+>>> res = invwarp.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        reference: (an existing file name)
+                Name of a file in target space. Note that the target space is now
+                different from the target space that was used to create the --warp
+                file. It would typically be the file that was specified with the
+                --in argument when running fnirt.
+                flag: --ref=%s
+        warp: (an existing file name)
+                Name of file containing warp-coefficients/fields. This would
+                typically be the output from the --cout switch of fnirt (but can
+                also use fields, like the output from --fout).
+                flag: --warp=%s
+
+        [Optional]
+        absolute: (a boolean)
+                If set it indicates that the warps in --warp should be interpreted
+                as absolute, provided that it is not created by fnirt (which always
+                uses relative warps). If set it also indicates that the output --out
+                should be absolute.
+                flag: --abs
+                mutually_exclusive: relative
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inverse_warp: (a file name)
+                Name of output file, containing warps that are the "reverse" of
+                those in --warp. This will be a field-file (rather than a file of
+                spline coefficients), and it will have any affine component included
+                as part of the displacements.
+                flag: --out=%s
+        jacobian_max: (a float)
+                Maximum acceptable Jacobian value for constraint (default 100.0)
+                flag: --jmax=%f
+        jacobian_min: (a float)
+                Minimum acceptable Jacobian value for constraint (default 0.01)
+                flag: --jmin=%f
+        niter: (an integer)
+                Determines how many iterations of the gradient-descent search that
+                should be run.
+                flag: --niter=%d
+        noconstraint: (a boolean)
+                Do not apply Jacobian constraint
+                flag: --noconstraint
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        regularise: (a float)
+                Regularization strength (deafult=1.0).
+                flag: --regularise=%f
+        relative: (a boolean)
+                If set it indicates that the warps in --warp should be interpreted
+                as relative. I.e. the values in --warp are displacements from the
+                coordinates in the --ref space. If set it also indicates that the
+                output --out should be relative.
+                flag: --rel
+                mutually_exclusive: absolute
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        inverse_warp: (an existing file name)
+                Name of output file, containing warps that are the "reverse" of
+                those in --warp.
+
+.. _nipype.interfaces.fsl.utils.Merge:
+
+
+.. index:: Merge
+
+Merge
+-----
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L150>`__
+
+Wraps command **fslmerge**
+
+Use fslmerge to concatenate images
+
+Images can be concatenated across time, x, y, or z dimensions. Across the
+time (t) dimension the TR is set by default to 1 sec.
+
+Note: to set the TR to a different value, specify 't' for dimension and
+specify the TR value in seconds for the tr input. The dimension will be
+automatically updated to 'tr'.
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import Merge
+>>> merger = Merge()
+>>> merger.inputs.in_files = ['functional2.nii', 'functional3.nii']
+>>> merger.inputs.dimension = 't'
+>>> merger.inputs.output_type = 'NIFTI_GZ'
+>>> merger.cmdline
+'fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii'
+>>> merger.inputs.tr = 2.25
+>>> merger.cmdline
+'fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25'
+
+Inputs::
+
+        [Mandatory]
+        dimension: ('t' or 'x' or 'y' or 'z' or 'a')
+                dimension along which to merge, optionally set tr input when
+                dimension is t
+                flag: -%s, position: 0
+        in_files: (a list of items which are an existing file name)
+                flag: %s, position: 2
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        merged_file: (a file name)
+                flag: %s, position: 1
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        tr: (a float)
+                use to specify TR in seconds (default is 1.00 sec), overrides
+                dimension and sets it to tr
+                flag: %.2f, position: -1
+
+Outputs::
+
+        merged_file: (an existing file name)
+
+.. _nipype.interfaces.fsl.utils.Overlay:
+
+
+.. index:: Overlay
+
+Overlay
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L648>`__
+
+Wraps command **overlay**
+
+Use FSL's overlay command to combine background and statistical images
+    into one volume
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces import fsl
+>>> combine = fsl.Overlay()
+>>> combine.inputs.background_image = 'mean_func.nii.gz'
+>>> combine.inputs.auto_thresh_bg = True
+>>> combine.inputs.stat_image = 'zstat1.nii.gz'
+>>> combine.inputs.stat_thresh = (3.5, 10)
+>>> combine.inputs.show_negative_stats = True
+>>> res = combine.run() #doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        auto_thresh_bg: (a boolean)
+                automatically threshold the background image
+                flag: -a, position: 5
+                mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+        background_image: (an existing file name)
+                image to use as background
+                flag: %s, position: 4
+        bg_thresh: (a tuple of the form: (a float, a float))
+                min and max values for background intensity
+                flag: %.3f %.3f, position: 5
+                mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+        full_bg_range: (a boolean)
+                use full range of background image
+                flag: -A, position: 5
+                mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+        stat_image: (an existing file name)
+                statistical image to overlay in color
+                flag: %s, position: 6
+        stat_thresh: (a tuple of the form: (a float, a float))
+                min and max values for the statistical overlay
+                flag: %.2f %.2f, position: 7
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                combined image volume
+                flag: %s, position: -1
+        out_type: ('float' or 'int', nipype default value: float)
+                write output with float or int
+                flag: %s, position: 2
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        show_negative_stats: (a boolean)
+                display negative statistics in overlay
+                flag: %s, position: 8
+                mutually_exclusive: stat_image2
+        stat_image2: (an existing file name)
+                second statistical image to overlay in color
+                flag: %s, position: 9
+                mutually_exclusive: show_negative_stats
+        stat_thresh2: (a tuple of the form: (a float, a float))
+                min and max values for second statistical overlay
+                flag: %.2f %.2f, position: 10
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        transparency: (a boolean, nipype default value: True)
+                make overlay colors semi-transparent
+                flag: %s, position: 1
+        use_checkerboard: (a boolean)
+                use checkerboard mask for overlay
+                flag: -c, position: 3
+
+Outputs::
+
+        out_file: (an existing file name)
+                combined image volume
+
+.. _nipype.interfaces.fsl.utils.PlotMotionParams:
+
+
+.. index:: PlotMotionParams
+
+PlotMotionParams
+----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L937>`__
+
+Wraps command **fsl_tsplot**
+
+Use fsl_tsplot to plot the estimated motion parameters from a realignment
+program.
+
+
+Examples
+~~~~~~~~
+
+>>> import nipype.interfaces.fsl as fsl
+>>> plotter = fsl.PlotMotionParams()
+>>> plotter.inputs.in_file = 'functional.par'
+>>> plotter.inputs.in_source = 'fsl'
+>>> plotter.inputs.plot_type = 'rotations'
+>>> res = plotter.run() #doctest: +SKIP
+
+
+Notes
+~~~~~
+
+The 'in_source' attribute determines the order of columns that are expected
+in the source file.  FSL prints motion parameters in the order rotations,
+translations, while SPM prints them in the opposite order.  This interface
+should be able to plot timecourses of motion parameters generated from other
+sources as long as they fall under one of these two patterns.  For more
+flexibilty, see the :class:`fsl.PlotTimeSeries` interface.
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name or a list of items which are an
+                 existing file name)
+                file with motion parameters
+                flag: %s, position: 1
+        in_source: ('spm' or 'fsl')
+                which program generated the motion parameter file - fsl, spm
+        plot_type: ('rotations' or 'translations' or 'displacement')
+                which motion type to plot - rotations, translations, displacement
+                flag: %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                image to write
+                flag: -o %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        plot_size: (a tuple of the form: (an integer, an integer))
+                plot image height and width
+                flag: %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+                image to write
+
+.. _nipype.interfaces.fsl.utils.PlotTimeSeries:
+
+
+.. index:: PlotTimeSeries
+
+PlotTimeSeries
+--------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L854>`__
+
+Wraps command **fsl_tsplot**
+
+Use fsl_tsplot to create images of time course plots.
+
+Examples
+~~~~~~~~
+
+>>> import nipype.interfaces.fsl as fsl
+>>> plotter = fsl.PlotTimeSeries()
+>>> plotter.inputs.in_file = 'functional.par'
+>>> plotter.inputs.title = 'Functional timeseries'
+>>> plotter.inputs.labels = ['run1', 'run2']
+>>> plotter.run() #doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name or a list of items which are an
+                 existing file name)
+                file or list of files with columns of timecourse information
+                flag: %s, position: 1
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        labels: (a string or a list of items which are a string)
+                label or list of labels
+                flag: %s
+        legend_file: (an existing file name)
+                legend file
+                flag: --legend=%s
+        out_file: (a file name)
+                image to write
+                flag: -o %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        plot_finish: (an integer)
+                final column from in-file to plot
+                flag: --finish=%d
+                mutually_exclusive: plot_range
+        plot_range: (a tuple of the form: (an integer, an integer))
+                first and last columns from the in-file to plot
+                flag: %s
+                mutually_exclusive: plot_start, plot_finish
+        plot_size: (a tuple of the form: (an integer, an integer))
+                plot image height and width
+                flag: %s
+        plot_start: (an integer)
+                first column from in-file to plot
+                flag: --start=%d
+                mutually_exclusive: plot_range
+        sci_notation: (a boolean)
+                switch on scientific notation
+                flag: --sci
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        title: (a string)
+                plot title
+                flag: %s
+        x_precision: (an integer)
+                precision of x-axis labels
+                flag: --precision=%d
+        x_units: (an integer, nipype default value: 1)
+                scaling units for x-axis (between 1 and length of in file)
+                flag: -u %d
+        y_max: (a float)
+                maximum y value
+                flag: --ymax=%.2f
+                mutually_exclusive: y_range
+        y_min: (a float)
+                minumum y value
+                flag: --ymin=%.2f
+                mutually_exclusive: y_range
+        y_range: (a tuple of the form: (a float, a float))
+                min and max y axis values
+                flag: %s
+                mutually_exclusive: y_min, y_max
+
+Outputs::
+
+        out_file: (an existing file name)
+                image to write
+
+.. _nipype.interfaces.fsl.utils.PowerSpectrum:
+
+
+.. index:: PowerSpectrum
+
+PowerSpectrum
+-------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1163>`__
+
+Wraps command **fslpspec**
+
+Use FSL PowerSpectrum command for power spectrum estimation.
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces import fsl
+>>> pspec = fsl.PowerSpectrum()
+>>> pspec.inputs.in_file = 'functional.nii'
+>>> res = pspec.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input 4D file to estimate the power spectrum
+                flag: %s, position: 0
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                name of output 4D file for power spectrum
+                flag: %s, position: 1
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+                path/name of the output 4D power spectrum file
+
+.. _nipype.interfaces.fsl.utils.Reorient2Std:
+
+
+.. index:: Reorient2Std
+
+Reorient2Std
+------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1261>`__
+
+Wraps command **fslreorient2std**
+
+fslreorient2std is a tool for reorienting the image to match the
+approximate orientation of the standard template images (MNI152).
+
+
+Examples
+~~~~~~~~
+
+>>> reorient = Reorient2Std()
+>>> reorient.inputs.in_file = "functional.nii"
+>>> res = reorient.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                flag: %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                flag: %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+
+.. _nipype.interfaces.fsl.utils.SigLoss:
+
+
+.. index:: SigLoss
+
+SigLoss
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1220>`__
+
+Wraps command **sigloss**
+
+Estimates signal loss from a field map (in rad/s)
+
+Examples
+~~~~~~~~
+
+>>> sigloss = SigLoss()
+>>> sigloss.inputs.in_file = "phase.nii"
+>>> sigloss.inputs.echo_time = 0.03
+>>> res = sigloss.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                b0 fieldmap file
+                flag: -i %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        echo_time: (a float)
+                echo time in seconds
+                flag: --te=%f
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mask_file: (an existing file name)
+                brain mask file
+                flag: -m %s
+        out_file: (a file name)
+                output signal loss estimate file
+                flag: -s %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        slice_direction: ('x' or 'y' or 'z')
+                slicing direction
+                flag: -d %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+                signal loss estimate file
+
+.. _nipype.interfaces.fsl.utils.Slicer:
+
+
+.. index:: Slicer
+
+Slicer
+------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L763>`__
+
+Wraps command **slicer**
+
+Use FSL's slicer command to output a png image from a volume.
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces import fsl
+>>> from nipype.testing import example_data
+>>> slice = fsl.Slicer()
+>>> slice.inputs.in_file = example_data('functional.nii')
+>>> slice.inputs.all_axial = True
+>>> slice.inputs.image_width = 750
+>>> res = slice.run() #doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input volume
+                flag: %s, position: 1
+
+        [Optional]
+        all_axial: (a boolean)
+                output all axial slices into one picture
+                flag: -A, position: 10
+                mutually_exclusive: single_slice, middle_slices, all_axial,
+                 sample_axial
+                requires: image_width
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        colour_map: (an existing file name)
+                use different colour map from that stored in nifti header
+                flag: -l %s, position: 4
+        dither_edges: (a boolean)
+                produce semi-transparent (dithered) edges
+                flag: -t, position: 7
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        image_edges: (an existing file name)
+                volume to display edge overlay for (useful for checking registration
+                flag: %s, position: 2
+        image_width: (an integer)
+                max picture width
+                flag: %d, position: -2
+        intensity_range: (a tuple of the form: (a float, a float))
+                min and max intensities to display
+                flag: -i %.3f %.3f, position: 5
+        label_slices: (a boolean, nipype default value: True)
+                display slice number
+                flag: -L, position: 3
+        middle_slices: (a boolean)
+                output picture of mid-sagittal, axial, and coronal slices
+                flag: -a, position: 10
+                mutually_exclusive: single_slice, middle_slices, all_axial,
+                 sample_axial
+        nearest_neighbour: (a boolean)
+                use nearest neighbor interpolation for output
+                flag: -n, position: 8
+        out_file: (a file name)
+                picture to write
+                flag: %s, position: -1
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        sample_axial: (an integer)
+                output every n axial slices into one picture
+                flag: -S %d, position: 10
+                mutually_exclusive: single_slice, middle_slices, all_axial,
+                 sample_axial
+                requires: image_width
+        scaling: (a float)
+                image scale
+                flag: -s %f, position: 0
+        show_orientation: (a boolean, nipype default value: True)
+                label left-right orientation
+                flag: %s, position: 9
+        single_slice: ('x' or 'y' or 'z')
+                output picture of single slice in the x, y, or z plane
+                flag: -%s, position: 10
+                mutually_exclusive: single_slice, middle_slices, all_axial,
+                 sample_axial
+                requires: slice_number
+        slice_number: (an integer)
+                slice number to save in picture
+                flag: -%d, position: 11
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        threshold_edges: (a float)
+                use threshold for edges
+                flag: -e %.3f, position: 6
+
+Outputs::
+
+        out_file: (an existing file name)
+                picture to write
+
+.. _nipype.interfaces.fsl.utils.Smooth:
+
+
+.. index:: Smooth
+
+Smooth
+------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L103>`__
+
+Wraps command **fslmaths**
+
+Use fslmaths to smooth the image
+
+Inputs::
+
+        [Mandatory]
+        fwhm: (a float)
+                flag: -kernel gauss %f -fmean, position: 1
+        in_file: (an existing file name)
+                flag: %s, position: 0
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        smoothed_file: (a file name)
+                flag: %s, position: 2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        smoothed_file: (an existing file name)
+
+.. _nipype.interfaces.fsl.utils.Split:
+
+
+.. index:: Split
+
+Split
+-----
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L297>`__
+
+Wraps command **fslsplit**
+
+Uses FSL Fslsplit command to separate a volume into images in
+time, x, y or z dimension.
+
+Inputs::
+
+        [Mandatory]
+        dimension: ('t' or 'x' or 'y' or 'z')
+                dimension along which the file will be split
+                flag: -%s, position: 2
+        in_file: (an existing file name)
+                input filename
+                flag: %s, position: 0
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_base_name: (a string)
+                outputs prefix
+                flag: %s, position: 1
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_files: (a list of items which are an existing file name)
+
+.. _nipype.interfaces.fsl.utils.SwapDimensions:
+
+
+.. index:: SwapDimensions
+
+SwapDimensions
+--------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1121>`__
+
+Wraps command **fslswapdim**
+
+Use fslswapdim to alter the orientation of an image.
+
+This interface accepts a three-tuple corresponding to the new
+orientation.  You may either provide dimension ids in the form of
+(-)x, (-)y, or (-z), or nifti-syle dimension codes (RL, LR, AP, PA, IS, SI).
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                input image
+                flag: %s, position: 1
+        new_dims: (a tuple of the form: ('x' or '-x' or 'y' or '-y' or 'z' or
+                 '-z' or 'RL' or 'LR' or 'AP' or 'PA' or 'IS' or 'SI', 'x' or '-x'
+                 or 'y' or '-y' or 'z' or '-z' or 'RL' or 'LR' or 'AP' or 'PA' or
+                 'IS' or 'SI', 'x' or '-x' or 'y' or '-y' or 'z' or '-z' or 'RL' or
+                 'LR' or 'AP' or 'PA' or 'IS' or 'SI'))
+                3-tuple of new dimension order
+                flag: %s %s %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                image to write
+                flag: %s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        out_file: (an existing file name)
+                image with new dimensions
+
+.. _nipype.interfaces.fsl.utils.WarpPoints:
+
+
+.. index:: WarpPoints
+
+WarpPoints
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1752>`__
+
+Wraps command **img2imgcoord**
+
+Use FSL `img2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+to transform point sets. Accepts plain text files and vtk files.
+
+.. Note:: transformation of TrackVis trk files is not yet implemented
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import WarpPoints
+>>> warppoints = WarpPoints()
+>>> warppoints.inputs.in_coords = 'surf.txt'
+>>> warppoints.inputs.src_file = 'epi.nii'
+>>> warppoints.inputs.dest_file = 'T1.nii'
+>>> warppoints.inputs.warp_file = 'warpfield.nii'
+>>> warppoints.inputs.coord_mm = True
+>>> warppoints.cmdline # doctest: +ELLIPSIS
+'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
+>>> res = invwarp.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        dest_file: (an existing file name)
+                filename of destination image
+                flag: -dest %s
+        in_coords: (an existing file name)
+                filename of file containing coordinates
+                flag: %s, position: -1
+        src_file: (an existing file name)
+                filename of source image
+                flag: -src %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        coord_mm: (a boolean)
+                all coordinates in mm
+                flag: -mm
+                mutually_exclusive: coord_vox
+        coord_vox: (a boolean)
+                all coordinates in voxels - default
+                flag: -vox
+                mutually_exclusive: coord_mm
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                output file name
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        warp_file: (an existing file name)
+                filename of warpfield (e.g. intermediate2dest_warp.nii.gz)
+                flag: -warp %s
+                mutually_exclusive: xfm_file
+        xfm_file: (an existing file name)
+                filename of affine transform (e.g. source2dest.mat)
+                flag: -xfm %s
+                mutually_exclusive: warp_file
+
+Outputs::
+
+        out_file: (an existing file name)
+                Name of output file, containing the warp as field or coefficients.
+
+.. _nipype.interfaces.fsl.utils.WarpPointsToStd:
+
+
+.. index:: WarpPointsToStd
+
+WarpPointsToStd
+---------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1911>`__
+
+Wraps command **img2stdcoord**
+
+Use FSL `img2stdcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
+to transform point sets to standard space coordinates. Accepts plain text files and
+vtk files.
+
+.. Note:: transformation of TrackVis trk files is not yet implemented
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import WarpPointsToStd
+>>> warppoints = WarpPointsToStd()
+>>> warppoints.inputs.in_coords = 'surf.txt'
+>>> warppoints.inputs.img_file = 'T1.nii'
+>>> warppoints.inputs.std_file = 'mni.nii'
+>>> warppoints.inputs.warp_file = 'warpfield.nii'
+>>> warppoints.inputs.coord_mm = True
+>>> warppoints.cmdline # doctest: +ELLIPSIS
+'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
+>>> res = invwarp.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        img_file: (an existing file name)
+                filename of input image
+                flag: -img %s
+        in_coords: (an existing file name)
+                filename of file containing coordinates
+                flag: %s, position: -1
+        std_file: (an existing file name)
+                filename of destination image
+                flag: -std %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        coord_mm: (a boolean)
+                all coordinates in mm
+                flag: -mm
+                mutually_exclusive: coord_vox
+        coord_vox: (a boolean)
+                all coordinates in voxels - default
+                flag: -vox
+                mutually_exclusive: coord_mm
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_file: (a file name)
+                output file name
+        premat_file: (an existing file name)
+                filename of pre-warp affine transform (e.g.
+                example_func2highres.mat)
+                flag: -premat %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        warp_file: (an existing file name)
+                filename of warpfield (e.g. intermediate2dest_warp.nii.gz)
+                flag: -warp %s
+                mutually_exclusive: xfm_file
+        xfm_file: (an existing file name)
+                filename of affine transform (e.g. source2dest.mat)
+                flag: -xfm %s
+                mutually_exclusive: warp_file
+
+Outputs::
+
+        out_file: (an existing file name)
+                Name of output file, containing the warp as field or coefficients.
+
+.. _nipype.interfaces.fsl.utils.WarpUtils:
+
+
+.. index:: WarpUtils
+
+WarpUtils
+---------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1566>`__
+
+Wraps command **fnirtfileutils**
+
+Use FSL `fnirtfileutils <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
+to convert field->coefficients, coefficients->field, coefficients->other_coefficients etc
+
+
+Examples
+~~~~~~~~
+
+>>> from nipype.interfaces.fsl import WarpUtils
+>>> warputils = WarpUtils()
+>>> warputils.inputs.in_file = "warpfield.nii"
+>>> warputils.inputs.reference = "T1.nii"
+>>> warputils.inputs.out_format = 'spline'
+>>> warputils.inputs.warp_resolution = (10,10,10)
+>>> warputils.inputs.output_type = "NIFTI_GZ"
+>>> warputils.cmdline # doctest: +ELLIPSIS
+'fnirtfileutils --in=warpfield.nii --outformat=spline --ref=T1.nii --warpres=10.0000,10.0000,10.0000 --out=warpfield_coeffs.nii.gz'
+>>> res = invwarp.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                Name of file containing warp-coefficients/fields. This would
+                typically be the output from the --cout switch of fnirt (but can
+                also use fields, like the output from --fout).
+                flag: --in=%s
+        reference: (an existing file name)
+                Name of a file in target space. Note that the target space is now
+                different from the target space that was used to create the --warp
+                file. It would typically be the file that was specified with the
+                --in argument when running fnirt.
+                flag: --ref=%s
+        write_jacobian: (a boolean, nipype default value: False)
+                Switch on --jac flag with automatically generated filename
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        knot_space: (a tuple of the form: (an integer, an integer, an
+                 integer))
+                Alternative (to --warpres) specification of the resolution of the
+                output spline-field.
+                flag: --knotspace=%d,%d,%d
+        out_file: (a file name)
+                Name of output file. The format of the output depends on what other
+                parameters are set. The default format is a (4D) field-file. If the
+                --outformat is set to spline the format will be a (4D) file of
+                spline coefficients.
+                flag: --out=%s, position: -1
+        out_format: ('spline' or 'field')
+                Specifies the output format. If set to field (default) the output
+                will be a (4D) field-file. If set to spline the format will be a
+                (4D) file of spline coefficients.
+                flag: --outformat=%s
+        out_jacobian: (a file name)
+                Specifies that a (3D) file of Jacobian determinants corresponding to
+                --in should be produced and written to filename.
+                flag: --jac=%s
+        output_type: ('NIFTI_PAIR' or 'NIFTI_PAIR_GZ' or 'NIFTI_GZ' or
+                 'NIFTI')
+                FSL output type
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        warp_resolution: (a tuple of the form: (a float, a float, a float))
+                Specifies the resolution/knot-spacing of the splines pertaining to
+                the coefficients in the --out file. This parameter is only relevant
+                if --outformat is set to spline. It should be noted that if the --in
+                file has a higher resolution, the resulting coefficients will
+                pertain to the closest (in a least-squares sense) file in the space
+                of fields with the --warpres resolution. It should also be noted
+                that the resolution will always be an integer multiple of the voxel
+                size.
+                flag: --warpres=%0.4f,%0.4f,%0.4f
+        with_affine: (a boolean)
+                Specifies that the affine transform (i.e. that which was specified
+                for the --aff parameter in fnirt) should be included as
+                displacements in the --out file. That can be useful for interfacing
+                with software that cannot decode FSL/fnirt coefficient-files (where
+                the affine transform is stored separately from the displacements).
+                flag: --withaff
+
+Outputs::
+
+        out_file: (a file name)
+                Name of output file, containing the warp as field or coefficients.
+        out_jacobian: (a file name)
+                Name of output file, containing the map of the determinant of the
+                Jacobian

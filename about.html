@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="#" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="index.html">
+            <img src="_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="index.html">Home</a> ·
+<a class="navbar" href="quickstart.html">Quickstart</a> ·
+<a class="navbar" href="documentation.html">Documentation</a> ·
+<a class="navbar" href="#">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">About</a><ul>
+<li><a class="reference internal" href="#citation">Citation</a></li>
+<li><a class="reference internal" href="#code-contributors">Code contributors</a></li>
+<li><a class="reference internal" href="#other-contributors">Other contributors</a></li>
+<li><a class="reference internal" href="#funding">Funding</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="about">
+<span id="id1"></span><h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-reference admonition">
+<p class="first admonition-title">Reference</p>
+<p>Gorgolewski K, Burns CD, Madison C, Clark D, Halchenko YO, Waskom ML,
+Ghosh SS. (2011). Nipype: a flexible, lightweight and extensible neuroimaging
+data processing framework in Python. Front. Neuroimform. 5:13.</p>
+<p class="last"><a class="reference external" href="http://www.frontiersin.org/Neuroinformatics/10.3389/fninf.2011.00013/abstract">Download</a></p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>@article { Gorgolewski2011,
+    title            = &quot;Nipype: a flexible, lightweight and extensible neuroimaging data processing framework in python.&quot;,
+    year             = &quot;2011&quot;,
+    author           = &quot;Krzysztof Gorgolewski and Christopher D Burns and Cindee Madison and Dav Clark and Yaroslav O Halchenko and Michael L Waskom and Satrajit S Ghosh&quot;,
+    journal          = &quot;Front Neuroinform&quot;,
+    volume           = &quot;5&quot;,
+    month            = &quot;08&quot;,
+    doi              = &quot;10.3389/fninf.2011.00013&quot;,
+    pubmed           = &quot;21897815&quot;,
+    url              = &quot;http://dx.doi.org/10.3389/fninf.2011.00013&quot;,
+    issn             = &quot;1662-5196&quot;}
+</pre></div>
+</div>
+</div>
+<div class="section" id="code-contributors">
+<h2>Code contributors<a class="headerlink" href="#code-contributors" title="Permalink to this headline">¶</a></h2>
+<p>Contributors to Nipype include but are not limited to:</p>
+<table class="hlist"><tr><td><ul class="simple">
+<li>Aimi Watanabe</li>
+<li>Alexander Schaefer</li>
+<li>Alexandre Gramfort</li>
+<li>Anisha Keshavan</li>
+<li>Ariel Rokem</li>
+<li>Ben Acland</li>
+<li>Basile Pinsard</li>
+<li>Brendan Moloney</li>
+<li>Brian Cheung</li>
+<li>Charl Linssen</li>
+<li>Chris Filo Gorgolewski</li>
+<li>Chris Steele</li>
+<li>Christian Haselgrove</li>
+<li>Christopher Burns</li>
+<li>Cindee Madison</li>
+<li>Claire Tarbert</li>
+<li>Colin Buchanan</li>
+<li>Daniel Ginsburg</li>
+<li>Daniel Haehn</li>
+<li>Daniel Margulies</li>
+<li>Dav Clark</li>
+<li>David Welch</li>
+<li>Drew Erickson</li>
+<li>Erik Kastman</li>
+<li>Félix C. Morency</li>
+<li>Gael Varoquaux</li>
+</ul>
+</td><td><ul class="simple">
+<li>Hans Johnson</li>
+<li>Janosch Linkersdörfer</li>
+<li>Januzz</li>
+<li>Jarrod Millman</li>
+<li>Jeff Lai</li>
+<li>Jessica Forbes</li>
+<li>John Salvatore</li>
+<li>Lijie Huang</li>
+<li>Michael Hallquist</li>
+<li>Michael Hanke</li>
+<li>Michael Notter</li>
+<li>Michael Waskom</li>
+<li>Nolan Nichols</li>
+<li>Oliver Hinds</li>
+<li>Oscar Esteban</li>
+<li>Rosalia Tungaraza</li>
+<li>Satrajit Ghosh</li>
+<li>Sharad Sikka</li>
+<li>Stephan Gerhard</li>
+<li>Erik Ziegler</li>
+<li>Valentin Haenel</li>
+<li>Xiangzhen Kong</li>
+<li>Xu Wang</li>
+<li>Yannick Schwartz</li>
+<li>Yaroslav O. Halchenko</li>
+</ul>
+</td></tr></table>
+<p>For full most up to date list see <a class="reference external" href="https://www.ohloh.net/p/nipype/contributors">Ohloh</a>.</p>
+</div>
+<div class="section" id="other-contributors">
+<h2>Other contributors<a class="headerlink" href="#other-contributors" title="Permalink to this headline">¶</a></h2>
+<table class="hlist"><tr><td><ul class="simple">
+<li>Matthew Brett</li>
+<li>Michael Castelle</li>
+<li>Philippe Ciuciu</li>
+<li>Yann Cointepas</li>
+<li>Mark D&#8217;Esposito</li>
+<li>Susan Gabrieli</li>
+<li>Brian Hawthorne</li>
+<li>Tim Leslie</li>
+<li>Fernando Perez</li>
+<li>Tyler Perrachione</li>
+</ul>
+</td><td><ul class="simple">
+<li>Jean-Baptiste Poline</li>
+<li>Alexis Roche</li>
+<li>Denis Riviere</li>
+<li>Gretchen Reynolds</li>
+<li>Jonathan Taylor</li>
+<li>Bertrand Thirion</li>
+<li>Bernjamin Thyreau</li>
+<li>Mike Trumpis</li>
+<li>Karl Young</li>
+<li>Tom Waite</li>
+</ul>
+</td></tr></table>
+<p>We would also like to thank <a class="reference external" href="http://www.jetbrains.com/">JetBrains</a> for providing <a class="reference external" href="http://www.jetbrains.com/pycharm/">Pycharm</a> licenses.</p>
+</div>
+<div class="section" id="funding">
+<h2>Funding<a class="headerlink" href="#funding" title="Permalink to this headline">¶</a></h2>
+<p>Satrajit Ghosh work on this project was partially funded by NIBIB R03 EB008673 (PI: Ghosh and Whitfield-Gabrieli) and by the <a class="reference external" href="http://www.incf.org">INCF</a> through a contract with TankThink Labs, LLC.
+Chris Burns was supported by NIMH grant 5R01MH081909-02 (PI: Desposito). Hans Jonson was supported by
+<a class="reference external" href="http://projectreporter.nih.gov/project_info_description.cfm?aid=8153616&amp;icde=16158743&amp;ddparam=&amp;ddvalue=&amp;ddsub=&amp;cr=18&amp;csb=PT&amp;cs=ASC">2 U54 EB005149 - 06     Core 2b Huntington&#8217;s Disease - Driving Biological Project</a>,
+<a class="reference external" href="http://projectreporter.nih.gov/project_info_description.cfm?aid=7209718&amp;icde=16158552&amp;ddparam=&amp;ddvalue=&amp;ddsub=&amp;cr=1&amp;csb=default&amp;cs=ASC">S10 RR023392    Enterprise Storage In A Collaborative Neuroimaging Environment</a>,
+<a class="reference external" href="http://projectreporter.nih.gov/project_info_description.cfm?aid=6266377&amp;icde=16158103">R01 NS040068    Neurobiological Predictors of Huntington&#8217;s Disease</a>,
+and <a class="reference external" href="http://projectreporter.nih.gov/project_info_description.cfm?aid=8467220&amp;icde=16159156&amp;ddparam=&amp;ddvalue=&amp;ddsub=&amp;cr=1&amp;csb=default&amp;cs=ASC">UL1 TR000442       University of Iowa Clinical and Translational Science Program</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

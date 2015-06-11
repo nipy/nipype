@@ -1,0 +1,391 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.dmri.camino.connectivity_mapping
+==========================================
+
+
+.. module:: nipype.workflows.dmri.camino.connectivity_mapping
+
+
+.. _nipype.workflows.dmri.camino.connectivity_mapping.create_connectivity_pipeline:
+
+:func:`create_connectivity_pipeline`
+------------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/camino/connectivity_mapping.py#L15>`__
+
+
+
+Creates a pipeline that does the same connectivity processing as in the
+:ref:`example_dmri_connectivity` example script. Given a subject id (and completed Freesurfer reconstruction)
+diffusion-weighted image, b-values, and b-vectors, the workflow will return the subject's connectome
+as a Connectome File Format (CFF) file for use in Connectome Viewer (http://www.cmtk.org).
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.camino.connectivity_mapping import create_connectivity_pipeline
+>>> conmapper = create_connectivity_pipeline("nipype_conmap")
+>>> conmapper.inputs.inputnode.subjects_dir = '.'
+>>> conmapper.inputs.inputnode.subject_id = 'subj1'
+>>> conmapper.inputs.inputnode.dwi = 'data.nii.gz'
+>>> conmapper.inputs.inputnode.bvecs = 'bvecs'
+>>> conmapper.inputs.inputnode.bvals = 'bvals'
+>>> conmapper.run()                 # doctest: +SKIP
+
+Inputs::
+
+    inputnode.subject_id
+    inputnode.subjects_dir
+    inputnode.dwi
+    inputnode.bvecs
+    inputnode.bvals
+    inputnode.resolution_network_file
+
+Outputs::
+
+    outputnode.connectome
+    outputnode.cmatrix
+    outputnode.gpickled_network
+    outputnode.fa
+    outputnode.struct
+    outputnode.trace
+    outputnode.tracts
+    outputnode.tensors
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph connectivity{
+
+	  label="connectivity";
+
+	  connectivity_inputnode[label="inputnode (utility)"];
+
+	  connectivity_outputnode[label="outputnode (utility)"];
+
+	  subgraph cluster_connectivity_mapping {
+
+	      label="mapping";
+
+	    connectivity_mapping_inputnode_within[label="inputnode_within (utility)"];
+
+	    connectivity_mapping_image2voxel[label="image2voxel (camino)"];
+
+	    connectivity_mapping_bet_b0[label="bet_b0 (fsl)"];
+
+	    connectivity_mapping_fsl2scheme[label="fsl2scheme (camino)"];
+
+	    connectivity_mapping_fssourceRH[label="fssourceRH (io)"];
+
+	    connectivity_mapping_mris_convertRH[label="mris_convertRH (freesurfer)"];
+
+	    connectivity_mapping_mris_convertRHlabels[label="mris_convertRHlabels (freesurfer)"];
+
+	    connectivity_mapping_mris_convertRHsphere[label="mris_convertRHsphere (freesurfer)"];
+
+	    connectivity_mapping_mris_convertRHinflated[label="mris_convertRHinflated (freesurfer)"];
+
+	    connectivity_mapping_mris_convertRHwhite[label="mris_convertRHwhite (freesurfer)"];
+
+	    connectivity_mapping_dtlutgen[label="dtlutgen (camino)"];
+
+	    connectivity_mapping_fssourceLH[label="fssourceLH (io)"];
+
+	    connectivity_mapping_mris_convertLHwhite[label="mris_convertLHwhite (freesurfer)"];
+
+	    connectivity_mapping_mris_convertLHlabels[label="mris_convertLHlabels (freesurfer)"];
+
+	    connectivity_mapping_mris_convertLHsphere[label="mris_convertLHsphere (freesurfer)"];
+
+	    connectivity_mapping_mris_convertLHinflated[label="mris_convertLHinflated (freesurfer)"];
+
+	    connectivity_mapping_GiftiLabels[label="GiftiLabels (utility)"];
+
+	    connectivity_mapping_mris_convertLH[label="mris_convertLH (freesurfer)"];
+
+	    connectivity_mapping_GiftiSurfaces[label="GiftiSurfaces (utility)"];
+
+	    connectivity_mapping_fssource[label="fssource (io)"];
+
+	    connectivity_mapping_mri_convert_Brain[label="mri_convert_Brain (freesurfer)"];
+
+	    connectivity_mapping_mri_convert_AparcAseg[label="mri_convert_AparcAseg (freesurfer)"];
+
+	    connectivity_mapping_ROIGen_structspace[label="ROIGen_structspace (cmtk)"];
+
+	    connectivity_mapping_coregister[label="coregister (fsl)"];
+
+	    connectivity_mapping_convertxfm[label="convertxfm (fsl)"];
+
+	    connectivity_mapping_inverse[label="inverse (fsl)"];
+
+	    connectivity_mapping_inverse_AparcAseg[label="inverse_AparcAseg (fsl)"];
+
+	    connectivity_mapping_dtifit[label="dtifit (camino)"];
+
+	    connectivity_mapping_trace[label="trace (camino)"];
+
+	    connectivity_mapping_analyzeheader_trace[label="analyzeheader_trace (camino)"];
+
+	    connectivity_mapping_trace2nii[label="trace2nii (misc)"];
+
+	    connectivity_mapping_picopdfs[label="picopdfs (camino)"];
+
+	    connectivity_mapping_track[label="track (camino)"];
+
+	    connectivity_mapping_vtkstreamlines[label="vtkstreamlines (camino)"];
+
+	    connectivity_mapping_dteig[label="dteig (camino)"];
+
+	    connectivity_mapping_fa[label="fa (camino)"];
+
+	    connectivity_mapping_analyzeheader_fa[label="analyzeheader_fa (camino)"];
+
+	    connectivity_mapping_fa2nii[label="fa2nii (misc)"];
+
+	    connectivity_mapping_camino2trackvis[label="camino2trackvis (camino2trackvis)"];
+
+	    connectivity_mapping_trk2camino[label="trk2camino (camino2trackvis)"];
+
+	    connectivity_mapping_ROIGen[label="ROIGen (cmtk)"];
+
+	    connectivity_mapping_NiftiVolumes[label="NiftiVolumes (utility)"];
+
+	    connectivity_mapping_CreateNodes[label="CreateNodes (cmtk)"];
+
+	    connectivity_mapping_CreateMatrix[label="CreateMatrix (cmtk)"];
+
+	    connectivity_mapping_FiberDataArrays[label="FiberDataArrays (utility)"];
+
+	    connectivity_mapping_CFFConverter[label="CFFConverter (cmtk)"];
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_bet_b0;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_bet_b0;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fsl2scheme;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fsl2scheme;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssourceLH;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssourceLH;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_camino2trackvis;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_camino2trackvis;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_CreateNodes;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssource;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssource;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fa2nii;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssourceRH;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_fssourceRH;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_CreateMatrix;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_CreateMatrix;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_trace2nii;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_analyzeheader_trace;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_analyzeheader_trace;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_NiftiVolumes;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_image2voxel;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_analyzeheader_fa;
+
+	    connectivity_mapping_inputnode_within -> connectivity_mapping_analyzeheader_fa;
+
+	    connectivity_mapping_image2voxel -> connectivity_mapping_dtifit;
+
+	    connectivity_mapping_bet_b0 -> connectivity_mapping_track;
+
+	    connectivity_mapping_bet_b0 -> connectivity_mapping_inverse_AparcAseg;
+
+	    connectivity_mapping_bet_b0 -> connectivity_mapping_coregister;
+
+	    connectivity_mapping_bet_b0 -> connectivity_mapping_inverse;
+
+	    connectivity_mapping_fsl2scheme -> connectivity_mapping_dtifit;
+
+	    connectivity_mapping_fsl2scheme -> connectivity_mapping_dtlutgen;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRH;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRHlabels;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRHlabels;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRHsphere;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRHinflated;
+
+	    connectivity_mapping_fssourceRH -> connectivity_mapping_mris_convertRHwhite;
+
+	    connectivity_mapping_mris_convertRH -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_mris_convertRHlabels -> connectivity_mapping_GiftiLabels;
+
+	    connectivity_mapping_mris_convertRHsphere -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_mris_convertRHinflated -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_mris_convertRHwhite -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_dtlutgen -> connectivity_mapping_picopdfs;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLHwhite;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLHlabels;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLHlabels;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLH;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLHsphere;
+
+	    connectivity_mapping_fssourceLH -> connectivity_mapping_mris_convertLHinflated;
+
+	    connectivity_mapping_mris_convertLHwhite -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_mris_convertLHlabels -> connectivity_mapping_GiftiLabels;
+
+	    connectivity_mapping_mris_convertLHsphere -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_mris_convertLHinflated -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_GiftiLabels -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_mris_convertLH -> connectivity_mapping_GiftiSurfaces;
+
+	    connectivity_mapping_GiftiSurfaces -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_fssource -> connectivity_mapping_mri_convert_Brain;
+
+	    connectivity_mapping_fssource -> connectivity_mapping_mri_convert_AparcAseg;
+
+	    connectivity_mapping_mri_convert_Brain -> connectivity_mapping_NiftiVolumes;
+
+	    connectivity_mapping_mri_convert_Brain -> connectivity_mapping_coregister;
+
+	    connectivity_mapping_mri_convert_Brain -> connectivity_mapping_inverse;
+
+	    connectivity_mapping_mri_convert_AparcAseg -> connectivity_mapping_inverse_AparcAseg;
+
+	    connectivity_mapping_mri_convert_AparcAseg -> connectivity_mapping_ROIGen_structspace;
+
+	    connectivity_mapping_ROIGen_structspace -> connectivity_mapping_CreateNodes;
+
+	    connectivity_mapping_coregister -> connectivity_mapping_convertxfm;
+
+	    connectivity_mapping_convertxfm -> connectivity_mapping_inverse;
+
+	    connectivity_mapping_convertxfm -> connectivity_mapping_inverse_AparcAseg;
+
+	    connectivity_mapping_inverse_AparcAseg -> connectivity_mapping_ROIGen;
+
+	    connectivity_mapping_dtifit -> connectivity_mapping_trace;
+
+	    connectivity_mapping_dtifit -> connectivity_mapping_picopdfs;
+
+	    connectivity_mapping_dtifit -> connectivity_mapping_dteig;
+
+	    connectivity_mapping_dtifit -> connectivity_mapping_fa;
+
+	    connectivity_mapping_trace -> connectivity_mapping_analyzeheader_trace;
+
+	    connectivity_mapping_trace -> connectivity_mapping_trace2nii;
+
+	    connectivity_mapping_analyzeheader_trace -> connectivity_mapping_trace2nii;
+
+	    connectivity_mapping_picopdfs -> connectivity_mapping_track;
+
+	    connectivity_mapping_track -> connectivity_mapping_camino2trackvis;
+
+	    connectivity_mapping_track -> connectivity_mapping_vtkstreamlines;
+
+	    connectivity_mapping_fa -> connectivity_mapping_fa2nii;
+
+	    connectivity_mapping_fa -> connectivity_mapping_analyzeheader_fa;
+
+	    connectivity_mapping_analyzeheader_fa -> connectivity_mapping_fa2nii;
+
+	    connectivity_mapping_camino2trackvis -> connectivity_mapping_CreateMatrix;
+
+	    connectivity_mapping_camino2trackvis -> connectivity_mapping_trk2camino;
+
+	    connectivity_mapping_camino2trackvis -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_ROIGen -> connectivity_mapping_CreateMatrix;
+
+	    connectivity_mapping_ROIGen -> connectivity_mapping_NiftiVolumes;
+
+	    connectivity_mapping_NiftiVolumes -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_CreateNodes -> connectivity_mapping_CreateMatrix;
+
+	    connectivity_mapping_CreateMatrix -> connectivity_mapping_FiberDataArrays;
+
+	    connectivity_mapping_CreateMatrix -> connectivity_mapping_FiberDataArrays;
+
+	    connectivity_mapping_CreateMatrix -> connectivity_mapping_FiberDataArrays;
+
+	    connectivity_mapping_CreateMatrix -> connectivity_mapping_FiberDataArrays;
+
+	    connectivity_mapping_CreateMatrix -> connectivity_mapping_CFFConverter;
+
+	    connectivity_mapping_FiberDataArrays -> connectivity_mapping_CFFConverter;
+
+	  }
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_inputnode -> connectivity_mapping_inputnode_within;
+
+	  connectivity_mapping_camino2trackvis -> connectivity_outputnode;
+
+	  connectivity_mapping_CFFConverter -> connectivity_outputnode;
+
+	  connectivity_mapping_CreateMatrix -> connectivity_outputnode;
+
+	  connectivity_mapping_CreateMatrix -> connectivity_outputnode;
+
+	  connectivity_mapping_CreateMatrix -> connectivity_outputnode;
+
+	  connectivity_mapping_fa2nii -> connectivity_outputnode;
+
+	  connectivity_mapping_CreateMatrix -> connectivity_outputnode;
+
+	  connectivity_mapping_ROIGen -> connectivity_outputnode;
+
+	  connectivity_mapping_mri_convert_Brain -> connectivity_outputnode;
+
+	  connectivity_mapping_trace2nii -> connectivity_outputnode;
+
+	  connectivity_mapping_dtifit -> connectivity_outputnode;
+
+	}
+

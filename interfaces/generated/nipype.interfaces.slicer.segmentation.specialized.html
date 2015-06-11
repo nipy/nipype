@@ -1,0 +1,480 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.slicer.segmentation.specialized</a><ul>
+<li><a class="reference internal" href="#brainsroiauto">BRAINSROIAuto</a></li>
+<li><a class="reference internal" href="#emsegmentcommandline">EMSegmentCommandLine</a></li>
+<li><a class="reference internal" href="#robuststatisticssegmenter">RobustStatisticsSegmenter</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-slicer-segmentation-specialized">
+<h1>interfaces.slicer.segmentation.specialized<a class="headerlink" href="#interfaces-slicer-segmentation-specialized" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-slicer-segmentation-specialized-brainsroiauto"></span><div class="section" id="brainsroiauto">
+<span id="index-0"></span><h2>BRAINSROIAuto<a class="headerlink" href="#brainsroiauto" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/segmentation/specialized.py#L122">Link to code</a></p>
+<p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>BRAINSROIAuto **</p>
+<p>title: Foreground masking (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: This tool uses a combination of otsu thresholding and a closing operations to identify the most prominant foreground region in an image.</p>
+<p>version: 2.4.1</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, <a class="reference external" href="http://wwww.psychiatry.uiowa.edu">http://wwww.psychiatry.uiowa.edu</a></p>
+<p>acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+ROIAutoDilateSize: (a float)
+        This flag is only relavent when using ROIAUTO mode for initializing
+        masks. It defines the final dilation size to capture a bit of
+        background outside the tissue region. At setting of 10mm has been
+        shown to help regularize a BSpline registration type so that there
+        is some background constraints to match the edges of the head
+        better.
+        flag: --ROIAutoDilateSize %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+closingSize: (a float)
+        The Closing Size (in millimeters) for largest connected filled mask.
+        This value is divided by image spacing and rounded to the next
+        largest voxel number.
+        flag: --closingSize %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        The input image for finding the largest region filled mask.
+        flag: --inputVolume %s
+numberOfThreads: (an integer)
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+otsuPercentileThreshold: (a float)
+        Parameter to the Otsu threshold algorithm.
+        flag: --otsuPercentileThreshold %f
+outputClippedVolumeROI: (a boolean or a file name)
+        The inputVolume clipped to the region of the brain mask.
+        flag: --outputClippedVolumeROI %s
+outputROIMaskVolume: (a boolean or a file name)
+        The ROI automatically found from the input image.
+        flag: --outputROIMaskVolume %s
+outputVolumePixelType: (&#39;float&#39; or &#39;short&#39; or &#39;ushort&#39; or &#39;int&#39; or
+         &#39;uint&#39; or &#39;uchar&#39;)
+        The output image Pixel Type is the scalar datatype for
+        representation of the Output Volume.
+        flag: --outputVolumePixelType %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+thresholdCorrectionFactor: (a float)
+        A factor to scale the Otsu algorithm&#39;s result threshold, in case
+        clipping mangles the image.
+        flag: --thresholdCorrectionFactor %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputClippedVolumeROI: (an existing file name)
+        The inputVolume clipped to the region of the brain mask.
+outputROIMaskVolume: (an existing file name)
+        The ROI automatically found from the input image.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-segmentation-specialized-emsegmentcommandline"></span></div>
+<div class="section" id="emsegmentcommandline">
+<span id="index-1"></span><h2>EMSegmentCommandLine<a class="headerlink" href="#emsegmentcommandline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/segmentation/specialized.py#L77">Link to code</a></p>
+<p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>EMSegmentCommandLine **</p>
+<dl class="docutils">
+<dt>title:</dt>
+<dd>EMSegment Command-line</dd>
+<dt>category:</dt>
+<dd>Segmentation.Specialized</dd>
+<dt>description:</dt>
+<dd>This module is used to simplify the process of segmenting large collections of images by providing a command line interface to the EMSegment algorithm for script and batch processing.</dd>
+</dl>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/4.0/EMSegment_Command-line">http://www.slicer.org/slicerWiki/index.php/Documentation/4.0/EMSegment_Command-line</a></p>
+<p>contributor: Sebastien Barre, Brad Davis, Kilian Pohl, Polina Golland, Yumin Yuan, Daniel Haehn</p>
+<p>acknowledgements: Many people and organizations have contributed to the funding, design, and development of the EMSegment algorithm and its various implementations.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+atlasVolumeFileNames: (a list of items which are an existing file
+         name)
+        Use an alternative atlas to the one that is specified by the mrml
+        file - note the order matters !
+        flag: --atlasVolumeFileNames %s...
+disableCompression: (a boolean)
+        Don&#39;t use compression when writing result image to disk.
+        flag: --disableCompression
+disableMultithreading: (an integer)
+        Disable multithreading for the EMSegmenter algorithm only!
+        Preprocessing might still run in multi-threaded mode. -1: Do not
+        overwrite default value. 0: Disable. 1: Enable.
+        flag: --disableMultithreading %d
+dontUpdateIntermediateData: (an integer)
+        Disable update of intermediate results. -1: Do not overwrite default
+        value. 0: Disable. 1: Enable.
+        flag: --dontUpdateIntermediateData %d
+dontWriteResults: (a boolean)
+        Used for testing. Don&#39;t actually write the resulting labelmap to
+        disk.
+        flag: --dontWriteResults
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+generateEmptyMRMLSceneAndQuit: (a boolean or a file name)
+        Used for testing. Only write a scene with default mrml parameters.
+        flag: --generateEmptyMRMLSceneAndQuit %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+intermediateResultsDirectory: (an existing directory name)
+        Directory where EMSegmenter will write intermediate data (e.g.,
+        aligned atlas data).
+        flag: --intermediateResultsDirectory %s
+keepTempFiles: (a boolean)
+        If flag is set then at the end of command the temporary files are
+        not removed
+        flag: --keepTempFiles
+loadAtlasNonCentered: (a boolean)
+        Read atlas files non-centered.
+        flag: --loadAtlasNonCentered
+loadTargetCentered: (a boolean)
+        Read target files centered.
+        flag: --loadTargetCentered
+mrmlSceneFileName: (an existing file name)
+        Active MRML scene that contains EMSegment algorithm parameters.
+        flag: --mrmlSceneFileName %s
+parametersMRMLNodeName: (a string)
+        The name of the EMSegment parameters node within the active MRML
+        scene. Leave blank for default.
+        flag: --parametersMRMLNodeName %s
+registrationAffineType: (an integer)
+        specify the accuracy of the affine registration. -2: Do not
+        overwrite default, -1: Test, 0: Disable, 1: Fast, 2: Accurate
+        flag: --registrationAffineType %d
+registrationDeformableType: (an integer)
+        specify the accuracy of the deformable registration. -2: Do not
+        overwrite default, -1: Test, 0: Disable, 1: Fast, 2: Accurate
+        flag: --registrationDeformableType %d
+registrationPackage: (a string)
+        specify the registration package for preprocessing (CMTK or BRAINS
+        or PLASTIMATCH or DEMONS)
+        flag: --registrationPackage %s
+resultMRMLSceneFileName: (a boolean or a file name)
+        Write out the MRML scene after command line substitutions have been
+        made.
+        flag: --resultMRMLSceneFileName %s
+resultStandardVolumeFileName: (an existing file name)
+        Used for testing. Compare segmentation results to this image and
+        return EXIT_FAILURE if they do not match.
+        flag: --resultStandardVolumeFileName %s
+resultVolumeFileName: (a boolean or a file name)
+        The file name that the segmentation result volume will be written
+        to.
+        flag: --resultVolumeFileName %s
+targetVolumeFileNames: (a list of items which are an existing file
+         name)
+        File names of target volumes (to be segmented). The number of target
+        images must be equal to the number of target images specified in the
+        parameter set, and these images must be spatially aligned.
+        flag: --targetVolumeFileNames %s...
+taskPreProcessingSetting: (a string)
+        Specifies the different task parameter. Leave blank for default.
+        flag: --taskPreProcessingSetting %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+verbose: (a boolean)
+        Enable verbose output.
+        flag: --verbose
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>generateEmptyMRMLSceneAndQuit: (an existing file name)
+        Used for testing. Only write a scene with default mrml parameters.
+resultMRMLSceneFileName: (an existing file name)
+        Write out the MRML scene after command line substitutions have been
+        made.
+resultVolumeFileName: (an existing file name)
+        The file name that the segmentation result volume will be written
+        to.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-segmentation-specialized-robuststatisticssegmenter"></span></div>
+<div class="section" id="robuststatisticssegmenter">
+<span id="index-2"></span><h2>RobustStatisticsSegmenter<a class="headerlink" href="#robuststatisticssegmenter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/segmentation/specialized.py#L24">Link to code</a></p>
+<p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>RobustStatisticsSegmenter **</p>
+<p>title: Robust Statistics Segmenter</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: Active contour segmentation using robust statistic.</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RobustStatisticsSegmenter">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RobustStatisticsSegmenter</a></p>
+<p>contributor: Yi Gao (gatech), Allen Tannenbaum (gatech), Ron Kikinis (SPL, BWH)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curvatureWeight: (a float)
+        Given sphere 1.0 score and extreme rough bounday/surface 0 score,
+        what is the expected smoothness of the object?
+        flag: --curvatureWeight %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+expectedVolume: (a float)
+        The approximate volume of the object, in mL.
+        flag: --expectedVolume %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+intensityHomogeneity: (a float)
+        What is the homogeneity of intensity within the object? Given
+        constant intensity at 1.0 score and extreme fluctuating intensity at
+        0.
+        flag: --intensityHomogeneity %f
+labelImageFileName: (an existing file name)
+        Label image for initialization
+        flag: %s, position: -2
+labelValue: (an integer)
+        Label value of the output image
+        flag: --labelValue %d
+maxRunningTime: (a float)
+        The program will stop if this time is reached.
+        flag: --maxRunningTime %f
+originalImageFileName: (an existing file name)
+        Original image to be segmented
+        flag: %s, position: -3
+segmentedImageFileName: (a boolean or a file name)
+        Segmented image
+        flag: %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>segmentedImageFileName: (an existing file name)
+        Segmented image
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

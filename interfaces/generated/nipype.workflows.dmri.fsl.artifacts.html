@@ -1,0 +1,2439 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">workflows.dmri.fsl.artifacts</a><ul>
+<li><a class="reference internal" href="#all-fmb-pipeline"><tt class="docutils literal"><span class="pre">all_fmb_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#graph">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#all-fsl-pipeline"><tt class="docutils literal"><span class="pre">all_fsl_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+<li><a class="reference internal" href="#id5">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#all-peb-pipeline"><tt class="docutils literal"><span class="pre">all_peb_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#id7">Examples</a></li>
+<li><a class="reference internal" href="#id8">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ecc-pipeline"><tt class="docutils literal"><span class="pre">ecc_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#id11">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hmc-pipeline"><tt class="docutils literal"><span class="pre">hmc_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#id16">Example</a></li>
+<li><a class="reference internal" href="#id17">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#remove-bias"><tt class="docutils literal"><span class="pre">remove_bias()</span></tt></a><ul>
+<li><a class="reference internal" href="#id19">Example</a></li>
+<li><a class="reference internal" href="#id20">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sdc-fmb"><tt class="docutils literal"><span class="pre">sdc_fmb()</span></tt></a><ul>
+<li><a class="reference internal" href="#id23">Example</a></li>
+<li><a class="reference internal" href="#id24">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sdc-peb"><tt class="docutils literal"><span class="pre">sdc_peb()</span></tt></a><ul>
+<li><a class="reference internal" href="#id28">Example</a></li>
+<li><a class="reference internal" href="#id29">Graph</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-nipype.workflows.dmri.fsl.artifacts">
+<span id="workflows-dmri-fsl-artifacts"></span><h1>workflows.dmri.fsl.artifacts<a class="headerlink" href="#module-nipype.workflows.dmri.fsl.artifacts" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="all-fmb-pipeline">
+<span id="nipype-workflows-dmri-fsl-artifacts-all-fmb-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">all_fmb_pipeline()</span></tt><a class="headerlink" href="#all-fmb-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L15">Link to code</a></p>
+<p>Builds a pipeline including three artifact corrections: head-motion
+correction (HMC), susceptibility-derived distortion correction (SDC),
+and Eddy currents-derived distortion correction (ECC).</p>
+<p>The displacement fields from each kind of distortions are combined. Thus,
+only one interpolation occurs between input data and result.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">this workflow rotates the gradients table (<em>b</em>-vectors)
+<a class="reference internal" href="#leemans09" id="id1">[Leemans09]</a>.</p>
+</div>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">all_fmb_pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span> <span class="o">=</span> <span class="n">all_fmb_pipeline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">bmap_mag</span> <span class="o">=</span> <span class="s">&#39;magnitude.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">bmap_pha</span> <span class="o">=</span> <span class="s">&#39;phase.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_param</span> <span class="o">=</span> <span class="s">&#39;epi_param.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-0d9afc3b7a458210574578e0d3db6b1547d94816.png" alt="digraph hmc_sdc_ecc{
+
+  label=&quot;hmc_sdc_ecc&quot;;
+
+  hmc_sdc_ecc_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  hmc_sdc_ecc_B0indices[label=&quot;B0indices (utility)&quot;];
+
+  hmc_sdc_ecc_b0_avg_pre[label=&quot;b0_avg_pre (utility)&quot;];
+
+  hmc_sdc_ecc_bet_dwi_pre[label=&quot;bet_dwi_pre (fsl)&quot;];
+
+  hmc_sdc_ecc_b0_avg_post[label=&quot;b0_avg_post (utility)&quot;];
+
+  hmc_sdc_ecc_bet_dwi_post[label=&quot;bet_dwi_post (fsl)&quot;];
+
+  hmc_sdc_ecc_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_b0_avg_pre;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_B0indices;
+
+  hmc_sdc_ecc_B0indices -&gt; hmc_sdc_ecc_b0_avg_post;
+
+  hmc_sdc_ecc_B0indices -&gt; hmc_sdc_ecc_b0_avg_pre;
+
+  hmc_sdc_ecc_b0_avg_pre -&gt; hmc_sdc_ecc_bet_dwi_pre;
+
+  subgraph cluster_hmc_sdc_ecc_motion_correct {
+
+      label=&quot;motion_correct&quot;;
+
+    hmc_sdc_ecc_motion_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_SplitDWI[label=&quot;SplitDWI (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat[label=&quot;InsertRefmat (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_Rotate_Bvec[label=&quot;Rotate_Bvec (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_Rotate_Bvec;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_InsertRefmat;
+
+    subgraph cluster_hmc_sdc_ecc_motion_correct_DWICoregistration {
+
+            label=&quot;DWICoregistration&quot;;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_Bias -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode;
+
+    }
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat -&gt; hmc_sdc_ecc_motion_correct_Rotate_Bvec;
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+    hmc_sdc_ecc_motion_correct_Rotate_Bvec -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+    hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_motion_correct_InsertRefmat;
+
+  }
+
+  subgraph cluster_hmc_sdc_ecc_eddy_correct {
+
+      label=&quot;eddy_correct&quot;;
+
+    hmc_sdc_ecc_eddy_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_b0_avg[label=&quot;b0_avg (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_ExtractDWI[label=&quot;ExtractDWI (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_GatherMatrices[label=&quot;GatherMatrices (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_MergeDWIs[label=&quot;MergeDWIs (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_GatherMatrices;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_b0_avg;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_b0_avg;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_ExtractDWI;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_ExtractDWI;
+
+    subgraph cluster_hmc_sdc_ecc_eddy_correct_DWICoregistration {
+
+            label=&quot;DWICoregistration&quot;;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode;
+
+    }
+
+    hmc_sdc_ecc_eddy_correct_SplitDWIs -&gt; hmc_sdc_ecc_eddy_correct_ModulateDWIs;
+
+    hmc_sdc_ecc_eddy_correct_GatherMatrices -&gt; hmc_sdc_ecc_eddy_correct_outputnode;
+
+    hmc_sdc_ecc_eddy_correct_ModulateDWIs -&gt; hmc_sdc_ecc_eddy_correct_RemoveNegative;
+
+    hmc_sdc_ecc_eddy_correct_RemoveNegative -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    hmc_sdc_ecc_eddy_correct_MergeDWIs -&gt; hmc_sdc_ecc_eddy_correct_outputnode;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_SplitDWIs;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_GatherMatrices;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_ModulateDWIs;
+
+    hmc_sdc_ecc_eddy_correct_ExtractDWI -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_b0_avg -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+  }
+
+  hmc_sdc_ecc_b0_avg_post -&gt; hmc_sdc_ecc_bet_dwi_post;
+
+  hmc_sdc_ecc_bet_dwi_post -&gt; hmc_sdc_ecc_outputnode;
+
+  subgraph cluster_hmc_sdc_ecc_fmb_correction {
+
+      label=&quot;fmb_correction&quot;;
+
+    hmc_sdc_ecc_fmb_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_GetFirst[label=&quot;GetFirst (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_Bias[label=&quot;Bias (ants)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_PreparePhase[label=&quot;PreparePhase (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber[label=&quot;SettingsGrabber (io)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_EffEcho[label=&quot;EffEcho (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_BrainExtraction[label=&quot;BrainExtraction (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_PhaseUnwrap[label=&quot;PhaseUnwrap (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_ToRadSec[label=&quot;ToRadSec (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_Baseline[label=&quot;Baseline (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_FMm_to_B0[label=&quot;FMm_to_B0 (ants)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_FMp_to_B0[label=&quot;FMp_to_B0 (ants)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_PreliminaryFugue[label=&quot;PreliminaryFugue (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_DemeanFmap[label=&quot;DemeanFmap (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_AddEmptyVol[label=&quot;AddEmptyVol (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_ComputeVSM[label=&quot;ComputeVSM (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_ComputeVSM;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Baseline;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Baseline;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_SplitDWIs;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_DemeanFmap;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_PreparePhase;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_FMm_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_GetFirst;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_PreliminaryFugue;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_SettingsGrabber;
+
+    hmc_sdc_ecc_fmb_correction_GetFirst -&gt; hmc_sdc_ecc_fmb_correction_Bias;
+
+    hmc_sdc_ecc_fmb_correction_Bias -&gt; hmc_sdc_ecc_fmb_correction_FMm_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_Bias -&gt; hmc_sdc_ecc_fmb_correction_BrainExtraction;
+
+    hmc_sdc_ecc_fmb_correction_Bias -&gt; hmc_sdc_ecc_fmb_correction_PhaseUnwrap;
+
+    hmc_sdc_ecc_fmb_correction_SplitDWIs -&gt; hmc_sdc_ecc_fmb_correction_UnwarpDWIs;
+
+    hmc_sdc_ecc_fmb_correction_PreparePhase -&gt; hmc_sdc_ecc_fmb_correction_PhaseUnwrap;
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_UnwarpDWIs;
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_EffEcho;
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_EffEcho;
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_ToRadSec;
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_ComputeVSM;
+
+    hmc_sdc_ecc_fmb_correction_EffEcho -&gt; hmc_sdc_ecc_fmb_correction_ComputeVSM;
+
+    hmc_sdc_ecc_fmb_correction_BrainExtraction -&gt; hmc_sdc_ecc_fmb_correction_MskDilate;
+
+    hmc_sdc_ecc_fmb_correction_MskDilate -&gt; hmc_sdc_ecc_fmb_correction_FMm_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_MskDilate -&gt; hmc_sdc_ecc_fmb_correction_PhaseUnwrap;
+
+    hmc_sdc_ecc_fmb_correction_PhaseUnwrap -&gt; hmc_sdc_ecc_fmb_correction_ToRadSec;
+
+    hmc_sdc_ecc_fmb_correction_ToRadSec -&gt; hmc_sdc_ecc_fmb_correction_FMp_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_Baseline -&gt; hmc_sdc_ecc_fmb_correction_FMm_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_Baseline -&gt; hmc_sdc_ecc_fmb_correction_FMp_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_FMm_to_B0 -&gt; hmc_sdc_ecc_fmb_correction_FMp_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_FMm_to_B0 -&gt; hmc_sdc_ecc_fmb_correction_FMp_to_B0;
+
+    hmc_sdc_ecc_fmb_correction_FMp_to_B0 -&gt; hmc_sdc_ecc_fmb_correction_PreliminaryFugue;
+
+    hmc_sdc_ecc_fmb_correction_PreliminaryFugue -&gt; hmc_sdc_ecc_fmb_correction_DemeanFmap;
+
+    subgraph cluster_hmc_sdc_ecc_fmb_correction_Cleanup {
+
+            label=&quot;Cleanup&quot;;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_Despike[label=&quot;Despike (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_MskErode[label=&quot;MskErode (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_NewMask[label=&quot;NewMask (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_ApplyMask[label=&quot;ApplyMask (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_Merge[label=&quot;Merge (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_AddEdge[label=&quot;AddEdge (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_AddEdge;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_Despike;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_Despike;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_MskErode;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_NewMask;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_Despike -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_ApplyMask;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_MskErode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_Merge;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_MskErode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_NewMask;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_NewMask -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_ApplyMask;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_ApplyMask -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_Merge;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_Merge -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_AddEdge;
+
+        hmc_sdc_ecc_fmb_correction_Cleanup_AddEdge -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_outputnode;
+
+    }
+
+    hmc_sdc_ecc_fmb_correction_AddEmptyVol -&gt; hmc_sdc_ecc_fmb_correction_ComputeVSM;
+
+    hmc_sdc_ecc_fmb_correction_ComputeVSM -&gt; hmc_sdc_ecc_fmb_correction_UnwarpDWIs;
+
+    hmc_sdc_ecc_fmb_correction_ComputeVSM -&gt; hmc_sdc_ecc_fmb_correction_outputnode;
+
+    hmc_sdc_ecc_fmb_correction_UnwarpDWIs -&gt; hmc_sdc_ecc_fmb_correction_RemoveNegative;
+
+    hmc_sdc_ecc_fmb_correction_RemoveNegative -&gt; hmc_sdc_ecc_fmb_correction_MergeDWIs;
+
+    hmc_sdc_ecc_fmb_correction_MergeDWIs -&gt; hmc_sdc_ecc_fmb_correction_outputnode;
+
+    subgraph cluster_hmc_sdc_ecc_fmb_correction_Shiftmap2Warping {
+
+            label=&quot;Shiftmap2Warping&quot;;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_Fix_hdr[label=&quot;Fix_hdr (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_ScaleField[label=&quot;ScaleField (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_vsm2dfm[label=&quot;vsm2dfm (fsl)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_Fix_hdr;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_Fix_hdr;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_ScaleField;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_Fix_hdr -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_ScaleField;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_ScaleField -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_vsm2dfm -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_outputnode;
+
+    }
+
+    hmc_sdc_ecc_fmb_correction_SettingsGrabber -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode;
+
+    hmc_sdc_ecc_fmb_correction_Cleanup_outputnode -&gt; hmc_sdc_ecc_fmb_correction_AddEmptyVol;
+
+    hmc_sdc_ecc_fmb_correction_ComputeVSM -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode;
+
+    hmc_sdc_ecc_fmb_correction_MergeDWIs -&gt; hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_inputnode;
+
+    hmc_sdc_ecc_fmb_correction_DemeanFmap -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_inputnode;
+
+    hmc_sdc_ecc_fmb_correction_Shiftmap2Warping_outputnode -&gt; hmc_sdc_ecc_fmb_correction_outputnode;
+
+    hmc_sdc_ecc_fmb_correction_inputnode -&gt; hmc_sdc_ecc_fmb_correction_Cleanup_inputnode;
+
+  }
+
+  subgraph cluster_hmc_sdc_ecc_UnwarpArtifacts {
+
+      label=&quot;UnwarpArtifacts&quot;;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp[label=&quot;ConvertWarp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference[label=&quot;Reference (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp[label=&quot;CoeffComp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp[label=&quot;JacobianComp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_CoeffComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_Reference;
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_JacobianComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_CoeffComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_JacobianComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative;
+
+    hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative -&gt; hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+  }
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_outputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_fmb_correction_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_UnwarpArtifacts_outputnode -&gt; hmc_sdc_ecc_outputnode;
+
+  hmc_sdc_ecc_eddy_correct_outputnode -&gt; hmc_sdc_ecc_b0_avg_post;
+
+  hmc_sdc_ecc_eddy_correct_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_B0indices -&gt; hmc_sdc_ecc_fmb_correction_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="all-fsl-pipeline">
+<span id="nipype-workflows-dmri-fsl-artifacts-all-fsl-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">all_fsl_pipeline()</span></tt><a class="headerlink" href="#all-fsl-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L193">Link to code</a></p>
+<p>Workflow that integrates FSL <tt class="docutils literal"><span class="pre">topup</span></tt> and <tt class="docutils literal"><span class="pre">eddy</span></tt>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">this workflow rotates the gradients table (<em>b</em>-vectors)
+<a class="reference internal" href="#leemans09" id="id2">[Leemans09]</a>.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">this workflow does not perform jacobian modulation of each
+<em>DWI</em> <a class="reference internal" href="#jones10" id="id3">[Jones10]</a>.</p>
+</div>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">all_fsl_pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span> <span class="o">=</span> <span class="n">all_fsl_pipeline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">alt_file</span> <span class="o">=</span> <span class="s">&#39;epi_rev.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>Graph<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-1e0a20e4a44f44120b23441f829ca8d528b16e13.png" alt="digraph fsl_all_correct{
+
+  label=&quot;fsl_all_correct&quot;;
+
+  fsl_all_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  fsl_all_correct_b0_avg_pre[label=&quot;b0_avg_pre (utility)&quot;];
+
+  fsl_all_correct_bet_dwi_pre[label=&quot;bet_dwi_pre (fsl)&quot;];
+
+  fsl_all_correct_fsl_eddy[label=&quot;fsl_eddy (fsl)&quot;];
+
+  fsl_all_correct_Rotate_Bvec[label=&quot;Rotate_Bvec (utility)&quot;];
+
+  fsl_all_correct_b0_avg_post[label=&quot;b0_avg_post (utility)&quot;];
+
+  fsl_all_correct_bet_dwi_post[label=&quot;bet_dwi_post (fsl)&quot;];
+
+  fsl_all_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_Rotate_Bvec;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_b0_avg_pre;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_b0_avg_pre;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_b0_avg_post;
+
+  fsl_all_correct_b0_avg_pre -&gt; fsl_all_correct_bet_dwi_pre;
+
+  fsl_all_correct_bet_dwi_pre -&gt; fsl_all_correct_fsl_eddy;
+
+  subgraph cluster_fsl_all_correct_peb_correction {
+
+      label=&quot;peb_correction&quot;;
+
+    fsl_all_correct_peb_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    fsl_all_correct_peb_correction_b0_ref[label=&quot;b0_ref (fsl)&quot;];
+
+    fsl_all_correct_peb_correction_b0_alt[label=&quot;b0_alt (fsl)&quot;];
+
+    fsl_all_correct_peb_correction_b0_list[label=&quot;b0_list (utility)&quot;];
+
+    fsl_all_correct_peb_correction_b0_merged[label=&quot;b0_merged (fsl)&quot;];
+
+    fsl_all_correct_peb_correction_topup[label=&quot;topup (fsl)&quot;];
+
+    fsl_all_correct_peb_correction_unwarp[label=&quot;unwarp (fsl)&quot;];
+
+    fsl_all_correct_peb_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    fsl_all_correct_peb_correction_inputnode -&gt; fsl_all_correct_peb_correction_b0_ref;
+
+    fsl_all_correct_peb_correction_inputnode -&gt; fsl_all_correct_peb_correction_b0_ref;
+
+    fsl_all_correct_peb_correction_inputnode -&gt; fsl_all_correct_peb_correction_unwarp;
+
+    fsl_all_correct_peb_correction_inputnode -&gt; fsl_all_correct_peb_correction_b0_alt;
+
+    fsl_all_correct_peb_correction_inputnode -&gt; fsl_all_correct_peb_correction_b0_alt;
+
+    fsl_all_correct_peb_correction_b0_ref -&gt; fsl_all_correct_peb_correction_b0_list;
+
+    fsl_all_correct_peb_correction_b0_alt -&gt; fsl_all_correct_peb_correction_b0_list;
+
+    fsl_all_correct_peb_correction_b0_list -&gt; fsl_all_correct_peb_correction_b0_merged;
+
+    fsl_all_correct_peb_correction_b0_merged -&gt; fsl_all_correct_peb_correction_topup;
+
+    fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_peb_correction_unwarp;
+
+    fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_peb_correction_unwarp;
+
+    fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_peb_correction_unwarp;
+
+    fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_peb_correction_outputnode;
+
+    subgraph cluster_fsl_all_correct_peb_correction_Shiftmap2Warping {
+
+            label=&quot;Shiftmap2Warping&quot;;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_Fix_hdr[label=&quot;Fix_hdr (utility)&quot;];
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_ScaleField[label=&quot;ScaleField (fsl)&quot;];
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_vsm2dfm[label=&quot;vsm2dfm (fsl)&quot;];
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_ScaleField;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_Fix_hdr;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_Fix_hdr;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_Fix_hdr -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_ScaleField;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_ScaleField -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        fsl_all_correct_peb_correction_Shiftmap2Warping_vsm2dfm -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_outputnode;
+
+    }
+
+    fsl_all_correct_peb_correction_unwarp -&gt; fsl_all_correct_peb_correction_outputnode;
+
+    fsl_all_correct_peb_correction_Shiftmap2Warping_outputnode -&gt; fsl_all_correct_peb_correction_outputnode;
+
+    fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode;
+
+    fsl_all_correct_peb_correction_b0_ref -&gt; fsl_all_correct_peb_correction_Shiftmap2Warping_inputnode;
+
+  }
+
+  fsl_all_correct_fsl_eddy -&gt; fsl_all_correct_Rotate_Bvec;
+
+  fsl_all_correct_fsl_eddy -&gt; fsl_all_correct_outputnode;
+
+  fsl_all_correct_fsl_eddy -&gt; fsl_all_correct_b0_avg_post;
+
+  fsl_all_correct_Rotate_Bvec -&gt; fsl_all_correct_outputnode;
+
+  fsl_all_correct_b0_avg_post -&gt; fsl_all_correct_bet_dwi_post;
+
+  fsl_all_correct_bet_dwi_post -&gt; fsl_all_correct_outputnode;
+
+  fsl_all_correct_bet_dwi_pre -&gt; fsl_all_correct_peb_correction_inputnode;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_peb_correction_inputnode;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_peb_correction_inputnode;
+
+  fsl_all_correct_inputnode -&gt; fsl_all_correct_peb_correction_inputnode;
+
+  fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_fsl_eddy;
+
+  fsl_all_correct_peb_correction_topup -&gt; fsl_all_correct_fsl_eddy;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="all-peb-pipeline">
+<span id="nipype-workflows-dmri-fsl-artifacts-all-peb-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">all_peb_pipeline()</span></tt><a class="headerlink" href="#all-peb-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L106">Link to code</a></p>
+<p>Builds a pipeline including three artifact corrections: head-motion
+correction (HMC), susceptibility-derived distortion correction (SDC),
+and Eddy currents-derived distortion correction (ECC).</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">this workflow rotates the gradients table (<em>b</em>-vectors)
+<a class="reference internal" href="#leemans09" id="id6">[Leemans09]</a>.</p>
+</div>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">all_peb_pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span> <span class="o">=</span> <span class="n">all_peb_pipeline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">alt_file</span> <span class="o">=</span> <span class="s">&#39;epi_rev.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allcorr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>Graph<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-56c88ff5fd58c2252db9118875e8a06e7121ff78.png" alt="digraph hmc_sdc_ecc{
+
+  label=&quot;hmc_sdc_ecc&quot;;
+
+  hmc_sdc_ecc_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  hmc_sdc_ecc_b0_avg_pre[label=&quot;b0_avg_pre (utility)&quot;];
+
+  hmc_sdc_ecc_bet_dwi_pre[label=&quot;bet_dwi_pre (fsl)&quot;];
+
+  hmc_sdc_ecc_b0_avg_post[label=&quot;b0_avg_post (utility)&quot;];
+
+  hmc_sdc_ecc_bet_dwi_post[label=&quot;bet_dwi_post (fsl)&quot;];
+
+  hmc_sdc_ecc_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_b0_avg_post;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_b0_avg_pre;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_b0_avg_pre;
+
+  hmc_sdc_ecc_b0_avg_pre -&gt; hmc_sdc_ecc_bet_dwi_pre;
+
+  subgraph cluster_hmc_sdc_ecc_motion_correct {
+
+      label=&quot;motion_correct&quot;;
+
+    hmc_sdc_ecc_motion_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_SplitDWI[label=&quot;SplitDWI (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat[label=&quot;InsertRefmat (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_Rotate_Bvec[label=&quot;Rotate_Bvec (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_SplitDWI;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_Rotate_Bvec;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_InsertRefmat;
+
+    subgraph cluster_hmc_sdc_ecc_motion_correct_DWICoregistration {
+
+            label=&quot;DWICoregistration&quot;;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_InitXforms -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_SplitDWIs -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_Bias -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_B0Equalize -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_DWEqualize -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_RemoveNegative -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs;
+
+        hmc_sdc_ecc_motion_correct_DWICoregistration_MergeDWIs -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode;
+
+    }
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat -&gt; hmc_sdc_ecc_motion_correct_Rotate_Bvec;
+
+    hmc_sdc_ecc_motion_correct_InsertRefmat -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+    hmc_sdc_ecc_motion_correct_Rotate_Bvec -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+    hmc_sdc_ecc_motion_correct_inputnode -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_SplitDWI -&gt; hmc_sdc_ecc_motion_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_motion_correct_InsertRefmat;
+
+    hmc_sdc_ecc_motion_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_motion_correct_outputnode;
+
+  }
+
+  subgraph cluster_hmc_sdc_ecc_eddy_correct {
+
+      label=&quot;eddy_correct&quot;;
+
+    hmc_sdc_ecc_eddy_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_b0_avg[label=&quot;b0_avg (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_ExtractDWI[label=&quot;ExtractDWI (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_GatherMatrices[label=&quot;GatherMatrices (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_MergeDWIs[label=&quot;MergeDWIs (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_ExtractDWI;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_ExtractDWI;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_GatherMatrices;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_b0_avg;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_b0_avg;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    subgraph cluster_hmc_sdc_ecc_eddy_correct_DWICoregistration {
+
+            label=&quot;DWICoregistration&quot;;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_Bias -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_InitXforms -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_B0Equalize -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MskDilate -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_SplitDWIs -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_DWEqualize -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_CoRegistration -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_RemoveNegative -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs;
+
+        hmc_sdc_ecc_eddy_correct_DWICoregistration_MergeDWIs -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode;
+
+    }
+
+    hmc_sdc_ecc_eddy_correct_GatherMatrices -&gt; hmc_sdc_ecc_eddy_correct_outputnode;
+
+    hmc_sdc_ecc_eddy_correct_SplitDWIs -&gt; hmc_sdc_ecc_eddy_correct_ModulateDWIs;
+
+    hmc_sdc_ecc_eddy_correct_ModulateDWIs -&gt; hmc_sdc_ecc_eddy_correct_RemoveNegative;
+
+    hmc_sdc_ecc_eddy_correct_RemoveNegative -&gt; hmc_sdc_ecc_eddy_correct_MergeDWIs;
+
+    hmc_sdc_ecc_eddy_correct_MergeDWIs -&gt; hmc_sdc_ecc_eddy_correct_outputnode;
+
+    hmc_sdc_ecc_eddy_correct_ExtractDWI -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_ModulateDWIs;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_GatherMatrices;
+
+    hmc_sdc_ecc_eddy_correct_DWICoregistration_outputnode -&gt; hmc_sdc_ecc_eddy_correct_SplitDWIs;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_inputnode -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+    hmc_sdc_ecc_eddy_correct_b0_avg -&gt; hmc_sdc_ecc_eddy_correct_DWICoregistration_inputnode;
+
+  }
+
+  subgraph cluster_hmc_sdc_ecc_peb_correction {
+
+      label=&quot;peb_correction&quot;;
+
+    hmc_sdc_ecc_peb_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_peb_correction_b0_ref[label=&quot;b0_ref (fsl)&quot;];
+
+    hmc_sdc_ecc_peb_correction_b0_alt[label=&quot;b0_alt (fsl)&quot;];
+
+    hmc_sdc_ecc_peb_correction_b0_list[label=&quot;b0_list (utility)&quot;];
+
+    hmc_sdc_ecc_peb_correction_b0_merged[label=&quot;b0_merged (fsl)&quot;];
+
+    hmc_sdc_ecc_peb_correction_topup[label=&quot;topup (fsl)&quot;];
+
+    hmc_sdc_ecc_peb_correction_unwarp[label=&quot;unwarp (fsl)&quot;];
+
+    hmc_sdc_ecc_peb_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_peb_correction_inputnode -&gt; hmc_sdc_ecc_peb_correction_b0_ref;
+
+    hmc_sdc_ecc_peb_correction_inputnode -&gt; hmc_sdc_ecc_peb_correction_b0_ref;
+
+    hmc_sdc_ecc_peb_correction_inputnode -&gt; hmc_sdc_ecc_peb_correction_unwarp;
+
+    hmc_sdc_ecc_peb_correction_inputnode -&gt; hmc_sdc_ecc_peb_correction_b0_alt;
+
+    hmc_sdc_ecc_peb_correction_inputnode -&gt; hmc_sdc_ecc_peb_correction_b0_alt;
+
+    hmc_sdc_ecc_peb_correction_b0_ref -&gt; hmc_sdc_ecc_peb_correction_b0_list;
+
+    hmc_sdc_ecc_peb_correction_b0_alt -&gt; hmc_sdc_ecc_peb_correction_b0_list;
+
+    hmc_sdc_ecc_peb_correction_b0_list -&gt; hmc_sdc_ecc_peb_correction_b0_merged;
+
+    hmc_sdc_ecc_peb_correction_b0_merged -&gt; hmc_sdc_ecc_peb_correction_topup;
+
+    hmc_sdc_ecc_peb_correction_topup -&gt; hmc_sdc_ecc_peb_correction_unwarp;
+
+    hmc_sdc_ecc_peb_correction_topup -&gt; hmc_sdc_ecc_peb_correction_unwarp;
+
+    hmc_sdc_ecc_peb_correction_topup -&gt; hmc_sdc_ecc_peb_correction_unwarp;
+
+    hmc_sdc_ecc_peb_correction_topup -&gt; hmc_sdc_ecc_peb_correction_outputnode;
+
+    hmc_sdc_ecc_peb_correction_unwarp -&gt; hmc_sdc_ecc_peb_correction_outputnode;
+
+    subgraph cluster_hmc_sdc_ecc_peb_correction_Shiftmap2Warping {
+
+            label=&quot;Shiftmap2Warping&quot;;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode[label=&quot;inputnode (utility)&quot;];
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_Fix_hdr[label=&quot;Fix_hdr (utility)&quot;];
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_ScaleField[label=&quot;ScaleField (fsl)&quot;];
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_vsm2dfm[label=&quot;vsm2dfm (fsl)&quot;];
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_Fix_hdr;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_Fix_hdr;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_ScaleField;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_Fix_hdr -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_ScaleField;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_ScaleField -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_vsm2dfm;
+
+        hmc_sdc_ecc_peb_correction_Shiftmap2Warping_vsm2dfm -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_outputnode;
+
+    }
+
+    hmc_sdc_ecc_peb_correction_b0_ref -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode;
+
+    hmc_sdc_ecc_peb_correction_topup -&gt; hmc_sdc_ecc_peb_correction_Shiftmap2Warping_inputnode;
+
+    hmc_sdc_ecc_peb_correction_Shiftmap2Warping_outputnode -&gt; hmc_sdc_ecc_peb_correction_outputnode;
+
+  }
+
+  hmc_sdc_ecc_b0_avg_post -&gt; hmc_sdc_ecc_bet_dwi_post;
+
+  hmc_sdc_ecc_bet_dwi_post -&gt; hmc_sdc_ecc_outputnode;
+
+  subgraph cluster_hmc_sdc_ecc_UnwarpArtifacts {
+
+      label=&quot;UnwarpArtifacts&quot;;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp[label=&quot;ConvertWarp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference[label=&quot;Reference (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp[label=&quot;CoeffComp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp[label=&quot;JacobianComp (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_CoeffComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ConvertWarp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_Reference;
+
+    hmc_sdc_ecc_UnwarpArtifacts_SplitDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_CoeffComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_Reference -&gt; hmc_sdc_ecc_UnwarpArtifacts_JacobianComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_JacobianComp;
+
+    hmc_sdc_ecc_UnwarpArtifacts_CoeffComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_UnwarpDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_JacobianComp -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+    hmc_sdc_ecc_UnwarpArtifacts_ModulateDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative;
+
+    hmc_sdc_ecc_UnwarpArtifacts_RemoveNegative -&gt; hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs;
+
+    hmc_sdc_ecc_UnwarpArtifacts_MergeDWIs -&gt; hmc_sdc_ecc_UnwarpArtifacts_outputnode;
+
+  }
+
+  hmc_sdc_ecc_UnwarpArtifacts_outputnode -&gt; hmc_sdc_ecc_outputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_bet_dwi_pre -&gt; hmc_sdc_ecc_peb_correction_inputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_outputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_peb_correction_inputnode;
+
+  hmc_sdc_ecc_motion_correct_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_peb_correction_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_eddy_correct_outputnode -&gt; hmc_sdc_ecc_b0_avg_post;
+
+  hmc_sdc_ecc_eddy_correct_outputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_UnwarpArtifacts_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_motion_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_eddy_correct_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_peb_correction_inputnode;
+
+  hmc_sdc_ecc_inputnode -&gt; hmc_sdc_ecc_peb_correction_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="ecc-pipeline">
+<span id="nipype-workflows-dmri-fsl-artifacts-ecc-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">ecc_pipeline()</span></tt><a class="headerlink" href="#ecc-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L396">Link to code</a></p>
+<p>ECC stands for Eddy currents correction.</p>
+<p>Creates a pipeline that corrects for artifacts induced by Eddy currents in
+dMRI sequences.
+It takes a series of diffusion weighted images and linearly co-registers
+them to one reference image (the average of all b0s in the dataset).</p>
+<p>DWIs are also modulated by the determinant of the Jacobian as indicated by
+<a class="reference internal" href="#jones10" id="id9">[Jones10]</a> and <a class="reference internal" href="#rohde04" id="id10">[Rohde04]</a>.</p>
+<p>A list of rigid transformation matrices can be provided, sourcing from a
+<tt class="xref py py-func docutils literal"><span class="pre">hmc_pipeline()</span></tt> workflow, to initialize registrations in a <em>motion
+free</em> framework.</p>
+<p>A list of affine transformation matrices is available as output, so that
+transforms can be chained (discussion
+<a class="reference external" href="https://github.com/nipy/nipype/pull/530#issuecomment-14505042">here</a>).</p>
+<div class="admonition-references admonition">
+<p class="first admonition-title">References</p>
+<table class="docutils citation" frame="void" id="jones10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Jones10]</td><td><em>(<a class="fn-backref" href="#id3">1</a>, <a class="fn-backref" href="#id9">2</a>)</em> Jones DK, <a class="reference external" href="http://cds.ismrm.org/protected/10MProceedings/files/1644_129.pdf">The signal intensity must be modulated by the
+determinant of the Jacobian when correcting for eddy currents in
+diffusion MRI</a>,
+Proc. ISMRM 18th Annual Meeting, (2010).</td></tr>
+</tbody>
+</table>
+<table class="last docutils citation" frame="void" id="rohde04" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id10">[Rohde04]</a></td><td>Rohde et al., <a class="reference external" href="http://stbb.nichd.nih.gov/pdf/com_app_cor_mri04.pdf">Comprehensive Approach for Correction of
+Motion and Distortion in Diffusion-Weighted MRI</a>, MRM
+51:103-114 (2004).</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">ecc_pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ecc</span> <span class="o">=</span> <span class="n">ecc_pipeline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ecc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ecc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ecc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ecc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_file - input dwi file
+inputnode.in_mask - weights mask of reference image (a file with data range sin [0.0, 1.0], indicating the weight of each voxel when computing the metric.
+inputnode.in_bval - b-values table
+inputnode.in_xfms - list of matrices to initialize registration (from head-motion correction)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputnode.out_file - corrected dwi file
+outputnode.out_xfms - list of transformation matrices
+</pre></div>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>Graph<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-adcb4723e84906d86d417b2dd09f1e7ff1071192.png" alt="digraph eddy_correct{
+
+  label=&quot;eddy_correct&quot;;
+
+  eddy_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  eddy_correct_ExtractDWI[label=&quot;ExtractDWI (utility)&quot;];
+
+  eddy_correct_b0_avg[label=&quot;b0_avg (utility)&quot;];
+
+  eddy_correct_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+  eddy_correct_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
+
+  eddy_correct_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+  eddy_correct_MergeDWIs[label=&quot;MergeDWIs (utility)&quot;];
+
+  eddy_correct_GatherMatrices[label=&quot;GatherMatrices (utility)&quot;];
+
+  eddy_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  eddy_correct_inputnode -&gt; eddy_correct_GatherMatrices;
+
+  eddy_correct_inputnode -&gt; eddy_correct_MergeDWIs;
+
+  eddy_correct_inputnode -&gt; eddy_correct_MergeDWIs;
+
+  eddy_correct_inputnode -&gt; eddy_correct_b0_avg;
+
+  eddy_correct_inputnode -&gt; eddy_correct_b0_avg;
+
+  eddy_correct_inputnode -&gt; eddy_correct_ExtractDWI;
+
+  eddy_correct_inputnode -&gt; eddy_correct_ExtractDWI;
+
+  subgraph cluster_eddy_correct_DWICoregistration {
+
+      label=&quot;DWICoregistration&quot;;
+
+    eddy_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    eddy_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    eddy_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+    eddy_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+    eddy_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+    eddy_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+    eddy_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+    eddy_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+    eddy_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    eddy_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+    eddy_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_InitXforms;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_InitXforms;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_SplitDWIs;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_Bias;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_Bias;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_B0Equalize;
+
+    eddy_correct_DWICoregistration_inputnode -&gt; eddy_correct_DWICoregistration_MskDilate;
+
+    eddy_correct_DWICoregistration_SplitDWIs -&gt; eddy_correct_DWICoregistration_DWEqualize;
+
+    eddy_correct_DWICoregistration_Bias -&gt; eddy_correct_DWICoregistration_B0Equalize;
+
+    eddy_correct_DWICoregistration_B0Equalize -&gt; eddy_correct_DWICoregistration_CoRegistration;
+
+    eddy_correct_DWICoregistration_MskDilate -&gt; eddy_correct_DWICoregistration_CoRegistration;
+
+    eddy_correct_DWICoregistration_MskDilate -&gt; eddy_correct_DWICoregistration_CoRegistration;
+
+    eddy_correct_DWICoregistration_MskDilate -&gt; eddy_correct_DWICoregistration_DWEqualize;
+
+    eddy_correct_DWICoregistration_DWEqualize -&gt; eddy_correct_DWICoregistration_CoRegistration;
+
+    eddy_correct_DWICoregistration_InitXforms -&gt; eddy_correct_DWICoregistration_CoRegistration;
+
+    eddy_correct_DWICoregistration_CoRegistration -&gt; eddy_correct_DWICoregistration_outputnode;
+
+    eddy_correct_DWICoregistration_CoRegistration -&gt; eddy_correct_DWICoregistration_RemoveNegative;
+
+    eddy_correct_DWICoregistration_RemoveNegative -&gt; eddy_correct_DWICoregistration_MergeDWIs;
+
+    eddy_correct_DWICoregistration_MergeDWIs -&gt; eddy_correct_DWICoregistration_outputnode;
+
+  }
+
+  eddy_correct_SplitDWIs -&gt; eddy_correct_ModulateDWIs;
+
+  eddy_correct_ModulateDWIs -&gt; eddy_correct_RemoveNegative;
+
+  eddy_correct_RemoveNegative -&gt; eddy_correct_MergeDWIs;
+
+  eddy_correct_MergeDWIs -&gt; eddy_correct_outputnode;
+
+  eddy_correct_GatherMatrices -&gt; eddy_correct_outputnode;
+
+  eddy_correct_b0_avg -&gt; eddy_correct_DWICoregistration_inputnode;
+
+  eddy_correct_DWICoregistration_outputnode -&gt; eddy_correct_GatherMatrices;
+
+  eddy_correct_DWICoregistration_outputnode -&gt; eddy_correct_ModulateDWIs;
+
+  eddy_correct_DWICoregistration_outputnode -&gt; eddy_correct_SplitDWIs;
+
+  eddy_correct_inputnode -&gt; eddy_correct_DWICoregistration_inputnode;
+
+  eddy_correct_inputnode -&gt; eddy_correct_DWICoregistration_inputnode;
+
+  eddy_correct_inputnode -&gt; eddy_correct_DWICoregistration_inputnode;
+
+  eddy_correct_ExtractDWI -&gt; eddy_correct_DWICoregistration_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="hmc-pipeline">
+<span id="nipype-workflows-dmri-fsl-artifacts-hmc-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">hmc_pipeline()</span></tt><a class="headerlink" href="#hmc-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L288">Link to code</a></p>
+<p>HMC stands for head-motion correction.</p>
+<p>Creates a pipeline that corrects for head motion artifacts in dMRI
+sequences.
+It takes a series of diffusion weighted images and rigidly co-registers
+them to one reference image. Finally, the <cite>b</cite>-matrix is rotated accordingly
+<a class="reference internal" href="#leemans09" id="id12">[Leemans09]</a> making use of the rotation matrix obtained by FLIRT.</p>
+<p>Search angles have been limited to 4 degrees, based on results in
+<a class="reference internal" href="#yendiki13" id="id13">[Yendiki13]</a>.</p>
+<p>A list of rigid transformation matrices is provided, so that transforms
+can be chained.
+This is useful to correct for artifacts with only one interpolation process
+(as previously discussed <a class="reference external" href="https://github.com/nipy/nipype/pull/530#issuecomment-14505042">here</a>),
+and also to compute nuisance regressors as proposed by <a class="reference internal" href="#yendiki13" id="id15">[Yendiki13]</a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This workflow rotates the <cite>b</cite>-vectors, so please be advised
+that not all the dicom converters ensure the consistency between the
+resulting nifti orientation and the gradients table (e.g. dcm2nii
+checks it).</p>
+</div>
+<div class="admonition-references admonition">
+<p class="first admonition-title">References</p>
+<table class="docutils citation" frame="void" id="leemans09" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Leemans09]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id6">3</a>, <a class="fn-backref" href="#id12">4</a>)</em> Leemans A, and Jones DK, <a class="reference external" href="http://dx.doi.org/10.1002/mrm.21890">The B-matrix must be rotated
+when correcting for subject motion in DTI data</a>,
+Magn Reson Med. 61(6):1336-49. 2009. doi: 10.1002/mrm.21890.</td></tr>
+</tbody>
+</table>
+<table class="last docutils citation" frame="void" id="yendiki13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Yendiki13]</td><td><em>(<a class="fn-backref" href="#id13">1</a>, <a class="fn-backref" href="#id15">2</a>)</em> Yendiki A et al., <a class="reference external" href="http://dx.doi.org/10.1016/j.neuroimage.2013.11.027">Spurious group differences due to head
+motion in a diffusion MRI study</a>.
+Neuroimage. 21(88C):79-90. 2013. doi: 10.1016/j.neuroimage.2013.11.027</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id16">
+<h3>Example<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">hmc_pipeline</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span> <span class="o">=</span> <span class="n">hmc_pipeline</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hmc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_file - input dwi file
+inputnode.in_mask - weights mask of reference image (a file with data range in [0.0, 1.0], indicating the weight of each voxel when computing the metric.
+inputnode.in_bvec - gradients file (b-vectors)
+inputnode.ref_num (optional, default=0) index of the b0 volume that should be taken as reference
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputnode.out_file - corrected dwi file
+outputnode.out_bvec - rotated gradient vectors table
+outputnode.out_xfms - list of transformation matrices
+</pre></div>
+</div>
+</div>
+<div class="section" id="id17">
+<h3>Graph<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-96008c7a94b192e9b4378b62ec20ba3a0913f81b.png" alt="digraph motion_correct{
+
+  label=&quot;motion_correct&quot;;
+
+  motion_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  motion_correct_SplitDWI[label=&quot;SplitDWI (utility)&quot;];
+
+  motion_correct_InsertRefmat[label=&quot;InsertRefmat (utility)&quot;];
+
+  motion_correct_Rotate_Bvec[label=&quot;Rotate_Bvec (utility)&quot;];
+
+  motion_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  motion_correct_inputnode -&gt; motion_correct_SplitDWI;
+
+  motion_correct_inputnode -&gt; motion_correct_SplitDWI;
+
+  motion_correct_inputnode -&gt; motion_correct_SplitDWI;
+
+  motion_correct_inputnode -&gt; motion_correct_Rotate_Bvec;
+
+  motion_correct_SplitDWI -&gt; motion_correct_InsertRefmat;
+
+  subgraph cluster_motion_correct_DWICoregistration {
+
+      label=&quot;DWICoregistration&quot;;
+
+    motion_correct_DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    motion_correct_DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
+
+    motion_correct_DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+
+    motion_correct_DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+    motion_correct_DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+    motion_correct_DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+
+    motion_correct_DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+
+    motion_correct_DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
+
+    motion_correct_DWICoregistration_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+    motion_correct_DWICoregistration_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+    motion_correct_DWICoregistration_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_Bias;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_Bias;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_B0Equalize;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_SplitDWIs;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_InitXforms;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_InitXforms;
+
+    motion_correct_DWICoregistration_inputnode -&gt; motion_correct_DWICoregistration_MskDilate;
+
+    motion_correct_DWICoregistration_InitXforms -&gt; motion_correct_DWICoregistration_CoRegistration;
+
+    motion_correct_DWICoregistration_Bias -&gt; motion_correct_DWICoregistration_B0Equalize;
+
+    motion_correct_DWICoregistration_SplitDWIs -&gt; motion_correct_DWICoregistration_DWEqualize;
+
+    motion_correct_DWICoregistration_MskDilate -&gt; motion_correct_DWICoregistration_CoRegistration;
+
+    motion_correct_DWICoregistration_MskDilate -&gt; motion_correct_DWICoregistration_CoRegistration;
+
+    motion_correct_DWICoregistration_MskDilate -&gt; motion_correct_DWICoregistration_DWEqualize;
+
+    motion_correct_DWICoregistration_DWEqualize -&gt; motion_correct_DWICoregistration_CoRegistration;
+
+    motion_correct_DWICoregistration_B0Equalize -&gt; motion_correct_DWICoregistration_CoRegistration;
+
+    motion_correct_DWICoregistration_CoRegistration -&gt; motion_correct_DWICoregistration_RemoveNegative;
+
+    motion_correct_DWICoregistration_CoRegistration -&gt; motion_correct_DWICoregistration_outputnode;
+
+    motion_correct_DWICoregistration_RemoveNegative -&gt; motion_correct_DWICoregistration_MergeDWIs;
+
+    motion_correct_DWICoregistration_MergeDWIs -&gt; motion_correct_DWICoregistration_outputnode;
+
+  }
+
+  motion_correct_InsertRefmat -&gt; motion_correct_Rotate_Bvec;
+
+  motion_correct_InsertRefmat -&gt; motion_correct_outputnode;
+
+  motion_correct_Rotate_Bvec -&gt; motion_correct_outputnode;
+
+  motion_correct_inputnode -&gt; motion_correct_DWICoregistration_inputnode;
+
+  motion_correct_SplitDWI -&gt; motion_correct_DWICoregistration_inputnode;
+
+  motion_correct_SplitDWI -&gt; motion_correct_DWICoregistration_inputnode;
+
+  motion_correct_SplitDWI -&gt; motion_correct_DWICoregistration_inputnode;
+
+  motion_correct_DWICoregistration_outputnode -&gt; motion_correct_InsertRefmat;
+
+  motion_correct_DWICoregistration_outputnode -&gt; motion_correct_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="remove-bias">
+<span id="nipype-workflows-dmri-fsl-artifacts-remove-bias"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">remove_bias()</span></tt><a class="headerlink" href="#remove-bias" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L804">Link to code</a></p>
+<p>This workflow estimates a single multiplicative bias field from the
+averaged <em>b0</em> image, as suggested in <a class="reference internal" href="#jeurissen2014" id="id18">[Jeurissen2014]</a>.</p>
+<div class="admonition-references admonition">
+<p class="first admonition-title">References</p>
+<table class="last docutils citation" frame="void" id="jeurissen2014" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id18">[Jeurissen2014]</a></td><td>Jeurissen B. et al., <a class="reference external" href="http://dx.doi.org/10.1016/j.neuroimage.2014.07.061">Multi-tissue constrained
+spherical deconvolution for improved analysis of multi-shell diffusion
+MRI data</a>.
+NeuroImage (2014). doi: 10.1016/j.neuroimage.2014.07.061</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id19">
+<h3>Example<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">remove_bias</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span> <span class="o">=</span> <span class="n">remove_bias</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id20">
+<h3>Graph<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-1a4da2a354e19b4a6e25a73bb4d77f84fece8a97.png" alt="digraph bias_correct{
+
+  label=&quot;bias_correct&quot;;
+
+  bias_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  bias_correct_b0_avg[label=&quot;b0_avg (utility)&quot;];
+
+  bias_correct_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+  bias_correct_Bias_b0[label=&quot;Bias_b0 (ants)&quot;];
+
+  bias_correct_RemoveBiasOfDWIs[label=&quot;RemoveBiasOfDWIs (fsl)&quot;];
+
+  bias_correct_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+  bias_correct_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+  bias_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  bias_correct_inputnode -&gt; bias_correct_Bias_b0;
+
+  bias_correct_inputnode -&gt; bias_correct_b0_avg;
+
+  bias_correct_inputnode -&gt; bias_correct_b0_avg;
+
+  bias_correct_inputnode -&gt; bias_correct_SplitDWIs;
+
+  bias_correct_b0_avg -&gt; bias_correct_Bias_b0;
+
+  bias_correct_SplitDWIs -&gt; bias_correct_RemoveBiasOfDWIs;
+
+  bias_correct_Bias_b0 -&gt; bias_correct_RemoveBiasOfDWIs;
+
+  bias_correct_RemoveBiasOfDWIs -&gt; bias_correct_RemoveNegative;
+
+  bias_correct_RemoveNegative -&gt; bias_correct_MergeDWIs;
+
+  bias_correct_MergeDWIs -&gt; bias_correct_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="sdc-fmb">
+<span id="nipype-workflows-dmri-fsl-artifacts-sdc-fmb"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">sdc_fmb()</span></tt><a class="headerlink" href="#sdc-fmb" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L515">Link to code</a></p>
+<p>SDC stands for susceptibility distortion correction. FMB stands for
+fieldmap-based.</p>
+<p>The fieldmap based (FMB) method implements SDC by using a mapping of the
+B0 field as proposed by <a class="reference internal" href="#jezzard95" id="id21">[Jezzard95]</a>. This workflow uses the implementation
+of FSL (<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE">FUGUE</a>). Phase
+unwrapping is performed using <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fugue/prelude.html">PRELUDE</a>
+<a class="reference internal" href="#jenkinson03" id="id22">[Jenkinson03]</a>. Preparation of the fieldmap is performed reproducing the
+script in FSL <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE/Guide#SIEMENS_data">fsl_prepare_fieldmap</a>.</p>
+<div class="section" id="id23">
+<h3>Example<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">sdc_fmb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span> <span class="o">=</span> <span class="n">sdc_fmb</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_ref</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">bmap_mag</span> <span class="o">=</span> <span class="s">&#39;magnitude.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">bmap_pha</span> <span class="o">=</span> <span class="s">&#39;phase.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="s">&#39;epi_param.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fmb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Only SIEMENS format fieldmaps are supported.</p>
+</div>
+<div class="admonition-references admonition">
+<p class="first admonition-title">References</p>
+<table class="docutils citation" frame="void" id="jezzard95" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id21">[Jezzard95]</a></td><td>Jezzard P, and Balaban RS, <a class="reference external" href="http://dx.doi.org/10.1002/mrm.1910340111">Correction for geometric
+distortion in echo planar images from B0 field variations</a>,
+MRM 34(1):65-73. (1995). doi: 10.1002/mrm.1910340111.</td></tr>
+</tbody>
+</table>
+<table class="last docutils citation" frame="void" id="jenkinson03" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id22">[Jenkinson03]</a></td><td>Jenkinson M., <a class="reference external" href="http://dx.doi.org/10.1002/mrm.10354">Fast, automated, N-dimensional
+phase-unwrapping algorithm</a>,
+MRM 49(1):193-197, 2003, doi: 10.1002/mrm.10354.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="id24">
+<h3>Graph<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-15ff257af07e8c8942f91dfe9ecbc65938336e1d.png" alt="digraph fmb_correction{
+
+  label=&quot;fmb_correction&quot;;
+
+  fmb_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  fmb_correction_PreparePhase[label=&quot;PreparePhase (utility)&quot;];
+
+  fmb_correction_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+
+  fmb_correction_GetFirst[label=&quot;GetFirst (fsl)&quot;];
+
+  fmb_correction_Baseline[label=&quot;Baseline (utility)&quot;];
+
+  fmb_correction_SettingsGrabber[label=&quot;SettingsGrabber (io)&quot;];
+
+  fmb_correction_EffEcho[label=&quot;EffEcho (utility)&quot;];
+
+  fmb_correction_Bias[label=&quot;Bias (ants)&quot;];
+
+  fmb_correction_BrainExtraction[label=&quot;BrainExtraction (fsl)&quot;];
+
+  fmb_correction_MskDilate[label=&quot;MskDilate (fsl)&quot;];
+
+  fmb_correction_PhaseUnwrap[label=&quot;PhaseUnwrap (fsl)&quot;];
+
+  fmb_correction_ToRadSec[label=&quot;ToRadSec (utility)&quot;];
+
+  fmb_correction_FMm_to_B0[label=&quot;FMm_to_B0 (ants)&quot;];
+
+  fmb_correction_FMp_to_B0[label=&quot;FMp_to_B0 (ants)&quot;];
+
+  fmb_correction_PreliminaryFugue[label=&quot;PreliminaryFugue (fsl)&quot;];
+
+  fmb_correction_DemeanFmap[label=&quot;DemeanFmap (utility)&quot;];
+
+  fmb_correction_AddEmptyVol[label=&quot;AddEmptyVol (utility)&quot;];
+
+  fmb_correction_ComputeVSM[label=&quot;ComputeVSM (fsl)&quot;];
+
+  fmb_correction_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
+
+  fmb_correction_RemoveNegative[label=&quot;RemoveNegative (fsl)&quot;];
+
+  fmb_correction_MergeDWIs[label=&quot;MergeDWIs (fsl)&quot;];
+
+  fmb_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  fmb_correction_inputnode -&gt; fmb_correction_PreliminaryFugue;
+
+  fmb_correction_inputnode -&gt; fmb_correction_FMm_to_B0;
+
+  fmb_correction_inputnode -&gt; fmb_correction_PreparePhase;
+
+  fmb_correction_inputnode -&gt; fmb_correction_ComputeVSM;
+
+  fmb_correction_inputnode -&gt; fmb_correction_DemeanFmap;
+
+  fmb_correction_inputnode -&gt; fmb_correction_SplitDWIs;
+
+  fmb_correction_inputnode -&gt; fmb_correction_GetFirst;
+
+  fmb_correction_inputnode -&gt; fmb_correction_Baseline;
+
+  fmb_correction_inputnode -&gt; fmb_correction_Baseline;
+
+  fmb_correction_inputnode -&gt; fmb_correction_SettingsGrabber;
+
+  fmb_correction_PreparePhase -&gt; fmb_correction_PhaseUnwrap;
+
+  fmb_correction_SplitDWIs -&gt; fmb_correction_UnwarpDWIs;
+
+  fmb_correction_GetFirst -&gt; fmb_correction_Bias;
+
+  fmb_correction_Baseline -&gt; fmb_correction_FMm_to_B0;
+
+  fmb_correction_Baseline -&gt; fmb_correction_FMp_to_B0;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_EffEcho;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_EffEcho;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_UnwarpDWIs;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_ToRadSec;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_ComputeVSM;
+
+  fmb_correction_EffEcho -&gt; fmb_correction_ComputeVSM;
+
+  fmb_correction_Bias -&gt; fmb_correction_PhaseUnwrap;
+
+  fmb_correction_Bias -&gt; fmb_correction_BrainExtraction;
+
+  fmb_correction_Bias -&gt; fmb_correction_FMm_to_B0;
+
+  fmb_correction_BrainExtraction -&gt; fmb_correction_MskDilate;
+
+  fmb_correction_MskDilate -&gt; fmb_correction_PhaseUnwrap;
+
+  fmb_correction_MskDilate -&gt; fmb_correction_FMm_to_B0;
+
+  fmb_correction_PhaseUnwrap -&gt; fmb_correction_ToRadSec;
+
+  fmb_correction_ToRadSec -&gt; fmb_correction_FMp_to_B0;
+
+  fmb_correction_FMm_to_B0 -&gt; fmb_correction_FMp_to_B0;
+
+  fmb_correction_FMm_to_B0 -&gt; fmb_correction_FMp_to_B0;
+
+  fmb_correction_FMp_to_B0 -&gt; fmb_correction_PreliminaryFugue;
+
+  fmb_correction_PreliminaryFugue -&gt; fmb_correction_DemeanFmap;
+
+  subgraph cluster_fmb_correction_Cleanup {
+
+      label=&quot;Cleanup&quot;;
+
+    fmb_correction_Cleanup_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    fmb_correction_Cleanup_MskErode[label=&quot;MskErode (fsl)&quot;];
+
+    fmb_correction_Cleanup_Despike[label=&quot;Despike (fsl)&quot;];
+
+    fmb_correction_Cleanup_NewMask[label=&quot;NewMask (fsl)&quot;];
+
+    fmb_correction_Cleanup_ApplyMask[label=&quot;ApplyMask (fsl)&quot;];
+
+    fmb_correction_Cleanup_Merge[label=&quot;Merge (utility)&quot;];
+
+    fmb_correction_Cleanup_AddEdge[label=&quot;AddEdge (fsl)&quot;];
+
+    fmb_correction_Cleanup_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    fmb_correction_Cleanup_inputnode -&gt; fmb_correction_Cleanup_MskErode;
+
+    fmb_correction_Cleanup_inputnode -&gt; fmb_correction_Cleanup_AddEdge;
+
+    fmb_correction_Cleanup_inputnode -&gt; fmb_correction_Cleanup_Despike;
+
+    fmb_correction_Cleanup_inputnode -&gt; fmb_correction_Cleanup_Despike;
+
+    fmb_correction_Cleanup_inputnode -&gt; fmb_correction_Cleanup_NewMask;
+
+    fmb_correction_Cleanup_MskErode -&gt; fmb_correction_Cleanup_Merge;
+
+    fmb_correction_Cleanup_MskErode -&gt; fmb_correction_Cleanup_NewMask;
+
+    fmb_correction_Cleanup_Despike -&gt; fmb_correction_Cleanup_ApplyMask;
+
+    fmb_correction_Cleanup_NewMask -&gt; fmb_correction_Cleanup_ApplyMask;
+
+    fmb_correction_Cleanup_ApplyMask -&gt; fmb_correction_Cleanup_Merge;
+
+    fmb_correction_Cleanup_Merge -&gt; fmb_correction_Cleanup_AddEdge;
+
+    fmb_correction_Cleanup_AddEdge -&gt; fmb_correction_Cleanup_outputnode;
+
+  }
+
+  fmb_correction_AddEmptyVol -&gt; fmb_correction_ComputeVSM;
+
+  fmb_correction_ComputeVSM -&gt; fmb_correction_UnwarpDWIs;
+
+  fmb_correction_ComputeVSM -&gt; fmb_correction_outputnode;
+
+  fmb_correction_UnwarpDWIs -&gt; fmb_correction_RemoveNegative;
+
+  fmb_correction_RemoveNegative -&gt; fmb_correction_MergeDWIs;
+
+  fmb_correction_MergeDWIs -&gt; fmb_correction_outputnode;
+
+  subgraph cluster_fmb_correction_Shiftmap2Warping {
+
+      label=&quot;Shiftmap2Warping&quot;;
+
+    fmb_correction_Shiftmap2Warping_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    fmb_correction_Shiftmap2Warping_Fix_hdr[label=&quot;Fix_hdr (utility)&quot;];
+
+    fmb_correction_Shiftmap2Warping_ScaleField[label=&quot;ScaleField (fsl)&quot;];
+
+    fmb_correction_Shiftmap2Warping_vsm2dfm[label=&quot;vsm2dfm (fsl)&quot;];
+
+    fmb_correction_Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    fmb_correction_Shiftmap2Warping_inputnode -&gt; fmb_correction_Shiftmap2Warping_ScaleField;
+
+    fmb_correction_Shiftmap2Warping_inputnode -&gt; fmb_correction_Shiftmap2Warping_Fix_hdr;
+
+    fmb_correction_Shiftmap2Warping_inputnode -&gt; fmb_correction_Shiftmap2Warping_Fix_hdr;
+
+    fmb_correction_Shiftmap2Warping_inputnode -&gt; fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+    fmb_correction_Shiftmap2Warping_inputnode -&gt; fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+    fmb_correction_Shiftmap2Warping_Fix_hdr -&gt; fmb_correction_Shiftmap2Warping_ScaleField;
+
+    fmb_correction_Shiftmap2Warping_ScaleField -&gt; fmb_correction_Shiftmap2Warping_vsm2dfm;
+
+    fmb_correction_Shiftmap2Warping_vsm2dfm -&gt; fmb_correction_Shiftmap2Warping_outputnode;
+
+  }
+
+  fmb_correction_ComputeVSM -&gt; fmb_correction_Shiftmap2Warping_inputnode;
+
+  fmb_correction_DemeanFmap -&gt; fmb_correction_Cleanup_inputnode;
+
+  fmb_correction_SettingsGrabber -&gt; fmb_correction_Shiftmap2Warping_inputnode;
+
+  fmb_correction_inputnode -&gt; fmb_correction_Cleanup_inputnode;
+
+  fmb_correction_Shiftmap2Warping_outputnode -&gt; fmb_correction_outputnode;
+
+  fmb_correction_Cleanup_outputnode -&gt; fmb_correction_AddEmptyVol;
+
+  fmb_correction_MergeDWIs -&gt; fmb_correction_Shiftmap2Warping_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="sdc-peb">
+<span id="nipype-workflows-dmri-fsl-artifacts-sdc-peb"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">sdc_peb()</span></tt><a class="headerlink" href="#sdc-peb" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/artifacts.py#L699">Link to code</a></p>
+<p>SDC stands for susceptibility distortion correction. PEB stands for
+phase-encoding-based.</p>
+<p>The phase-encoding-based (PEB) method implements SDC by acquiring
+diffusion images with two different enconding directions <a class="reference internal" href="#andersson2003" id="id25">[Andersson2003]</a>.
+The most typical case is acquiring with opposed phase-gradient blips
+(e.g. <em>A&gt;&gt;&gt;P</em> and <em>P&gt;&gt;&gt;A</em>, or equivalently, <em>-y</em> and <em>y</em>)
+as in <a class="reference internal" href="#chiou2000" id="id26">[Chiou2000]</a>, but it is also possible to use orthogonal
+configurations <a class="reference internal" href="#cordes2000" id="id27">[Cordes2000]</a> (e.g. <em>A&gt;&gt;&gt;P</em> and <em>L&gt;&gt;&gt;R</em>,
+or equivalently <em>-y</em> and <em>x</em>).
+This workflow uses the implementation of FSL
+(<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP">TOPUP</a>).</p>
+<div class="section" id="id28">
+<h3>Example<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.artifacts</span> <span class="kn">import</span> <span class="n">sdc_peb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span> <span class="o">=</span> <span class="n">sdc_peb</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">alt_file</span> <span class="o">=</span> <span class="s">&#39;epi_rev.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bval</span> <span class="o">=</span> <span class="s">&#39;diffusion.bval&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="admonition-references admonition">
+<p class="first admonition-title">References</p>
+<table class="docutils citation" frame="void" id="andersson2003" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id25">[Andersson2003]</a></td><td>Andersson JL et al., <a class="reference external" href="http://dx.doi.org/10.1016/S1053-8119(03)00336-7">How to correct susceptibility
+distortions in spin-echo echo-planar images: application to diffusion
+tensor imaging</a>.
+Neuroimage. 2003 Oct;20(2):870-88. doi: 10.1016/S1053-8119(03)00336-7</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="cordes2000" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id27">[Cordes2000]</a></td><td>Cordes D et al., Geometric distortion correction in EPI
+using two images with orthogonal phase-encoding directions, in Proc.
+ISMRM (8), p.1712, Denver, US, 2000.</td></tr>
+</tbody>
+</table>
+<table class="last docutils citation" frame="void" id="chiou2000" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id26">[Chiou2000]</a></td><td>Chiou JY, and Nalcioglu O, A simple method to correct
+off-resonance related distortion in echo planar imaging, in Proc.
+ISMRM (8), p.1712, Denver, US, 2000.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="id29">
+<h3>Graph<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-390a732203482abbe037675c09a28313558e9479.png" alt="digraph peb_correction{
+
+  label=&quot;peb_correction&quot;;
+
+  peb_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  peb_correction_b0_ref[label=&quot;b0_ref (fsl)&quot;];
+
+  peb_correction_b0_alt[label=&quot;b0_alt (fsl)&quot;];
+
+  peb_correction_b0_list[label=&quot;b0_list (utility)&quot;];
+
+  peb_correction_b0_merged[label=&quot;b0_merged (fsl)&quot;];
+
+  peb_correction_topup[label=&quot;topup (fsl)&quot;];
+
+  peb_correction_unwarp[label=&quot;unwarp (fsl)&quot;];
+
+  peb_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  peb_correction_inputnode -&gt; peb_correction_unwarp;
+
+  peb_correction_inputnode -&gt; peb_correction_b0_ref;
+
+  peb_correction_inputnode -&gt; peb_correction_b0_ref;
+
+  peb_correction_inputnode -&gt; peb_correction_b0_alt;
+
+  peb_correction_inputnode -&gt; peb_correction_b0_alt;
+
+  peb_correction_b0_ref -&gt; peb_correction_b0_list;
+
+  peb_correction_b0_alt -&gt; peb_correction_b0_list;
+
+  peb_correction_b0_list -&gt; peb_correction_b0_merged;
+
+  peb_correction_b0_merged -&gt; peb_correction_topup;
+
+  peb_correction_topup -&gt; peb_correction_unwarp;
+
+  peb_correction_topup -&gt; peb_correction_unwarp;
+
+  peb_correction_topup -&gt; peb_correction_unwarp;
+
+  peb_correction_topup -&gt; peb_correction_outputnode;
+
+  peb_correction_unwarp -&gt; peb_correction_outputnode;
+
+  subgraph cluster_peb_correction_Shiftmap2Warping {
+
+      label=&quot;Shiftmap2Warping&quot;;
+
+    peb_correction_Shiftmap2Warping_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    peb_correction_Shiftmap2Warping_Fix_hdr[label=&quot;Fix_hdr (utility)&quot;];
+
+    peb_correction_Shiftmap2Warping_ScaleField[label=&quot;ScaleField (fsl)&quot;];
+
+    peb_correction_Shiftmap2Warping_vsm2dfm[label=&quot;vsm2dfm (fsl)&quot;];
+
+    peb_correction_Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    peb_correction_Shiftmap2Warping_inputnode -&gt; peb_correction_Shiftmap2Warping_Fix_hdr;
+
+    peb_correction_Shiftmap2Warping_inputnode -&gt; peb_correction_Shiftmap2Warping_Fix_hdr;
+
+    peb_correction_Shiftmap2Warping_inputnode -&gt; peb_correction_Shiftmap2Warping_vsm2dfm;
+
+    peb_correction_Shiftmap2Warping_inputnode -&gt; peb_correction_Shiftmap2Warping_vsm2dfm;
+
+    peb_correction_Shiftmap2Warping_inputnode -&gt; peb_correction_Shiftmap2Warping_ScaleField;
+
+    peb_correction_Shiftmap2Warping_Fix_hdr -&gt; peb_correction_Shiftmap2Warping_ScaleField;
+
+    peb_correction_Shiftmap2Warping_ScaleField -&gt; peb_correction_Shiftmap2Warping_vsm2dfm;
+
+    peb_correction_Shiftmap2Warping_vsm2dfm -&gt; peb_correction_Shiftmap2Warping_outputnode;
+
+  }
+
+  peb_correction_Shiftmap2Warping_outputnode -&gt; peb_correction_outputnode;
+
+  peb_correction_topup -&gt; peb_correction_Shiftmap2Warping_inputnode;
+
+  peb_correction_b0_ref -&gt; peb_correction_Shiftmap2Warping_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

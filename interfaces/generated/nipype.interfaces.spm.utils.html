@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.spm.utils</a><ul>
+<li><a class="reference internal" href="#analyze2nii">Analyze2nii</a></li>
+<li><a class="reference internal" href="#applyinversedeformation">ApplyInverseDeformation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#applytransform">ApplyTransform</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#calccoregaffine">CalcCoregAffine</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dicomimport">DicomImport</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reslice">Reslice</a></li>
+<li><a class="reference internal" href="#reslicetoreference">ResliceToReference</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-spm-utils">
+<h1>interfaces.spm.utils<a class="headerlink" href="#interfaces-spm-utils" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-spm-utils-analyze2nii"></span><div class="section" id="analyze2nii">
+<span id="index-0"></span><h2>Analyze2nii<a class="headerlink" href="#analyze2nii" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L19">Link to code</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+analyze_file: (an existing file name)
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+nifti_file: (an existing file name)
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-applyinversedeformation"></span></div>
+<div class="section" id="applyinversedeformation">
+<span id="index-1"></span><h2>ApplyInverseDeformation<a class="headerlink" href="#applyinversedeformation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L266">Link to code</a></p>
+<p>Uses spm to apply inverse deformation stored in a .mat file or a
+deformation field to a given file</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm.utils</span> <span class="kn">as</span> <span class="nn">spmu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span> <span class="o">=</span> <span class="n">spmu</span><span class="o">.</span><span class="n">ApplyInverseDeformation</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">deformation</span> <span class="o">=</span> <span class="s">&#39;struct_to_func.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inv</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        Files on which deformation is applied
+
+[Optional]
+bounding_box: (a list of from 6 to 6 items which are a float)
+        6-element list (opt)
+deformation: (an existing file name)
+        SN SPM deformation file
+        mutually_exclusive: deformation_field
+deformation_field: (an existing file name)
+        SN SPM deformation file
+        mutually_exclusive: deformation
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interpolation: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+target: (an existing file name)
+        File defining target space
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+voxel_sizes: (a list of from 3 to 3 items which are a float)
+        3-element list (opt)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (a list of items which are an existing file name)
+        Transformed files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-applytransform"></span></div>
+</div>
+<div class="section" id="applytransform">
+<span id="index-2"></span><h2>ApplyTransform<a class="headerlink" href="#applytransform" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L131">Link to code</a></p>
+<p>Uses SPM to apply transform stored in a .mat file to given file</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm.utils</span> <span class="kn">as</span> <span class="nn">spmu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applymat</span> <span class="o">=</span> <span class="n">spmu</span><span class="o">.</span><span class="n">ApplyTransform</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applymat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applymat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mat</span> <span class="o">=</span> <span class="s">&#39;func_to_struct.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applymat</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        file to apply transform to, (only updates header)
+mat: (an existing file name)
+        file holding transform to apply
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+out_file: (a file name)
+        output file name for transformed data
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        Transformed image file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-calccoregaffine"></span></div>
+</div>
+<div class="section" id="calccoregaffine">
+<span id="index-3"></span><h2>CalcCoregAffine<a class="headerlink" href="#calccoregaffine" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L53">Link to code</a></p>
+<p>Uses SPM (spm_coreg) to calculate the transform mapping
+moving to target. Saves Transform in mat (matlab binary file)
+Also saves inverse transform</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm.utils</span> <span class="kn">as</span> <span class="nn">spmu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span> <span class="o">=</span> <span class="n">spmu</span><span class="o">.</span><span class="n">CalcCoregAffine</span><span class="p">(</span><span class="n">matlab_cmd</span><span class="o">=</span><span class="s">&#39;matlab-spm8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mat</span> <span class="o">=</span> <span class="s">&#39;func_to_struct.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>the output file mat is saves as a matlab binary file</li>
+<li>calculating the transforms does NOT change either input image
+it does not <strong>move</strong> the moving image, only calculates the transform
+that can be used to move it</li>
+</ul>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+moving: (an existing file name)
+        volume transform can be applied to register with target
+target: (an existing file name)
+        target for generating affine transform
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invmat: (a file name)
+        Filename used to store inverse affine matrix
+mat: (a file name)
+        Filename used to store affine matrix
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>invmat: (a file name)
+        Matlab file holding inverse transform
+mat: (an existing file name)
+        Matlab file holding transform
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-dicomimport"></span></div>
+</div>
+<div class="section" id="dicomimport">
+<span id="index-4"></span><h2>DicomImport<a class="headerlink" href="#dicomimport" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L410">Link to code</a></p>
+<p>Uses spm to convert DICOM files to nii or img+hdr.</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm.utils</span> <span class="kn">as</span> <span class="nn">spmu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">di</span> <span class="o">=</span> <span class="n">spmu</span><span class="o">.</span><span class="n">DicomImport</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">di</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional_1.dcm&#39;</span><span class="p">,</span> <span class="s">&#39;functional_2.dcm&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">di</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        dicom files to be converted
+
+[Optional]
+format: (&#39;nii&#39; or &#39;img&#39;, nipype default value: nii)
+        output format.
+icedims: (a boolean, nipype default value: False)
+        If image sorting fails, one can try using the additional SIEMENS
+        ICEDims information to create unique filenames. Use this only if
+        there would be multiple volumes with exactly the same file names.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+output_dir: (a string, nipype default value: ./converted_dicom)
+        output directory.
+output_dir_struct: (&#39;flat&#39; or &#39;series&#39; or &#39;patname&#39; or &#39;patid_date&#39;
+         or &#39;patid&#39; or &#39;date_time&#39;, nipype default value: flat)
+        directory structure for the output.
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (a list of items which are an existing file name)
+        converted files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-reslice"></span></div>
+</div>
+<div class="section" id="reslice">
+<span id="index-5"></span><h2>Reslice<a class="headerlink" href="#reslice" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L198">Link to code</a></p>
+<p>uses  spm_reslice to resample in_file into space of space_defining</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        file to apply transform to, (only updates header)
+space_defining: (an existing file name)
+        Volume defining space to slice in_file into
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (0 &lt;= an integer &lt;= 7, nipype default value: 0)
+        degree of b-spline used for interpolation0 is nearest neighbor
+        (default)
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+out_file: (a file name)
+        Optional file to save resliced volume
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        resliced volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-utils-reslicetoreference"></span></div>
+<div class="section" id="reslicetoreference">
+<span id="index-6"></span><h2>ResliceToReference<a class="headerlink" href="#reslicetoreference" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/utils.py#L338">Link to code</a></p>
+<p>Uses spm to reslice a volume to a target image space or to a provided voxel size and bounding box</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm.utils</span> <span class="kn">as</span> <span class="nn">spmu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2ref</span> <span class="o">=</span> <span class="n">spmu</span><span class="o">.</span><span class="n">ResliceToReference</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2ref</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2ref</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r2ref</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        Files on which deformation is applied
+
+[Optional]
+bounding_box: (a list of from 6 to 6 items which are a float)
+        6-element list (opt)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interpolation: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a list of items which are a directory name)
+        Paths to add to matlabpath
+target: (an existing file name)
+        File defining target space
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+voxel_sizes: (a list of from 3 to 3 items which are a float)
+        3-element list (opt)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (a list of items which are an existing file name)
+        Transformed files
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

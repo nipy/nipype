@@ -1,0 +1,731 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.camino.odf</a><ul>
+<li><a class="reference internal" href="#linrecon">LinRecon</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mesd">MESD</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#qballmx">QBallMX</a><ul>
+<li><a class="reference internal" href="#example-1">Example 1</a></li>
+<li><a class="reference internal" href="#example-2">Example 2</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sfpeaks">SFPeaks</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-camino-odf">
+<h1>interfaces.camino.odf<a class="headerlink" href="#interfaces-camino-odf" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-camino-odf-linrecon"></span><div class="section" id="linrecon">
+<span id="index-0"></span><h2>LinRecon<a class="headerlink" href="#linrecon" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L111">Link to code</a></p>
+<p>Wraps command <strong>linrecon</strong></p>
+<p>Runs a linear transformation in each voxel.</p>
+<p>Reads  a  linear  transformation from the matrix file assuming the
+imaging scheme specified in the scheme file. Performs the linear
+transformation on the data in every voxel and outputs the result to
+the standard output. The ouput in every voxel is actually:</p>
+<blockquote>
+<div>[exit code, ln(S(0)), p1, ..., pR]</div></blockquote>
+<p>where p1, ..., pR are the parameters of the reconstruction.
+Possible exit codes are:</p>
+<blockquote>
+<div>0. No problems.
+6. Bad data replaced by substitution of zero.</div></blockquote>
+<p>The matrix must be R by N+M where N+M is the number of measurements
+and R is the number of parameters of the reconstruction. The matrix
+file contains binary double-precision floats. The matrix elements
+are stored row by row.</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<p>First run QBallMX and create a linear transform matrix using
+Spherical Harmonics (sh).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">QBallMX</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">basistype</span> <span class="o">=</span> <span class="s">&#39;sh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>            
+</pre></div>
+</div>
+<p>Then run it over each voxel using LinRecon</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">LinRecon</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;SubjectA.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">qball_mat</span> <span class="o">=</span> <span class="s">&#39;A_qmat.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>         
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        voxel-order data filename
+        flag: %s, position: 1
+qball_mat: (an existing file name)
+        Linear transformation matrix.
+        flag: %s, position: 3
+scheme_file: (an existing file name)
+        Specifies the scheme file for the diffusion MRI data
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        background mask
+        flag: -bgmask %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+log: (a boolean)
+        Transform the log measurements rather than the measurements
+        themselves
+        flag: -log
+normalize: (a boolean)
+        Normalize the measurements and discard the zero measurements before
+        the linear transform.
+        flag: -normalize
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>recon_data: (an existing file name)
+        Transformed data
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-odf-mesd"></span></div>
+</div>
+<div class="section" id="mesd">
+<span id="index-1"></span><h2>MESD<a class="headerlink" href="#mesd" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L194">Link to code</a></p>
+<p>Wraps command <strong>mesd</strong></p>
+<p>MESD is a general program for maximum entropy spherical deconvolution.
+It also runs PASMRI, which is a special case of spherical deconvolution.
+The input data must be in voxel order.</p>
+<p>The format of the output in each voxel is:
+{ exitcode, ln(A^star(0)), lambda_0, lambda_1, ..., lambda_N }</p>
+<p>The  exitcode  contains  the  results of three tests. The first test thresholds
+the maximum relative error between the numerical integrals computed at con-
+vergence and those computed using a larger test point set; if the error is
+greater than a threshold the exitcode is increased from zero to one as a
+warning; if it is greater than a larger threshold the exitcode is increased to
+two to suggest failure. The  second  test  thresholds  the predicted  error in
+numerical integrals computed using the test point set; if the predicted error
+is greater than a threshold the exitcode is increased by 10. The third test
+thresholds the RMS error between the measurements and their predictions from
+the fitted deconvolution; if the errors are greater than a threshold, the exit
+code is increased by 100. An exitcode of 112 means that all three tests were
+failed and the result is likely to be unreliable.  If all is well the exitcode
+is zero. Results are often still reliable even if one or two of the tests are
+failed.</p>
+<dl class="docutils">
+<dt>Other possible exitcodes are:</dt>
+<dd>5   - The optimization failed to converge</dd>
+</dl>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-1</span></kbd></td>
+<td><ul class="first last simple">
+<li>Background</li>
+</ul>
+</td></tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>-100 - Something wrong in the MRI data, e.g. negative or zero measurements,</dt>
+<dd>so that the optimization could not run.</dd>
+</dl>
+<p>The  standard  MESD  implementation  is computationally demanding, particularly
+as the number of measurements increases (computation is approximately O(N^2),
+where N is the number of measurements). There are two ways to obtain significant
+computational speed-up:</p>
+<p>i) Turn off error checks and use a small point set for computing numerical
+integrals in the algorithm by adding the flag -fastmesd. Sakaie CDMRI 2008
+shows that using the smallest point set  (-basepointset  0)  with  no
+error  checks  usually  has only a minor effect on the output of the algorithm,
+but provides a major reduction in computation time. You can increase the point
+set size using -basepointset with an argument higher than 0, which may produce
+better results in some voxels, but will increase computation time, which
+approximately doubles every time the point set index increases by 1.</p>
+<p>ii) Reduce the complexity of the maximum entropy encoding using -mepointset &lt;X&gt;.
+By default &lt;X&gt; = N, the number of measurements, and is the number of parameters
+in the max.  ent. representation of the  output  function, ie  the  number of
+lambda parameters, as described in Jansons and Alexander Inverse Problems 2003.
+However, we can represent the function using less components and &lt;X&gt; here
+specifies the number of lambda parameters. To obtain speed-up, set &lt;X&gt;
+&lt; N; complexity become O(&lt;X&gt;^2) rather than O(N^2). Note that &lt;X&gt; must be chosen
+so that the camino/PointSets directory contains a point set  with  that  number
+of  elements.  When  -mepointset decreases, the  numerical  integration checks
+make less and less of a difference and smaller point sets for numerical
+integration (see -basepointset) become adequate. So when &lt;X&gt; is low -fastmesd is
+worth using to get even more speed-up.</p>
+<p>The choice of &lt;X&gt; is a parameter of the technique. Too low and you lose angular
+resoloution; too high and you see no computational benefit and may even suffer
+from overfitting. Empirically, we  have  found  that  &lt;X&gt;=16 often  gives  good
+results and good speed up, but it is worth trying a few values a comparing
+performance. The reduced encoding is described in the following ISMRM abstract:
+Sweet and Alexander &#8220;Reduced Encoding Persistent Angular Structure&#8221; 572 ISMRM 2010.</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Run MESD on every voxel of the data file SubjectA.Bfloat using the PASMRI kernel.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">MESD</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;SubjectA.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inverter</span> <span class="o">=</span> <span class="s">&#39;PAS&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inverter_param</span> <span class="o">=</span> <span class="mf">1.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mesd</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>            
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        voxel-order data filename
+        flag: -inputfile %s, position: 1
+inverter: (&#39;SPIKE&#39; or &#39;PAS&#39;)
+        The inversion index specifies the type of inversion to perform on
+        the data.The currently available choices are:Inverter name |
+        Inverter parameters---------------|------------------SPIKE | bd
+        (b-value x diffusivity along the fibre.)PAS | r
+        flag: -filter %s, position: 2
+inverter_param: (a float)
+        Parameter associated with the inverter. Cf. inverter description
+        formore information.
+        flag: %f, position: 3
+scheme_file: (an existing file name)
+        Specifies the scheme file for the diffusion MRI data
+        flag: -schemefile %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        background mask
+        flag: -bgmask %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fastmesd: (a boolean)
+        Turns off numerical integration checks and fixes the integration
+        point set size at that ofthe index specified by -basepointset..
+        flag: -fastmesd
+        requires: mepointset
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;float&#39; or &#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the input file: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;,
+        &quot;long&quot;,&quot;float&quot; or &quot;double&quot;. The input file must have BIG-ENDIAN
+        ordering.By default, the input type is &quot;float&quot;.
+        flag: -inputdatatype %s
+mepointset: (an integer)
+        Use a set of directions other than those in the scheme file for the
+        deconvolution kernel.The number refers to the number of directions
+        on the unit sphere. For example, &quot;-mepointset 54&quot; uses the
+        directions in &quot;camino/PointSets/Elec054.txt&quot;.
+        flag: -mepointset %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>mesd_data: (an existing file name)
+        MESD data
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-odf-qballmx"></span></div>
+</div>
+<div class="section" id="qballmx">
+<span id="index-2"></span><h2>QBallMX<a class="headerlink" href="#qballmx" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L39">Link to code</a></p>
+<p>Wraps command <strong>qballmx</strong></p>
+<p>Generates a reconstruction matrix for Q-Ball. Used in LinRecon with
+the same scheme file to reconstruct data.</p>
+<div class="section" id="example-1">
+<h3>Example 1<a class="headerlink" href="#example-1" title="Permalink to this headline">¶</a></h3>
+<p>To create  a linear transform matrix using Spherical Harmonics (sh).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">QBallMX</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">basistype</span> <span class="o">=</span> <span class="s">&#39;sh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>            
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-2">
+<h3>Example 2<a class="headerlink" href="#example-2" title="Permalink to this headline">¶</a></h3>
+<p>To create  a linear transform matrix using Radial Basis Functions
+(rbf). This command uses the default setting of rbf sigma = 0.2618
+(15 degrees), data smoothing sigma = 0.1309 (7.5 degrees), rbf
+pointset 246</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">QBallMX</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballmx</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>              
+</pre></div>
+</div>
+<p>The linear transform matrix from any of these two examples can then
+be run over each voxel using LinRecon</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">LinRecon</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;SubjectA.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">qball_mat</span> <span class="o">=</span> <span class="s">&#39;A_qmat.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">normalize</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bgmask</span> <span class="o">=</span> <span class="s">&#39;brain_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qballcoeffs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>             
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+scheme_file: (an existing file name)
+        Specifies the scheme file for the diffusion MRI data
+        flag: -schemefile %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+basistype: (&#39;rbf&#39; or &#39;sh&#39;, nipype default value: rbf)
+        Basis function type. &quot;rbf&quot; to use radial basis functions &quot;sh&quot; to use
+        spherical harmonics
+        flag: -basistype %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+order: (an integer)
+        Specific to sh. Maximum order of the spherical harmonic series.
+        Default is 4.
+        flag: -order %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+rbfpointset: (an integer)
+        Specific to rbf. Sets the number of radial basis functions to use.
+        The value specified must be present in the Pointsets directory. The
+        default value is 246.
+        flag: -rbfpointset %d
+rbfsigma: (a float)
+        Specific to rbf. Sets the width of the interpolating basis
+        functions. The default value is 0.2618 (15 degrees).
+        flag: -rbfsigma %f
+smoothingsigma: (a float)
+        Specific to rbf. Sets the width of the smoothing basis functions.
+        The default value is 0.1309 (7.5 degrees).
+        flag: -smoothingsigma %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>qmat: (an existing file name)
+        Q-Ball reconstruction matrix
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-odf-sfpeaks"></span></div>
+</div>
+<div class="section" id="sfpeaks">
+<span id="index-3"></span><h2>SFPeaks<a class="headerlink" href="#sfpeaks" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L336">Link to code</a></p>
+<p>Wraps command <strong>sfpeaks</strong></p>
+<p>Finds the peaks of spherical functions.</p>
+<p>This utility reads coefficients of the spherical functions and
+outputs a list of peak directions of the function. It computes the
+value of the function at each of a set of sample points. Then it
+finds local maxima by finding all points at which the function is
+larger than for any other point within a fixed search radius (the
+default  is 0.4). The utility then uses Powell&#8217;s algorithm to
+optimize the position of each local maximum. Finally the utility
+removes duplicates and tiny peaks with function value smaller than
+some threshold, which is the mean of the function plus some number
+of standard deviations. By default the program checks for con-
+sistency with a second set of starting points, but skips the
+optimization step. To speed up execution, you can turn off the con-
+sistency check by setting the noconsistencycheck flag to True.</p>
+<p>By  default, the utility constructs a set of sample points by
+randomly rotating a unit icosahedron repeatedly (the default is 1000
+times, which produces a set of 6000 points) and concatenating the
+lists of vertices. The &#8216;pointset = &lt;index&gt;&#8217; attribute can tell the
+utility to use an evenly distributed set of points (index 0 gives
+1082 points, 1 gives 1922, 2 gives 4322, 3 gives 8672, 4 gives 15872,
+5 gives 32762, 6 gives 72032), which is quicker, because you can get
+away with fewer points. We estimate that you can use a factor of 2.5
+less evenly distributed points than randomly distributed points and
+still expect similar performance levels.</p>
+<p>The output for each voxel is:
+- exitcode (inherited from the input data).
+- ln(A(0))
+- number of peaks found.
+- flag for consistency with a repeated run (number of directions is</p>
+<blockquote>
+<div>the same and the directions are the same to within a threshold.)</div></blockquote>
+<ul class="simple">
+<li>mean(f).</li>
+<li>std(f).</li>
+<li>direction 1 (x, y, z, f, H00, H01, H10, H11).</li>
+<li>direction 2 (x, y, z, f, H00, H01, H10, H11).</li>
+<li>direction 3 (x, y, z, f, H00, H01, H10, H11).</li>
+</ul>
+<p>H is the Hessian of f at the peak. It is the matrix:
+[d^2f/ds^2 d^2f/dsdt]
+[d^2f/dtds d^2f/dt^2]
+= [H00 H01]</p>
+<blockquote>
+<div>[H10 H11]</div></blockquote>
+<p>where s and t are orthogonal coordinates local to the peak.</p>
+<p>By default the maximum number of peak directions output in each
+voxel is three. If less than three directions are found, zeros are
+output for later directions. The peaks are ordered by the value of
+the function at the peak. If more than the maximum number of
+directions are found only the strongest ones are output. The maximum
+number can be changed setting the &#8216;numpds&#8217; attribute.</p>
+<p>The utility can read various kinds of spherical function, but must
+be told what kind of function is input using the &#8216;inputmodel&#8217;
+attribute. The description of the &#8216;inputmodel&#8217; attribute lists
+additional information required by SFPeaks for each input model.</p>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>First run QBallMX and create a linear transform matrix using
+Spherical Harmonics (sh).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">SFPeaks</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;A_recon_params.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span> <span class="o">=</span> <span class="s">&#39;sh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">density</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">searchradius</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sf_peaks</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>          
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Voxel-order data of spherical functions
+        flag: -inputfile %s
+inputmodel: (&#39;sh&#39; or &#39;maxent&#39; or &#39;rbf&#39;)
+        Type of functions input via in_file. Currently supported options
+        are: sh - Spherical harmonic series. Specify the maximum order of
+        the SH series with the &quot;order&quot; attribute if different from the
+        default of 4. maxent - Maximum entropy representations output by
+        MESD. The reconstruction directions input to MESD must be specified.
+        By default this is the same set of gradient directions (excluding
+        zero gradients) in the scheme file, so specify the &quot;schemefile&quot;
+        attribute unless the &quot;mepointset&quot; attribute was set in MESD. rbf -
+        Sums of radial basis functions. Specify the pointset with the
+        attribute &quot;rbfpointset&quot; if different from the default. See QBallMX.
+        flag: -inputmodel %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+density: (an integer)
+        The number of randomly rotated icosahedra to use in constructing the
+        set of points for random sampling in the peak finding algorithm.
+        Default is 1000, which works well for very spiky maxent functions.
+        For other types of function, it is reasonable to set the density
+        much lower and increase the search radius slightly, which speeds up
+        the computation.
+        flag: -density %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mepointset: (an integer)
+        Use a set of directions other than those in the scheme file for the
+        deconvolution kernel. The number refers to the number of directions
+        on the unit sphere. For example, &quot;mepointset = 54&quot; uses the
+        directions in &quot;camino/PointSets/Elec054.txt&quot; Use this option only if
+        you told MESD to use a custom set of directions with the same
+        option. Otherwise, specify the scheme file with the &quot;schemefile&quot;
+        attribute.
+        flag: -mepointset %d
+noconsistencycheck: (a boolean)
+        Turns off the consistency check. The output shows all consistencies
+        as true.
+        flag: -noconsistencycheck
+numpds: (an integer)
+        The largest number of peak directions to output in each voxel.
+        flag: -numpds %d
+order: (an integer)
+        Specific to sh. Maximum order of the spherical harmonic series.
+        flag: -order %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+pdthresh: (a float)
+        Base threshold on the actual peak direction strength divided by the
+        mean of the function. The default is 1.0 (the peak must be equal or
+        greater than the mean).
+        flag: -pdthresh %f
+pointset: (an integer)
+        To sample using an evenly distributed set of points instead. The
+        integer can be 0, 1, ..., 7. Index 0 gives 1082 points, 1 gives
+        1922, 2 gives 3002, 3 gives 4322, 4 gives 5882, 5 gives 8672, 6
+        gives 12002, 7 gives 15872.
+        flag: -pointset %d
+rbfpointset: (an integer)
+        Specific to rbf. Sets the number of radial basis functions to use.
+        The value specified must be present in the Pointsets directory. The
+        default value is 246.
+        flag: -rbfpointset %d
+scheme_file: (an existing file name)
+        Specific to maxent. Specifies the scheme file.
+        flag: %s
+searchradius: (a float)
+        The search radius in the peak finding algorithm. The default is 0.4
+        (cf. &quot;density&quot;)
+        flag: -searchradius %f
+stdsfrommean: (a float)
+        This is the number of standard deviations of the function to be
+        added to the &quot;pdthresh&quot; attribute in the peak directions pruning.
+        flag: -stdsfrommean %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>peaks: (an existing file name)
+        Peaks of the spherical functions.
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -1,0 +1,2376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.camino.dti</a><ul>
+<li><a class="reference internal" href="#computeeigensystem">ComputeEigensystem</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#computefractionalanisotropy">ComputeFractionalAnisotropy</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#computemeandiffusivity">ComputeMeanDiffusivity</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#computetensortrace">ComputeTensorTrace</a><ul>
+<li><a class="reference internal" href="#id3">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dtifit">DTIFit</a><ul>
+<li><a class="reference internal" href="#id4">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dtlutgen">DTLUTGen</a><ul>
+<li><a class="reference internal" href="#id5">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dtmetric">DTMetric</a><ul>
+<li><a class="reference internal" href="#id6">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modelfit">ModelFit</a><ul>
+<li><a class="reference internal" href="#id7">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#picopdfs">PicoPDFs</a><ul>
+<li><a class="reference internal" href="#id8">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#track">Track</a><ul>
+<li><a class="reference internal" href="#id9">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackballstick">TrackBallStick</a><ul>
+<li><a class="reference internal" href="#id10">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackbayesdirac">TrackBayesDirac</a><ul>
+<li><a class="reference internal" href="#id11">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackbedpostxdeter">TrackBedpostxDeter</a><ul>
+<li><a class="reference internal" href="#id12">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackbedpostxproba">TrackBedpostxProba</a><ul>
+<li><a class="reference internal" href="#id13">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackbootstrap">TrackBootstrap</a><ul>
+<li><a class="reference internal" href="#id14">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackdt">TrackDT</a><ul>
+<li><a class="reference internal" href="#id15">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trackpico">TrackPICo</a><ul>
+<li><a class="reference internal" href="#id16">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-camino-dti">
+<h1>interfaces.camino.dti<a class="headerlink" href="#interfaces-camino-dti" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-camino-dti-computeeigensystem"></span><div class="section" id="computeeigensystem">
+<span id="index-0"></span><h2>ComputeEigensystem<a class="headerlink" href="#computeeigensystem" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L997">Link to code</a></p>
+<p>Wraps command <strong>dteig</strong></p>
+<p>Computes the eigensystem from tensor fitted data.</p>
+<p>Reads diffusion tensor (single, two-tensor, three-tensor or multitensor) data from the
+standard input, computes the eigenvalues and eigenvectors of each tensor and outputs the
+results to the standard output. For multiple-tensor data the program outputs the
+eigensystem of each tensor. For each tensor the program outputs: {l_1, e_11, e_12, e_13,
+l_2, e_21, e_22, e_33, l_3, e_31, e_32, e_33}, where l_1 &gt;= l_2 &gt;= l_3 and e_i = (e_i1,
+e_i2, e_i3) is the eigenvector with eigenvalue l_i. For three-tensor data, for example,
+the output contains thirty-six values per voxel.</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dteig</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ComputeEigensystem</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dteig</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dteig</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Tensor-fitted data filename
+        flag: &lt; %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;double&#39; or &#39;float&#39; or &#39;long&#39; or &#39;int&#39; or &#39;short&#39; or
+         &#39;char&#39;, nipype default value: double)
+        Specifies the data type of the input data. The data type can be any
+        of the following strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.Default is double data type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39;)
+        Specifies the model that the input data contains parameters for.
+        Possible model types are: &quot;dt&quot; (diffusion-tensor data) and
+        &quot;multitensor&quot;
+        flag: -inputmodel %s
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel of the input
+        data.
+        flag: -maxcomponents %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outputdatatype: (&#39;double&#39; or &#39;float&#39; or &#39;long&#39; or &#39;int&#39; or &#39;short&#39; or
+         &#39;char&#39;, nipype default value: double)
+        Specifies the data type of the output data. The data type can be any
+        of the following strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.Default is double data type
+        flag: -outputdatatype %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>eigen: (an existing file name)
+        Trace of the diffusion tensor
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-computefractionalanisotropy"></span></div>
+</div>
+<div class="section" id="computefractionalanisotropy">
+<span id="index-1"></span><h2>ComputeFractionalAnisotropy<a class="headerlink" href="#computefractionalanisotropy" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L879">Link to code</a></p>
+<p>Wraps command <strong>fa</strong></p>
+<p>Computes the fractional anisotropy of tensors.</p>
+<p>Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
+computes the fractional anisotropy (FA) of each tensor and outputs the results to the
+standard output. For multiple-tensor data the program outputs the FA of each tensor,
+so for three-tensor data, for example, the output contains three fractional anisotropy
+values per voxel.</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fa</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ComputeFractionalAnisotropy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fa</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fa</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fa</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Tensor-fitted data filename
+        flag: &lt; %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the input file. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;twotensor&#39; or &#39;threetensor&#39; or &#39;multitensor&#39;)
+        Specifies the model that the input tensor data contains parameters
+        for.Possible model types are: &quot;dt&quot; (diffusion-tensor data),
+        &quot;twotensor&quot; (two-tensor data), &quot;threetensor&quot; (three-tensor data). By
+        default, the program assumes that the input data contains a single
+        diffusion tensor in each voxel.
+        flag: -inputmodel %s
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the output data. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -outputdatatype %s
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: %s, position: 2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>fa: (an existing file name)
+        Fractional Anisotropy Map
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-computemeandiffusivity"></span></div>
+</div>
+<div class="section" id="computemeandiffusivity">
+<span id="index-2"></span><h2>ComputeMeanDiffusivity<a class="headerlink" href="#computemeandiffusivity" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L826">Link to code</a></p>
+<p>Wraps command <strong>md</strong></p>
+<p>Computes the mean diffusivity (trace/3) from diffusion tensors.</p>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ComputeMeanDiffusivity</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">md</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Tensor-fitted data filename
+        flag: &lt; %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the input file. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;twotensor&#39; or &#39;threetensor&#39;)
+        Specifies the model that the input tensor data contains parameters
+        for.Possible model types are: &quot;dt&quot; (diffusion-tensor data),
+        &quot;twotensor&quot; (two-tensor data), &quot;threetensor&quot; (three-tensor data). By
+        default, the program assumes that the input data contains a single
+        diffusion tensor in each voxel.
+        flag: -inputmodel %s
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the output data. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -outputdatatype %s
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: %s, position: 2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>md: (an existing file name)
+        Mean Diffusivity Map
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-computetensortrace"></span></div>
+</div>
+<div class="section" id="computetensortrace">
+<span id="index-3"></span><h2>ComputeTensorTrace<a class="headerlink" href="#computetensortrace" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L938">Link to code</a></p>
+<p>Wraps command <strong>trd</strong></p>
+<p>Computes the trace of tensors.</p>
+<p>Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
+computes the trace of each tensor, i.e., three times the mean diffusivity, and outputs
+the results to the standard output. For multiple-tensor data the program outputs the
+trace of each tensor, so for three-tensor data, for example, the output contains three
+values per voxel.</p>
+<p>Divide the output by three to get the mean diffusivity.</p>
+<div class="section" id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trace</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ComputeTensorTrace</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trace</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trace</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trace</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Tensor-fitted data filename
+        flag: &lt; %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the input file. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;twotensor&#39; or &#39;threetensor&#39; or &#39;multitensor&#39;)
+        Specifies the model that the input tensor data contains parameters
+        for.Possible model types are: &quot;dt&quot; (diffusion-tensor data),
+        &quot;twotensor&quot; (two-tensor data), &quot;threetensor&quot; (three-tensor data). By
+        default, the program assumes that the input data contains a single
+        diffusion tensor in each voxel.
+        flag: -inputmodel %s
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outputdatatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or &#39;float&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the output data. The data type can be any
+        of thefollowing strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.
+        flag: -outputdatatype %s
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: %s, position: 2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>trace: (an existing file name)
+        Trace of the diffusion tensor
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-dtifit"></span></div>
+</div>
+<div class="section" id="dtifit">
+<span id="index-4"></span><h2>DTIFit<a class="headerlink" href="#dtifit" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L34">Link to code</a></p>
+<p>Wraps command <strong>dtfit</strong></p>
+<p>Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file.</p>
+<p>Use non-linear fitting instead of the default linear regression to the log measurements.
+The data file stores the diffusion MRI data in voxel order with the measurements stored in big-endian format and ordered as in the scheme file.
+The default input data type is four-byte float. The default output data type is eight-byte double.
+See modelfit and camino for the format of the data file and scheme file.
+The program fits the diffusion tensor to each voxel and outputs the results,
+in voxel order and as big-endian eight-byte doubles, to the standard output.
+The program outputs eight values in each voxel: [exit code, ln(S(0)), D_xx, D_xy, D_xz, D_yy, D_yz, D_zz].
+An exit code of zero indicates no problems. For a list of other exit codes, see modelfit(1). The entry S(0) is an estimate of the signal at q=0.</p>
+<div class="section" id="id4">
+<h3>Example<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">DTIFit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        voxel-order data filename
+        flag: %s, position: 1
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        Provides the name of a file containing a background mask computed
+        using, for example, FSL bet2 program. The mask file contains zero in
+        background voxels and non-zero in foreground.
+        flag: -bgmask %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+non_linear: (a boolean)
+        Use non-linear fitting instead of the default linear regression to
+        the log measurements.
+        flag: -nonlinear, position: 3
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tensor_fitted: (an existing file name)
+        path/name of 4D volume in voxel order
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-dtlutgen"></span></div>
+</div>
+<div class="section" id="dtlutgen">
+<span id="index-5"></span><h2>DTLUTGen<a class="headerlink" href="#dtlutgen" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L299">Link to code</a></p>
+<p>Wraps command <strong>dtlutgen</strong></p>
+<p>Calibrates the PDFs for PICo probabilistic tractography.</p>
+<p>This program needs to be run once for every acquisition scheme.
+It outputs a lookup table that is used by the dtpicoparams program to find PICo PDF parameters for an image.
+The default single tensor LUT contains parameters of the Bingham distribution and is generated by supplying
+a scheme file and an estimated signal to noise in white matter regions of the (q=0) image.
+The default inversion is linear (inversion index 1).</p>
+<p>Advanced users can control several options, including the extent and resolution of the LUT,
+the inversion index, and the type of PDF. See dtlutgen(1) for details.</p>
+<div class="section" id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtl</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">DTLUTGen</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtl</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">snr</span> <span class="o">=</span> <span class="mi">16</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtl</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtl</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+scheme_file: (a file name)
+        The scheme file of the images to be processed using this LUT.
+        flag: -schemefile %s, position: 2
+
+[Optional]
+acg: (a boolean)
+        Compute a LUT for the ACG PDF.
+        flag: -acg
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bingham: (a boolean)
+        Compute a LUT for the Bingham PDF. This is the default.
+        flag: -bingham
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+frange: (a list of from 2 to 2 items which are a float)
+        Index to two-tensor LUTs. This is the fractional anisotropy of the
+        two tensors. The default is 0.3 to 0.94
+        flag: -frange %s, position: 1
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inversion: (an integer)
+        Index of the inversion to use. The default is 1 (linear single
+        tensor inversion).
+        flag: -inversion %d
+lrange: (a list of from 2 to 2 items which are a float)
+        Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.The
+        LUT is square, with half the values calculated (because L2 / L3
+        cannot be less than L1 / L3 by definition).The minimum must be &gt;= 1.
+        For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to
+        an FA of 0.891, and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an
+        FA of 0.929. The default range is 1 to 10.
+        flag: -lrange %s, position: 1
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+samples: (an integer)
+        The number of synthetic measurements to generate at each point in
+        the LUT. The default is 2000.
+        flag: -samples %d
+snr: (a float)
+        The signal to noise ratio of the unweighted (q = 0)
+        measurements.This should match the SNR (in white matter) of the
+        images that the LUTs are used with.
+        flag: -snr %f
+step: (a float)
+        Distance between points in the LUT.For example, if lrange is 1 to 10
+        and the step is 0.1, LUT entries will be computed at L1 / L3 = 1,
+        1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.For single
+        tensor LUTs, the default step is 0.2, for two-tensor LUTs it is
+        0.02.
+        flag: -step %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trace: (a float)
+        Trace of the diffusion tensor(s) used in the test function in the
+        LUT generation. The default is 2100E-12 m^2 s^-1.
+        flag: -trace %G
+watson: (a boolean)
+        Compute a LUT for the Watson PDF.
+        flag: -watson
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dtLUT: (an existing file name)
+        Lookup Table
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-dtmetric"></span></div>
+</div>
+<div class="section" id="dtmetric">
+<span id="index-6"></span><h2>DTMetric<a class="headerlink" href="#dtmetric" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L104">Link to code</a></p>
+<p>Wraps command <strong>dtshape</strong></p>
+<p>Computes tensor metric statistics based on the eigenvalues l1 &gt;= l2 &gt;= l3
+typically obtained from ComputeEigensystem.</p>
+<p>The full list of statistics is:</p>
+<blockquote>
+<div><p>&lt;cl&gt; = (l1 - l2) / l1 , a measure of linearity
+&lt;cp&gt; = (l2 - l3) / l1 , a measure of planarity
+&lt;cs&gt; = l3 / l1 , a measure of isotropy</p>
+<blockquote>
+<div>with: cl + cp + cs = 1</div></blockquote>
+<p>&lt;l1&gt; = first eigenvalue
+&lt;l2&gt; = second eigenvalue
+&lt;l3&gt; = third eigenvalue</p>
+<p>&lt;tr&gt; = l1 + l2 + l3
+&lt;md&gt; = tr / 3
+&lt;rd&gt; = (l2 + l3) / 2
+&lt;fa&gt; = fractional anisotropy. (Basser et al, J Magn Reson B 1996)
+&lt;ra&gt; = relative anisotropy (Basser et al, J Magn Reson B 1996)</p>
+<dl class="docutils">
+<dt>&lt;2dfa&gt; = 2D FA of the two minor eigenvalues l2 and l3</dt>
+<dd><dl class="first last docutils">
+<dt>i.e. sqrt( 2 * [(l2 - &lt;l&gt;)^2 + (l3 - &lt;l&gt;)^2] / (l2^2 + l3^2) )</dt>
+<dd>with: &lt;l&gt; = (l2 + l3) / 2</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<div class="section" id="id6">
+<h3>Example<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>Compute the CP planar metric as float data type.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtmetric</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">DTMetric</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtmetric</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">eigen_data</span> <span class="o">=</span> <span class="s">&#39;dteig.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtmetric</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="s">&#39;cp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtmetric</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputdatatype</span> <span class="o">=</span> <span class="s">&#39;float&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dtmetric</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+eigen_data: (an existing file name)
+        voxel-order data filename
+        flag: -inputfile %s
+metric: (&#39;fa&#39; or &#39;md&#39; or &#39;rd&#39; or &#39;l1&#39; or &#39;l2&#39; or &#39;l3&#39; or &#39;tr&#39; or &#39;ra&#39;
+         or &#39;2dfa&#39; or &#39;cl&#39; or &#39;cp&#39; or &#39;cs&#39;)
+        Specifies the metric to compute. Possible choices are: &quot;fa&quot;, &quot;md&quot;,
+        &quot;rd&quot;, &quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;, &quot;tr&quot;, &quot;ra&quot;, &quot;2dfa&quot;, &quot;cl&quot;, &quot;cp&quot; or &quot;cs&quot;.
+        flag: -stat %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+data_header: (an existing file name)
+        A Nifti .nii or .nii.gz file containing the header information.
+        Usually this will be the header of the raw data file from which the
+        diffusion tensors were reconstructed.
+        flag: -header %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;double&#39; or &#39;float&#39; or &#39;long&#39; or &#39;int&#39; or &#39;short&#39; or
+         &#39;char&#39;, nipype default value: double)
+        Specifies the data type of the input data. The data type can be any
+        of the following strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.Default is double data type
+        flag: -inputdatatype %s
+outputdatatype: (&#39;double&#39; or &#39;float&#39; or &#39;long&#39; or &#39;int&#39; or &#39;short&#39; or
+         &#39;char&#39;, nipype default value: double)
+        Specifies the data type of the output data. The data type can be any
+        of the following strings: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;.Default is double data type
+        flag: -outputdatatype %s
+outputfile: (a file name)
+        Output name. Output will be a .nii.gz file if data_header is
+        provided andin voxel order with outputdatatype datatype (default:
+        double) otherwise.
+        flag: -outputfile %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>metric_stats: (an existing file name)
+        Diffusion Tensor statistics of the chosen metric
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-modelfit"></span></div>
+</div>
+<div class="section" id="modelfit">
+<span id="index-7"></span><h2>ModelFit<a class="headerlink" href="#modelfit" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L222">Link to code</a></p>
+<p>Wraps command <strong>modelfit</strong></p>
+<p>Fits models of the spin-displacement density to diffusion MRI measurements.</p>
+<p>This is an interface to various model fitting routines for diffusion MRI data that
+fit models of the spin-displacement density function. In particular, it will fit the
+diffusion tensor to a set of measurements as well as various other models including
+two or three-tensor models. The program can read input data from a file or can
+generate synthetic data using various test functions for testing and simulations.</p>
+<div class="section" id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ModelFit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fit</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        voxel-order data filename
+        flag: -inputfile %s
+model: (&#39;dt&#39; or &#39;restore&#39; or &#39;algdt&#39; or &#39;nldt_pos&#39; or &#39;nldt&#39; or
+         &#39;ldt_wtd&#39; or &#39;adc&#39; or &#39;ball_stick&#39; or &#39;cylcyl dt&#39; or &#39;cylcyl
+         restore&#39; or &#39;cylcyl algdt&#39; or &#39;cylcyl nldt_pos&#39; or &#39;cylcyl nldt&#39; or
+         &#39;cylcyl ldt_wtd&#39; or &#39;cylcyl adc&#39; or &#39;cylcyl ball_stick&#39; or
+         &#39;cylcyl_eq dt&#39; or &#39;cylcyl_eq restore&#39; or &#39;cylcyl_eq algdt&#39; or
+         &#39;cylcyl_eq nldt_pos&#39; or &#39;cylcyl_eq nldt&#39; or &#39;cylcyl_eq ldt_wtd&#39; or
+         &#39;cylcyl_eq adc&#39; or &#39;cylcyl_eq ball_stick&#39; or &#39;pospos dt&#39; or &#39;pospos
+         restore&#39; or &#39;pospos algdt&#39; or &#39;pospos nldt_pos&#39; or &#39;pospos nldt&#39; or
+         &#39;pospos ldt_wtd&#39; or &#39;pospos adc&#39; or &#39;pospos ball_stick&#39; or
+         &#39;pospos_eq dt&#39; or &#39;pospos_eq restore&#39; or &#39;pospos_eq algdt&#39; or
+         &#39;pospos_eq nldt_pos&#39; or &#39;pospos_eq nldt&#39; or &#39;pospos_eq ldt_wtd&#39; or
+         &#39;pospos_eq adc&#39; or &#39;pospos_eq ball_stick&#39; or &#39;poscyl dt&#39; or &#39;poscyl
+         restore&#39; or &#39;poscyl algdt&#39; or &#39;poscyl nldt_pos&#39; or &#39;poscyl nldt&#39; or
+         &#39;poscyl ldt_wtd&#39; or &#39;poscyl adc&#39; or &#39;poscyl ball_stick&#39; or
+         &#39;poscyl_eq dt&#39; or &#39;poscyl_eq restore&#39; or &#39;poscyl_eq algdt&#39; or
+         &#39;poscyl_eq nldt_pos&#39; or &#39;poscyl_eq nldt&#39; or &#39;poscyl_eq ldt_wtd&#39; or
+         &#39;poscyl_eq adc&#39; or &#39;poscyl_eq ball_stick&#39; or &#39;cylcylcyl dt&#39; or
+         &#39;cylcylcyl restore&#39; or &#39;cylcylcyl algdt&#39; or &#39;cylcylcyl nldt_pos&#39; or
+         &#39;cylcylcyl nldt&#39; or &#39;cylcylcyl ldt_wtd&#39; or &#39;cylcylcyl adc&#39; or
+         &#39;cylcylcyl ball_stick&#39; or &#39;cylcylcyl_eq dt&#39; or &#39;cylcylcyl_eq
+         restore&#39; or &#39;cylcylcyl_eq algdt&#39; or &#39;cylcylcyl_eq nldt_pos&#39; or
+         &#39;cylcylcyl_eq nldt&#39; or &#39;cylcylcyl_eq ldt_wtd&#39; or &#39;cylcylcyl_eq adc&#39;
+         or &#39;cylcylcyl_eq ball_stick&#39; or &#39;pospospos dt&#39; or &#39;pospospos
+         restore&#39; or &#39;pospospos algdt&#39; or &#39;pospospos nldt_pos&#39; or &#39;pospospos
+         nldt&#39; or &#39;pospospos ldt_wtd&#39; or &#39;pospospos adc&#39; or &#39;pospospos
+         ball_stick&#39; or &#39;pospospos_eq dt&#39; or &#39;pospospos_eq restore&#39; or
+         &#39;pospospos_eq algdt&#39; or &#39;pospospos_eq nldt_pos&#39; or &#39;pospospos_eq
+         nldt&#39; or &#39;pospospos_eq ldt_wtd&#39; or &#39;pospospos_eq adc&#39; or
+         &#39;pospospos_eq ball_stick&#39; or &#39;posposcyl dt&#39; or &#39;posposcyl restore&#39;
+         or &#39;posposcyl algdt&#39; or &#39;posposcyl nldt_pos&#39; or &#39;posposcyl nldt&#39; or
+         &#39;posposcyl ldt_wtd&#39; or &#39;posposcyl adc&#39; or &#39;posposcyl ball_stick&#39; or
+         &#39;posposcyl_eq dt&#39; or &#39;posposcyl_eq restore&#39; or &#39;posposcyl_eq algdt&#39;
+         or &#39;posposcyl_eq nldt_pos&#39; or &#39;posposcyl_eq nldt&#39; or &#39;posposcyl_eq
+         ldt_wtd&#39; or &#39;posposcyl_eq adc&#39; or &#39;posposcyl_eq ball_stick&#39; or
+         &#39;poscylcyl dt&#39; or &#39;poscylcyl restore&#39; or &#39;poscylcyl algdt&#39; or
+         &#39;poscylcyl nldt_pos&#39; or &#39;poscylcyl nldt&#39; or &#39;poscylcyl ldt_wtd&#39; or
+         &#39;poscylcyl adc&#39; or &#39;poscylcyl ball_stick&#39; or &#39;poscylcyl_eq dt&#39; or
+         &#39;poscylcyl_eq restore&#39; or &#39;poscylcyl_eq algdt&#39; or &#39;poscylcyl_eq
+         nldt_pos&#39; or &#39;poscylcyl_eq nldt&#39; or &#39;poscylcyl_eq ldt_wtd&#39; or
+         &#39;poscylcyl_eq adc&#39; or &#39;poscylcyl_eq ball_stick&#39;)
+        Specifies the model to be fit to the data.
+        flag: -model %s
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: -schemefile %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        Provides the name of a file containing a background mask computed
+        using, for example, FSL&#39;s bet2 program. The mask file contains zero
+        in background voxels and non-zero in foreground.
+        flag: -bgmask %s
+bgthresh: (a float)
+        Sets a threshold on the average q=0 measurement to separate
+        foreground and background. The program does not process background
+        voxels, but outputs the same number of values in background voxels
+        and foreground voxels. Each value is zero in background voxels apart
+        from the exit code which is -1.
+        flag: -bgthresh %G
+cfthresh: (a float)
+        Sets a threshold on the average q=0 measurement to determine which
+        voxels are CSF. This program does not treat CSF voxels any different
+        to other voxels.
+        flag: -csfthresh %G
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixedbvalue: (a list of from 3 to 3 items which are a float)
+        As above, but specifies &lt;M&gt; &lt;N&gt; &lt;b&gt;. The resulting scheme is the
+        same whether you specify b directly or indirectly using -fixedmodq.
+        flag: -fixedbvalue %s
+fixedmodq: (a list of from 4 to 4 items which are a float)
+        Specifies &lt;M&gt; &lt;N&gt; &lt;Q&gt; &lt;tau&gt; a spherical acquisition scheme with M
+        measurements with q=0 and N measurements with |q|=Q and diffusion
+        time tau. The N measurements with |q|=Q have unique directions. The
+        program reads in the directions from the files in directory
+        PointSets.
+        flag: -fixedmod %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputdatatype: (&#39;float&#39; or &#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or
+         &#39;double&#39;)
+        Specifies the data type of the input file: &quot;char&quot;, &quot;short&quot;, &quot;int&quot;,
+        &quot;long&quot;, &quot;float&quot; or &quot;double&quot;. The input file must have BIG-ENDIAN
+        ordering. By default, the input type is &quot;float&quot;.
+        flag: -inputdatatype %s
+noisemap: (an existing file name)
+        Specifies the name of the file to contain the estimated noise
+        variance on the diffusion-weighted signal, generated by a weighted
+        tensor fit. The data type of this file is big-endian double.
+        flag: -noisemap %s
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outlier: (an existing file name)
+        Specifies the name of the file to contain the outlier map generated
+        by the RESTORE algorithm.
+        flag: -outliermap %s
+outputfile: (a file name)
+        Filename of the output file.
+        flag: -outputfile %s
+residualmap: (an existing file name)
+        Specifies the name of the file to contain the weighted residual
+        errors after computing a weighted linear tensor fit. One value is
+        produced per measurement, in voxel order.The data type of this file
+        is big-endian double. Images of the residuals for each measurement
+        can be extracted with shredder.
+        flag: -residualmap %s
+sigma: (a float)
+        Specifies the standard deviation of the noise in the data. Required
+        by the RESTORE algorithm.
+        flag: -sigma %G
+tau: (a float)
+        Sets the diffusion time separately. This overrides the diffusion
+        time specified in a scheme file or by a scheme index for both the
+        acquisition scheme and in the data synthesis.
+        flag: -tau %G
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>fitted_data: (an existing file name)
+        output file of 4D volume in voxel order
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-picopdfs"></span></div>
+</div>
+<div class="section" id="picopdfs">
+<span id="index-8"></span><h2>PicoPDFs<a class="headerlink" href="#picopdfs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L368">Link to code</a></p>
+<p>Wraps command <strong>picopdfs</strong></p>
+<p>Constructs a spherical PDF in each voxel for probabilistic tractography.</p>
+<div class="section" id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pdf</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">PicoPDFs</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pdf</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pdf</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">luts</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;lut_file&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pdf</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;voxel-order_data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pdf</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        voxel-order data filename
+        flag: &lt; %s, position: 1
+luts: (a list of items which are an existing file name)
+        Files containing the lookup tables.For tensor data, one lut must be
+        specified for each type of inversion used in the image (one-tensor,
+        two-tensor, three-tensor).For pds, the number of LUTs must match
+        -numpds (it is acceptable to use the same LUT several times - see
+        example, above).These LUTs may be generated with dtlutgen.
+        flag: -luts %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+directmap: (a boolean)
+        Only applicable when using pds as the inputmodel. Use direct mapping
+        between the eigenvalues and the distribution parameters instead of
+        the log of the eigenvalues.
+        flag: -directmap
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;pds&#39;, nipype default value:
+         dt)
+        input model type
+        flag: -inputmodel %s, position: 2
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel (default 2) for
+        multitensor data.Currently, only the default is supported, but
+        future releases may allow the input of three-tensor data using this
+        option.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel (default 3) for PD data.This
+        option determines the size of the input and output voxels.This means
+        that the data file may be large enough to accomodate three or more
+        PDs,but does not mean that any of the voxels are classified as
+        containing three or more PDs.
+        flag: -numpds %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+pdf: (&#39;bingham&#39; or &#39;watson&#39; or &#39;acg&#39;, nipype default value: bingham)
+         Specifies the PDF to use. There are three choices:watson - The
+        Watson distribution. This distribution is rotationally
+        symmetric.bingham - The Bingham distributionn, which allows
+        elliptical probability density contours.acg - The Angular Central
+        Gaussian distribution, which also allows elliptical probability
+        density contours
+        flag: -pdf %s, position: 4
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>pdfs: (an existing file name)
+        path/name of 4D volume in voxel order
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-track"></span></div>
+</div>
+<div class="section" id="track">
+<span id="index-9"></span><h2>Track<a class="headerlink" href="#track" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L529">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs tractography using one of the following models:
+dt&#8217;, &#8216;multitensor&#8217;, &#8216;pds&#8217;, &#8216;pico&#8217;, &#8216;bootstrap&#8217;, &#8216;ballstick&#8217;, &#8216;bayesdirac&#8217;</p>
+<div class="section" id="id9">
+<h3>Example<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">Track</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackballstick"></span></div>
+</div>
+<div class="section" id="trackballstick">
+<span id="index-10"></span><h2>TrackBallStick<a class="headerlink" href="#trackballstick" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L747">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs streamline tractography using ball-stick fitted data</p>
+<div class="section" id="id10">
+<h3>Example<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TrackBallStick</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;ballstickfit_data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackbayesdirac"></span></div>
+</div>
+<div class="section" id="trackbayesdirac">
+<span id="index-11"></span><h2>TrackBayesDirac<a class="headerlink" href="#trackbayesdirac" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L726">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs streamline tractography using a Bayesian tracking with Dirac priors</p>
+<div class="section" id="id11">
+<h3>Example<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TrackBayesDirac</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;bvecs.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+scheme_file: (an existing file name)
+        The scheme file corresponding to the data being processed.
+        flag: -schemefile %s
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvepriorg: (a float)
+        Concentration parameter for the prior distribution on fibre
+        orientations given the fibre orientation at the previous step.
+        Larger values of g make curvature less likely.
+        flag: -curvepriorg %G
+curvepriork: (a float)
+        Concentration parameter for the prior distribution on fibre
+        orientations given the fibre orientation at the previous step.
+        Larger values of k make curvature less likely.
+        flag: -curvepriork %G
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+datamodel: (&#39;cylsymmdt&#39; or &#39;ballstick&#39;)
+        Model of the data for Bayesian tracking. The default model is
+        &quot;cylsymmdt&quot;, a diffusion tensor with cylindrical symmetry about e_1,
+        ie L1 &gt;= L_2 = L_3. The other model is &quot;ballstick&quot;, the partial
+        volume model (see ballstickfit).
+        flag: -datamodel %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+extpriordatatype: (&#39;float&#39; or &#39;double&#39;)
+        Datatype of the prior image. The default is &quot;double&quot;.
+        flag: -extpriordatatype %s
+extpriorfile: (an existing file name)
+        Path to a PICo image produced by picopdfs. The PDF in each voxel is
+        used as a prior for the fibre orientation in Bayesian tracking. The
+        prior image must be in the same space as the diffusion data.
+        flag: -extpriorfile %s
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+iterations: (an integer)
+        Number of streamlines to generate at each seed point. The default is
+        5000.
+        flag: -iterations %d
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+pdf: (&#39;bingham&#39; or &#39;watson&#39; or &#39;acg&#39;)
+        Specifies the model for PICo priors (not the curvature priors). The
+        default is &quot;bingham&quot;.
+        flag: -pdf %s
+pointset: (an integer)
+        Index to the point set to use for Bayesian likelihood calculation.
+        The index specifies a set of evenly distributed points on the unit
+        sphere, where each point x defines two possible step directions (x
+        or -x) for the streamline path. A larger number indexes a larger
+        point set, which gives higher angular resolution at the expense of
+        computation time. The default is index 1, which gives 1922 points,
+        index 0 gives 1082 points, index 2 gives 3002 points.
+        flag: -pointset %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackbedpostxdeter"></span></div>
+</div>
+<div class="section" id="trackbedpostxdeter">
+<span id="index-12"></span><h2>TrackBedpostxDeter<a class="headerlink" href="#trackbedpostxdeter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L625">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Data from FSL&#8217;s bedpostx can be imported into Camino for deterministic tracking.
+(Use TrackBedpostxProba for bedpostx probabilistic tractography.)</p>
+<p>The tracking is based on the vector images dyads1.nii.gz, ... , dyadsN.nii.gz,
+where there are a maximum of N compartments (corresponding to each fiber
+population) in each voxel.</p>
+<p>It also uses the N images mean_f1samples.nii.gz, ..., mean_fNsamples.nii.gz,
+normalized such that the sum of all compartments is 1. Compartments where the
+mean_f is less than a threshold are discarded and not used for tracking.
+The default value is 0.01. This can be changed with the min_vol_frac option.</p>
+<div class="section" id="id12">
+<h3>Example<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">TrackBedpostxDeter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bedpostxdir</span> <span class="o">=</span> <span class="s">&#39;bedpostxout&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bedpostxdir: (an existing directory name)
+        Directory containing bedpostx output
+        flag: -bedpostxdir %s
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+min_vol_frac: (a float)
+        Zeros out compartments in bedpostx data with a mean volume fraction
+        f of less than min_vol_frac. The default is 0.01.
+        flag: -bedpostxminf %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackbedpostxproba"></span></div>
+</div>
+<div class="section" id="trackbedpostxproba">
+<span id="index-13"></span><h2>TrackBedpostxProba<a class="headerlink" href="#trackbedpostxproba" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L668">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Data from FSL&#8217;s bedpostx can be imported into Camino for probabilistic tracking.
+(Use TrackBedpostxDeter for bedpostx deterministic tractography.)</p>
+<p>The tracking uses the files merged_th1samples.nii.gz, merged_ph1samples.nii.gz,
+... , merged_thNsamples.nii.gz, merged_phNsamples.nii.gz where there are a
+maximum of N compartments (corresponding to each fiber population) in each
+voxel. These images contain M samples of theta and phi, the polar coordinates
+describing the &#8220;stick&#8221; for each compartment. At each iteration, a random number
+X between 1 and M is drawn and the Xth samples of theta and phi become the
+principal directions in the voxel.</p>
+<p>It also uses the N images mean_f1samples.nii.gz, ..., mean_fNsamples.nii.gz,
+normalized such that the sum of all compartments is 1. Compartments where the
+mean_f is less than a threshold are discarded and not used for tracking.
+The default value is 0.01. This can be changed with the min_vol_frac option.</p>
+<div class="section" id="id13">
+<h3>Example<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">TrackBedpostxProba</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bedpostxdir</span> <span class="o">=</span> <span class="s">&#39;bedpostxout&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bedpostxdir: (an existing directory name)
+        Directory containing bedpostx output
+        flag: -bedpostxdir %s
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+iterations: (an integer)
+        Number of streamlines to generate at each seed point. The default is
+        1.
+        flag: -iterations %d
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+min_vol_frac: (a float)
+        Zeros out compartments in bedpostx data with a mean volume fraction
+        f of less than min_vol_frac. The default is 0.01.
+        flag: -bedpostxminf %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackbootstrap"></span></div>
+</div>
+<div class="section" id="trackbootstrap">
+<span id="index-14"></span><h2>TrackBootstrap<a class="headerlink" href="#trackbootstrap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L776">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs bootstrap streamline tractography using mulitple scans of the same subject</p>
+<div class="section" id="id14">
+<h3>Example<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TrackBootstrap</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span><span class="o">=</span><span class="s">&#39;repbs_dt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;bvecs.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bsdatafiles</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;fitted_data1.Bfloat&#39;</span><span class="p">,</span> <span class="s">&#39;fitted_data2.Bfloat&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bsdatafiles: (a list of items which are an existing file name)
+        Specifies files containing raw data for repetition bootstrapping.
+        Use -inputfile for wild bootstrap data.
+        flag: -bsdatafile %s
+scheme_file: (an existing file name)
+        The scheme file corresponding to the data being processed.
+        flag: -schemefile %s
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        Provides the name of a file containing a background mask computed
+        using, for example, FSL&#39;s bet2 program. The mask file contains zero
+        in background voxels and non-zero in foreground.
+        flag: -bgmask %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+inversion: (an integer)
+        Tensor reconstruction algorithm for repetition bootstrapping.
+        Default is 1 (linear reconstruction, single tensor).
+        flag: -inversion %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+iterations: (an integer)
+        Number of streamlines to generate at each seed point.
+        flag: -iterations %d
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackdt"></span></div>
+</div>
+<div class="section" id="trackdt">
+<span id="index-15"></span><h2>TrackDT<a class="headerlink" href="#trackdt" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L573">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs streamline tractography using tensor data</p>
+<div class="section" id="id15">
+<h3>Example<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TrackDT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-dti-trackpico"></span></div>
+</div>
+<div class="section" id="trackpico">
+<span id="index-16"></span><h2>TrackPICo<a class="headerlink" href="#trackpico" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L596">Link to code</a></p>
+<p>Wraps command <strong>track</strong></p>
+<p>Performs streamline tractography using the Probabilistic Index of Connectivity (PICo) algorithm</p>
+<div class="section" id="id16">
+<h3>Example<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TrackPICo</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;pdfs.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">seed_file</span> <span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">track</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+anisfile: (an existing file name)
+        File containing the anisotropy map. This is required to apply an
+        anisotropy threshold with non tensor data. If the map issupplied it
+        is always used, even in tensor data.
+        flag: -anisfile %s
+anisthresh: (a float)
+        Terminate fibres that enter a voxel with lower anisotropy than the
+        threshold.
+        flag: -anisthresh %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+curveinterval: (a float)
+        Interval over which the curvature threshold should be evaluated, in
+        mm. The default is 5mm. When using the default curvature threshold
+        of 90 degrees, this means that streamlines will terminate if they
+        curve by more than 90 degrees over a path length of 5mm.
+        flag: -curveinterval %f
+        requires: curvethresh
+curvethresh: (a float)
+        Curvature threshold for tracking, expressed as the maximum angle (in
+        degrees) between between two streamline orientations calculated over
+        the length of a voxel. If the angle is greater than this, then the
+        streamline terminates.
+        flag: -curvethresh %f
+data_dims: (a list of from 3 to 3 items which are an integer)
+        data dimensions in voxels
+        flag: -datadims %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+        flag: -inputfile %s, position: 1
+inputdatatype: (&#39;float&#39; or &#39;double&#39;)
+        input file type
+        flag: -inputdatatype %s
+inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;sfpeak&#39; or &#39;pico&#39; or
+         &#39;repbs_dt&#39; or &#39;repbs_multitensor&#39; or &#39;ballstick&#39; or &#39;wildbs_dt&#39; or
+         &#39;bayesdirac&#39; or &#39;bayesdirac_dt&#39; or &#39;bedpostx_dyad&#39; or &#39;bedpostx&#39;,
+         nipype default value: dt)
+        input model type
+        flag: -inputmodel %s
+interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
+        The interpolation algorithm determines how the fiber orientation(s)
+        are defined at a given continuous point within the input image.
+        Interpolators are only used when the tracking algorithm is not FACT.
+        The choices are: - NN: Nearest-neighbour interpolation, just uses
+        the local voxel data directly.- PROB_NN: Probabilistic nearest-
+        neighbor interpolation, similar to the method pro- posed by Behrens
+        et al [Magnetic Resonance in Medicine, 50:1077-1088, 2003]. The data
+        is not interpolated, but at each point we randomly choose one of the
+        8 voxels sur- rounding a point. The probability of choosing a
+        particular voxel is based on how close the point is to the centre of
+        that voxel.- LINEAR: Linear interpolation of the vector field
+        containing the principal directions at each point.
+        flag: -interpolator %s
+ipthresh: (a float)
+        Curvature threshold for tracking, expressed as the minimum dot
+        product between two streamline orientations calculated over the
+        length of a voxel. If the dot product between the previous and
+        current directions is less than this threshold, then the streamline
+        terminates. The default setting will terminate fibres that curve by
+        more than 80 degrees. Set this to -1.0 to disable curvature checking
+        completely.
+        flag: -ipthresh %f
+iterations: (an integer)
+        Number of streamlines to generate at each seed point. The default is
+        5000.
+        flag: -iterations %d
+maxcomponents: (an integer)
+        The maximum number of tensor components in a voxel. This determines
+        the size of the input file and does not say anything about the voxel
+        classification. The default is 2 if the input model is multitensor
+        and 1 if the input model is dt.
+        flag: -maxcomponents %d
+numpds: (an integer)
+        The maximum number of PDs in a voxel for input models sfpeak and
+        pico. The default is 3 for input model sfpeak and 1 for input model
+        pico. This option determines the size of the voxels in the input
+        file and does not affect tracking. For tensor data, use the
+        -maxcomponents option.
+        flag: -numpds %d
+out_file: (a file name)
+        output data file
+        flag: -outputfile %s, position: -1
+output_root: (a file name)
+        root directory for output
+        flag: -outputroot %s, position: -1
+outputtracts: (&#39;float&#39; or &#39;double&#39; or &#39;oogl&#39;)
+        output tract file type
+        flag: -outputtracts %s
+pdf: (&#39;bingham&#39; or &#39;watson&#39; or &#39;acg&#39;)
+        Specifies the model for PICo parameters. The default is &quot;bingham.
+        flag: -pdf %s
+seed_file: (an existing file name)
+        seed file
+        flag: -seedfile %s, position: 2
+stepsize: (a float)
+        Step size for EULER and RK4 tracking. The default is 1mm.
+        flag: -stepsize %f
+        requires: tracker
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tracker: (&#39;fact&#39; or &#39;euler&#39; or &#39;rk4&#39;, nipype default value: fact)
+        The tracking algorithm controls streamlines are generated from the
+        data. The choices are: - FACT, which follows the local fibre
+        orientation in each voxel. No interpolation is used.- EULER, which
+        uses a fixed step size along the local fibre orientation. With
+        nearest-neighbour interpolation, this method may be very similar to
+        FACT, except that the step size is fixed, whereas FACT steps extend
+        to the boundary of the next voxel (distance variable depending on
+        the entry and exit points to the voxel).- RK4: Fourth-order Runge-
+        Kutta method. The step size is fixed, however the eventual direction
+        of the step is determined by taking and averaging a series of
+        partial steps.
+        flag: -tracker %s
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tracked: (an existing file name)
+        output file containing reconstructed tracts
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

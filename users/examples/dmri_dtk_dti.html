@@ -1,0 +1,391 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dMRI: DTI - Diffusion Toolkit, FSL</a><ul>
+<li><a class="reference internal" href="#setting-up-workflows">Setting up workflows</a></li>
+<li><a class="reference internal" href="#data-specific-components">Data specific components</a></li>
+<li><a class="reference internal" href="#setup-for-diffusion-tensor-computation">Setup for Diffusion Tensor Computation</a></li>
+<li><a class="reference internal" href="#setup-for-tracktography">Setup for Tracktography</a></li>
+<li><a class="reference internal" href="#setup-the-pipeline-that-combines-the-two-workflows-tractography-and-computetensor">Setup the pipeline that combines the two workflows: tractography and computeTensor</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dmri-dti-diffusion-toolkit-fsl">
+<span id="example-dmri-dtk-dti"></span><h1>dMRI: DTI - Diffusion Toolkit, FSL<a class="headerlink" href="#dmri-dti-diffusion-toolkit-fsl" title="Permalink to this headline">¶</a></h1>
+<p>A pipeline example that uses several interfaces to perform analysis on
+diffusion weighted images using Diffusion Toolkit tools.</p>
+<p>This tutorial is based on the 2010 FSL course and uses data freely available at
+the FSL website at: <a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz">http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</a></p>
+<p>More details can be found at
+<a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm">http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/fdt/index.htm</a></p>
+<p>In order to run this tutorial you need to have Diffusion Toolkit and FSL tools installed and
+accessible from matlab/command line. Check by calling fslinfo and dtk from the command
+line.</p>
+<p>Tell python where to find the appropriate functions.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># Data i/o</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>          <span class="c"># fsl</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.diffusion_toolkit</span> <span class="kn">as</span> <span class="nn">dtk</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+<span class="kn">import</span> <span class="nn">os</span>                                    <span class="c"># system functions</span>
+<span class="kn">from</span> <span class="nn">nipype.workflows.dmri.fsl.dti</span> <span class="kn">import</span> <span class="n">create_eddy_correct_pipeline</span>
+</pre></div>
+</div>
+<p>Confirm package dependencies are installed.  (This is only for the
+tutorial, rarely would you put this in your own code.)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">nipype.utils.misc</span> <span class="kn">import</span> <span class="n">package_check</span>
+
+<span class="n">package_check</span><span class="p">(</span><span class="s">&#39;numpy&#39;</span><span class="p">,</span> <span class="s">&#39;1.3&#39;</span><span class="p">,</span> <span class="s">&#39;tutorial1&#39;</span><span class="p">)</span>
+<span class="n">package_check</span><span class="p">(</span><span class="s">&#39;scipy&#39;</span><span class="p">,</span> <span class="s">&#39;0.7&#39;</span><span class="p">,</span> <span class="s">&#39;tutorial1&#39;</span><span class="p">)</span>
+<span class="n">package_check</span><span class="p">(</span><span class="s">&#39;networkx&#39;</span><span class="p">,</span> <span class="s">&#39;1.0&#39;</span><span class="p">,</span> <span class="s">&#39;tutorial1&#39;</span><span class="p">)</span>
+<span class="n">package_check</span><span class="p">(</span><span class="s">&#39;IPython&#39;</span><span class="p">,</span> <span class="s">&#39;0.10&#39;</span><span class="p">,</span> <span class="s">&#39;tutorial1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="setting-up-workflows">
+<h2>Setting up workflows<a class="headerlink" href="#setting-up-workflows" title="Permalink to this headline">¶</a></h2>
+<p>This is a generic workflow for DTI data analysis using the FSL</p>
+</div>
+<div class="section" id="data-specific-components">
+<h2>Data specific components<a class="headerlink" href="#data-specific-components" title="Permalink to this headline">¶</a></h2>
+<p>The nipype tutorial contains data for two subjects.  Subject data
+is in two subdirectories, <tt class="docutils literal"><span class="pre">dwis1</span></tt> and <tt class="docutils literal"><span class="pre">dwis2</span></tt>.  Each subject directory
+contains each of the following files: bvec, bval, diffusion weighted data, a set of target masks,
+a seed file, and a transformation matrix.</p>
+<p>Below we set some variables to inform the <tt class="docutils literal"><span class="pre">datasource</span></tt> about the
+layout of our data.  We specify the location of the data, the subject
+sub-directories and a dictionary that maps each run to a mnemonic (or
+field) for the run type (<tt class="docutils literal"><span class="pre">dwi</span></tt> or <tt class="docutils literal"><span class="pre">bvals</span></tt>).  These fields become
+the output fields of the <tt class="docutils literal"><span class="pre">datasource</span></tt> node in the pipeline.</p>
+<p>Specify the subject directories</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subj1&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Map field names to individual subject runs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">]],</span>
+            <span class="n">bvecs</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvecs&#39;</span><span class="p">]],</span>
+            <span class="n">bvals</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvals&#39;</span><span class="p">]])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+<tt class="docutils literal"><span class="pre">datasource</span></tt> attribute <tt class="docutils literal"><span class="pre">iterables</span></tt> tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+<tt class="docutils literal"><span class="pre">subject_list</span></tt>. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we create a <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></tt> object and
+fill in the information from above about the layout of our data.  The
+<a class="reference internal" href="../../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></tt></a> module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span>
+
+<span class="c"># This needs to point to the fdt folder you can find after extracting</span>
+<span class="c"># http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;fsl_course_data/fdt/&#39;</span><span class="p">)</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii.gz&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-for-diffusion-tensor-computation">
+<h2>Setup for Diffusion Tensor Computation<a class="headerlink" href="#setup-for-diffusion-tensor-computation" title="Permalink to this headline">¶</a></h2>
+<p>Here we will create a generic workflow for DTI computation</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">computeTensor</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;computeTensor&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>extract the volume with b=0 (nodif_brain)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fslroi</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">ExtractROI</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fslroi&#39;</span><span class="p">)</span>
+<span class="n">fslroi</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_min</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">fslroi</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_size</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>create a brain mask from the nodif_brain</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bet</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;bet&#39;</span><span class="p">)</span>
+<span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.34</span>
+</pre></div>
+</div>
+<p>correct the diffusion weighted images for eddy_currents</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">eddycorrect</span> <span class="o">=</span> <span class="n">create_eddy_correct_pipeline</span><span class="p">(</span><span class="s">&#39;eddycorrect&#39;</span><span class="p">)</span>
+<span class="n">eddycorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span><span class="o">=</span><span class="mi">0</span>
+</pre></div>
+</div>
+<p>compute the diffusion tensor in each voxel</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dtifit</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">dtk</span><span class="o">.</span><span class="n">DTIRecon</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;dtifit&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>connect all the nodes for this workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">computeTensor</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                        <span class="p">(</span><span class="n">fslroi</span><span class="p">,</span><span class="n">bet</span><span class="p">,[(</span><span class="s">&#39;roi_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)]),</span>
+                        <span class="p">(</span><span class="n">eddycorrect</span><span class="p">,</span><span class="n">dtifit</span><span class="p">,[(</span><span class="s">&#39;outputnode.eddy_corrected&#39;</span><span class="p">,</span><span class="s">&#39;DWI&#39;</span><span class="p">)])</span>
+                      <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-for-tracktography">
+<h2>Setup for Tracktography<a class="headerlink" href="#setup-for-tracktography" title="Permalink to this headline">¶</a></h2>
+<p>Here we will create a workflow to enable deterministic tracktography</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tractography&#39;</span><span class="p">)</span>
+
+<span class="n">dtk_tracker</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">dtk</span><span class="o">.</span><span class="n">DTITracker</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;dtk_tracker&quot;</span><span class="p">)</span>
+<span class="n">dtk_tracker</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_x</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">smooth_trk</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">dtk</span><span class="o">.</span><span class="n">SplineFilter</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;smooth_trk&quot;</span><span class="p">)</span>
+<span class="n">smooth_trk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">step_length</span> <span class="o">=</span> <span class="mf">0.5</span>
+</pre></div>
+</div>
+<p>connect all the nodes for this workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                      <span class="p">(</span><span class="n">dtk_tracker</span><span class="p">,</span> <span class="n">smooth_trk</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;track_file&#39;</span><span class="p">,</span> <span class="s">&#39;track_file&#39;</span><span class="p">)])</span>
+                      <span class="p">])</span>
+</pre></div>
+</div>
+<p>Setup data storage area</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasink</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;datasink&#39;</span><span class="p">)</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;dtiresults&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">getstripdir</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/workingdir/dwiproc&#39;</span><span class="p">),</span><span class="s">&#39;_subject_id_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">subject_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-the-pipeline-that-combines-the-two-workflows-tractography-and-computetensor">
+<h2>Setup the pipeline that combines the two workflows: tractography and computeTensor<a class="headerlink" href="#setup-the-pipeline-that-combines-the-two-workflows-tractography-and-computetensor" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dwiproc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;dwiproc&quot;</span><span class="p">)</span>
+<span class="n">dwiproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;dtk_dti_tutorial&#39;</span><span class="p">)</span>
+<span class="n">dwiproc</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                    <span class="p">(</span><span class="n">infosource</span><span class="p">,</span><span class="n">datasource</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">computeTensor</span><span class="p">,[(</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span><span class="s">&#39;fslroi.in_file&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&#39;bvals&#39;</span><span class="p">,</span><span class="s">&#39;dtifit.bvals&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&#39;bvecs&#39;</span><span class="p">,</span><span class="s">&#39;dtifit.bvecs&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span><span class="s">&#39;eddycorrect.inputnode.in_file&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">computeTensor</span><span class="p">,</span><span class="n">tractography</span><span class="p">,[(</span><span class="s">&#39;bet.mask_file&#39;</span><span class="p">,</span><span class="s">&#39;dtk_tracker.mask1_file&#39;</span><span class="p">),</span>
+                                                 <span class="p">(</span><span class="s">&#39;dtifit.tensor&#39;</span><span class="p">,</span><span class="s">&#39;dtk_tracker.tensor_file&#39;</span><span class="p">)</span>
+                                                 <span class="p">])</span>
+                <span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">dwiproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">dwiproc</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/dmri_dtk_dti.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+This same script is also included in the Nipype source distribution under the
+<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

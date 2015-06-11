@@ -1,0 +1,2682 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.afni.preprocess</a><ul>
+<li><a class="reference internal" href="#allineate">Allineate</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#autotcorrelate">AutoTcorrelate</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#autobox">Autobox</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#automask">Automask</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bandpass">Bandpass</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#blurinmask">BlurInMask</a><ul>
+<li><a class="reference internal" href="#id9">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#brickstat">BrickStat</a><ul>
+<li><a class="reference internal" href="#id10">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#calc">Calc</a><ul>
+<li><a class="reference internal" href="#id11">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#copy">Copy</a><ul>
+<li><a class="reference internal" href="#id12">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#despike">Despike</a><ul>
+<li><a class="reference internal" href="#id13">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#detrend">Detrend</a><ul>
+<li><a class="reference internal" href="#id14">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eval">Eval</a><ul>
+<li><a class="reference internal" href="#id15">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fim">Fim</a><ul>
+<li><a class="reference internal" href="#id16">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fourier">Fourier</a><ul>
+<li><a class="reference internal" href="#id17">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#maskave">Maskave</a><ul>
+<li><a class="reference internal" href="#id18">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#means">Means</a><ul>
+<li><a class="reference internal" href="#id19">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#merge">Merge</a><ul>
+<li><a class="reference internal" href="#id20">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#roistats">ROIStats</a><ul>
+<li><a class="reference internal" href="#id21">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#refit">Refit</a><ul>
+<li><a class="reference internal" href="#id24">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#resample">Resample</a><ul>
+<li><a class="reference internal" href="#id25">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#retroicor">Retroicor</a><ul>
+<li><a class="reference internal" href="#id26">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#skullstrip">SkullStrip</a><ul>
+<li><a class="reference internal" href="#id27">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tcat">TCat</a><ul>
+<li><a class="reference internal" href="#id28">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tcorr1d">TCorr1D</a></li>
+<li><a class="reference internal" href="#tcorrmap">TCorrMap</a><ul>
+<li><a class="reference internal" href="#id31">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tcorrelate">TCorrelate</a><ul>
+<li><a class="reference internal" href="#id32">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tshift">TShift</a><ul>
+<li><a class="reference internal" href="#id35">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tstat">TStat</a><ul>
+<li><a class="reference internal" href="#id36">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#to3d">To3D</a><ul>
+<li><a class="reference internal" href="#id37">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#volreg">Volreg</a><ul>
+<li><a class="reference internal" href="#id38">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#warp">Warp</a><ul>
+<li><a class="reference internal" href="#id39">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#zcutup">ZCutUp</a><ul>
+<li><a class="reference internal" href="#id40">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-afni-preprocess">
+<h1>interfaces.afni.preprocess<a class="headerlink" href="#interfaces-afni-preprocess" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-afni-preprocess-allineate"></span><div class="section" id="allineate">
+<span id="index-0"></span><h2>Allineate<a class="headerlink" href="#allineate" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1083">Link to code</a></p>
+<p>Wraps command <strong>3dAllineate</strong></p>
+<p>Program to align one dataset (the &#8216;source&#8217;) to a base dataset</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html">3dAllineate Documentation.</a></p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allineate</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Allineate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allineate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allineate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="o">=</span> <span class="s">&#39;functional_allineate.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">allineate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_matrix</span><span class="o">=</span> <span class="s">&#39;cmatrix.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">allineate</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dAllineate
+        flag: -source %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+autobox: (a boolean)
+        Expand the -automask function to enclose a rectangular
+         box that holds the irregular mask.
+        flag: -autobox
+automask: (an integer)
+        Compute a mask function, set a value for dilation or 0.
+        flag: -automask+%d
+autoweight: (a string)
+        Compute a weight function using the 3dAutomask
+         algorithm plus some blurring of the base image.
+        flag: -autoweight%s
+center_of_mass: (a string)
+        Use the center-of-mass calculation to bracket the shifts.
+        flag: -cmass%s
+check: (a list of items which are &#39;leastsq&#39; or &#39;ls&#39; or &#39;mutualinfo&#39;
+         or &#39;mi&#39; or &#39;corratio_mul&#39; or &#39;crM&#39; or &#39;norm_mutualinfo&#39; or &#39;nmi&#39; or
+         &#39;hellinger&#39; or &#39;hel&#39; or &#39;corratio_add&#39; or &#39;crA&#39; or &#39;corratio_uns&#39;
+         or &#39;crU&#39;)
+        After cost functional optimization is done, start at the
+         final parameters and RE-optimize using this new cost functions.
+         If the results are too different, a warning message will be
+         printed. However, the final parameters from the original
+         optimization will be used to create the output dataset.
+        flag: -check %s
+convergence: (a float)
+        Convergence test in millimeters (default 0.05mm).
+        flag: -conv %f
+cost: (&#39;leastsq&#39; or &#39;ls&#39; or &#39;mutualinfo&#39; or &#39;mi&#39; or &#39;corratio_mul&#39; or
+         &#39;crM&#39; or &#39;norm_mutualinfo&#39; or &#39;nmi&#39; or &#39;hellinger&#39; or &#39;hel&#39; or
+         &#39;corratio_add&#39; or &#39;crA&#39; or &#39;corratio_uns&#39; or &#39;crU&#39;)
+        Defines the &#39;cost&#39; function that defines the matching
+         between the source and the base
+        flag: -cost %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+epi: (a boolean)
+        Treat the source dataset as being composed of warped
+         EPI slices, and the base as comprising anatomically
+         &#39;true&#39; images. Only phase-encoding direction image
+         shearing and scaling will be allowed with this option.
+        flag: -EPI
+final_interpolation: (&#39;nearestneighbour&#39; or &#39;linear&#39; or &#39;cubic&#39; or
+         &#39;quintic&#39; or &#39;wsinc5&#39;)
+        Defines interpolation method used to create the output dataset
+        flag: -final %s
+fine_blur: (a float)
+        Set the blurring radius to use in the fine resolution
+         pass to &#39;x&#39; mm. A small amount (1-2 mm?) of blurring at
+         the fine step may help with convergence, if there is
+         some problem, especially if the base volume is very noisy.
+         [Default == 0 mm = no blurring at the final alignment pass]
+        flag: -fineblur %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_matrix: (a file name)
+        matrix to align input file
+        flag: -1Dmatrix_apply %s, position: -3
+in_param_file: (an existing file name)
+        Read warp parameters from file and apply them to
+         the source dataset, and produce a new dataset
+        flag: -1Dparam_apply %s
+interpolation: (&#39;nearestneighbour&#39; or &#39;linear&#39; or &#39;cubic&#39; or
+         &#39;quintic&#39;)
+        Defines interpolation method to use during matching
+        flag: -interp %s
+master: (an existing file name)
+        Write the output dataset on the same grid as this file
+        flag: -master %s
+newgrid: (a float)
+        Write the output dataset using isotropic grid spacing in mm
+        flag: -newgrid %f
+nmatch: (an integer)
+        Use at most n scattered points to match the datasets.
+        flag: -nmatch %d
+no_pad: (a boolean)
+        Do not use zero-padding on the base image.
+        flag: -nopad
+nomask: (a boolean)
+        Don&#39;t compute the autoweight/mask; if -weight is not
+         also used, then every voxel will be counted equally.
+        flag: -nomask
+nwarp: (&#39;bilinear&#39; or &#39;cubic&#39; or &#39;quintic&#39; or &#39;heptic&#39; or &#39;nonic&#39; or
+         &#39;poly3&#39; or &#39;poly5&#39; or &#39;poly7&#39; or &#39;poly9&#39;)
+        Experimental nonlinear warping: bilinear or legendre poly.
+        flag: -nwarp %s
+nwarp_fixdep: (a list of items which are &#39;X&#39; or &#39;Y&#39; or &#39;Z&#39; or &#39;I&#39; or
+         &#39;J&#39; or &#39;K&#39;)
+        To fix non-linear warp dependency along directions.
+        flag: -nwarp_fixdep%s
+nwarp_fixmot: (a list of items which are &#39;X&#39; or &#39;Y&#39; or &#39;Z&#39; or &#39;I&#39; or
+         &#39;J&#39; or &#39;K&#39;)
+        To fix motion along directions.
+        flag: -nwarp_fixmot%s
+one_pass: (a boolean)
+        Use only the refining pass -- do not try a coarse
+         resolution pass first. Useful if you know that only
+         small amounts of image alignment are needed.
+        flag: -onepass
+out_file: (a file name)
+        output file from 3dAllineate
+        flag: -prefix %s, position: -2
+out_matrix: (a file name)
+        Save the transformation matrix for each volume.
+        flag: -1Dmatrix_save %s
+out_param_file: (a file name)
+        Save the warp parameters in ASCII (.1D) format.
+        flag: -1Dparam_save %s
+out_weight_file: (a file name)
+        Write the weight volume to disk as a dataset
+        flag: -wtprefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+reference: (an existing file name)
+        file to be used as reference, the first volume will be used
+        if not given the reference will be the first volume of in_file.
+        flag: -base %s
+replacebase: (a boolean)
+        If the source has more than one volume, then after the first
+         volume is aligned to the base
+        flag: -replacebase
+replacemeth: (&#39;leastsq&#39; or &#39;ls&#39; or &#39;mutualinfo&#39; or &#39;mi&#39; or
+         &#39;corratio_mul&#39; or &#39;crM&#39; or &#39;norm_mutualinfo&#39; or &#39;nmi&#39; or
+         &#39;hellinger&#39; or &#39;hel&#39; or &#39;corratio_add&#39; or &#39;crA&#39; or &#39;corratio_uns&#39;
+         or &#39;crU&#39;)
+        After first volume is aligned, switch method for later volumes.
+         For use with &#39;-replacebase&#39;.
+        flag: -replacemeth %s
+source_automask: (an integer)
+        Automatically mask the source dataset with dilation or 0.
+        flag: -source_automask+%d
+source_mask: (an existing file name)
+        mask the input dataset
+        flag: -source_mask %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+two_best: (an integer)
+        In the coarse pass, use the best &#39;bb&#39; set of initial
+         points to search for the starting point for the fine
+         pass. If bb==0, then no search is made for the best
+         starting point, and the identity transformation is
+         used as the starting point. [Default=5; min=0 max=11]
+        flag: -twobest %d
+two_blur: (a float)
+        Set the blurring radius for the first pass in mm.
+        flag: -twoblur
+two_first: (a boolean)
+        Use -twopass on the first image to be registered, and
+         then on all subsequent images from the source dataset,
+         use results from the first image&#39;s coarse pass to start
+         the fine pass.
+        flag: -twofirst
+two_pass: (a boolean)
+        Use a two pass alignment strategy for all volumes, searching
+         for a large rotation+shift and then refining the alignment.
+        flag: -twopass
+usetemp: (a boolean)
+        temporary file use
+        flag: -usetemp
+warp_type: (&#39;shift_only&#39; or &#39;shift_rotate&#39; or &#39;shift_rotate_scale&#39; or
+         &#39;affine_general&#39;)
+        Set the warp type.
+        flag: -warp %s
+warpfreeze: (a boolean)
+        Freeze the non-rigid body parameters after first volume.
+        flag: -warpfreeze
+weight_file: (an existing file name)
+        Set the weighting for each voxel in the base dataset;
+         larger weights mean that voxel count more in the cost function.
+         Must be defined on the same grid as the base dataset
+        flag: -weight %s
+zclip: (a boolean)
+        Replace negative values in the input datasets (source &amp; base) with
+        zero.
+        flag: -zclip
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>matrix: (a file name)
+        matrix to align input file
+out_file: (a file name)
+        output image file name
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-autotcorrelate"></span></div>
+</div>
+<div class="section" id="autotcorrelate">
+<span id="index-1"></span><h2>AutoTcorrelate<a class="headerlink" href="#autotcorrelate" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L345">Link to code</a></p>
+<p>Wraps command <strong>3dAutoTcorrelate</strong></p>
+<p>Computes the correlation coefficient between the time series of each
+pair of voxels in the input dataset, and stores the output into a
+new anatomical bucket dataset [scaled to shorts to save memory space].</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">AutoTcorrelate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">polort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">eta2</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_only_targets</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">corr</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">corr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        timeseries x space (volume or surface) file
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+eta2: (a boolean)
+        eta^2 similarity
+        flag: -eta2
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        mask of voxels
+        flag: -mask %s
+mask_only_targets: (a boolean)
+        use mask only on targets voxels
+        flag: -mask_only_targets
+        mutually_exclusive: mask_source
+mask_source: (an existing file name)
+        mask for source voxels
+        flag: -mask_source %s
+        mutually_exclusive: mask_only_targets
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+polort: (an integer)
+        Remove polynomical trend of order m or -1 for no detrending
+        flag: -polort %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-autobox"></span></div>
+</div>
+<div class="section" id="autobox">
+<span id="index-2"></span><h2>Autobox<a class="headerlink" href="#autobox" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1788">Link to code</a></p>
+<p>Wraps command <strong>3dAutobox</strong></p>
+<p>Computes size of a box that fits around the volume.
+Also can be used to crop the volume to that box.</p>
+<p>For complete details, see the <a href="#id2"><span class="problematic" id="id3">`</span></a>3dAutobox Documentation.
+&lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutobox.html</a>&gt;</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">abox</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Autobox</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">abox</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">abox</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">abox</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file
+        flag: -input %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+no_clustering: (a boolean)
+        Don&#39;t do any clustering to find box. Any non-zero
+         voxel will be preserved in the cropped volume.
+         The default method uses some clustering to find the
+         cropping box, and will clip off small isolated blobs.
+        flag: -noclust
+out_file: (a file name)
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+padding: (an integer)
+        Number of extra voxels to pad on each side of box
+        flag: -npad %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (a file name)
+        output file
+x_max: (an integer)
+x_min: (an integer)
+y_max: (an integer)
+y_min: (an integer)
+z_max: (an integer)
+z_min: (an integer)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-automask"></span></div>
+</div>
+<div class="section" id="automask">
+<span id="index-3"></span><h2>Automask<a class="headerlink" href="#automask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L526">Link to code</a></p>
+<p>Wraps command <strong>3dAutomask</strong></p>
+<p>Create a brain-only mask of the image using AFNI 3dAutomask command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html">3dAutomask Documentation.</a></p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automask</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Automask</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dilate</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&quot;NIFTI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">automask</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">automask</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dAutomask
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+brain_file: (a file name)
+        output file from 3dAutomask
+        flag: -apply_prefix %s
+clfrac: (a float)
+        sets the clip level fraction (must be 0.1-0.9). A small value will
+        tend to make the mask larger [default = 0.5].
+        flag: -clfrac %s
+dilate: (an integer)
+        dilate the mask outwards
+        flag: -dilate %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+erode: (an integer)
+        erode the mask inwards
+        flag: -erode %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>brain_file: (an existing file name)
+        brain file (skull stripped)
+out_file: (an existing file name)
+        mask file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-bandpass"></span></div>
+</div>
+<div class="section" id="bandpass">
+<span id="index-4"></span><h2>Bandpass<a class="headerlink" href="#bandpass" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L825">Link to code</a></p>
+<p>Wraps command <strong>3dBandpass</strong></p>
+<p>Program to lowpass and/or highpass each voxel time series in a
+dataset, offering more/different options than Fourier</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dbandpass.html">3dBandpass Documentation.</a></p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span>  <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bandpass</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Bandpass</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;functional.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">highpass</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bandpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lowpass</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">bandpass</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+highpass: (a float)
+        highpass
+        flag: %f, position: -3
+in_file: (an existing file name)
+        input file to 3dBandpass
+        flag: %s, position: -1
+lowpass: (a float)
+        lowpass
+        flag: %f, position: -2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+automask: (a boolean)
+        Create a mask from the input dataset
+        flag: -automask
+blur: (a float)
+        Blur (inside the mask only) with a filter
+         width (FWHM) of &#39;fff&#39; millimeters.
+        flag: -blur %f
+despike: (a boolean)
+        Despike each time series before other processing.
+         ++ Hopefully, you don&#39;t actually need to do this,
+         which is why it is optional.
+        flag: -despike
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+localPV: (a float)
+        Replace each vector by the local Principal Vector
+         (AKA first singular vector) from a neighborhood
+         of radius &#39;rrr&#39; millimiters.
+         ++ Note that the PV time series is L2 normalized.
+         ++ This option is mostly for Bob Cox to have fun with.
+        flag: -localPV %f
+mask: (an existing file name)
+        mask file
+        flag: -mask %s, position: 2
+nfft: (an integer)
+        set the FFT length [must be a legal value]
+        flag: -nfft %d
+no_detrend: (a boolean)
+        Skip the quadratic detrending of the input that
+         occurs before the FFT-based bandpassing.
+         ++ You would only want to do this if the dataset
+         had been detrended already in some other program.
+        flag: -nodetrend
+normalize: (a boolean)
+        Make all output time series have L2 norm = 1
+         ++ i.e., sum of squares = 1
+        flag: -norm
+notrans: (a boolean)
+        Don&#39;t check for initial positive transients in the data:
+         ++ The test is a little slow, so skipping it is OK,
+         if you KNOW the data time series are transient-free.
+        flag: -notrans
+orthogonalize_dset: (an existing file name)
+        Orthogonalize each voxel to the corresponding
+         voxel time series in dataset &#39;fset&#39;, which must
+         have the same spatial and temporal grid structure
+         as the main input dataset.
+         ++ At present, only one &#39;-dsort&#39; option is allowed.
+        flag: -dsort %s
+orthogonalize_file: (a list of items which are an existing file name)
+        Also orthogonalize input to columns in f.1D
+         ++ Multiple &#39;-ort&#39; options are allowed.
+        flag: -ort %s
+out_file: (a file name)
+        output file from 3dBandpass
+        flag: -prefix %s, position: 1
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tr: (a float)
+        set time step (TR) in sec [default=from dataset header]
+        flag: -dt %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-blurinmask"></span></div>
+</div>
+<div class="section" id="blurinmask">
+<span id="index-5"></span><h2>BlurInMask<a class="headerlink" href="#blurinmask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1631">Link to code</a></p>
+<p>Wraps command <strong>3dBlurInMask</strong></p>
+<p>Blurs a dataset spatially inside a mask.  That&#8217;s all.  Experimental.</p>
+<p>For complete details, see the <a href="#id7"><span class="problematic" id="id8">`</span></a>3dBlurInMask Documentation.
+&lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBlurInMask.html</a>&gt;</p>
+<div class="section" id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bim</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">BlurInMask</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mf">5.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bim</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dBlurInMask -input functional.nii -FWHM 5.000000 -mask mask.nii -prefix functional_blur&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">bim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fwhm: (a float)
+        fwhm kernel size
+        flag: -FWHM %f
+in_file: (an existing file name)
+        input file to 3dSkullStrip
+        flag: -input %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+automask: (a boolean)
+        Create an automask from the input dataset.
+        flag: -automask
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+float_out: (a boolean)
+        Save dataset as floats, no matter what the input data type is.
+        flag: -float
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (a file name)
+        Mask dataset, if desired. Blurring will occur only within the mask.
+        Voxels NOT in the mask will be set to zero in the output.
+        flag: -mask %s
+multimask: (a file name)
+        Multi-mask dataset -- each distinct nonzero value in dataset will be
+        treated as a separate mask for blurring purposes.
+        flag: -Mmask %s
+options: (a string)
+        options
+        flag: %s, position: 2
+out_file: (a file name)
+        output to the file
+        flag: -prefix %s, position: -1
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+preserve: (a boolean)
+        Normally, voxels not in the mask will be set to zero in the output.
+        If you want the original values in the dataset to be preserved in
+        the output, use this option.
+        flag: -preserve
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-brickstat"></span></div>
+</div>
+<div class="section" id="brickstat">
+<span id="index-6"></span><h2>BrickStat<a class="headerlink" href="#brickstat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1422">Link to code</a></p>
+<p>Wraps command <strong>3dBrickStat</strong></p>
+<p>Compute maximum and/or minimum voxel values of an input dataset</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html">3dBrickStat Documentation.</a></p>
+<div class="section" id="id10">
+<h3>Examples<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brickstat</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">BrickStat</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brickstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brickstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;skeleton_mask.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">brickstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">brickstat</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dmaskave
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        -mask dset = use dset as mask to include/exclude voxels
+        flag: -mask %s, position: 2
+min: (a boolean)
+        print the minimum value in dataset
+        flag: -min, position: 1
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>min_val: (a float)
+        output
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-calc"></span></div>
+</div>
+<div class="section" id="calc">
+<span id="index-7"></span><h2>Calc<a class="headerlink" href="#calc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1556">Link to code</a></p>
+<p>Wraps command <strong>3dcalc</strong></p>
+<p>This program does voxel-by-voxel arithmetic on 3D datasets</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html">3dcalc Documentation.</a></p>
+<div class="section" id="id11">
+<h3>Examples<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Calc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_a</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_b</span> <span class="o">=</span> <span class="s">&#39;functional2.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">expr</span><span class="o">=</span><span class="s">&#39;a*b&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span>  <span class="s">&#39;functional_calc.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&quot;NIFTI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dcalc -a functional.nii  -b functional2.nii -expr &quot;a*b&quot; -prefix functional_calc.nii.gz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+expr: (a string)
+        expr
+        flag: -expr &quot;%s&quot;, position: 3
+in_file_a: (an existing file name)
+        input file to 3dcalc
+        flag: -a %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file_b: (an existing file name)
+        operand file to 3dcalc
+        flag:  -b %s, position: 1
+in_file_c: (an existing file name)
+        operand file to 3dcalc
+        flag:  -c %s, position: 2
+other: (a file name)
+        other options
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+single_idx: (an integer)
+        volume index for in_file_a
+start_idx: (an integer)
+        start index for in_file_a
+        requires: stop_idx
+stop_idx: (an integer)
+        stop index for in_file_a
+        requires: start_idx
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-copy"></span></div>
+</div>
+<div class="section" id="copy">
+<span id="index-8"></span><h2>Copy<a class="headerlink" href="#copy" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L673">Link to code</a></p>
+<p>Wraps command <strong>3dcopy</strong></p>
+<p>Copies an image of one type to an image of the same
+or different type using 3dcopy command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcopy.html">3dcopy Documentation.</a></p>
+<div class="section" id="id12">
+<h3>Examples<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;new_func.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dcopy
+        flag: %s, position: -2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-despike"></span></div>
+</div>
+<div class="section" id="despike">
+<span id="index-9"></span><h2>Despike<a class="headerlink" href="#despike" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L468">Link to code</a></p>
+<p>Wraps command <strong>3dDespike</strong></p>
+<p>Removes &#8216;spikes&#8217; from the 3D+time input dataset</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html">3dDespike Documentation.</a></p>
+<div class="section" id="id13">
+<h3>Examples<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">despike</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Despike</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">despike</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">despike</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dDespike -prefix functional_despike functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">despike</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dDespike
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-detrend"></span></div>
+</div>
+<div class="section" id="detrend">
+<span id="index-10"></span><h2>Detrend<a class="headerlink" href="#detrend" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L430">Link to code</a></p>
+<p>Wraps command <strong>3dDetrend</strong></p>
+<p>This program removes components from voxel time series using
+linear least squares</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDetrend.html">3dDetrend Documentation.</a></p>
+<div class="section" id="id14">
+<h3>Examples<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">detrend</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Detrend</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">detrend</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">detrend</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;-polort 2&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">detrend</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&quot;AFNI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">detrend</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dDetrend -polort 2 -prefix functional_detrend functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">detrend</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dDetrend
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-eval"></span></div>
+</div>
+<div class="section" id="eval">
+<span id="index-11"></span><h2>Eval<a class="headerlink" href="#eval" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1959">Link to code</a></p>
+<p>Wraps command <strong>1deval</strong></p>
+<p>Evaluates an expression that may include columns of data from one or more text files</p>
+<p>see AFNI Documentation: &lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html</a>&gt;</p>
+<div class="section" id="id15">
+<h3>Examples<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Eval</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_a</span> <span class="o">=</span> <span class="s">&#39;seed.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_b</span> <span class="o">=</span> <span class="s">&#39;resp.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">expr</span><span class="o">=</span><span class="s">&#39;a*b&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out1D</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">eval</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span>  <span class="s">&#39;data_calc.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">calc</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3deval -a timeseries1.1D  -b timeseries2.1D -expr &quot;a*b&quot; -1D -prefix data_calc.1D&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+expr: (a string)
+        expr
+        flag: -expr &quot;%s&quot;, position: 3
+in_file_a: (an existing file name)
+        input file to 1deval
+        flag: -a %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file_b: (an existing file name)
+        operand file to 1deval
+        flag:  -b %s, position: 1
+in_file_c: (an existing file name)
+        operand file to 1deval
+        flag:  -c %s, position: 2
+other: (a file name)
+        other options
+out1D: (a boolean)
+        output in 1D
+        flag: -1D
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+single_idx: (an integer)
+        volume index for in_file_a
+start_idx: (an integer)
+        start index for in_file_a
+        requires: stop_idx
+stop_idx: (an integer)
+        stop index for in_file_a
+        requires: start_idx
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-fim"></span></div>
+</div>
+<div class="section" id="fim">
+<span id="index-12"></span><h2>Fim<a class="headerlink" href="#fim" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1260">Link to code</a></p>
+<p>Wraps command <strong>3dfim+</strong></p>
+<p>Program to calculate the cross-correlation of
+an ideal reference waveform with the measured FMRI
+time series for each voxel</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfim+.html">3dfim+ Documentation.</a></p>
+<div class="section" id="id16">
+<h3>Examples<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Fim</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">ideal_file</span><span class="o">=</span> <span class="s">&#39;seed.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;functional_corr.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out</span> <span class="o">=</span> <span class="s">&#39;Correlation&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fim_thr</span> <span class="o">=</span> <span class="mf">0.0009</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+ideal_file: (an existing file name)
+        ideal time series file name
+        flag: -ideal_file %s, position: 2
+in_file: (an existing file name)
+        input file to 3dfim+
+        flag:  -input %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fim_thr: (a float)
+        fim internal mask threshold value
+        flag: -fim_thr %f, position: 3
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out: (a string)
+        Flag to output the specified parameter
+        flag: -out %s, position: 4
+out_file: (a file name)
+        output image file name
+        flag: -bucket %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-fourier"></span></div>
+</div>
+<div class="section" id="fourier">
+<span id="index-13"></span><h2>Fourier<a class="headerlink" href="#fourier" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L715">Link to code</a></p>
+<p>Wraps command <strong>3dFourier</strong></p>
+<p>Program to lowpass and/or highpass each voxel time series in a
+dataset, via the FFT</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dfourier.html">3dFourier Documentation.</a></p>
+<div class="section" id="id17">
+<h3>Examples<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fourier</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Fourier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fourier</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fourier</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;-retrend&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fourier</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">highpass</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fourier</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">lowpass</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fourier</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+highpass: (a float)
+        highpass
+        flag: -highpass %f, position: 1
+in_file: (an existing file name)
+        input file to 3dFourier
+        flag: %s, position: -1
+lowpass: (a float)
+        lowpass
+        flag: -lowpass %f, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-maskave"></span></div>
+</div>
+<div class="section" id="maskave">
+<span id="index-14"></span><h2>Maskave<a class="headerlink" href="#maskave" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1144">Link to code</a></p>
+<p>Wraps command <strong>3dmaskave</strong></p>
+<p>Computes average of all voxels in the input dataset
+which satisfy the criterion in the options list</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmaskave.html">3dmaskave Documentation.</a></p>
+<div class="section" id="id18">
+<h3>Examples<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maskave</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Maskave</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maskave</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maskave</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span><span class="o">=</span> <span class="s">&#39;seed_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maskave</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">quiet</span><span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maskave</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dmaskave -mask seed_mask.nii -quiet functional.nii &gt; functional_maskave.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">maskave</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dmaskave
+        flag: %s, position: -2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        matrix to align input file
+        flag: -mask %s, position: 1
+out_file: (a file name)
+        output image file name
+        flag: &gt; %s, position: -1
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+quiet: (a boolean)
+        matrix to align input file
+        flag: -quiet, position: 2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-means"></span></div>
+</div>
+<div class="section" id="means">
+<span id="index-15"></span><h2>Means<a class="headerlink" href="#means" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L2021">Link to code</a></p>
+<p>Wraps command <strong>3dMean</strong></p>
+<p>Takes the voxel-by-voxel mean of all input datasets using 3dMean</p>
+<p>see AFNI Documentation: &lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html</a>&gt;</p>
+<div class="section" id="id19">
+<h3>Examples<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">means</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Means</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">means</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_a</span> <span class="o">=</span> <span class="s">&#39;im1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">means</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file_b</span> <span class="o">=</span> <span class="s">&#39;im2.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">means</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span>  <span class="s">&#39;output.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">means</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dMean im1.nii im2.nii -prefix output.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file_a: (an existing file name)
+        input file to 3dMean
+        flag: %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+count: (a boolean)
+        compute count of non-zero voxels
+        flag: -count
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file_b: (an existing file name)
+        another input file to 3dMean
+        flag: %s, position: 1
+mask_inter: (a boolean)
+        create intersection mask
+        flag: -mask_inter
+mask_union: (a boolean)
+        create union mask
+        flag: -mask_union
+non_zero: (a boolean)
+        use only non-zero values
+        flag: -non_zero
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+scale: (a string)
+        scaling of output
+        flag: -%sscale
+sqr: (a boolean)
+        mean square instead of value
+        flag: -sqr
+std_dev: (a boolean)
+        calculate std dev
+        flag: -stdev
+summ: (a boolean)
+        take sum, (not average)
+        flag: -sum
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-merge"></span></div>
+</div>
+<div class="section" id="merge">
+<span id="index-16"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L638">Link to code</a></p>
+<p>Wraps command <strong>3dmerge</strong></p>
+<p>Merge or edit volumes using AFNI 3dmerge command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html">3dmerge Documentation.</a></p>
+<div class="section" id="id20">
+<h3>Examples<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merge</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Merge</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merge</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merge</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">blurfwhm</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merge</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">doall</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merge</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;e7.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">merge</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+blurfwhm: (an integer)
+        FWHM blur value (mm)
+        flag: -1blur_fwhm %d
+doall: (a boolean)
+        apply options to all sub-bricks in dataset
+        flag: -doall
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-roistats"></span></div>
+</div>
+<div class="section" id="roistats">
+<span id="index-17"></span><h2>ROIStats<a class="headerlink" href="#roistats" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1505">Link to code</a></p>
+<p>Wraps command <strong>3dROIstats</strong></p>
+<p>Display statistics over masked regions</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html">3dROIstats Documentation.</a></p>
+<div class="section" id="id21">
+<h3>Examples<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">roistats</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">ROIStats</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">roistats</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">roistats</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;skeleton_mask.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">roistats</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">quiet</span><span class="o">=</span><span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">roistats</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dROIstats
+        flag: %s, position: -1
+terminal_output: (&#39;allatonce&#39;, nipype default value: allatonce)
+        Control terminal output:`allatonce` - waits till command is finished
+        to display output
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        input mask
+        flag: -mask %s, position: 3
+mask_f2short: (a boolean)
+        Tells the program to convert a float mask to short integers, by
+        simple rounding.
+        flag: -mask_f2short, position: 2
+quiet: (a boolean)
+        execute quietly
+        flag: -quiet, position: 1
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>stats: (an existing file name)
+        output tab separated values file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-refit"></span></div>
+</div>
+<div class="section" id="refit">
+<span id="index-18"></span><h2>Refit<a class="headerlink" href="#refit" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L174">Link to code</a></p>
+<p>Wraps command <strong>3drefit</strong></p>
+<p>Changes some of the information inside a 3D dataset&#8217;s header</p>
+<p>For complete details, see the <a href="#id22"><span class="problematic" id="id23">`</span></a>3drefit Documentation.
+&lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3drefit.html</a>&gt;</p>
+<div class="section" id="id24">
+<h3>Examples<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refit</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Refit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">deoblique</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">refit</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3drefit -deoblique structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">refit</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3drefit
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+deoblique: (a boolean)
+        replace current transformation matrix with cardinal matrix
+        flag: -deoblique
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xorigin: (a string)
+        x distance for edge voxel offset
+        flag: -xorigin %s
+yorigin: (a string)
+        y distance for edge voxel offset
+        flag: -yorigin %s
+zorigin: (a string)
+        z distance for edge voxel offset
+        flag: -zorigin %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-resample"></span></div>
+</div>
+<div class="section" id="resample">
+<span id="index-19"></span><h2>Resample<a class="headerlink" href="#resample" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L293">Link to code</a></p>
+<p>Wraps command <strong>3dresample</strong></p>
+<p>Resample or reorient an image using AFNI 3dresample command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html">3dresample Documentation.</a></p>
+<div class="section" id="id25">
+<h3>Examples<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Resample</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">orientation</span><span class="o">=</span> <span class="s">&#39;RPI&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&quot;NIFTI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resample</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dresample -orient RPI -prefix functional_resample.nii -inset functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">resample</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dresample
+        flag: -inset %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+master: (a file name)
+        align dataset grid to a reference file
+        flag: -master %s
+orientation: (a string)
+        new orientation code
+        flag: -orient %s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+resample_mode: (&#39;NN&#39; or &#39;Li&#39; or &#39;Cu&#39; or &#39;Bk&#39;)
+        resampling method from set {&#39;NN&#39;, &#39;Li&#39;, &#39;Cu&#39;, &#39;Bk&#39;}. These are for
+        &#39;Nearest Neighbor&#39;, &#39;Linear&#39;, &#39;Cubic&#39; and &#39;Blocky&#39; interpolation,
+        respectively. Default is NN.
+        flag: -rmode %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+voxel_size: (a tuple of the form: (a float, a float, a float))
+        resample to new dx, dy and dz
+        flag: -dxyz %f %f %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-retroicor"></span></div>
+</div>
+<div class="section" id="retroicor">
+<span id="index-20"></span><h2>Retroicor<a class="headerlink" href="#retroicor" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1861">Link to code</a></p>
+<p>Wraps command <strong>3dretroicor</strong></p>
+<p>Performs Retrospective Image Correction for physiological
+motion effects, using a slightly modified version of the
+RETROICOR algorithm</p>
+<p>The durations of the physiological inputs are assumed to equal
+the duration of the dataset. Any constant sampling rate may be
+used, but 40 Hz seems to be acceptable. This program&#8217;s cardiac
+peak detection algorithm is rather simplistic, so you might try
+using the scanner&#8217;s cardiac gating output (transform it to a
+spike wave if necessary).</p>
+<p>This program uses slice timing information embedded in the
+dataset to estimate the proper cardiac/respiratory phase for
+each slice. It makes sense to run this program before any
+program that may destroy the slice timings (e.g. 3dvolreg for
+motion correction).</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dretroicor.html">3dretroicor Documentation.</a></p>
+<div class="section" id="id26">
+<h3>Examples<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Retroicor</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">card</span> <span class="o">=</span> <span class="s">&#39;mask.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ret</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">resp</span> <span class="o">=</span> <span class="s">&#39;resp.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dretroicor
+        flag: %s, position: -1
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+card: (an existing file name)
+        1D cardiac data file for cardiac correction
+        flag: -card %s, position: -2
+cardphase: (a file name)
+        Filename for 1D cardiac phase output
+        flag: -cardphase %s, position: -6
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+order: (an integer)
+        The order of the correction (2 is typical)
+        flag: -order %s, position: -5
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+resp: (an existing file name)
+        1D respiratory waveform data for correction
+        flag: -resp %s, position: -3
+respphase: (a file name)
+        Filename for 1D resp phase output
+        flag: -respphase %s, position: -7
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (an integer)
+        Threshold for detection of R-wave peaks in input (Make sure it is
+        above the background noise level, Try 3/4 or 4/5 times range plus
+        minimum)
+        flag: -threshold %d, position: -4
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-skullstrip"></span></div>
+</div>
+<div class="section" id="skullstrip">
+<span id="index-21"></span><h2>SkullStrip<a class="headerlink" href="#skullstrip" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1181">Link to code</a></p>
+<p>Wraps command <strong>3dSkullStrip</strong></p>
+<p>A program to extract the brain from surrounding
+tissue from MRI T1-weighted images</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dSkullStrip.html">3dSkullStrip Documentation.</a></p>
+<div class="section" id="id27">
+<h3>Examples<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skullstrip</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">SkullStrip</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skullstrip</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skullstrip</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;-o_ply&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">skullstrip</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dSkullStrip
+        flag: -input %s, position: 1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tcat"></span></div>
+</div>
+<div class="section" id="tcat">
+<span id="index-22"></span><h2>TCat<a class="headerlink" href="#tcat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1216">Link to code</a></p>
+<p>Wraps command <strong>3dTcat</strong></p>
+<p>Concatenate sub-bricks from input datasets into
+one big 3D+time dataset</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcat.html">3dTcat Documentation.</a></p>
+<div class="section" id="id28">
+<h3>Examples<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcat</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TCat</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span><span class="o">=</span> <span class="s">&#39;functional_tcat.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">rlt</span> <span class="o">=</span> <span class="s">&#39;+&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tcat</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        input file to 3dTcat
+        flag:  %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+rlt: (a string)
+        options
+        flag: -rlt%s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tcorr1d"></span></div>
+</div>
+<div class="section" id="tcorr1d">
+<span id="index-23"></span><h2>TCorr1D<a class="headerlink" href="#tcorr1d" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1381">Link to code</a></p>
+<p>Wraps command <strong>3dTcorr1D</strong></p>
+<p>Computes the correlation coefficient between each voxel time series
+in the input 3D+time dataset.
+For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorr1D.html">3dTcorr1D Documentation.</a></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorr1D</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TCorr1D</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorr1D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">xset</span><span class="o">=</span> <span class="s">&#39;u_rc1s1_Template.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorr1D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">y_1d</span> <span class="o">=</span> <span class="s">&#39;seed.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorr1D</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dTcorr1D -prefix u_rc1s1_Template_correlation.nii.gz  u_rc1s1_Template.nii  seed.1D&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tcorr1D</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+xset: (an existing file name)
+        3d+time dataset input
+        flag:  %s, position: -2
+y_1d: (an existing file name)
+        1D time series file input
+        flag:  %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+ktaub: (a boolean)
+        Correlation is the Kendall&#39;s tau_b correlation coefficient
+        flag:  -ktaub, position: 1
+        mutually_exclusive: pearson, spearman, quadrant
+out_file: (a file name)
+        output filename prefix
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+pearson: (a boolean)
+        Correlation is the normal Pearson correlation coefficient
+        flag:  -pearson, position: 1
+        mutually_exclusive: spearman, quadrant, ktaub
+quadrant: (a boolean)
+        Correlation is the quadrant correlation coefficient
+        flag:  -quadrant, position: 1
+        mutually_exclusive: pearson, spearman, ktaub
+spearman: (a boolean)
+        Correlation is the Spearman (rank) correlation coefficient
+        flag:  -spearman, position: 1
+        mutually_exclusive: pearson, quadrant, ktaub
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file containing correlations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tcorrmap"></span></div>
+<div class="section" id="tcorrmap">
+<span id="index-24"></span><h2>TCorrMap<a class="headerlink" href="#tcorrmap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1726">Link to code</a></p>
+<p>Wraps command <strong>3dTcorrMap</strong></p>
+<p>For each voxel time series, computes the correlation between it
+and all other voxels, and combines this set of values into the
+output dataset(s) in some way.</p>
+<p>For complete details, see the <a href="#id29"><span class="problematic" id="id30">`</span></a>3dTcorrMap Documentation.
+&lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrMap.html</a>&gt;</p>
+<div class="section" id="id31">
+<h3>Examples<a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcm</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TCorrMap</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcm</span><span class="o">.</span><span class="n">mean_file</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_meancorr.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tcm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        flag: -input %s
+
+[Optional]
+absolute_threshold: (a file name)
+        flag: -Thresh %f %s
+        mutually_exclusive: absolute_threshold, var_absolute_threshold,
+         var_absolute_threshold_normalize
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+automask: (a boolean)
+        flag: -automask
+average_expr: (a file name)
+        flag: -Aexpr %s %s
+        mutually_exclusive: average_expr, average_expr_nonzero, sum_expr
+average_expr_nonzero: (a file name)
+        flag: -Cexpr %s %s
+        mutually_exclusive: average_expr, average_expr_nonzero, sum_expr
+bandpass: (a tuple of the form: (a float, a float))
+        flag: -bpass %f %f
+blur_fwhm: (a float)
+        flag: -Gblur %f
+correlation_maps: (a file name)
+        flag: -CorrMap %s
+correlation_maps_masked: (a file name)
+        flag: -CorrMask %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+expr: (a string)
+histogram: (a file name)
+        flag: -Hist %d %s
+histogram_bin_numbers: (an integer)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        flag: -mask %s
+mean_file: (a file name)
+        flag: -Mean %s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+pmean: (a file name)
+        flag: -Pmean %s
+polort: (an integer)
+        flag: -polort %d
+qmean: (a file name)
+        flag: -Qmean %s
+regress_out_timeseries: (a file name)
+        flag: -ort %s
+seeds: (an existing file name)
+        flag: -seed %s
+        mutually_exclusive: s, e, e, d, s, _, w, i, d, t, h
+seeds_width: (a float)
+        flag: -Mseed %f
+        mutually_exclusive: s, e, e, d, s
+sum_expr: (a file name)
+        flag: -Sexpr %s %s
+        mutually_exclusive: average_expr, average_expr_nonzero, sum_expr
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+thresholds: (a list of items which are an integer)
+var_absolute_threshold: (a file name)
+        flag: -VarThresh %f %f %f %s
+        mutually_exclusive: absolute_threshold, var_absolute_threshold,
+         var_absolute_threshold_normalize
+var_absolute_threshold_normalize: (a file name)
+        flag: -VarThreshN %f %f %f %s
+        mutually_exclusive: absolute_threshold, var_absolute_threshold,
+         var_absolute_threshold_normalize
+zmean: (a file name)
+        flag: -Zmean %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>absolute_threshold: (a file name)
+average_expr: (a file name)
+average_expr_nonzero: (a file name)
+correlation_maps: (a file name)
+correlation_maps_masked: (a file name)
+histogram: (a file name)
+mean_file: (a file name)
+pmean: (a file name)
+qmean: (a file name)
+sum_expr: (a file name)
+var_absolute_threshold: (a file name)
+var_absolute_threshold_normalize: (a file name)
+zmean: (a file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tcorrelate"></span></div>
+</div>
+<div class="section" id="tcorrelate">
+<span id="index-25"></span><h2>TCorrelate<a class="headerlink" href="#tcorrelate" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1310">Link to code</a></p>
+<p>Wraps command <strong>3dTcorrelate</strong></p>
+<p>Computes the correlation coefficient between corresponding voxel
+time series in two input 3D+time datasets &#8216;xset&#8217; and &#8216;yset&#8217;</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTcorrelate.html">3dTcorrelate Documentation.</a></p>
+<div class="section" id="id32">
+<h3>Examples<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TCorrelate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">xset</span><span class="o">=</span> <span class="s">&#39;u_rc1s1_Template.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">yset</span> <span class="o">=</span> <span class="s">&#39;u_rc1s2_Template.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;functional_tcorrelate.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">polort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcorrelate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pearson</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tcarrelate</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+xset: (an existing file name)
+        input xset
+        flag:  %s, position: -2
+yset: (an existing file name)
+        input yset
+        flag:  %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+pearson: (a boolean)
+        Correlation is the normal Pearson correlation coefficient
+        flag: -pearson, position: 1
+polort: (an integer)
+        Remove polynomical trend of order m
+        flag: -polort %d, position: 2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tshift"></span></div>
+</div>
+<div class="section" id="tshift">
+<span id="index-26"></span><h2>TShift<a class="headerlink" href="#tshift" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L126">Link to code</a></p>
+<p>Wraps command <strong>3dTshift</strong></p>
+<p>Shifts voxel time series from input
+so that seperate slices are aligned to the same
+temporal origin</p>
+<p>For complete details, see the <a href="#id33"><span class="problematic" id="id34">`</span></a>3dTshift Documentation.
+&lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTshift.html</a>&gt;</p>
+<div class="section" id="id35">
+<h3>Examples<a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tshift</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TShift</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tshift</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tshift</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tpattern</span> <span class="o">=</span> <span class="s">&#39;alt+z&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tshift</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tzero</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tshift</span><span class="o">.</span><span class="n">cmdline</span> <span class="c">#doctest:</span>
+<span class="go">&#39;3dTshift -prefix functional_tshift -tpattern alt+z -tzero 0.0 functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tshift</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dTShift
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore: (an integer)
+        ignore the first set of points specified
+        flag: -ignore %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (&#39;Fourier&#39; or &#39;linear&#39; or &#39;cubic&#39; or &#39;quintic&#39; or &#39;heptic&#39;)
+        different interpolation methods (see 3dTShift for details) default =
+        Fourier
+        flag: -%s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+rlt: (a boolean)
+        Before shifting, remove the mean and linear trend
+        flag: -rlt
+rltplus: (a boolean)
+        Before shifting, remove the mean and linear trend and later put back
+        the mean
+        flag: -rlt+
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tpattern: (a string)
+        use specified slice time pattern rather than one in header
+        flag: -tpattern %s
+tr: (a string)
+        manually set the TRYou can attach suffix &quot;s&quot; for seconds or &quot;ms&quot; for
+        milliseconds.
+        flag: -TR %s
+tslice: (an integer)
+        align each slice to time offset of given slice
+        flag: -slice %s
+        mutually_exclusive: tzero
+tzero: (a float)
+        align each slice to given time offset
+        flag: -tzero %s
+        mutually_exclusive: tslice
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-tstat"></span></div>
+</div>
+<div class="section" id="tstat">
+<span id="index-27"></span><h2>TStat<a class="headerlink" href="#tstat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L393">Link to code</a></p>
+<p>Wraps command <strong>3dTstat</strong></p>
+<p>Compute voxel-wise statistics using AFNI 3dTstat command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html">3dTstat Documentation.</a></p>
+<div class="section" id="id36">
+<h3>Examples<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tstat</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">TStat</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span><span class="o">=</span> <span class="s">&#39;-mean&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tstat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&quot;stats&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tstat</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dTstat -mean -prefix stats functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tstat</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dTstat
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        mask file
+        flag: -mask %s
+options: (a string)
+        selected statistical output
+        flag: %s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-to3d"></span></div>
+</div>
+<div class="section" id="to3d">
+<span id="index-28"></span><h2>To3D<a class="headerlink" href="#to3d" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L58">Link to code</a></p>
+<p>Wraps command <strong>to3d</strong></p>
+<p>Create a 3D dataset from 2D image files using AFNI to3d command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html">to3d Documentation</a></p>
+<div class="section" id="id37">
+<h3>Examples<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">To3D</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="s">&#39;float&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_folder</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;dicomdir.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">filetype</span> <span class="o">=</span> <span class="s">&quot;anat&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">To3D</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;to3d -datum float -anat -prefix dicomdir.nii ./*.dcm&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">To3D</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_folder: (an existing directory name)
+        folder with DICOM images to convert
+        flag: %s/*.dcm, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+assumemosaic: (a boolean)
+        assume that Siemens image is mosaic
+        flag: -assume_dicom_mosaic
+datatype: (&#39;short&#39; or &#39;float&#39; or &#39;byte&#39; or &#39;complex&#39;)
+        set output file datatype
+        flag: -datum %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+filetype: (&#39;spgr&#39; or &#39;fse&#39; or &#39;epan&#39; or &#39;anat&#39; or &#39;ct&#39; or &#39;spct&#39; or
+         &#39;pet&#39; or &#39;mra&#39; or &#39;bmap&#39; or &#39;diff&#39; or &#39;omri&#39; or &#39;abuc&#39; or &#39;fim&#39; or
+         &#39;fith&#39; or &#39;fico&#39; or &#39;fitt&#39; or &#39;fift&#39; or &#39;fizt&#39; or &#39;fict&#39; or &#39;fibt&#39;
+         or &#39;fibn&#39; or &#39;figt&#39; or &#39;fipt&#39; or &#39;fbuc&#39;)
+        type of datafile being converted
+        flag: -%s
+funcparams: (a string)
+        parameters for functional data
+        flag: -time:zt %s alt+z2
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+skipoutliers: (a boolean)
+        skip the outliers check
+        flag: -skip_outliers
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-volreg"></span></div>
+</div>
+<div class="section" id="volreg">
+<span id="index-29"></span><h2>Volreg<a class="headerlink" href="#volreg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L596">Link to code</a></p>
+<p>Wraps command <strong>3dvolreg</strong></p>
+<p>Register input volumes to a base volume using AFNI 3dvolreg command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html">3dvolreg Documentation.</a></p>
+<div class="section" id="id38">
+<h3>Examples<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Volreg</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;-Fourier -twopass&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zpad</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&quot;NIFTI&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">volreg</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">volreg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dvolreg
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+basefile: (an existing file name)
+        base file for registration
+        flag: -base %s, position: -6
+copyorigin: (a boolean)
+        copy base file origin coords to output
+        flag: -twodup
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+md1d_file: (a file name)
+        max displacement output file
+        flag: -maxdisp1D %s, position: -4
+oned_file: (a file name)
+        1D movement parameters output file
+        flag: -1Dfile %s
+oned_matrix_save: (a file name)
+        Save the matrix transformation
+        flag: -1Dmatrix_save %s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+timeshift: (a boolean)
+        time shift to mean slice time offset
+        flag: -tshift 0
+verbose: (a boolean)
+        more detailed description of the process
+        flag: -verbose
+zpad: (an integer)
+        Zeropad around the edges by &#39;n&#39; voxels during rotations
+        flag: -zpad %d, position: -5
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>md1d_file: (an existing file name)
+        max displacement info file
+oned_file: (an existing file name)
+        movement parameters info file
+oned_matrix_save: (an existing file name)
+        matrix transformation from base to input
+out_file: (an existing file name)
+        registered file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-warp"></span></div>
+</div>
+<div class="section" id="warp">
+<span id="index-30"></span><h2>Warp<a class="headerlink" href="#warp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L241">Link to code</a></p>
+<p>Wraps command <strong>3dWarp</strong></p>
+<p>Use 3dWarp for spatially transforming a dataset</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html">3dWarp Documentation.</a></p>
+<div class="section" id="id39">
+<h3>Examples<a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Warp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">deoblique</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&quot;trans.nii.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dWarp -deoblique -prefix trans.nii.gz structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dWarp
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+deoblique: (a boolean)
+        transform dataset from oblique to cardinal
+        flag: -deoblique
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gridset: (an existing file name)
+        copy grid of specified dataset
+        flag: -gridset %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (&#39;linear&#39; or &#39;cubic&#39; or &#39;NN&#39; or &#39;quintic&#39;)
+        spatial interpolation methods [default = linear]
+        flag: -%s
+matparent: (an existing file name)
+        apply transformation from 3dWarpDrive
+        flag: -matparent %s
+mni2tta: (a boolean)
+        transform dataset from MNI152 to Talaraich
+        flag: -mni2tta
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tta2mni: (a boolean)
+        transform dataset from Talairach to MNI152
+        flag: -tta2mni
+zpad: (an integer)
+        pad input dataset with N planes of zero on all sides.
+        flag: -zpad %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-afni-preprocess-zcutup"></span></div>
+</div>
+<div class="section" id="zcutup">
+<span id="index-31"></span><h2>ZCutUp<a class="headerlink" href="#zcutup" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L863">Link to code</a></p>
+<p>Wraps command <strong>3dZcutup</strong></p>
+<p>Cut z-slices from a volume using AFNI 3dZcutup command</p>
+<p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html">3dZcutup Documentation.</a></p>
+<div class="section" id="id40">
+<h3>Examples<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zcutup</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">ZCutUp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zcutup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zcutup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;functional_zcutup.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zcutup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keep</span><span class="o">=</span> <span class="s">&#39;0 10&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">zcutup</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to 3dZcutup
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+keep: (a string)
+        slice range to keep in output
+        flag: -keep %s
+out_file: (a file name)
+        output image file name
+        flag: -prefix %s
+outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
+        AFNI output filetype
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

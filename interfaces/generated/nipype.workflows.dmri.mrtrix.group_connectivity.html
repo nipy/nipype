@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">workflows.dmri.mrtrix.group_connectivity</a><ul>
+<li><a class="reference internal" href="#create-group-connectivity-pipeline"><tt class="docutils literal"><span class="pre">create_group_connectivity_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-nipype.workflows.dmri.mrtrix.group_connectivity">
+<span id="workflows-dmri-mrtrix-group-connectivity"></span><h1>workflows.dmri.mrtrix.group_connectivity<a class="headerlink" href="#module-nipype.workflows.dmri.mrtrix.group_connectivity" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-group-connectivity-pipeline">
+<span id="nipype-workflows-dmri-mrtrix-group-connectivity-create-group-connectivity-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_group_connectivity_pipeline()</span></tt><a class="headerlink" href="#create-group-connectivity-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/mrtrix/group_connectivity.py#L17">Link to code</a></p>
+<p>Creates a pipeline that performs MRtrix structural connectivity processing
+on groups of subjects. Given a diffusion-weighted image, and text files containing
+the associated b-values and b-vectors, the workflow will return each subjects&#8217; connectomes
+in a Connectome File Format (CFF) file, for use in Connectome Viewer (<a class="reference external" href="http://www.cmtk.org">http://www.cmtk.org</a>).</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.workflows.dmri.mrtrix.group_connectivity</span> <span class="kn">as</span> <span class="nn">groupwork</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cmp</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span><span class="o">.</span><span class="n">FSCommand</span><span class="o">.</span><span class="n">set_default_subjects_dir</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_list</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_list</span><span class="p">[</span><span class="s">&#39;group1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subj1&#39;</span><span class="p">,</span> <span class="s">&#39;subj2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_list</span><span class="p">[</span><span class="s">&#39;group2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subj3&#39;</span><span class="p">,</span> <span class="s">&#39;subj4&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;dwi&#39;</span><span class="p">]],</span> <span class="n">bvecs</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;bvecs&#39;</span><span class="p">]],</span> <span class="n">bvals</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;bvals&#39;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_id</span> <span class="o">=</span> <span class="s">&#39;group1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l1pipeline</span> <span class="o">=</span> <span class="n">groupwork</span><span class="o">.</span><span class="n">create_group_connectivity_pipeline</span><span class="p">(</span><span class="n">group_list</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">template_args</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parcellation_name</span> <span class="o">=</span> <span class="s">&#39;scale500&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">Parcellate</span><span class="o">.</span><span class="n">parcellation_name</span> <span class="o">=</span> <span class="n">parcellation_name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmp_config</span> <span class="o">=</span> <span class="nb">cmp</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">PipelineConfiguration</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cmp_config</span><span class="o">.</span><span class="n">parcellation_scheme</span> <span class="o">=</span> <span class="s">&quot;Lausanne2008&quot;</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">inputnode_within</span><span class="o">.</span><span class="n">resolution_network_file</span> <span class="o">=</span> <span class="n">cmp_config</span><span class="o">.</span><span class="n">_get_lausanne_parcellation</span><span class="p">(</span><span class="s">&#39;Lausanne2008&#39;</span><span class="p">)[</span><span class="n">parcellation_name</span><span class="p">][</span><span class="s">&#39;node_information_graphml&#39;</span><span class="p">]</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l1pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>group_list: Dictionary of subject lists, keyed by group name
+group_id: String containing the group name
+data_dir: Path to the data directory
+subjects_dir: Path to the Freesurfer &#39;subjects&#39; directory
+output_dir: Path for the output files
+template_args_dict: Dictionary of template arguments for the connectivity pipeline datasource
+                        e.g.    info = dict(dwi=[[&#39;subject_id&#39;, &#39;dwi&#39;]],
+                                        bvecs=[[&#39;subject_id&#39;,&#39;bvecs&#39;]],
+                                        bvals=[[&#39;subject_id&#39;,&#39;bvals&#39;]])
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

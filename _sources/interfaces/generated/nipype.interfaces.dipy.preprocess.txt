@@ -1,0 +1,122 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.dipy.preprocess
+==========================
+
+
+.. _nipype.interfaces.dipy.preprocess.Denoise:
+
+
+.. index:: Denoise
+
+Denoise
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dipy/preprocess.py#L108>`__
+
+An interface to denoising diffusion datasets [Coupe2008]_.
+See
+http://nipy.org/dipy/examples_built/denoise_nlmeans.html#example-denoise-nlmeans.
+
+.. [Coupe2008] Coupe P et al., `An Optimized Blockwise Non Local Means
+  Denoising Filter for 3D Magnetic Resonance Images
+  <http://dx.doi.org/10.1109%2FTMI.2007.906087>`_,
+  IEEE Transactions on Medical Imaging, 27(4):425-441, 2008.
+
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.dipy as dipy
+>>> denoise = dipy.Denoise()
+>>> denoise.inputs.in_file = 'diffusion.nii'
+>>> denoise.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                The input 4D diffusion-weighted image file
+        noise_model: ('rician' or 'gaussian', nipype default value: rician)
+                noise distribution model
+
+        [Optional]
+        block_radius: (an integer)
+                block_radius
+        in_mask: (an existing file name)
+                brain mask
+        noise_mask: (an existing file name)
+                mask in which the standard deviation of noise will be computed
+        patch_radius: (an integer)
+                patch radius
+
+Outputs::
+
+        out_file: (an existing file name)
+
+.. _nipype.interfaces.dipy.preprocess.Resample:
+
+
+.. index:: Resample
+
+Resample
+--------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dipy/preprocess.py#L47>`__
+
+An interface to reslicing diffusion datasets.
+See
+http://nipy.org/dipy/examples_built/reslice_datasets.html#example-reslice-datasets.
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.dipy as dipy
+>>> reslice = dipy.Resample()
+>>> reslice.inputs.in_file = 'diffusion.nii'
+>>> reslice.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                The input 4D diffusion-weighted image file
+        interp: (an integer, nipype default value: 1)
+                order of the interpolator (0 = nearest, 1 = linear, etc.
+
+        [Optional]
+        vox_size: (a tuple of the form: (a float, a float, a float))
+                specify the new voxel zooms. If no vox_size is set, then isotropic
+                regridding will be performed, with spacing equal to the smallest
+                current zoom.
+
+Outputs::
+
+        out_file: (an existing file name)
+
+.. module:: nipype.interfaces.dipy.preprocess
+
+
+.. _nipype.interfaces.dipy.preprocess.nlmeans_proxy:
+
+:func:`nlmeans_proxy`
+---------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dipy/preprocess.py#L207>`__
+
+
+
+Uses non-local means to denoise 4D datasets
+
+
+.. _nipype.interfaces.dipy.preprocess.resample_proxy:
+
+:func:`resample_proxy`
+----------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dipy/preprocess.py#L171>`__
+
+
+
+Performs regridding of an image to set isotropic voxel sizes using dipy.
+

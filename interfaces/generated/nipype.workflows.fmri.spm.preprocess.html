@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">workflows.fmri.spm.preprocess</a><ul>
+<li><a class="reference internal" href="#create-dartel-template"><tt class="docutils literal"><span class="pre">create_DARTEL_template()</span></tt></a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#graph">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-spm-preproc"><tt class="docutils literal"><span class="pre">create_spm_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+<li><a class="reference internal" href="#id2">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-vbm-preproc"><tt class="docutils literal"><span class="pre">create_vbm_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#id3">Example</a></li>
+<li><a class="reference internal" href="#id4">Graph</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-nipype.workflows.fmri.spm.preprocess">
+<span id="workflows-fmri-spm-preprocess"></span><h1>workflows.fmri.spm.preprocess<a class="headerlink" href="#module-nipype.workflows.fmri.spm.preprocess" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-dartel-template">
+<span id="nipype-workflows-fmri-spm-preprocess-create-dartel-template"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_DARTEL_template()</span></tt><a class="headerlink" href="#create-dartel-template" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/spm/preprocess.py#L224">Link to code</a></p>
+<p>Create a vbm workflow that generates DARTEL-based template</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_DARTEL_template</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">structural_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;s1.nii&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;s3.nii&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">template_prefix</span> <span class="o">=</span> <span class="s">&#39;Template&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.structural_files : structural data to be used to create templates
+inputspec.template_prefix : prefix for dartel template
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.template_file : DARTEL template
+outputspec.flow_fields : warps from input struct files to the template
+</pre></div>
+</div>
+</div>
+<div class="section" id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-cae86622cd1dc20e544bec046c05c39dc141703d.png" alt="digraph dartel_template{
+
+  label=&quot;dartel_template&quot;;
+
+  dartel_template_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  dartel_template_segment[label=&quot;segment (spm)&quot;];
+
+  dartel_template_dartel[label=&quot;dartel (spm)&quot;];
+
+  dartel_template_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  dartel_template_inputspec -&gt; dartel_template_segment;
+
+  dartel_template_inputspec -&gt; dartel_template_dartel;
+
+  dartel_template_segment -&gt; dartel_template_dartel;
+
+  dartel_template_dartel -&gt; dartel_template_outputspec;
+
+  dartel_template_dartel -&gt; dartel_template_outputspec;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-spm-preproc">
+<span id="nipype-workflows-fmri-spm-preprocess-create-spm-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_spm_preproc()</span></tt><a class="headerlink" href="#create-spm-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/spm/preprocess.py#L15">Link to code</a></p>
+<p>Create an spm preprocessing workflow with freesurfer registration and
+artifact detection.</p>
+<p>The workflow realigns and smooths and registers the functional images with
+the subject&#8217;s freesurfer space.</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_spm_preproc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;s1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">functionals</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;f3.nii&#39;</span><span class="p">,</span> <span class="s">&#39;f5.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">norm_threshold</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">zintensity_threshold</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.functionals : functional runs use 4d nifti
+inputspec.subject_id : freesurfer subject id
+inputspec.subjects_dir : freesurfer subjects dir
+inputspec.fwhm : smoothing fwhm
+inputspec.norm_threshold : norm threshold for outliers
+inputspec.zintensity_threshold : intensity threshold in z-score
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.realignment_parameters : realignment parameter files
+outputspec.smoothed_files : smoothed functional files
+outputspec.outlier_files : list of outliers
+outputspec.outlier_stats : statistics of outliers
+outputspec.outlier_plots : images of outliers
+outputspec.mask_file : binary mask file in reference image space
+outputspec.reg_file : registration file that maps reference image to
+                        freesurfer space
+outputspec.reg_cost : cost of registration (useful for detecting misalignment)
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-1b0fe0152733401253b637f666eea81827e84e23.png" alt="digraph preproc{
+
+  label=&quot;preproc&quot;;
+
+  preproc_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  preproc_realign[label=&quot;realign (spm)&quot;];
+
+  preproc_artdetect[label=&quot;artdetect (rapidart)&quot;];
+
+  preproc_smooth[label=&quot;smooth (spm)&quot;];
+
+  preproc_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  preproc_inputspec -&gt; preproc_realign;
+
+  preproc_inputspec -&gt; preproc_artdetect;
+
+  preproc_inputspec -&gt; preproc_artdetect;
+
+  preproc_inputspec -&gt; preproc_smooth;
+
+  preproc_realign -&gt; preproc_outputspec;
+
+  preproc_realign -&gt; preproc_smooth;
+
+  preproc_realign -&gt; preproc_artdetect;
+
+  preproc_realign -&gt; preproc_artdetect;
+
+  subgraph cluster_preproc_getmask {
+
+      label=&quot;getmask&quot;;
+
+    preproc_getmask_inputspec[label=&quot;inputspec (utility)&quot;];
+
+    preproc_getmask_fssource[label=&quot;fssource (io)&quot;];
+
+    preproc_getmask_threshold[label=&quot;threshold (freesurfer)&quot;];
+
+    preproc_getmask_register[label=&quot;register (freesurfer)&quot;];
+
+    preproc_getmask_transform[label=&quot;transform (freesurfer)&quot;];
+
+    preproc_getmask_threshold2[label=&quot;threshold2 (freesurfer)&quot;];
+
+    preproc_getmask_outputspec[label=&quot;outputspec (utility)&quot;];
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_fssource;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_fssource;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_transform;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_transform;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_fssource -&gt; preproc_getmask_threshold;
+
+    preproc_getmask_threshold -&gt; preproc_getmask_transform;
+
+    preproc_getmask_register -&gt; preproc_getmask_outputspec;
+
+    preproc_getmask_register -&gt; preproc_getmask_outputspec;
+
+    preproc_getmask_register -&gt; preproc_getmask_transform;
+
+    preproc_getmask_transform -&gt; preproc_getmask_threshold2;
+
+    preproc_getmask_threshold2 -&gt; preproc_getmask_outputspec;
+
+  }
+
+  preproc_artdetect -&gt; preproc_outputspec;
+
+  preproc_artdetect -&gt; preproc_outputspec;
+
+  preproc_artdetect -&gt; preproc_outputspec;
+
+  preproc_smooth -&gt; preproc_outputspec;
+
+  preproc_inputspec -&gt; preproc_getmask_inputspec;
+
+  preproc_inputspec -&gt; preproc_getmask_inputspec;
+
+  preproc_realign -&gt; preproc_getmask_inputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_artdetect;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-vbm-preproc">
+<span id="nipype-workflows-fmri-spm-preprocess-create-vbm-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_vbm_preproc()</span></tt><a class="headerlink" href="#create-vbm-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/spm/preprocess.py#L131">Link to code</a></p>
+<p>Create a vbm workflow that generates DARTEL-based warps to MNI space</p>
+<p>Based on: <a class="reference external" href="http://www.fil.ion.ucl.ac.uk/~john/misc/VBMclass10.pdf">http://www.fil.ion.ucl.ac.uk/~john/misc/VBMclass10.pdf</a></p>
+<div class="section" id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_vbm_preproc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">structural_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;s1.nii&#39;</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;s3.nii&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">template_prefix</span> <span class="o">=</span> <span class="s">&#39;Template&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.structural_files : structural data to be used to create templates
+inputspec.fwhm: single of triplet for smoothing when normalizing to MNI space
+inputspec.template_prefix : prefix for dartel template
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.normalized_files : normalized gray matter files
+outputspec.template_file : DARTEL template
+outputspec.icv : intracranial volume (cc - assuming dimensions in mm)
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Graph<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-9576b5f62e2a9d7438d87192f3f1dfe45f66846f.png" alt="digraph vbmpreproc{
+
+  label=&quot;vbmpreproc&quot;;
+
+  vbmpreproc_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  vbmpreproc_norm2mni[label=&quot;norm2mni (spm)&quot;];
+
+  vbmpreproc_calc_icv[label=&quot;calc_icv (utility)&quot;];
+
+  vbmpreproc_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  vbmpreproc_inputspec -&gt; vbmpreproc_norm2mni;
+
+  subgraph cluster_vbmpreproc_dartel_template {
+
+      label=&quot;dartel_template&quot;;
+
+    vbmpreproc_dartel_template_inputspec[label=&quot;inputspec (utility)&quot;];
+
+    vbmpreproc_dartel_template_segment[label=&quot;segment (spm)&quot;];
+
+    vbmpreproc_dartel_template_dartel[label=&quot;dartel (spm)&quot;];
+
+    vbmpreproc_dartel_template_outputspec[label=&quot;outputspec (utility)&quot;];
+
+    vbmpreproc_dartel_template_inputspec -&gt; vbmpreproc_dartel_template_segment;
+
+    vbmpreproc_dartel_template_inputspec -&gt; vbmpreproc_dartel_template_dartel;
+
+    vbmpreproc_dartel_template_segment -&gt; vbmpreproc_dartel_template_dartel;
+
+    vbmpreproc_dartel_template_dartel -&gt; vbmpreproc_dartel_template_outputspec;
+
+    vbmpreproc_dartel_template_dartel -&gt; vbmpreproc_dartel_template_outputspec;
+
+  }
+
+  vbmpreproc_norm2mni -&gt; vbmpreproc_outputspec;
+
+  vbmpreproc_calc_icv -&gt; vbmpreproc_outputspec;
+
+  vbmpreproc_inputspec -&gt; vbmpreproc_dartel_template_inputspec;
+
+  vbmpreproc_inputspec -&gt; vbmpreproc_dartel_template_inputspec;
+
+  vbmpreproc_dartel_template_segment -&gt; vbmpreproc_calc_icv;
+
+  vbmpreproc_dartel_template_outputspec -&gt; vbmpreproc_norm2mni;
+
+  vbmpreproc_dartel_template_outputspec -&gt; vbmpreproc_norm2mni;
+
+  vbmpreproc_dartel_template_segment -&gt; vbmpreproc_norm2mni;
+
+  vbmpreproc_dartel_template_outputspec -&gt; vbmpreproc_outputspec;
+
+}" />
+</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

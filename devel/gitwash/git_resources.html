@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">git resources</a><ul>
+<li><a class="reference internal" href="#tutorials-and-summaries">Tutorials and summaries</a></li>
+<li><a class="reference internal" href="#advanced-git-workflow">Advanced git workflow</a></li>
+<li><a class="reference internal" href="#manual-pages-online">Manual pages online</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="git-resources">
+<span id="id1"></span><h1><a class="reference external" href="http://git-scm.com/">git</a> resources<a class="headerlink" href="#git-resources" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tutorials-and-summaries">
+<h2>Tutorials and summaries<a class="headerlink" href="#tutorials-and-summaries" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://help.github.com">github help</a> has an excellent series of how-to guides.</li>
+<li><a class="reference external" href="http://learn.github.com/">learn.github</a> has an excellent series of tutorials</li>
+<li>The <a class="reference external" href="http://progit.org/">pro git book</a> is a good in-depth book on git.</li>
+<li>A <a class="reference external" href="http://github.com/guides/git-cheat-sheet">git cheat sheet</a> is a page giving summaries of common commands.</li>
+<li>The <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/user-manual.html">git user manual</a></li>
+<li>The <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/gittutorial.html">git tutorial</a></li>
+<li>The <a class="reference external" href="http://book.git-scm.com/">git community book</a></li>
+<li><a class="reference external" href="http://www.gitready.com/">git ready</a> — a nice series of tutorials</li>
+<li><a class="reference external" href="http://www.gitcasts.com/">git casts</a> — video snippets giving git how-tos.</li>
+<li><a class="reference external" href="http://www-cs-students.stanford.edu/~blynn/gitmagic/index.html">git magic</a> — extended introduction with intermediate detail</li>
+<li>The <a class="reference external" href="http://tom.preston-werner.com/2009/05/19/the-git-parable.html">git parable</a> is an easy read explaining the concepts behind git.</li>
+<li>Our own <a class="reference external" href="http://matthew-brett.github.com/pydagogue/foundation.html">git foundation</a> expands on the <a class="reference external" href="http://tom.preston-werner.com/2009/05/19/the-git-parable.html">git parable</a>.</li>
+<li>Fernando Perez&#8217; git page — <a class="reference external" href="http://www.fperez.org/py4science/git.html">Fernando&#8217;s git page</a> — many
+links and tips</li>
+<li>A good but technical page on <a class="reference external" href="http://www.eecs.harvard.edu/~cduan/technical/git/">git concepts</a></li>
+<li><a class="reference external" href="http://git-scm.com/course/svn.html">git svn crash course</a>: <a class="reference external" href="http://git-scm.com/">git</a> for those of us used to <a class="reference external" href="http://subversion.tigris.org/">subversion</a></li>
+</ul>
+</div>
+<div class="section" id="advanced-git-workflow">
+<h2>Advanced git workflow<a class="headerlink" href="#advanced-git-workflow" title="Permalink to this headline">¶</a></h2>
+<p>There are many ways of working with <a class="reference external" href="http://git-scm.com/">git</a>; here are some posts on the
+rules of thumb that other projects have come up with:</p>
+<ul class="simple">
+<li>Linus Torvalds on <a class="reference external" href="http://kerneltrap.org/Linux/Git_Management">git management</a></li>
+<li>Linus Torvalds on <a class="reference external" href="http://www.mail-archive.com/dri-devel&#64;lists.sourceforge.net/msg39091.html">linux git workflow</a> .  Summary; use the git tools
+to make the history of your edits as clean as possible; merge from
+upstream edits as little as possible in branches where you are doing
+active development.</li>
+</ul>
+</div>
+<div class="section" id="manual-pages-online">
+<h2>Manual pages online<a class="headerlink" href="#manual-pages-online" title="Permalink to this headline">¶</a></h2>
+<p>You can get these on your own machine with (e.g) <tt class="docutils literal"><span class="pre">git</span> <span class="pre">help</span> <span class="pre">push</span></tt> or
+(same thing) <tt class="docutils literal"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--help</span></tt>, but, for convenience, here are the
+online manual pages for some common commands:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-add.html">git add</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-branch.html">git branch</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-checkout.html">git checkout</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-clone.html">git clone</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-commit.html">git commit</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-config.html">git config</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-diff.html">git diff</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-log.html">git log</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-pull.html">git pull</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-push.html">git push</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-remote.html">git remote</a></li>
+<li><a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-status.html">git status</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -1,0 +1,82 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.smri.freesurfer.recon
+===============================
+
+
+.. module:: nipype.workflows.smri.freesurfer.recon
+
+
+.. _nipype.workflows.smri.freesurfer.recon.create_skullstripped_recon_flow:
+
+:func:`create_skullstripped_recon_flow`
+---------------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/freesurfer/recon.py#L5>`__
+
+
+
+Performs recon-all on voulmes that are already skull stripped.
+FreeSurfer failes to perform skullstrippig on some volumes (especially
+MP2RAGE). This can be avoided by doing skullstripping before runnig recon-all
+(using for example SPECTRE algorithm)
+
+Example
+~~~~~~~
+>>> from nipype.workflows.smri.freesurfer import create_skullstripped_recon_flow
+>>> recon_flow = create_skullstripped_recon_flow()
+>>> recon_flow.inputs.inputspec.subject_id = 'subj1'
+>>> recon_flow.inputs.inputspec.T1_files = 'T1.nii.gz'
+>>> recon_flow.run()  # doctest: +SKIP
+
+
+Inputs::
+       inputspec.T1_files : skullstripped T1_files (mandatory)
+       inputspec.subject_id : freesurfer subject id (optional)
+       inputspec.subjects_dir : freesurfer subjects directory (optional)
+
+Outputs::
+
+       outputspec.subject_id : freesurfer subject id
+       outputspec.subjects_dir : freesurfer subjects directory
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph skullstripped_recon_all{
+
+	  label="skullstripped_recon_all";
+
+	  skullstripped_recon_all_inputspec[label="inputspec (utility)"];
+
+	  skullstripped_recon_all_autorecon1[label="autorecon1 (freesurfer)"];
+
+	  skullstripped_recon_all_link_masks[label="link_masks (utility)"];
+
+	  skullstripped_recon_all_autorecon_resume[label="autorecon_resume (freesurfer)"];
+
+	  skullstripped_recon_all_outputspec[label="outputspec (utility)"];
+
+	  skullstripped_recon_all_inputspec -> skullstripped_recon_all_autorecon1;
+
+	  skullstripped_recon_all_inputspec -> skullstripped_recon_all_autorecon1;
+
+	  skullstripped_recon_all_inputspec -> skullstripped_recon_all_autorecon1;
+
+	  skullstripped_recon_all_autorecon1 -> skullstripped_recon_all_link_masks;
+
+	  skullstripped_recon_all_autorecon1 -> skullstripped_recon_all_link_masks;
+
+	  skullstripped_recon_all_link_masks -> skullstripped_recon_all_autorecon_resume;
+
+	  skullstripped_recon_all_link_masks -> skullstripped_recon_all_autorecon_resume;
+
+	  skullstripped_recon_all_autorecon_resume -> skullstripped_recon_all_outputspec;
+
+	  skullstripped_recon_all_autorecon_resume -> skullstripped_recon_all_outputspec;
+
+	}
+

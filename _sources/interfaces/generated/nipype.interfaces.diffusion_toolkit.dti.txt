@@ -1,0 +1,204 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.diffusion_toolkit.dti
+================================
+
+
+.. _nipype.interfaces.diffusion_toolkit.dti.DTIRecon:
+
+
+.. index:: DTIRecon
+
+DTIRecon
+--------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/diffusion_toolkit/dti.py#L57>`__
+
+Wraps command **dti_recon**
+
+Use dti_recon to generate tensors and other maps
+
+Inputs::
+
+        [Mandatory]
+        DWI: (an existing file name)
+                Input diffusion volume
+                flag: %s, position: 1
+        bvals: (an existing file name)
+                b values file
+        bvecs: (an existing file name)
+                b vectors file
+                flag: -gm %s
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        b0_threshold: (a float)
+                program will use b0 image with the given threshold to mask out high
+                 background of fa/adc maps. by default it will calculate threshold
+                 automatically. but if it failed, you need to set it manually.
+                flag: -b0_th
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        image_orientation_vectors: (a list of from 6 to 6 items which are a
+                 float)
+                specify image orientation vectors. if just one argument given,
+                 will treat it as filename and read the orientation vectors from
+                 the file. if 6 arguments are given, will treat them as 6 float
+                 numbers and construct the 1st and 2nd vector and calculate the 3rd
+                 one automatically.
+                 this information will be used to determine image orientation,
+                 as well as to adjust gradient vectors with oblique angle when
+                flag: -iop %f
+        n_averages: (an integer)
+                Number of averages
+                flag: -nex %s
+        oblique_correction: (a boolean)
+                when oblique angle(s) applied, some SIEMENS dti protocols do not
+                 adjust gradient accordingly, thus it requires adjustment for
+                correct
+                 diffusion tensor calculation
+                flag: -oc
+        out_prefix: (a string, nipype default value: dti)
+                Output file prefix
+                flag: %s, position: 2
+        output_type: ('nii' or 'analyze' or 'ni1' or 'nii.gz', nipype default
+                 value: nii)
+                output file type
+                flag: -ot %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        ADC: (an existing file name)
+        B0: (an existing file name)
+        FA: (an existing file name)
+        FA_color: (an existing file name)
+        L1: (an existing file name)
+        L2: (an existing file name)
+        L3: (an existing file name)
+        V1: (an existing file name)
+        V2: (an existing file name)
+        V3: (an existing file name)
+        exp: (an existing file name)
+        tensor: (an existing file name)
+
+.. _nipype.interfaces.diffusion_toolkit.dti.DTITracker:
+
+
+.. index:: DTITracker
+
+DTITracker
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/diffusion_toolkit/dti.py#L147>`__
+
+Wraps command **dti_tracker**
+
+
+Inputs::
+
+        [Mandatory]
+        mask1_file: (a file name)
+                first mask image
+                flag: -m %s, position: 2
+
+        [Optional]
+        angle_threshold: (a float)
+                set angle threshold. default value is 35 degree
+                flag: -at %f
+        angle_threshold_weight: (a float)
+                set angle threshold weighting factor. weighting will be be applied
+                on top of the angle_threshold
+                flag: -atw %f
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        input_data_prefix: (a string, nipype default value: dti)
+                for internal naming use only
+                flag: %s, position: 0
+        input_type: ('nii' or 'analyze' or 'ni1' or 'nii.gz')
+                input and output file type. accepted values are:
+                 analyze -> analyze format 7.5
+                 ni1 -> nifti format saved in seperate .hdr and .img file
+                 nii -> nifti format with one .nii file
+                 nii.gz -> nifti format with compression
+                 default type is 'nii'
+                flag: -it %s
+        invert_x: (a boolean)
+                invert x component of the vector
+                flag: -ix
+        invert_y: (a boolean)
+                invert y component of the vector
+                flag: -iy
+        invert_z: (a boolean)
+                invert z component of the vector
+                flag: -iz
+        mask1_threshold: (a float)
+                threshold value for the first mask image, if not given, the program
+                will try automatically find the threshold
+        mask2_file: (a file name)
+                second mask image
+                flag: -m2 %s, position: 4
+        mask2_threshold: (a float)
+                threshold value for the second mask image, if not given, the program
+                will try automatically find the threshold
+        output_file: (a file name, nipype default value: tracks.trk)
+                flag: %s, position: 1
+        output_mask: (a file name)
+                output a binary mask file in analyze format
+                flag: -om %s
+        primary_vector: ('v2' or 'v3')
+                which vector to use for fibre tracking: v2 or v3. If not set use v1
+                flag: -%s
+        random_seed: (an integer)
+                use random location in a voxel instead of the center of the voxel to
+                seed. can also define number of seed per voxel. default is 1
+                flag: -rseed
+        step_length: (a float)
+                set step length, in the unit of minimum voxel size.
+                 default value is 0.5 for interpolated streamline method
+                 and 0.1 for other methods
+                flag: -l %f
+        swap_xy: (a boolean)
+                swap x & y vectors while tracking
+                flag: -sxy
+        swap_yz: (a boolean)
+                swap y & z vectors while tracking
+                flag: -syz
+        swap_zx: (a boolean)
+                swap x & z vectors while tracking
+                flag: -szx
+        tensor_file: (an existing file name)
+                reconstructed tensor file
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        tracking_method: ('fact' or 'rk2' or 'tl' or 'sl')
+                fact -> use FACT method for tracking. this is the default method.
+                 rk2 -> use 2nd order runge-kutta method for tracking.
+                 tl -> use tensorline method for tracking.
+                 sl -> use interpolated streamline method with fixed step-length
+                flag: -%s
+
+Outputs::
+
+        mask_file: (an existing file name)
+        track_file: (an existing file name)

@@ -1,0 +1,1063 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.maths</a><ul>
+<li><a class="reference internal" href="#applymask">ApplyMask</a></li>
+<li><a class="reference internal" href="#binarymaths">BinaryMaths</a></li>
+<li><a class="reference internal" href="#changedatatype">ChangeDataType</a></li>
+<li><a class="reference internal" href="#dilateimage">DilateImage</a></li>
+<li><a class="reference internal" href="#erodeimage">ErodeImage</a></li>
+<li><a class="reference internal" href="#isotropicsmooth">IsotropicSmooth</a></li>
+<li><a class="reference internal" href="#mathscommand">MathsCommand</a></li>
+<li><a class="reference internal" href="#maximage">MaxImage</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#meanimage">MeanImage</a></li>
+<li><a class="reference internal" href="#multiimagemaths">MultiImageMaths</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spatialfilter">SpatialFilter</a></li>
+<li><a class="reference internal" href="#temporalfilter">TemporalFilter</a></li>
+<li><a class="reference internal" href="#threshold">Threshold</a></li>
+<li><a class="reference internal" href="#unarymaths">UnaryMaths</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-fsl-maths">
+<h1>interfaces.fsl.maths<a class="headerlink" href="#interfaces-fsl-maths" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-maths-applymask"></span><div class="section" id="applymask">
+<span id="index-0"></span><h2>ApplyMask<a class="headerlink" href="#applymask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L171">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to apply a binary mask to another image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+mask_file: (an existing file name)
+        binary image defining mask space
+        flag: -mas %s, position: 4
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-binarymaths"></span></div>
+<div class="section" id="binarymaths">
+<span id="index-1"></span><h2>BinaryMaths<a class="headerlink" href="#binarymaths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L274">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to perform mathematical operations using a second image or a numeric value.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+operand_file: (an existing file name)
+        second image to perform operation with
+        flag: %s, position: 5
+        mutually_exclusive: operand_value
+operand_value: (a float)
+        value to perform operation with
+        flag: %.8f, position: 5
+        mutually_exclusive: operand_file
+operation: (&#39;add&#39; or &#39;sub&#39; or &#39;mul&#39; or &#39;div&#39; or &#39;rem&#39; or &#39;max&#39; or
+         &#39;min&#39;)
+        operation to perform
+        flag: -%s, position: 4
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-changedatatype"></span></div>
+<div class="section" id="changedatatype">
+<span id="index-2"></span><h2>ChangeDataType<a class="headerlink" href="#changedatatype" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L64">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to change the datatype of an image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        output data type
+        flag: -odt %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-dilateimage"></span></div>
+<div class="section" id="dilateimage">
+<span id="index-3"></span><h2>DilateImage<a class="headerlink" href="#dilateimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L195">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to perform a spatial dilation of an image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+operation: (&#39;mean&#39; or &#39;modal&#39; or &#39;max&#39;)
+        filtering operation to perfoem in dilation
+        flag: -dil%s, position: 6
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+kernel_file: (an existing file name)
+        use external file for kernel
+        flag: %s, position: 5
+        mutually_exclusive: kernel_size
+kernel_shape: (&#39;3D&#39; or &#39;2D&#39; or &#39;box&#39; or &#39;boxv&#39; or &#39;gauss&#39; or &#39;sphere&#39;
+         or &#39;file&#39;)
+        kernel shape to use
+        flag: -kernel %s, position: 4
+kernel_size: (a float)
+        kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss
+        flag: %.4f, position: 5
+        mutually_exclusive: kernel_file
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-erodeimage"></span></div>
+<div class="section" id="erodeimage">
+<span id="index-4"></span><h2>ErodeImage<a class="headerlink" href="#erodeimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L214">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to perform a spatial erosion of an image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+kernel_file: (an existing file name)
+        use external file for kernel
+        flag: %s, position: 5
+        mutually_exclusive: kernel_size
+kernel_shape: (&#39;3D&#39; or &#39;2D&#39; or &#39;box&#39; or &#39;boxv&#39; or &#39;gauss&#39; or &#39;sphere&#39;
+         or &#39;file&#39;)
+        kernel shape to use
+        flag: -kernel %s, position: 4
+kernel_size: (a float)
+        kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss
+        flag: %.4f, position: 5
+        mutually_exclusive: kernel_file
+minimum_filter: (a boolean, nipype default value: False)
+        if true, minimum filter rather than erosion by zeroing-out
+        flag: %s, position: 6
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-isotropicsmooth"></span></div>
+<div class="section" id="isotropicsmooth">
+<span id="index-5"></span><h2>IsotropicSmooth<a class="headerlink" href="#isotropicsmooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L151">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to spatially smooth an image with a gaussian kernel.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fwhm: (a float)
+        fwhm of smoothing kernel [mm]
+        flag: -s %.5f, position: 4
+        mutually_exclusive: sigma
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+sigma: (a float)
+        sigma of smoothing kernel [mm]
+        flag: -s %.5f, position: 4
+        mutually_exclusive: fwhm
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-mathscommand"></span></div>
+<div class="section" id="mathscommand">
+<span id="index-6"></span><h2>MathsCommand<a class="headerlink" href="#mathscommand" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L35">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-maximage"></span></div>
+<div class="section" id="maximage">
+<span id="index-7"></span><h2>MaxImage<a class="headerlink" href="#maximage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L126">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to generate a max image across a given dimension.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>from nipype.interfaces.fsl.maths import MaxImage
+maxer = MaxImage()
+maxer.inputs.in_file = &#8220;functional.nii&#8221;
+maxer.dimension = &#8220;T&#8221;
+maths.cmdline
+fslmaths functional.nii -Tmax functional_max.nii</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (&#39;T&#39; or &#39;X&#39; or &#39;Y&#39; or &#39;Z&#39;, nipype default value: T)
+        dimension to max across
+        flag: -%smax, position: 4
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-meanimage"></span></div>
+</div>
+<div class="section" id="meanimage">
+<span id="index-8"></span><h2>MeanImage<a class="headerlink" href="#meanimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L113">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to generate a mean image across a given dimension.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (&#39;T&#39; or &#39;X&#39; or &#39;Y&#39; or &#39;Z&#39;, nipype default value: T)
+        dimension to mean across
+        flag: -%smean, position: 4
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-multiimagemaths"></span></div>
+<div class="section" id="multiimagemaths">
+<span id="index-9"></span><h2>MultiImageMaths<a class="headerlink" href="#multiimagemaths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L289">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to perform a sequence of mathematical operations.</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>from nipype.interfaces.fsl import MultiImageMaths
+maths = MultiImageMaths()
+maths.inputs.in_file = &#8220;functional.nii&#8221;
+maths.inputs.op_string = &#8220;-add %s -mul -1 -div %s&#8221;
+maths.inputs.operand_files = [&#8220;functional2.nii&#8221;, &#8220;functional3.nii&#8221;]
+maths.inputs.out_file = functional4.nii
+maths.cmdline
+fslmaths functional1.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+op_string: (a string)
+        python formatted string of operations to perform
+        flag: %s, position: 4
+operand_files: (a list of items which are an existing file name)
+        list of file names to plug into op string
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-spatialfilter"></span></div>
+</div>
+<div class="section" id="spatialfilter">
+<span id="index-10"></span><h2>SpatialFilter<a class="headerlink" href="#spatialfilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L235">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to spatially filter an image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+operation: (&#39;mean&#39; or &#39;median&#39; or &#39;meanu&#39;)
+        operation to filter with
+        flag: -f%s, position: 6
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+kernel_file: (an existing file name)
+        use external file for kernel
+        flag: %s, position: 5
+        mutually_exclusive: kernel_size
+kernel_shape: (&#39;3D&#39; or &#39;2D&#39; or &#39;box&#39; or &#39;boxv&#39; or &#39;gauss&#39; or &#39;sphere&#39;
+         or &#39;file&#39;)
+        kernel shape to use
+        flag: -kernel %s, position: 4
+kernel_size: (a float)
+        kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss
+        flag: %.4f, position: 5
+        mutually_exclusive: kernel_file
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-temporalfilter"></span></div>
+<div class="section" id="temporalfilter">
+<span id="index-11"></span><h2>TemporalFilter<a class="headerlink" href="#temporalfilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L320">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to apply a low, high, or bandpass temporal filter to a timeseries.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+highpass_sigma: (a float, nipype default value: -1)
+        highpass filter sigma (in volumes)
+        flag: -bptf %.6f, position: 4
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+lowpass_sigma: (a float, nipype default value: -1)
+        lowpass filter sigma (in volumes)
+        flag: %.6f, position: 5
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-threshold"></span></div>
+<div class="section" id="threshold">
+<span id="index-12"></span><h2>Threshold<a class="headerlink" href="#threshold" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L83">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to apply a threshold to an image in a variety of ways.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+thresh: (a float)
+        threshold value
+        flag: %s, position: 4
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+direction: (&#39;below&#39; or &#39;above&#39;, nipype default value: below)
+        zero-out either below or above thresh value
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+use_nonzero_voxels: (a boolean)
+        use nonzero voxels to caluclate robust range
+        requires: use_robust_range
+use_robust_range: (a boolean)
+        inteperet thresh as percentage (0-100) of robust range
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-maths-unarymaths"></span></div>
+<div class="section" id="unarymaths">
+<span id="index-13"></span><h2>UnaryMaths<a class="headerlink" href="#unarymaths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/maths.py#L252">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to perorm a variety of mathematical operations on an image.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to operate on
+        flag: %s, position: 2
+operation: (&#39;exp&#39; or &#39;log&#39; or &#39;sin&#39; or &#39;cos&#39; or &#39;tan&#39; or &#39;asin&#39; or
+         &#39;acos&#39; or &#39;atan&#39; or &#39;sqr&#39; or &#39;sqrt&#39; or &#39;recip&#39; or &#39;abs&#39; or &#39;bin&#39; or
+         &#39;binv&#39; or &#39;fillh&#39; or &#39;fillh26&#39; or &#39;index&#39; or &#39;edge&#39; or &#39;nan&#39; or
+         &#39;nanm&#39; or &#39;rand&#39; or &#39;randn&#39; or &#39;range&#39;)
+        operation to perform
+        flag: -%s, position: 4
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+internal_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for calculations (default is float)
+        flag: -dt %s, position: 1
+nan2zeros: (a boolean)
+        change NaNs to zeros before doing anything
+        flag: -nan, position: 3
+out_file: (a file name)
+        image to write
+        flag: %s, position: -2
+output_datatype: (&#39;float&#39; or &#39;char&#39; or &#39;int&#39; or &#39;short&#39; or &#39;double&#39;
+         or &#39;input&#39;)
+        datatype to use for output (default uses input type)
+        flag: -odt %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image written after calculations
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

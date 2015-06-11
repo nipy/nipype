@@ -1,0 +1,768 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fMRI: surface smooth - FreeSurfer, SPM</a><ul>
+<li><a class="reference internal" href="#preparing-environment">Preparing environment</a><ul>
+<li><a class="reference internal" href="#step-0">Step 0</a></li>
+<li><a class="reference internal" href="#step-1">Step 1</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-the-workflow">Defining the workflow</a><ul>
+<li><a class="reference internal" href="#preliminaries">Preliminaries</a></li>
+<li><a class="reference internal" href="#setup-preprocessing-workflow">Setup preprocessing workflow</a></li>
+<li><a class="reference internal" href="#set-up-volume-analysis-workflow">Set up volume analysis workflow</a></li>
+<li><a class="reference internal" href="#set-up-surface-analysis-workflow">Set up surface analysis workflow</a></li>
+<li><a class="reference internal" href="#set-up-volume-normalization-workflow">Set up volume normalization workflow</a></li>
+<li><a class="reference internal" href="#preproc-analysis-volumenormalization-workflow">Preproc + Analysis + VolumeNormalization workflow</a></li>
+<li><a class="reference internal" href="#data-specific-components">Data specific components</a></li>
+<li><a class="reference internal" href="#set-preprocessing-parameters">Set preprocessing parameters</a></li>
+<li><a class="reference internal" href="#experimental-paradigm-specific-components">Experimental paradigm specific components</a></li>
+<li><a class="reference internal" href="#set-up-node-specific-inputs">Set up node specific inputs</a></li>
+<li><a class="reference internal" href="#setup-the-pipeline">Setup the pipeline</a></li>
+<li><a class="reference internal" href="#store-the-output">Store the output</a></li>
+<li><a class="reference internal" href="#level2-surface-based-pipeline">Level2 surface-based pipeline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fmri-surface-smooth-freesurfer-spm">
+<span id="example-fmri-freesurfer-smooth"></span><h1>fMRI: surface smooth - FreeSurfer, SPM<a class="headerlink" href="#fmri-surface-smooth-freesurfer-spm" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial illustrates how to perform surface-based smoothing of
+cortical data using <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu">FreeSurfer</a> and then perform firstlevel model and
+contrast estimation using <a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm">SPM</a>. A surface-based second level glm
+illustrates the use of spherical registration and freesurfer&#8217;s glm
+functions.</p>
+<div class="section" id="preparing-environment">
+<h2>Preparing environment<a class="headerlink" href="#preparing-environment" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="step-0">
+<h3>Step 0<a class="headerlink" href="#step-0" title="Permalink to this headline">¶</a></h3>
+<p>In order to run this tutorial you need to have <a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm">SPM</a> and <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu">FreeSurfer</a>
+tools installed and accessible from matlab/command line. Check by
+calling mri_info from the command line.</p>
+</div>
+<div class="section" id="step-1">
+<h3>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h3>
+<p>Link the <em>fsaverage</em> directory for your freesurfer distribution. To do
+this type:</p>
+<div class="highlight-python"><div class="highlight"><pre>cd nipype-tutorial/fsdata
+ln -s $FREESURFER_HOME/subjects/fsaverage
+cd ..
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="defining-the-workflow">
+<h2>Defining the workflow<a class="headerlink" href="#defining-the-workflow" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>                                    <span class="c"># system functions</span>
+
+<span class="kn">import</span> <span class="nn">nipype.algorithms.modelgen</span> <span class="kn">as</span> <span class="nn">model</span>   <span class="c"># model generation</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">as</span> <span class="nn">ra</span>      <span class="c"># artifact detection</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>    <span class="c"># freesurfer</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># i/o routines</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.matlab</span> <span class="kn">as</span> <span class="nn">mlab</span>      <span class="c"># how to run matlab</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>          <span class="c"># spm</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+</pre></div>
+</div>
+<div class="section" id="preliminaries">
+<h3>Preliminaries<a class="headerlink" href="#preliminaries" title="Permalink to this headline">¶</a></h3>
+<p>Set any package specific configuration.</p>
+<p>Setting the subjects directory and the appropriate matlab command to use. if
+you want to use a different spm version/path, it should also be entered here.</p>
+<p>These are currently being set at the class level, so every node will inherit
+these settings. However, these can also be changed or set for an individual
+node.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Tell freesurfer what subjects directory to use</span>
+<span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;fsdata&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">FSCommand</span><span class="o">.</span><span class="n">set_default_subjects_dir</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">)</span>
+
+<span class="c"># Set the way matlab should be called</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">MatlabCommand</span><span class="o">.</span><span class="n">set_default_matlab_cmd</span><span class="p">(</span><span class="s">&quot;matlab -nodesktop -nosplash&quot;</span><span class="p">)</span>
+<span class="c"># If SPM is not in your MATLAB path you should add it here</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">MatlabCommand</span><span class="o">.</span><span class="n">set_default_paths</span><span class="p">(</span><span class="s">&#39;/software/spm8&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-preprocessing-workflow">
+<h3>Setup preprocessing workflow<a class="headerlink" href="#setup-preprocessing-workflow" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;preproc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></tt> for motion correction
+and register all images to the mean image.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">realign</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;realign&quot;</span><span class="p">)</span>
+<span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></tt> to determine which of the
+images in the functional series are outliers based on deviations in
+intensity or movement.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ra</span><span class="o">.</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_differences</span>      <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_norm</span>             <span class="o">=</span> <span class="bp">True</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">norm_threshold</span>       <span class="o">=</span> <span class="mi">1</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zintensity_threshold</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_type</span>            <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">parameter_source</span>     <span class="o">=</span> <span class="s">&#39;SPM&#39;</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.BBRegister</span></tt> to coregister the mean
+functional image generated by realign to the subjects&#8217; surfaces.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">surfregister</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;surfregister&#39;</span><span class="p">)</span>
+<span class="n">surfregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="s">&#39;fsl&#39;</span>
+<span class="n">surfregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_type</span> <span class="o">=</span> <span class="s">&#39;t2&#39;</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.FreeSurferSource</span></tt> to retrieve various image
+files that are automatically generated by the recon-all process.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">FreeSurferSource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">FreeSurferSource</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;fssource&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></tt> to convert the
+brainmask generated by freesurfer into the realigned functional space.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ApplyVolTransform</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(),</span>
+                            <span class="n">name</span><span class="o">=</span><span class="s">&#39;applyreg&#39;</span><span class="p">)</span>
+<span class="n">ApplyVolTransform</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inverse</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></tt> to extract a binary brain
+mask.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">Threshold</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">Binarize</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;threshold&#39;</span><span class="p">)</span>
+<span class="n">Threshold</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">Threshold</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_type</span> <span class="o">=</span> <span class="s">&#39;nii&#39;</span>
+</pre></div>
+</div>
+<p>Two different types of functional data smoothing are performed in this
+workflow. The volume smoothing option performs a standard SPM smoothin. using
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></tt>. In addition, we use a smoothing routine
+from freesurfer (<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></tt>) to project the
+functional data from the volume to the subjects&#8217; surface, smooth it on the
+surface and fit it back into the volume forming the cortical ribbon. The
+projection uses the average value along a &#8220;cortical column&#8221;. In addition to the
+surface smoothing, the rest of the volume is smoothed with a 3d gaussian kernel.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It is very important to note that the projection to the surface takes a 3d
+manifold to a 2d manifold. Hence the reverse projection, simply fills the
+thickness of cortex with the smoothed data. The smoothing is not performed
+in a depth specific manner. The output of this branch should only be used
+for surface-based analysis and visualization.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">volsmooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;volsmooth&quot;</span><span class="p">)</span>
+<span class="n">surfsmooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(</span><span class="n">proj_frac_avg</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.1</span><span class="p">)),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;surfsmooth&quot;</span><span class="p">,</span>
+                        <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We connect up the different nodes to implement the preprocessing workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">realign</span><span class="p">,</span> <span class="n">surfregister</span><span class="p">,[(</span><span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">FreeSurferSource</span><span class="p">,</span> <span class="n">ApplyVolTransform</span><span class="p">,[(</span><span class="s">&#39;brainmask&#39;</span><span class="p">,</span><span class="s">&#39;target_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">surfregister</span><span class="p">,</span> <span class="n">ApplyVolTransform</span><span class="p">,[(</span><span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span><span class="s">&#39;reg_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">ApplyVolTransform</span><span class="p">,[(</span><span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">ApplyVolTransform</span><span class="p">,</span> <span class="n">Threshold</span><span class="p">,[(</span><span class="s">&#39;transformed_file&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">art</span><span class="p">,[(</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">,</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span><span class="s">&#39;realigned_files&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">Threshold</span><span class="p">,</span> <span class="n">art</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;binary_file&#39;</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">volsmooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">surfsmooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">surfregister</span><span class="p">,</span> <span class="n">surfsmooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span><span class="s">&#39;reg_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-volume-analysis-workflow">
+<h3>Set up volume analysis workflow<a class="headerlink" href="#set-up-volume-analysis-workflow" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">volanalysis</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;volanalysis&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate SPM-specific design information using
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">modelspec</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">SpecifySPMModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;modelspec&quot;</span><span class="p">)</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenate_runs</span>        <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Generate a first level SPM.mat file for analysis
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Level1Design</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1design</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Level1Design</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;level1design&quot;</span><span class="p">)</span>
+<span class="n">level1design</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bases</span>              <span class="o">=</span> <span class="p">{</span><span class="s">&#39;hrf&#39;</span><span class="p">:{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]}}</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateModel</span></tt> to determine the
+parameters of the model.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1estimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">EstimateModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;level1estimate&quot;</span><span class="p">)</span>
+<span class="n">level1estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">estimation_method</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Classical&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateContrast</span></tt> to estimate the
+first level contrasts specified in a few steps above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">contrastestimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">EstimateContrast</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;contrastestimate&quot;</span><span class="p">)</span>
+
+<span class="n">volanalysis</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">modelspec</span><span class="p">,</span><span class="n">level1design</span><span class="p">,[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span><span class="s">&#39;session_info&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">level1design</span><span class="p">,</span><span class="n">level1estimate</span><span class="p">,[(</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">,</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">level1estimate</span><span class="p">,</span><span class="n">contrastestimate</span><span class="p">,[(</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">,</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">),</span>
+                                                  <span class="p">(</span><span class="s">&#39;beta_images&#39;</span><span class="p">,</span><span class="s">&#39;beta_images&#39;</span><span class="p">),</span>
+                                                  <span class="p">(</span><span class="s">&#39;residual_image&#39;</span><span class="p">,</span><span class="s">&#39;residual_image&#39;</span><span class="p">)]),</span>
+                  <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-surface-analysis-workflow">
+<h3>Set up surface analysis workflow<a class="headerlink" href="#set-up-surface-analysis-workflow" title="Permalink to this headline">¶</a></h3>
+<p>We simply clone the volume analysis workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">surfanalysis</span> <span class="o">=</span> <span class="n">volanalysis</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;surfanalysis&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-volume-normalization-workflow">
+<h3>Set up volume normalization workflow<a class="headerlink" href="#set-up-volume-normalization-workflow" title="Permalink to this headline">¶</a></h3>
+<p>The volume analysis is performed in individual space. Therefore, post analysis
+we normalize the contrast images to MNI space.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">volnorm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;volnormconimages&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.MRIConvert</span></tt> to convert the brainmask,
+an mgz file and the contrast images (nifti-1 img/hdr pairs), to single volume
+nifti images.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">convert</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">MRIConvert</span><span class="p">(</span><span class="n">out_type</span><span class="o">=</span><span class="s">&#39;nii&#39;</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2nii&#39;</span><span class="p">)</span>
+<span class="n">convert2</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">MRIConvert</span><span class="p">(</span><span class="n">out_type</span><span class="o">=</span><span class="s">&#39;nii&#39;</span><span class="p">),</span>
+                      <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;convertimg2nii&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Segment</span></tt> to segment the structural image and
+generate the transformation file to MNI space.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Segment takes longer than usual because the nose is wrapped behind
+the head in the structural image.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">segment</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Segment</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;segment&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></tt> to convert contrast
+images into freesurfer space.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">normwreg</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(),</span>
+                      <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;source_file&#39;</span><span class="p">],</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;applyreg2con&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Normalize</span></tt> to normalize the contrast images
+to MNI space</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">normalize</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">jobtype</span><span class="o">=</span><span class="s">&#39;write&#39;</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;norm2mni&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connect up the volume normalization components</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">volnorm</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">convert</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span><span class="s">&#39;data&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">convert2</span><span class="p">,</span> <span class="n">normwreg</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">normalize</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;transformation_mat&#39;</span><span class="p">,</span> <span class="s">&#39;parameter_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">normwreg</span><span class="p">,</span> <span class="n">normalize</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;transformed_file&#39;</span><span class="p">,</span><span class="s">&#39;apply_to_files&#39;</span><span class="p">)]),</span>
+                 <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="preproc-analysis-volumenormalization-workflow">
+<h3>Preproc + Analysis + VolumeNormalization workflow<a class="headerlink" href="#preproc-analysis-volumenormalization-workflow" title="Permalink to this headline">¶</a></h3>
+<p>Connect up the lower level workflows into an integrated analysis. In addition,
+we add an input node that specifies all the inputs needed for this
+workflow. Thus, one can import this workflow and connect it to their own data
+sources. An example with the nifti-tutorial data is provided below.</p>
+<p>For this workflow the only necessary inputs are the functional images, a
+freesurfer subject id corresponding to recon-all processed data, the session
+information for the functional runs and the contrasts to be evaluated.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span>
+                                                             <span class="s">&#39;subject_id&#39;</span><span class="p">,</span>
+                                                             <span class="s">&#39;session_info&#39;</span><span class="p">,</span>
+                                                             <span class="s">&#39;contrasts&#39;</span><span class="p">]),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;inputnode&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connect the components into an integrated workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1pipeline</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;firstlevel&#39;</span><span class="p">)</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span><span class="n">preproc</span><span class="p">,[(</span><span class="s">&#39;func&#39;</span><span class="p">,</span><span class="s">&#39;realign.in_files&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;surfregister.subject_id&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;fssource.subject_id&#39;</span><span class="p">),</span>
+                                        <span class="p">]),</span>
+                    <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">volanalysis</span><span class="p">,[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span><span class="s">&#39;modelspec.subject_info&#39;</span><span class="p">),</span>
+                                             <span class="p">(</span><span class="s">&#39;contrasts&#39;</span><span class="p">,</span><span class="s">&#39;contrastestimate.contrasts&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">surfanalysis</span><span class="p">,[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span><span class="s">&#39;modelspec.subject_info&#39;</span><span class="p">),</span>
+                                              <span class="p">(</span><span class="s">&#39;contrasts&#39;</span><span class="p">,</span><span class="s">&#39;contrastestimate.contrasts&#39;</span><span class="p">)]),</span>
+                    <span class="p">])</span>
+
+<span class="c"># attach volume and surface model specification and estimation components</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">volanalysis</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realign.realignment_parameters&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;modelspec.realignment_parameters&#39;</span><span class="p">),</span>
+                                           <span class="p">(</span><span class="s">&#39;volsmooth.smoothed_files&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;modelspec.functional_runs&#39;</span><span class="p">),</span>
+                                           <span class="p">(</span><span class="s">&#39;art.outlier_files&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;modelspec.outlier_files&#39;</span><span class="p">),</span>
+                                           <span class="p">(</span><span class="s">&#39;threshold.binary_file&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;level1design.mask_image&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">surfanalysis</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realign.realignment_parameters&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;modelspec.realignment_parameters&#39;</span><span class="p">),</span>
+                                             <span class="p">(</span><span class="s">&#39;surfsmooth.smoothed_file&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;modelspec.functional_runs&#39;</span><span class="p">),</span>
+                                             <span class="p">(</span><span class="s">&#39;art.outlier_files&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;modelspec.outlier_files&#39;</span><span class="p">),</span>
+                                             <span class="p">(</span><span class="s">&#39;threshold.binary_file&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;level1design.mask_image&#39;</span><span class="p">)])</span>
+                    <span class="p">])</span>
+
+<span class="c"># attach volume contrast normalization components</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">volnorm</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;fssource.orig&#39;</span><span class="p">,</span><span class="s">&#39;convert2nii.in_file&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;surfregister.out_reg_file&#39;</span><span class="p">,</span><span class="s">&#39;applyreg2con.reg_file&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;fssource.orig&#39;</span><span class="p">,</span><span class="s">&#39;applyreg2con.target_file&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">volanalysis</span><span class="p">,</span> <span class="n">volnorm</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;contrastestimate.con_images&#39;</span><span class="p">,</span>
+                                             <span class="s">&#39;convertimg2nii.in_file&#39;</span><span class="p">),</span>
+                                            <span class="p">])</span>
+                  <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="data-specific-components">
+<h3>Data specific components<a class="headerlink" href="#data-specific-components" title="Permalink to this headline">¶</a></h3>
+<p>The nipype tutorial contains data for two subjects.  Subject data
+is in two subdirectories, <tt class="docutils literal"><span class="pre">s1</span></tt> and <tt class="docutils literal"><span class="pre">s2</span></tt>.  Each subject directory
+contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
+one anatomical volume named struct.nii.</p>
+<p>Below we set some variables to inform the <tt class="docutils literal"><span class="pre">datasource</span></tt> about the
+layout of our data.  We specify the location of the data, the subject
+sub-directories and a dictionary that maps each run to a mnemonic (or
+field) for the run type (<tt class="docutils literal"><span class="pre">struct</span></tt> or <tt class="docutils literal"><span class="pre">func</span></tt>).  These fields become
+the output fields of the <tt class="docutils literal"><span class="pre">datasource</span></tt> node in the pipeline.</p>
+<p>In the example below, run &#8216;f3&#8217; is of type &#8216;func&#8217; and gets mapped to a
+nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; would become
+&#8216;f3.nii&#8217;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Specify the location of the data.</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+<span class="c"># Specify the subject directories</span>
+<span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;s1&#39;</span><span class="p">,</span> <span class="s">&#39;s3&#39;</span><span class="p">]</span>
+<span class="c"># Map field names to individual subject runs.</span>
+<span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;f3&#39;</span><span class="p">,</span><span class="s">&#39;f5&#39;</span><span class="p">,</span><span class="s">&#39;f7&#39;</span><span class="p">,</span><span class="s">&#39;f10&#39;</span><span class="p">]]],</span>
+            <span class="n">struct</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;struct&#39;</span><span class="p">]])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+<tt class="docutils literal"><span class="pre">datasource</span></tt> attribute <tt class="docutils literal"><span class="pre">iterables</span></tt> tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+<tt class="docutils literal"><span class="pre">subject_list</span></tt>. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we create a <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></tt> object and
+fill in the information from above about the layout of our data.  The
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></tt> module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;struct&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">data_dir</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii&#39;</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-preprocessing-parameters">
+<h3>Set preprocessing parameters<a class="headerlink" href="#set-preprocessing-parameters" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">fssource</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">subjects_dir</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">volsmooth</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">surfsmooth</span><span class="o">.</span><span class="n">surface_fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">surfsmooth</span><span class="o">.</span><span class="n">vol_fwhm</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="experimental-paradigm-specific-components">
+<h3>Experimental paradigm specific components<a class="headerlink" href="#experimental-paradigm-specific-components" title="Permalink to this headline">¶</a></h3>
+<p>Here we create a function that returns subject-specific information
+about the experimental paradigm. This is used by the
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></tt> to create the information
+necessary to generate an SPM design matrix. In this tutorial, the same
+paradigm was used for every participant.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">subjectinfo</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+    <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+    <span class="k">print</span> <span class="s">&quot;Subject ID: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">subject_id</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">onsets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span><span class="mi">60</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span><span class="mi">60</span><span class="p">)]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">r</span><span class="p">,</span>
+                      <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+                            <span class="n">onsets</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">onsets</span><span class="p">),</span>
+                            <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">15</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">names</span><span class="p">],</span>
+                            <span class="p">))</span>
+    <span class="k">return</span> <span class="n">output</span>
+</pre></div>
+</div>
+<p>Setup the contrast structure that needs to be evaluated. This is a
+list of lists. The inner list specifies the contrasts and has the
+following format - [Name,Stat,[list of condition names],[weights on
+those conditions]. The condition names must match the <cite>names</cite> listed
+in the <cite>subjectinfo</cite> function described above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cont1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task&gt;Baseline&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">cont2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task-Odd&gt;Task-Even&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">contrasts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cont1</span><span class="p">,</span><span class="n">cont2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-node-specific-inputs">
+<h3>Set up node specific inputs<a class="headerlink" href="#set-up-node-specific-inputs" title="Permalink to this headline">¶</a></h3>
+<p>We replicate the modelspec parameters separately for the surface- and
+volume-based analysis.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">modelspecref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">volanalysis</span><span class="o">.</span><span class="n">modelspec</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">input_units</span>             <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>         <span class="o">=</span> <span class="mf">3.</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mi">120</span>
+
+<span class="n">modelspecref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surfanalysis</span><span class="o">.</span><span class="n">modelspec</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">input_units</span>             <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>         <span class="o">=</span> <span class="mf">3.</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mi">120</span>
+
+<span class="n">l1designref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">volanalysis</span><span class="o">.</span><span class="n">level1design</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">timing_units</span>       <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">output_units</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">interscan_interval</span> <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>
+
+<span class="n">l1designref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">surfanalysis</span><span class="o">.</span><span class="n">level1design</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">timing_units</span>       <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">output_units</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">interscan_interval</span> <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>
+
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">contrasts</span> <span class="o">=</span> <span class="n">contrasts</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-the-pipeline">
+<h3>Setup the pipeline<a class="headerlink" href="#setup-the-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>The nodes created above do not describe the flow of data. They merely
+describe the parameters used for each function. In this section we
+setup the connections between the nodes such that appropriate outputs
+from nodes are piped into appropriate inputs of other nodes.</p>
+<p>Use the <tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Workfow</span></tt> to create a
+graph-based execution pipeline for first level analysis.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;level1&quot;</span><span class="p">)</span>
+<span class="n">level1</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;volsurf_tutorial/workingdir&#39;</span><span class="p">)</span>
+
+<span class="n">level1</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">l1pipeline</span><span class="p">,[(</span><span class="s">&#39;func&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.func&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">infosource</span><span class="p">,</span><span class="n">l1pipeline</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.subject_id&#39;</span><span class="p">),</span>
+                                       <span class="p">((</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subjectinfo</span><span class="p">),</span>
+                                        <span class="s">&#39;inputnode.session_info&#39;</span><span class="p">)]),</span>
+                <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="store-the-output">
+<h3>Store the output<a class="headerlink" href="#store-the-output" title="Permalink to this headline">¶</a></h3>
+<p>Create a datasink node to store the contrast images and registration info</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasink</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasink&quot;</span><span class="p">)</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;volsurf_tutorial/l1out&#39;</span><span class="p">)</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">substitutions</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">def</span> <span class="nf">getsubs</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
+    <span class="n">subs</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;_subject_id_</span><span class="si">%s</span><span class="s">/&#39;</span><span class="o">%</span><span class="n">subject_id</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">subs</span>
+
+<span class="c"># store relevant outputs from various stages of the 1st level analysis</span>
+<span class="n">level1</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;container&#39;</span><span class="p">),</span>
+                                       <span class="p">((</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">getsubs</span><span class="p">),</span> <span class="s">&#39;substitutions&#39;</span><span class="p">)</span>
+                                       <span class="p">]),</span>
+                <span class="p">(</span><span class="n">l1pipeline</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,[(</span><span class="s">&#39;surfanalysis.contrastestimate.con_images&#39;</span><span class="p">,</span><span class="s">&#39;contrasts&#39;</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="s">&#39;preproc.surfregister.out_reg_file&#39;</span><span class="p">,</span><span class="s">&#39;registrations&#39;</span><span class="p">),</span>
+                                       <span class="p">])</span>
+                <span class="p">])</span>
+</pre></div>
+</div>
+<p>Run the analysis pipeline and also create a dot+png (if graphviz is available)
+that visually represents the workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">level1</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">level1</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="level2-surface-based-pipeline">
+<h3>Level2 surface-based pipeline<a class="headerlink" href="#level2-surface-based-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>Create a level2 workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l2flow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;l2out&#39;</span><span class="p">)</span>
+<span class="n">l2flow</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;volsurf_tutorial&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Setup a dummy node to iterate over contrasts and hemispheres</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l2inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;contrasts&#39;</span><span class="p">,</span>
+                                                               <span class="s">&#39;hemi&#39;</span><span class="p">]),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;inputnode&#39;</span><span class="p">)</span>
+<span class="n">l2inputnode</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">contrasts</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)),</span>
+                         <span class="p">(</span><span class="s">&#39;hemi&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;lh&#39;</span><span class="p">,</span><span class="s">&#39;rh&#39;</span><span class="p">])]</span>
+</pre></div>
+</div>
+<p>Use a datagrabber node to collect contrast images and registration files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l2source</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;con_id&#39;</span><span class="p">],</span>
+                                             <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;con&#39;</span><span class="p">,</span><span class="s">&#39;reg&#39;</span><span class="p">]),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;l2source&#39;</span><span class="p">)</span>
+<span class="n">l2source</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;volsurf_tutorial/l1out&#39;</span><span class="p">)</span>
+<span class="n">l2source</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+<span class="n">l2source</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">con</span><span class="o">=</span><span class="s">&#39;*/contrasts/con_</span><span class="si">%04d</span><span class="s">.img&#39;</span><span class="p">,</span>
+                                      <span class="n">reg</span><span class="o">=</span><span class="s">&#39;*/registrations/*.dat&#39;</span><span class="p">)</span>
+<span class="n">l2source</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">con</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;con_id&#39;</span><span class="p">]],</span><span class="n">reg</span><span class="o">=</span><span class="p">[[]])</span>
+<span class="n">l2source</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">l2inputnode</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="n">l2source</span><span class="p">,</span> <span class="s">&#39;con_id&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Merge contrast images and registration files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mergenode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s">&#39;hstack&#39;</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;merge&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">ordersubjects</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">subj_list</span><span class="p">):</span>
+    <span class="n">outlist</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subj_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s">&#39;/</span><span class="si">%s</span><span class="s">/&#39;</span><span class="o">%</span><span class="n">s</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">outlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">continue</span>
+    <span class="k">print</span> <span class="n">outlist</span>
+    <span class="k">return</span> <span class="n">outlist</span>
+
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">l2source</span><span class="p">,(</span><span class="s">&#39;con&#39;</span><span class="p">,</span> <span class="n">ordersubjects</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">),</span> <span class="n">mergenode</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">l2source</span><span class="p">,(</span><span class="s">&#39;reg&#39;</span><span class="p">,</span> <span class="n">ordersubjects</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">),</span> <span class="n">mergenode</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Concatenate contrast images projected to fsaverage</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l2concat</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">MRISPreproc</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;concat&#39;</span><span class="p">)</span>
+<span class="n">l2concat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;fsaverage&#39;</span>
+<span class="n">l2concat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="k">def</span> <span class="nf">list2tuple</span><span class="p">(</span><span class="n">listoflist</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">listoflist</span><span class="p">]</span>
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">l2inputnode</span><span class="p">,</span> <span class="s">&#39;hemi&#39;</span><span class="p">,</span> <span class="n">l2concat</span><span class="p">,</span> <span class="s">&#39;hemi&#39;</span><span class="p">)</span>
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mergenode</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">list2tuple</span><span class="p">),</span> <span class="n">l2concat</span><span class="p">,</span> <span class="s">&#39;vol_measure_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Perform a one sample t-test</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l2ttest</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">OneSampleTTest</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;onesample&#39;</span><span class="p">)</span>
+<span class="n">l2flow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">l2concat</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">l2ttest</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Run the analysis pipeline and also create a dot+png (if graphviz is available)
+that visually represents the workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">l2flow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">l2flow</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_freesurfer_smooth.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+This same script is also included in the Nipype source distribution under the
+<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

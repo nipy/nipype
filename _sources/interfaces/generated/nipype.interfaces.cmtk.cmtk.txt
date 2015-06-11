@@ -1,0 +1,337 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.cmtk.cmtk
+====================
+
+
+.. _nipype.interfaces.cmtk.cmtk.CreateMatrix:
+
+
+.. index:: CreateMatrix
+
+CreateMatrix
+------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L430>`__
+
+Performs connectivity mapping and outputs the result as a NetworkX graph and a Matlab matrix
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.cmtk as cmtk
+>>> conmap = cmtk.CreateMatrix()
+>>> conmap.roi_file = 'fsLUT_aparc+aseg.nii'
+>>> conmap.tract_file = 'fibers.trk'
+>>> conmap.run()                 # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        resolution_network_file: (an existing file name)
+                Parcellation files from Connectome Mapping Toolkit
+        roi_file: (an existing file name)
+                Freesurfer aparc+aseg file
+        tract_file: (an existing file name)
+                Trackvis tract file
+
+        [Optional]
+        count_region_intersections: (a boolean, nipype default value: False)
+                Counts all of the fiber-region traversals in the connectivity matrix
+                (requires significantly more computational time)
+        out_endpoint_array_name: (a file name)
+                Name for the generated endpoint arrays
+        out_fiber_length_std_matrix_mat_file: (a file name)
+                Matlab matrix describing the deviation in fiber lengths connecting
+                each node.
+        out_intersection_matrix_mat_file: (a file name)
+                Matlab connectivity matrix if all region/fiber intersections are
+                counted.
+        out_matrix_file: (a file name)
+                NetworkX graph describing the connectivity
+        out_matrix_mat_file: (a file name, nipype default value: cmatrix.mat)
+                Matlab matrix describing the connectivity
+        out_mean_fiber_length_matrix_mat_file: (a file name)
+                Matlab matrix describing the mean fiber lengths between each node.
+        out_median_fiber_length_matrix_mat_file: (a file name)
+                Matlab matrix describing the mean fiber lengths between each node.
+
+Outputs::
+
+        endpoint_file: (an existing file name)
+                Saved Numpy array with the endpoints of each fiber
+        endpoint_file_mm: (an existing file name)
+                Saved Numpy array with the endpoints of each fiber (in millimeters)
+        fiber_label_file: (an existing file name)
+                Saved Numpy array with the labels for each fiber
+        fiber_labels_noorphans: (an existing file name)
+                Saved Numpy array with the labels for each non-orphan fiber
+        fiber_length_file: (an existing file name)
+                Saved Numpy array with the lengths of each fiber
+        fiber_length_std_matrix_mat_file: (an existing file name)
+                Matlab matrix describing the deviation in fiber lengths connecting
+                each node.
+        filtered_tractographies: (a list of items which are an existing file
+                 name)
+        filtered_tractography: (an existing file name)
+                TrackVis file containing only those fibers originate in one and
+                terminate in another region
+        filtered_tractography_by_intersections: (an existing file name)
+                TrackVis file containing all fibers which connect two regions
+        intersection_matrix_file: (an existing file name)
+                NetworkX graph describing the connectivity
+        intersection_matrix_mat_file: (an existing file name)
+                Matlab matrix describing the mean fiber lengths between each node.
+        matlab_matrix_files: (a list of items which are an existing file
+                 name)
+        matrix_file: (an existing file name)
+                NetworkX graph describing the connectivity
+        matrix_files: (a list of items which are an existing file name)
+        matrix_mat_file: (an existing file name)
+                Matlab matrix describing the connectivity
+        mean_fiber_length_matrix_mat_file: (an existing file name)
+                Matlab matrix describing the mean fiber lengths between each node.
+        median_fiber_length_matrix_mat_file: (an existing file name)
+                Matlab matrix describing the median fiber lengths between each node.
+        stats_file: (an existing file name)
+                Saved Matlab .mat file with the number of fibers saved at each stage
+
+.. _nipype.interfaces.cmtk.cmtk.CreateNodes:
+
+
+.. index:: CreateNodes
+
+CreateNodes
+-----------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L747>`__
+
+Generates a NetworkX graph containing nodes at the centroid of each region in the input ROI file.
+Node data is added from the resolution network file.
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.cmtk as cmtk
+>>> mknode = cmtk.CreateNodes()
+>>> mknode.inputs.roi_file = 'ROI_scale500.nii.gz'
+>>> mknode.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        resolution_network_file: (an existing file name)
+                Parcellation file from Connectome Mapping Toolkit
+        roi_file: (an existing file name)
+                Region of interest file
+
+        [Optional]
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_filename: (a file name, nipype default value: nodenetwork.pck)
+                Output gpickled network with the nodes defined.
+
+Outputs::
+
+        node_network: (a file name)
+                Output gpickled network with the nodes defined.
+
+.. _nipype.interfaces.cmtk.cmtk.ROIGen:
+
+
+.. index:: ROIGen
+
+ROIGen
+------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L578>`__
+
+Generates a ROI file for connectivity mapping and a dictionary file containing relevant node information
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.cmtk as cmtk
+>>> rg = cmtk.ROIGen()
+>>> rg.inputs.aparc_aseg_file = 'aparc+aseg.nii'
+>>> rg.inputs.use_freesurfer_LUT = True
+>>> rg.inputs.freesurfer_dir = '/usr/local/freesurfer'
+>>> rg.run() # doctest: +SKIP
+
+The label dictionary is written to disk using Pickle. Resulting data can be loaded using:
+
+>>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")
+>>> file = open("fsLUT_aparc+aseg.pck", "r")
+>>> labelDict = pickle.load(file) # doctest: +SKIP
+>>> print labelDict                     # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        aparc_aseg_file: (an existing file name)
+                Freesurfer aparc+aseg file
+
+        [Optional]
+        LUT_file: (an existing file name)
+                Custom lookup table (cf. FreeSurferColorLUT.txt)
+                mutually_exclusive: use_freesurfer_LUT
+        freesurfer_dir: (a directory name)
+                Freesurfer main directory
+                requires: use_freesurfer_LUT
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        out_dict_file: (a file name)
+                Label dictionary saved in Pickle format
+        out_roi_file: (a file name)
+                Region of Interest file for connectivity mapping
+        use_freesurfer_LUT: (a boolean)
+                Boolean value; Set to True to use default Freesurfer LUT, False for
+                custom LUT
+                mutually_exclusive: LUT_file
+
+Outputs::
+
+        dict_file: (a file name)
+                Label dictionary saved in Pickle format
+        roi_file: (a file name)
+                Region of Interest file for connectivity mapping
+
+.. module:: nipype.interfaces.cmtk.cmtk
+
+
+.. _nipype.interfaces.cmtk.cmtk.cmat:
+
+:func:`cmat`
+------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L165>`__
+
+
+
+Create the connection matrix for each resolution using fibers and ROIs.
+
+
+.. _nipype.interfaces.cmtk.cmtk.create_allpoints_cmat:
+
+:func:`create_allpoints_cmat`
+-----------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L95>`__
+
+
+
+Create the intersection arrays for each fiber
+
+
+.. _nipype.interfaces.cmtk.cmtk.create_endpoints_array:
+
+:func:`create_endpoints_array`
+------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L120>`__
+
+
+
+Create the endpoints arrays for each fiber
+Parameters
+~~~~~~~~~~
+fib: the fibers data
+voxelSize: 3-tuple containing the voxel size of the ROI image
+Returns
+~~~~~~~
+(endpoints: matrix of size [#fibers, 2, 3] containing for each fiber the
+index of its first and last point in the voxelSize volume
+endpointsmm) : endpoints in milimeter coordinates
+
+
+.. _nipype.interfaces.cmtk.cmtk.create_nodes:
+
+:func:`create_nodes`
+--------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L726>`__
+
+
+
+
+
+
+.. _nipype.interfaces.cmtk.cmtk.get_connectivity_matrix:
+
+:func:`get_connectivity_matrix`
+-------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L84>`__
+
+
+
+
+
+
+.. _nipype.interfaces.cmtk.cmtk.get_rois_crossed:
+
+:func:`get_rois_crossed`
+------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L71>`__
+
+
+
+
+
+
+.. _nipype.interfaces.cmtk.cmtk.length:
+
+:func:`length`
+--------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L27>`__
+
+
+
+Euclidean length of track line
+
+Parameters
+~~~~~~~~~~
+xyz : array-like shape (N,3)
+   array representing x,y,z of N points in a track
+along : bool, optional
+   If True, return array giving cumulative length along track,
+   otherwise (default) return scalar giving total length.
+
+Returns
+~~~~~~~
+L : scalar or array shape (N-1,)
+   scalar in case of `along` == False, giving total length, array if
+   `along` == True, giving cumulative lengths.
+
+Examples
+~~~~~~~~
+>>> xyz = np.array([[1,1,1],[2,3,4],[0,0,0]])
+>>> expected_lens = np.sqrt([1+2**2+3**2, 2**2+3**2+4**2])
+>>> length(xyz) == expected_lens.sum()
+True
+>>> len_along = length(xyz, along=True)
+>>> np.allclose(len_along, expected_lens.cumsum())
+True
+>>> length([])
+~
+>>> length([[1, 2, 3]])
+~
+>>> length([], along=True)
+array([0])
+
+
+.. _nipype.interfaces.cmtk.cmtk.save_fibers:
+
+:func:`save_fibers`
+-------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L385>`__
+
+
+
+Stores a new trackvis file fname using only given indices
+

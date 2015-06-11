@@ -1,0 +1,1803 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.mipav.developer</a><ul>
+<li><a class="reference internal" href="#jistbrainmgdmsegmentation">JistBrainMgdmSegmentation</a></li>
+<li><a class="reference internal" href="#jistbrainmp2rageduraestimation">JistBrainMp2rageDuraEstimation</a></li>
+<li><a class="reference internal" href="#jistbrainmp2rageskullstripping">JistBrainMp2rageSkullStripping</a></li>
+<li><a class="reference internal" href="#jistbrainpartialvolumefilter">JistBrainPartialVolumeFilter</a></li>
+<li><a class="reference internal" href="#jistcortexsurfacemeshinflation">JistCortexSurfaceMeshInflation</a></li>
+<li><a class="reference internal" href="#jistintensitymp2ragemasking">JistIntensityMp2rageMasking</a></li>
+<li><a class="reference internal" href="#jistlaminarprofilecalculator">JistLaminarProfileCalculator</a></li>
+<li><a class="reference internal" href="#jistlaminarprofilegeometry">JistLaminarProfileGeometry</a></li>
+<li><a class="reference internal" href="#jistlaminarprofilesampling">JistLaminarProfileSampling</a></li>
+<li><a class="reference internal" href="#jistlaminarroiaveraging">JistLaminarROIAveraging</a></li>
+<li><a class="reference internal" href="#jistlaminarvolumetriclayering">JistLaminarVolumetricLayering</a></li>
+<li><a class="reference internal" href="#medicalgorithmimagecalculator">MedicAlgorithmImageCalculator</a></li>
+<li><a class="reference internal" href="#medicalgorithmlesiontoads">MedicAlgorithmLesionToads</a></li>
+<li><a class="reference internal" href="#medicalgorithmmipavreorient">MedicAlgorithmMipavReorient</a></li>
+<li><a class="reference internal" href="#medicalgorithmn3">MedicAlgorithmN3</a></li>
+<li><a class="reference internal" href="#medicalgorithmspectre2010">MedicAlgorithmSPECTRE2010</a><ul>
+<li><a class="reference internal" href="#description-simple-paradigm-for-extra-cranial-tissue-removal">description: Simple Paradigm for Extra-Cranial Tissue REmoval</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#medicalgorithmthresholdtobinarymask">MedicAlgorithmThresholdToBinaryMask</a></li>
+<li><a class="reference internal" href="#randomvol">RandomVol</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-mipav-developer">
+<h1>interfaces.mipav.developer<a class="headerlink" href="#interfaces-mipav-developer" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-mipav-developer-jistbrainmgdmsegmentation"></span><div class="section" id="jistbrainmgdmsegmentation">
+<span id="index-0"></span><h2>JistBrainMgdmSegmentation<a class="headerlink" href="#jistbrainmgdmsegmentation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L91">Link to code</a></p>
+<p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation **</p>
+<p>title: MGDM Whole Brain Segmentation</p>
+<p>category: Developer Tools</p>
+<p>description: Estimate brain structures from an atlas for a MRI dataset (multiple input combinations are possible).</p>
+<p>version: 2.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inAdjust: (&#39;true&#39; or &#39;false&#39;)
+        Adjust intensity priors
+        flag: --inAdjust %s
+inAtlas: (an existing file name)
+        Atlas file
+        flag: --inAtlas %s
+inCompute: (&#39;true&#39; or &#39;false&#39;)
+        Compute posteriors
+        flag: --inCompute %s
+inCurvature: (a float)
+        Curvature weight
+        flag: --inCurvature %f
+inData: (a float)
+        Data weight
+        flag: --inData %f
+inFLAIR: (an existing file name)
+        FLAIR Image
+        flag: --inFLAIR %s
+inMP2RAGE: (an existing file name)
+        MP2RAGE T1 Map Image
+        flag: --inMP2RAGE %s
+inMP2RAGE2: (an existing file name)
+        MP2RAGE T1-weighted Image
+        flag: --inMP2RAGE2 %s
+inMPRAGE: (an existing file name)
+        MPRAGE T1-weighted Image
+        flag: --inMPRAGE %s
+inMax: (an integer)
+        Max iterations
+        flag: --inMax %d
+inMin: (a float)
+        Min change
+        flag: --inMin %f
+inOutput: (&#39;segmentation&#39; or &#39;memberships&#39;)
+        Output images
+        flag: --inOutput %s
+inPV: (an existing file name)
+        PV / Dura Image
+        flag: --inPV %s
+inPosterior: (a float)
+        Posterior scale (mm)
+        flag: --inPosterior %f
+inSteps: (an integer)
+        Steps
+        flag: --inSteps %d
+inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39; or &#39;6/6&#39; or &#39;wcs&#39;
+         or &#39;wco&#39; or &#39;no&#39;)
+        Topology
+        flag: --inTopology %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outLevelset: (a boolean or a file name)
+        Levelset Boundary Image
+        flag: --outLevelset %s
+outPosterior2: (a boolean or a file name)
+        Posterior Maximum Memberships (4D)
+        flag: --outPosterior2 %s
+outPosterior3: (a boolean or a file name)
+        Posterior Maximum Labels (4D)
+        flag: --outPosterior3 %s
+outSegmented: (a boolean or a file name)
+        Segmented Brain Image
+        flag: --outSegmented %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outLevelset: (an existing file name)
+        Levelset Boundary Image
+outPosterior2: (an existing file name)
+        Posterior Maximum Memberships (4D)
+outPosterior3: (an existing file name)
+        Posterior Maximum Labels (4D)
+outSegmented: (an existing file name)
+        Segmented Brain Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistbrainmp2rageduraestimation"></span></div>
+<div class="section" id="jistbrainmp2rageduraestimation">
+<span id="index-1"></span><h2>JistBrainMp2rageDuraEstimation<a class="headerlink" href="#jistbrainmp2rageduraestimation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L497">Link to code</a></p>
+<p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation **</p>
+<p>title: MP2RAGE Dura Estimation</p>
+<p>category: Developer Tools</p>
+<p>description: Filters a MP2RAGE brain image to obtain a probability map of dura matter.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inDistance: (a float)
+        Distance to background (mm)
+        flag: --inDistance %f
+inSecond: (an existing file name)
+        Second inversion (Inv2) Image
+        flag: --inSecond %s
+inSkull: (an existing file name)
+        Skull Stripping Mask
+        flag: --inSkull %s
+inoutput: (&#39;dura_region&#39; or &#39;boundary&#39; or &#39;dura_prior&#39; or &#39;bg_prior&#39;
+         or &#39;intens_prior&#39;)
+        Outputs an estimate of the dura / CSF boundary or an estimate of the
+        entire dura region.
+        flag: --inoutput %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outDura: (a boolean or a file name)
+        Dura Image
+        flag: --outDura %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outDura: (an existing file name)
+        Dura Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistbrainmp2rageskullstripping"></span></div>
+<div class="section" id="jistbrainmp2rageskullstripping">
+<span id="index-2"></span><h2>JistBrainMp2rageSkullStripping<a class="headerlink" href="#jistbrainmp2rageskullstripping" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L345">Link to code</a></p>
+<p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping **</p>
+<p>title: MP2RAGE Skull Stripping</p>
+<p>category: Developer Tools</p>
+<p>description: Estimate a brain mask for a MP2RAGE dataset. At least a T1-weighted or a T1 map image is required.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inFilter: (an existing file name)
+        Filter Image (opt)
+        flag: --inFilter %s
+inSecond: (an existing file name)
+        Second inversion (Inv2) Image
+        flag: --inSecond %s
+inSkip: (&#39;true&#39; or &#39;false&#39;)
+        Skip zero values
+        flag: --inSkip %s
+inT1: (an existing file name)
+        T1 Map (T1_Images) Image (opt)
+        flag: --inT1 %s
+inT1weighted: (an existing file name)
+        T1-weighted (UNI) Image (opt)
+        flag: --inT1weighted %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outBrain: (a boolean or a file name)
+        Brain Mask Image
+        flag: --outBrain %s
+outMasked: (a boolean or a file name)
+        Masked T1 Map Image
+        flag: --outMasked %s
+outMasked2: (a boolean or a file name)
+        Masked T1-weighted Image
+        flag: --outMasked2 %s
+outMasked3: (a boolean or a file name)
+        Masked Filter Image
+        flag: --outMasked3 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outBrain: (an existing file name)
+        Brain Mask Image
+outMasked: (an existing file name)
+        Masked T1 Map Image
+outMasked2: (an existing file name)
+        Masked T1-weighted Image
+outMasked3: (an existing file name)
+        Masked Filter Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistbrainpartialvolumefilter"></span></div>
+<div class="section" id="jistbrainpartialvolumefilter">
+<span id="index-3"></span><h2>JistBrainPartialVolumeFilter<a class="headerlink" href="#jistbrainpartialvolumefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L695">Link to code</a></p>
+<p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter **</p>
+<p>title: Partial Volume Filter</p>
+<p>category: Developer Tools</p>
+<p>description: Filters an image for regions of partial voluming assuming a ridge-like model of intensity.</p>
+<p>version: 2.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inInput: (an existing file name)
+        Input Image
+        flag: --inInput %s
+inPV: (&#39;bright&#39; or &#39;dark&#39; or &#39;both&#39;)
+        Outputs the raw intensity values or a probability score for the
+        partial volume regions.
+        flag: --inPV %s
+inoutput: (&#39;probability&#39; or &#39;intensity&#39;)
+        output
+        flag: --inoutput %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outPartial: (a boolean or a file name)
+        Partial Volume Image
+        flag: --outPartial %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outPartial: (an existing file name)
+        Partial Volume Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistcortexsurfacemeshinflation"></span></div>
+<div class="section" id="jistcortexsurfacemeshinflation">
+<span id="index-4"></span><h2>JistCortexSurfaceMeshInflation<a class="headerlink" href="#jistcortexsurfacemeshinflation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L384">Link to code</a></p>
+<p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation **</p>
+<p>title: Surface Mesh Inflation</p>
+<p>category: Developer Tools</p>
+<p>description: Inflates a cortical surface mesh.
+D. Tosun, M. E. Rettmann, X. Han, X. Tao, C. Xu, S. M. Resnick, D. Pham, and J. L. Prince, Cortical Surface Segmentation and Mapping, NeuroImage, vol. 23, pp. S108&#8211;S118, 2004.</p>
+<p>version: 3.0.RC</p>
+<p>contributor: Duygu Tosun</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inLevelset: (an existing file name)
+        Levelset Image
+        flag: --inLevelset %s
+inLorentzian: (&#39;true&#39; or &#39;false&#39;)
+        Lorentzian Norm
+        flag: --inLorentzian %s
+inMax: (an integer)
+        Max Iterations
+        flag: --inMax %d
+inMean: (a float)
+        Mean Curvature Threshold
+        flag: --inMean %f
+inSOR: (a float)
+        SOR Parameter
+        flag: --inSOR %f
+inStep: (an integer)
+        Step Size
+        flag: --inStep %d
+inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39; or &#39;6/6&#39; or &#39;wcs&#39;
+         or &#39;wco&#39; or &#39;no&#39;)
+        Topology
+        flag: --inTopology %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outInflated: (a boolean or a file name)
+        Inflated Surface
+        flag: --outInflated %s
+outOriginal: (a boolean or a file name)
+        Original Surface
+        flag: --outOriginal %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outInflated: (an existing file name)
+        Inflated Surface
+outOriginal: (an existing file name)
+        Original Surface
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistintensitymp2ragemasking"></span></div>
+<div class="section" id="jistintensitymp2ragemasking">
+<span id="index-5"></span><h2>JistIntensityMp2rageMasking<a class="headerlink" href="#jistintensitymp2ragemasking" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L737">Link to code</a></p>
+<p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking **</p>
+<p>title: MP2RAGE Background Masking</p>
+<p>category: Developer Tools</p>
+<p>description: Estimate a background signal mask for a MP2RAGE dataset.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inBackground: (&#39;exponential&#39; or &#39;half-normal&#39;)
+        Model distribution for background noise (default is half-normal,
+        exponential is more stringent).
+        flag: --inBackground %s
+inMasking: (&#39;binary&#39; or &#39;proba&#39;)
+        Whether to use a binary threshold or a weighted average based on the
+        probability.
+        flag: --inMasking %s
+inQuantitative: (an existing file name)
+        Quantitative T1 Map (T1_Images) Image
+        flag: --inQuantitative %s
+inSecond: (an existing file name)
+        Second inversion (Inv2) Image
+        flag: --inSecond %s
+inSkip: (&#39;true&#39; or &#39;false&#39;)
+        Skip zero values
+        flag: --inSkip %s
+inT1weighted: (an existing file name)
+        T1-weighted (UNI) Image
+        flag: --inT1weighted %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outMasked: (a boolean or a file name)
+        Masked T1 Map Image
+        flag: --outMasked %s
+outMasked2: (a boolean or a file name)
+        Masked Iso Image
+        flag: --outMasked2 %s
+outSignal: (a boolean or a file name)
+        Signal Proba Image
+        flag: --outSignal %s
+outSignal2: (a boolean or a file name)
+        Signal Mask Image
+        flag: --outSignal2 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outMasked: (an existing file name)
+        Masked T1 Map Image
+outMasked2: (an existing file name)
+        Masked Iso Image
+outSignal: (an existing file name)
+        Signal Proba Image
+outSignal2: (an existing file name)
+        Signal Mask Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilecalculator"></span></div>
+<div class="section" id="jistlaminarprofilecalculator">
+<span id="index-6"></span><h2>JistLaminarProfileCalculator<a class="headerlink" href="#jistlaminarprofilecalculator" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L159">Link to code</a></p>
+<p>Wraps command <a href="#id13"><span class="problematic" id="id14">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator **</p>
+<p>title: Profile Calculator</p>
+<p>category: Developer Tools</p>
+<p>description: Compute various moments for intensities mapped along a cortical profile.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inIntensity: (an existing file name)
+        Intensity Profile Image
+        flag: --inIntensity %s
+inMask: (an existing file name)
+        Mask Image (opt, 3D or 4D)
+        flag: --inMask %s
+incomputed: (&#39;mean&#39; or &#39;stdev&#39; or &#39;skewness&#39; or &#39;kurtosis&#39;)
+        computed statistic
+        flag: --incomputed %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outResult: (a boolean or a file name)
+        Result
+        flag: --outResult %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outResult: (an existing file name)
+        Result
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilegeometry"></span></div>
+<div class="section" id="jistlaminarprofilegeometry">
+<span id="index-7"></span><h2>JistLaminarProfileGeometry<a class="headerlink" href="#jistlaminarprofilegeometry" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L126">Link to code</a></p>
+<p>Wraps command <a href="#id15"><span class="problematic" id="id16">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry **</p>
+<p>title: Profile Geometry</p>
+<p>category: Developer Tools</p>
+<p>description: Compute various geometric quantities for a cortical layers.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inProfile: (an existing file name)
+        Profile Surface Image
+        flag: --inProfile %s
+incomputed: (&#39;thickness&#39; or &#39;curvedness&#39; or &#39;shape_index&#39; or
+         &#39;mean_curvature&#39; or &#39;gauss_curvature&#39; or &#39;profile_length&#39; or
+         &#39;profile_curvature&#39; or &#39;profile_torsion&#39;)
+        computed measure
+        flag: --incomputed %s
+inoutside: (a float)
+        outside extension (mm)
+        flag: --inoutside %f
+inregularization: (&#39;none&#39; or &#39;Gaussian&#39;)
+        regularization
+        flag: --inregularization %s
+insmoothing: (a float)
+        smoothing parameter
+        flag: --insmoothing %f
+null: (a string)
+        Execution Time
+        flag: --null %s
+outResult: (a boolean or a file name)
+        Result
+        flag: --outResult %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outResult: (an existing file name)
+        Result
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilesampling"></span></div>
+<div class="section" id="jistlaminarprofilesampling">
+<span id="index-8"></span><h2>JistLaminarProfileSampling<a class="headerlink" href="#jistlaminarprofilesampling" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L532">Link to code</a></p>
+<p>Wraps command <a href="#id17"><span class="problematic" id="id18">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileSampling **</p>
+<p>title: Profile Sampling</p>
+<p>category: Developer Tools</p>
+<p>description: Sample some intensity image along a cortical profile across layer surfaces.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inCortex: (an existing file name)
+        Cortex Mask (opt)
+        flag: --inCortex %s
+inIntensity: (an existing file name)
+        Intensity Image
+        flag: --inIntensity %s
+inProfile: (an existing file name)
+        Profile Surface Image
+        flag: --inProfile %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outProfile2: (a boolean or a file name)
+        Profile 4D Mask
+        flag: --outProfile2 %s
+outProfilemapped: (a boolean or a file name)
+        Profile-mapped Intensity Image
+        flag: --outProfilemapped %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outProfile2: (an existing file name)
+        Profile 4D Mask
+outProfilemapped: (an existing file name)
+        Profile-mapped Intensity Image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistlaminarroiaveraging"></span></div>
+<div class="section" id="jistlaminarroiaveraging">
+<span id="index-9"></span><h2>JistLaminarROIAveraging<a class="headerlink" href="#jistlaminarroiaveraging" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L234">Link to code</a></p>
+<p>Wraps command <a href="#id19"><span class="problematic" id="id20">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarROIAveraging **</p>
+<p>title: Profile ROI Averaging</p>
+<p>category: Developer Tools</p>
+<p>description: Compute an average profile over a given ROI.</p>
+<p>version: 3.0.RC</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inIntensity: (an existing file name)
+        Intensity Profile Image
+        flag: --inIntensity %s
+inMask: (an existing file name)
+        Mask Image (opt, 3D or 4D)
+        flag: --inMask %s
+inROI: (an existing file name)
+        ROI Mask
+        flag: --inROI %s
+inROI2: (a string)
+        ROI Name
+        flag: --inROI2 %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outROI3: (a boolean or a file name)
+        ROI Average
+        flag: --outROI3 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outROI3: (an existing file name)
+        ROI Average
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-jistlaminarvolumetriclayering"></span></div>
+<div class="section" id="jistlaminarvolumetriclayering">
+<span id="index-10"></span><h2>JistLaminarVolumetricLayering<a class="headerlink" href="#jistlaminarvolumetriclayering" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L36">Link to code</a></p>
+<p>Wraps command <a href="#id21"><span class="problematic" id="id22">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering **</p>
+<p>title: Volumetric Layering</p>
+<p>category: Developer Tools</p>
+<p>description: Builds a continuous layering of the cortex following distance-preserving or volume-preserving models of cortical folding.
+Waehnert MD, Dinse J, Weiss M, Streicher MN, Waehnert P, Geyer S, Turner R, Bazin PL, Anatomically motivated modeling of cortical laminae, Neuroimage, 2013.</p>
+<p>version: 3.0.RC</p>
+<p>contributor: Miriam Waehnert (<a class="reference external" href="mailto:waehnert&#37;&#52;&#48;cbs&#46;mpg&#46;de">waehnert<span>&#64;</span>cbs<span>&#46;</span>mpg<span>&#46;</span>de</a>) <a class="reference external" href="http://www.cbs.mpg.de/">http://www.cbs.mpg.de/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inInner: (an existing file name)
+        Inner Distance Image (GM/WM boundary)
+        flag: --inInner %s
+inLayering: (&#39;distance-preserving&#39; or &#39;volume-preserving&#39;)
+        Layering method
+        flag: --inLayering %s
+inLayering2: (&#39;outward&#39; or &#39;inward&#39;)
+        Layering direction
+        flag: --inLayering2 %s
+inMax: (an integer)
+        Max iterations for narrow band evolution
+        flag: --inMax %d
+inMin: (a float)
+        Min change ratio for narrow band evolution
+        flag: --inMin %f
+inNumber: (an integer)
+        Number of layers
+        flag: --inNumber %d
+inOuter: (an existing file name)
+        Outer Distance Image (CSF/GM boundary)
+        flag: --inOuter %s
+inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39; or &#39;6/6&#39; or &#39;wcs&#39;
+         or &#39;wco&#39; or &#39;no&#39;)
+        Topology
+        flag: --inTopology %s
+incurvature: (an integer)
+        curvature approximation scale (voxels)
+        flag: --incurvature %d
+inpresmooth: (&#39;true&#39; or &#39;false&#39;)
+        pre-smooth cortical surfaces
+        flag: --inpresmooth %s
+inratio: (a float)
+        ratio smoothing kernel size (voxels)
+        flag: --inratio %f
+null: (a string)
+        Execution Time
+        flag: --null %s
+outContinuous: (a boolean or a file name)
+        Continuous depth measurement
+        flag: --outContinuous %s
+outDiscrete: (a boolean or a file name)
+        Discrete sampled layers
+        flag: --outDiscrete %s
+outLayer: (a boolean or a file name)
+        Layer boundary surfaces
+        flag: --outLayer %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outContinuous: (an existing file name)
+        Continuous depth measurement
+outDiscrete: (an existing file name)
+        Discrete sampled layers
+outLayer: (an existing file name)
+        Layer boundary surfaces
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmimagecalculator"></span></div>
+<div class="section" id="medicalgorithmimagecalculator">
+<span id="index-11"></span><h2>MedicAlgorithmImageCalculator<a class="headerlink" href="#medicalgorithmimagecalculator" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L461">Link to code</a></p>
+<p>Wraps command <a href="#id23"><span class="problematic" id="id24">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator **</p>
+<p>title: Image Calculator</p>
+<p>category: Developer Tools</p>
+<p>description: Perform simple image calculator operations on two images. The operations include &#8216;Add&#8217;, &#8216;Subtract&#8217;, &#8216;Multiply&#8217;, and &#8216;Divide&#8217;</p>
+<p>version: 1.10.RC</p>
+<p>documentation-url: <a class="reference external" href="http://www.iacl.ece.jhu.edu/">http://www.iacl.ece.jhu.edu/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inOperation: (&#39;Add&#39; or &#39;Subtract&#39; or &#39;Multiply&#39; or &#39;Divide&#39; or &#39;Min&#39;
+         or &#39;Max&#39;)
+        Operation
+        flag: --inOperation %s
+inVolume: (an existing file name)
+        Volume 1
+        flag: --inVolume %s
+inVolume2: (an existing file name)
+        Volume 2
+        flag: --inVolume2 %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outResult: (a boolean or a file name)
+        Result Volume
+        flag: --outResult %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outResult: (an existing file name)
+        Result Volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmlesiontoads"></span></div>
+<div class="section" id="medicalgorithmlesiontoads">
+<span id="index-12"></span><h2>MedicAlgorithmLesionToads<a class="headerlink" href="#medicalgorithmlesiontoads" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L301">Link to code</a></p>
+<p>Wraps command <a href="#id25"><span class="problematic" id="id26">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads **</p>
+<p>title: Lesion TOADS</p>
+<p>category: Developer Tools</p>
+<p>description: Algorithm for simulataneous brain structures and MS lesion segmentation of MS Brains. The brain segmentation is topologically consistent and the algorithm can use multiple MR sequences as input data.
+N. Shiee, P.-L. Bazin, A.Z. Ozturk, P.A. Calabresi, D.S. Reich, D.L. Pham, &#8220;A Topology-Preserving Approach to the Segmentation of Brain Images with Multiple Sclerosis&#8221;, NeuroImage, vol. 49, no. 2, pp. 1524-1535, 2010.</p>
+<p>version: 1.9.R</p>
+<p>contributor: Navid Shiee (<a class="reference external" href="mailto:navid&#46;shiee&#37;&#52;&#48;nih&#46;gov">navid<span>&#46;</span>shiee<span>&#64;</span>nih<span>&#46;</span>gov</a>) <a class="reference external" href="http://iacl.ece.jhu.edu/~nshiee/">http://iacl.ece.jhu.edu/~nshiee/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inAtlas: (&#39;With Lesion&#39; or &#39;No Lesion&#39;)
+        Atlas to Use
+        flag: --inAtlas %s
+inAtlas2: (an existing file name)
+        Atlas File - With Lesions
+        flag: --inAtlas2 %s
+inAtlas3: (an existing file name)
+        Atlas File - No Lesion - T1 and FLAIR
+        flag: --inAtlas3 %s
+inAtlas4: (an existing file name)
+        Atlas File - No Lesion - T1 Only
+        flag: --inAtlas4 %s
+inAtlas5: (a float)
+        Controls the effect of the statistical atlas on the segmentation
+        flag: --inAtlas5 %f
+inAtlas6: (&#39;rigid&#39; or &#39;multi_fully_affine&#39;)
+        Atlas alignment
+        flag: --inAtlas6 %s
+inConnectivity: (&#39;(26,6)&#39; or &#39;(6,26)&#39; or &#39;(6,18)&#39; or &#39;(18,6)&#39;)
+        Connectivity (foreground,background)
+        flag: --inConnectivity %s
+inCorrect: (&#39;true&#39; or &#39;false&#39;)
+        Correct MR field inhomogeneity.
+        flag: --inCorrect %s
+inFLAIR: (an existing file name)
+        FLAIR Image
+        flag: --inFLAIR %s
+inInclude: (&#39;true&#39; or &#39;false&#39;)
+        Include lesion in WM class in hard classification
+        flag: --inInclude %s
+inMaximum: (an integer)
+        Maximum distance from the interventricular WM boundary to downweight
+        the lesion membership to avoid false postives
+        flag: --inMaximum %d
+inMaximum2: (an integer)
+        Maximum Ventircle Distance
+        flag: --inMaximum2 %d
+inMaximum3: (an integer)
+        Maximum InterVentricular Distance
+        flag: --inMaximum3 %d
+inMaximum4: (a float)
+        Maximum amount of relative change in the energy function considered
+        as the convergence criteria
+        flag: --inMaximum4 %f
+inMaximum5: (an integer)
+        Maximum iterations
+        flag: --inMaximum5 %d
+inOutput: (&#39;hard segmentation&#39; or &#39;hard segmentation+memberships&#39; or
+         &#39;cruise inputs&#39; or &#39;dura removal inputs&#39;)
+        Output images
+        flag: --inOutput %s
+inOutput2: (&#39;true&#39; or &#39;false&#39;)
+        Output the hard classification using maximum membership (not
+        neceesarily topologically correct)
+        flag: --inOutput2 %s
+inOutput3: (&#39;true&#39; or &#39;false&#39;)
+        Output the estimated inhomogeneity field
+        flag: --inOutput3 %s
+inSmooting: (a float)
+        Controls the effect of neighberhood voxels on the membership
+        flag: --inSmooting %f
+inT1_MPRAGE: (an existing file name)
+        T1_MPRAGE Image
+        flag: --inT1_MPRAGE %s
+inT1_SPGR: (an existing file name)
+        T1_SPGR Image
+        flag: --inT1_SPGR %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outCortical: (a boolean or a file name)
+        Cortical GM Membership
+        flag: --outCortical %s
+outFilled: (a boolean or a file name)
+        Filled WM Membership
+        flag: --outFilled %s
+outHard: (a boolean or a file name)
+        Hard segmentation
+        flag: --outHard %s
+outHard2: (a boolean or a file name)
+        Hard segmentationfrom memberships
+        flag: --outHard2 %s
+outInhomogeneity: (a boolean or a file name)
+        Inhomogeneity Field
+        flag: --outInhomogeneity %s
+outLesion: (a boolean or a file name)
+        Lesion Segmentation
+        flag: --outLesion %s
+outMembership: (a boolean or a file name)
+        Membership Functions
+        flag: --outMembership %s
+outSulcal: (a boolean or a file name)
+        Sulcal CSF Membership
+        flag: --outSulcal %s
+outWM: (a boolean or a file name)
+        WM Mask
+        flag: --outWM %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outCortical: (an existing file name)
+        Cortical GM Membership
+outFilled: (an existing file name)
+        Filled WM Membership
+outHard: (an existing file name)
+        Hard segmentation
+outHard2: (an existing file name)
+        Hard segmentationfrom memberships
+outInhomogeneity: (an existing file name)
+        Inhomogeneity Field
+outLesion: (an existing file name)
+        Lesion Segmentation
+outMembership: (an existing file name)
+        Membership Functions
+outSulcal: (an existing file name)
+        Sulcal CSF Membership
+outWM: (an existing file name)
+        WM Mask
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmmipavreorient"></span></div>
+<div class="section" id="medicalgorithmmipavreorient">
+<span id="index-13"></span><h2>MedicAlgorithmMipavReorient<a class="headerlink" href="#medicalgorithmmipavreorient" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L571">Link to code</a></p>
+<p>Wraps command <a href="#id27"><span class="problematic" id="id28">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient **</p>
+<p>title: Reorient Volume</p>
+<p>category: Developer Tools</p>
+<p>description: Reorient a volume to a particular anatomical orientation.</p>
+<p>version: .alpha</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inInterpolation: (&#39;Nearest Neighbor&#39; or &#39;Trilinear&#39; or &#39;Bspline 3rd
+         order&#39; or &#39;Bspline 4th order&#39; or &#39;Cubic Lagrangian&#39; or &#39;Quintic
+         Lagrangian&#39; or &#39;Heptic Lagrangian&#39; or &#39;Windowed Sinc&#39;)
+        Interpolation
+        flag: --inInterpolation %s
+inNew: (&#39;Dicom axial&#39; or &#39;Dicom coronal&#39; or &#39;Dicom sagittal&#39; or &#39;User
+         defined&#39;)
+        New image orientation
+        flag: --inNew %s
+inResolution: (&#39;Unchanged&#39; or &#39;Finest cubic&#39; or &#39;Coarsest cubic&#39; or
+         &#39;Same as template&#39;)
+        Resolution
+        flag: --inResolution %s
+inSource: (a list of items which are a file name)
+        Source
+        flag: --inSource %s
+inTemplate: (an existing file name)
+        Template
+        flag: --inTemplate %s
+inUser: (&#39;Unknown&#39; or &#39;Patient Right to Left&#39; or &#39;Patient Left to
+         Right&#39; or &#39;Patient Posterior to Anterior&#39; or &#39;Patient Anterior to
+         Posterior&#39; or &#39;Patient Inferior to Superior&#39; or &#39;Patient Superior
+         to Inferior&#39;)
+        User defined X-axis orientation (image left to right)
+        flag: --inUser %s
+inUser2: (&#39;Unknown&#39; or &#39;Patient Right to Left&#39; or &#39;Patient Left to
+         Right&#39; or &#39;Patient Posterior to Anterior&#39; or &#39;Patient Anterior to
+         Posterior&#39; or &#39;Patient Inferior to Superior&#39; or &#39;Patient Superior
+         to Inferior&#39;)
+        User defined Y-axis orientation (image top to bottom)
+        flag: --inUser2 %s
+inUser3: (&#39;Unknown&#39; or &#39;Patient Right to Left&#39; or &#39;Patient Left to
+         Right&#39; or &#39;Patient Posterior to Anterior&#39; or &#39;Patient Anterior to
+         Posterior&#39; or &#39;Patient Inferior to Superior&#39; or &#39;Patient Superior
+         to Inferior&#39;)
+        User defined Z-axis orientation (into the screen)
+        flag: --inUser3 %s
+inUser4: (&#39;Axial&#39; or &#39;Coronal&#39; or &#39;Sagittal&#39; or &#39;Unknown&#39;)
+        User defined Image Orientation
+        flag: --inUser4 %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outReoriented: (a list of items which are a file name)
+        Reoriented Volume
+        flag: --outReoriented %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmn3"></span></div>
+<div class="section" id="medicalgorithmn3">
+<span id="index-14"></span><h2>MedicAlgorithmN3<a class="headerlink" href="#medicalgorithmn3" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L200">Link to code</a></p>
+<p>Wraps command <a href="#id29"><span class="problematic" id="id30">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmN3 **</p>
+<p>title: N3 Correction</p>
+<p>category: Developer Tools</p>
+<p>description: Non-parametric Intensity Non-uniformity Correction, N3, originally by J.G. Sled.</p>
+<p>version: 1.8.R</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inAutomatic: (&#39;true&#39; or &#39;false&#39;)
+        If true determines the threshold by histogram analysis. If true a
+        VOI cannot be used and the input threshold is ignored.
+        flag: --inAutomatic %s
+inEnd: (a float)
+        Usually 0.01-0.00001, The measure used to terminate the iterations
+        is the coefficient of variation of change in field estimates between
+        successive iterations.
+        flag: --inEnd %f
+inField: (a float)
+        Characteristic distance over which the field varies. The distance
+        between adjacent knots in bspline fitting with at least 4 knots
+        going in every dimension. The default in the dialog is one third the
+        distance (resolution * extents) of the smallest dimension.
+        flag: --inField %f
+inInput: (an existing file name)
+        Input Volume
+        flag: --inInput %s
+inKernel: (a float)
+        Usually between 0.05-0.50, Width of deconvolution kernel used to
+        sharpen the histogram. Larger values give faster convergence while
+        smaller values give greater accuracy.
+        flag: --inKernel %f
+inMaximum: (an integer)
+        Maximum number of Iterations
+        flag: --inMaximum %d
+inSignal: (a float)
+        Default = min + 1, Values at less than threshold are treated as part
+        of the background
+        flag: --inSignal %f
+inSubsample: (a float)
+        Usually between 1-32, The factor by which the data is subsampled to
+        a lower resolution in estimating the slowly varying non-uniformity
+        field. Reduce sampling in the finest sampling direction by the
+        shrink factor.
+        flag: --inSubsample %f
+inWeiner: (a float)
+        Usually between 0.0-1.0
+        flag: --inWeiner %f
+null: (a string)
+        Execution Time
+        flag: --null %s
+outInhomogeneity: (a boolean or a file name)
+        Inhomogeneity Corrected Volume
+        flag: --outInhomogeneity %s
+outInhomogeneity2: (a boolean or a file name)
+        Inhomogeneity Field
+        flag: --outInhomogeneity2 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outInhomogeneity: (an existing file name)
+        Inhomogeneity Corrected Volume
+outInhomogeneity2: (an existing file name)
+        Inhomogeneity Field
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmspectre2010"></span></div>
+<div class="section" id="medicalgorithmspectre2010">
+<span id="index-15"></span><h2>MedicAlgorithmSPECTRE2010<a class="headerlink" href="#medicalgorithmspectre2010" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L651">Link to code</a></p>
+<p>Wraps command <a href="#id31"><span class="problematic" id="id32">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 **</p>
+<p>title: SPECTRE 2010</p>
+<p>category: Developer Tools</p>
+<div class="section" id="description-simple-paradigm-for-extra-cranial-tissue-removal">
+<h3>description: Simple Paradigm for Extra-Cranial Tissue REmoval<a class="headerlink" href="#description-simple-paradigm-for-extra-cranial-tissue-removal" title="Permalink to this headline">¶</a></h3>
+<p>Algorithm Version: 1.6
+GUI Version: 1.10</p>
+<p>A. Carass, M.B. Wheeler, J. Cuzzocreo, P.-L. Bazin, S.S. Bassett, and J.L. Prince, &#8216;A Joint Registration and Segmentation Approach to Skull Stripping&#8217;, Fourth IEEE International Symposium on Biomedical Imaging (ISBI 2007), Arlington, VA, April 12-15, 2007.
+A. Carass, J. Cuzzocreo, M.B. Wheeler, P.-L. Bazin, S.M. Resnick, and J.L. Prince, &#8216;Simple paradigm for extra-cerebral tissue removal: Algorithm and analysis&#8217;, NeuroImage 56(4):1982-1992, 2011.</p>
+<p>version: 1.6.R</p>
+<p>documentation-url: <a class="reference external" href="http://www.iacl.ece.jhu.edu/">http://www.iacl.ece.jhu.edu/</a></p>
+<p>contributor: Aaron Carass (<a class="reference external" href="mailto:aaron_carass&#37;&#52;&#48;jhu&#46;edu">aaron_carass<span>&#64;</span>jhu<span>&#46;</span>edu</a>) <a class="reference external" href="http://www.iacl.ece.jhu.edu/">http://www.iacl.ece.jhu.edu/</a>
+Hanlin Wan (<a class="reference external" href="mailto:hanlinwan&#37;&#52;&#48;gmail&#46;com">hanlinwan<span>&#64;</span>gmail<span>&#46;</span>com</a>)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inApply: (&#39;All&#39; or &#39;X&#39; or &#39;Y&#39; or &#39;Z&#39;)
+        Apply rotation
+        flag: --inApply %s
+inAtlas: (an existing file name)
+        SPECTRE atlas description file. A text file enumerating atlas files
+        and landmarks.
+        flag: --inAtlas %s
+inBackground: (a float)
+        flag: --inBackground %f
+inCoarse: (a float)
+        Coarse angle increment
+        flag: --inCoarse %f
+inCost: (&#39;Correlation ratio&#39; or &#39;Least squares&#39; or &#39;Normalized cross
+         correlation&#39; or &#39;Normalized mutual information&#39;)
+        Cost function
+        flag: --inCost %s
+inDegrees: (&#39;Rigid - 6&#39; or &#39;Global rescale - 7&#39; or &#39;Specific rescale
+         - 9&#39; or &#39;Affine - 12&#39;)
+        Degrees of freedom
+        flag: --inDegrees %s
+inFind: (&#39;true&#39; or &#39;false&#39;)
+        Find Midsaggital Plane
+        flag: --inFind %s
+inFine: (a float)
+        Fine angle increment
+        flag: --inFine %f
+inImage: (&#39;T1_SPGR&#39; or &#39;T1_ALT&#39; or &#39;T1_MPRAGE&#39; or &#39;T2&#39; or &#39;FLAIR&#39;)
+        Set the image modality. MP-RAGE is recommended for most T1 sequence
+        images.
+        flag: --inImage %s
+inInhomogeneity: (&#39;true&#39; or &#39;false&#39;)
+        Set to false by default, this parameter will make FANTASM try to do
+        inhomogeneity correction during it&#39;s iterative cycle.
+        flag: --inInhomogeneity %s
+inInitial: (an integer)
+        Erosion of the inital mask, which is based on the probability mask
+        and the classification., The initial mask is ouput as the d0 volume
+        at the conclusion of SPECTRE.
+        flag: --inInitial %d
+inInitial2: (a float)
+        Initial probability threshold
+        flag: --inInitial2 %f
+inInput: (an existing file name)
+        Input volume to be skullstripped.
+        flag: --inInput %s
+inMMC: (an integer)
+        The size of the dilation step within the Modified Morphological
+        Closing.
+        flag: --inMMC %d
+inMMC2: (an integer)
+        The size of the erosion step within the Modified Morphological
+        Closing.
+        flag: --inMMC2 %d
+inMaximum: (a float)
+        Maximum angle
+        flag: --inMaximum %f
+inMinimum: (a float)
+        Minimum probability threshold
+        flag: --inMinimum %f
+inMinimum2: (a float)
+        Minimum angle
+        flag: --inMinimum2 %f
+inMultiple: (an integer)
+        Multiple of tolerance to bracket the minimum
+        flag: --inMultiple %d
+inMultithreading: (&#39;true&#39; or &#39;false&#39;)
+        Set to false by default, this parameter controls the multithreaded
+        behavior of the linear registration.
+        flag: --inMultithreading %s
+inNumber: (an integer)
+        Number of iterations
+        flag: --inNumber %d
+inNumber2: (an integer)
+        Number of minima from Level 8 to test at Level 4
+        flag: --inNumber2 %d
+inOutput: (&#39;true&#39; or &#39;false&#39;)
+        Determines if the output results are transformed back into the space
+        of the original input image.
+        flag: --inOutput %s
+inOutput2: (&#39;true&#39; or &#39;false&#39;)
+        Output Plane?
+        flag: --inOutput2 %s
+inOutput3: (&#39;true&#39; or &#39;false&#39;)
+        Output Split-Halves?
+        flag: --inOutput3 %s
+inOutput4: (&#39;true&#39; or &#39;false&#39;)
+        Output Segmentation on Plane?
+        flag: --inOutput4 %s
+inOutput5: (&#39;Trilinear&#39; or &#39;Bspline 3rd order&#39; or &#39;Bspline 4th order&#39;
+         or &#39;Cubic Lagrangian&#39; or &#39;Quintic Lagrangian&#39; or &#39;Heptic
+         Lagrangian&#39; or &#39;Windowed sinc&#39; or &#39;Nearest Neighbor&#39;)
+        Output interpolation
+        flag: --inOutput5 %s
+inRegistration: (&#39;Trilinear&#39; or &#39;Bspline 3rd order&#39; or &#39;Bspline 4th
+         order&#39; or &#39;Cubic Lagrangian&#39; or &#39;Quintic Lagrangian&#39; or &#39;Heptic
+         Lagrangian&#39; or &#39;Windowed sinc&#39;)
+        Registration interpolation
+        flag: --inRegistration %s
+inResample: (&#39;true&#39; or &#39;false&#39;)
+        Determines if the data is resampled to be isotropic during the
+        processing.
+        flag: --inResample %s
+inRun: (&#39;true&#39; or &#39;false&#39;)
+        Run Smooth Brain Mask
+        flag: --inRun %s
+inSkip: (&#39;true&#39; or &#39;false&#39;)
+        Skip multilevel search (Assume images are close to alignment)
+        flag: --inSkip %s
+inSmoothing: (a float)
+        flag: --inSmoothing %f
+inSubsample: (&#39;true&#39; or &#39;false&#39;)
+        Subsample image for speed
+        flag: --inSubsample %s
+inUse: (&#39;true&#39; or &#39;false&#39;)
+        Use the max of the min resolutions of the two datasets when
+        resampling
+        flag: --inUse %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outFANTASM: (a boolean or a file name)
+        Tissue classification of of the whole input volume.
+        flag: --outFANTASM %s
+outMask: (a boolean or a file name)
+        Binary Mask of the skullstripped result with just the brain
+        flag: --outMask %s
+outMidsagittal: (a boolean or a file name)
+        Plane dividing the brain hemispheres
+        flag: --outMidsagittal %s
+outOriginal: (a boolean or a file name)
+        If Output in Original Space Flag is true then outputs the original
+        input volume. Otherwise outputs the axialy reoriented input volume.
+        flag: --outOriginal %s
+outPrior: (a boolean or a file name)
+        Probability prior from the atlas registrations
+        flag: --outPrior %s
+outSegmentation: (a boolean or a file name)
+        2D image showing the tissue classification on the midsagittal plane
+        flag: --outSegmentation %s
+outSplitHalves: (a boolean or a file name)
+        Skullstripped mask of the brain with the hemispheres divided.
+        flag: --outSplitHalves %s
+outStripped: (a boolean or a file name)
+        Skullstripped result of the input volume with just the brain.
+        flag: --outStripped %s
+outd0: (a boolean or a file name)
+        Initial Brainmask
+        flag: --outd0 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outFANTASM: (an existing file name)
+        Tissue classification of of the whole input volume.
+outMask: (an existing file name)
+        Binary Mask of the skullstripped result with just the brain
+outMidsagittal: (an existing file name)
+        Plane dividing the brain hemispheres
+outOriginal: (an existing file name)
+        If Output in Original Space Flag is true then outputs the original
+        input volume. Otherwise outputs the axialy reoriented input volume.
+outPrior: (an existing file name)
+        Probability prior from the atlas registrations
+outSegmentation: (an existing file name)
+        2D image showing the tissue classification on the midsagittal plane
+outSplitHalves: (an existing file name)
+        Skullstripped mask of the brain with the hemispheres divided.
+outStripped: (an existing file name)
+        Skullstripped result of the input volume with just the brain.
+outd0: (an existing file name)
+        Initial Brainmask
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmthresholdtobinarymask"></span></div>
+</div>
+<div class="section" id="medicalgorithmthresholdtobinarymask">
+<span id="index-16"></span><h2>MedicAlgorithmThresholdToBinaryMask<a class="headerlink" href="#medicalgorithmthresholdtobinarymask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L771">Link to code</a></p>
+<p>Wraps command <a href="#id33"><span class="problematic" id="id34">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask **</p>
+<p>title: Threshold to Binary Mask</p>
+<p>category: Developer Tools</p>
+<p>description: Given a volume and an intensity range create a binary mask for values within that range.</p>
+<p>version: 1.2.RC</p>
+<p>documentation-url: <a class="reference external" href="http://www.iacl.ece.jhu.edu/">http://www.iacl.ece.jhu.edu/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inLabel: (a list of items which are a file name)
+        Input volumes
+        flag: --inLabel %s
+inMaximum: (a float)
+        Maximum threshold value.
+        flag: --inMaximum %f
+inMinimum: (a float)
+        Minimum threshold value.
+        flag: --inMinimum %f
+inUse: (&#39;true&#39; or &#39;false&#39;)
+        Use the images max intensity as the max value of the range.
+        flag: --inUse %s
+null: (a string)
+        Execution Time
+        flag: --null %s
+outBinary: (a list of items which are a file name)
+        Binary Mask
+        flag: --outBinary %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-mipav-developer-randomvol"></span></div>
+<div class="section" id="randomvol">
+<span id="index-17"></span><h2>RandomVol<a class="headerlink" href="#randomvol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L426">Link to code</a></p>
+<p>Wraps command <a href="#id35"><span class="problematic" id="id36">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.bme.smile.demo.RandomVol **</p>
+<p>title: Random Volume Generator</p>
+<p>category: Developer Tools</p>
+<p>description: Generate a random scalar volume.</p>
+<p>version: 1.12.RC</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/jist/">http://www.nitrc.org/projects/jist/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inField: (&#39;Uniform&#39; or &#39;Normal&#39; or &#39;Exponential&#39;)
+        Field
+        flag: --inField %s
+inLambda: (a float)
+        Lambda Value for Exponential Distribution
+        flag: --inLambda %f
+inMaximum: (an integer)
+        Maximum Value
+        flag: --inMaximum %d
+inMinimum: (an integer)
+        Minimum Value
+        flag: --inMinimum %d
+inSize: (an integer)
+        Size of Volume in X direction
+        flag: --inSize %d
+inSize2: (an integer)
+        Size of Volume in Y direction
+        flag: --inSize2 %d
+inSize3: (an integer)
+        Size of Volume in Z direction
+        flag: --inSize3 %d
+inSize4: (an integer)
+        Size of Volume in t direction
+        flag: --inSize4 %d
+inStandard: (an integer)
+        Standard Deviation for Normal Distribution
+        flag: --inStandard %d
+null: (a string)
+        Execution Time
+        flag: --null %s
+outRand1: (a boolean or a file name)
+        Rand1
+        flag: --outRand1 %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+xDefaultMem: (an integer)
+        Set default maximum heap size
+        flag: -xDefaultMem %d
+xMaxProcess: (an integer, nipype default value: 1)
+        Set default maximum number of processes.
+        flag: -xMaxProcess %d
+xPrefExt: (&#39;nrrd&#39;)
+        Output File Type
+        flag: --xPrefExt %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outRand1: (an existing file name)
+        Rand1
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

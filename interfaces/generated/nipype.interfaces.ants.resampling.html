@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.ants.resampling</a><ul>
+<li><a class="reference internal" href="#applytransforms">ApplyTransforms</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#applytransformstopoints">ApplyTransformsToPoints</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#warpimagemultitransform">WarpImageMultiTransform</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#warptimeseriesimagemultitransform">WarpTimeSeriesImageMultiTransform</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-ants-resampling">
+<h1>interfaces.ants.resampling<a class="headerlink" href="#interfaces-ants-resampling" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-ants-resampling-applytransforms"></span><div class="section" id="applytransforms">
+<span id="index-0"></span><h2>ApplyTransforms<a class="headerlink" href="#applytransforms" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/ants/resampling.py#L259">Link to code</a></p>
+<p>Wraps command <strong>antsApplyTransforms</strong></p>
+<p>ApplyTransforms, applied to an input image, transforms it according to a
+reference image and a transform (or a set of transforms).</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">ApplyTransforms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span> <span class="o">=</span> <span class="n">ApplyTransforms</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image</span> <span class="o">=</span> <span class="s">&#39;moving1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span> <span class="o">=</span> <span class="s">&#39;fixed1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_image</span> <span class="o">=</span> <span class="s">&#39;deformed_moving1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">default_value</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;trans.mat&#39;</span><span class="p">,</span> <span class="s">&#39;ants_Warp.nii.gz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+input_image: (an existing file name)
+        image to apply transformation to (generally a coregistered
+        functional)
+        flag: --input %s
+reference_image: (an existing file name)
+        reference image space that you wish to warp INTO
+        flag: --reference-image %s
+transforms: (a list of items which are an existing file name)
+        flag: %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+default_value: (a float, nipype default value: 0.0)
+        flag: --default-value %g
+dimension: (2 or 3 or 4)
+        This option forces the image to be treated as a specified-
+        dimensional image. If not specified, antsWarp tries to infer the
+        dimensionality from the input image.
+        flag: --dimensionality %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+input_image_type: (0 or 1 or 2 or 3)
+        Option specifying the input image type of scalar (default), vector,
+        tensor, or time series.
+        flag: --input-image-type %d
+interpolation: (&#39;Linear&#39; or &#39;NearestNeighbor&#39; or &#39;CosineWindowedSinc&#39;
+         or &#39;WelchWindowedSinc&#39; or &#39;HammingWindowedSinc&#39; or
+         &#39;LanczosWindowedSinc&#39; or &#39;MultiLabel&#39; or &#39;Gaussian&#39; or &#39;BSpline&#39;,
+         nipype default value: Linear)
+        flag: %s
+invert_transform_flags: (a list of items which are a boolean)
+num_threads: (an integer, nipype default value: 1)
+        Number of ITK threads to use
+out_postfix: (a string, nipype default value: _trans)
+        Postfix that is appended to all output files (default = _trans)
+output_image: (a string)
+        output file name
+        flag: --output %s
+print_out_composite_warp_file: (0 or 1)
+        requires: output_image
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>output_image: (an existing file name)
+        Warped image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-ants-resampling-applytransformstopoints"></span></div>
+</div>
+<div class="section" id="applytransformstopoints">
+<span id="index-1"></span><h2>ApplyTransformsToPoints<a class="headerlink" href="#applytransformstopoints" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/ants/resampling.py#L362">Link to code</a></p>
+<p>Wraps command <strong>antsApplyTransformsToPoints</strong></p>
+<p>ApplyTransformsToPoints, applied to an CSV file, transforms coordinates
+using provided transform (or a set of transforms).</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">ApplyTransforms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span> <span class="o">=</span> <span class="n">ApplyTransformsToPoints</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_file</span> <span class="o">=</span> <span class="s">&#39;moving.csv&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;trans.mat&#39;</span><span class="p">,</span> <span class="s">&#39;ants_Warp.nii.gz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">at</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+input_file: (an existing file name)
+        Currently, the only input supported is a csv file with columns
+        including x,y (2D), x,y,z (3D) or x,y,z,t,label (4D) column
+        headers.The points should be defined in physical space.If in doubt
+        how to convert coordinates from your files to the spacerequired by
+        antsApplyTransformsToPoints try creating/drawing a simplelabel
+        volume with only one voxel set to 1 and all others set to 0.Write
+        down the voxel coordinates. Then use ImageMaths LabelStats to
+        findout what coordinates for this voxel antsApplyTransformsToPoints
+        isexpecting.
+        flag: --input %s
+transforms: (a list of items which are an existing file name)
+        transforms that will be applied to the points
+        flag: %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (2 or 3 or 4)
+        This option forces the image to be treated as a specified-
+        dimensional image. If not specified, antsWarp tries to infer the
+        dimensionality from the input image.
+        flag: --dimensionality %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_transform_flags: (a list of items which are a boolean)
+        list indicating if a transform should be reversed
+num_threads: (an integer, nipype default value: 1)
+        Number of ITK threads to use
+output_file: (a string)
+        Name of the output CSV file
+        flag: --output %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>output_file: (an existing file name)
+        csv file with transformed coordinates
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-ants-resampling-warpimagemultitransform"></span></div>
+</div>
+<div class="section" id="warpimagemultitransform">
+<span id="index-2"></span><h2>WarpImageMultiTransform<a class="headerlink" href="#warpimagemultitransform" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/ants/resampling.py#L149">Link to code</a></p>
+<p>Wraps command <strong>WarpImageMultiTransform</strong></p>
+<p>Warps an image from one space to another</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">WarpImageMultiTransform</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span> <span class="o">=</span> <span class="n">WarpImageMultiTransform</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span> <span class="o">=</span> <span class="s">&#39;ants_deformed.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transformation_series</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ants_Warp.nii.gz&#39;</span><span class="p">,</span><span class="s">&#39;ants_Affine.txt&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span> <span class="o">=</span> <span class="n">WarpImageMultiTransform</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image</span> <span class="o">=</span> <span class="s">&#39;diffusion_weighted.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transformation_series</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;func2anat_coreg_Affine.txt&#39;</span><span class="p">,</span><span class="s">&#39;func2anat_InverseWarp.nii.gz&#39;</span><span class="p">,</span><span class="s">&#39;dwi2anat_Warp.nii.gz&#39;</span><span class="p">,</span><span class="s">&#39;dwi2anat_coreg_Affine.txt&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_affine</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wimt</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii -i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+input_image: (a file name)
+        image to apply transformation to (generally a coregistered
+        functional)
+        flag: %s, position: 2
+transformation_series: (a list of items which are an existing file
+         name)
+        transformation file(s) to be applied
+        flag: %s, position: -1
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (3 or 2, nipype default value: 3)
+        image dimension (2 or 3)
+        flag: %d, position: 1
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_affine: (a list of items which are an integer)
+        List of Affine transformations to invert.E.g.: [1,4,5] inverts the
+        1st, 4th, and 5th Affines found in transformation_series. Note that
+        indexing starts with 1 and does not include warp fields. Affine
+        transformations are distinguished from warp fields by the word
+        &quot;affine&quot; included in their filenames.
+num_threads: (an integer, nipype default value: 1)
+        Number of ITK threads to use
+out_postfix: (a file name, nipype default value: _wimt)
+        Postfix that is prepended to all output files (default = _wimt)
+        mutually_exclusive: output_image
+output_image: (a file name)
+        name of the output warped image
+        flag: %s, position: 3
+        mutually_exclusive: out_postfix
+reference_image: (a file name)
+        reference image space that you wish to warp INTO
+        flag: -R %s
+        mutually_exclusive: tightest_box
+reslice_by_header: (a boolean)
+        Uses orientation matrix and origin encoded in reference image file
+        header. Not typically used with additional transforms
+        flag: --reslice-by-header
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tightest_box: (a boolean)
+        computes tightest bounding box (overrided by reference_image if
+        given)
+        flag: --tightest-bounding-box
+        mutually_exclusive: reference_image
+use_bspline: (a boolean)
+        Use 3rd order B-Spline interpolation
+        flag: --use-BSpline
+use_nearest: (a boolean)
+        Use nearest neighbor interpolation
+        flag: --use-NN
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>output_image: (an existing file name)
+        Warped image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-ants-resampling-warptimeseriesimagemultitransform"></span></div>
+</div>
+<div class="section" id="warptimeseriesimagemultitransform">
+<span id="index-3"></span><h2>WarpTimeSeriesImageMultiTransform<a class="headerlink" href="#warptimeseriesimagemultitransform" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/ants/resampling.py#L54">Link to code</a></p>
+<p>Wraps command <strong>WarpTimeSeriesImageMultiTransform</strong></p>
+<p>Warps a time-series from one space to another</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">WarpTimeSeriesImageMultiTransform</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtsimt</span> <span class="o">=</span> <span class="n">WarpTimeSeriesImageMultiTransform</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtsimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image</span> <span class="o">=</span> <span class="s">&#39;resting.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtsimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference_image</span> <span class="o">=</span> <span class="s">&#39;ants_deformed.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtsimt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transformation_series</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ants_Warp.nii.gz&#39;</span><span class="p">,</span><span class="s">&#39;ants_Affine.txt&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wtsimt</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+input_image: (a file name)
+        image to apply transformation to (generally a coregistered
+        functional)
+        flag: %s
+transformation_series: (a list of items which are an existing file
+         name)
+        transformation file(s) to be applied
+        flag: %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (4 or 3, nipype default value: 4)
+        image dimension (3 or 4)
+        flag: %d, position: 1
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_affine: (a list of items which are an integer)
+        List of Affine transformations to invert. E.g.: [1,4,5] inverts the
+        1st, 4th, and 5th Affines found in transformation_series
+num_threads: (an integer, nipype default value: 1)
+        Number of ITK threads to use
+out_postfix: (a string, nipype default value: _wtsimt)
+        Postfix that is prepended to all output files (default = _wtsimt)
+        flag: %s
+reference_image: (a file name)
+        reference image space that you wish to warp INTO
+        flag: -R %s
+        mutually_exclusive: tightest_box
+reslice_by_header: (a boolean)
+        Uses orientation matrix and origin encoded in reference image file
+        header. Not typically used with additional transforms
+        flag: --reslice-by-header
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tightest_box: (a boolean)
+        computes tightest bounding box (overrided by reference_image if
+        given)
+        flag: --tightest-bounding-box
+        mutually_exclusive: reference_image
+use_bspline: (a boolean)
+        Use 3rd order B-Spline interpolation
+        flag: --use-Bspline
+use_nearest: (a boolean)
+        Use nearest neighbor interpolation
+        flag: --use-NN
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>output_image: (an existing file name)
+        Warped image
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

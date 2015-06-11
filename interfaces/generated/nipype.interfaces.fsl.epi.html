@@ -1,0 +1,982 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.epi</a><ul>
+<li><a class="reference internal" href="#applytopup">ApplyTOPUP</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#epidewarp">EPIDeWarp</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eddy">Eddy</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#eddycorrect">EddyCorrect</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#epireg">EpiReg</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#preparefieldmap">PrepareFieldmap</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sigloss">SigLoss</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#topup">TOPUP</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-fsl-epi">
+<h1>interfaces.fsl.epi<a class="headerlink" href="#interfaces-fsl-epi" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-epi-applytopup"></span><div class="section" id="applytopup">
+<span id="index-0"></span><h2>ApplyTOPUP<a class="headerlink" href="#applytopup" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L347">Link to code</a></p>
+<p>Wraps command <strong>applytopup</strong></p>
+<p>Interface for FSL topup, a tool for estimating and correcting
+susceptibility induced distortions.
+<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ApplytopupUsersGuide">General reference</a>
+and <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup">use example</a>.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">ApplyTOPUP</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span> <span class="o">=</span> <span class="n">ApplyTOPUP</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;epi.nii&quot;</span><span class="p">,</span> <span class="s">&quot;epi_rev.nii&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">encoding_file</span> <span class="o">=</span> <span class="s">&quot;topup_encoding.txt&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_index</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_topup_fieldcoef</span> <span class="o">=</span> <span class="s">&quot;topup_fieldcoef.nii.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_topup_movpar</span> <span class="o">=</span> <span class="s">&quot;topup_movpar.txt&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applytopup</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;applytopup --datain=topup_encoding.txt --imain=epi.nii,epi_rev.nii --inindex=1,2 --topup=topup --out=epi_corrected.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">applytopup</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+encoding_file: (an existing file name)
+        name of text file with PE directions/times
+        flag: --datain=%s
+in_files: (a list of items which are an existing file name)
+        name of 4D file with images
+        flag: --imain=%s
+in_index: (a list of items which are an integer)
+        comma separated list of indicies into --datain of the input image
+        (to be corrected)
+        flag: --inindex=%s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39; or &#39;double&#39;)
+        force output data type
+        flag: -d=%s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_topup_fieldcoef: (an existing file name)
+        topup file containing the field coefficients
+        flag: --topup=%s
+        requires: in_topup_movpar
+in_topup_movpar: (an existing file name)
+        topup movpar.txt file
+        requires: in_topup_fieldcoef
+interp: (&#39;trilinear&#39; or &#39;spline&#39;)
+        interpolation method
+        flag: --interp=%s
+method: (&#39;jac&#39; or &#39;lsr&#39;)
+        use jacobian modulation (jac) or least-squares resampling (lsr)
+        flag: --method=%s
+out_corrected: (a file name)
+        output (warped) image
+        flag: --out=%s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_corrected: (an existing file name)
+        name of 4D image file with unwarped images
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-epidewarp"></span></div>
+</div>
+<div class="section" id="epidewarp">
+<span id="index-1"></span><h2>EPIDeWarp<a class="headerlink" href="#epidewarp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L733">Link to code</a></p>
+<p>Wraps command <strong>epidewarp.fsl</strong></p>
+<p>Wraps the unwarping script <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl">epidewarp.fsl</a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">deprecated in FSL, please use
+<tt class="xref py py-func docutils literal"><span class="pre">nipype.workflows.dmri.preprocess.epi.sdc_fmb()</span></tt> instead.</p>
+</div>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">EPIDeWarp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span> <span class="o">=</span> <span class="n">EPIDeWarp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">epi_file</span> <span class="o">=</span> <span class="s">&quot;functional.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mag_file</span> <span class="o">=</span> <span class="s">&quot;magnitude.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dph_file</span> <span class="o">=</span> <span class="s">&quot;phase.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dewarp</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii --esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 --tmpdir .../temp --vsm .../vsm.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">dewarp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dph_file: (an existing file name)
+        Phase file assumed to be scaled from 0 to 4095
+        flag: --dph %s
+mag_file: (an existing file name)
+        Magnitude file
+        flag: --mag %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+cleanup: (a boolean)
+        cleanup
+        flag: --cleanup
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+epi_file: (an existing file name)
+        EPI volume to unwarp
+        flag: --epi %s
+epidw: (a string)
+        dewarped epi volume
+        flag: --epidw %s
+esp: (a float, nipype default value: 0.58)
+        EPI echo spacing
+        flag: --esp %s
+exf_file: (an existing file name)
+        example func volume (or use epi)
+        flag: --exf %s
+exfdw: (a string)
+        dewarped example func volume
+        flag: --exfdw %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+nocleanup: (a boolean, nipype default value: True)
+        no cleanup
+        flag: --nocleanup
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+sigma: (an integer, nipype default value: 2)
+        2D spatial gaussing smoothing stdev (default = 2mm)
+        flag: --sigma %s
+tediff: (a float, nipype default value: 2.46)
+        difference in B0 field map TEs
+        flag: --tediff %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tmpdir: (a string)
+        tmpdir
+        flag: --tmpdir %s
+vsm: (a string)
+        voxel shift map
+        flag: --vsm %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>exf_mask: (a file name)
+        Mask from example functional volume
+exfdw: (a file name)
+        dewarped functional volume example
+unwarped_file: (a file name)
+        unwarped epi file
+vsm_file: (a file name)
+        voxel shift map
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-eddy"></span></div>
+</div>
+<div class="section" id="eddy">
+<span id="index-2"></span><h2>Eddy<a class="headerlink" href="#eddy" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L440">Link to code</a></p>
+<p>Wraps command <strong>eddy</strong></p>
+<p>Interface for FSL eddy, a tool for estimating and correcting eddy
+currents induced distortions. <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide">User guide</a> and
+<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/eddy/Faq#How_do_I_know_what_to_put_into_my_--acqp_file">more info regarding acqp file</a>.</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">Eddy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span> <span class="o">=</span> <span class="n">Eddy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span>  <span class="o">=</span> <span class="s">&#39;epi_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_index</span> <span class="o">=</span> <span class="s">&#39;epi_index.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_acqp</span>  <span class="o">=</span> <span class="s">&#39;epi_acqp.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_bvec</span>  <span class="o">=</span> <span class="s">&#39;bvecs.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_bval</span>  <span class="o">=</span> <span class="s">&#39;bvals.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddy</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii --out=.../eddy_corrected&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">eddy</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_acqp: (an existing file name)
+        File containing acquisition parameters
+        flag: --acqp=%s
+in_bval: (an existing file name)
+        File containing the b-values for all volumes in --imain
+        flag: --bvals=%s
+in_bvec: (an existing file name)
+        File containing the b-vectors for all volumes in --imain
+        flag: --bvecs=%s
+in_file: (an existing file name)
+        File containing all the images to estimate distortions for
+        flag: --imain=%s
+in_index: (an existing file name)
+        File containing indices for all volumes in --imain into --acqp and
+        --topup
+        flag: --index=%s
+in_mask: (an existing file name)
+        Mask to indicate brain
+        flag: --mask=%s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+flm: (&#39;linear&#39; or &#39;quadratic&#39; or &#39;cubic&#39;)
+        First level EC model
+        flag: --flm=%s
+fwhm: (a float)
+        FWHM for conditioning filter when estimating the parameters
+        flag: --fwhm=%s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_topup_fieldcoef: (an existing file name)
+        topup file containing the field coefficients
+        flag: --topup=%s
+        requires: in_topup_movpar
+in_topup_movpar: (an existing file name)
+        topup movpar.txt file
+        requires: in_topup_fieldcoef
+method: (&#39;jac&#39; or &#39;lsr&#39;)
+        Final resampling method (jacobian/least squares)
+        flag: --resamp=%s
+niter: (an integer)
+        Number of iterations
+        flag: --niter=%s
+num_threads: (an integer, nipype default value: 1)
+        Number of openmp threads to use
+out_base: (a unicode string, nipype default value: eddy_corrected)
+        basename for output (warped) image
+        flag: --out=%s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+repol: (a boolean)
+        Detect and replace outlier slices
+        flag: --repol
+session: (an existing file name)
+        File containing session indices for all volumes in --imain
+        flag: --session=%s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_corrected: (an existing file name)
+        4D image file containing all the corrected volumes
+out_parameter: (an existing file name)
+        text file with parameters definining the field and movement for each
+        scan
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-eddycorrect"></span></div>
+</div>
+<div class="section" id="eddycorrect">
+<span id="index-3"></span><h2>EddyCorrect<a class="headerlink" href="#eddycorrect" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L831">Link to code</a></p>
+<p>Wraps command <strong>eddy_correct</strong></p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deprecated in FSL. Please use
+<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.epi.Eddy</span></tt> instead</p>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">EddyCorrect</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddyc</span> <span class="o">=</span> <span class="n">EddyCorrect</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;diffusion.nii&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">out_file</span><span class="o">=</span><span class="s">&quot;diffusion_edc.nii&quot;</span><span class="p">,</span> <span class="n">ref_num</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">eddyc</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;eddy_correct diffusion.nii diffusion_edc.nii 0&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        4D input file
+        flag: %s, position: 0
+ref_num: (an integer, nipype default value: 0)
+        reference number
+        flag: %d, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        4D output file
+        flag: %s, position: 1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>eddy_corrected: (an existing file name)
+        path/name of 4D eddy corrected output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-epireg"></span></div>
+</div>
+<div class="section" id="epireg">
+<span id="index-4"></span><h2>EpiReg<a class="headerlink" href="#epireg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L622">Link to code</a></p>
+<p>Wraps command <strong>epi_reg</strong></p>
+<p>Runs FSL epi_reg script for simultaneous coregistration and fieldmap
+unwarping.</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">EpiReg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span> <span class="o">=</span> <span class="n">EpiReg</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">epi</span><span class="o">=</span><span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1_head</span><span class="o">=</span><span class="s">&#39;T1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1_brain</span><span class="o">=</span><span class="s">&#39;T1_brain.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_base</span><span class="o">=</span><span class="s">&#39;epi2struct&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fmap</span><span class="o">=</span><span class="s">&#39;fieldmap_phase_fslprepared.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fmapmag</span><span class="o">=</span><span class="s">&#39;fieldmap_mag.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fmapmagbrain</span><span class="o">=</span><span class="s">&#39;fieldmap_mag_brain.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">echospacing</span><span class="o">=</span><span class="mf">0.00067</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pedir</span><span class="o">=</span><span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;epi_reg --echospacing=0.000670 --fmap=fieldmap_phase_fslprepared.nii --fmapmag=fieldmap_mag.nii --fmapmagbrain=fieldmap_mag_brain.nii --pedir=y --epi=epi.nii --t1=T1.nii --t1brain=T1_brain.nii --out=epi2struct&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">epireg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+epi: (an existing file name)
+        EPI image
+        flag: --epi=%s, position: -4
+t1_brain: (an existing file name)
+        brain extracted T1 image
+        flag: --t1brain=%s, position: -2
+t1_head: (an existing file name)
+        wholehead T1 image
+        flag: --t1=%s, position: -3
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+echospacing: (a float)
+        Effective EPI echo spacing (sometimes called dwell time) - in
+        seconds
+        flag: --echospacing=%f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fmap: (an existing file name)
+        fieldmap image (in rad/s)
+        flag: --fmap=%s
+fmapmag: (an existing file name)
+        fieldmap magnitude image - wholehead
+        flag: --fmapmag=%s
+fmapmagbrain: (an existing file name)
+        fieldmap magnitude image - brain extracted
+        flag: --fmapmagbrain=%s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+no_clean: (a boolean)
+        do not clean up intermediate files
+        flag: --noclean
+no_fmapreg: (a boolean)
+        do not perform registration of fmap to T1 (use if fmap already
+        registered)
+        flag: --nofmapreg
+out_base: (a string)
+        output base name
+        flag: --out=%s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+pedir: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39; or &#39;-x&#39; or &#39;-y&#39; or &#39;-z&#39;)
+        phase encoding direction, dir = x/y/z/-x/-y/-z
+        flag: --pedir=%s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+weight_image: (an existing file name)
+        weighting image (in T1 space)
+        flag: --weight=%s
+wmseg: (an existing file name)
+        white matter segmentation of T1 image, has to be named like the
+        t1brain and end on _wmseg
+        flag: --wmseg=%s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>epi2str_inv: (an existing file name)
+        rigid structural-to-epi transform
+epi2str_mat: (an existing file name)
+        rigid epi-to-structural transform
+fmap2epi_mat: (an existing file name)
+        rigid fieldmap-to-epi transform
+fmap2str_mat: (an existing file name)
+        rigid fieldmap-to-structural transform
+fmap_epi: (an existing file name)
+        fieldmap in epi space
+fmap_str: (an existing file name)
+        fieldmap in structural space
+fmapmag_str: (an existing file name)
+        fieldmap magnitude image in structural space
+fullwarp: (an existing file name)
+        warpfield to unwarp epi and transform into structural space
+out_1vol: (an existing file name)
+        unwarped and coregistered single volume
+out_file: (an existing file name)
+        unwarped and coregistered epi input
+shiftmap: (an existing file name)
+        shiftmap in epi space
+wmedge: (an existing file name)
+        white matter edges for visualization
+wmseg: (an existing file name)
+        white matter segmentation used in flirt bbr
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-preparefieldmap"></span></div>
+</div>
+<div class="section" id="preparefieldmap">
+<span id="index-5"></span><h2>PrepareFieldmap<a class="headerlink" href="#preparefieldmap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L57">Link to code</a></p>
+<p>Wraps command <strong>fsl_prepare_fieldmap</strong></p>
+<p>Interface for the fsl_prepare_fieldmap script (FSL 5.0)</p>
+<p>Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in
+rad/s format (e.g. <tt class="docutils literal"><span class="pre">`fsl_prepare_fieldmap</span> <span class="pre">SIEMENS</span>
+<span class="pre">images_3_gre_field_mapping</span> <span class="pre">images_4_gre_field_mapping</span> <span class="pre">fmap_rads</span> <span class="pre">2.65`</span></tt>).</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">PrepareFieldmap</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prepare</span> <span class="o">=</span> <span class="n">PrepareFieldmap</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prepare</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_phase</span> <span class="o">=</span> <span class="s">&quot;phase.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prepare</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_magnitude</span> <span class="o">=</span> <span class="s">&quot;magnitude.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prepare</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prepare</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii .../phase_fslprepared.nii.gz 2.460000&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">prepare</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+delta_TE: (a float, nipype default value: 2.46)
+        echo time difference of the fieldmap sequence in ms. (usually 2.46ms
+        in Siemens)
+        flag: %f, position: -2
+in_magnitude: (an existing file name)
+        Magnitude difference map, brain extracted
+        flag: %s, position: 3
+in_phase: (an existing file name)
+        Phase difference map, in SIEMENS format range from 0-4096 or 0-8192)
+        flag: %s, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+nocheck: (a boolean, nipype default value: False)
+        do not perform sanity checks for image size/range/dimensions
+        flag: --nocheck, position: -1
+out_fieldmap: (a file name)
+        output name for prepared fieldmap
+        flag: %s, position: 4
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+scanner: (a string, nipype default value: SIEMENS)
+        must be SIEMENS
+        flag: %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_fieldmap: (an existing file name)
+        output name for prepared fieldmap
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-sigloss"></span></div>
+</div>
+<div class="section" id="sigloss">
+<span id="index-6"></span><h2>SigLoss<a class="headerlink" href="#sigloss" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L527">Link to code</a></p>
+<p>Wraps command <strong>sigloss</strong></p>
+<p>Estimates signal loss from a field map (in rad/s)</p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">SigLoss</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span> <span class="o">=</span> <span class="n">SigLoss</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;phase.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">echo_time</span> <span class="o">=</span> <span class="mf">0.03</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">sigloss</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        b0 fieldmap file
+        flag: -i %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+echo_time: (a float)
+        echo time in seconds
+        flag: --te=%f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask_file: (an existing file name)
+        brain mask file
+        flag: -m %s
+out_file: (a file name)
+        output signal loss estimate file
+        flag: -s %s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+slice_direction: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
+        slicing direction
+        flag: -d %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        signal loss estimate file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-epi-topup"></span></div>
+</div>
+<div class="section" id="topup">
+<span id="index-7"></span><h2>TOPUP<a class="headerlink" href="#topup" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L219">Link to code</a></p>
+<p>Wraps command <strong>topup</strong></p>
+<p>Interface for FSL topup, a tool for estimating and correcting
+susceptibility induced distortions. See FSL documentation for
+<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP">reference</a>,
+<a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup">usage examples</a>,
+and <a href="#id7"><span class="problematic" id="id8">`exemplary config files
+&lt;https://github.com/ahheckel/FSL-scripts/blob/master/rsc/fsl/fsl4/topup/b02b0.cnf`_</span></a>.</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">TOPUP</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">topup</span> <span class="o">=</span> <span class="n">TOPUP</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">topup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;b0_b0rev.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">topup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">encoding_file</span> <span class="o">=</span> <span class="s">&quot;topup_encoding.txt&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">topup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">topup</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;topup --config=b02b0.cnf --datain=topup_encoding.txt --imain=b0_b0rev.nii --out=b0_b0rev_base --iout=b0_b0rev_corrected.nii.gz --fout=b0_b0rev_field.nii.gz --logout=b0_b0rev_topup.log&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">topup</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+encoding_direction: (a list of items which are &#39;y&#39; or &#39;x&#39; or &#39;z&#39; or
+         &#39;x-&#39; or &#39;y-&#39; or &#39;z-&#39;)
+        encoding direction for automatic generation of encoding_file
+        flag: --datain=%s
+        mutually_exclusive: encoding_file
+        requires: readout_times
+encoding_file: (an existing file name)
+        name of text file with PE directions/times
+        flag: --datain=%s
+        mutually_exclusive: encoding_direction
+in_file: (an existing file name)
+        name of 4D file with images
+        flag: --imain=%s
+readout_times: (a list of items which are a float)
+        readout times (dwell times by # phase-encode steps minus 1)
+        mutually_exclusive: encoding_file
+        requires: encoding_direction
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+config: (a string, nipype default value: b02b0.cnf)
+        Name of config file specifying command line arguments
+        flag: --config=%s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+estmov: (1 or 0)
+        estimate movements if set
+        flag: --estmov=%d
+fwhm: (a float)
+        FWHM (in mm) of gaussian smoothing kernel
+        flag: --fwhm=%f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (&#39;spline&#39; or &#39;linear&#39;)
+        Image interpolation model, linear or spline.
+        flag: --interp=%s
+max_iter: (an integer)
+        max # of non-linear iterations
+        flag: --miter=%d
+minmet: (0 or 1)
+        Minimisation method 0=Levenberg-Marquardt, 1=Scaled Conjugate
+        Gradient
+        flag: --minmet=%d
+numprec: (&#39;double&#39; or &#39;float&#39;)
+        Precision for representing Hessian, double or float.
+        flag: --numprec=%s
+out_base: (a file name)
+        base-name of output files (spline coefficients (Hz) and movement
+        parameters)
+        flag: --out=%s
+out_corrected: (a file name)
+        name of 4D image file with unwarped images
+        flag: --iout=%s
+out_field: (a file name)
+        name of image file with field (Hz)
+        flag: --fout=%s
+out_logfile: (a file name)
+        name of log-file
+        flag: --logout=%s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+reg_lambda: (a float)
+        lambda weighting value of the regularisation term
+        flag: --miter=%0.f
+regmod: (&#39;bending_energy&#39; or &#39;membrane_energy&#39;)
+        Regularisation term implementation. Defaults to bending_energy. Note
+        that the two functions have vastly different scales. The membrane
+        energy is based on the first derivatives and the bending energy on
+        the second derivatives. The second derivatives will typically be
+        much smaller than the first derivatives, so input lambda will have
+        to be larger for bending_energy to yield approximately the same
+        level of regularisation.
+        flag: --regmod=%s
+regrid: (1 or 0)
+        If set (=1), the calculations are done in a different grid
+        flag: --regrid=%d
+scale: (0 or 1)
+        If set (=1), the images are individually scaled to a common mean
+        flag: --scale=%d
+splineorder: (an integer)
+        order of spline, 2-&gt;Qadratic spline, 3-&gt;Cubic spline
+        flag: --splineorder=%d
+ssqlambda: (1 or 0)
+        Weight lambda by the current value of the ssd. If used (=1), the
+        effective weight of regularisation term becomes higher for the
+        initial iterations, therefore initial steps are a little smoother
+        than they would without weighting. This reduces the risk of finding
+        a local minimum.
+        flag: --ssqlambda=%d
+subsamp: (an integer)
+        sub-sampling scheme
+        flag: --subsamp=%d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+warp_res: (a float)
+        (approximate) resolution (in mm) of warp basis for the different
+        sub-sampling levels.
+        flag: --warpres=%f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_corrected: (a file name)
+        name of 4D image file with unwarped images
+out_enc_file: (a file name)
+        encoding directions file output for applytopup
+out_field: (a file name)
+        name of image file with field (Hz)
+out_fieldcoef: (an existing file name)
+        file containing the field coefficients
+out_logfile: (a file name)
+        name of log-file
+out_movpar: (an existing file name)
+        movpar.txt output file
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

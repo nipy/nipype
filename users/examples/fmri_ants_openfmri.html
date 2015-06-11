@@ -1,0 +1,1293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fmri-openfmri-org-data-fsl-ants-c3daffine">
+<span id="example-fmri-ants-openfmri"></span><h1>fMRI: OpenfMRI.org data, FSL, ANTS, c3daffine<a class="headerlink" href="#fmri-openfmri-org-data-fsl-ants-c3daffine" title="Permalink to this headline">¶</a></h1>
+<p>A growing number of datasets are available on <a class="reference external" href="http://openfmri.org">OpenfMRI</a>.
+This script demonstrates how to use nipype to analyze a data set:</p>
+<div class="highlight-python"><div class="highlight"><pre>python fmri_ants_openfmri.py --datasetdir ds107
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="n">config</span><span class="o">.</span><span class="n">enable_provenance</span><span class="p">()</span>
+
+<span class="kn">from</span> <span class="nn">nipype.external</span> <span class="kn">import</span> <span class="n">six</span>
+
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.modelgen</span> <span class="kn">as</span> <span class="nn">model</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">as</span> <span class="nn">ra</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">as</span> <span class="nn">ants</span>
+<span class="kn">from</span> <span class="nn">nipype.algorithms.misc</span> <span class="kn">import</span> <span class="n">TSNR</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.c3</span> <span class="kn">import</span> <span class="n">C3dAffineTool</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">niu</span>
+<span class="kn">from</span> <span class="nn">nipype.workflows.fmri.fsl</span> <span class="kn">import</span> <span class="p">(</span><span class="n">create_featreg_preproc</span><span class="p">,</span>
+                                       <span class="n">create_modelfit_workflow</span><span class="p">,</span>
+                                       <span class="n">create_fixed_effects_flow</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">LooseVersion</span>
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">MapNode</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="p">(</span><span class="n">fsl</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">ants</span><span class="p">,</span> <span class="n">freesurfer</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">import</span> <span class="n">Rename</span><span class="p">,</span> <span class="n">Merge</span><span class="p">,</span> <span class="n">IdentityInterface</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">filename_to_list</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">DataSink</span><span class="p">,</span> <span class="n">FreeSurferSource</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>
+
+<span class="n">version</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">version</span><span class="p">()</span> <span class="ow">and</span> \
+    <span class="n">LooseVersion</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">version</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">LooseVersion</span><span class="p">(</span><span class="s">&#39;5.0.6&#39;</span><span class="p">):</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="mi">507</span>
+
+<span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI_GZ&#39;</span><span class="p">)</span>
+
+<span class="n">imports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;import os&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import nibabel as nb&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import numpy as np&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import scipy as sp&#39;</span><span class="p">,</span>
+           <span class="s">&#39;from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename&#39;</span><span class="p">,</span>
+           <span class="s">&#39;from scipy.special import legendre&#39;</span>
+           <span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">median</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes an average of the median of each realigned timeseries</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    in_files: one or more realigned Nifti 4D time series</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    out_file: a 3D Nifti file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">average</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">average</span> <span class="o">=</span> <span class="n">average</span> <span class="o">+</span> <span class="n">data</span>
+    <span class="n">median_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">average</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                                <span class="n">img</span><span class="o">.</span><span class="n">get_affine</span><span class="p">(),</span> <span class="n">img</span><span class="o">.</span><span class="n">get_header</span><span class="p">())</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&#39;median.nii.gz&#39;</span><span class="p">)</span>
+    <span class="n">median_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filename</span>
+
+
+<span class="k">def</span> <span class="nf">create_reg_workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;registration&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a FEAT preprocessing workflow together with freesurfer</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">        name : name of workflow (default: &#39;registration&#39;)</span>
+
+<span class="sd">    Inputs:</span>
+
+<span class="sd">        inputspec.source_files : files (filename or list of filenames to register)</span>
+<span class="sd">        inputspec.mean_image : reference image to use</span>
+<span class="sd">        inputspec.anatomical_image : anatomical image to coregister to</span>
+<span class="sd">        inputspec.target_image : registration target</span>
+
+<span class="sd">    Outputs:</span>
+
+<span class="sd">        outputspec.func2anat_transform : FLIRT transform</span>
+<span class="sd">        outputspec.anat2target_transform : FLIRT+FNIRT transform</span>
+<span class="sd">        outputspec.transformed_files : transformed files in target space</span>
+<span class="sd">        outputspec.transformed_mean : mean image in target space</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">register</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;source_files&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;mean_image&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;anatomical_image&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;target_image&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;target_image_brain&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;config_file&#39;</span><span class="p">]),</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s">&#39;inputspec&#39;</span><span class="p">)</span>
+    <span class="n">outputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func2anat_transform&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;anat2target_transform&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;transformed_files&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;transformed_mean&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;anat2target&#39;</span><span class="p">,</span>
+                                                                 <span class="p">]),</span>
+                         <span class="n">name</span><span class="o">=</span><span class="s">&#39;outputspec&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Estimate the tissue classes from the anatomical image. But use spm&#8217;s segment
+as FSL appears to be breaking.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stripper</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;stripper&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;anatomical_image&#39;</span><span class="p">,</span> <span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">fast</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">FAST</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;fast&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">fast</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Binarize the segmentation</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">binarize</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(</span><span class="n">op_string</span><span class="o">=</span><span class="s">&#39;-nan -thr 0.5 -bin&#39;</span><span class="p">),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;binarize&#39;</span><span class="p">)</span>
+<span class="n">pickindex</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fast</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;partial_volume_files&#39;</span><span class="p">,</span> <span class="n">pickindex</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                 <span class="n">binarize</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Calculate rigid transform from mean image to anatomical image</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mean2anat</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mean2anat&#39;</span><span class="p">)</span>
+<span class="n">mean2anat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dof</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">mean2anat</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">mean2anat</span><span class="p">,</span> <span class="s">&#39;reference&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now use bbr cost function to improve the transform</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mean2anatbbr</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mean2anatbbr&#39;</span><span class="p">)</span>
+<span class="n">mean2anatbbr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dof</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">mean2anatbbr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">cost</span> <span class="o">=</span> <span class="s">&#39;bbr&#39;</span>
+<span class="n">mean2anatbbr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&#39;FSLDIR&#39;</span><span class="p">),</span>
+                                            <span class="s">&#39;etc/flirtsch/bbr.sch&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;wm_seg&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;anatomical_image&#39;</span><span class="p">,</span> <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;reference&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mean2anat</span><span class="p">,</span> <span class="s">&#39;out_matrix_file&#39;</span><span class="p">,</span>
+                 <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;in_matrix_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Convert the BBRegister transformation to ANTS ITK format</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">convert2itk</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">C3dAffineTool</span><span class="p">(),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2itk&#39;</span><span class="p">)</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fsl2ras</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;out_matrix_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;transform_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;reference_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute registration between the subject&#8217;s structural and MNI template
+This is currently set to perform a very quick registration. However, the
+registration can be made significantly more accurate for cortical
+structures by increasing the number of iterations
+All parameters are set using the example from:
+#https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">reg</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">Registration</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;antsRegister&#39;</span><span class="p">)</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_transform_prefix</span> <span class="o">=</span> <span class="s">&quot;output_&quot;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Rigid&#39;</span><span class="p">,</span> <span class="s">&#39;Affine&#39;</span><span class="p">,</span> <span class="s">&#39;SyN&#39;</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transform_parameters</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">number_of_iterations</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">11110</span><span class="p">,</span> <span class="mi">11110</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">write_composite_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">collapse_output_transforms</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform_com</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="s">&#39;Mattes&#39;</span><span class="p">,</span> <span class="s">&#39;CC&#39;</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_strategy</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Regular&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_percentage</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_threshold</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e-8</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_window_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smoothing_sigmas</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sigma_units</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;vox&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">shrink_factors</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_estimate_learning_rate_once</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-pe orte 4&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;--mem=6G -c 4&#39;</span><span class="p">}</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="s">&#39;moving_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image_brain&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span><span class="s">&#39;fixed_image&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Concatenate the affine and ants transforms into a list</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform the mean image. First to anatomical and then to target</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpmean</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpmean&#39;</span><span class="p">)</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image_brain&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span><span class="s">&#39;reference_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform the remaining images. First to anatomical and then to target</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpall</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span>
+                     <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;input_image&#39;</span><span class="p">],</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpall&#39;</span><span class="p">)</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image_brain&#39;</span><span class="p">,</span><span class="n">warpall</span><span class="p">,</span><span class="s">&#39;reference_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;source_files&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Assign all the output files</p>
+<div class="highlight-python"><div class="highlight"><pre>    register.connect(reg, &#39;warped_image&#39;, outputnode, &#39;anat2target&#39;)
+    register.connect(warpmean, &#39;output_image&#39;, outputnode, &#39;transformed_mean&#39;)
+    register.connect(warpall, &#39;output_image&#39;, outputnode, &#39;transformed_files&#39;)
+    register.connect(mean2anatbbr, &#39;out_matrix_file&#39;,
+                     outputnode, &#39;func2anat_transform&#39;)
+    register.connect(reg, &#39;composite_transform&#39;,
+                     outputnode, &#39;anat2target_transform&#39;)
+
+    return register
+
+def get_aparc_aseg(files):
+    &quot;&quot;&quot;Return the aparc+aseg.mgz file&quot;&quot;&quot;
+    for name in files:
+        if &#39;aparc+aseg.mgz&#39; in name:
+            return name
+    raise ValueError(&#39;aparc+aseg.mgz not found&#39;)
+
+def create_fs_reg_workflow(name=&#39;registration&#39;):
+    &quot;&quot;&quot;Create a FEAT preprocessing workflow together with freesurfer
+
+    Parameters
+    ----------
+
+    ::
+
+        name : name of workflow (default: &#39;registration&#39;)
+
+    Inputs::
+
+        inputspec.source_files : files (filename or list of filenames to register)
+        inputspec.mean_image : reference image to use
+        inputspec.target_image : registration target
+
+    Outputs::
+
+        outputspec.func2anat_transform : FLIRT transform
+        outputspec.anat2target_transform : FLIRT+FNIRT transform
+        outputspec.transformed_files : transformed files in target space
+        outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+</pre></div>
+</div>
+<p>register = Workflow(name=name)
+inputnode = Node(interface=IdentityInterface(fields=[&#8216;source_files&#8217;,</p>
+<blockquote>
+<div><blockquote>
+<div>&#8216;mean_image&#8217;,
+&#8216;subject_id&#8217;,
+&#8216;subjects_dir&#8217;,
+&#8216;target_image&#8217;]),</div></blockquote>
+<p>name=&#8217;inputspec&#8217;)</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>outputnode = Node(interface=IdentityInterface(fields=[&#8216;func2anat_transform&#8217;,</dt>
+<dd><blockquote class="first">
+<div>&#8216;out_reg_file&#8217;,
+&#8216;anat2target_transform&#8217;,
+&#8216;transforms&#8217;,
+&#8216;transformed_mean&#8217;,
+&#8216;transformed_files&#8217;,
+&#8216;min_cost_file&#8217;,
+&#8216;anat2target&#8217;,
+&#8216;aparc&#8217;
+]),</div></blockquote>
+<p class="last">name=&#8217;outputspec&#8217;)</p>
+</dd>
+</dl>
+<p># Get the subject&#8217;s freesurfer source directory
+fssource = Node(FreeSurferSource(),</p>
+<blockquote>
+<div>name=&#8217;fssource&#8217;)</div></blockquote>
+<p>fssource.run_without_submitting = True
+register.connect(inputnode, &#8216;subject_id&#8217;, fssource, &#8216;subject_id&#8217;)
+register.connect(inputnode, &#8216;subjects_dir&#8217;, fssource, &#8216;subjects_dir&#8217;)
+convert = Node(freesurfer.MRIConvert(out_type=&#8217;nii&#8217;),</p>
+<blockquote>
+<div>name=&#8221;convert&#8221;)</div></blockquote>
+<p>register.connect(fssource, &#8216;T1&#8217;, convert, &#8216;in_file&#8217;)
+# Coregister the median to the surface
+bbregister = Node(freesurfer.BBRegister(),</p>
+<blockquote>
+<div>name=&#8217;bbregister&#8217;)</div></blockquote>
+<p>bbregister.inputs.init = &#8216;fsl&#8217;
+bbregister.inputs.contrast_type = &#8216;t2&#8217;
+bbregister.inputs.out_fsl_file = True
+bbregister.inputs.epi_mask = True
+register.connect(inputnode, &#8216;subject_id&#8217;, bbregister, &#8216;subject_id&#8217;)
+register.connect(inputnode, &#8216;mean_image&#8217;, bbregister, &#8216;source_file&#8217;)
+register.connect(inputnode, &#8216;subjects_dir&#8217;, bbregister, &#8216;subjects_dir&#8217;)</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><p class="first">use aparc+aseg&#8217;s brain mask
+&#8220;&#8221;&#8220;</p>
+<p>binarize = Node(fs.Binarize(min=0.5, out_type=&#8221;nii.gz&#8221;, dilate=1), name=&#8221;binarize_aparc&#8221;)
+register.connect(fssource, (&#8220;aparc_aseg&#8221;, get_aparc_aseg), binarize, &#8220;in_file&#8221;)</p>
+<p class="last">stripper = Node(fsl.ApplyMask(), name =&#8217;stripper&#8217;)
+register.connect(binarize, &#8220;binary_file&#8221;, stripper, &#8220;mask_file&#8221;)
+register.connect(convert, &#8216;out_file&#8217;, stripper, &#8216;in_file&#8217;)</p>
+</dd>
+</dl>
+<p>Apply inverse transform to aparc file</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><dl class="first docutils">
+<dt>aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,</dt>
+<dd><blockquote class="first">
+<div>interp=&#8217;nearest&#8217;),</div></blockquote>
+<p class="last">name=&#8217;aparc_inverse_transform&#8217;)</p>
+</dd>
+</dl>
+<p>register.connect(inputnode, &#8216;subjects_dir&#8217;, aparcxfm, &#8216;subjects_dir&#8217;)
+register.connect(bbregister, &#8216;out_reg_file&#8217;, aparcxfm, &#8216;reg_file&#8217;)
+register.connect(fssource, (&#8216;aparc_aseg&#8217;, get_aparc_aseg),</p>
+<blockquote>
+<div>aparcxfm, &#8216;target_file&#8217;)</div></blockquote>
+<p class="last">register.connect(inputnode, &#8216;mean_image&#8217;, aparcxfm, &#8216;source_file&#8217;)</p>
+</dd>
+</dl>
+<p>Convert the BBRegister transformation to ANTS ITK format</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">convert2itk</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">C3dAffineTool</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2itk&#39;</span><span class="p">)</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fsl2ras</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">itk_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_fsl_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;transform_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;reference_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Compute registration between the subject&#8217;s structural and MNI template
+This is currently set to perform a very quick registration. However, the
+registration can be made significantly more accurate for cortical
+structures by increasing the number of iterations
+All parameters are set using the example from:
+#https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">reg</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">Registration</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;antsRegister&#39;</span><span class="p">)</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_transform_prefix</span> <span class="o">=</span> <span class="s">&quot;output_&quot;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Rigid&#39;</span><span class="p">,</span> <span class="s">&#39;Affine&#39;</span><span class="p">,</span> <span class="s">&#39;SyN&#39;</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transform_parameters</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,),</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">number_of_iterations</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">11110</span><span class="p">,</span> <span class="mi">11110</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">write_composite_transform</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">collapse_output_transforms</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform_com</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="s">&#39;Mattes&#39;</span><span class="p">,</span> <span class="s">&#39;CC&#39;</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_strategy</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Regular&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_percentage</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_threshold</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e-8</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.01</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">convergence_window_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">smoothing_sigmas</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sigma_units</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;vox&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">shrink_factors</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span> <span class="p">[[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_estimate_learning_rate_once</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-pe orte 4&#39;</span><span class="p">,</span>
+                   <span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;--mem=6G -c 4&#39;</span><span class="p">}</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span> <span class="s">&#39;moving_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image&#39;</span><span class="p">,</span> <span class="n">reg</span><span class="p">,</span><span class="s">&#39;fixed_image&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Concatenate the affine and ants transforms into a list</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Transform the mean image. First to anatomical and then to target</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>warpmean = Node(ants.ApplyTransforms(), name=&#8217;warpmean&#8217;)
+warpmean.inputs.input_image_type = 0
+warpmean.inputs.interpolation = &#8216;Linear&#8217;
+warpmean.inputs.invert_transform_flags = [False, False]
+warpmean.inputs.terminal_output = &#8216;file&#8217;
+warpmean.inputs.args = &#8216;&#8211;float&#8217;
+#warpmean.inputs.num_threads = 4
+#warpmean.plugin_args = {&#8216;sbatch_args&#8217;: &#8216;&#8211;mem=4G -c 4&#8217;}</dd>
+</dl>
+<p>Transform the remaining images. First to anatomical and then to target</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpall</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span>
+                     <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;input_image&#39;</span><span class="p">],</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpall&#39;</span><span class="p">)</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">warpall</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;--mem=6G -c 2&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Assign all the output files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;output_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transformed_mean&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;output_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transformed_files&#39;</span><span class="p">)</span>
+
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span><span class="s">&#39;reference_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span><span class="s">&#39;reference_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;source_files&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpall</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Assign all the output files</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;warped_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;transformed_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;aparc&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_fsl_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;func2anat_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+
+<span class="k">return</span> <span class="n">register</span>
+</pre></div>
+</div>
+<p>Get info for a given subject</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_subjectinfo</span><span class="p">(</span><span class="n">subject_id</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">model_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get info for a given subject</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    subject_id : string</span>
+<span class="sd">        Subject identifier (e.g., sub001)</span>
+<span class="sd">    base_dir : string</span>
+<span class="sd">        Path to base directory of the dataset</span>
+<span class="sd">    task_id : int</span>
+<span class="sd">        Which task to process</span>
+<span class="sd">    model_id : int</span>
+<span class="sd">        Which model to process</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    run_ids : list of ints</span>
+<span class="sd">        Run numbers</span>
+<span class="sd">    conds : list of str</span>
+<span class="sd">        Condition names</span>
+<span class="sd">    TR : float</span>
+<span class="sd">        Repetition time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="n">condition_info</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">cond_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s">&#39;models&#39;</span><span class="p">,</span> <span class="s">&#39;model</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model_id</span><span class="p">,</span>
+                             <span class="s">&#39;condition_key.txt&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cond_file</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">condition_info</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">info</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="mi">2</span><span class="p">:])])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">condition_info</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;No condition info found in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">cond_file</span><span class="p">)</span>
+    <span class="n">taskinfo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">condition_info</span><span class="p">)</span>
+    <span class="n">n_tasks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">taskinfo</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="n">conds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">run_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">task_id</span> <span class="o">&gt;</span> <span class="n">n_tasks</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Task id </span><span class="si">%d</span><span class="s"> does not exist&#39;</span> <span class="o">%</span> <span class="n">task_id</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_tasks</span><span class="p">):</span>
+        <span class="n">taskidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">taskinfo</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">conds</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">condition</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">condition</span>
+                      <span class="ow">in</span> <span class="n">taskinfo</span><span class="p">[</span><span class="n">taskidx</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">2</span><span class="p">]])</span> <span class="c"># if &#39;junk&#39; not in condition])</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span>
+                                         <span class="n">subject_id</span><span class="p">,</span>
+                                         <span class="s">&#39;BOLD&#39;</span><span class="p">,</span>
+                                         <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">_run*&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))))</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+        <span class="n">run_ids</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">runs</span><span class="p">)</span>
+    <span class="n">json_info</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s">&#39;BOLD&#39;</span><span class="p">,</span>
+                                 <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">_run</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">run_ids</span><span class="p">[</span><span class="n">task_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                                 <span class="s">&#39;bold_scaninfo.json&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">json_info</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">json_info</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+            <span class="n">TR</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;global&#39;</span><span class="p">][</span><span class="s">&#39;const&#39;</span><span class="p">][</span><span class="s">&#39;RepetitionTime&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">task_scan_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s">&#39;BOLD&#39;</span><span class="p">,</span>
+                                 <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">_run</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">run_ids</span><span class="p">[</span><span class="n">task_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+                                 <span class="s">&#39;scan_key.txt&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">task_scan_key</span><span class="p">):</span>
+            <span class="n">TR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">task_scan_key</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">TR</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="s">&#39;scan_key.txt&#39;</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">run_ids</span><span class="p">[</span><span class="n">task_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">conds</span><span class="p">[</span><span class="n">task_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">TR</span>
+</pre></div>
+</div>
+<p>Analyzes an open fmri dataset</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">analyze_openfmri_dataset</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">task_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subj_prefix</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">,</span>
+                             <span class="n">hpcutoff</span><span class="o">=</span><span class="mf">120.</span><span class="p">,</span> <span class="n">use_derivatives</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                             <span class="n">fwhm</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analyzes an open fmri dataset</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    data_dir : str</span>
+<span class="sd">        Path to the base data directory</span>
+
+<span class="sd">    work_dir : str</span>
+<span class="sd">        Nipype working directory (defaults to cwd)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Load nipype workflows</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_featreg_preproc</span><span class="p">(</span><span class="n">whichvol</span><span class="o">=</span><span class="s">&#39;first&#39;</span><span class="p">)</span>
+<span class="n">modelfit</span> <span class="o">=</span> <span class="n">create_modelfit_workflow</span><span class="p">()</span>
+<span class="n">fixed_fx</span> <span class="o">=</span> <span class="n">create_fixed_effects_flow</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">subjects_dir</span><span class="p">:</span>
+    <span class="n">registration</span> <span class="o">=</span> <span class="n">create_fs_reg_workflow</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">registration</span> <span class="o">=</span> <span class="n">create_reg_workflow</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Remove the plotting connection so that plot iterables don&#8217;t propagate
+to the model stage</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">preproc</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;plot_motion&#39;</span><span class="p">),</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span>
+                   <span class="n">preproc</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;outputspec&#39;</span><span class="p">),</span> <span class="s">&#39;motion_plots&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Set up openfmri data specific components</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subjects</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span>
+                   <span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">subj_prefix</span><span class="p">))])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span>
+                                                   <span class="s">&#39;model_id&#39;</span><span class="p">,</span>
+                                                   <span class="s">&#39;task_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;infosource&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subjects</span><span class="p">),</span>
+                            <span class="p">(</span><span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">model_id</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)]</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span>
+                             <span class="p">[</span><span class="n">subjects</span><span class="p">[</span><span class="n">subjects</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">subj</span><span class="p">)]</span> <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">subject</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">model_id</span><span class="p">]),</span>
+                            <span class="p">(</span><span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">task_id</span><span class="p">)]</span>
+
+<span class="n">subjinfo</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;base_dir&#39;</span><span class="p">,</span>
+                                             <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">],</span>
+                                <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;run_id&#39;</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">,</span> <span class="s">&#39;TR&#39;</span><span class="p">],</span>
+                                <span class="n">function</span><span class="o">=</span><span class="n">get_subjectinfo</span><span class="p">),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;subjectinfo&#39;</span><span class="p">)</span>
+<span class="n">subjinfo</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">data_dir</span>
+</pre></div>
+</div>
+<p>Return data components as anat, bold and behav</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd><dl class="first docutils">
+<dt>contrast_file = os.path.join(data_dir, &#8216;models&#8217;, &#8216;model%03d&#8217; % model_id,</dt>
+<dd>&#8216;task_contrasts.txt&#8217;)</dd>
+</dl>
+<p>has_contrast = os.path.exists(contrast_file)
+if has_contrast:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>datasource = pe.Node(nio.DataGrabber(infields=[&#8216;subject_id&#8217;, &#8216;run_id&#8217;,</dt>
+<dd><blockquote class="first">
+<div><blockquote>
+<div>&#8216;task_id&#8217;, &#8216;model_id&#8217;],</div></blockquote>
+<dl class="docutils">
+<dt>outfields=[&#8216;anat&#8217;, &#8216;bold&#8217;, &#8216;behav&#8217;,</dt>
+<dd>&#8216;contrasts&#8217;]),</dd>
+</dl>
+</div></blockquote>
+<p class="last">name=&#8217;datasource&#8217;)</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt>else:</dt>
+<dd><dl class="first last docutils">
+<dt>datasource = pe.Node(nio.DataGrabber(infields=[&#8216;subject_id&#8217;, &#8216;run_id&#8217;,</dt>
+<dd><blockquote class="first">
+<div><blockquote>
+<div>&#8216;task_id&#8217;, &#8216;model_id&#8217;],</div></blockquote>
+<p>outfields=[&#8216;anat&#8217;, &#8216;bold&#8217;, &#8216;behav&#8217;]),</p>
+</div></blockquote>
+<p class="last">name=&#8217;datasource&#8217;)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>datasource.inputs.base_directory = data_dir
+datasource.inputs.template = &#8216;*&#8217;</p>
+<dl class="docutils">
+<dt>if has_contrast:</dt>
+<dd><dl class="first last docutils">
+<dt>datasource.inputs.field_template = {&#8216;anat&#8217;: &#8216;%s/anatomy/T1_001.nii.gz&#8217;,</dt>
+<dd><p class="first">&#8216;bold&#8217;: &#8216;%s/BOLD/task%03d_r*/bold.nii.gz&#8217;,
+&#8216;behav&#8217;: (&#8216;%s/model/model%03d/onsets/task%03d_&#8217;</p>
+<blockquote>
+<div>&#8216;run%03d/cond*.txt&#8217;),</div></blockquote>
+<dl class="last docutils">
+<dt>&#8216;contrasts&#8217;: (&#8216;models/model%03d/&#8217;</dt>
+<dd>&#8216;task_contrasts.txt&#8217;)}</dd>
+</dl>
+</dd>
+<dt>datasource.inputs.template_args = {&#8216;anat&#8217;: [[&#8216;subject_id&#8217;]],</dt>
+<dd><p class="first">&#8216;bold&#8217;: [[&#8216;subject_id&#8217;, &#8216;task_id&#8217;]],
+&#8216;behav&#8217;: [[&#8216;subject_id&#8217;, &#8216;model_id&#8217;,</p>
+<blockquote>
+<div>&#8216;task_id&#8217;, &#8216;run_id&#8217;]],</div></blockquote>
+<p class="last">&#8216;contrasts&#8217;: [[&#8216;model_id&#8217;]]}</p>
+</dd>
+</dl>
+</dd>
+<dt>else:</dt>
+<dd><dl class="first last docutils">
+<dt>datasource.inputs.field_template = {&#8216;anat&#8217;: &#8216;%s/anatomy/T1_001.nii.gz&#8217;,</dt>
+<dd><p class="first">&#8216;bold&#8217;: &#8216;%s/BOLD/task%03d_r*/bold.nii.gz&#8217;,
+&#8216;behav&#8217;: (&#8216;%s/model/model%03d/onsets/task%03d_&#8217;</p>
+<blockquote class="last">
+<div>&#8216;run%03d/cond*.txt&#8217;)}</div></blockquote>
+</dd>
+<dt>datasource.inputs.template_args = {&#8216;anat&#8217;: [[&#8216;subject_id&#8217;]],</dt>
+<dd><p class="first">&#8216;bold&#8217;: [[&#8216;subject_id&#8217;, &#8216;task_id&#8217;]],
+&#8216;behav&#8217;: [[&#8216;subject_id&#8217;, &#8216;model_id&#8217;,</p>
+<blockquote class="last">
+<div>&#8216;task_id&#8217;, &#8216;run_id&#8217;]]}</div></blockquote>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="last">datasource.inputs.sort_filelist = True</p>
+</dd>
+</dl>
+<p>Create meta workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">wf</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;openfmri&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">datasource</span><span class="p">,</span> <span class="n">preproc</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;bold&#39;</span><span class="p">,</span> <span class="s">&#39;inputspec.func&#39;</span><span class="p">)]),</span>
+            <span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">get_highpass</span><span class="p">(</span><span class="n">TR</span><span class="p">,</span> <span class="n">hpcutoff</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">hpcutoff</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">TR</span><span class="p">)</span>
+<span class="n">gethighpass</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;TR&#39;</span><span class="p">,</span> <span class="s">&#39;hpcutoff&#39;</span><span class="p">],</span>
+                                   <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;highpass&#39;</span><span class="p">],</span>
+                                   <span class="n">function</span><span class="o">=</span><span class="n">get_highpass</span><span class="p">),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;gethighpass&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;TR&#39;</span><span class="p">,</span> <span class="n">gethighpass</span><span class="p">,</span> <span class="s">&#39;TR&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">gethighpass</span><span class="p">,</span> <span class="s">&#39;highpass&#39;</span><span class="p">,</span> <span class="n">preproc</span><span class="p">,</span> <span class="s">&#39;inputspec.highpass&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Setup a basic set of contrasts, a t-test per condition</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_contrasts</span><span class="p">(</span><span class="n">contrast_file</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">conds</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="n">contrast_def</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">contrast_file</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">contrast_file</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">contrast_def</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">fp</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()])</span>
+    <span class="n">contrasts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">contrast_def</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">task_id</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cond</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">))],</span>
+               <span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="n">contrasts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+    <span class="c"># add auto contrasts for each column</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">conds</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="p">[</span><span class="n">cond</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cond</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">contrasts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">contrasts</span>
+
+<span class="n">contrastgen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;contrast_file&#39;</span><span class="p">,</span>
+                                                <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">],</span>
+                                   <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;contrasts&#39;</span><span class="p">],</span>
+                                   <span class="n">function</span><span class="o">=</span><span class="n">get_contrasts</span><span class="p">),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;contrastgen&#39;</span><span class="p">)</span>
+
+<span class="n">art</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ra</span><span class="o">.</span><span class="n">ArtifactDetect</span><span class="p">(</span><span class="n">use_differences</span><span class="o">=</span><span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">],</span>
+                                             <span class="n">use_norm</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">norm_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                             <span class="n">zintensity_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                             <span class="n">parameter_source</span><span class="o">=</span><span class="s">&#39;FSL&#39;</span><span class="p">,</span>
+                                             <span class="n">mask_type</span><span class="o">=</span><span class="s">&#39;file&#39;</span><span class="p">),</span>
+                 <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;realignment_parameters&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;mask_file&#39;</span><span class="p">],</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
+
+<span class="n">modelspec</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">SpecifyModel</span><span class="p">(),</span>
+                       <span class="n">name</span><span class="o">=</span><span class="s">&quot;modelspec&quot;</span><span class="p">)</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_units</span> <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+
+<span class="k">def</span> <span class="nf">check_behav_list</span><span class="p">(</span><span class="n">behav</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">conds</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.external</span> <span class="kn">import</span> <span class="n">six</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="n">num_conds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">behav</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+        <span class="n">behav</span> <span class="o">=</span> <span class="p">[</span><span class="n">behav</span><span class="p">]</span>
+    <span class="n">behav_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">behav</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">num_elements</span> <span class="o">=</span> <span class="n">behav_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">behav_array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_elements</span><span class="o">/</span><span class="n">num_conds</span><span class="p">,</span> <span class="n">num_conds</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+<span class="n">reshape_behav</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;behav&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">],</span>
+                                   <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;behav&#39;</span><span class="p">],</span>
+                                   <span class="n">function</span><span class="o">=</span><span class="n">check_behav_list</span><span class="p">),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;reshape_behav&#39;</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;TR&#39;</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,</span> <span class="s">&#39;time_repetition&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;behav&#39;</span><span class="p">,</span> <span class="n">reshape_behav</span><span class="p">,</span> <span class="s">&#39;behav&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">reshape_behav</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">,</span> <span class="n">reshape_behav</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reshape_behav</span><span class="p">,</span> <span class="s">&#39;behav&#39;</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,</span> <span class="s">&#39;event_files&#39;</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;TR&#39;</span><span class="p">,</span> <span class="n">modelfit</span><span class="p">,</span> <span class="s">&#39;inputspec.interscan_interval&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">,</span> <span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">has_contrast</span><span class="p">:</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;contrast_file&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">contrastgen</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_file</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="n">modelfit</span><span class="p">,</span> <span class="s">&#39;inputspec.contrasts&#39;</span><span class="p">)</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">art</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.motion_parameters&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;realignment_parameters&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="s">&#39;outputspec.realigned_files&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;realigned_files&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="s">&#39;outputspec.mask&#39;</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.highpassed_files&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;functional_runs&#39;</span><span class="p">),</span>
+                                  <span class="p">(</span><span class="s">&#39;outputspec.motion_parameters&#39;</span><span class="p">,</span>
+                                   <span class="s">&#39;realignment_parameters&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outlier_files&#39;</span><span class="p">,</span> <span class="s">&#39;outlier_files&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">modelspec</span><span class="p">,</span> <span class="n">modelfit</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;inputspec.session_info&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">modelfit</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.highpassed_files&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;inputspec.functional_data&#39;</span><span class="p">)])</span>
+            <span class="p">])</span>
+
+<span class="c"># Comute TSNR on realigned data regressing polynomials upto order 2</span>
+<span class="n">tsnr</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">TSNR</span><span class="p">(</span><span class="n">regress_poly</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;tsnr&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">preproc</span><span class="p">,</span> <span class="s">&quot;outputspec.realigned_files&quot;</span><span class="p">,</span> <span class="n">tsnr</span><span class="p">,</span> <span class="s">&quot;in_file&quot;</span><span class="p">)</span>
+
+<span class="c"># Compute the median image across runs</span>
+<span class="n">calc_median</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_files&#39;</span><span class="p">],</span>
+                            <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;median_file&#39;</span><span class="p">],</span>
+                            <span class="n">function</span><span class="o">=</span><span class="n">median</span><span class="p">,</span>
+                            <span class="n">imports</span><span class="o">=</span><span class="n">imports</span><span class="p">),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;median&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;detrended_file&#39;</span><span class="p">,</span> <span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Reorder the copes so that now it combines across runs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sort_copes</span><span class="p">(</span><span class="n">copes</span><span class="p">,</span> <span class="n">varcopes</span><span class="p">,</span> <span class="n">contrasts</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">copes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">copes</span> <span class="o">=</span> <span class="p">[</span><span class="n">copes</span><span class="p">]</span>
+        <span class="n">varcopes</span> <span class="o">=</span> <span class="p">[</span><span class="n">varcopes</span><span class="p">]</span>
+    <span class="n">num_copes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">contrasts</span><span class="p">)</span>
+    <span class="n">n_runs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">copes</span><span class="p">)</span>
+    <span class="n">all_copes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">copes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">all_varcopes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">varcopes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">outcopes</span> <span class="o">=</span> <span class="n">all_copes</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_copes</span><span class="p">)</span><span class="o">/</span><span class="n">num_copes</span><span class="p">,</span> <span class="n">num_copes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">outvarcopes</span> <span class="o">=</span> <span class="n">all_varcopes</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_varcopes</span><span class="p">)</span><span class="o">/</span><span class="n">num_copes</span><span class="p">,</span> <span class="n">num_copes</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">outcopes</span><span class="p">,</span> <span class="n">outvarcopes</span><span class="p">,</span> <span class="n">n_runs</span>
+
+<span class="n">cope_sorter</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">,</span>
+                                                <span class="s">&#39;contrasts&#39;</span><span class="p">],</span>
+                                   <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">,</span>
+                                                 <span class="s">&#39;n_runs&#39;</span><span class="p">],</span>
+                                   <span class="n">function</span><span class="o">=</span><span class="n">sort_copes</span><span class="p">),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;cope_sorter&#39;</span><span class="p">)</span>
+
+<span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="n">cope_sorter</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">fixed_fx</span><span class="p">,</span> <span class="p">[((</span><span class="s">&#39;outputspec.mask&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span>
+                                  <span class="s">&#39;flameo.mask_file&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">modelfit</span><span class="p">,</span> <span class="n">cope_sorter</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.copes&#39;</span><span class="p">,</span> <span class="s">&#39;copes&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">modelfit</span><span class="p">,</span> <span class="n">cope_sorter</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.varcopes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">cope_sorter</span><span class="p">,</span> <span class="n">fixed_fx</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;inputspec.copes&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;varcopes&#39;</span><span class="p">,</span> <span class="s">&#39;inputspec.varcopes&#39;</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;n_runs&#39;</span><span class="p">,</span> <span class="s">&#39;l2model.num_copes&#39;</span><span class="p">)]),</span>
+            <span class="p">(</span><span class="n">modelfit</span><span class="p">,</span> <span class="n">fixed_fx</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.dof_file&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;inputspec.dof_files&#39;</span><span class="p">),</span>
+                                  <span class="p">])</span>
+            <span class="p">])</span>
+
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;median_file&#39;</span><span class="p">,</span> <span class="n">registration</span><span class="p">,</span> <span class="s">&#39;inputspec.mean_image&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">subjects_dir</span><span class="p">:</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">registration</span><span class="p">,</span> <span class="s">&#39;inputspec.subject_id&#39;</span><span class="p">)</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">subjects_dir</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">standard_image</span><span class="p">(</span><span class="s">&#39;MNI152_T1_2mm_brain.nii.gz&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span><span class="p">:</span>
+        <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image</span> <span class="o">=</span> <span class="n">target</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">datasource</span><span class="p">,</span> <span class="s">&#39;anat&#39;</span><span class="p">,</span> <span class="n">registration</span><span class="p">,</span> <span class="s">&#39;inputspec.anatomical_image&#39;</span><span class="p">)</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">standard_image</span><span class="p">(</span><span class="s">&#39;MNI152_T1_2mm.nii.gz&#39;</span><span class="p">)</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image_brain</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Info</span><span class="o">.</span><span class="n">standard_image</span><span class="p">(</span><span class="s">&#39;MNI152_T1_2mm_brain.nii.gz&#39;</span><span class="p">)</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">config_file</span> <span class="o">=</span> <span class="s">&#39;T1_2_MNI152_2mm&#39;</span>
+
+<span class="k">def</span> <span class="nf">merge_files</span><span class="p">(</span><span class="n">copes</span><span class="p">,</span> <span class="n">varcopes</span><span class="p">,</span> <span class="n">zstats</span><span class="p">):</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">splits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">out_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">copes</span><span class="p">)</span>
+    <span class="n">splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">copes</span><span class="p">))</span>
+    <span class="n">out_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">varcopes</span><span class="p">)</span>
+    <span class="n">splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">varcopes</span><span class="p">))</span>
+    <span class="n">out_files</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">zstats</span><span class="p">)</span>
+    <span class="n">splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zstats</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out_files</span><span class="p">,</span> <span class="n">splits</span>
+
+<span class="n">mergefunc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;zstats&#39;</span><span class="p">],</span>
+                               <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="s">&#39;splits&#39;</span><span class="p">],</span>
+                               <span class="n">function</span><span class="o">=</span><span class="n">merge_files</span><span class="p">),</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;merge_files&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fixed_fx</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;outputspec&#39;</span><span class="p">),</span> <span class="n">mergefunc</span><span class="p">,</span>
+                             <span class="p">[(</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;copes&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;varcopes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;zstats&#39;</span><span class="p">,</span> <span class="s">&#39;zstats&#39;</span><span class="p">),</span>
+                              <span class="p">])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mergefunc</span><span class="p">,</span> <span class="s">&#39;out_files&#39;</span><span class="p">,</span> <span class="n">registration</span><span class="p">,</span> <span class="s">&#39;inputspec.source_files&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">split_files</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">splits</span><span class="p">):</span>
+    <span class="n">copes</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[:</span><span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">varcopes</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[</span><span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]:(</span><span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">splits</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="n">zstats</span> <span class="o">=</span> <span class="n">in_files</span><span class="p">[(</span><span class="n">splits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">splits</span><span class="p">[</span><span class="mi">1</span><span class="p">]):]</span>
+    <span class="k">return</span> <span class="n">copes</span><span class="p">,</span> <span class="n">varcopes</span><span class="p">,</span> <span class="n">zstats</span>
+
+<span class="n">splitfunc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_files&#39;</span><span class="p">,</span> <span class="s">&#39;splits&#39;</span><span class="p">],</span>
+                                 <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">,</span>
+                                               <span class="s">&#39;zstats&#39;</span><span class="p">],</span>
+                                 <span class="n">function</span><span class="o">=</span><span class="n">split_files</span><span class="p">),</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;split_files&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mergefunc</span><span class="p">,</span> <span class="s">&#39;splits&#39;</span><span class="p">,</span> <span class="n">splitfunc</span><span class="p">,</span> <span class="s">&#39;splits&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.transformed_files&#39;</span><span class="p">,</span>
+           <span class="n">splitfunc</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">subjects_dir</span><span class="p">:</span>
+    <span class="n">get_roi_mean</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">SegStats</span><span class="p">(</span><span class="n">default_color_table</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                              <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;get_aparc_means&#39;</span><span class="p">)</span>
+    <span class="n">get_roi_mean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">avgwf_txt_file</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fixed_fx</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;outputspec&#39;</span><span class="p">),</span> <span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="n">get_roi_mean</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.aparc&#39;</span><span class="p">,</span> <span class="n">get_roi_mean</span><span class="p">,</span> <span class="s">&#39;segmentation_file&#39;</span><span class="p">)</span>
+
+    <span class="n">get_roi_tsnr</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">SegStats</span><span class="p">(</span><span class="n">default_color_table</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                              <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;get_aparc_tsnr&#39;</span><span class="p">)</span>
+    <span class="n">get_roi_tsnr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">avgwf_txt_file</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;tsnr_file&#39;</span><span class="p">,</span> <span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.aparc&#39;</span><span class="p">,</span> <span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="s">&#39;segmentation_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Connect to a datasink</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_subs</span><span class="p">(</span><span class="n">subject_id</span><span class="p">,</span> <span class="n">conds</span><span class="p">,</span> <span class="n">run_id</span><span class="p">,</span> <span class="n">model_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">):</span>
+    <span class="n">subs</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;_subject_id_</span><span class="si">%s</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">subject_id</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)]</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_model_id_</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model_id</span><span class="p">,</span> <span class="s">&#39;model</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span><span class="n">model_id</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;task_id_</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">task_id</span><span class="p">,</span> <span class="s">&#39;/task</span><span class="si">%03d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">task_id</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp&#39;</span><span class="p">,</span>
+    <span class="s">&#39;mean&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt&#39;</span><span class="p">,</span>
+    <span class="s">&#39;affine&#39;</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)):</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_flameo</span><span class="si">%d</span><span class="s">/cope1.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;cope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_flameo</span><span class="si">%d</span><span class="s">/varcope1.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;varcope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_flameo</span><span class="si">%d</span><span class="s">/zstat1.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;zstat</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_flameo</span><span class="si">%d</span><span class="s">/tstat1.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;tstat</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_flameo</span><span class="si">%d</span><span class="s">/res4d.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;res4d</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/cope1_warp.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+                     <span class="s">&#39;cope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/varcope1_warp.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="s">&#39;varcope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/zstat1_warp.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="s">&#39;zstat</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/cope1_trans.&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span>
+                     <span class="s">&#39;cope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/varcope1_trans.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="s">&#39;varcope</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_warpall</span><span class="si">%d</span><span class="s">/zstat1_trans.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">conds</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+                     <span class="s">&#39;zstat</span><span class="si">%02d</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__get_aparc_means</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/cope</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_num</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">run_id</span><span class="p">):</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__get_aparc_tsnr</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/run</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">run_num</span><span class="p">))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__art</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/run</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">run_num</span><span class="p">))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__dilatemask</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/run</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">run_num</span><span class="p">))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__realign</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/run</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">run_num</span><span class="p">))</span>
+        <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;__modelgen</span><span class="si">%d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s">&#39;/run</span><span class="si">%02d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="n">run_num</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;/model</span><span class="si">%03d</span><span class="s">/task</span><span class="si">%03d</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span> <span class="s">&#39;/&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;/model</span><span class="si">%03d</span><span class="s">/task</span><span class="si">%03d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span> <span class="s">&#39;/&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_bold_dtype_mcf_bet_thresh_dil&#39;</span><span class="p">,</span> <span class="s">&#39;_mask&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_output_warped_image&#39;</span><span class="p">,</span> <span class="s">&#39;_anat2target&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">subs</span>
+
+<span class="n">subsgen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">],</span>
+                               <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;substitutions&#39;</span><span class="p">],</span>
+                               <span class="n">function</span><span class="o">=</span><span class="n">get_subs</span><span class="p">),</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s">&#39;subsgen&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span> <span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">)</span>
+
+<span class="n">datasink</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasink&quot;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;container&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">,</span> <span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">contrastgen</span><span class="p">,</span> <span class="s">&#39;contrasts&#39;</span><span class="p">,</span> <span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">subsgen</span><span class="p">,</span> <span class="s">&#39;substitutions&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;substitutions&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fixed_fx</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;outputspec&#39;</span><span class="p">),</span> <span class="n">datasink</span><span class="p">,</span>
+                             <span class="p">[(</span><span class="s">&#39;res4d&#39;</span><span class="p">,</span> <span class="s">&#39;res4d&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;copes&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;varcopes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;zstats&#39;</span><span class="p">,</span> <span class="s">&#39;zstats&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;tstats&#39;</span><span class="p">,</span> <span class="s">&#39;tstats&#39;</span><span class="p">)])</span>
+                             <span class="p">])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">modelfit</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;modelgen&#39;</span><span class="p">),</span> <span class="n">datasink</span><span class="p">,</span>
+                             <span class="p">[(</span><span class="s">&#39;design_cov&#39;</span><span class="p">,</span> <span class="s">&#39;qa.model&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;design_image&#39;</span><span class="p">,</span> <span class="s">&#39;qa.model.@matrix_image&#39;</span><span class="p">),</span>
+                              <span class="p">(</span><span class="s">&#39;design_file&#39;</span><span class="p">,</span> <span class="s">&#39;qa.model.@matrix&#39;</span><span class="p">),</span>
+                             <span class="p">])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;outputspec.motion_parameters&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;qa.motion&#39;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s">&#39;outputspec.motion_plots&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;qa.motion.plots&#39;</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s">&#39;outputspec.mask&#39;</span><span class="p">,</span> <span class="s">&#39;qa.mask&#39;</span><span class="p">)])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;norm_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@norm&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;intensity_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@intensity&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;outlier_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@outlier_files&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.anat2target&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.anat2target&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;tsnr_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.tsnr.@map&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">subjects_dir</span><span class="p">:</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.min_cost_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.mincost&#39;</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">,</span> <span class="s">&#39;qa.tsnr&#39;</span><span class="p">),</span>
+                                          <span class="p">(</span><span class="s">&#39;summary_file&#39;</span><span class="p">,</span> <span class="s">&#39;qa.tsnr.@summary&#39;</span><span class="p">)])])</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">get_roi_mean</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;avgwf_txt_file&#39;</span><span class="p">,</span> <span class="s">&#39;copes.roi&#39;</span><span class="p">),</span>
+                                          <span class="p">(</span><span class="s">&#39;summary_file&#39;</span><span class="p">,</span> <span class="s">&#39;copes.roi.@summary&#39;</span><span class="p">)])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">splitfunc</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span>
+             <span class="p">[(</span><span class="s">&#39;copes&#39;</span><span class="p">,</span> <span class="s">&#39;copes.mni&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;varcopes&#39;</span><span class="p">,</span> <span class="s">&#39;varcopes.mni&#39;</span><span class="p">),</span>
+              <span class="p">(</span><span class="s">&#39;zstats&#39;</span><span class="p">,</span> <span class="s">&#39;zstats.mni&#39;</span><span class="p">),</span>
+              <span class="p">])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;median_file&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;mean&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.transformed_mean&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;mean.mni&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.func2anat_transform&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;xfm.mean2anat&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.anat2target_transform&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;xfm.anat2target&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Set processing parameters</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="n">fwhm</span>
+<span class="n">gethighpass</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hpcutoff</span> <span class="o">=</span> <span class="n">hpcutoff</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="n">hpcutoff</span>
+<span class="n">modelfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">bases</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;dgamma&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="n">use_derivatives</span><span class="p">}}</span>
+<span class="n">modelfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">model_serial_correlations</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">modelfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">film_threshold</span> <span class="o">=</span> <span class="mi">1000</span>
+
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">output_dir</span>
+<span class="k">return</span> <span class="n">wf</span>
+</pre></div>
+</div>
+<p>The following functions run the whole workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">defstr</span> <span class="o">=</span> <span class="s">&#39; (default </span><span class="si">%(default)s</span><span class="s">)&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">&#39;fmri_openfmri.py&#39;</span><span class="p">,</span>
+                                     <span class="n">description</span><span class="o">=</span><span class="n">__doc__</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--datasetdir&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--subject&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Subject name (e.g. &#39;sub001&#39;)&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-m&#39;</span><span class="p">,</span> <span class="s">&#39;--model&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Model index&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-x&#39;</span><span class="p">,</span> <span class="s">&#39;--subjectprefix&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">&#39;sub*&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Subject prefix&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;-t&#39;</span><span class="p">,</span> <span class="s">&#39;--task&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="c">#nargs=&#39;+&#39;,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Task index&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--hpfilter&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">120.</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;High pass filter cutoff (in secs)&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--fwhm&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">6.</span><span class="p">,</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Spatial FWHM&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--derivatives&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&quot;store_true&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Use derivatives&quot;</span> <span class="o">+</span> <span class="n">defstr</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span> <span class="s">&quot;--output_dir&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;outdir&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Output directory base&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-w&quot;</span><span class="p">,</span> <span class="s">&quot;--work_dir&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;work_dir&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Output directory base&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;-p&quot;</span><span class="p">,</span> <span class="s">&quot;--plugin&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;plugin&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s">&#39;Linear&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Plugin to use&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--plugin_args&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;plugin_args&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;Plugin arguments&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--sd&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;subjects_dir&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s">&quot;FreeSurfer subjects directory (if available)&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&quot;--target&quot;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&quot;target_file&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="p">(</span><span class="s">&quot;Target in MNI space. Best to use the MindBoggle &quot;</span>
+                              <span class="s">&quot;template - only used with FreeSurfer&quot;</span>
+                              <span class="s">&quot;OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz&quot;</span><span class="p">))</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">outdir</span>
+    <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">work_dir</span><span class="p">:</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">work_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outdir</span><span class="p">:</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">outdir</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="s">&#39;output&#39;</span><span class="p">)</span>
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outdir</span><span class="p">,</span> <span class="s">&#39;model</span><span class="si">%02d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
+                          <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">task</span><span class="p">))</span>
+    <span class="n">derivatives</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">derivatives</span>
+    <span class="k">if</span> <span class="n">derivatives</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+       <span class="n">derivatives</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">analyze_openfmri_dataset</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datasetdir</span><span class="p">),</span>
+                                  <span class="n">subject</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span>
+                                  <span class="n">model_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
+                                  <span class="n">task_id</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">task</span><span class="p">)],</span>
+                                  <span class="n">subj_prefix</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">subjectprefix</span><span class="p">,</span>
+                                  <span class="n">output_dir</span><span class="o">=</span><span class="n">outdir</span><span class="p">,</span>
+                                  <span class="n">hpcutoff</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">hpfilter</span><span class="p">,</span>
+                                  <span class="n">use_derivatives</span><span class="o">=</span><span class="n">derivatives</span><span class="p">,</span>
+                                  <span class="n">fwhm</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fwhm</span><span class="p">,</span>
+                                  <span class="n">subjects_dir</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">subjects_dir</span><span class="p">,</span>
+                                  <span class="n">target</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">target_file</span><span class="p">)</span>
+    <span class="c">#wf.config[&#39;execution&#39;][&#39;remove_unnecessary_outputs&#39;] = False</span>
+
+    <span class="n">wf</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">work_dir</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">plugin_args</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin</span><span class="p">,</span> <span class="n">plugin_args</span><span class="o">=</span><span class="nb">eval</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin_args</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">plugin</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_ants_openfmri.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+This same script is also included in the Nipype source distribution under the
+<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

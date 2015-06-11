@@ -1,0 +1,1040 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.fmri.fsl.preprocess
+=============================
+
+
+.. module:: nipype.workflows.fmri.fsl.preprocess
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.create_featreg_preproc:
+
+:func:`create_featreg_preproc`
+------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L374>`__
+
+
+
+Create a FEAT preprocessing workflow with registration to one volume of the first run
+
+Parameters
+~~~~~~~~~~
+
+::
+
+    name : name of workflow (default: featpreproc)
+    highpass : boolean (default: True)
+    whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
+
+Inputs::
+
+    inputspec.func : functional runs (filename or list of filenames)
+    inputspec.fwhm : fwhm for smoothing with SUSAN
+    inputspec.highpass : HWHM in TRs (if created with highpass=True)
+
+Outputs::
+
+    outputspec.reference : volume to which runs are realigned
+    outputspec.motion_parameters : motion correction parameters
+    outputspec.realigned_files : motion corrected files
+    outputspec.motion_plots : plots of motion correction parameters
+    outputspec.mask : mask file used to mask the brain
+    outputspec.smoothed_files : smoothed functional data
+    outputspec.highpassed_files : highpassed functional data (if highpass=True)
+    outputspec.mean : mean file
+
+Example
+~~~~~~~
+
+>>> preproc = create_featreg_preproc()
+>>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
+>>> preproc.inputs.inputspec.fwhm = 5
+>>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
+>>> preproc.base_dir = '/tmp'
+>>> preproc.run() # doctest: +SKIP
+
+>>> preproc = create_featreg_preproc(highpass=False, whichvol='mean')
+>>> preproc.inputs.inputspec.func = 'f3.nii'
+>>> preproc.inputs.inputspec.fwhm = 5
+>>> preproc.base_dir = '/tmp'
+>>> preproc.run() # doctest: +SKIP
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph featpreproc{
+
+	  label="featpreproc";
+
+	  featpreproc_inputspec[label="inputspec (utility)"];
+
+	  featpreproc_img2float[label="img2float (fsl)"];
+
+	  featpreproc_extractref[label="extractref (fsl)"];
+
+	  featpreproc_realign[label="realign (fsl)"];
+
+	  featpreproc_meanfunc[label="meanfunc (fsl)"];
+
+	  featpreproc_meanfuncmask[label="meanfuncmask (fsl)"];
+
+	  featpreproc_maskfunc[label="maskfunc (fsl)"];
+
+	  featpreproc_getthreshold[label="getthreshold (fsl)"];
+
+	  featpreproc_threshold[label="threshold (fsl)"];
+
+	  featpreproc_dilatemask[label="dilatemask (fsl)"];
+
+	  featpreproc_maskfunc2[label="maskfunc2 (fsl)"];
+
+	  featpreproc_maskfunc3[label="maskfunc3 (fsl)"];
+
+	  featpreproc_concat[label="concat (utility)"];
+
+	  featpreproc_plot_motion[label="plot_motion (fsl)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+	  featpreproc_select[label="select (utility)"];
+
+	  featpreproc_medianval[label="medianval (fsl)"];
+
+	  featpreproc_meanscale[label="meanscale (fsl)"];
+
+	  featpreproc_meanfunc3[label="meanfunc3 (fsl)"];
+
+	  featpreproc_highpass[label="highpass (fsl)"];
+
+	  featpreproc_meanfunc4[label="meanfunc4 (fsl)"];
+
+	  featpreproc_addmean[label="addmean (fsl)"];
+
+	  featpreproc_outputspec[label="outputspec (utility)"];
+
+	  featpreproc_inputspec -> featpreproc_img2float;
+
+	  featpreproc_inputspec -> featpreproc_highpass;
+
+	  featpreproc_inputspec -> featpreproc_select;
+
+	  featpreproc_img2float -> featpreproc_realign;
+
+	  featpreproc_img2float -> featpreproc_extractref;
+
+	  featpreproc_img2float -> featpreproc_extractref;
+
+	  featpreproc_extractref -> featpreproc_realign;
+
+	  featpreproc_extractref -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_maskfunc2;
+
+	  featpreproc_realign -> featpreproc_medianval;
+
+	  featpreproc_realign -> featpreproc_meanfunc;
+
+	  featpreproc_realign -> featpreproc_maskfunc;
+
+	  featpreproc_realign -> featpreproc_plot_motion;
+
+	  featpreproc_meanfunc -> featpreproc_meanfuncmask;
+
+	  featpreproc_meanfuncmask -> featpreproc_maskfunc;
+
+	  featpreproc_maskfunc -> featpreproc_getthreshold;
+
+	  featpreproc_maskfunc -> featpreproc_threshold;
+
+	  featpreproc_getthreshold -> featpreproc_threshold;
+
+	  featpreproc_threshold -> featpreproc_dilatemask;
+
+	  featpreproc_threshold -> featpreproc_medianval;
+
+	  featpreproc_dilatemask -> featpreproc_maskfunc2;
+
+	  featpreproc_dilatemask -> featpreproc_maskfunc3;
+
+	  featpreproc_dilatemask -> featpreproc_outputspec;
+
+	  featpreproc_maskfunc2 -> featpreproc_concat;
+
+	  subgraph cluster_featpreproc_susan_smooth {
+
+	      label="susan_smooth";
+
+	    featpreproc_susan_smooth_inputnode[label="inputnode (utility)"];
+
+	    featpreproc_susan_smooth_mask[label="mask (fsl)"];
+
+	    featpreproc_susan_smooth_meanfunc2[label="meanfunc2 (fsl)"];
+
+	    featpreproc_susan_smooth_median[label="median (fsl)"];
+
+	    featpreproc_susan_smooth_merge[label="merge (utility)"];
+
+	    featpreproc_susan_smooth_smooth[label="smooth (fsl)"];
+
+	    featpreproc_susan_smooth_outputnode[label="outputnode (utility)"];
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_median;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_median;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_mask;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_mask;
+
+	    featpreproc_susan_smooth_mask -> featpreproc_susan_smooth_meanfunc2;
+
+	    featpreproc_susan_smooth_meanfunc2 -> featpreproc_susan_smooth_merge;
+
+	    featpreproc_susan_smooth_median -> featpreproc_susan_smooth_merge;
+
+	    featpreproc_susan_smooth_median -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_merge -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_smooth -> featpreproc_susan_smooth_outputnode;
+
+	  }
+
+	  featpreproc_maskfunc3 -> featpreproc_concat;
+
+	  featpreproc_concat -> featpreproc_select;
+
+	  featpreproc_plot_motion -> featpreproc_outputspec;
+
+	  featpreproc_select -> featpreproc_meanscale;
+
+	  featpreproc_select -> featpreproc_outputspec;
+
+	  featpreproc_medianval -> featpreproc_meanscale;
+
+	  featpreproc_meanscale -> featpreproc_meanfunc3;
+
+	  featpreproc_meanscale -> featpreproc_highpass;
+
+	  featpreproc_meanscale -> featpreproc_meanfunc4;
+
+	  featpreproc_meanfunc3 -> featpreproc_outputspec;
+
+	  featpreproc_highpass -> featpreproc_addmean;
+
+	  featpreproc_meanfunc4 -> featpreproc_addmean;
+
+	  featpreproc_addmean -> featpreproc_outputspec;
+
+	  featpreproc_inputspec -> featpreproc_susan_smooth_inputnode;
+
+	  featpreproc_maskfunc2 -> featpreproc_susan_smooth_inputnode;
+
+	  featpreproc_susan_smooth_outputnode -> featpreproc_maskfunc3;
+
+	  featpreproc_dilatemask -> featpreproc_susan_smooth_inputnode;
+
+	}
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.create_fsl_fs_preproc:
+
+:func:`create_fsl_fs_preproc`
+-----------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L836>`__
+
+
+
+Create a FEAT preprocessing workflow together with freesurfer
+
+Parameters
+~~~~~~~~~~
+
+::
+
+    name : name of workflow (default: preproc)
+    highpass : boolean (default: True)
+    whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
+
+Inputs::
+
+    inputspec.func : functional runs (filename or list of filenames)
+    inputspec.fwhm : fwhm for smoothing with SUSAN
+    inputspec.highpass : HWHM in TRs (if created with highpass=True)
+    inputspec.subject_id : freesurfer subject id
+    inputspec.subjects_dir : freesurfer subjects dir
+
+Outputs::
+
+    outputspec.reference : volume to which runs are realigned
+    outputspec.motion_parameters : motion correction parameters
+    outputspec.realigned_files : motion corrected files
+    outputspec.motion_plots : plots of motion correction parameters
+    outputspec.mask_file : mask file used to mask the brain
+    outputspec.smoothed_files : smoothed functional data
+    outputspec.highpassed_files : highpassed functional data (if highpass=True)
+    outputspec.reg_file : bbregister registration files
+    outputspec.reg_cost : bbregister registration cost files
+
+Example
+~~~~~~~
+
+>>> preproc = create_fsl_fs_preproc(whichvol='first')
+>>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
+>>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
+>>> preproc.inputs.inputspec.subjects_dir = '.'
+>>> preproc.inputs.inputspec.subject_id = 's1'
+>>> preproc.inputs.inputspec.fwhm = 6
+>>> preproc.run() # doctest: +SKIP
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph preproc{
+
+	  label="preproc";
+
+	  preproc_inputspec[label="inputspec (utility)"];
+
+	  preproc_img2float[label="img2float (fsl)"];
+
+	  preproc_extractref[label="extractref (fsl)"];
+
+	  preproc_realign[label="realign (fsl)"];
+
+	  preproc_medianval[label="medianval (fsl)"];
+
+	  preproc_plot_motion[label="plot_motion (fsl)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+	  preproc_maskfunc[label="maskfunc (fsl)"];
+
+	  preproc_maskfunc3[label="maskfunc3 (fsl)"];
+
+	  preproc_concat[label="concat (utility)"];
+
+	  preproc_select[label="select (utility)"];
+
+	  preproc_meanscale[label="meanscale (fsl)"];
+
+	  preproc_highpass[label="highpass (fsl)"];
+
+	  preproc_outputspec[label="outputspec (utility)"];
+
+	  preproc_inputspec -> preproc_img2float;
+
+	  preproc_inputspec -> preproc_highpass;
+
+	  preproc_inputspec -> preproc_select;
+
+	  preproc_img2float -> preproc_extractref;
+
+	  preproc_img2float -> preproc_extractref;
+
+	  preproc_img2float -> preproc_realign;
+
+	  preproc_extractref -> preproc_outputspec;
+
+	  preproc_extractref -> preproc_realign;
+
+	  subgraph cluster_preproc_getmask {
+
+	      label="getmask";
+
+	    preproc_getmask_inputspec[label="inputspec (utility)"];
+
+	    preproc_getmask_fssource[label="fssource (io)"];
+
+	    preproc_getmask_register[label="register (freesurfer)"];
+
+	    preproc_getmask_threshold[label="threshold (freesurfer)"];
+
+	    preproc_getmask_transform[label="transform (freesurfer)"];
+
+	    preproc_getmask_threshold2[label="threshold2 (freesurfer)"];
+
+	    preproc_getmask_outputspec[label="outputspec (utility)"];
+
+	    preproc_getmask_inputspec -> preproc_getmask_transform;
+
+	    preproc_getmask_inputspec -> preproc_getmask_transform;
+
+	    preproc_getmask_inputspec -> preproc_getmask_fssource;
+
+	    preproc_getmask_inputspec -> preproc_getmask_fssource;
+
+	    preproc_getmask_inputspec -> preproc_getmask_register;
+
+	    preproc_getmask_inputspec -> preproc_getmask_register;
+
+	    preproc_getmask_inputspec -> preproc_getmask_register;
+
+	    preproc_getmask_inputspec -> preproc_getmask_register;
+
+	    preproc_getmask_fssource -> preproc_getmask_threshold;
+
+	    preproc_getmask_register -> preproc_getmask_transform;
+
+	    preproc_getmask_register -> preproc_getmask_outputspec;
+
+	    preproc_getmask_register -> preproc_getmask_outputspec;
+
+	    preproc_getmask_threshold -> preproc_getmask_transform;
+
+	    preproc_getmask_transform -> preproc_getmask_threshold2;
+
+	    preproc_getmask_threshold2 -> preproc_getmask_outputspec;
+
+	  }
+
+	  preproc_realign -> preproc_maskfunc;
+
+	  preproc_realign -> preproc_outputspec;
+
+	  preproc_realign -> preproc_outputspec;
+
+	  preproc_realign -> preproc_medianval;
+
+	  preproc_realign -> preproc_plot_motion;
+
+	  preproc_medianval -> preproc_meanscale;
+
+	  preproc_plot_motion -> preproc_outputspec;
+
+	  preproc_maskfunc -> preproc_concat;
+
+	  subgraph cluster_preproc_susan_smooth {
+
+	      label="susan_smooth";
+
+	    preproc_susan_smooth_inputnode[label="inputnode (utility)"];
+
+	    preproc_susan_smooth_median[label="median (fsl)"];
+
+	    preproc_susan_smooth_mask[label="mask (fsl)"];
+
+	    preproc_susan_smooth_meanfunc2[label="meanfunc2 (fsl)"];
+
+	    preproc_susan_smooth_merge[label="merge (utility)"];
+
+	    preproc_susan_smooth_smooth[label="smooth (fsl)"];
+
+	    preproc_susan_smooth_outputnode[label="outputnode (utility)"];
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_mask;
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_mask;
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_median;
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_median;
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_smooth;
+
+	    preproc_susan_smooth_inputnode -> preproc_susan_smooth_smooth;
+
+	    preproc_susan_smooth_median -> preproc_susan_smooth_merge;
+
+	    preproc_susan_smooth_median -> preproc_susan_smooth_smooth;
+
+	    preproc_susan_smooth_mask -> preproc_susan_smooth_meanfunc2;
+
+	    preproc_susan_smooth_meanfunc2 -> preproc_susan_smooth_merge;
+
+	    preproc_susan_smooth_merge -> preproc_susan_smooth_smooth;
+
+	    preproc_susan_smooth_smooth -> preproc_susan_smooth_outputnode;
+
+	  }
+
+	  preproc_maskfunc3 -> preproc_concat;
+
+	  preproc_concat -> preproc_select;
+
+	  preproc_select -> preproc_meanscale;
+
+	  preproc_select -> preproc_outputspec;
+
+	  preproc_meanscale -> preproc_highpass;
+
+	  preproc_highpass -> preproc_outputspec;
+
+	  preproc_maskfunc -> preproc_susan_smooth_inputnode;
+
+	  preproc_extractref -> preproc_getmask_inputspec;
+
+	  preproc_getmask_outputspec -> preproc_outputspec;
+
+	  preproc_getmask_outputspec -> preproc_outputspec;
+
+	  preproc_getmask_outputspec -> preproc_outputspec;
+
+	  preproc_getmask_outputspec -> preproc_maskfunc;
+
+	  preproc_getmask_outputspec -> preproc_maskfunc3;
+
+	  preproc_getmask_outputspec -> preproc_medianval;
+
+	  preproc_getmask_outputspec -> preproc_susan_smooth_inputnode;
+
+	  preproc_susan_smooth_outputnode -> preproc_maskfunc3;
+
+	  preproc_inputspec -> preproc_susan_smooth_inputnode;
+
+	  preproc_inputspec -> preproc_getmask_inputspec;
+
+	  preproc_inputspec -> preproc_getmask_inputspec;
+
+	}
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.create_parallelfeat_preproc:
+
+:func:`create_parallelfeat_preproc`
+-----------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L61>`__
+
+
+
+Preprocess each run with FSL independently of the others
+
+Parameters
+~~~~~~~~~~
+
+::
+
+  name : name of workflow (default: featpreproc)
+  highpass : boolean (default: True)
+
+Inputs::
+
+    inputspec.func : functional runs (filename or list of filenames)
+    inputspec.fwhm : fwhm for smoothing with SUSAN
+    inputspec.highpass : HWHM in TRs (if created with highpass=True)
+
+Outputs::
+
+    outputspec.reference : volume to which runs are realigned
+    outputspec.motion_parameters : motion correction parameters
+    outputspec.realigned_files : motion corrected files
+    outputspec.motion_plots : plots of motion correction parameters
+    outputspec.mask : mask file used to mask the brain
+    outputspec.smoothed_files : smoothed functional data
+    outputspec.highpassed_files : highpassed functional data (if highpass=True)
+    outputspec.mean : mean file
+
+Example
+~~~~~~~
+
+>>> preproc = create_parallelfeat_preproc()
+>>> preproc.inputs.inputspec.func = ['f3.nii', 'f5.nii']
+>>> preproc.inputs.inputspec.fwhm = 5
+>>> preproc.inputs.inputspec.highpass = 128./(2*2.5)
+>>> preproc.base_dir = '/tmp'
+>>> preproc.run() # doctest: +SKIP
+
+>>> preproc = create_parallelfeat_preproc(highpass=False)
+>>> preproc.inputs.inputspec.func = 'f3.nii'
+>>> preproc.inputs.inputspec.fwhm = 5
+>>> preproc.base_dir = '/tmp'
+>>> preproc.run() # doctest: +SKIP
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph featpreproc{
+
+	  label="featpreproc";
+
+	  featpreproc_inputspec[label="inputspec (utility)"];
+
+	  featpreproc_img2float[label="img2float (fsl)"];
+
+	  featpreproc_extractref[label="extractref (fsl)"];
+
+	  featpreproc_realign[label="realign (fsl)"];
+
+	  featpreproc_plot_motion[label="plot_motion (fsl)", shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+	  featpreproc_meanfunc[label="meanfunc (fsl)"];
+
+	  featpreproc_meanfuncmask[label="meanfuncmask (fsl)"];
+
+	  featpreproc_maskfunc[label="maskfunc (fsl)"];
+
+	  featpreproc_getthreshold[label="getthreshold (fsl)"];
+
+	  featpreproc_threshold[label="threshold (fsl)"];
+
+	  featpreproc_medianval[label="medianval (fsl)"];
+
+	  featpreproc_dilatemask[label="dilatemask (fsl)"];
+
+	  featpreproc_maskfunc2[label="maskfunc2 (fsl)"];
+
+	  featpreproc_maskfunc3[label="maskfunc3 (fsl)"];
+
+	  featpreproc_concat[label="concat (utility)"];
+
+	  featpreproc_select[label="select (utility)"];
+
+	  featpreproc_meanscale[label="meanscale (fsl)"];
+
+	  featpreproc_highpass[label="highpass (fsl)"];
+
+	  featpreproc_meanfunc3[label="meanfunc3 (fsl)"];
+
+	  featpreproc_outputspec[label="outputspec (utility)"];
+
+	  featpreproc_inputspec -> featpreproc_highpass;
+
+	  featpreproc_inputspec -> featpreproc_img2float;
+
+	  featpreproc_inputspec -> featpreproc_select;
+
+	  featpreproc_img2float -> featpreproc_realign;
+
+	  featpreproc_img2float -> featpreproc_extractref;
+
+	  featpreproc_img2float -> featpreproc_extractref;
+
+	  featpreproc_extractref -> featpreproc_realign;
+
+	  featpreproc_extractref -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_plot_motion;
+
+	  featpreproc_realign -> featpreproc_maskfunc2;
+
+	  featpreproc_realign -> featpreproc_maskfunc;
+
+	  featpreproc_realign -> featpreproc_meanfunc;
+
+	  featpreproc_realign -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_outputspec;
+
+	  featpreproc_realign -> featpreproc_medianval;
+
+	  featpreproc_plot_motion -> featpreproc_outputspec;
+
+	  featpreproc_meanfunc -> featpreproc_meanfuncmask;
+
+	  featpreproc_meanfuncmask -> featpreproc_maskfunc;
+
+	  featpreproc_maskfunc -> featpreproc_getthreshold;
+
+	  featpreproc_maskfunc -> featpreproc_threshold;
+
+	  featpreproc_getthreshold -> featpreproc_threshold;
+
+	  featpreproc_threshold -> featpreproc_medianval;
+
+	  featpreproc_threshold -> featpreproc_dilatemask;
+
+	  featpreproc_medianval -> featpreproc_meanscale;
+
+	  featpreproc_dilatemask -> featpreproc_maskfunc2;
+
+	  featpreproc_dilatemask -> featpreproc_outputspec;
+
+	  featpreproc_dilatemask -> featpreproc_maskfunc3;
+
+	  featpreproc_maskfunc2 -> featpreproc_concat;
+
+	  subgraph cluster_featpreproc_susan_smooth {
+
+	      label="susan_smooth";
+
+	    featpreproc_susan_smooth_inputnode[label="inputnode (utility)"];
+
+	    featpreproc_susan_smooth_mask[label="mask (fsl)"];
+
+	    featpreproc_susan_smooth_meanfunc2[label="meanfunc2 (fsl)"];
+
+	    featpreproc_susan_smooth_median[label="median (fsl)"];
+
+	    featpreproc_susan_smooth_merge[label="merge (utility)"];
+
+	    featpreproc_susan_smooth_smooth[label="smooth (fsl)"];
+
+	    featpreproc_susan_smooth_outputnode[label="outputnode (utility)"];
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_mask;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_mask;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_median;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_median;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_inputnode -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_mask -> featpreproc_susan_smooth_meanfunc2;
+
+	    featpreproc_susan_smooth_meanfunc2 -> featpreproc_susan_smooth_merge;
+
+	    featpreproc_susan_smooth_median -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_median -> featpreproc_susan_smooth_merge;
+
+	    featpreproc_susan_smooth_merge -> featpreproc_susan_smooth_smooth;
+
+	    featpreproc_susan_smooth_smooth -> featpreproc_susan_smooth_outputnode;
+
+	  }
+
+	  featpreproc_maskfunc3 -> featpreproc_concat;
+
+	  featpreproc_concat -> featpreproc_select;
+
+	  featpreproc_select -> featpreproc_meanscale;
+
+	  featpreproc_select -> featpreproc_outputspec;
+
+	  featpreproc_meanscale -> featpreproc_highpass;
+
+	  featpreproc_highpass -> featpreproc_outputspec;
+
+	  featpreproc_highpass -> featpreproc_meanfunc3;
+
+	  featpreproc_meanfunc3 -> featpreproc_outputspec;
+
+	  featpreproc_inputspec -> featpreproc_susan_smooth_inputnode;
+
+	  featpreproc_susan_smooth_outputnode -> featpreproc_maskfunc3;
+
+	  featpreproc_maskfunc2 -> featpreproc_susan_smooth_inputnode;
+
+	  featpreproc_dilatemask -> featpreproc_susan_smooth_inputnode;
+
+	}
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.create_reg_workflow:
+
+:func:`create_reg_workflow`
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L1095>`__
+
+
+
+Create a FEAT preprocessing workflow together with freesurfer
+
+Parameters
+~~~~~~~~~~
+
+::
+
+    name : name of workflow (default: 'registration')
+
+Inputs::
+
+    inputspec.source_files : files (filename or list of filenames to register)
+    inputspec.mean_image : reference image to use
+    inputspec.anatomical_image : anatomical image to coregister to
+    inputspec.target_image : registration target
+
+Outputs::
+
+    outputspec.func2anat_transform : FLIRT transform
+    outputspec.anat2target_transform : FLIRT+FNIRT transform
+    outputspec.transformed_files : transformed files in target space
+    outputspec.transformed_mean : mean image in target space
+
+Example
+~~~~~~~
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph registration{
+
+	  label="registration";
+
+	  registration_inputspec[label="inputspec (utility)"];
+
+	  registration_stripper[label="stripper (fsl)"];
+
+	  registration_anat2target_linear[label="anat2target_linear (fsl)"];
+
+	  registration_anat2target_nonlinear[label="anat2target_nonlinear (fsl)"];
+
+	  registration_fast[label="fast (fsl)"];
+
+	  registration_binarize[label="binarize (fsl)"];
+
+	  registration_mean2anat[label="mean2anat (fsl)"];
+
+	  registration_mean2anatbbr[label="mean2anatbbr (fsl)"];
+
+	  registration_warpmean[label="warpmean (fsl)"];
+
+	  registration_warpall[label="warpall (fsl)"];
+
+	  registration_outputspec[label="outputspec (utility)"];
+
+	  registration_inputspec -> registration_mean2anat;
+
+	  registration_inputspec -> registration_mean2anatbbr;
+
+	  registration_inputspec -> registration_mean2anatbbr;
+
+	  registration_inputspec -> registration_warpmean;
+
+	  registration_inputspec -> registration_warpmean;
+
+	  registration_inputspec -> registration_anat2target_nonlinear;
+
+	  registration_inputspec -> registration_anat2target_nonlinear;
+
+	  registration_inputspec -> registration_anat2target_nonlinear;
+
+	  registration_inputspec -> registration_stripper;
+
+	  registration_inputspec -> registration_warpall;
+
+	  registration_inputspec -> registration_warpall;
+
+	  registration_inputspec -> registration_anat2target_linear;
+
+	  registration_stripper -> registration_fast;
+
+	  registration_stripper -> registration_anat2target_linear;
+
+	  registration_stripper -> registration_mean2anat;
+
+	  registration_anat2target_linear -> registration_anat2target_nonlinear;
+
+	  registration_anat2target_nonlinear -> registration_warpmean;
+
+	  registration_anat2target_nonlinear -> registration_outputspec;
+
+	  registration_anat2target_nonlinear -> registration_warpall;
+
+	  registration_fast -> registration_binarize;
+
+	  registration_binarize -> registration_mean2anatbbr;
+
+	  registration_mean2anat -> registration_mean2anatbbr;
+
+	  registration_mean2anatbbr -> registration_warpmean;
+
+	  registration_mean2anatbbr -> registration_outputspec;
+
+	  registration_mean2anatbbr -> registration_warpall;
+
+	  registration_warpmean -> registration_outputspec;
+
+	  registration_warpall -> registration_outputspec;
+
+	}
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.create_susan_smooth:
+
+:func:`create_susan_smooth`
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L714>`__
+
+
+
+Create a SUSAN smoothing workflow
+
+Parameters
+~~~~~~~~~~
+
+::
+
+    name : name of workflow (default: susan_smooth)
+    separate_masks : separate masks for each run
+
+Inputs::
+
+    inputnode.in_files : functional runs (filename or list of filenames)
+    inputnode.fwhm : fwhm for smoothing with SUSAN
+    inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
+
+Outputs::
+
+    outputnode.smoothed_files : functional runs (filename or list of filenames)
+
+Example
+~~~~~~~
+
+>>> smooth = create_susan_smooth()
+>>> smooth.inputs.inputnode.in_files = 'f3.nii'
+>>> smooth.inputs.inputnode.fwhm = 5
+>>> smooth.inputs.inputnode.mask_file = 'mask.nii'
+>>> smooth.run() # doctest: +SKIP
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph susan_smooth{
+
+	  label="susan_smooth";
+
+	  susan_smooth_inputnode[label="inputnode (utility)"];
+
+	  susan_smooth_median[label="median (fsl)"];
+
+	  susan_smooth_mask[label="mask (fsl)"];
+
+	  susan_smooth_meanfunc2[label="meanfunc2 (fsl)"];
+
+	  susan_smooth_merge[label="merge (utility)"];
+
+	  susan_smooth_smooth[label="smooth (fsl)"];
+
+	  susan_smooth_outputnode[label="outputnode (utility)"];
+
+	  susan_smooth_inputnode -> susan_smooth_median;
+
+	  susan_smooth_inputnode -> susan_smooth_median;
+
+	  susan_smooth_inputnode -> susan_smooth_smooth;
+
+	  susan_smooth_inputnode -> susan_smooth_smooth;
+
+	  susan_smooth_inputnode -> susan_smooth_mask;
+
+	  susan_smooth_inputnode -> susan_smooth_mask;
+
+	  susan_smooth_median -> susan_smooth_merge;
+
+	  susan_smooth_median -> susan_smooth_smooth;
+
+	  susan_smooth_mask -> susan_smooth_meanfunc2;
+
+	  susan_smooth_meanfunc2 -> susan_smooth_merge;
+
+	  susan_smooth_merge -> susan_smooth_smooth;
+
+	  susan_smooth_smooth -> susan_smooth_outputnode;
+
+	}
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.chooseindex:
+
+:func:`chooseindex`
+-------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L46>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.getbtthresh:
+
+:func:`getbtthresh`
+-------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L43>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.getmeanscale:
+
+:func:`getmeanscale`
+--------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L52>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.getthreshop:
+
+:func:`getthreshop`
+-------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L15>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.getusans:
+
+:func:`getusans`
+----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L55>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.pickfirst:
+
+:func:`pickfirst`
+-----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L18>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.pickmiddle:
+
+:func:`pickmiddle`
+------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L24>`__
+
+
+
+
+
+
+.. _nipype.workflows.fmri.fsl.preprocess.pickvol:
+
+:func:`pickvol`
+---------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L32>`__
+
+
+
+
+

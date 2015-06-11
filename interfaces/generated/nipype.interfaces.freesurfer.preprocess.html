@@ -1,0 +1,1546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.freesurfer.preprocess</a><ul>
+<li><a class="reference internal" href="#applyvoltransform">ApplyVolTransform</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bbregister">BBRegister</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dicomconvert">DICOMConvert</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fitmsparams">FitMSParams</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mriconvert">MRIConvert</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parsedicomdir">ParseDICOMDir</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reconall">ReconAll</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#resample">Resample</a><ul>
+<li><a class="reference internal" href="#id7">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#robustregister">RobustRegister</a><ul>
+<li><a class="reference internal" href="#id8">Examples</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#smooth">Smooth</a><ul>
+<li><a class="reference internal" href="#id9">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#synthesizeflash">SynthesizeFLASH</a><ul>
+<li><a class="reference internal" href="#id10">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#unpacksdicomdir">UnpackSDICOMDir</a><ul>
+<li><a class="reference internal" href="#id11">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="interfaces-freesurfer-preprocess">
+<h1>interfaces.freesurfer.preprocess<a class="headerlink" href="#interfaces-freesurfer-preprocess" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-applyvoltransform"></span><div class="section" id="applyvoltransform">
+<span id="index-0"></span><h2>ApplyVolTransform<a class="headerlink" href="#applyvoltransform" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L976">Link to code</a></p>
+<p>Wraps command <strong>mri_vol2vol</strong></p>
+<p>Use FreeSurfer mri_vol2vol to apply a transform.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">ApplyVolTransform</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span> <span class="o">=</span> <span class="n">ApplyVolTransform</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reg_file</span> <span class="o">=</span> <span class="s">&#39;register.dat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">transformed_file</span> <span class="o">=</span> <span class="s">&#39;struct_warped.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fs_target</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyreg</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_vol2vol --fstarg --reg register.dat --mov structural.nii --o struct_warped.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fs_target: (a boolean)
+        use orig.mgz from subject in regfile as target
+        flag: --fstarg
+        mutually_exclusive: target_file, tal, fs_target
+        requires: reg_file
+fsl_reg_file: (an existing file name)
+        fslRAS-to-fslRAS matrix (FSL format)
+        flag: --fsl %s
+        mutually_exclusive: reg_file, fsl_reg_file, xfm_reg_file,
+         reg_header, subject
+reg_file: (an existing file name)
+        tkRAS-to-tkRAS matrix (tkregister2 format)
+        flag: --reg %s
+        mutually_exclusive: reg_file, fsl_reg_file, xfm_reg_file,
+         reg_header, subject
+reg_header: (a boolean)
+        ScannerRAS-to-ScannerRAS matrix = identity
+        flag: --regheader
+        mutually_exclusive: reg_file, fsl_reg_file, xfm_reg_file,
+         reg_header, subject
+source_file: (an existing file name)
+        Input volume you wish to transform
+        flag: --mov %s
+subject: (a string)
+        set matrix = identity and use subject for any templates
+        flag: --s %s
+        mutually_exclusive: reg_file, fsl_reg_file, xfm_reg_file,
+         reg_header, subject
+tal: (a boolean)
+        map to a sub FOV of MNI305 (with --reg only)
+        flag: --tal
+        mutually_exclusive: target_file, tal, fs_target
+target_file: (an existing file name)
+        Output template volume
+        flag: --targ %s
+        mutually_exclusive: target_file, tal, fs_target
+xfm_reg_file: (an existing file name)
+        ScannerRAS-to-ScannerRAS matrix (MNI format)
+        flag: --xfm %s
+        mutually_exclusive: reg_file, fsl_reg_file, xfm_reg_file,
+         reg_header, subject
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (&#39;trilin&#39; or &#39;nearest&#39; or &#39;cubic&#39;)
+        Interpolation method (&lt;trilin&gt; or nearest)
+        flag: --interp %s
+inverse: (a boolean)
+        sample from target to source
+        flag: --inv
+invert_morph: (a boolean)
+        Compute and use the inverse of the non-linear morph to resample the
+        input volume. To be used by --m3z.
+        flag: --inv-morph
+        requires: m3z_file
+m3z_file: (a file name)
+        This is the morph to be applied to the volume. Unless the morph is
+        in mri/transforms (eg.: for talairach.m3z computed by reconall), you
+        will need to specify the full path to this morph and use the
+        --noDefM3zPath flag.
+        flag: --m3z %s
+no_ded_m3z_path: (a boolean)
+        To be used with the m3z flag. Instructs the code not to look for
+        them3z morph in the default location
+        (SUBJECTS_DIR/subj/mri/transforms), but instead just use the path
+        indicated in --m3z.
+        flag: --noDefM3zPath
+        requires: m3z_file
+no_resample: (a boolean)
+        Do not resample; just change vox2ras matrix
+        flag: --no-resample
+subjects_dir: (an existing directory name)
+        subjects directory
+tal_resolution: (a float)
+        Resolution to sample when using tal
+        flag: --talres %.10f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+transformed_file: (a file name)
+        Output volume
+        flag: --o %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>transformed_file: (an existing file name)
+        Path to output file if used normally
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-bbregister"></span></div>
+</div>
+<div class="section" id="bbregister">
+<span id="index-1"></span><h2>BBRegister<a class="headerlink" href="#bbregister" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L842">Link to code</a></p>
+<p>Wraps command <strong>bbregister</strong></p>
+<p>Use FreeSurfer bbregister to register a volume to the Freesurfer anatomical.</p>
+<p>This program performs within-subject, cross-modal registration using a
+boundary-based cost function. The registration is constrained to be 6
+DOF (rigid). It is required that you have an anatomical scan of the
+subject that has already been recon-all-ed using freesurfer.</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">BBRegister</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bbreg</span> <span class="o">=</span> <span class="n">BBRegister</span><span class="p">(</span><span class="n">subject_id</span><span class="o">=</span><span class="s">&#39;me&#39;</span><span class="p">,</span> <span class="n">source_file</span><span class="o">=</span><span class="s">&#39;structural.nii&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="s">&#39;header&#39;</span><span class="p">,</span> <span class="n">contrast_type</span><span class="o">=</span><span class="s">&#39;t2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bbreg</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;bbregister --t2 --init-header --reg structural_bbreg_me.dat --mov structural.nii --s me&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+contrast_type: (&#39;t1&#39; or &#39;t2&#39;)
+        contrast type of image
+        flag: --%s
+init: (&#39;spm&#39; or &#39;fsl&#39; or &#39;header&#39;)
+        initialize registration spm, fsl, header
+        flag: --init-%s
+        mutually_exclusive: init_reg_file
+init_reg_file: (an existing file name)
+        existing registration file
+        flag: --init-reg %s
+        mutually_exclusive: init
+source_file: (a file name)
+        source file to be registered
+        flag: --mov %s
+subject_id: (a string)
+        freesurfer subject id
+        flag: --s %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+epi_mask: (a boolean)
+        mask out B0 regions in stages 1 and 2
+        flag: --epi-mask
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+intermediate_file: (an existing file name)
+        Intermediate image, e.g. in case of partial FOV
+        flag: --int %s
+out_fsl_file: (a boolean or a file name)
+        write the transformation matrix in FSL FLIRT format
+        flag: --fslmat %s
+out_reg_file: (a file name)
+        output registration file
+        flag: --reg %s
+reg_frame: (an integer)
+        0-based frame index for 4D source file
+        flag: --frame %d
+        mutually_exclusive: reg_middle_frame
+reg_middle_frame: (a boolean)
+        Register middle frame of 4D source file
+        flag: --mid-frame
+        mutually_exclusive: reg_frame
+registered_file: (a boolean or a file name)
+        output warped sourcefile either True or filename
+        flag: --o %s
+spm_nifti: (a boolean)
+        force use of nifti rather than analyze with SPM
+        flag: --spm-nii
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>min_cost_file: (an existing file name)
+        Output registration minimum cost file
+out_fsl_file: (a file name)
+        Output FLIRT-style registration file
+out_reg_file: (an existing file name)
+        Output registration file
+registered_file: (a file name)
+        Registered and resampled source file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-dicomconvert"></span></div>
+</div>
+<div class="section" id="dicomconvert">
+<span id="index-2"></span><h2>DICOMConvert<a class="headerlink" href="#dicomconvert" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L439">Link to code</a></p>
+<p>Wraps command <strong>mri_convert</strong></p>
+<p>use fs mri_convert to convert dicom files</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">DICOMConvert</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cvt</span> <span class="o">=</span> <span class="n">DICOMConvert</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cvt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dicom_dir</span> <span class="o">=</span> <span class="s">&#39;dicomdir&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cvt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">file_mapping</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;nifti&#39;</span><span class="p">,</span> <span class="s">&#39;*.nii&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;info&#39;</span><span class="p">,</span> <span class="s">&#39;dicom*.txt&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;dti&#39;</span><span class="p">,</span> <span class="s">&#39;*dti.bv*&#39;</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+base_output_dir: (a directory name)
+        directory in which subject directories are created
+dicom_dir: (an existing directory name)
+        dicom directory from which to convert dicom files
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dicom_info: (an existing file name)
+        File containing summary information from mri_parse_sdcmdir
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+file_mapping: (a list of items which are a tuple of the form: (a
+         string, a string))
+        defines the output fields of interface
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+ignore_single_slice: (a boolean)
+        ignore volumes containing a single slice
+        requires: dicom_info
+out_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
+         &#39;analyze4d&#39; or &#39;spm&#39; or &#39;afni&#39; or &#39;brik&#39; or &#39;bshort&#39; or &#39;bfloat&#39; or
+         &#39;sdt&#39; or &#39;outline&#39; or &#39;otl&#39; or &#39;gdf&#39; or &#39;nifti1&#39; or &#39;nii&#39; or
+         &#39;niigz&#39;, nipype default value: niigz)
+        defines the type of output file produced
+seq_list: (a list of items which are a string)
+        list of pulse sequence names to be converted.
+        requires: dicom_info
+subject_dir_template: (a string, nipype default value: S.%04d)
+        template for subject directory name
+subject_id: (any value)
+        subject identifier to insert into template
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-fitmsparams"></span></div>
+</div>
+<div class="section" id="fitmsparams">
+<span id="index-3"></span><h2>FitMSParams<a class="headerlink" href="#fitmsparams" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1249">Link to code</a></p>
+<p>Wraps command <strong>mri_ms_fitparms</strong></p>
+<p>Estimate tissue paramaters from a set of FLASH images.</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">FitMSParams</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msfit</span> <span class="o">=</span> <span class="n">FitMSParams</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;flash_05.mgz&#39;</span><span class="p">,</span> <span class="s">&#39;flash_30.mgz&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="s">&#39;flash_parameters&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msfit</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_ms_fitparms  flash_05.mgz flash_30.mgz flash_parameters&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        list of FLASH images (must be in mgh format)
+        flag: %s, position: -2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+flip_list: (a list of items which are an integer)
+        list of flip angles of the input files
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_dir: (a directory name)
+        directory to store output in
+        flag: %s, position: -1
+subjects_dir: (an existing directory name)
+        subjects directory
+te_list: (a list of items which are a float)
+        list of TEs of the input files (in msec)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tr_list: (a list of items which are an integer)
+        list of TRs of the input files (in msec)
+xfm_list: (a list of items which are an existing file name)
+        list of transform files to apply to each FLASH image
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>pd_image: (an existing file name)
+        image of estimated proton density values
+t1_image: (an existing file name)
+        image of estimated T1 relaxation values
+t2star_image: (an existing file name)
+        image of estimated T2* values
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-mriconvert"></span></div>
+</div>
+<div class="section" id="mriconvert">
+<span id="index-4"></span><h2>MRIConvert<a class="headerlink" href="#mriconvert" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L325">Link to code</a></p>
+<p>Wraps command <strong>mri_convert</strong></p>
+<p>use fs mri_convert to manipulate files</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Adds niigz as an output type option</p>
+</div>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">mc</span> <span class="o">=</span> <span class="n">MRIConvert</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;outfile.mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_type</span> <span class="o">=</span> <span class="s">&#39;mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mc</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_convert --out_type mgz --input_volume structural.nii --output_volume outfile.mgz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        File to read/convert
+        flag: --input_volume %s, position: -2
+
+[Optional]
+apply_inv_transform: (an existing file name)
+        apply inverse transformation xfm file
+        flag: --apply_inverse_transform %s
+apply_transform: (an existing file name)
+        apply xfm file
+        flag: --apply_transform %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+ascii: (a boolean)
+        save output as ascii col&gt;row&gt;slice&gt;frame
+        flag: --ascii
+autoalign_matrix: (an existing file name)
+        text file with autoalign matrix
+        flag: --autoalign %s
+color_file: (an existing file name)
+        color file
+        flag: --color_file %s
+conform: (a boolean)
+        conform to 256^3
+        flag: --conform
+conform_min: (a boolean)
+        conform to smallest size
+        flag: --conform_min
+conform_size: (a float)
+        conform to size_in_mm
+        flag: --conform_size %s
+crop_center: (a tuple of the form: (an integer, an integer, an
+         integer))
+        &lt;x&gt; &lt;y&gt; &lt;z&gt; crop to 256 around center (x, y, z)
+        flag: --crop %d %d %d
+crop_gdf: (a boolean)
+        apply GDF cropping
+        flag: --crop_gdf
+crop_size: (a tuple of the form: (an integer, an integer, an
+         integer))
+        &lt;dx&gt; &lt;dy&gt; &lt;dz&gt; crop to size &lt;dx, dy, dz&gt;
+        flag: --cropsize %d %d %d
+cut_ends: (an integer)
+        remove ncut slices from the ends
+        flag: --cutends %d
+devolve_transform: (a string)
+        subject id
+        flag: --devolvexfm %s
+drop_n: (an integer)
+        drop the last n frames
+        flag: --ndrop %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fill_parcellation: (a boolean)
+        fill parcellation
+        flag: --fill_parcellation
+force_ras: (a boolean)
+        use default when orientation info absent
+        flag: --force_ras_good
+frame: (an integer)
+        keep only 0-based frame number
+        flag: --frame %d
+frame_subsample: (a tuple of the form: (an integer, an integer, an
+         integer))
+        start delta end : frame subsampling (end = -1 for end)
+        flag: --fsubsample %d %d %d
+fwhm: (a float)
+        smooth input volume by fwhm mm
+        flag: --fwhm %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_center: (a list of at most 3 items which are a float)
+        &lt;R coordinate&gt; &lt;A coordinate&gt; &lt;S coordinate&gt;
+        flag: --in_center %s
+in_i_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --in_i_direction %f %f %f
+in_i_size: (an integer)
+        input i size
+        flag: --in_i_size %d
+in_info: (a boolean)
+        display input info
+        flag: --in_info
+in_j_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --in_j_direction %f %f %f
+in_j_size: (an integer)
+        input j size
+        flag: --in_j_size %d
+in_k_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --in_k_direction %f %f %f
+in_k_size: (an integer)
+        input k size
+        flag: --in_k_size %d
+in_like: (an existing file name)
+        input looks like
+        flag: --in_like %s
+in_matrix: (a boolean)
+        display input matrix
+        flag: --in_matrix
+in_orientation: (&#39;LAI&#39; or &#39;LIA&#39; or &#39;ALI&#39; or &#39;AIL&#39; or &#39;ILA&#39; or &#39;IAL&#39;
+         or &#39;LAS&#39; or &#39;LSA&#39; or &#39;ALS&#39; or &#39;ASL&#39; or &#39;SLA&#39; or &#39;SAL&#39; or &#39;LPI&#39; or
+         &#39;LIP&#39; or &#39;PLI&#39; or &#39;PIL&#39; or &#39;ILP&#39; or &#39;IPL&#39; or &#39;LPS&#39; or &#39;LSP&#39; or
+         &#39;PLS&#39; or &#39;PSL&#39; or &#39;SLP&#39; or &#39;SPL&#39; or &#39;RAI&#39; or &#39;RIA&#39; or &#39;ARI&#39; or
+         &#39;AIR&#39; or &#39;IRA&#39; or &#39;IAR&#39; or &#39;RAS&#39; or &#39;RSA&#39; or &#39;ARS&#39; or &#39;ASR&#39; or
+         &#39;SRA&#39; or &#39;SAR&#39; or &#39;RPI&#39; or &#39;RIP&#39; or &#39;PRI&#39; or &#39;PIR&#39; or &#39;IRP&#39; or
+         &#39;IPR&#39; or &#39;RPS&#39; or &#39;RSP&#39; or &#39;PRS&#39; or &#39;PSR&#39; or &#39;SRP&#39; or &#39;SPR&#39;)
+        specify the input orientation
+        flag: --in_orientation %s
+in_scale: (a float)
+        input intensity scale factor
+        flag: --scale %f
+in_stats: (a boolean)
+        display input stats
+        flag: --in_stats
+in_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
+         &#39;analyze4d&#39; or &#39;spm&#39; or &#39;afni&#39; or &#39;brik&#39; or &#39;bshort&#39; or &#39;bfloat&#39; or
+         &#39;sdt&#39; or &#39;outline&#39; or &#39;otl&#39; or &#39;gdf&#39; or &#39;nifti1&#39; or &#39;nii&#39; or
+         &#39;niigz&#39; or &#39;ge&#39; or &#39;gelx&#39; or &#39;lx&#39; or &#39;ximg&#39; or &#39;siemens&#39; or &#39;dicom&#39;
+         or &#39;siemens_dicom&#39;)
+        input file type
+        flag: --in_type %s
+invert_contrast: (a float)
+        threshold for inversting contrast
+        flag: --invert_contrast %f
+midframe: (a boolean)
+        keep only the middle frame
+        flag: --mid-frame
+no_change: (a boolean)
+        don&#39;t change type of input to that of template
+        flag: --nochange
+no_scale: (a boolean)
+        dont rescale values for COR
+        flag: --no_scale 1
+no_translate: (a boolean)
+        ~~~
+        flag: --no_translate
+no_write: (a boolean)
+        do not write output
+        flag: --no_write
+out_center: (a tuple of the form: (a float, a float, a float))
+        &lt;R coordinate&gt; &lt;A coordinate&gt; &lt;S coordinate&gt;
+        flag: --out_center %f %f %f
+out_datatype: (&#39;uchar&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39;)
+        output data type &lt;uchar|short|int|float&gt;
+        flag: --out_data_type %s
+out_file: (a file name)
+        output filename or True to generate one
+        flag: --output_volume %s, position: -1
+out_i_count: (an integer)
+        some count ?? in i direction
+        flag: --out_i_count %d
+out_i_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --out_i_direction %f %f %f
+out_i_size: (an integer)
+        output i size
+        flag: --out_i_size %d
+out_info: (a boolean)
+        display output info
+        flag: --out_info
+out_j_count: (an integer)
+        some count ?? in j direction
+        flag: --out_j_count %d
+out_j_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --out_j_direction %f %f %f
+out_j_size: (an integer)
+        output j size
+        flag: --out_j_size %d
+out_k_count: (an integer)
+        some count ?? in k direction
+        flag: --out_k_count %d
+out_k_dir: (a tuple of the form: (a float, a float, a float))
+        &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
+        flag: --out_k_direction %f %f %f
+out_k_size: (an integer)
+        output k size
+        flag: --out_k_size %d
+out_matrix: (a boolean)
+        display output matrix
+        flag: --out_matrix
+out_orientation: (&#39;LAI&#39; or &#39;LIA&#39; or &#39;ALI&#39; or &#39;AIL&#39; or &#39;ILA&#39; or &#39;IAL&#39;
+         or &#39;LAS&#39; or &#39;LSA&#39; or &#39;ALS&#39; or &#39;ASL&#39; or &#39;SLA&#39; or &#39;SAL&#39; or &#39;LPI&#39; or
+         &#39;LIP&#39; or &#39;PLI&#39; or &#39;PIL&#39; or &#39;ILP&#39; or &#39;IPL&#39; or &#39;LPS&#39; or &#39;LSP&#39; or
+         &#39;PLS&#39; or &#39;PSL&#39; or &#39;SLP&#39; or &#39;SPL&#39; or &#39;RAI&#39; or &#39;RIA&#39; or &#39;ARI&#39; or
+         &#39;AIR&#39; or &#39;IRA&#39; or &#39;IAR&#39; or &#39;RAS&#39; or &#39;RSA&#39; or &#39;ARS&#39; or &#39;ASR&#39; or
+         &#39;SRA&#39; or &#39;SAR&#39; or &#39;RPI&#39; or &#39;RIP&#39; or &#39;PRI&#39; or &#39;PIR&#39; or &#39;IRP&#39; or
+         &#39;IPR&#39; or &#39;RPS&#39; or &#39;RSP&#39; or &#39;PRS&#39; or &#39;PSR&#39; or &#39;SRP&#39; or &#39;SPR&#39;)
+        specify the output orientation
+        flag: --out_orientation %s
+out_scale: (a float)
+        output intensity scale factor
+        flag: --out-scale %d
+out_stats: (a boolean)
+        display output stats
+        flag: --out_stats
+out_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
+         &#39;analyze4d&#39; or &#39;spm&#39; or &#39;afni&#39; or &#39;brik&#39; or &#39;bshort&#39; or &#39;bfloat&#39; or
+         &#39;sdt&#39; or &#39;outline&#39; or &#39;otl&#39; or &#39;gdf&#39; or &#39;nifti1&#39; or &#39;nii&#39; or
+         &#39;niigz&#39;)
+        output file type
+        flag: --out_type %s
+parse_only: (a boolean)
+        parse input only
+        flag: --parse_only
+read_only: (a boolean)
+        read the input volume
+        flag: --read_only
+reorder: (a tuple of the form: (an integer, an integer, an integer))
+        olddim1 olddim2 olddim3
+        flag: --reorder %d %d %d
+resample_type: (&#39;interpolate&#39; or &#39;weighted&#39; or &#39;nearest&#39; or &#39;sinc&#39; or
+         &#39;cubic&#39;)
+        &lt;interpolate|weighted|nearest|sinc|cubic&gt; (default is interpolate)
+        flag: --resample_type %s
+reslice_like: (an existing file name)
+        reslice output to match file
+        flag: --reslice_like %s
+sdcm_list: (an existing file name)
+        list of DICOM files for conversion
+        flag: --sdcmlist %s
+skip_n: (an integer)
+        skip the first n frames
+        flag: --nskip %d
+slice_bias: (a float)
+        apply half-cosine bias field
+        flag: --slice-bias %f
+slice_crop: (a tuple of the form: (an integer, an integer))
+        s_start s_end : keep slices s_start to s_end
+        flag: --slice-crop %d %d
+slice_reverse: (a boolean)
+        reverse order of slices, update vox2ras
+        flag: --slice-reverse
+smooth_parcellation: (a boolean)
+        smooth parcellation
+        flag: --smooth_parcellation
+sphinx: (a boolean)
+        change orientation info to sphinx
+        flag: --sphinx
+split: (a boolean)
+        split output frames into separate output files.
+        flag: --split
+status_file: (a file name)
+        status file for DICOM conversion
+        flag: --status %s
+subject_name: (a string)
+        subject name ???
+        flag: --subject_name %s
+subjects_dir: (an existing directory name)
+        subjects directory
+template_info: (a boolean)
+        dump info about template
+template_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
+         &#39;analyze4d&#39; or &#39;spm&#39; or &#39;afni&#39; or &#39;brik&#39; or &#39;bshort&#39; or &#39;bfloat&#39; or
+         &#39;sdt&#39; or &#39;outline&#39; or &#39;otl&#39; or &#39;gdf&#39; or &#39;nifti1&#39; or &#39;nii&#39; or
+         &#39;niigz&#39; or &#39;ge&#39; or &#39;gelx&#39; or &#39;lx&#39; or &#39;ximg&#39; or &#39;siemens&#39; or &#39;dicom&#39;
+         or &#39;siemens_dicom&#39;)
+        template file type
+        flag: --template_type %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+unwarp_gradient: (a boolean)
+        unwarp gradient nonlinearity
+        flag: --unwarp_gradient_nonlinearity
+vox_size: (a tuple of the form: (a float, a float, a float))
+        &lt;size_x&gt; &lt;size_y&gt; &lt;size_z&gt; specify the size (mm) - useful for
+        upsampling or downsampling
+        flag: -voxsize %f %f %f
+zero_ge_z_offset: (a boolean)
+        zero ge z offset ???
+        flag: --zero_ge_z_offset
+zero_outlines: (a boolean)
+        zero outlines
+        flag: --zero_outlines
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (a list of items which are an existing file name)
+        converted output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-parsedicomdir"></span></div>
+</div>
+<div class="section" id="parsedicomdir">
+<span id="index-5"></span><h2>ParseDICOMDir<a class="headerlink" href="#parsedicomdir" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L49">Link to code</a></p>
+<p>Wraps command <strong>mri_parse_sdcmdir</strong></p>
+<p>Uses mri_parse_sdcmdir to get information from dicom directories</p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">ParseDICOMDir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcminfo</span> <span class="o">=</span> <span class="n">ParseDICOMDir</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcminfo</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dicom_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcminfo</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sortbyrun</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcminfo</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">summarize</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcminfo</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_parse_sdcmdir --d . --o dicominfo.txt --sortbyrun --summarize&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dicom_dir: (an existing directory name)
+        path to siemens dicom directory
+        flag: --d %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dicom_info_file: (a file name, nipype default value: dicominfo.txt)
+        file to which results are written
+        flag: --o %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+sortbyrun: (a boolean)
+        assign run numbers
+        flag: --sortbyrun
+subjects_dir: (an existing directory name)
+        subjects directory
+summarize: (a boolean)
+        only print out info for run leaders
+        flag: --summarize
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dicom_info_file: (an existing file name)
+        text file containing dicom information
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-reconall"></span></div>
+</div>
+<div class="section" id="reconall">
+<span id="index-6"></span><h2>ReconAll<a class="headerlink" href="#reconall" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L619">Link to code</a></p>
+<p>Wraps command <strong>recon-all</strong></p>
+<p>Uses recon-all to generate surfaces and parcellations of structural data
+from anatomical images of a subject.</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">ReconAll</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span> <span class="o">=</span> <span class="n">ReconAll</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;foo&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">directive</span> <span class="o">=</span> <span class="s">&#39;all&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">T1_files</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reconall</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;recon-all -all -i structural.nii -subjid foo -sd .&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+T1_files: (a list of items which are an existing file name)
+        name of T1 file to process
+        flag: -i %s...
+T2_file: (an existing file name)
+        Use a T2 image to refine the cortical surface
+        flag: -T2 %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+directive: (&#39;all&#39; or &#39;autorecon1&#39; or &#39;autorecon2&#39; or &#39;autorecon2-cp&#39;
+         or &#39;autorecon2-wm&#39; or &#39;autorecon2-inflate1&#39; or &#39;autorecon2-perhemi&#39;
+         or &#39;autorecon3&#39; or &#39;localGI&#39; or &#39;qcache&#39;, nipype default value:
+         all)
+        process directive
+        flag: -%s, position: 0
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+flags: (a string)
+        additional parameters
+        flag: %s
+hemi: (&#39;lh&#39; or &#39;rh&#39;)
+        hemisphere to process
+        flag: -hemi %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+openmp: (an integer)
+        Number of processors to use in parallel
+        flag: -openmp %d
+subject_id: (a string, nipype default value: recon_all)
+        subject name
+        flag: -subjid %s
+subjects_dir: (an existing directory name)
+        path to subjects directory
+        flag: -sd %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>BA_stats: (a list of items which are an existing file name)
+        Brodmann Area statistics files
+T1: (an existing file name)
+        Intensity normalized whole-head volume
+annot: (a list of items which are an existing file name)
+        Surface annotation files
+aparc_a2009s_stats: (a list of items which are an existing file name)
+        Aparc a2009s parcellation statistics files
+aparc_aseg: (a list of items which are an existing file name)
+        Aparc parcellation projected into aseg volume
+aparc_stats: (a list of items which are an existing file name)
+        Aparc parcellation statistics files
+aseg: (an existing file name)
+        Volumetric map of regions from automatic segmentation
+aseg_stats: (a list of items which are an existing file name)
+        Automated segmentation statistics file
+brain: (an existing file name)
+        Intensity normalized brain-only volume
+brainmask: (an existing file name)
+        Skull-stripped (brain-only) volume
+curv: (a list of items which are an existing file name)
+        Maps of surface curvature
+curv_stats: (a list of items which are an existing file name)
+        Curvature statistics files
+entorhinal_exvivo_stats: (a list of items which are an existing file
+         name)
+        Entorhinal exvivo statistics files
+filled: (an existing file name)
+        Subcortical mass volume
+inflated: (a list of items which are an existing file name)
+        Inflated surface meshes
+label: (a list of items which are an existing file name)
+        Volume and surface label files
+norm: (an existing file name)
+        Normalized skull-stripped volume
+nu: (an existing file name)
+        Non-uniformity corrected whole-head volume
+orig: (an existing file name)
+        Base image conformed to Freesurfer space
+pial: (a list of items which are an existing file name)
+        Gray matter/pia mater surface meshes
+rawavg: (an existing file name)
+        Volume formed by averaging input images
+ribbon: (a list of items which are an existing file name)
+        Volumetric maps of cortical ribbons
+smoothwm: (a list of items which are an existing file name)
+        Smoothed original surface meshes
+sphere: (a list of items which are an existing file name)
+        Spherical surface meshes
+sphere_reg: (a list of items which are an existing file name)
+        Spherical registration file
+subject_id: (a string)
+        Subject name for whom to retrieve data
+subjects_dir: (an existing directory name)
+        Freesurfer subjects directory.
+sulc: (a list of items which are an existing file name)
+        Surface maps of sulcal depth
+thickness: (a list of items which are an existing file name)
+        Surface maps of cortical thickness
+volume: (a list of items which are an existing file name)
+        Surface maps of cortical volume
+white: (a list of items which are an existing file name)
+        White/gray matter surface meshes
+wm: (an existing file name)
+        Segmented white-matter volume
+wmparc: (an existing file name)
+        Aparc parcellation projected into subcortical white matter
+wmparc_stats: (a list of items which are an existing file name)
+        White matter parcellation statistics file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-resample"></span></div>
+</div>
+<div class="section" id="resample">
+<span id="index-7"></span><h2>Resample<a class="headerlink" href="#resample" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L553">Link to code</a></p>
+<p>Wraps command <strong>mri_convert</strong></p>
+<p>Use FreeSurfer mri_convert to up or down-sample image files</p>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">freesurfer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampler</span> <span class="o">=</span> <span class="n">freesurfer</span><span class="o">.</span><span class="n">Resample</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampler</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampler</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">resampled_file</span> <span class="o">=</span> <span class="s">&#39;resampled.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampler</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">voxel_size</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.1</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resampler</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_convert -vs 2.10 2.10 2.10 -i structural.nii -o resampled.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        file to resample
+        flag: -i %s, position: -2
+voxel_size: (a tuple of the form: (a float, a float, a float))
+        triplet of output voxel sizes
+        flag: -vs %.2f %.2f %.2f
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+resampled_file: (a file name)
+        output filename
+        flag: -o %s, position: -1
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>resampled_file: (an existing file name)
+        output filename
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-robustregister"></span></div>
+</div>
+<div class="section" id="robustregister">
+<span id="index-8"></span><h2>RobustRegister<a class="headerlink" href="#robustregister" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1161">Link to code</a></p>
+<p>Wraps command <strong>mri_robust_register</strong></p>
+<p>Perform intramodal linear registration (translation and rotation) using robust statistics.</p>
+<div class="section" id="id8">
+<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">RobustRegister</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">RobustRegister</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target_file</span> <span class="o">=</span> <span class="s">&#39;T1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">auto_sens</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init_orient</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_robust_register --satit --initorient --lta structural_robustreg.lta --mov structural.nii --dst T1.nii&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<p>Reuter, M, Rosas, HD, and Fischl, B, (2010). Highly Accurate Inverse Consistent Registration:
+A Robust Approach.  Neuroimage 53(4) 1181-96.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+auto_sens: (a boolean)
+        auto-detect good sensitivity
+        flag: --satit
+        mutually_exclusive: outlier_sens
+outlier_sens: (a float)
+        set outlier sensitivity explicitly
+        flag: --sat %.4f
+        mutually_exclusive: auto_sens
+source_file: (a file name)
+        volume to be registered
+        flag: --mov %s
+target_file: (a file name)
+        target volume for the registration
+        flag: --dst %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+est_int_scale: (a boolean)
+        estimate intensity scale (recommended for unnormalized images)
+        flag: --iscale
+force_double: (a boolean)
+        use double-precision intensities
+        flag: --doubleprec
+force_float: (a boolean)
+        use float intensities
+        flag: --floattype
+half_source: (a boolean or a file name)
+        write source volume mapped to halfway space
+        flag: --halfmov %s
+half_source_xfm: (a boolean or a file name)
+        write transform from source to halfway space
+        flag: --halfmovlta %s
+half_targ: (a boolean or a file name)
+        write target volume mapped to halfway space
+        flag: --halfdst %s
+half_targ_xfm: (a boolean or a file name)
+        write transform from target to halfway space
+        flag: --halfdstlta %s
+half_weights: (a boolean or a file name)
+        write weights volume mapped to halfway space
+        flag: --halfweights %s
+high_iterations: (an integer)
+        max # of times on highest resolution
+        flag: --highit %d
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_xfm_file: (an existing file name)
+        use initial transform on source
+        flag: --transform
+init_orient: (a boolean)
+        use moments for initial orient (recommended for stripped brains)
+        flag: --initorient
+iteration_thresh: (a float)
+        stop iterations when below threshold
+        flag: --epsit %.3f
+least_squares: (a boolean)
+        use least squares instead of robust estimator
+        flag: --leastsquares
+mask_source: (an existing file name)
+        image to mask source volume with
+        flag: --maskmov %s
+mask_target: (an existing file name)
+        image to mask target volume with
+        flag: --maskdst %s
+max_iterations: (an integer)
+        maximum # of times on each resolution
+        flag: --maxit %d
+no_init: (a boolean)
+        skip transform init
+        flag: --noinit
+no_multi: (a boolean)
+        work on highest resolution
+        flag: --nomulti
+out_reg_file: (a file name)
+        registration file to write
+        flag: --lta %s
+outlier_limit: (a float)
+        set maximal outlier limit in satit
+        flag: --wlimit %.3f
+registered_file: (a boolean or a file name)
+        registered image; either True or filename
+        flag: --warp %s
+subjects_dir: (an existing directory name)
+        subjects directory
+subsample_thresh: (an integer)
+        subsample if dimension is above threshold size
+        flag: --subsample %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trans_only: (a boolean)
+        find 3 parameter translation only
+        flag: --transonly
+weights_file: (a boolean or a file name)
+        weights image to write; either True or filename
+        flag: --weights %s
+write_vo2vox: (a boolean)
+        output vox2vox matrix (default is RAS2RAS)
+        flag: --vox2vox
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>half_source: (a file name)
+        source image mapped to halfway space
+half_source_xfm: (a file name)
+        transform file to map source image to halfway space
+half_targ: (a file name)
+        target image mapped to halfway space
+half_targ_xfm: (a file name)
+        transform file to map target image to halfway space
+half_weights: (a file name)
+        weights image mapped to halfway space
+out_reg_file: (an existing file name)
+        output registration file
+registered_file: (a file name)
+        output image with registration applied
+weights_file: (a file name)
+        image of weights used
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-smooth"></span></div>
+</div>
+<div class="section" id="smooth">
+<span id="index-9"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1050">Link to code</a></p>
+<p>Wraps command <strong>mris_volsmooth</strong></p>
+<p>Use FreeSurfer mris_volsmooth to smooth a volume</p>
+<p>This function smoothes cortical regions on a surface and non-cortical
+regions in volume.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Cortical voxels are mapped to the surface (3D-&gt;2D) and then the
+smoothed values from the surface are put back into the volume to fill
+the cortical ribbon. If data is smoothed with this algorithm, one has to
+be careful about how further processing is interpreted.</p>
+</div>
+<div class="section" id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">Smooth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smoothvol</span> <span class="o">=</span> <span class="n">Smooth</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="n">smoothed_file</span> <span class="o">=</span> <span class="s">&#39;foo_out.nii&#39;</span><span class="p">,</span> <span class="n">reg_file</span><span class="o">=</span><span class="s">&#39;register.dat&#39;</span><span class="p">,</span> <span class="n">surface_fwhm</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">vol_fwhm</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smoothvol</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mris_volsmooth --i functional.nii --reg register.dat --o foo_out.nii --fwhm 10.000000 --vol-fwhm 6.000000&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        source volume
+        flag: --i %s
+num_iters: (an integer &gt;= 1)
+        number of iterations instead of fwhm
+        flag: --niters %d
+        mutually_exclusive: surface_fwhm
+reg_file: (an existing file name)
+        registers volume to surface anatomical
+        flag: --reg %s
+surface_fwhm: (a floating point number &gt;= 0.0)
+        surface FWHM in mm
+        flag: --fwhm %f
+        mutually_exclusive: num_iters
+        requires: reg_file
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+proj_frac: (a float)
+        project frac of thickness a long surface normal
+        flag: --projfrac %s
+        mutually_exclusive: proj_frac_avg
+proj_frac_avg: (a tuple of the form: (a float, a float, a float))
+        average a long normal min max delta
+        flag: --projfrac-avg %.2f %.2f %.2f
+        mutually_exclusive: proj_frac
+smoothed_file: (a file name)
+        output volume
+        flag: --o %s
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+vol_fwhm: (a floating point number &gt;= 0.0)
+        volume smoothing outside of surface
+        flag: --vol-fwhm %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>smoothed_file: (an existing file name)
+        smoothed input volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-synthesizeflash"></span></div>
+</div>
+<div class="section" id="synthesizeflash">
+<span id="index-10"></span><h2>SynthesizeFLASH<a class="headerlink" href="#synthesizeflash" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1321">Link to code</a></p>
+<p>Wraps command <strong>mri_synthesize</strong></p>
+<p>Synthesize a FLASH acquisition from T1 and proton density maps.</p>
+<div class="section" id="id10">
+<h3>Examples<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">SynthesizeFLASH</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">syn</span> <span class="o">=</span> <span class="n">SynthesizeFLASH</span><span class="p">(</span><span class="n">tr</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">te</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">flip_angle</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">syn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t1_image</span> <span class="o">=</span> <span class="s">&#39;T1.mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">syn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pd_image</span> <span class="o">=</span> <span class="s">&#39;PD.mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">syn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;flash_30syn.mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">syn</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_synthesize 20.00 30.00 3.000 T1.mgz PD.mgz flash_30syn.mgz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+flip_angle: (a float)
+        flip angle (in degrees)
+        flag: %.2f, position: 3
+pd_image: (an existing file name)
+        image of proton density values
+        flag: %s, position: 6
+t1_image: (an existing file name)
+        image of T1 values
+        flag: %s, position: 5
+te: (a float)
+        echo time (in msec)
+        flag: %.3f, position: 4
+tr: (a float)
+        repetition time (in msec)
+        flag: %.2f, position: 2
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixed_weighting: (a boolean)
+        use a fixed weighting to generate optimal gray/white contrast
+        flag: -w, position: 1
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        image to write
+        flag: %s
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        synthesized FLASH acquisition
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-preprocess-unpacksdicomdir"></span></div>
+</div>
+<div class="section" id="unpacksdicomdir">
+<span id="index-11"></span><h2>UnpackSDICOMDir<a class="headerlink" href="#unpacksdicomdir" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L109">Link to code</a></p>
+<p>Wraps command <strong>unpacksdcmdir</strong></p>
+<p>Use unpacksdcmdir to convert dicom files</p>
+<p>Call unpacksdcmdir -help from the command line to see more information on
+using this command.</p>
+<div class="section" id="id11">
+<h3>Examples<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">import</span> <span class="n">UnpackSDICOMDir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span> <span class="o">=</span> <span class="n">UnpackSDICOMDir</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">run_info</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s">&#39;mprage&#39;</span><span class="p">,</span> <span class="s">&#39;nii&#39;</span><span class="p">,</span> <span class="s">&#39;struct&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dir_structure</span> <span class="o">=</span> <span class="s">&#39;generic&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unpack</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+config: (an existing file name)
+        specify unpacking rules in file
+        flag: -cfg %s
+        mutually_exclusive: run_info, config, seq_config
+run_info: (a tuple of the form: (an integer, a string, a string, a
+         string))
+        runno subdir format name : spec unpacking rules on cmdline
+        flag: -run %d %s %s %s
+        mutually_exclusive: run_info, config, seq_config
+seq_config: (an existing file name)
+        specify unpacking rules based on sequence
+        flag: -seqcfg %s
+        mutually_exclusive: run_info, config, seq_config
+source_dir: (an existing directory name)
+        directory with the DICOM files
+        flag: -src %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dir_structure: (&#39;fsfast&#39; or &#39;generic&#39;)
+        unpack to specified directory structures
+        flag: -%s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+log_file: (an existing file name)
+        explicilty set log file
+        flag: -log %s
+no_info_dump: (a boolean)
+        do not create infodump file
+        flag: -noinfodump
+no_unpack_err: (a boolean)
+        do not try to unpack runs with errors
+        flag: -no-unpackerr
+output_dir: (a directory name)
+        top directory into which the files will be unpacked
+        flag: -targ %s
+scan_only: (an existing file name)
+        only scan the directory and put result in file
+        flag: -scanonly %s
+spm_zeropad: (an integer)
+        set frame number zero padding width for SPM
+        flag: -nspmzeropad %d
+subjects_dir: (an existing directory name)
+        subjects directory
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

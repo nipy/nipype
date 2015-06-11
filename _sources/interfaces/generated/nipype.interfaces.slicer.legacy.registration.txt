@@ -1,0 +1,736 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.slicer.legacy.registration
+=====================================
+
+
+.. _nipype.interfaces.slicer.legacy.registration.AffineRegistration:
+
+
+.. index:: AffineRegistration
+
+AffineRegistration
+------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L73>`__
+
+Wraps command **AffineRegistration **
+
+title: Affine Registration
+
+category: Legacy.Registration
+
+description: Registers two images together using an affine transform and mutual information. This module is often used to align images of different subjects or images of the same subject from different modalities.
+
+This module can smooth images prior to registration to mitigate noise and improve convergence. Many of the registration parameters require a working knowledge of the algorithm although the default parameters are sufficient for many registration tasks.
+
+
+
+version: 0.1.0.$Revision: 19608 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/AffineRegistration
+
+contributor: Daniel Blezek (GE)
+
+acknowledgements: This module was developed by Daniel Blezek while at GE Research with contributions from Jim Miller.
+
+This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        FixedImageFileName: (an existing file name)
+                Fixed image to which to register
+                flag: %s, position: -2
+        MovingImageFileName: (an existing file name)
+                Moving image
+                flag: %s, position: -1
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fixedsmoothingfactor: (an integer)
+                Amount of smoothing applied to fixed image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --fixedsmoothingfactor %d
+        histogrambins: (an integer)
+                Number of histogram bins to use for Mattes Mutual Information.
+                Reduce the number of bins if a registration fails. If the number of
+                bins is too large, the estimated PDFs will be a field of impulses
+                and will inhibit reliable registration estimation.
+                flag: --histogrambins %d
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        initialtransform: (an existing file name)
+                Initial transform for aligning the fixed and moving image. Maps
+                positions in the fixed coordinate frame to positions in the moving
+                coordinate frame. Optional.
+                flag: --initialtransform %s
+        iterations: (an integer)
+                Number of iterations
+                flag: --iterations %d
+        movingsmoothingfactor: (an integer)
+                Amount of smoothing applied to moving image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --movingsmoothingfactor %d
+        outputtransform: (a boolean or a file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+                flag: --outputtransform %s
+        resampledmovingfilename: (a boolean or a file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+                flag: --resampledmovingfilename %s
+        spatialsamples: (an integer)
+                Number of spatial samples to use in estimating Mattes Mutual
+                Information. Larger values yield more accurate PDFs and improved
+                registration quality.
+                flag: --spatialsamples %d
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        translationscale: (a float)
+                Relative scale of translations to rotations, i.e. a value of 100
+                means 10mm = 1 degree. (Actual scale used is
+                1/(TranslationScale^2)). This parameter is used to 'weight' or
+                'standardized' the transform parameters and their effect on the
+                registration objective function.
+                flag: --translationscale %f
+
+Outputs::
+
+        outputtransform: (an existing file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+        resampledmovingfilename: (an existing file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+
+.. _nipype.interfaces.slicer.legacy.registration.BSplineDeformableRegistration:
+
+
+.. index:: BSplineDeformableRegistration
+
+BSplineDeformableRegistration
+-----------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L31>`__
+
+Wraps command **BSplineDeformableRegistration **
+
+title: BSpline Deformable Registration
+
+category: Legacy.Registration
+
+description: Registers two images together using BSpline transform and mutual information.
+
+version: 0.1.0.$Revision: 19608 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/BSplineDeformableRegistration
+
+contributor: Bill Lorensen (GE)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        FixedImageFileName: (an existing file name)
+                Fixed image to which to register
+                flag: %s, position: -2
+        MovingImageFileName: (an existing file name)
+                Moving image
+                flag: %s, position: -1
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        constrain: (a boolean)
+                Constrain the deformation to the amount specified in Maximum
+                Deformation
+                flag: --constrain
+        default: (an integer)
+                Default pixel value used if resampling a pixel outside of the
+                volume.
+                flag: --default %d
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        gridSize: (an integer)
+                Number of grid points on interior of the fixed image. Larger grid
+                sizes allow for finer registrations.
+                flag: --gridSize %d
+        histogrambins: (an integer)
+                Number of histogram bins to use for Mattes Mutual Information.
+                Reduce the number of bins if a deformable registration fails. If the
+                number of bins is too large, the estimated PDFs will be a field of
+                impulses and will inhibit reliable registration estimation.
+                flag: --histogrambins %d
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        initialtransform: (an existing file name)
+                Initial transform for aligning the fixed and moving image. Maps
+                positions in the fixed coordinate frame to positions in the moving
+                coordinate frame. This transform should be an affine or rigid
+                transform. It is used an a bulk transform for the BSpline. Optional.
+                flag: --initialtransform %s
+        iterations: (an integer)
+                Number of iterations
+                flag: --iterations %d
+        maximumDeformation: (a float)
+                If Constrain Deformation is checked, limit the deformation to this
+                amount.
+                flag: --maximumDeformation %f
+        outputtransform: (a boolean or a file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions from the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+                flag: --outputtransform %s
+        outputwarp: (a boolean or a file name)
+                Vector field that applies an equivalent warp as the BSpline. Maps
+                positions from the fixed coordinate frame to the moving coordinate
+                frame. Optional.
+                flag: --outputwarp %s
+        resampledmovingfilename: (a boolean or a file name)
+                Resampled moving image to fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+                flag: --resampledmovingfilename %s
+        spatialsamples: (an integer)
+                Number of spatial samples to use in estimating Mattes Mutual
+                Information. Larger values yield more accurate PDFs and improved
+                registration quality.
+                flag: --spatialsamples %d
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        outputtransform: (an existing file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions from the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+        outputwarp: (an existing file name)
+                Vector field that applies an equivalent warp as the BSpline. Maps
+                positions from the fixed coordinate frame to the moving coordinate
+                frame. Optional.
+        resampledmovingfilename: (an existing file name)
+                Resampled moving image to fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+
+.. _nipype.interfaces.slicer.legacy.registration.ExpertAutomatedRegistration:
+
+
+.. index:: ExpertAutomatedRegistration
+
+ExpertAutomatedRegistration
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L277>`__
+
+Wraps command **ExpertAutomatedRegistration **
+
+title: Expert Automated Registration
+
+category: Legacy.Registration
+
+description: Provides rigid, affine, and BSpline registration methods via a simple GUI
+
+version: 0.1.0.$Revision: 2104 $(alpha)
+
+documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ExpertAutomatedRegistration
+
+contributor: Stephen R Aylward (Kitware), Casey B Goodlett (Kitware)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        affineMaxIterations: (an integer)
+                Maximum number of affine optimization iterations
+                flag: --affineMaxIterations %d
+        affineSamplingRatio: (a float)
+                Portion of the image to use in computing the metric during affine
+                registration
+                flag: --affineSamplingRatio %f
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        bsplineMaxIterations: (an integer)
+                Maximum number of bspline optimization iterations
+                flag: --bsplineMaxIterations %d
+        bsplineSamplingRatio: (a float)
+                Portion of the image to use in computing the metric during BSpline
+                registration
+                flag: --bsplineSamplingRatio %f
+        controlPointSpacing: (an integer)
+                Number of pixels between control points
+                flag: --controlPointSpacing %d
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        expectedOffset: (a float)
+                Expected misalignment after initialization
+                flag: --expectedOffset %f
+        expectedRotation: (a float)
+                Expected misalignment after initialization
+                flag: --expectedRotation %f
+        expectedScale: (a float)
+                Expected misalignment after initialization
+                flag: --expectedScale %f
+        expectedSkew: (a float)
+                Expected misalignment after initialization
+                flag: --expectedSkew %f
+        fixedImage: (an existing file name)
+                Image which defines the space into which the moving image is
+                registered
+                flag: %s, position: -2
+        fixedImageMask: (an existing file name)
+                Image which defines a mask for the fixed image
+                flag: --fixedImageMask %s
+        fixedLandmarks: (a list of items which are a list of from 3 to 3
+                 items which are a float)
+                Ordered list of landmarks in the fixed image
+                flag: --fixedLandmarks %s...
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        initialization: ('None' or 'Landmarks' or 'ImageCenters' or
+                 'CentersOfMass' or 'SecondMoments')
+                Method to prime the registration process
+                flag: --initialization %s
+        interpolation: ('NearestNeighbor' or 'Linear' or 'BSpline')
+                Method for interpolation within the optimization process
+                flag: --interpolation %s
+        loadTransform: (an existing file name)
+                Load a transform that is immediately applied to the moving image
+                flag: --loadTransform %s
+        metric: ('MattesMI' or 'NormCorr' or 'MeanSqrd')
+                Method to quantify image match
+                flag: --metric %s
+        minimizeMemory: (a boolean)
+                Reduce the amount of memory required at the cost of increased
+                computation time
+                flag: --minimizeMemory
+        movingImage: (an existing file name)
+                The transform goes from the fixed image's space into the moving
+                image's space
+                flag: %s, position: -1
+        movingLandmarks: (a list of items which are a list of from 3 to 3
+                 items which are a float)
+                Ordered list of landmarks in the moving image
+                flag: --movingLandmarks %s...
+        numberOfThreads: (an integer)
+                Number of CPU threads to use
+                flag: --numberOfThreads %d
+        randomNumberSeed: (an integer)
+                Seed to generate a consistent random number sequence
+                flag: --randomNumberSeed %d
+        registration: ('None' or 'Initial' or 'Rigid' or 'Affine' or
+                 'BSpline' or 'PipelineRigid' or 'PipelineAffine' or
+                 'PipelineBSpline')
+                Method for the registration process
+                flag: --registration %s
+        resampledImage: (a boolean or a file name)
+                Registration results
+                flag: --resampledImage %s
+        rigidMaxIterations: (an integer)
+                Maximum number of rigid optimization iterations
+                flag: --rigidMaxIterations %d
+        rigidSamplingRatio: (a float)
+                Portion of the image to use in computing the metric during rigid
+                registration
+                flag: --rigidSamplingRatio %f
+        sampleFromOverlap: (a boolean)
+                Limit metric evaluation to the fixed image region overlapped by the
+                moving image
+                flag: --sampleFromOverlap
+        saveTransform: (a boolean or a file name)
+                Save the transform that results from registration
+                flag: --saveTransform %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        verbosityLevel: ('Silent' or 'Standard' or 'Verbose')
+                Level of detail of reporting progress
+                flag: --verbosityLevel %s
+
+Outputs::
+
+        resampledImage: (an existing file name)
+                Registration results
+        saveTransform: (an existing file name)
+                Save the transform that results from registration
+
+.. _nipype.interfaces.slicer.legacy.registration.LinearRegistration:
+
+
+.. index:: LinearRegistration
+
+LinearRegistration
+------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L218>`__
+
+Wraps command **LinearRegistration **
+
+title: Linear Registration
+
+category: Legacy.Registration
+
+description: Registers two images together using a rigid transform and mutual information.
+
+version: 0.1.0.$Revision: 19608 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/LinearRegistration
+
+contributor: Daniel Blezek (GE)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        FixedImageFileName: (an existing file name)
+                Fixed image to which to register
+                flag: %s, position: -2
+        MovingImageFileName: (an existing file name)
+                Moving image
+                flag: %s, position: -1
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fixedsmoothingfactor: (an integer)
+                Amount of smoothing applied to fixed image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --fixedsmoothingfactor %d
+        histogrambins: (an integer)
+                Number of histogram bins to use for Mattes Mutual Information.
+                Reduce the number of bins if a registration fails. If the number of
+                bins is too large, the estimated PDFs will be a field of impulses
+                and will inhibit reliable registration estimation.
+                flag: --histogrambins %d
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        initialtransform: (an existing file name)
+                Initial transform for aligning the fixed and moving image. Maps
+                positions in the fixed coordinate frame to positions in the moving
+                coordinate frame. Optional.
+                flag: --initialtransform %s
+        iterations: (a list of items which are an integer)
+                Comma separated list of iterations. Must have the same number of
+                elements as the learning rate.
+                flag: --iterations %s
+        learningrate: (a list of items which are a float)
+                Comma separated list of learning rates. Learning rate is a scale
+                factor on the gradient of the registration objective function
+                (gradient with respect to the parameters of the transformation) used
+                to update the parameters of the transformation during optimization.
+                Smaller values cause the optimizer to take smaller steps through the
+                parameter space. Larger values are typically used early in the
+                registration process to take large jumps in parameter space followed
+                by smaller values to home in on the optimum value of the
+                registration objective function. Default is: 0.01, 0.005, 0.0005,
+                0.0002. Must have the same number of elements as iterations.
+                flag: --learningrate %s
+        movingsmoothingfactor: (an integer)
+                Amount of smoothing applied to moving image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --movingsmoothingfactor %d
+        outputtransform: (a boolean or a file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+                flag: --outputtransform %s
+        resampledmovingfilename: (a boolean or a file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+                flag: --resampledmovingfilename %s
+        spatialsamples: (an integer)
+                Number of spatial samples to use in estimating Mattes Mutual
+                Information. Larger values yield more accurate PDFs and improved
+                registration quality.
+                flag: --spatialsamples %d
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        translationscale: (a float)
+                Relative scale of translations to rotations, i.e. a value of 100
+                means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)).
+                This parameter is used to 'weight' or 'standardized' the transform
+                parameters and their effect on the registration objective function.
+                flag: --translationscale %f
+
+Outputs::
+
+        outputtransform: (an existing file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+        resampledmovingfilename: (an existing file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+
+.. _nipype.interfaces.slicer.legacy.registration.MultiResolutionAffineRegistration:
+
+
+.. index:: MultiResolutionAffineRegistration
+
+MultiResolutionAffineRegistration
+---------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L121>`__
+
+Wraps command **MultiResolutionAffineRegistration **
+
+title: Robust Multiresolution Affine Registration
+
+category: Legacy.Registration
+
+description: Provides affine registration using multiple resolution levels and decomposed affine transforms.
+
+version: 0.1.0.$Revision: 2104 $(alpha)
+
+documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/MultiResolutionAffineRegistration
+
+contributor: Casey B Goodlett (Utah)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fixedImage: (an existing file name)
+                Image which defines the space into which the moving image is
+                registered
+                flag: %s, position: -2
+        fixedImageMask: (an existing file name)
+                Label image which defines a mask of interest for the fixed image
+                flag: --fixedImageMask %s
+        fixedImageROI: (a list of items which are any value)
+                Label image which defines a ROI of interest for the fixed image
+                flag: --fixedImageROI %s
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        metricTolerance: (a float)
+                flag: --metricTolerance %f
+        movingImage: (an existing file name)
+                The transform goes from the fixed image's space into the moving
+                image's space
+                flag: %s, position: -1
+        numIterations: (an integer)
+                Number of iterations to run at each resolution level.
+                flag: --numIterations %d
+        numLineIterations: (an integer)
+                Number of iterations to run at each resolution level.
+                flag: --numLineIterations %d
+        resampledImage: (a boolean or a file name)
+                Registration results
+                flag: --resampledImage %s
+        saveTransform: (a boolean or a file name)
+                Save the output transform from the registration
+                flag: --saveTransform %s
+        stepSize: (a float)
+                The maximum step size of the optimizer in voxels
+                flag: --stepSize %f
+        stepTolerance: (a float)
+                The maximum step size of the optimizer in voxels
+                flag: --stepTolerance %f
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        resampledImage: (an existing file name)
+                Registration results
+        saveTransform: (an existing file name)
+                Save the output transform from the registration
+
+.. _nipype.interfaces.slicer.legacy.registration.RigidRegistration:
+
+
+.. index:: RigidRegistration
+
+RigidRegistration
+-----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L165>`__
+
+Wraps command **RigidRegistration **
+
+title: Rigid Registration
+
+category: Legacy.Registration
+
+description: Registers two images together using a rigid transform and mutual information.
+
+This module was originally distributed as "Linear registration" but has been renamed to eliminate confusion with the "Affine registration" module.
+
+This module is often used to align images of different subjects or images of the same subject from different modalities.
+
+This module can smooth images prior to registration to mitigate noise and improve convergence. Many of the registration parameters require a working knowledge of the algorithm although the default parameters are sufficient for many registration tasks.
+
+
+
+version: 0.1.0.$Revision: 19608 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RigidRegistration
+
+contributor: Daniel Blezek (GE)
+
+acknowledgements: This module was developed by Daniel Blezek while at GE Research with contributions from Jim Miller.
+
+This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        FixedImageFileName: (an existing file name)
+                Fixed image to which to register
+                flag: %s, position: -2
+        MovingImageFileName: (an existing file name)
+                Moving image
+                flag: %s, position: -1
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fixedsmoothingfactor: (an integer)
+                Amount of smoothing applied to fixed image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --fixedsmoothingfactor %d
+        histogrambins: (an integer)
+                Number of histogram bins to use for Mattes Mutual Information.
+                Reduce the number of bins if a registration fails. If the number of
+                bins is too large, the estimated PDFs will be a field of impulses
+                and will inhibit reliable registration estimation.
+                flag: --histogrambins %d
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        initialtransform: (an existing file name)
+                Initial transform for aligning the fixed and moving image. Maps
+                positions in the fixed coordinate frame to positions in the moving
+                coordinate frame. Optional.
+                flag: --initialtransform %s
+        iterations: (a list of items which are an integer)
+                Comma separated list of iterations. Must have the same number of
+                elements as the learning rate.
+                flag: --iterations %s
+        learningrate: (a list of items which are a float)
+                Comma separated list of learning rates. Learning rate is a scale
+                factor on the gradient of the registration objective function
+                (gradient with respect to the parameters of the transformation) used
+                to update the parameters of the transformation during optimization.
+                Smaller values cause the optimizer to take smaller steps through the
+                parameter space. Larger values are typically used early in the
+                registration process to take large jumps in parameter space followed
+                by smaller values to home in on the optimum value of the
+                registration objective function. Default is: 0.01, 0.005, 0.0005,
+                0.0002. Must have the same number of elements as iterations.
+                flag: --learningrate %s
+        movingsmoothingfactor: (an integer)
+                Amount of smoothing applied to moving image prior to registration.
+                Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+                input data if there is considerable amounts of noise or the noise
+                pattern in the fixed and moving images is very different.
+                flag: --movingsmoothingfactor %d
+        outputtransform: (a boolean or a file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+                flag: --outputtransform %s
+        resampledmovingfilename: (a boolean or a file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).
+                flag: --resampledmovingfilename %s
+        spatialsamples: (an integer)
+                Number of spatial samples to use in estimating Mattes Mutual
+                Information. Larger values yield more accurate PDFs and improved
+                registration quality.
+                flag: --spatialsamples %d
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        testingmode: (a boolean)
+                Enable testing mode. Input transform will be used to construct
+                floating image. The floating image will be ignored if passed.
+                flag: --testingmode
+        translationscale: (a float)
+                Relative scale of translations to rotations, i.e. a value of 100
+                means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)).
+                This parameter is used to 'weight' or 'standardized' the transform
+                parameters and their effect on the registration objective function.
+                flag: --translationscale %f
+
+Outputs::
+
+        outputtransform: (an existing file name)
+                Transform calculated that aligns the fixed and moving image. Maps
+                positions in the fixed coordinate frame to the moving coordinate
+                frame. Optional (specify an output transform or an output volume or
+                both).
+        resampledmovingfilename: (an existing file name)
+                Resampled moving image to the fixed image coordinate frame. Optional
+                (specify an output transform or an output volume or both).

@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dMRI: Group connectivity - MRtrix, FSL, FreeSurfer</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#import-the-workflows">Import the workflows</a></li>
+<li><a class="reference internal" href="#set-the-proper-directories">Set the proper directories</a></li>
+<li><a class="reference internal" href="#define-the-groups">Define the groups</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#main-processing-loop">Main processing loop</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dmri-group-connectivity-mrtrix-fsl-freesurfer">
+<span id="example-dmri-group-connectivity-mrtrix"></span><h1>dMRI: Group connectivity - MRtrix, FSL, FreeSurfer<a class="headerlink" href="#dmri-group-connectivity-mrtrix-fsl-freesurfer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This script, dmri_group_connectivity_mrtrix.py, runs group-based connectivity analysis using
+the dmri.mrtrix.connectivity_mapping Nipype workflow. Further detail on the processing can be
+found in <a class="reference internal" href="dmri_connectivity_advanced.html"><em>dMRI: Connectivity - MRtrix, CMTK, FreeSurfer</em></a>. This tutorial can be run using:</p>
+<div class="highlight-python"><div class="highlight"><pre>python dmri_group_connectivity_mrtrix.py
+</pre></div>
+</div>
+<p>We perform this analysis using one healthy subject and two subjects who suffer from Parkinson&#8217;s disease.</p>
+<p>The whole package (960 mb as .tar.gz / 1.3 gb uncompressed) including the Freesurfer directories for these subjects, can be acquired from here:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://db.tt/b6F1t0QV">http://db.tt/b6F1t0QV</a></li>
+</ul>
+</div></blockquote>
+<p>A data package containing the outputs of this pipeline can be obtained from here:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://db.tt/elmMnIt1">http://db.tt/elmMnIt1</a></li>
+</ul>
+</div></blockquote>
+<p>Along with MRtrix, FSL, and Freesurfer, you must also have the Connectome File Format
+library installed as well as the Connectome Mapper (cmp).</p>
+<blockquote>
+<div><ul class="simple">
+<li>MRtrix: <a class="reference external" href="http://www.brain.org.au/software/mrtrix/">http://www.brain.org.au/software/mrtrix/</a></li>
+<li>FSL: <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/">http://www.fmrib.ox.ac.uk/fsl/</a></li>
+<li>Freesurfer: <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/">http://surfer.nmr.mgh.harvard.edu/</a></li>
+<li>CTMK: <a class="reference external" href="http://www.cmtk.org/">http://www.cmtk.org/</a></li>
+<li>CFF: sudo apt-get install python-cfflib</li>
+</ul>
+</div></blockquote>
+<p>Or on github at:</p>
+<blockquote>
+<div><ul class="simple">
+<li>CFFlib: <a class="reference external" href="https://github.com/LTS5/cfflib">https://github.com/LTS5/cfflib</a></li>
+<li>CMP: <a class="reference external" href="https://github.com/LTS5/cmp">https://github.com/LTS5/cmp</a></li>
+</ul>
+</div></blockquote>
+<p>Output data can be visualized in ConnectomeViewer, TrackVis, Gephi,
+the MRtrix Viewer (mrview), and anything that can view Nifti files.</p>
+<blockquote>
+<div><ul class="simple">
+<li>ConnectomeViewer: <a class="reference external" href="https://github.com/LTS5/connectomeviewer">https://github.com/LTS5/connectomeviewer</a></li>
+<li>TrackVis: <a class="reference external" href="http://trackvis.org/">http://trackvis.org/</a></li>
+<li>Gephi: <a class="reference external" href="http://gephi.org/">http://gephi.org/</a></li>
+</ul>
+</div></blockquote>
+<p>The fiber data is available in Numpy arrays, and the connectivity matrix
+is also produced as a MATLAB matrix.</p>
+<div class="section" id="import-the-workflows">
+<h3>Import the workflows<a class="headerlink" href="#import-the-workflows" title="Permalink to this headline">¶</a></h3>
+<p>First, we import the necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>    <span class="c"># freesurfer</span>
+<span class="kn">import</span>  <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">op</span>                     <span class="c"># system functions</span>
+<span class="kn">import</span> <span class="nn">cmp</span>
+<span class="kn">from</span> <span class="nn">nipype.workflows.dmri.mrtrix.group_connectivity</span> <span class="kn">import</span> <span class="n">create_group_connectivity_pipeline</span>
+<span class="kn">from</span> <span class="nn">nipype.workflows.dmri.connectivity.group_connectivity</span> <span class="kn">import</span> <span class="p">(</span><span class="n">create_merge_network_results_by_group_workflow</span><span class="p">,</span> <span class="n">create_merge_group_network_results_workflow</span><span class="p">,</span> <span class="n">create_average_networks_by_group_workflow</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-the-proper-directories">
+<h3>Set the proper directories<a class="headerlink" href="#set-the-proper-directories" title="Permalink to this headline">¶</a></h3>
+<p>First, we import the necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;groupcondatapackage/subjects/&#39;</span><span class="p">)</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;groupcondatapackage/data/&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">FSCommand</span><span class="o">.</span><span class="n">set_default_subjects_dir</span><span class="p">(</span><span class="n">subjects_dir</span><span class="p">)</span>
+<span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="define-the-groups">
+<h3>Define the groups<a class="headerlink" href="#define-the-groups" title="Permalink to this headline">¶</a></h3>
+<p>Here we define the groups for this study. We would like to search for differences between the healthy subject and the two
+vegetative patients. The group list is defined as a Python dictionary (see <a class="reference external" href="http://docs.python.org/tutorial/datastructures.html">http://docs.python.org/tutorial/datastructures.html</a>),
+with group IDs (&#8216;controls&#8217;, &#8216;parkinsons&#8217;) as keys, and subject/patient names as values. We set the main output directory as &#8216;groupcon&#8217;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">group_list</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">group_list</span><span class="p">[</span><span class="s">&#39;controls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cont17&#39;</span><span class="p">]</span>
+<span class="n">group_list</span><span class="p">[</span><span class="s">&#39;parkinsons&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;pat10&#39;</span><span class="p">,</span> <span class="s">&#39;pat20&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The output directory must be named as well.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">global</span> <span class="n">output_dir</span>
+<span class="n">output_dir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;dmri_group_connectivity_mrtrix&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="main-processing-loop">
+<h2>Main processing loop<a class="headerlink" href="#main-processing-loop" title="Permalink to this headline">¶</a></h2>
+<p>The title for the final grouped-network connectome file is dependent on the group names. The resulting file for this example
+is &#8216;parkinsons-controls.cff&#8217;. The following code implements the format a-b-c-...x.cff for an arbitary number of groups.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The &#8216;info&#8217; dictionary below is used to define the input files. In this case, the diffusion weighted image contains the string &#8216;dti&#8217;.
+The same applies to the b-values and b-vector files, and this must be changed to fit your naming scheme.</p>
+</div>
+<p>The workflow is created given the information input about the groups and subjects.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<ul class="last simple">
+<li>nipype/workflows/dmri/mrtrix/group_connectivity.py</li>
+<li>nipype/workflows/dmri/mrtrix/connectivity_mapping.py</li>
+<li><a class="reference internal" href="dmri_connectivity_advanced.html"><em>dMRI: Connectivity - MRtrix, CMTK, FreeSurfer</em></a></li>
+</ul>
+</div>
+<p>We set values for absolute threshold used on the fractional anisotropy map. This is done
+in order to identify single-fiber voxels. In brains with more damage, however, it may be necessary
+to reduce the threshold, since their brains are have lower average fractional anisotropy values.</p>
+<p>We invert the b-vectors in the encoding file, and set the maximum harmonic order
+of the pre-tractography spherical deconvolution step. This is done to show
+how to set inputs that will affect both groups.</p>
+<p>Next we create and run the second-level pipeline. The purpose of this workflow is simple:
+It is used to merge each subject&#8217;s CFF file into one, so that there is a single file containing
+all of the networks for each group. This can be useful for performing Network Brain Statistics
+using the NBS plugin in ConnectomeViewer.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html">http://www.connectomeviewer.org/documentation/users/tutorials/tut_nbs.html</a></p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">group_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">group_list</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+    <span class="n">title</span> <span class="o">+=</span> <span class="n">group_id</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_list</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">title</span> <span class="o">+=</span> <span class="s">&#39;-&#39;</span>
+
+    <span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;dti&#39;</span><span class="p">]],</span>
+                <span class="n">bvecs</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;bvecs&#39;</span><span class="p">]],</span>
+                <span class="n">bvals</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;bvals&#39;</span><span class="p">]])</span>
+
+    <span class="n">l1pipeline</span> <span class="o">=</span> <span class="n">create_group_connectivity_pipeline</span><span class="p">(</span><span class="n">group_list</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">info</span><span class="p">)</span>
+
+    <span class="c"># Here with invert the b-vectors in the Y direction and set the maximum harmonic order of the</span>
+    <span class="c"># spherical deconvolution step</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">fsl2mrtrix</span><span class="o">.</span><span class="n">invert_y</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">csdeconv</span><span class="o">.</span><span class="n">maximum_harmonic_order</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c"># Here we define the parcellation scheme and the number of tracks to produce</span>
+    <span class="n">parcellation_name</span> <span class="o">=</span> <span class="s">&#39;scale500&#39;</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">Parcellate</span><span class="o">.</span><span class="n">parcellation_name</span> <span class="o">=</span> <span class="n">parcellation_name</span>
+    <span class="n">cmp_config</span> <span class="o">=</span> <span class="nb">cmp</span><span class="o">.</span><span class="n">configuration</span><span class="o">.</span><span class="n">PipelineConfiguration</span><span class="p">()</span>
+    <span class="n">cmp_config</span><span class="o">.</span><span class="n">parcellation_scheme</span> <span class="o">=</span> <span class="s">&quot;Lausanne2008&quot;</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">inputnode_within</span><span class="o">.</span><span class="n">resolution_network_file</span> <span class="o">=</span> <span class="n">cmp_config</span><span class="o">.</span><span class="n">_get_lausanne_parcellation</span><span class="p">(</span><span class="s">&#39;Lausanne2008&#39;</span><span class="p">)[</span><span class="n">parcellation_name</span><span class="p">][</span><span class="s">&#39;node_information_graphml&#39;</span><span class="p">]</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">connectivity</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">probCSDstreamtrack</span><span class="o">.</span><span class="n">desired_number_of_tracks</span> <span class="o">=</span> <span class="mi">100000</span>
+
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;eps&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+
+    <span class="c"># The second-level pipeline is created here</span>
+    <span class="n">l2pipeline</span> <span class="o">=</span> <span class="n">create_merge_network_results_by_group_workflow</span><span class="p">(</span><span class="n">group_list</span><span class="p">,</span> <span class="n">group_id</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">l2pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">l2inputnode</span><span class="o">.</span><span class="n">network_file</span> <span class="o">=</span> <span class="n">cmp_config</span><span class="o">.</span><span class="n">_get_lausanne_parcellation</span><span class="p">(</span><span class="s">&#39;Lausanne2008&#39;</span><span class="p">)[</span><span class="n">parcellation_name</span><span class="p">][</span><span class="s">&#39;node_information_graphml&#39;</span><span class="p">]</span>
+    <span class="n">l2pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">l2pipeline</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;eps&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now that the for loop is complete there are two grouped CFF files each containing the appropriate subjects.
+It is also convenient to have every subject in a single CFF file, so that is what the third-level pipeline does.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l3pipeline</span> <span class="o">=</span> <span class="n">create_merge_group_network_results_workflow</span><span class="p">(</span><span class="n">group_list</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+<span class="n">l3pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">l3pipeline</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;eps&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The fourth and final workflow averages the networks and saves them in another CFF file</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l4pipeline</span> <span class="o">=</span> <span class="n">create_average_networks_by_group_workflow</span><span class="p">(</span><span class="n">group_list</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">subjects_dir</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+<span class="n">l4pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">l4pipeline</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">&#39;eps&#39;</span><span class="p">,</span> <span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/dmri_group_connectivity_mrtrix.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+This same script is also included in the Nipype source distribution under the
+<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

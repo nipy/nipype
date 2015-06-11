@@ -1,0 +1,834 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.dmri.fsl.epi
+======================
+
+
+.. module:: nipype.workflows.dmri.fsl.epi
+
+
+.. _nipype.workflows.dmri.fsl.epi.create_dmri_preprocessing:
+
+:func:`create_dmri_preprocessing`
+---------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L9>`__
+
+
+
+Creates a workflow that chains the necessary pipelines to
+correct for motion, eddy currents, and, if selected, susceptibility
+artifacts in EPI dMRI sequences.
+
+.. deprecated:: 0.9.3
+  Use :func:`nipype.workflows.dmri.preprocess.epi.all_fmb_pipeline` or
+  :func:`nipype.workflows.dmri.preprocess.epi.all_peb_pipeline` instead.
+
+
+.. warning:: This workflow rotates the b-vectors, so please be
+  advised that not all the dicom converters ensure the consistency between the resulting
+  nifti orientation and the b matrix table (e.g. dcm2nii checks it).
+
+
+Example
+~~~~~~~
+
+>>> nipype_dmri_preprocess = create_dmri_preprocessing('nipype_dmri_prep')
+>>> nipype_dmri_preprocess.inputs.inputnode.in_file = 'diffusion.nii'
+>>> nipype_dmri_preprocess.inputs.inputnode.in_bvec = 'diffusion.bvec'
+>>> nipype_dmri_preprocess.inputs.inputnode.ref_num = 0
+>>> nipype_dmri_preprocess.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
+>>> nipype_dmri_preprocess.inputs.inputnode.fieldmap_pha = 'phase.nii'
+>>> nipype_dmri_preprocess.inputs.inputnode.te_diff = 2.46
+>>> nipype_dmri_preprocess.inputs.inputnode.epi_echospacing = 0.77
+>>> nipype_dmri_preprocess.inputs.inputnode.epi_rev_encoding = False
+>>> nipype_dmri_preprocess.inputs.inputnode.pi_accel_factor = True
+>>> nipype_dmri_preprocess.run() # doctest: +SKIP
+
+
+Inputs::
+
+    inputnode.in_file - The diffusion data
+    inputnode.in_bvec - The b-matrix file, in FSL format and consistent with the in_file orientation
+    inputnode.ref_num - The reference volume (a b=0 volume in dMRI)
+    inputnode.fieldmap_mag - The magnitude of the fieldmap
+    inputnode.fieldmap_pha - The phase difference of the fieldmap
+    inputnode.te_diff - TE increment used (in msec.) on the fieldmap acquisition (generally 2.46ms for 3T scanners)
+    inputnode.epi_echospacing - The EPI EchoSpacing parameter (in msec.)
+    inputnode.epi_rev_encoding - True if reverse encoding was used (generally False)
+    inputnode.pi_accel_factor - Parallel imaging factor (aka GRAPPA acceleration factor)
+    inputnode.vsm_sigma - Sigma (in mm.) of the gaussian kernel used for in-slice smoothing of the deformation field (voxel shift map, vsm)
+
+
+Outputs::
+
+    outputnode.dmri_corrected
+    outputnode.bvec_rotated
+
+
+Optional arguments::
+
+    use_fieldmap - True if there are fieldmap files that should be used (default True)
+    fieldmap_registration - True if registration to fieldmap should be performed (default False)
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph dMRI_preprocessing{
+
+	  label="dMRI_preprocessing";
+
+	  dMRI_preprocessing_inputnode[label="inputnode (utility)"];
+
+	  dMRI_preprocessing_outputnode[label="outputnode (utility)"];
+
+	  subgraph cluster_dMRI_preprocessing_motion_correct {
+
+	      label="motion_correct";
+
+	    dMRI_preprocessing_motion_correct_inputnode[label="inputnode (utility)"];
+
+	    dMRI_preprocessing_motion_correct_split[label="split (fsl)"];
+
+	    dMRI_preprocessing_motion_correct_pick_ref[label="pick_ref (utility)"];
+
+	    dMRI_preprocessing_motion_correct_coregistration[label="coregistration (fsl)"];
+
+	    dMRI_preprocessing_motion_correct_merge[label="merge (fsl)"];
+
+	    dMRI_preprocessing_motion_correct_rotate_b_matrix[label="rotate_b_matrix (utility)"];
+
+	    dMRI_preprocessing_motion_correct_outputnode[label="outputnode (utility)"];
+
+	    dMRI_preprocessing_motion_correct_inputnode -> dMRI_preprocessing_motion_correct_split;
+
+	    dMRI_preprocessing_motion_correct_inputnode -> dMRI_preprocessing_motion_correct_pick_ref;
+
+	    dMRI_preprocessing_motion_correct_inputnode -> dMRI_preprocessing_motion_correct_rotate_b_matrix;
+
+	    dMRI_preprocessing_motion_correct_split -> dMRI_preprocessing_motion_correct_coregistration;
+
+	    dMRI_preprocessing_motion_correct_split -> dMRI_preprocessing_motion_correct_pick_ref;
+
+	    dMRI_preprocessing_motion_correct_pick_ref -> dMRI_preprocessing_motion_correct_coregistration;
+
+	    dMRI_preprocessing_motion_correct_coregistration -> dMRI_preprocessing_motion_correct_rotate_b_matrix;
+
+	    dMRI_preprocessing_motion_correct_coregistration -> dMRI_preprocessing_motion_correct_merge;
+
+	    dMRI_preprocessing_motion_correct_merge -> dMRI_preprocessing_motion_correct_outputnode;
+
+	    dMRI_preprocessing_motion_correct_rotate_b_matrix -> dMRI_preprocessing_motion_correct_outputnode;
+
+	  }
+
+	  subgraph cluster_dMRI_preprocessing_eddy_correct {
+
+	      label="eddy_correct";
+
+	    dMRI_preprocessing_eddy_correct_inputnode[label="inputnode (utility)"];
+
+	    dMRI_preprocessing_eddy_correct_split[label="split (fsl)"];
+
+	    dMRI_preprocessing_eddy_correct_pick_ref[label="pick_ref (utility)"];
+
+	    dMRI_preprocessing_eddy_correct_coregistration[label="coregistration (fsl)"];
+
+	    dMRI_preprocessing_eddy_correct_merge[label="merge (fsl)"];
+
+	    dMRI_preprocessing_eddy_correct_outputnode[label="outputnode (utility)"];
+
+	    dMRI_preprocessing_eddy_correct_inputnode -> dMRI_preprocessing_eddy_correct_split;
+
+	    dMRI_preprocessing_eddy_correct_inputnode -> dMRI_preprocessing_eddy_correct_pick_ref;
+
+	    dMRI_preprocessing_eddy_correct_split -> dMRI_preprocessing_eddy_correct_coregistration;
+
+	    dMRI_preprocessing_eddy_correct_split -> dMRI_preprocessing_eddy_correct_pick_ref;
+
+	    dMRI_preprocessing_eddy_correct_pick_ref -> dMRI_preprocessing_eddy_correct_coregistration;
+
+	    dMRI_preprocessing_eddy_correct_coregistration -> dMRI_preprocessing_eddy_correct_merge;
+
+	    dMRI_preprocessing_eddy_correct_merge -> dMRI_preprocessing_eddy_correct_outputnode;
+
+	  }
+
+	  subgraph cluster_dMRI_preprocessing_epidewarp {
+
+	      label="epidewarp";
+
+	    dMRI_preprocessing_epidewarp_inputnode[label="inputnode (utility)"];
+
+	    dMRI_preprocessing_epidewarp_normalize_phasediff[label="normalize_phasediff (utility)"];
+
+	    dMRI_preprocessing_epidewarp_dwell_time[label="dwell_time (utility)"];
+
+	    dMRI_preprocessing_epidewarp_dwi_split[label="dwi_split (utility)"];
+
+	    dMRI_preprocessing_epidewarp_select_magnitude[label="select_magnitude (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_mask_magnitude[label="mask_magnitude (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_mask_dilate[label="mask_dilate (utility)"];
+
+	    dMRI_preprocessing_epidewarp_phase_unwrap[label="phase_unwrap (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_fill_phasediff[label="fill_phasediff (utility)"];
+
+	    dMRI_preprocessing_epidewarp_generate_vsm[label="generate_vsm (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_vsm_mean_shift[label="vsm_mean_shift (utility)"];
+
+	    dMRI_preprocessing_epidewarp_dwi_fugue[label="dwi_fugue (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_dwi_merge[label="dwi_merge (fsl)"];
+
+	    dMRI_preprocessing_epidewarp_outputnode[label="outputnode (utility)"];
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_normalize_phasediff;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_dwell_time;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_dwell_time;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_dwell_time;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_dwi_split;
+
+	    dMRI_preprocessing_epidewarp_inputnode -> dMRI_preprocessing_epidewarp_select_magnitude;
+
+	    dMRI_preprocessing_epidewarp_normalize_phasediff -> dMRI_preprocessing_epidewarp_phase_unwrap;
+
+	    dMRI_preprocessing_epidewarp_dwell_time -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_dwi_split -> dMRI_preprocessing_epidewarp_dwi_fugue;
+
+	    dMRI_preprocessing_epidewarp_select_magnitude -> dMRI_preprocessing_epidewarp_mask_magnitude;
+
+	    dMRI_preprocessing_epidewarp_select_magnitude -> dMRI_preprocessing_epidewarp_phase_unwrap;
+
+	    dMRI_preprocessing_epidewarp_mask_magnitude -> dMRI_preprocessing_epidewarp_mask_dilate;
+
+	    dMRI_preprocessing_epidewarp_mask_dilate -> dMRI_preprocessing_epidewarp_dwi_fugue;
+
+	    dMRI_preprocessing_epidewarp_mask_dilate -> dMRI_preprocessing_epidewarp_phase_unwrap;
+
+	    dMRI_preprocessing_epidewarp_mask_dilate -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_mask_dilate -> dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+	    dMRI_preprocessing_epidewarp_phase_unwrap -> dMRI_preprocessing_epidewarp_fill_phasediff;
+
+	    dMRI_preprocessing_epidewarp_fill_phasediff -> dMRI_preprocessing_epidewarp_generate_vsm;
+
+	    dMRI_preprocessing_epidewarp_generate_vsm -> dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+	    dMRI_preprocessing_epidewarp_generate_vsm -> dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+	    dMRI_preprocessing_epidewarp_vsm_mean_shift -> dMRI_preprocessing_epidewarp_dwi_fugue;
+
+	    dMRI_preprocessing_epidewarp_dwi_fugue -> dMRI_preprocessing_epidewarp_dwi_merge;
+
+	    dMRI_preprocessing_epidewarp_dwi_merge -> dMRI_preprocessing_epidewarp_outputnode;
+
+	  }
+
+	  dMRI_preprocessing_motion_correct_outputnode -> dMRI_preprocessing_eddy_correct_inputnode;
+
+	  dMRI_preprocessing_motion_correct_outputnode -> dMRI_preprocessing_outputnode;
+
+	  dMRI_preprocessing_epidewarp_outputnode -> dMRI_preprocessing_outputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_motion_correct_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_motion_correct_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_motion_correct_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	  dMRI_preprocessing_inputnode -> dMRI_preprocessing_eddy_correct_inputnode;
+
+	  dMRI_preprocessing_eddy_correct_outputnode -> dMRI_preprocessing_epidewarp_inputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.epi.create_eddy_correct_pipeline:
+
+:func:`create_eddy_correct_pipeline`
+------------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L201>`__
+
+
+
+.. deprecated:: 0.9.3
+  Use :func:`nipype.workflows.dmri.preprocess.epi.ecc_pipeline` instead.
+
+
+Creates a pipeline that replaces eddy_correct script in FSL. It takes a
+series of diffusion weighted images and linearly co-registers them to one
+reference image. No rotation of the B-matrix is performed, so this pipeline
+should be executed after the motion correction pipeline.
+
+Example
+~~~~~~~
+
+>>> nipype_eddycorrect = create_eddy_correct_pipeline('nipype_eddycorrect')
+>>> nipype_eddycorrect.inputs.inputnode.in_file = 'diffusion.nii'
+>>> nipype_eddycorrect.inputs.inputnode.ref_num = 0
+>>> nipype_eddycorrect.run() # doctest: +SKIP
+
+Inputs::
+
+    inputnode.in_file
+    inputnode.ref_num
+
+Outputs::
+
+    outputnode.eddy_corrected
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph eddy_correct{
+
+	  label="eddy_correct";
+
+	  eddy_correct_inputnode[label="inputnode (utility)"];
+
+	  eddy_correct_split[label="split (fsl)"];
+
+	  eddy_correct_pick_ref[label="pick_ref (utility)"];
+
+	  eddy_correct_coregistration[label="coregistration (fsl)"];
+
+	  eddy_correct_merge[label="merge (fsl)"];
+
+	  eddy_correct_outputnode[label="outputnode (utility)"];
+
+	  eddy_correct_inputnode -> eddy_correct_split;
+
+	  eddy_correct_inputnode -> eddy_correct_pick_ref;
+
+	  eddy_correct_split -> eddy_correct_coregistration;
+
+	  eddy_correct_split -> eddy_correct_pick_ref;
+
+	  eddy_correct_pick_ref -> eddy_correct_coregistration;
+
+	  eddy_correct_coregistration -> eddy_correct_merge;
+
+	  eddy_correct_merge -> eddy_correct_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.epi.create_epidewarp_pipeline:
+
+:func:`create_epidewarp_pipeline`
+---------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L484>`__
+
+
+
+Replaces the epidewarp.fsl script (http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl)
+for susceptibility distortion correction of dMRI & fMRI acquired with EPI sequences and the fieldmap
+information (Jezzard et al., 1995) using FSL's FUGUE. The registration to the (warped) fieldmap
+(strictly following the original script) is available using fieldmap_registration=True.
+
+
+.. warning:: This workflow makes use of ``epidewarp.fsl`` a script of FSL deprecated long
+  time ago. The use of this workflow is not recommended, use
+  :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
+
+
+Example
+~~~~~~~
+
+>>> nipype_epicorrect = create_epidewarp_pipeline('nipype_epidewarp', fieldmap_registration=False)
+>>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
+>>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
+>>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
+>>> nipype_epicorrect.inputs.inputnode.te_diff = 2.46
+>>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
+>>> nipype_epicorrect.inputs.inputnode.epi_rev_encoding = False
+>>> nipype_epicorrect.inputs.inputnode.ref_num = 0
+>>> nipype_epicorrect.inputs.inputnode.pi_accel_factor = 1.0
+>>> nipype_epicorrect.run() # doctest: +SKIP
+
+Inputs::
+
+    inputnode.in_file - The volume acquired with EPI sequence
+    inputnode.fieldmap_mag - The magnitude of the fieldmap
+    inputnode.fieldmap_pha - The phase difference of the fieldmap
+    inputnode.te_diff - Time difference between TE in ms.
+    inputnode.epi_echospacing - The echo spacing (aka dwell time) in the EPI sequence
+    inputnode.epi_ph_encoding_dir - The phase encoding direction in EPI acquisition (default y)
+    inputnode.epi_rev_encoding - True if it is acquired with reverse encoding
+    inputnode.pi_accel_factor - Acceleration factor used for EPI parallel imaging (GRAPPA)
+    inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
+    inputnode.ref_num - The reference volume (B=0 in dMRI or a central frame in fMRI)
+
+
+Outputs::
+
+    outputnode.epi_corrected
+
+
+Optional arguments::
+
+    fieldmap_registration - True if registration to fieldmap should be done (default False)
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph epidewarp{
+
+	  label="epidewarp";
+
+	  epidewarp_inputnode[label="inputnode (utility)"];
+
+	  epidewarp_dwell_time[label="dwell_time (utility)"];
+
+	  epidewarp_dwi_split[label="dwi_split (utility)"];
+
+	  epidewarp_normalize_phasediff[label="normalize_phasediff (utility)"];
+
+	  epidewarp_select_magnitude[label="select_magnitude (fsl)"];
+
+	  epidewarp_mask_magnitude[label="mask_magnitude (fsl)"];
+
+	  epidewarp_mask_dilate[label="mask_dilate (utility)"];
+
+	  epidewarp_phase_unwrap[label="phase_unwrap (fsl)"];
+
+	  epidewarp_fill_phasediff[label="fill_phasediff (utility)"];
+
+	  epidewarp_generate_vsm[label="generate_vsm (fsl)"];
+
+	  epidewarp_vsm_mean_shift[label="vsm_mean_shift (utility)"];
+
+	  epidewarp_dwi_fugue[label="dwi_fugue (fsl)"];
+
+	  epidewarp_dwi_merge[label="dwi_merge (fsl)"];
+
+	  epidewarp_outputnode[label="outputnode (utility)"];
+
+	  epidewarp_inputnode -> epidewarp_generate_vsm;
+
+	  epidewarp_inputnode -> epidewarp_generate_vsm;
+
+	  epidewarp_inputnode -> epidewarp_generate_vsm;
+
+	  epidewarp_inputnode -> epidewarp_dwell_time;
+
+	  epidewarp_inputnode -> epidewarp_dwell_time;
+
+	  epidewarp_inputnode -> epidewarp_dwell_time;
+
+	  epidewarp_inputnode -> epidewarp_dwi_split;
+
+	  epidewarp_inputnode -> epidewarp_normalize_phasediff;
+
+	  epidewarp_inputnode -> epidewarp_select_magnitude;
+
+	  epidewarp_dwell_time -> epidewarp_generate_vsm;
+
+	  epidewarp_dwi_split -> epidewarp_dwi_fugue;
+
+	  epidewarp_normalize_phasediff -> epidewarp_phase_unwrap;
+
+	  epidewarp_select_magnitude -> epidewarp_phase_unwrap;
+
+	  epidewarp_select_magnitude -> epidewarp_mask_magnitude;
+
+	  epidewarp_mask_magnitude -> epidewarp_mask_dilate;
+
+	  epidewarp_mask_dilate -> epidewarp_phase_unwrap;
+
+	  epidewarp_mask_dilate -> epidewarp_dwi_fugue;
+
+	  epidewarp_mask_dilate -> epidewarp_generate_vsm;
+
+	  epidewarp_mask_dilate -> epidewarp_vsm_mean_shift;
+
+	  epidewarp_phase_unwrap -> epidewarp_fill_phasediff;
+
+	  epidewarp_fill_phasediff -> epidewarp_generate_vsm;
+
+	  epidewarp_generate_vsm -> epidewarp_vsm_mean_shift;
+
+	  epidewarp_generate_vsm -> epidewarp_vsm_mean_shift;
+
+	  epidewarp_vsm_mean_shift -> epidewarp_dwi_fugue;
+
+	  epidewarp_dwi_fugue -> epidewarp_dwi_merge;
+
+	  epidewarp_dwi_merge -> epidewarp_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.epi.create_motion_correct_pipeline:
+
+:func:`create_motion_correct_pipeline`
+--------------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L123>`__
+
+
+
+Creates a pipeline that corrects for motion artifact in dMRI sequences.
+It takes a series of diffusion weighted images and rigidly co-registers
+them to one reference image. Finally, the b-matrix is rotated accordingly
+(Leemans et al. 2009 - http://www.ncbi.nlm.nih.gov/pubmed/19319973),
+making use of the rotation matrix obtained by FLIRT.
+
+
+.. deprecated:: 0.9.3
+  Use :func:`nipype.workflows.dmri.preprocess.epi.hmc_pipeline` instead.
+
+
+.. warning:: This workflow rotates the b-vectors, so please be adviced
+  that not all the dicom converters ensure the consistency between the resulting
+  nifti orientation and the b matrix table (e.g. dcm2nii checks it).
+
+
+Example
+~~~~~~~
+
+>>> nipype_motioncorrect = create_motion_correct_pipeline('nipype_motioncorrect')
+>>> nipype_motioncorrect.inputs.inputnode.in_file = 'diffusion.nii'
+>>> nipype_motioncorrect.inputs.inputnode.in_bvec = 'diffusion.bvec'
+>>> nipype_motioncorrect.inputs.inputnode.ref_num = 0
+>>> nipype_motioncorrect.run() # doctest: +SKIP
+
+Inputs::
+
+    inputnode.in_file
+    inputnode.ref_num
+    inputnode.in_bvec
+
+Outputs::
+
+    outputnode.motion_corrected
+    outputnode.out_bvec
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph motion_correct{
+
+	  label="motion_correct";
+
+	  motion_correct_inputnode[label="inputnode (utility)"];
+
+	  motion_correct_split[label="split (fsl)"];
+
+	  motion_correct_pick_ref[label="pick_ref (utility)"];
+
+	  motion_correct_coregistration[label="coregistration (fsl)"];
+
+	  motion_correct_merge[label="merge (fsl)"];
+
+	  motion_correct_rotate_b_matrix[label="rotate_b_matrix (utility)"];
+
+	  motion_correct_outputnode[label="outputnode (utility)"];
+
+	  motion_correct_inputnode -> motion_correct_rotate_b_matrix;
+
+	  motion_correct_inputnode -> motion_correct_split;
+
+	  motion_correct_inputnode -> motion_correct_pick_ref;
+
+	  motion_correct_split -> motion_correct_pick_ref;
+
+	  motion_correct_split -> motion_correct_coregistration;
+
+	  motion_correct_pick_ref -> motion_correct_coregistration;
+
+	  motion_correct_coregistration -> motion_correct_rotate_b_matrix;
+
+	  motion_correct_coregistration -> motion_correct_merge;
+
+	  motion_correct_merge -> motion_correct_outputnode;
+
+	  motion_correct_rotate_b_matrix -> motion_correct_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.epi.fieldmap_correction:
+
+:func:`fieldmap_correction`
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L264>`__
+
+
+
+.. deprecated:: 0.9.3
+  Use :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
+
+
+Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
+artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
+to EPI data, and a brain mask is required.
+
+Replaces the former workflow, still available as create_epidewarp_pipeline().  The difference
+with respect the epidewarp pipeline is that now the workflow uses the new fsl_prepare_fieldmap
+available as of FSL 5.0.
+
+
+Example
+~~~~~~~
+
+>>> nipype_epicorrect = fieldmap_correction('nipype_epidewarp')
+>>> nipype_epicorrect.inputs.inputnode.in_file = 'diffusion.nii'
+>>> nipype_epicorrect.inputs.inputnode.in_mask = 'brainmask.nii'
+>>> nipype_epicorrect.inputs.inputnode.fieldmap_pha = 'phase.nii'
+>>> nipype_epicorrect.inputs.inputnode.fieldmap_mag = 'magnitude.nii'
+>>> nipype_epicorrect.inputs.inputnode.te_diff = 2.46
+>>> nipype_epicorrect.inputs.inputnode.epi_echospacing = 0.77
+>>> nipype_epicorrect.inputs.inputnode.encoding_direction = 'y'
+>>> nipype_epicorrect.run() # doctest: +SKIP
+
+Inputs::
+
+    inputnode.in_file - The volume acquired with EPI sequence
+    inputnode.in_mask - A brain mask
+    inputnode.fieldmap_pha - The phase difference map from the fieldmapping, registered to in_file
+    inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan)
+                             from the fieldmapping, registered to in_file
+    inputnode.te_diff - Time difference in msec. between TE in ms of the fieldmapping (usually a GRE sequence).
+    inputnode.epi_echospacing - The effective echo spacing (aka dwell time) in msec. of the EPI sequence. If
+                                EPI was acquired with parallel imaging, then the effective echo spacing is
+                                eff_es = es / acc_factor.
+    inputnode.encoding_direction - The phase encoding direction in EPI acquisition (default y)
+    inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
+
+
+Outputs::
+
+    outputnode.epi_corrected
+    outputnode.out_vsm
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph fieldmap_correction{
+
+	  label="fieldmap_correction";
+
+	  fieldmap_correction_inputnode[label="inputnode (utility)"];
+
+	  fieldmap_correction_dwi_split[label="dwi_split (utility)"];
+
+	  fieldmap_correction_select_magnitude[label="select_magnitude (fsl)"];
+
+	  fieldmap_correction_mask_magnitude[label="mask_magnitude (fsl)"];
+
+	  fieldmap_correction_prepare_fieldmap[label="prepare_fieldmap (fsl)"];
+
+	  fieldmap_correction_generate_vsm[label="generate_vsm (fsl)"];
+
+	  fieldmap_correction_dwi_fugue[label="dwi_fugue (fsl)"];
+
+	  fieldmap_correction_dwi_merge[label="dwi_merge (fsl)"];
+
+	  fieldmap_correction_outputnode[label="outputnode (utility)"];
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_dwi_fugue;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_select_magnitude;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_prepare_fieldmap;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_prepare_fieldmap;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_dwi_split;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_inputnode -> fieldmap_correction_mask_magnitude;
+
+	  fieldmap_correction_dwi_split -> fieldmap_correction_dwi_fugue;
+
+	  fieldmap_correction_select_magnitude -> fieldmap_correction_mask_magnitude;
+
+	  fieldmap_correction_mask_magnitude -> fieldmap_correction_prepare_fieldmap;
+
+	  fieldmap_correction_mask_magnitude -> fieldmap_correction_dwi_fugue;
+
+	  fieldmap_correction_mask_magnitude -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_prepare_fieldmap -> fieldmap_correction_generate_vsm;
+
+	  fieldmap_correction_generate_vsm -> fieldmap_correction_dwi_fugue;
+
+	  fieldmap_correction_generate_vsm -> fieldmap_correction_outputnode;
+
+	  fieldmap_correction_dwi_fugue -> fieldmap_correction_dwi_merge;
+
+	  fieldmap_correction_dwi_merge -> fieldmap_correction_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.epi.topup_correction:
+
+:func:`topup_correction`
+------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/epi.py#L395>`__
+
+
+
+.. deprecated:: 0.9.3
+  Use :func:`nipype.workflows.dmri.preprocess.epi.sdc_peb` instead.
+
+
+Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
+been acquired
+
+
+Example
+~~~~~~~
+
+>>> nipype_epicorrect = topup_correction('nipype_topup')
+>>> nipype_epicorrect.inputs.inputnode.in_file_dir = 'epi.nii'
+>>> nipype_epicorrect.inputs.inputnode.in_file_rev = 'epi_rev.nii'
+>>> nipype_epicorrect.inputs.inputnode.encoding_direction = ['y', 'y-']
+>>> nipype_epicorrect.inputs.inputnode.ref_num = 0
+>>> nipype_epicorrect.run() # doctest: +SKIP
+
+
+Inputs::
+
+    inputnode.in_file_dir - EPI volume acquired in 'forward' phase encoding
+    inputnode.in_file_rev - EPI volume acquired in 'reversed' phase encoding
+    inputnode.encoding_direction - Direction encoding of in_file_dir
+    inputnode.ref_num - Identifier of the reference volumes (usually B0 volume)
+
+
+Outputs::
+
+    outputnode.epi_corrected
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph topup_correction{
+
+	  label="topup_correction";
+
+	  topup_correction_inputnode[label="inputnode (utility)"];
+
+	  topup_correction_merge2[label="merge2 (utility)"];
+
+	  topup_correction_b0_2[label="b0_2 (fsl)"];
+
+	  topup_correction_b0_1[label="b0_1 (fsl)"];
+
+	  topup_correction_merge[label="merge (utility)"];
+
+	  topup_correction_b0_comb[label="b0_comb (fsl)"];
+
+	  topup_correction_topup[label="topup (fsl)"];
+
+	  topup_correction_applytopup[label="applytopup (fsl)"];
+
+	  topup_correction_outputnode[label="outputnode (utility)"];
+
+	  topup_correction_inputnode -> topup_correction_b0_2;
+
+	  topup_correction_inputnode -> topup_correction_b0_2;
+
+	  topup_correction_inputnode -> topup_correction_topup;
+
+	  topup_correction_inputnode -> topup_correction_topup;
+
+	  topup_correction_inputnode -> topup_correction_b0_1;
+
+	  topup_correction_inputnode -> topup_correction_b0_1;
+
+	  topup_correction_inputnode -> topup_correction_merge2;
+
+	  topup_correction_inputnode -> topup_correction_merge2;
+
+	  topup_correction_merge2 -> topup_correction_applytopup;
+
+	  topup_correction_b0_2 -> topup_correction_merge;
+
+	  topup_correction_b0_1 -> topup_correction_merge;
+
+	  topup_correction_merge -> topup_correction_b0_comb;
+
+	  topup_correction_b0_comb -> topup_correction_topup;
+
+	  topup_correction_topup -> topup_correction_applytopup;
+
+	  topup_correction_topup -> topup_correction_applytopup;
+
+	  topup_correction_topup -> topup_correction_applytopup;
+
+	  topup_correction_topup -> topup_correction_outputnode;
+
+	  topup_correction_topup -> topup_correction_outputnode;
+
+	  topup_correction_topup -> topup_correction_outputnode;
+
+	  topup_correction_applytopup -> topup_correction_outputnode;
+
+	}
+

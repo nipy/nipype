@@ -1,0 +1,155 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.slicer.converters
+============================
+
+
+.. _nipype.interfaces.slicer.converters.DicomToNrrdConverter:
+
+
+.. index:: DicomToNrrdConverter
+
+DicomToNrrdConverter
+--------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/converters.py#L23>`__
+
+Wraps command **DicomToNrrdConverter **
+
+title: DICOM to NRRD Converter
+
+category: Converters
+
+description: Converts diffusion weighted MR images in dicom series into Nrrd format for analysis in Slicer. This program has been tested on only a limited subset of DTI dicom formats available from Siemens, GE, and Phillips scanners. Work in progress to support dicom multi-frame data. The program parses dicom header to extract necessary information about measurement frame, diffusion weighting directions, b-values, etc, and write out a nrrd image. For non-diffusion weighted dicom images, it loads in an entire dicom series and writes out a single dicom volume in a .nhdr/.raw pair.
+
+version: 0.2.0.$Revision: 916 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DicomToNrrdConverter
+
+license: https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt
+
+contributor: Xiaodong Tao (GE), Vince Magnotta (UIowa), Hans Johnson (UIowa)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for DTI data produced on Philips scanners was contributed by Vincent Magnotta and Hans Johnson at the University of Iowa.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inputDicomDirectory: (an existing directory name)
+                Directory holding Dicom series
+                flag: --inputDicomDirectory %s
+        outputDirectory: (a boolean or a directory name)
+                Directory holding the output NRRD format
+                flag: --outputDirectory %s
+        outputVolume: (a string)
+                Output filename (.nhdr or .nrrd)
+                flag: --outputVolume %s
+        smallGradientThreshold: (a float)
+                If a gradient magnitude is greater than 0 and less than
+                smallGradientThreshold, then DicomToNrrdConverter will display an
+                error message and quit, unless the useBMatrixGradientDirections
+                option is set.
+                flag: --smallGradientThreshold %f
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        useBMatrixGradientDirections: (a boolean)
+                Fill the nhdr header with the gradient directions and bvalues
+                computed out of the BMatrix. Only changes behavior for Siemens data.
+                flag: --useBMatrixGradientDirections
+        useIdentityMeaseurementFrame: (a boolean)
+                Adjust all the gradients so that the measurement frame is an
+                identity matrix.
+                flag: --useIdentityMeaseurementFrame
+        writeProtocolGradientsFile: (a boolean)
+                Write the protocol gradients to a file suffixed by '.txt' as they
+                were specified in the procol by multiplying each diffusion gradient
+                direction by the measurement frame. This file is for debugging
+                purposes only, the format is not fixed, and will likely change as
+                debugging of new dicom formats is necessary.
+                flag: --writeProtocolGradientsFile
+
+Outputs::
+
+        outputDirectory: (an existing directory name)
+                Directory holding the output NRRD format
+
+.. _nipype.interfaces.slicer.converters.OrientScalarVolume:
+
+
+.. index:: OrientScalarVolume
+
+OrientScalarVolume
+------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/converters.py#L58>`__
+
+Wraps command **OrientScalarVolume **
+
+title: Orient Scalar Volume
+
+category: Converters
+
+description: Orients an output volume. Rearranges the slices in a volume according to the selected orientation. The slices are not interpolated. They are just reordered and/or permuted. The resulting volume will cover the original volume. NOTE: since Slicer takes into account the orientation of a volume, the re-oriented volume will not show any difference from the original volume, To see the difference, save the volume and display it with a system that either ignores the orientation of the image (e.g. Paraview) or displays individual images.
+
+version: 0.1.0.$Revision: 19608 $(alpha)
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/OrientImage
+
+contributor: Bill Lorensen (GE)
+
+acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.
+
+Inputs::
+
+        [Mandatory]
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inputVolume1: (an existing file name)
+                Input volume 1
+                flag: %s, position: -2
+        orientation: ('Axial' or 'Coronal' or 'Sagittal' or 'RIP' or 'LIP' or
+                 'RSP' or 'LSP' or 'RIA' or 'LIA' or 'RSA' or 'LSA' or 'IRP' or
+                 'ILP' or 'SRP' or 'SLP' or 'IRA' or 'ILA' or 'SRA' or 'SLA' or
+                 'RPI' or 'LPI' or 'RAI' or 'LAI' or 'RPS' or 'LPS' or 'RAS' or
+                 'LAS' or 'PRI' or 'PLI' or 'ARI' or 'ALI' or 'PRS' or 'PLS' or
+                 'ARS' or 'ALS' or 'IPR' or 'SPR' or 'IAR' or 'SAR' or 'IPL' or
+                 'SPL' or 'IAL' or 'SAL' or 'PIR' or 'PSR' or 'AIR' or 'ASR' or
+                 'PIL' or 'PSL' or 'AIL' or 'ASL')
+                Orientation choices
+                flag: --orientation %s
+        outputVolume: (a boolean or a file name)
+                The oriented volume
+                flag: %s, position: -1
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal immediately
+                (default), `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+Outputs::
+
+        outputVolume: (an existing file name)
+                The oriented volume

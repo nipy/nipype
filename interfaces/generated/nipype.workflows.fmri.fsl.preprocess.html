@@ -1,0 +1,1171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0dev',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body>
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">workflows.fmri.fsl.preprocess</a><ul>
+<li><a class="reference internal" href="#create-featreg-preproc"><tt class="docutils literal"><span class="pre">create_featreg_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#graph">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-fsl-fs-preproc"><tt class="docutils literal"><span class="pre">create_fsl_fs_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#id1">Parameters</a></li>
+<li><a class="reference internal" href="#id2">Example</a></li>
+<li><a class="reference internal" href="#id3">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-parallelfeat-preproc"><tt class="docutils literal"><span class="pre">create_parallelfeat_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#id4">Parameters</a></li>
+<li><a class="reference internal" href="#id5">Example</a></li>
+<li><a class="reference internal" href="#id6">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-reg-workflow"><tt class="docutils literal"><span class="pre">create_reg_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#id7">Parameters</a></li>
+<li><a class="reference internal" href="#id8">Example</a></li>
+<li><a class="reference internal" href="#id9">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-susan-smooth"><tt class="docutils literal"><span class="pre">create_susan_smooth()</span></tt></a><ul>
+<li><a class="reference internal" href="#id10">Parameters</a></li>
+<li><a class="reference internal" href="#id11">Example</a></li>
+<li><a class="reference internal" href="#id12">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chooseindex"><tt class="docutils literal"><span class="pre">chooseindex()</span></tt></a></li>
+<li><a class="reference internal" href="#getbtthresh"><tt class="docutils literal"><span class="pre">getbtthresh()</span></tt></a></li>
+<li><a class="reference internal" href="#getmeanscale"><tt class="docutils literal"><span class="pre">getmeanscale()</span></tt></a></li>
+<li><a class="reference internal" href="#getthreshop"><tt class="docutils literal"><span class="pre">getthreshop()</span></tt></a></li>
+<li><a class="reference internal" href="#getusans"><tt class="docutils literal"><span class="pre">getusans()</span></tt></a></li>
+<li><a class="reference internal" href="#pickfirst"><tt class="docutils literal"><span class="pre">pickfirst()</span></tt></a></li>
+<li><a class="reference internal" href="#pickmiddle"><tt class="docutils literal"><span class="pre">pickmiddle()</span></tt></a></li>
+<li><a class="reference internal" href="#pickvol"><tt class="docutils literal"><span class="pre">pickvol()</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-nipype.workflows.fmri.fsl.preprocess">
+<span id="workflows-fmri-fsl-preprocess"></span><h1>workflows.fmri.fsl.preprocess<a class="headerlink" href="#module-nipype.workflows.fmri.fsl.preprocess" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-featreg-preproc">
+<span id="nipype-workflows-fmri-fsl-preprocess-create-featreg-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_featreg_preproc()</span></tt><a class="headerlink" href="#create-featreg-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L374">Link to code</a></p>
+<p>Create a FEAT preprocessing workflow with registration to one volume of the first run</p>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>name : name of workflow (default: featpreproc)
+highpass : boolean (default: True)
+whichvol : which volume of the first run to register to (&#39;first&#39;, &#39;middle&#39;, &#39;mean&#39;)
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.func : functional runs (filename or list of filenames)
+inputspec.fwhm : fwhm for smoothing with SUSAN
+inputspec.highpass : HWHM in TRs (if created with highpass=True)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.reference : volume to which runs are realigned
+outputspec.motion_parameters : motion correction parameters
+outputspec.realigned_files : motion corrected files
+outputspec.motion_plots : plots of motion correction parameters
+outputspec.mask : mask file used to mask the brain
+outputspec.smoothed_files : smoothed functional data
+outputspec.highpassed_files : highpassed functional data (if highpass=True)
+outputspec.mean : mean file
+</pre></div>
+</div>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_featreg_preproc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;f3.nii&#39;</span><span class="p">,</span> <span class="s">&#39;f5.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">highpass</span> <span class="o">=</span> <span class="mf">128.</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;/tmp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_featreg_preproc</span><span class="p">(</span><span class="n">highpass</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">whichvol</span><span class="o">=</span><span class="s">&#39;mean&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="s">&#39;f3.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;/tmp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-7de5f1258dfa1156050e8056b1c48d30f279d746.png" alt="digraph featpreproc{
+
+  label=&quot;featpreproc&quot;;
+
+  featpreproc_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  featpreproc_img2float[label=&quot;img2float (fsl)&quot;];
+
+  featpreproc_extractref[label=&quot;extractref (fsl)&quot;];
+
+  featpreproc_realign[label=&quot;realign (fsl)&quot;];
+
+  featpreproc_meanfunc[label=&quot;meanfunc (fsl)&quot;];
+
+  featpreproc_meanfuncmask[label=&quot;meanfuncmask (fsl)&quot;];
+
+  featpreproc_maskfunc[label=&quot;maskfunc (fsl)&quot;];
+
+  featpreproc_getthreshold[label=&quot;getthreshold (fsl)&quot;];
+
+  featpreproc_threshold[label=&quot;threshold (fsl)&quot;];
+
+  featpreproc_dilatemask[label=&quot;dilatemask (fsl)&quot;];
+
+  featpreproc_maskfunc2[label=&quot;maskfunc2 (fsl)&quot;];
+
+  featpreproc_maskfunc3[label=&quot;maskfunc3 (fsl)&quot;];
+
+  featpreproc_concat[label=&quot;concat (utility)&quot;];
+
+  featpreproc_plot_motion[label=&quot;plot_motion (fsl)&quot;, shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+  featpreproc_select[label=&quot;select (utility)&quot;];
+
+  featpreproc_medianval[label=&quot;medianval (fsl)&quot;];
+
+  featpreproc_meanscale[label=&quot;meanscale (fsl)&quot;];
+
+  featpreproc_meanfunc3[label=&quot;meanfunc3 (fsl)&quot;];
+
+  featpreproc_highpass[label=&quot;highpass (fsl)&quot;];
+
+  featpreproc_meanfunc4[label=&quot;meanfunc4 (fsl)&quot;];
+
+  featpreproc_addmean[label=&quot;addmean (fsl)&quot;];
+
+  featpreproc_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  featpreproc_inputspec -&gt; featpreproc_img2float;
+
+  featpreproc_inputspec -&gt; featpreproc_highpass;
+
+  featpreproc_inputspec -&gt; featpreproc_select;
+
+  featpreproc_img2float -&gt; featpreproc_realign;
+
+  featpreproc_img2float -&gt; featpreproc_extractref;
+
+  featpreproc_img2float -&gt; featpreproc_extractref;
+
+  featpreproc_extractref -&gt; featpreproc_realign;
+
+  featpreproc_extractref -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_maskfunc2;
+
+  featpreproc_realign -&gt; featpreproc_medianval;
+
+  featpreproc_realign -&gt; featpreproc_meanfunc;
+
+  featpreproc_realign -&gt; featpreproc_maskfunc;
+
+  featpreproc_realign -&gt; featpreproc_plot_motion;
+
+  featpreproc_meanfunc -&gt; featpreproc_meanfuncmask;
+
+  featpreproc_meanfuncmask -&gt; featpreproc_maskfunc;
+
+  featpreproc_maskfunc -&gt; featpreproc_getthreshold;
+
+  featpreproc_maskfunc -&gt; featpreproc_threshold;
+
+  featpreproc_getthreshold -&gt; featpreproc_threshold;
+
+  featpreproc_threshold -&gt; featpreproc_dilatemask;
+
+  featpreproc_threshold -&gt; featpreproc_medianval;
+
+  featpreproc_dilatemask -&gt; featpreproc_maskfunc2;
+
+  featpreproc_dilatemask -&gt; featpreproc_maskfunc3;
+
+  featpreproc_dilatemask -&gt; featpreproc_outputspec;
+
+  featpreproc_maskfunc2 -&gt; featpreproc_concat;
+
+  subgraph cluster_featpreproc_susan_smooth {
+
+      label=&quot;susan_smooth&quot;;
+
+    featpreproc_susan_smooth_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    featpreproc_susan_smooth_mask[label=&quot;mask (fsl)&quot;];
+
+    featpreproc_susan_smooth_meanfunc2[label=&quot;meanfunc2 (fsl)&quot;];
+
+    featpreproc_susan_smooth_median[label=&quot;median (fsl)&quot;];
+
+    featpreproc_susan_smooth_merge[label=&quot;merge (utility)&quot;];
+
+    featpreproc_susan_smooth_smooth[label=&quot;smooth (fsl)&quot;];
+
+    featpreproc_susan_smooth_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_median;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_median;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_mask;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_mask;
+
+    featpreproc_susan_smooth_mask -&gt; featpreproc_susan_smooth_meanfunc2;
+
+    featpreproc_susan_smooth_meanfunc2 -&gt; featpreproc_susan_smooth_merge;
+
+    featpreproc_susan_smooth_median -&gt; featpreproc_susan_smooth_merge;
+
+    featpreproc_susan_smooth_median -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_merge -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_smooth -&gt; featpreproc_susan_smooth_outputnode;
+
+  }
+
+  featpreproc_maskfunc3 -&gt; featpreproc_concat;
+
+  featpreproc_concat -&gt; featpreproc_select;
+
+  featpreproc_plot_motion -&gt; featpreproc_outputspec;
+
+  featpreproc_select -&gt; featpreproc_meanscale;
+
+  featpreproc_select -&gt; featpreproc_outputspec;
+
+  featpreproc_medianval -&gt; featpreproc_meanscale;
+
+  featpreproc_meanscale -&gt; featpreproc_meanfunc3;
+
+  featpreproc_meanscale -&gt; featpreproc_highpass;
+
+  featpreproc_meanscale -&gt; featpreproc_meanfunc4;
+
+  featpreproc_meanfunc3 -&gt; featpreproc_outputspec;
+
+  featpreproc_highpass -&gt; featpreproc_addmean;
+
+  featpreproc_meanfunc4 -&gt; featpreproc_addmean;
+
+  featpreproc_addmean -&gt; featpreproc_outputspec;
+
+  featpreproc_inputspec -&gt; featpreproc_susan_smooth_inputnode;
+
+  featpreproc_maskfunc2 -&gt; featpreproc_susan_smooth_inputnode;
+
+  featpreproc_susan_smooth_outputnode -&gt; featpreproc_maskfunc3;
+
+  featpreproc_dilatemask -&gt; featpreproc_susan_smooth_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-fsl-fs-preproc">
+<span id="nipype-workflows-fmri-fsl-preprocess-create-fsl-fs-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_fsl_fs_preproc()</span></tt><a class="headerlink" href="#create-fsl-fs-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L836">Link to code</a></p>
+<p>Create a FEAT preprocessing workflow together with freesurfer</p>
+<div class="section" id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>name : name of workflow (default: preproc)
+highpass : boolean (default: True)
+whichvol : which volume of the first run to register to (&#39;first&#39;, &#39;middle&#39;, &#39;mean&#39;)
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.func : functional runs (filename or list of filenames)
+inputspec.fwhm : fwhm for smoothing with SUSAN
+inputspec.highpass : HWHM in TRs (if created with highpass=True)
+inputspec.subject_id : freesurfer subject id
+inputspec.subjects_dir : freesurfer subjects dir
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.reference : volume to which runs are realigned
+outputspec.motion_parameters : motion correction parameters
+outputspec.realigned_files : motion corrected files
+outputspec.motion_plots : plots of motion correction parameters
+outputspec.mask_file : mask file used to mask the brain
+outputspec.smoothed_files : smoothed functional data
+outputspec.highpassed_files : highpassed functional data (if highpass=True)
+outputspec.reg_file : bbregister registration files
+outputspec.reg_cost : bbregister registration cost files
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_fsl_fs_preproc</span><span class="p">(</span><span class="n">whichvol</span><span class="o">=</span><span class="s">&#39;first&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">highpass</span> <span class="o">=</span> <span class="mf">128.</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;f3.nii&#39;</span><span class="p">,</span> <span class="s">&#39;f5.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;s1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h3>Graph<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-8217f0f763f46a343b17b2eabe2282479f96d3b8.png" alt="digraph preproc{
+
+  label=&quot;preproc&quot;;
+
+  preproc_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  preproc_img2float[label=&quot;img2float (fsl)&quot;];
+
+  preproc_extractref[label=&quot;extractref (fsl)&quot;];
+
+  preproc_realign[label=&quot;realign (fsl)&quot;];
+
+  preproc_medianval[label=&quot;medianval (fsl)&quot;];
+
+  preproc_plot_motion[label=&quot;plot_motion (fsl)&quot;, shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+  preproc_maskfunc[label=&quot;maskfunc (fsl)&quot;];
+
+  preproc_maskfunc3[label=&quot;maskfunc3 (fsl)&quot;];
+
+  preproc_concat[label=&quot;concat (utility)&quot;];
+
+  preproc_select[label=&quot;select (utility)&quot;];
+
+  preproc_meanscale[label=&quot;meanscale (fsl)&quot;];
+
+  preproc_highpass[label=&quot;highpass (fsl)&quot;];
+
+  preproc_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  preproc_inputspec -&gt; preproc_img2float;
+
+  preproc_inputspec -&gt; preproc_highpass;
+
+  preproc_inputspec -&gt; preproc_select;
+
+  preproc_img2float -&gt; preproc_extractref;
+
+  preproc_img2float -&gt; preproc_extractref;
+
+  preproc_img2float -&gt; preproc_realign;
+
+  preproc_extractref -&gt; preproc_outputspec;
+
+  preproc_extractref -&gt; preproc_realign;
+
+  subgraph cluster_preproc_getmask {
+
+      label=&quot;getmask&quot;;
+
+    preproc_getmask_inputspec[label=&quot;inputspec (utility)&quot;];
+
+    preproc_getmask_fssource[label=&quot;fssource (io)&quot;];
+
+    preproc_getmask_register[label=&quot;register (freesurfer)&quot;];
+
+    preproc_getmask_threshold[label=&quot;threshold (freesurfer)&quot;];
+
+    preproc_getmask_transform[label=&quot;transform (freesurfer)&quot;];
+
+    preproc_getmask_threshold2[label=&quot;threshold2 (freesurfer)&quot;];
+
+    preproc_getmask_outputspec[label=&quot;outputspec (utility)&quot;];
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_transform;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_transform;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_fssource;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_fssource;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_inputspec -&gt; preproc_getmask_register;
+
+    preproc_getmask_fssource -&gt; preproc_getmask_threshold;
+
+    preproc_getmask_register -&gt; preproc_getmask_transform;
+
+    preproc_getmask_register -&gt; preproc_getmask_outputspec;
+
+    preproc_getmask_register -&gt; preproc_getmask_outputspec;
+
+    preproc_getmask_threshold -&gt; preproc_getmask_transform;
+
+    preproc_getmask_transform -&gt; preproc_getmask_threshold2;
+
+    preproc_getmask_threshold2 -&gt; preproc_getmask_outputspec;
+
+  }
+
+  preproc_realign -&gt; preproc_maskfunc;
+
+  preproc_realign -&gt; preproc_outputspec;
+
+  preproc_realign -&gt; preproc_outputspec;
+
+  preproc_realign -&gt; preproc_medianval;
+
+  preproc_realign -&gt; preproc_plot_motion;
+
+  preproc_medianval -&gt; preproc_meanscale;
+
+  preproc_plot_motion -&gt; preproc_outputspec;
+
+  preproc_maskfunc -&gt; preproc_concat;
+
+  subgraph cluster_preproc_susan_smooth {
+
+      label=&quot;susan_smooth&quot;;
+
+    preproc_susan_smooth_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    preproc_susan_smooth_median[label=&quot;median (fsl)&quot;];
+
+    preproc_susan_smooth_mask[label=&quot;mask (fsl)&quot;];
+
+    preproc_susan_smooth_meanfunc2[label=&quot;meanfunc2 (fsl)&quot;];
+
+    preproc_susan_smooth_merge[label=&quot;merge (utility)&quot;];
+
+    preproc_susan_smooth_smooth[label=&quot;smooth (fsl)&quot;];
+
+    preproc_susan_smooth_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_mask;
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_mask;
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_median;
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_median;
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_smooth;
+
+    preproc_susan_smooth_inputnode -&gt; preproc_susan_smooth_smooth;
+
+    preproc_susan_smooth_median -&gt; preproc_susan_smooth_merge;
+
+    preproc_susan_smooth_median -&gt; preproc_susan_smooth_smooth;
+
+    preproc_susan_smooth_mask -&gt; preproc_susan_smooth_meanfunc2;
+
+    preproc_susan_smooth_meanfunc2 -&gt; preproc_susan_smooth_merge;
+
+    preproc_susan_smooth_merge -&gt; preproc_susan_smooth_smooth;
+
+    preproc_susan_smooth_smooth -&gt; preproc_susan_smooth_outputnode;
+
+  }
+
+  preproc_maskfunc3 -&gt; preproc_concat;
+
+  preproc_concat -&gt; preproc_select;
+
+  preproc_select -&gt; preproc_meanscale;
+
+  preproc_select -&gt; preproc_outputspec;
+
+  preproc_meanscale -&gt; preproc_highpass;
+
+  preproc_highpass -&gt; preproc_outputspec;
+
+  preproc_maskfunc -&gt; preproc_susan_smooth_inputnode;
+
+  preproc_extractref -&gt; preproc_getmask_inputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_outputspec;
+
+  preproc_getmask_outputspec -&gt; preproc_maskfunc;
+
+  preproc_getmask_outputspec -&gt; preproc_maskfunc3;
+
+  preproc_getmask_outputspec -&gt; preproc_medianval;
+
+  preproc_getmask_outputspec -&gt; preproc_susan_smooth_inputnode;
+
+  preproc_susan_smooth_outputnode -&gt; preproc_maskfunc3;
+
+  preproc_inputspec -&gt; preproc_susan_smooth_inputnode;
+
+  preproc_inputspec -&gt; preproc_getmask_inputspec;
+
+  preproc_inputspec -&gt; preproc_getmask_inputspec;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-parallelfeat-preproc">
+<span id="nipype-workflows-fmri-fsl-preprocess-create-parallelfeat-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_parallelfeat_preproc()</span></tt><a class="headerlink" href="#create-parallelfeat-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L61">Link to code</a></p>
+<p>Preprocess each run with FSL independently of the others</p>
+<div class="section" id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>name : name of workflow (default: featpreproc)
+highpass : boolean (default: True)
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.func : functional runs (filename or list of filenames)
+inputspec.fwhm : fwhm for smoothing with SUSAN
+inputspec.highpass : HWHM in TRs (if created with highpass=True)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.reference : volume to which runs are realigned
+outputspec.motion_parameters : motion correction parameters
+outputspec.realigned_files : motion corrected files
+outputspec.motion_plots : plots of motion correction parameters
+outputspec.mask : mask file used to mask the brain
+outputspec.smoothed_files : smoothed functional data
+outputspec.highpassed_files : highpassed functional data (if highpass=True)
+outputspec.mean : mean file
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_parallelfeat_preproc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;f3.nii&#39;</span><span class="p">,</span> <span class="s">&#39;f5.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">highpass</span> <span class="o">=</span> <span class="mf">128.</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;/tmp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">create_parallelfeat_preproc</span><span class="p">(</span><span class="n">highpass</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="s">&#39;f3.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;/tmp&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>Graph<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-41f7582daca0646ad049685729aad2d38ceee446.png" alt="digraph featpreproc{
+
+  label=&quot;featpreproc&quot;;
+
+  featpreproc_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  featpreproc_img2float[label=&quot;img2float (fsl)&quot;];
+
+  featpreproc_extractref[label=&quot;extractref (fsl)&quot;];
+
+  featpreproc_realign[label=&quot;realign (fsl)&quot;];
+
+  featpreproc_plot_motion[label=&quot;plot_motion (fsl)&quot;, shape=box3d,style=filled, color=black, colorscheme=greys7 fillcolor=2];
+
+  featpreproc_meanfunc[label=&quot;meanfunc (fsl)&quot;];
+
+  featpreproc_meanfuncmask[label=&quot;meanfuncmask (fsl)&quot;];
+
+  featpreproc_maskfunc[label=&quot;maskfunc (fsl)&quot;];
+
+  featpreproc_getthreshold[label=&quot;getthreshold (fsl)&quot;];
+
+  featpreproc_threshold[label=&quot;threshold (fsl)&quot;];
+
+  featpreproc_medianval[label=&quot;medianval (fsl)&quot;];
+
+  featpreproc_dilatemask[label=&quot;dilatemask (fsl)&quot;];
+
+  featpreproc_maskfunc2[label=&quot;maskfunc2 (fsl)&quot;];
+
+  featpreproc_maskfunc3[label=&quot;maskfunc3 (fsl)&quot;];
+
+  featpreproc_concat[label=&quot;concat (utility)&quot;];
+
+  featpreproc_select[label=&quot;select (utility)&quot;];
+
+  featpreproc_meanscale[label=&quot;meanscale (fsl)&quot;];
+
+  featpreproc_highpass[label=&quot;highpass (fsl)&quot;];
+
+  featpreproc_meanfunc3[label=&quot;meanfunc3 (fsl)&quot;];
+
+  featpreproc_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  featpreproc_inputspec -&gt; featpreproc_highpass;
+
+  featpreproc_inputspec -&gt; featpreproc_img2float;
+
+  featpreproc_inputspec -&gt; featpreproc_select;
+
+  featpreproc_img2float -&gt; featpreproc_realign;
+
+  featpreproc_img2float -&gt; featpreproc_extractref;
+
+  featpreproc_img2float -&gt; featpreproc_extractref;
+
+  featpreproc_extractref -&gt; featpreproc_realign;
+
+  featpreproc_extractref -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_plot_motion;
+
+  featpreproc_realign -&gt; featpreproc_maskfunc2;
+
+  featpreproc_realign -&gt; featpreproc_maskfunc;
+
+  featpreproc_realign -&gt; featpreproc_meanfunc;
+
+  featpreproc_realign -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_outputspec;
+
+  featpreproc_realign -&gt; featpreproc_medianval;
+
+  featpreproc_plot_motion -&gt; featpreproc_outputspec;
+
+  featpreproc_meanfunc -&gt; featpreproc_meanfuncmask;
+
+  featpreproc_meanfuncmask -&gt; featpreproc_maskfunc;
+
+  featpreproc_maskfunc -&gt; featpreproc_getthreshold;
+
+  featpreproc_maskfunc -&gt; featpreproc_threshold;
+
+  featpreproc_getthreshold -&gt; featpreproc_threshold;
+
+  featpreproc_threshold -&gt; featpreproc_medianval;
+
+  featpreproc_threshold -&gt; featpreproc_dilatemask;
+
+  featpreproc_medianval -&gt; featpreproc_meanscale;
+
+  featpreproc_dilatemask -&gt; featpreproc_maskfunc2;
+
+  featpreproc_dilatemask -&gt; featpreproc_outputspec;
+
+  featpreproc_dilatemask -&gt; featpreproc_maskfunc3;
+
+  featpreproc_maskfunc2 -&gt; featpreproc_concat;
+
+  subgraph cluster_featpreproc_susan_smooth {
+
+      label=&quot;susan_smooth&quot;;
+
+    featpreproc_susan_smooth_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    featpreproc_susan_smooth_mask[label=&quot;mask (fsl)&quot;];
+
+    featpreproc_susan_smooth_meanfunc2[label=&quot;meanfunc2 (fsl)&quot;];
+
+    featpreproc_susan_smooth_median[label=&quot;median (fsl)&quot;];
+
+    featpreproc_susan_smooth_merge[label=&quot;merge (utility)&quot;];
+
+    featpreproc_susan_smooth_smooth[label=&quot;smooth (fsl)&quot;];
+
+    featpreproc_susan_smooth_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_mask;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_mask;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_median;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_median;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_inputnode -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_mask -&gt; featpreproc_susan_smooth_meanfunc2;
+
+    featpreproc_susan_smooth_meanfunc2 -&gt; featpreproc_susan_smooth_merge;
+
+    featpreproc_susan_smooth_median -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_median -&gt; featpreproc_susan_smooth_merge;
+
+    featpreproc_susan_smooth_merge -&gt; featpreproc_susan_smooth_smooth;
+
+    featpreproc_susan_smooth_smooth -&gt; featpreproc_susan_smooth_outputnode;
+
+  }
+
+  featpreproc_maskfunc3 -&gt; featpreproc_concat;
+
+  featpreproc_concat -&gt; featpreproc_select;
+
+  featpreproc_select -&gt; featpreproc_meanscale;
+
+  featpreproc_select -&gt; featpreproc_outputspec;
+
+  featpreproc_meanscale -&gt; featpreproc_highpass;
+
+  featpreproc_highpass -&gt; featpreproc_outputspec;
+
+  featpreproc_highpass -&gt; featpreproc_meanfunc3;
+
+  featpreproc_meanfunc3 -&gt; featpreproc_outputspec;
+
+  featpreproc_inputspec -&gt; featpreproc_susan_smooth_inputnode;
+
+  featpreproc_susan_smooth_outputnode -&gt; featpreproc_maskfunc3;
+
+  featpreproc_maskfunc2 -&gt; featpreproc_susan_smooth_inputnode;
+
+  featpreproc_dilatemask -&gt; featpreproc_susan_smooth_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-reg-workflow">
+<span id="nipype-workflows-fmri-fsl-preprocess-create-reg-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_reg_workflow()</span></tt><a class="headerlink" href="#create-reg-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L1095">Link to code</a></p>
+<p>Create a FEAT preprocessing workflow together with freesurfer</p>
+<div class="section" id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>name : name of workflow (default: &#39;registration&#39;)
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.source_files : files (filename or list of filenames to register)
+inputspec.mean_image : reference image to use
+inputspec.anatomical_image : anatomical image to coregister to
+inputspec.target_image : registration target
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputspec.func2anat_transform : FLIRT transform
+outputspec.anat2target_transform : FLIRT+FNIRT transform
+outputspec.transformed_files : transformed files in target space
+outputspec.transformed_mean : mean image in target space
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id9">
+<h3>Graph<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-aa9216a6ce9e36146d680ee1a19d2891ffca056e.png" alt="digraph registration{
+
+  label=&quot;registration&quot;;
+
+  registration_inputspec[label=&quot;inputspec (utility)&quot;];
+
+  registration_stripper[label=&quot;stripper (fsl)&quot;];
+
+  registration_anat2target_linear[label=&quot;anat2target_linear (fsl)&quot;];
+
+  registration_anat2target_nonlinear[label=&quot;anat2target_nonlinear (fsl)&quot;];
+
+  registration_fast[label=&quot;fast (fsl)&quot;];
+
+  registration_binarize[label=&quot;binarize (fsl)&quot;];
+
+  registration_mean2anat[label=&quot;mean2anat (fsl)&quot;];
+
+  registration_mean2anatbbr[label=&quot;mean2anatbbr (fsl)&quot;];
+
+  registration_warpmean[label=&quot;warpmean (fsl)&quot;];
+
+  registration_warpall[label=&quot;warpall (fsl)&quot;];
+
+  registration_outputspec[label=&quot;outputspec (utility)&quot;];
+
+  registration_inputspec -&gt; registration_mean2anat;
+
+  registration_inputspec -&gt; registration_mean2anatbbr;
+
+  registration_inputspec -&gt; registration_mean2anatbbr;
+
+  registration_inputspec -&gt; registration_warpmean;
+
+  registration_inputspec -&gt; registration_warpmean;
+
+  registration_inputspec -&gt; registration_anat2target_nonlinear;
+
+  registration_inputspec -&gt; registration_anat2target_nonlinear;
+
+  registration_inputspec -&gt; registration_anat2target_nonlinear;
+
+  registration_inputspec -&gt; registration_stripper;
+
+  registration_inputspec -&gt; registration_warpall;
+
+  registration_inputspec -&gt; registration_warpall;
+
+  registration_inputspec -&gt; registration_anat2target_linear;
+
+  registration_stripper -&gt; registration_fast;
+
+  registration_stripper -&gt; registration_anat2target_linear;
+
+  registration_stripper -&gt; registration_mean2anat;
+
+  registration_anat2target_linear -&gt; registration_anat2target_nonlinear;
+
+  registration_anat2target_nonlinear -&gt; registration_warpmean;
+
+  registration_anat2target_nonlinear -&gt; registration_outputspec;
+
+  registration_anat2target_nonlinear -&gt; registration_warpall;
+
+  registration_fast -&gt; registration_binarize;
+
+  registration_binarize -&gt; registration_mean2anatbbr;
+
+  registration_mean2anat -&gt; registration_mean2anatbbr;
+
+  registration_mean2anatbbr -&gt; registration_warpmean;
+
+  registration_mean2anatbbr -&gt; registration_outputspec;
+
+  registration_mean2anatbbr -&gt; registration_warpall;
+
+  registration_warpmean -&gt; registration_outputspec;
+
+  registration_warpall -&gt; registration_outputspec;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-susan-smooth">
+<span id="nipype-workflows-fmri-fsl-preprocess-create-susan-smooth"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_susan_smooth()</span></tt><a class="headerlink" href="#create-susan-smooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L714">Link to code</a></p>
+<p>Create a SUSAN smoothing workflow</p>
+<div class="section" id="id10">
+<h3>Parameters<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre>name : name of workflow (default: susan_smooth)
+separate_masks : separate masks for each run
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_files : functional runs (filename or list of filenames)
+inputnode.fwhm : fwhm for smoothing with SUSAN
+inputnode.mask_file : mask used for estimating SUSAN thresholds (but not for smoothing)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputnode.smoothed_files : functional runs (filename or list of filenames)
+</pre></div>
+</div>
+</div>
+<div class="section" id="id11">
+<h3>Example<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span> <span class="o">=</span> <span class="n">create_susan_smooth</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;f3.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">mask_file</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="id12">
+<h3>Graph<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-61f8fee072b251cc3b1fb851865c98b1939653fe.png" alt="digraph susan_smooth{
+
+  label=&quot;susan_smooth&quot;;
+
+  susan_smooth_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  susan_smooth_median[label=&quot;median (fsl)&quot;];
+
+  susan_smooth_mask[label=&quot;mask (fsl)&quot;];
+
+  susan_smooth_meanfunc2[label=&quot;meanfunc2 (fsl)&quot;];
+
+  susan_smooth_merge[label=&quot;merge (utility)&quot;];
+
+  susan_smooth_smooth[label=&quot;smooth (fsl)&quot;];
+
+  susan_smooth_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  susan_smooth_inputnode -&gt; susan_smooth_median;
+
+  susan_smooth_inputnode -&gt; susan_smooth_median;
+
+  susan_smooth_inputnode -&gt; susan_smooth_smooth;
+
+  susan_smooth_inputnode -&gt; susan_smooth_smooth;
+
+  susan_smooth_inputnode -&gt; susan_smooth_mask;
+
+  susan_smooth_inputnode -&gt; susan_smooth_mask;
+
+  susan_smooth_median -&gt; susan_smooth_merge;
+
+  susan_smooth_median -&gt; susan_smooth_smooth;
+
+  susan_smooth_mask -&gt; susan_smooth_meanfunc2;
+
+  susan_smooth_meanfunc2 -&gt; susan_smooth_merge;
+
+  susan_smooth_merge -&gt; susan_smooth_smooth;
+
+  susan_smooth_smooth -&gt; susan_smooth_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="chooseindex">
+<span id="nipype-workflows-fmri-fsl-preprocess-chooseindex"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">chooseindex()</span></tt><a class="headerlink" href="#chooseindex" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L46">Link to code</a></p>
+</div>
+<div class="section" id="getbtthresh">
+<span id="nipype-workflows-fmri-fsl-preprocess-getbtthresh"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">getbtthresh()</span></tt><a class="headerlink" href="#getbtthresh" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L43">Link to code</a></p>
+</div>
+<div class="section" id="getmeanscale">
+<span id="nipype-workflows-fmri-fsl-preprocess-getmeanscale"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">getmeanscale()</span></tt><a class="headerlink" href="#getmeanscale" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L52">Link to code</a></p>
+</div>
+<div class="section" id="getthreshop">
+<span id="nipype-workflows-fmri-fsl-preprocess-getthreshop"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">getthreshop()</span></tt><a class="headerlink" href="#getthreshop" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L15">Link to code</a></p>
+</div>
+<div class="section" id="getusans">
+<span id="nipype-workflows-fmri-fsl-preprocess-getusans"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">getusans()</span></tt><a class="headerlink" href="#getusans" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L55">Link to code</a></p>
+</div>
+<div class="section" id="pickfirst">
+<span id="nipype-workflows-fmri-fsl-preprocess-pickfirst"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">pickfirst()</span></tt><a class="headerlink" href="#pickfirst" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L18">Link to code</a></p>
+</div>
+<div class="section" id="pickmiddle">
+<span id="nipype-workflows-fmri-fsl-preprocess-pickmiddle"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">pickmiddle()</span></tt><a class="headerlink" href="#pickmiddle" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L24">Link to code</a></p>
+</div>
+<div class="section" id="pickvol">
+<span id="nipype-workflows-fmri-fsl-preprocess-pickvol"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">pickvol()</span></tt><a class="headerlink" href="#pickvol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/preprocess.py#L32">Link to code</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>
