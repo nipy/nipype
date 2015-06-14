@@ -205,6 +205,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                   desc='image to apply transformation to (generally a coregistered functional)')
     moving_image_mask = File(requires=['fixed_image_mask'],
                              exists=True, desc='mask used to limit metric sampling region of the moving image')
+
+    save_state = File(argstr='--save-state %s', exists=False,
+                      desc='Filename for saving the internal restorable state of the registration')
+    restore_state = File(argstr='--restore-state %s', exists=True,
+                         desc='Filename for restoring the internal restorable state of the registration')
+
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(
@@ -337,7 +343,7 @@ class RegistrationOutputSpec(TraitedSpec):
         File(exists=True), desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
-
+    save_state = File(desc="The saved registration state to be restored")
 
 class Registration(ANTSCommand):
 
@@ -391,6 +397,8 @@ class Registration(ANTSCommand):
 
     >>> # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
+    >>> reg.inputs.save_state = 'trans.mat'
+    >>> reg.inputs.restore_state = 'trans.mat'
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
@@ -756,4 +764,6 @@ class Registration(ANTSCommand):
             outputs['warped_image'] = os.path.abspath(out_filename)
         if inv_out_filename:
             outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
+        if len(self.inputs.save_state):
+            outputs['save_state'] = os.path.abspath(self.inputs.save_state)
         return outputs
