@@ -581,13 +581,6 @@ class Registration(ANTSCommand):
         self._quantilesDone = True
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
 
-    def _formatCollapseLinearTransformsToFixedImageHeader(self):
-        if self.inputs.collapse_linear_transforms_to_fixed_image_header:
-            # return '--collapse-linear-transforms-to-fixed-image-header 1'
-            return ''
-        else:
-            # return '--collapse-linear-transforms-to-fixed-image-header 0'
-            return ''
 
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':
@@ -636,7 +629,7 @@ class Registration(ANTSCommand):
                 return self._formatWinsorizeImageIntensities()
             return ''  # Must return something for argstr!
         elif opt == 'collapse_linear_transforms_to_fixed_image_header':
-            return self._formatCollapseLinearTransformsToFixedImageHeader()
+            return '' # Command no longer exist, so return empty string for backwards compatibility
         return super(Registration, self)._format_arg(opt, spec, val)
 
     def _outputFileNames(self, prefix, count, transform, inverse=False):
