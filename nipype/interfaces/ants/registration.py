@@ -200,11 +200,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
     fixed_image_mask = File(argstr='%s', exists=True,
-                            desc='mask used to limit registration region')
+                            desc='mask used to limit metric sampling region of the fixed image')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
     moving_image_mask = File(requires=['fixed_image_mask'],
-                             exists=True, desc='')
+                             exists=True, desc='mask used to limit metric sampling region of the moving image')
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(
