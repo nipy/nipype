@@ -1493,10 +1493,10 @@ class MRIsInflateInputSpec(FSTraitedSpec):
     out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
                    desc="Output file for MRIsInflate")
     #optional
-    no_save_sulc = traits.Bool(argstr="-no-save-sulc", mandatory=False,
-                               desc="Do not save .sulc file")
-    hemisphere = traits.String(mandatory=False, desc="Hemisphere being processed")
-
+    out_sulc = File(mandatory=False, exists=False,
+                    desc="Future filename of the sulc file. Location is {SUBJECTS_DIR}/{SUBJID}/surf/<hemisphere>.sulc")
+    no_save_sulc = traits.Bool(argstr='-no-save-sulc', mandatory=False,
+                               desc="Do not save sulc file as output")
     
 class MRIsInflateOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output file for MRIsInflate")
@@ -1508,10 +1508,13 @@ class MRIsInflate(FSCommand):
     input_spec = MRIsInflateInputSpec
     output_spec = MRIsInflateOutputSpec
 
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        outputs["sulc_file"] = os.path.abspath(str(self.inputs.hemisphere) + '.sulc')
+        if not self.inputs.no_save_sulc:
+            #if the sulc file will be saved
+            outputs["out_sulc"] = os.path.abspath(self.inputs.out_sulc)
         return outputs
 
     
@@ -1520,6 +1523,7 @@ class QSphereInputSpec(FSTraitedSpec):
                    desc="Input file for QSphere")
     out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
                    desc="Output file for QSphere")
+    
     #optional
     seed = traits.Int(argstr="-seed %d", mandatory=False, desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q", mandatory=False,
@@ -1552,8 +1556,8 @@ class FixTopologyInputSpec(FSTraitedSpec):
                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
     mgz = traits.Bool(argstr="-mgz", mandatory=False,
                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
-    sphere = traits.String(argstr="-sphere %s", mandatory=False,
-                               desc="Sphere nane with the hemisphere prefix removed")
+    sphere = traits.File(argstr="-sphere %s", mandatory=False,
+                         desc="Sphere input file")
     
 
 class FixTopologyOutputSpec(TraitedSpec):
@@ -1570,18 +1574,22 @@ class FixTopology(FSCommand):
     input_spec = FixTopologyInputSpec
     output_spec = FixTopologyOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == 'sphere':
+            #get the basename and take out the hemisphere
+            suffix = os.path.basename(value).split('.',1)[1]
+            return spec.argstr % suffix
+        return super(FixTopology, self)._format_arg(name, spec, value) 
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.in_orig)
         return outputs
 
 
 class EulerNumberInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", position=-1, mandatory=True, exists=True,
                    desc="Input file for EulerNumber")
-    #optional
-    out_file = File(argstr="-o %s", mandatory=False, exists=False,
-                   desc="Output txt file for EulerNumber")
     
 class EulerNumberOutputSpec(TraitedSpec):
     out_file = File(exists=False, desc="Output file for EulerNumber")
@@ -1594,7 +1602,7 @@ class EulerNumber(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
 
 class RemoveIntersectionInputSpec(FSTraitedSpec):
@@ -1656,6 +1664,16 @@ class MakeSurfaces(FSCommand):
     input_spec = MakeSurfacesInputSpec
     output_spec = MakeSurfacesOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name in ['in_T1', 'in_aseg']:
+            basename = os.path.basename(value)
+            if self.inputs.mgz:
+                prefix = basename.rstrip('.mgz')
+            else:
+                prefix = basename
+            return spec.argstr % prefix
+        return super(MakeSurfaces, self)._format_arg(name, spec, value)    
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
         dest_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'surf')
@@ -1698,7 +1716,7 @@ class Curvature(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_mean"] = os.path.abspath(self.inputs.in_file) + '.H'
-        outputs["out_gauss"] = os.path.abspat(self.inputs.in_file) + '.K'
+        outputs["out_gauss"] = os.path.abspath(self.inputs.in_file) + '.K'
         return outputs
     
 class CurvatureStatsInputSpec(FSTraitedSpec):
@@ -1757,7 +1775,10 @@ class CurvatureStats(FSCommand):
         if name == 'surface':
             prefix = os.path.basename(value).split('.')[1]
             return spec.argstr % prefix
-        return super(CurvatureStats, self)._format_arg(name, spec, value)
+        elif name in ['in_curv', 'in_sulc']:
+            return spec.argstr
+        else:
+            return super(CurvatureStats, self)._format_arg(name, spec, value)
 
         
     def _list_outputs(self):
