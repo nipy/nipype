@@ -6,13 +6,17 @@ from .base import Info, FSCommand
 from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
                          ReconAll, BBRegister, ApplyVolTransform,Smooth,
                          DICOMConvert, RobustRegister, FitMSParams,
-                         SynthesizeFLASH, MNIBiasCorrection)
+                         SynthesizeFLASH, MNIBiasCorrection, Normalize, EditWMwithAseg,
+                         SegmentWM, SegmentCC, CALabel, CARegister, CANormalize)
 from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
                     SegStats, Label2Vol, MS_LDA)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2VolTransform,
-                    SurfaceSnapshots,ApplyMask, MRIsConvert, MRITessellate, MRIPretess,
+                    SurfaceSnapshots, ApplyMask, MRIsConvert, MRITessellate, MRIPretess,
                     MRIMarchingCubes, SmoothTessellation, MakeAverageSubject, TalairachQC,
-                    ExtractMainComponent, Tkregister2, AddXFormToHeader, CheckTalairachAlignment)
+                    ExtractMainComponent, Tkregister2, AddXFormToHeader, CheckTalairachAlignment,
+                    RemoveNeck, CurvatureStats, Curvature, MRIsInflate, MakeSurfaces,
+                    RemoveIntersection, EulerNumber, FixTopology, QSphere, ExtractMainComponent,
+                    MRIFill)
 
 from .longitudinal import RobustTemplate
 
