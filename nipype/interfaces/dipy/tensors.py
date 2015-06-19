@@ -29,26 +29,26 @@ else:
     from dipy.io.utils import nifti1_symmat
 
 
-def tensor_fitting(in_file, bvals, bvecs, mask_file=None)
+def tensor_fitting(data, bvals, bvecs, mask_file=None):
     """
     Use dipy to fit DTI
     
     Parameters
     ----------
     in_file : str
-        Full path to a DWI data file
+        Full path to a DWI data file.
     bvals : str
-        Full path to a file containing gradient magnitude information (b-values)
+        Full path to a file containing gradient magnitude information (b-values).
     bvecs : str
-        Full path to a file containing gradient direction information (b-vectors)
+        Full path to a file containing gradient direction information (b-vectors).
     mask_file : str, optional
         Full path to a file containing a binary mask. Defaults to use the entire volume.
 
     Returns
     -------
-    TensorFit object 
+    TensorFit object, affine
     """
-    img = nb.load(in_file)
+    img = nb.load(in_file).get_data()
     data = img.get_data()
     affine = img.get_affine()
     if mask_file is not None:
@@ -58,11 +58,10 @@ def tensor_fitting(in_file, bvals, bvecs, mask_file=None)
 
     # Load information about the gradients:
     gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
-    gtab.bvals = bvals
         
     # Fit it
     tenmodel = dti.TensorModel(gtab)
-    return tenmodel.fit(data, mask)
+    return tenmodel.fit(data, mask), affine
 
 
 class DTIInputSpec(TraitedSpec):
@@ -90,19 +89,21 @@ class DTI(BaseInterface):
     -------
 
     >>> import nipype.interfaces.dipy as dipy
-    >>> mode = dipy.DTI()
-    >>> mode.inputs.in_file = 'diffusion.nii'
-    >>> mode.inputs.bvecs = 'bvecs'
-    >>> mode.inputs.bvals = 'bvals'
-    >>> mode.inputs.mask_file = 'wm_mask.nii'
-    >>> mode.run()                                   # doctest: +SKIP
+    >>> dti = dipy.DTI()
+    >>> dti.inputs.in_file = 'diffusion.nii'
+    >>> dti.inputs.bvecs = 'bvecs'
+    >>> dti.inputs.bvals = 'bvals'
+    >>> dti.inputs.mask_file = 'wm_mask.nii'
+    >>> dti.run()                                   # doctest: +SKIP
     """
     input_spec = DTIInputSpec
     output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
-        ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
-                                 self.inputs.mask_file)
+        ten_fit, affine = tensor_fitting(self.inputs.in_file, 
+                                         self.inputs.bvals,
+                                         self.inputs.bvecs,
+                                         self.inputs.mask_file)
         lower_triangular = tenfit.lower_triangular()
         img = nifti1_symmat(lower_triangular, affine)
         out_file = op.abspath(self._gen_outfilename())
