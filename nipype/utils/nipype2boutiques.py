@@ -40,29 +40,27 @@ def print_inputs(tool_name, module=None, function=None):
         tool_outputs = []
                             
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-
-            #FIXME: optional inputs are not supported yet
-            if not ( hasattr(spec, "mandatory") and spec.mandatory ):
-                continue
             
             input = {}
+
             input['name'] = name
             type = spec.full_info(inputs, name, None)
-            if not "an existing file name" in type:
-                type = "String"
+            if "an existing file name" in type:
+                type = "File"
             else:
-                type = "File"            
+                type = "String"            
             input['type'] = type
             input['description'] = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:].replace("\n\t\t",". ")
             command_line_key = "["+str(input_counter)+"_"+name.upper()+"]"
             input_counter += 1
             input['command-line-key'] = command_line_key
             input['cardinality'] = "Single"
-            tool_inputs.append(input)
-            
-            if not ( hasattr(spec, "mandatory") and spec.mandatory ): 
-                command_line+= "--%s"%name+" "                        # unreachable code as long as optional inputs are not supported
+            if not ( hasattr(spec, "mandatory") and spec.mandatory ):
+                input['optional'] = "true"
+                input['command-line-flag'] = "--%s"%name+" "
                 
+            tool_inputs.append(input)
+
             command_line+= command_line_key+" "
 
             # add value to input so that output names can be generated
@@ -89,8 +87,7 @@ def print_inputs(tool_name, module=None, function=None):
                 output['value-template'] = os.path.basename(output_value)
                     
             output['cardinality'] = "Single"
-            if output['value-template'] != "": # outputs with no templates would certainly crash.
-              tool_outputs.append(output)
+            tool_outputs.append(output)
 
         # remove all temporary file names from inputs
         for input in tool_inputs:
