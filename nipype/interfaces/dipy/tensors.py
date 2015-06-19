@@ -29,6 +29,42 @@ else:
     from dipy.io.utils import nifti1_symmat
 
 
+def tensor_fitting(in_file, bvals, bvecs, mask_file=None)
+    """
+    Use dipy to fit DTI
+    
+    Parameters
+    ----------
+    in_file : str
+        Full path to a DWI data file
+    bvals : str
+        Full path to a file containing gradient magnitude information (b-values)
+    bvecs : str
+        Full path to a file containing gradient direction information (b-vectors)
+    mask_file : str, optional
+        Full path to a file containing a binary mask. Defaults to use the entire volume.
+
+    Returns
+    -------
+    TensorFit object 
+    """
+    img = nb.load(in_file)
+    data = img.get_data()
+    affine = img.get_affine()
+    if mask_file is not None:
+        mask = nb.load(self.inputs.mask_file).get_data()
+    else:
+        mask=None
+
+    # Load information about the gradients:
+    gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
+    gtab.bvals = bvals
+        
+    # Fit it
+    tenmodel = dti.TensorModel(gtab)
+    return tenmodel.fit(data, mask)
+
+
 class DTIInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input 4D diffusion-weighted image file')
@@ -65,22 +101,9 @@ class DTI(BaseInterface):
     output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
-        ## Load the 4D image files
-        img = nb.load(self.inputs.in_file)
-        data = img.get_data()
-        affine = img.get_affine()
-        mask = nb.load(self.inputs.mask_file).get_data()
-
-        # Load information about the gradients:
-        gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
-        gtab.bvals = bvals
-        
-        # Fit it
-        tenmodel = dti.TensorModel(gtab)
-        tenfit = tenmodel.fit(data, mask)
-        
+        ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
+                                 self.inputs.mask_file)
         lower_triangular = tenfit.lower_triangular()
-        lower_triangular *= opts.scale
         img = nifti1_symmat(lower_triangular, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
@@ -147,24 +170,11 @@ class TensorMode(BaseInterface):
     output_spec = TensorModeOutputSpec
 
     def _run_interface(self, runtime):
-        ## Load the 4D image files
-        img = nb.load(self.inputs.in_file)
-        data = img.get_data()
-        affine = img.get_affine()
-        mask = nb.load(self.inputs.mask_file).get_data()
-
-        ## Load the gradients
-        bvals = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
-
-        ## Fit the tensors to the data
-        tenmodel = dti.TensorModel(gtab)
-        tenfit = tenmodel.fit(data, mask)
-
-        ## Calculate the mode of each voxel's tensor
-        mode_data = tenfit.mode
+        ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
+                                 self.inputs.mask_file)
 
         ## Write as a 3D Nifti image with the original affine
-        img = nb.Nifti1Image(mode_data, affine)
+        img = nb.Nifti1Image(tenfit.mode, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)
         iflogger.info('Tensor mode image saved as {i}'.format(i=out_file))
