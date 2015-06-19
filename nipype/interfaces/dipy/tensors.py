@@ -25,8 +25,83 @@ except Exception, e:
     have_dipy = False
 else:
     import dipy.reconst.dti as dti
-    from dipy.core.gradients import GradientTable
+    from dipy.core.gradients import gradient_table
+    from dipy.io.utils import nifti1_symmat
 
+
+class DTIInputSpec(TraitedSpec):
+    in_file = File(exists=True, mandatory=True,
+                   desc='The input 4D diffusion-weighted image file')
+    bvecs = File(exists=True, mandatory=True,
+                 desc='The input b-vector text file')
+    bvals = File(exists=True, mandatory=True,
+                 desc='The input b-value text file')
+    mask_file = File(exists=True, mandatory=False,
+                 desc='An optional white matter mask')
+    out_filename = File(
+        genfile=True, desc='The output filename for the DTI parameters image')
+
+
+class DTIOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+
+
+class DTI(BaseInterface):
+    """
+    Calculates the diffusion tensor model parameters
+    
+    Example
+    -------
+
+    >>> import nipype.interfaces.dipy as dipy
+    >>> mode = dipy.DTI()
+    >>> mode.inputs.in_file = 'diffusion.nii'
+    >>> mode.inputs.bvecs = 'bvecs'
+    >>> mode.inputs.bvals = 'bvals'
+    >>> mode.inputs.mask_file = 'wm_mask.nii'
+    >>> mode.run()                                   # doctest: +SKIP
+    """
+    input_spec = DTIInputSpec
+    output_spec = DTIOutputSpec
+
+    def _run_interface(self, runtime):
+        ## Load the 4D image files
+        img = nb.load(self.inputs.in_file)
+        data = img.get_data()
+        affine = img.get_affine()
+        mask = nb.load(self.inputs.mask_file).get_data()
+
+        # Load information about the gradients:
+        gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
+        gtab.bvals = bvals
+        
+        # Fit it
+        tenmodel = dti.TensorModel(gtab)
+        tenfit = tenmodel.fit(data, mask)
+        
+        lower_triangular = tenfit.lower_triangular()
+        lower_triangular *= opts.scale
+        img = nifti1_symmat(lower_triangular, affine)
+        out_file = op.abspath(self._gen_outfilename())
+        nb.save(img, out_file)
+        iflogger.info('DTI parameters image saved as {i}'.format(i=out_file))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        return outputs
+
+    def _gen_filename(self, name):
+        if name is 'out_filename':
+            return self._gen_outfilename()
+        else:
+            return None
+
+    def _gen_outfilename(self):
+        _, name, _ = split_filename(self.inputs.in_file)
+        return name + '_dti.nii'
+    
 
 class TensorModeInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
@@ -35,6 +110,8 @@ class TensorModeInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
+    mask_file = File(exists=True, mandatory=False,
+                     desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the Tensor mode image')
 
@@ -63,6 +140,7 @@ class TensorMode(BaseInterface):
     >>> mode.inputs.in_file = 'diffusion.nii'
     >>> mode.inputs.bvecs = 'bvecs'
     >>> mode.inputs.bvals = 'bvals'
+    >>> mode.inputs.mask = 'wm_mask.nii'
     >>> mode.run()                                   # doctest: +SKIP
     """
     input_spec = TensorModeInputSpec
@@ -73,18 +151,10 @@ class TensorMode(BaseInterface):
         img = nb.load(self.inputs.in_file)
         data = img.get_data()
         affine = img.get_affine()
+        mask = nb.load(self.inputs.mask_file).get_data()
 
-        ## Load the gradient strengths and directions
-        bvals = np.loadtxt(self.inputs.bvals)
-        gradients = np.loadtxt(self.inputs.bvecs).T
-
-        ## Place in Dipy's preferred format
-        gtab = GradientTable(gradients)
-        gtab.bvals = bvals
-
-        ## Mask the data so that tensors are not fit for
-        ## unnecessary voxels
-        mask = data[..., 0] > 50
+        ## Load the gradients
+        bvals = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
 
         ## Fit the tensors to the data
         tenmodel = dti.TensorModel(gtab)
