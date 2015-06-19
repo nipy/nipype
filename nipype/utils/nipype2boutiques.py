@@ -98,7 +98,7 @@ def print_inputs(tool_name, module=None, function=None):
         tool_desc['command-line'] = command_line
         tool_desc['docker-image'] = 'docker.io/robdimsdale/nipype'
         tool_desc['docker-index'] = 'http://index.docker.io'
-        tool_desc['schema-version'] = '0.1'
+        tool_desc['schema-version'] = '0.2-snapshot'
         print json.dumps(tool_desc, indent=4, separators=(',', ': '))
                         
 def main(argv):
