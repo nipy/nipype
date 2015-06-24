@@ -7,7 +7,8 @@ from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
                          ReconAll, BBRegister, ApplyVolTransform,Smooth,
                          DICOMConvert, RobustRegister, FitMSParams,
                          SynthesizeFLASH, MNIBiasCorrection, Normalize, EditWMwithAseg,
-                         SegmentWM, SegmentCC, CALabel, CARegister, CANormalize)
+                         SegmentWM, SegmentCC, CALabel, CARegister, CANormalize,
+                         MRIsCALabel)
 from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
                     SegStats, Label2Vol, MS_LDA)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2VolTransform,
@@ -15,9 +16,9 @@ from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2Vo
                     MRIMarchingCubes, SmoothTessellation, MakeAverageSubject, TalairachQC,
                     ExtractMainComponent, Tkregister2, AddXFormToHeader, CheckTalairachAlignment,
                     RemoveNeck, CurvatureStats, Curvature, MRIsInflate, MakeSurfaces,
-                    RemoveIntersection, EulerNumber, FixTopology, QSphere, ExtractMainComponent,
-                    MRIFill)
+                    RemoveIntersection, EulerNumber, FixTopology, Sphere, ExtractMainComponent,
+                    MRIFill, Jacobian, MRIsCalc)
 
 from .longitudinal import RobustTemplate
 
-from .registration import MPRtoMNI305, RegisterAVItoTalairach, EMRegister
+from .registration import (MPRtoMNI305, RegisterAVItoTalairach, EMRegister, Register, Paint)

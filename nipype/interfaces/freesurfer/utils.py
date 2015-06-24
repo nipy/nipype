@@ -1518,29 +1518,43 @@ class MRIsInflate(FSCommand):
         return outputs
 
     
-class QSphereInputSpec(FSTraitedSpec):
+class SphereInputSpec(FSTraitedSpec):
     in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
-                   desc="Input file for QSphere")
-    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
-                   desc="Output file for QSphere")
+                   desc="Input file for Sphere")
     
     #optional
+    out_file = File(argstr="%s", position=-1, mandatory=False, exists=False,
+                    desc="Output file for Sphere")
     seed = traits.Int(argstr="-seed %d", mandatory=False, desc="Seed for setting random number generator")
     magic = traits.Bool(argstr="-q", mandatory=False,
                         desc="Magic. No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    in_smoothwm = File(mandatory=False, exists=True,
+                       desc="Input surface required when -q flag is not selected")
 
-class QSphereOutputSpec(TraitedSpec):
-    out_file = File(exists=False, desc="Output file for QSphere")
+class SphereOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for Sphere")
     
-class QSphere(FSCommand):
+class Sphere(FSCommand):
     
     _cmd = 'mris_sphere'
-    input_spec = QSphereInputSpec
-    output_spec = QSphereOutputSpec
+    input_spec = SphereInputSpec
+    output_spec = SphereOutputSpec
 
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        else:
+            #save file with hemisphere label and to same directoyr as input
+            head, tail = os.path.split(self.inputs.in_file)
+            hemisphere = tail.split('.')[0]
+            basename = hemisphere + '.sphere'
+            outputs["out_file"] = os.path.join(head, basename)
         return outputs
     
 class FixTopologyInputSpec(FSTraitedSpec):
@@ -1627,18 +1641,28 @@ class RemoveIntersection(FSCommand):
 
 
 class MakeSurfacesInputSpec(FSTraitedSpec):
-    in_wm = File(exists=True, mandatory=True, desc="Implicit input file wm.mgz")
-    in_filled = File(exists=True, mandatory=True, desc="Implicit input file filled.mgz")
-    in_aseg = File(argstr="-aseg %s", exists=True, mandatory=True, desc="Input segmentation file")
-    in_T1 = File(argstr="-T1 %s", exists=True, mandatory=True, desc="Input brain or T1 file")
-    in_orig = File(exists=True, mandatory=True, desc="Implicit input file <hemisphere>.orig")
-        
+    #required
     hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
                                desc="Hemisphere being processed")
     subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
                                desc="Subject being processed")
-
+    #implicit
+    in_orig = File(exists=True, mandatory=True, desc="Implicit input file <hemisphere>.orig")
+    in_wm = File(exists=True, mandatory=True, desc="Implicit input file wm.mgz")
+    in_filled = File(exists=True, mandatory=True, desc="Implicit input file filled.mgz")
+    in_label = File(exists=True, mandatory=False,
+                    desc="Implicit input label/<hemisphere>.aparc.annot")
     #optional
+    orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
+                      desc="Specify a white surface to start with")
+    orig_pial = File(argstr="-orig_pial %s", exists=True, mandatory=False, requires=['in_label'],
+                     desc="Specify a pial surface to start with")
+    fix_mtl = traits.Bool(argstr="-fix_mtl", mandatory=False,
+                          desc="Undocumented flag")
+    no_white = traits.Bool(argstr="-nowhite", mandatory=False,
+                           desc="Undocumented flag")
+    in_aseg = File(argstr="-aseg %s", exists=True, mandatory=False, desc="Input segmentation file")
+    in_T1 = File(argstr="-T1 %s", exists=True, mandatory=False, desc="Input brain or T1 file")
     mgz = traits.Bool(argstr="-mgz", mandatory=False,
                          desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
     noaparc = traits.Bool(argstr="-noaparc", mandatory=False,
@@ -1649,8 +1673,9 @@ class MakeSurfacesOutputSpec(TraitedSpec):
     out_curv = File(exists=False, desc="Output curv file for MakeSurfaces")
     out_area = File(exists=False, desc="Output area file for MakeSurfaces")
     out_cortex = File(exists=False, desc="Output cortex file for MakeSurfaces")
-    
-    
+    out_pial = File(exists=False, desc="Output pial surface for MakeSurfaces")
+    out_thickness = File(exists=False, desc="Output thickness file for MakeSurfaces")
+        
 class MakeSurfaces(FSCommand):
     """
     This program positions the tessellation of the cortical surface at the
@@ -1666,21 +1691,40 @@ class MakeSurfaces(FSCommand):
 
     def _format_arg(self, name, spec, value):
         if name in ['in_T1', 'in_aseg']:
+            #These inputs do not take full paths as inputs or even basenames
             basename = os.path.basename(value)
+            #whent he -mgz flag is specified, it assumes the mgz extension
             if self.inputs.mgz:
                 prefix = basename.rstrip('.mgz')
             else:
                 prefix = basename
             return spec.argstr % prefix
+        elif name in ['orig_white', 'orig_pial']:
+            #these inputs do take full file paths or even basenames
+            basename = os.path.basename(value)
+            suffix = basename.split('.')[1]
+            return spec.argstr % suffix
         return super(MakeSurfaces, self)._format_arg(name, spec, value)    
     
     def _list_outputs(self):
         outputs = self._outputs().get()
+        #Outputs are saved in the toward the surf directory
         dest_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'surf')
-        outputs["out_white"] = os.path.join(dest_dir, self.inputs.hemisphere + '.white')
+        if not self.inputs.no_white:
+            outputs["out_white"] = os.path.join(dest_dir, self.inputs.hemisphere + '.white')
+        #The curv and area files must have the hemisphere names as a prefix
         outputs["out_curv"] = os.path.join(dest_dir, self.inputs.hemisphere + '.curv')
         outputs["out_area"] = os.path.join(dest_dir, self.inputs.hemisphere + '.area')
-        outputs["out_cortex"] = os.path.join(dest_dir, self.inputs.hemisphere + '.cortex.label')
+        #Something determines when a pial surface and thickness file is generated, but documentation doesn't say what
+        #The orig_pial flag is just a guess
+        if isdefined(self.inputs.orig_pial):
+            outputs["out_curv"] =  outputs["out_curv"] + ".pial"
+            outputs["out_area"] =  outputs["out_area"] + ".pial"
+            outputs["out_pial"] = os.path.join(dest_dir, self.inputs.hemisphere + '.pial')
+            outputs["out_thickness"] = os.path.join(dest_dir, self.inputs.hemisphere + '.thickness')
+        else:
+            #when a pial surface is generated, the cortex label file is not generated
+            outputs["out_cortex"] = os.path.join(dest_dir, self.inputs.hemisphere + '.cortex.label')
         return outputs
 
 
@@ -1784,4 +1828,104 @@ class CurvatureStats(FSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class JacobianInputSpec(FSTraitedSpec):
+    #required
+    in_origsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                   desc="Original surface")
+    in_mappedsurf = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Mapped surface")
+    #optional
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+                    desc="Output Jacobian of the surface mapping")
+    
+class JacobianOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output Jacobian of the surface mapping")
+    
+class Jacobian(FSCommand):
+    """
+    This program computes the Jacobian of a surface mapping.
+    """
+    
+    _cmd = 'mris_jacobian'
+    input_spec = JacobianInputSpec
+    output_spec = JacobianOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            head, tail = os.path.split(self.inputs.in_origsurf)
+            hemisphere = tail.split('.')[0]
+            filename = hemisphere + '.jacobian_white'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
+    
+class MRIsCalcInputSpec(FSTraitedSpec):
+    #required
+    in_file1 = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                   desc="Input file 1")
+    action = traits.String(argstr="%s", position=-2, mandatory=True,
+                   desc="Action to perform on input file(s)")
+    #optional
+    in_file2 = File(argstr="%s", exists=True, position=-1, mandatory=False,
+                    xor=['in_float', 'in_int'], desc="Input file 2")
+    in_float = traits.Float(argstr="%f", position=-1, mandatory=False,
+                            xor=['in_file2', 'in_int'], desc="Input float")
+    in_int = traits.Int(argstr="%d", position=-1, mandatory=False,
+                            xor=['in_file2', 'in_float'], desc="Input integer")
+    out_file = File(argstr="-o %s", mandatory=False, genfile=True,
+                    desc="Output file after calculation")
+    
+class MRIsCalcOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file after calculation")
+    
+class MRIsCalc(FSCommand):
+    """
+    'mris_calc' is a simple calculator that operates on FreeSurfer 
+    curvatures and volumes. In most cases, the calculator functions with 
+    three arguments: two inputs and an <ACTION> linking them. Some 
+    actions, however, operate with only one input <file1>. In all cases, 
+    the first input <file1> is the name of a FreeSurfer curvature overlay 
+    (e.g. rh.curv) or volume file (e.g. orig.mgz). For two inputs, the 
+    calculator first assumes that the second input is a file. If, however,
+    this second input file doesn't exist, the calculator assumes it refers
+    to a float number, which is then processed according to <ACTION>.Note:
+    <file1> and <file2> should typically be generated on the same subject.
+    """
+    
+    _cmd = 'mris_calc'
+    input_spec = MRIsCalcInputSpec
+    output_spec = MRIsCalcOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_file':
+            return spec.argstr % self._list_outputs()[name]        
+        else:
+            return super(MRIsCalc, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            if os.path.isabs(self.inputs.out_file):
+                outputs['out_file'] = self.inputs.out_file
+            else:
+                basename = os.path.basename(self.inputs.out_file)
+                prefix = os.path.basename(self.inputs.in_file1).split('.')[0]
+                if prefix in ['lh', 'rh']:
+                    #add hemisphere label to output
+                    basename = prefix + '.' + basename
+                #Write output to same directory as input
+                dirname = os.path.dirname(self.inputs.in_file1)
+                outputs['out_file'] = os.path.join(dirname, basename)
+        else:
+            #if the output file is not predefined
+            outputs['out_file'] = self.inputs.in_file1 + '.' + self.inputs.action
         return outputs

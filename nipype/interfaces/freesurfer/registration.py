@@ -196,3 +196,96 @@ class EMRegister(FSCommand):
         else:
             outputs['out_file'] = 'talairach_with_skull.lta'
         return outputs
+
+class RegisterInputSpec(FSTraitedSpec):
+    # required
+    in_surf = File(argstr="%s", exists=True, mandatory=True, position=-3,
+                   desc="Surface to register, often {hemi}.sphere")
+    target = File(argstr="%s", exists=True, mandatory=True, position=-2,
+                  desc="The data to register to. In normal recon-all usage, this is a template file for average surface.")
+    in_smoothwm = File(exists=True, mandatory=True,
+                   desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.smoothwm ")
+    in_sulc = File(exists=True, mandatory=True,
+                   desc="Undocumented mandatory input file ${SUBJECTS_DIR}/surf/{hemisphere}.sulc ")
+    # optional
+    curv = File(argstr="-curv", mandatory=False, exists=True,
+                          desc="Use smoothwm curvature for final alignment")
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+                    desc="Output surface file to capture registration")
+    
+class RegisterOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output surface file to capture registration")
+
+
+class Register(FSCommand):
+    """ This program registers a surface to an average surface template.
+    """
+    _cmd = 'mris_register'
+    input_spec = RegisterInputSpec
+    output_spec = RegisterOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['out_file'] = os.path.abspath(self.inputs.in_surf) + '.reg'
+        return outputs
+
+
+class PaintInputSpec(FSTraitedSpec):
+    # required
+    in_surf = File(argstr="%s", exists=True, mandatory=True, position=-2,
+                   desc="Surface file with grid (vertices) onto which the template data is to be sampled or 'painted'")
+    template = File(argstr="%s", exists=True, mandatory=True, position=-3,
+                  desc="Template file")
+    #optional
+    template_param = traits.Int(mandatory=False, desc="Frame number of the input template")
+    averages = traits.Int(argstr="-a %d", mandatory=False,
+                         desc="Average curvature patterns")
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+                    desc="File containing a surface-worth of per-vertex values, saved in 'curvature' format.")
+    
+class PaintOutputSpec(TraitedSpec):
+    out_file = File(exists=False,
+                    desc="File containing a surface-worth of per-vertex values, saved in 'curvature' format.")
+
+
+class Paint(FSCommand):
+    """
+    This program is useful for extracting one of the arrays ("a variable")
+    from a surface-registration template file. The output is a file 
+    containing a surface-worth of per-vertex values, saved in "curvature" 
+    format. Because the template data is sampled to a particular surface 
+    mesh, this conjures the idea of "painting to a surface".
+    """
+    _cmd = 'mrisp_paint'
+    input_spec = PaintInputSpec
+    output_spec = PaintOutputSpec
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'template':
+            if isdefined(self.inputs.template_param):
+                return spec.argstr % (val + '#' + str(self.inputs.template_param))
+        return super(Paint, self)._format_arg(opt, spec, val)
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            head, tail = os.path.split(self.inputs.in_surf)
+            hemisphere = tail.split('.')[0]
+            filename = hemisphere + '.avg_curv'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
