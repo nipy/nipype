@@ -164,7 +164,7 @@ class TensorMode(BaseInterface):
     >>> mode.inputs.in_file = 'diffusion.nii'
     >>> mode.inputs.bvecs = 'bvecs'
     >>> mode.inputs.bvals = 'bvals'
-    >>> mode.inputs.mask = 'wm_mask.nii'
+    >>> mode.inputs.mask_file = 'wm_mask.nii'
     >>> mode.run()                                   # doctest: +SKIP
     """
     input_spec = TensorModeInputSpec

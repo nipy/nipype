@@ -9,7 +9,7 @@ def test_DTI_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
-    mask_file=dict(mandatory=False, 
+    mask_file=dict(mandatory=False,
     ),
     out_filename=dict(genfile=True,
     ),
