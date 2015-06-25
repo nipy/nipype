@@ -93,7 +93,6 @@ class DTI(BaseInterface):
     >>> dti.inputs.in_file = 'diffusion.nii'
     >>> dti.inputs.bvecs = 'bvecs'
     >>> dti.inputs.bvals = 'bvals'
-    >>> dti.inputs.mask_file = 'wm_mask.nii'
     >>> dti.run()                                   # doctest: +SKIP
     """
     input_spec = DTIInputSpec
@@ -164,7 +163,6 @@ class TensorMode(BaseInterface):
     >>> mode.inputs.in_file = 'diffusion.nii'
     >>> mode.inputs.bvecs = 'bvecs'
     >>> mode.inputs.bvals = 'bvals'
-    >>> mode.inputs.mask_file = 'wm_mask.nii'
     >>> mode.run()                                   # doctest: +SKIP
     """
     input_spec = TensorModeInputSpec
