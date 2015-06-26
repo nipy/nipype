@@ -140,7 +140,6 @@ class Tractography(CommandLine):
     output_spec = TractographyOutputSpec
 
     def _format_arg(self, name, trait_spec, value):
-        print name
         if 'roi_' in name and isinstance(value, tuple):
             value = ['%f' % v for v in value]
             return trait_spec.argstr % ','.join(value)
