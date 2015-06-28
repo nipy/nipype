@@ -121,3 +121,42 @@ class ResponseSD(CommandLine):
         if isdefined(self.inputs.out_sf):
             outputs['out_sf'] = op.abspath(self.inputs.out_sf)
         return outputs
+
+
+class ACTPrepareFSLInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='input anatomical image')
+
+    out_file = File(
+        'act_5tt.mif', argstr='%s', mandatory=True, position=-1,
+        usedefault=True, desc='output file after processing')
+
+
+class ACTPrepareFSLOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output response file')
+
+
+class ACTPrepareFSL(CommandLine):
+
+    """
+    Performs tractography after selecting the appropriate algorithm
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> resp = mrt.ACTPrepareFSL()
+    >>> resp.inputs.in_file = 'T1.nii.gz'
+    >>> resp.cmdline                               # doctest: +ELLIPSIS
+    'act_anat_prepare_fsl T1.nii.gz act_5tt.mif'
+    >>> resp.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'act_anat_prepare_fsl'
+    input_spec = ACTPrepareFSLInputSpec
+    output_spec = ACTPrepareFSLOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
