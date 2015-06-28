@@ -49,11 +49,11 @@ class Mesh2PVE(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> m2p = mrt.Mesh2PVE()
-    >>> m2p.inputs.in_file = 'surf.vtk'
-    >>> m2p.inputs.reference = 'dwi.nii.gz'
+    >>> m2p.inputs.in_file = 'surf1.vtk'
+    >>> m2p.inputs.reference = 'dwi.mif'
     >>> m2p.inputs.in_first = 'T1.nii.gz'
     >>> m2p.cmdline                               # doctest: +ELLIPSIS
-    'mesh2pve -first T1.nii.gz surf.vtk dwi.nii.gz mesh2volume.nii.gz'
+    'mesh2pve -first T1.nii.gz surf1.vtk dwi.mif mesh2volume.nii.gz'
     >>> resp.run()                                 # doctest: +SKIP
     """
 

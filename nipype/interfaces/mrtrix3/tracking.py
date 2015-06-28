@@ -131,7 +131,7 @@ class Tractography(CommandLine):
     >>> tk.cmdline                               # doctest: +ELLIPSIS
     'tckgen -algorithm iFOD2 -include mask.nii.gz \
 -seed_sphere 80.000000,100.000000,70.000000,10.000000 \
-./fods.nii.gz tracked.tck'
+./fods.mif tracked.tck'
     >>> tk.run()                                 # doctest: +SKIP
     """
 

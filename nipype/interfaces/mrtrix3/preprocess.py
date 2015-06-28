@@ -102,11 +102,11 @@ class ResponseSD(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> resp = mrt.ResponseSD()
-    >>> resp.inputs.in_file = 'dwi.nii.gz'
+    >>> resp.inputs.in_file = 'dwi.mif'
     >>> resp.inputs.in_mask = 'mask.nii.gz'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    ''
+    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif'
     >>> resp.run()                                 # doctest: +SKIP
     """
 
