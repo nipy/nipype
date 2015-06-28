@@ -129,9 +129,8 @@ class Tractography(CommandLine):
     >>> tk.inputs.roi_mask = 'mask.nii.gz'
     >>> tk.inputs.seed_sphere = (80, 100, 70, 10)
     >>> tk.cmdline                               # doctest: +ELLIPSIS
-    'tckgen -algorithm iFOD2 -include mask.nii.gz \
--seed_sphere 80.000000,100.000000,70.000000,10.000000 \
-./fods.mif tracked.tck'
+    'tckgen -algorithm iFOD2 -mask mask.nii.gz -seed_sphere \
+80.000000,100.000000,70.000000,10.000000 fods.mif tracked.tck'
     >>> tk.run()                                 # doctest: +SKIP
     """
 

@@ -106,7 +106,7 @@ class ResponseSD(CommandLine):
     >>> resp.inputs.in_mask = 'mask.nii.gz'
     >>> resp.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> resp.cmdline                               # doctest: +ELLIPSIS
-    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif'
+    'dwi2response -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt'
     >>> resp.run()                                 # doctest: +SKIP
     """
 
