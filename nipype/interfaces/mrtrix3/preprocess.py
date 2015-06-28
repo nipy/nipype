@@ -145,11 +145,11 @@ class ACTPrepareFSL(CommandLine):
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
-    >>> resp = mrt.ACTPrepareFSL()
-    >>> resp.inputs.in_file = 'T1.nii.gz'
-    >>> resp.cmdline                               # doctest: +ELLIPSIS
+    >>> prep = mrt.ACTPrepareFSL()
+    >>> prep.inputs.in_file = 'T1.nii.gz'
+    >>> prep.cmdline                               # doctest: +ELLIPSIS
     'act_anat_prepare_fsl T1.nii.gz act_5tt.mif'
-    >>> resp.run()                                 # doctest: +SKIP
+    >>> prep.run()                                 # doctest: +SKIP
     """
 
     _cmd = 'act_anat_prepare_fsl'
