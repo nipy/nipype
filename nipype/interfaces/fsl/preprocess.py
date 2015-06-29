@@ -1592,12 +1592,11 @@ class FIRST(FSLCommand):
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
 
-
         if name == 'original_segmentations':
-        	fnames = glob.glob(op.abspath('%s_all_*_origsegs.nii.gz' % outname))
+            fnames = glob.glob(op.abspath('%s_all_*_origsegs.nii.gz' % outname))
             return op.abspath(fnames[0])
         if name == 'segmentation_file':
-        	fnames = glob.glob(op.abspath('%s_all_*_firstseg.nii.gz' % outname))
+            fnames = glob.glob(op.abspath('%s_all_*_firstseg.nii.gz' % outname))
             return op.abspath(fnames[0])
 
         return None
