@@ -50,7 +50,77 @@ class TractographyInputSpec(CommandLineInputSpec):
         desc=('specify a masking region of interest. If defined,'
               'streamlines exiting the mask will be truncated'))
 
-    # Here streamlines tractography
+    # Streamlines tractography options
+    step_size = traits.Float(
+        argstr='-step %f',
+        desc=('set the step size of the algorithm in mm (default is 0.1'
+              ' x voxelsize; for iFOD2: 0.5 x voxelsize)'))
+    angle = traits.Float(
+        argstr='-angle %f',
+        desc=('set the maximum angle between successive steps (default '
+              'is 90deg x stepsize / voxelsize)'))
+    n_tracks = traits.Int(
+        argstr='-number %d',
+        desc=('set the desired number of tracks. The program will continue'
+              ' to generate tracks until this number of tracks have been '
+              'selected and written to the output file'))
+    max_tracks = traits.Int(
+        argstr='-maxnum %d',
+        desc=('set the maximum number of tracks to generate. The program '
+              'will not generate more tracks than this number, even if '
+              'the desired number of tracks hasn\'t yet been reached '
+              '(default is 100 x number)'))
+    max_length = traits.Float(
+        argstr='-maxlength %f',
+        desc=('set the maximum length of any track in mm (default is '
+              '100 x voxelsize)'))
+    min_length = traits.Float(
+        argstr='-minlength %f',
+        desc=('set the minimum length of any track in mm (default is '
+              '5 x voxelsize)'))
+    cutoff = traits.Float(
+        argstr='-cutoff %f',
+        desc=('set the FA or FOD amplitude cutoff for terminating '
+              'tracks (default is 0.1)'))
+    cutoff_init = traits.Float(
+        argstr='-initcutoff %f',
+        desc=('set the minimum FA or FOD amplitude for initiating '
+              'tracks (default is the same as the normal cutoff)'))
+    n_trials = traits.Int(
+        argstr='-trials %d',
+        desc=('set the maximum number of sampling trials at each point'
+              ' (only used for probabilistic tracking)'))
+    unidirectional = traits.Bool(
+        argstr='-unidirectional',
+        desc=('track from the seed point in one direction only '
+              '(default is to track in both directions)'))
+    init_dir = traits.Tuple(
+        traits.Float, traits.Float, traits.Float, 
+        argstr='-initdirection %f,%f,%f',
+        desc=('specify an initial direction for the tracking (this '
+              'should be supplied as a vector of 3 comma-separated values'))
+    noprecompt = traits.Bool(
+        argstr='-noprecomputed',
+        desc=('do NOT pre-compute legendre polynomial values. Warning: this '
+              'will slow down the algorithm by a factor of approximately 4'))
+    power = traits.Int(
+        argstr='-power %d',
+        desc=('raise the FOD to the power specified (default is 1/nsamples)'))
+    n_samples = traits.Int(
+        4, argstr='-samples %d',
+        desc=('set the number of FOD samples to take per step for the 2nd '
+              'order (iFOD2) method'))
+    use_rk4 = traits.Bool(
+        argstr='-rk4',
+        desc=('use 4th-order Runge-Kutta integration (slower, but eliminates'
+              ' curvature overshoot in 1st-order deterministic methods)'))
+    stop = traits.Bool(
+        argstr='-stop',
+        desc=('stop propagating a streamline once it has traversed all '
+              'include regions'))
+    downsample = traits.Float(
+        argstr='-downsample %f',
+        desc=('downsample the generated streamlines to reduce output file size'))
 
     # Anatomically-Constrained Tractography options
     act_file = File(
@@ -72,22 +142,39 @@ class TractographyInputSpec(CommandLineInputSpec):
         argstr='-seed_sphere %f,%f,%f,%f', desc='spherical seed')
     seed_image = File(exists=True, argstr='-seed_image %s',
                       desc='seed streamlines entirely at random within mask')
-    seed_rnd_voxel = traits.Enum(
-        traits.Int(), File(exists=True),
+    seed_rnd_voxel = traits.Tuple(
+        File(exists=True), traits.Int(),
         argstr='-seed_random_per_voxel %s %d',
         xor=['seed_image', 'seed_grid_voxel'],
         desc=('seed a fixed number of streamlines per voxel in a mask '
               'image; random placement of seeds in each voxel'))
-    seed_grid_voxel = traits.Enum(
-        traits.Int(), File(exists=True),
+    seed_grid_voxel = traits.Tuple(
+        File(exists=True), traits.Int(),
         argstr='-seed_grid_per_voxel %s %d',
         xor=['seed_image', 'seed_rnd_voxel'],
         desc=('seed a fixed number of streamlines per voxel in a mask '
               'image; place seeds on a 3D mesh grid (grid_size argument '
               'is per axis; so a grid_size of 3 results in 27 seeds per'
               ' voxel)'))
-
-    # missing opts: seed_rejection, seed_gmwmi, seed_dynamic, max_seed_attempts
+    seed_rejection = File(
+        exists=True, argstr='-seed_rejection %s',
+        desc=('seed from an image using rejection sampling (higher '
+              'values = more probable to seed from'))
+    seed_gmwmi = File(
+        exists=True, argstr='-seed_gmwmi %s', requires=['act_file'],
+        desc=('seed from the grey matter - white matter interface (only '
+              'valid if using ACT framework)'))
+    seed_dynamic = File(
+        exists=True, argstr='-seed_dynamic %s',
+        desc=('determine seed points dynamically using the SIFT model '
+              '(must not provide any other seeding mechanism). Note that'
+              ' while this seeding mechanism improves the distribution of'
+              ' reconstructed streamlines density, it should NOT be used '
+              'as a substitute for the SIFT method itself.'))
+    max_seed_attempts = traits.Int(argstr='-max_seed_attempts %d',
+        desc=('set the maximum number of times that the tracking '
+              'algorithm should attempt to find an appropriate tracking'
+              ' direction from a given seed point'))
     out_seeds = File(
         'out_seeds.nii.gz', argstr='-output_seeds %s',
         desc=('output the seed location of all successful streamlines to'
