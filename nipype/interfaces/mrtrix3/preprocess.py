@@ -95,7 +95,14 @@ class ResponseSDOutputSpec(TraitedSpec):
 class ResponseSD(CommandLine):
 
     """
-    Performs tractography after selecting the appropriate algorithm
+    Generate an appropriate response function from the image data for
+    spherical deconvolution.
+
+    .. [1] Tax, C. M.; Jeurissen, B.; Vos, S. B.; Viergever, M. A. and
+      Leemans, A., Recursive calibration of the fiber response function
+      for spherical deconvolution of diffusion MRI data. NeuroImage,
+      2014, 86, 67-80
+
 
     Example
     -------
@@ -139,7 +146,8 @@ class ACTPrepareFSLOutputSpec(TraitedSpec):
 class ACTPrepareFSL(CommandLine):
 
     """
-    Performs tractography after selecting the appropriate algorithm
+    Generate anatomical information necessary for Anatomically
+    Constrained Tractography (ACT).
 
     Example
     -------

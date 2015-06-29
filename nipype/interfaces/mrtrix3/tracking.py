@@ -118,7 +118,35 @@ class TractographyOutputSpec(TraitedSpec):
 class Tractography(CommandLine):
 
     """
-    Performs tractography after selecting the appropriate algorithm
+    Performs streamlines tractography after selecting the appropriate
+    algorithm.
+
+    .. [FACT] Mori, S.; Crain, B. J.; Chacko, V. P. & van Zijl,
+      P. C. M. Three-dimensional tracking of axonal projections in the
+      brain by magnetic resonance imaging. Annals of Neurology, 1999,
+      45, 265-269
+
+    .. [iFOD1] Tournier, J.-D.; Calamante, F. & Connelly, A. MRtrix:
+      Diffusion tractography in crossing fiber regions. Int. J. Imaging
+      Syst. Technol., 2012, 22, 53-66
+
+    .. [iFOD2] Tournier, J.-D.; Calamante, F. & Connelly, A. Improved
+      probabilistic streamlines tractography by 2nd order integration
+      over fibre orientation distributions. Proceedings of the
+      International Society for Magnetic Resonance in Medicine, 2010, 1670
+
+    .. [Nulldist] Morris, D. M.; Embleton, K. V. & Parker, G. J.
+      Probabilistic fibre tracking: Differentiation of connections from
+      chance events. NeuroImage, 2008, 42, 1329-1339
+
+    .. [Tensor_Det] Basser, P. J.; Pajevic, S.; Pierpaoli, C.; Duda, J.
+      and Aldroubi, A. In vivo fiber tractography using DT-MRI data.
+      Magnetic Resonance in Medicine, 2000, 44, 625-632
+
+    .. [Tensor_Prob] Jones, D. Tractography Gone Wild: Probabilistic Fibre
+      Tracking Using the Wild Bootstrap With Diffusion Tensor MRI. IEEE
+      Transactions on Medical Imaging, 2008, 27, 1268-1274
+
 
     Example
     -------

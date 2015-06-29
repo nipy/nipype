@@ -42,7 +42,8 @@ class Mesh2PVEOutputSpec(TraitedSpec):
 class Mesh2PVE(CommandLine):
 
     """
-    Performs tractography after selecting the appropriate algorithm
+    Convert a mesh surface to a partial volume estimation image
+
 
     Example
     -------
