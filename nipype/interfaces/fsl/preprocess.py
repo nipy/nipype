@@ -14,6 +14,7 @@ was written to work with FSL version 4.1.4.
 import os
 import os.path as op
 import warnings
+import glob
 
 import numpy as np
 
@@ -1593,9 +1594,11 @@ class FIRST(FSLCommand):
 
 
         if name == 'original_segmentations':
-            return op.abspath('%s_all_none_origsegs.nii.gz' % outname)
+        	fnames = glob.glob(op.abspath('%s_all_*_origsegs.nii.gz' % outname))
+            return op.abspath(fnames[0])
         if name == 'segmentation_file':
-            return op.abspath('%s_all_none_firstseg.nii.gz' % outname)
+        	fnames = glob.glob(op.abspath('%s_all_*_firstseg.nii.gz' % outname))
+            return op.abspath(fnames[0])
 
         return None
 
