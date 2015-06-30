@@ -201,10 +201,12 @@ class EstimateFOD(CommandLine):
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> fod = mrt.EstimateFOD()
     >>> fod.inputs.in_file = 'dwi.mif'
+    >>> fod.inputs.response = 'response.txt'
     >>> fod.inputs.in_mask = 'mask.nii.gz'
     >>> fod.inputs.grad_fsl = ('bvecs', 'bvals')
     >>> fod.cmdline                               # doctest: +ELLIPSIS
-    'dwi2fod -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif fods.mif'
+    'dwi2fod -fslgrad bvecs bvals -mask mask.nii.gz dwi.mif response.txt\
+ fods.mif'
     >>> fod.run()                                 # doctest: +SKIP
     """
 

@@ -22,11 +22,64 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
 
+class BrainMaskInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='input diffusion weighted images')
+    out_file = File(
+        'brainmask.mif', argstr='%s', mandatory=True, position=-1,
+        usedefault=True, desc='output brain mask')
+    # DW gradient table import options
+    grad_file = File(exists=True, argstr='-grad %s',
+                     desc='dw gradient scheme (MRTrix format')
+    grad_fsl = traits.Tuple(
+        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
+        desc='(bvecs, bvals) dw gradient scheme (FSL format')
+    bval_scale = traits.Enum(
+        'yes', 'no', argstr='-bvalue_scaling %s',
+        desc=('specifies whether the b - values should be scaled by the square'
+              ' of the corresponding DW gradient norm, as often required for '
+              'multishell or DSI DW acquisition schemes. The default action '
+              'can also be set in the MRtrix config file, under the '
+              'BValueScaling entry. Valid choices are yes / no, true / '
+              'false, 0 / 1 (default: true).'))
+
+class BrainMaskOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output response file')
+
+
+class BrainMask(CommandLine):
+
+    """
+    Convert a mesh surface to a partial volume estimation image
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> bmsk = mrt.BrainMask()
+    >>> bmsk.inputs.in_file = 'dwi.mif'
+    >>> bmsk.cmdline                               # doctest: +ELLIPSIS
+    'dwi2mask dwi.mif brainmask.mif'
+    >>> bmsk.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'dwi2mask'
+    input_spec = BrainMaskInputSpec
+    output_spec = BrainMaskOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
+
 class Mesh2PVEInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
-                   desc='input diffusion weighted images')
+                   desc='input mesh')
     reference = File(exists=True, argstr='%s', mandatory=True, position=-2,
-                     desc='input diffusion weighted images')
+                     desc='input reference image')
     in_first = File(
         exists=True, argstr='-first %s',
         desc='indicates that the mesh file is provided by FSL FIRST')
