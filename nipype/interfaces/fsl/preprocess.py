@@ -1622,8 +1622,3 @@ class FIRST(FSLCommand):
                 bvars.append(op.abspath(bvar))
             return bvars
         return None
-
-    @property
-    def cmdline(self):
-        print self._gen_fname('original_segmentations')
-        return super(FIRST, self).cmdline
