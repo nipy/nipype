@@ -167,3 +167,62 @@ class Generate5tt(CommandLine):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class TensorMetricsInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-1,
+                   desc='input DTI image')
+
+    out_fa = File(argstr='-fa %s', desc='output FA file')
+    out_adc = File(argstr='-adc %s', desc='output ADC file')
+    out_evec = File(argstr='-vector %s',
+                    desc='output selected eigenvector(s) file')
+    out_eval = File(argstr='-value %s',
+                    desc='output selected eigenvalue(s) file')
+    component = traits.List(
+        [1, 2, 3], argstr='-num %s', sep=',',
+        desc=('specify the desired eigenvalue/eigenvector(s). Note that '
+              'several eigenvalues can be specified as a number sequence'))
+    in_mask = File(exists=True, argstr='-mask %s',
+                   desc=('only perform computation within the specified binary '
+                         'brain mask image'))
+    modulate = traits.Enum('FA', 'none', 'eval', argstr='-modulate %s',
+                           desc='how to modulate the magnitude of the eigenvectors')
+
+class TensorMetricsOutputSpec(TraitedSpec):
+    out_fa = File(desc='output FA file')
+    out_adc = File(desc='output ADC file')
+    out_evec = File(desc='output selected eigenvector(s) file')
+    out_eval = File(desc='output selected eigenvalue(s) file')
+
+
+class TensorMetrics(CommandLine):
+
+    """
+    Convert a mesh surface to a partial volume estimation image
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> comp = mrt.TensorMetrics()
+    >>> comp.inputs.in_file = 'dti.mif'
+    >>> comp.inputs.out_fa = 'fa.mif'
+    >>> comp.cmdline                               # doctest: +ELLIPSIS
+    'tensor2metric -fa fa.mif dti.mif'
+    >>> comp.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'tensor2metric'
+    input_spec = TensorMetricsInputSpec
+    output_spec = TensorMetricsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+
+        for k in outputs.keys():
+            if isdefined(getattr(self.inputs, k)):
+                outputs[k] = op.abspath(getattr(self.inputs, k))
+
+        return outputs
