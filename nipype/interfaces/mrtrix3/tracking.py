@@ -95,7 +95,7 @@ class TractographyInputSpec(CommandLineInputSpec):
         desc=('track from the seed point in one direction only '
               '(default is to track in both directions)'))
     init_dir = traits.Tuple(
-        traits.Float, traits.Float, traits.Float, 
+        traits.Float, traits.Float, traits.Float,
         argstr='-initdirection %f,%f,%f',
         desc=('specify an initial direction for the tracking (this '
               'should be supplied as a vector of 3 comma-separated values'))
