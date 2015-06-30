@@ -1516,7 +1516,7 @@ class FIRSTInputSpec(FSLCommandInputSpec):
         desc=("Method must be one of auto, fast, none, or it can be entered "
               "using the 'method_as_numerical_threshold' input"))
     method_as_numerical_threshold = traits.Float(
-        argstr='-m %d', position=4,
+        argstr='-m %.4f', position=4,
         desc=("Specify a numerical threshold value or use the 'method' input "
               "to choose auto, fast, or none"))
     list_of_specific_structures = traits.List(
@@ -1592,12 +1592,18 @@ class FIRST(FSLCommand):
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
 
+        method = 'none'
+        if isdefined(self.inputs.method) and self.inputs.method == 'fast':
+            method = 'fast'
+
+        if isdefined(self.inputs.method_as_numerical_threshold):
+            thres = '%.4f' % self.inputs.method_as_numerical_threshold
+            method = thres.replace('.', '')
+
         if name == 'original_segmentations':
-            fnames = glob.glob(op.abspath('%s_all_*_origsegs.nii.gz' % outname))
-            return op.abspath(fnames[0])
+            return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
         if name == 'segmentation_file':
-            fnames = glob.glob(op.abspath('%s_all_*_firstseg.nii.gz' % outname))
-            return op.abspath(fnames[0])
+            return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
 
         return None
 
@@ -1616,3 +1622,8 @@ class FIRST(FSLCommand):
                 bvars.append(op.abspath(bvar))
             return bvars
         return None
+
+    @property
+    def cmdline(self):
+        print self._gen_fname('original_segmentations')
+        return super(FIRST, self).cmdline
