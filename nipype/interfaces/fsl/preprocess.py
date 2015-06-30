@@ -1389,26 +1389,6 @@ class FUGUE(FSLCommand):
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if self.inputs.forward_warping:
-            out_field = 'warped_file'
-        else:
-            out_field = 'unwarped_file'
-        out_file = getattr(self.inputs, out_field)
-        if not isdefined(out_file):
-            if isdefined(self.inputs.in_file):
-                out_file = self._gen_fname(self.inputs.in_file,
-                                           suffix='_'+out_field[:-5])
-        if isdefined(out_file):
-            outputs[out_field] = os.path.abspath(out_file)
-        if isdefined(self.inputs.fmap_out_file):
-            outputs['fmap_out_file'] = os.path.abspath(
-                self.inputs.fmap_out_file)
-        if isdefined(self.inputs.shift_out_file):
-            outputs['shift_out_file'] = os.path.abspath(
-                self.inputs.shift_out_file)
-        return outputs
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',
