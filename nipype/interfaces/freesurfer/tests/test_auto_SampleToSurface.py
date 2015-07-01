@@ -91,7 +91,7 @@ def test_SampleToSurface_inputs():
     ),
     subject_id=dict(),
     subjects_dir=dict(),
-    surf_reg=dict(argstr='--surfreg',
+    surf_reg=dict(argstr='--surfreg %s',
     requires=['target_subject'],
     ),
     surface=dict(argstr='--surf %s',
