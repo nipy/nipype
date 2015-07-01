@@ -50,3 +50,13 @@ Developer guides
    devel/gitwash/index
 
 .. include:: links_names.txt
+
+Useful links for beginners
+===========================
+
+Getting started with Python - Tutorials. `Available here`__
+
+Python for Beginners `Available here`__
+
+   __ http://www.codecademy.com/en/tracks/python
+   __ https://www.python.org/about/gettingstarted/
