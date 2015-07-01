@@ -1744,6 +1744,11 @@ class MRIsCALabel(FSCommand):
     input_spec = MRIsCALabelInputSpec
     output_spec = MRIsCALabelOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == "out_file":
+            return spec.argstr % self._list_outputs()[name]
+        return super(MRIsCALabel, self)._format_arg(name, spec, value)
+    
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
@@ -1752,9 +1757,15 @@ class MRIsCALabel(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            if os.path.isabs(self.inputs.out_file):
+                outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            else:
+                head = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+                hemisphere = self.inputs.hemisphere
+                filename = hemisphere + '.' + os.path.basename(self.inputs.out_file)
+                outputs['out_file'] = os.path.join(head, filename)
         else:
-            head = os.path.join(os.environ.get('SUBJECTS_DIR'), self.inputs.subject_id, 'label')
+            head = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
             hemisphere = self.inputs.hemisphere
             filename = hemisphere + '.aparc.annot'
             outputs['out_file'] = os.path.join(head, filename)
