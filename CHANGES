@@ -53,7 +53,6 @@ Next release
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 * FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 * FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
-* FIX: N4BiasFieldCorrection dimension input now uses short tag for compatibility. (https://github.com/nipy/nipype/pull/1096)
 
 Release 0.10.0 (October 10, 2014)
 ============
