@@ -1349,9 +1349,9 @@ class CommandLine(BaseInterface):
     def set_default_terminal_output(cls, output_type):
         """Set the default terminal output for CommandLine Interfaces.
 
-        This method is used to set default terminal output for 
-        CommandLine Interfaces.  However, setting this will not 
-        update the output type for any existing instances.  For these, 
+        This method is used to set default terminal output for
+        CommandLine Interfaces.  However, setting this will not
+        update the output type for any existing instances.  For these,
         assign the <instance>.inputs.terminal_output.
         """
 
