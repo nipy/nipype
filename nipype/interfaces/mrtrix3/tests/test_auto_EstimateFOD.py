@@ -42,7 +42,7 @@ def test_EstimateFOD_inputs():
     ),
     sh_filter=dict(argstr='-filter %s',
     ),
-    shell=dict(argstr='-shell %f',
+    shell=dict(argstr='-shell %s',
     sep=',',
     ),
     terminal_output=dict(nohash=True,

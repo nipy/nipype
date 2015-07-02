@@ -43,6 +43,7 @@ class BrainMaskInputSpec(CommandLineInputSpec):
               'BValueScaling entry. Valid choices are yes / no, true / '
               'false, 0 / 1 (default: true).'))
 
+
 class BrainMaskOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output response file')
 
@@ -72,7 +73,6 @@ class BrainMask(CommandLine):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
-
 
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
@@ -184,10 +184,12 @@ class TensorMetricsInputSpec(CommandLineInputSpec):
         desc=('specify the desired eigenvalue/eigenvector(s). Note that '
               'several eigenvalues can be specified as a number sequence'))
     in_mask = File(exists=True, argstr='-mask %s',
-                   desc=('only perform computation within the specified binary '
-                         'brain mask image'))
+                   desc=('only perform computation within the specified binary'
+                         ' brain mask image'))
     modulate = traits.Enum('FA', 'none', 'eval', argstr='-modulate %s',
-                           desc='how to modulate the magnitude of the eigenvectors')
+                           desc=('how to modulate the magnitude of the'
+                                 ' eigenvectors'))
+
 
 class TensorMetricsOutputSpec(TraitedSpec):
     out_fa = File(desc='output FA file')

@@ -21,6 +21,7 @@ from nipype.interfaces.base import (
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
+
 class FitTensorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input diffusion weighted images')
@@ -30,17 +31,16 @@ class FitTensorInputSpec(CommandLineInputSpec):
 
     # General options
     in_mask = File(exists=True, argstr='-mask %s',
-                   desc=('only perform computation within the specified binary '
-                         'brain mask image'))
+                   desc=('only perform computation within the specified '
+                         'binary brain mask image'))
     method = traits.Enum(
         'nonlinear', 'loglinear', 'sech', 'rician', argstr='-method %s',
         desc=('select method used to perform the fitting'))
     reg_term = traits.Float(
         5.e3, argstr='-regularisation %f',
-        desc=('specify the strength of the regularisation term on the magnitude '
-              'of the tensor elements (default = 5000). This only applies to the '
-              'non-linear methods'))
-
+        desc=('specify the strength of the regularisation term on the '
+              'magnitude of the tensor elements (default = 5000). This '
+              'only applies to the non-linear methods'))
 
     # DW gradient table import options
     grad_file = File(exists=True, argstr='-grad %s',
@@ -100,7 +100,8 @@ class EstimateFODInputSpec(CommandLineInputSpec):
               'function coefficients for a single fibre population'))
     out_file = File(
         'fods.mif', argstr='%s', mandatory=True, position=-1,
-        usedefault=True, desc='the output spherical harmonics coefficients image')
+        usedefault=True, desc=('the output spherical harmonics coefficients'
+                               ' image'))
 
     # DW gradient table import options
     grad_file = File(exists=True, argstr='-grad %s',
@@ -118,7 +119,7 @@ class EstimateFODInputSpec(CommandLineInputSpec):
               'false, 0 / 1 (default: true).'))
 
     # DW Shell selection options
-    shell = traits.List(traits.Float, sep=',', argstr='-shell %f',
+    shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
                         desc='specify one or more dw gradient shells')
 
     # Spherical deconvolution options

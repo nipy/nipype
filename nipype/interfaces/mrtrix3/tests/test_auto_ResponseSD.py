@@ -40,7 +40,7 @@ def test_ResponseSD_inputs():
     ),
     out_sf=dict(argstr='-sf %s',
     ),
-    shell=dict(argstr='-shell %f',
+    shell=dict(argstr='-shell %s',
     sep=',',
     ),
     terminal_output=dict(nohash=True,

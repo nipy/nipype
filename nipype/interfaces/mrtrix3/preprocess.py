@@ -46,7 +46,7 @@ class ResponseSDInputSpec(CommandLineInputSpec):
 
     # DW Shell selection options
 
-    shell = traits.List(traits.Float, sep=',', argstr='-shell %f',
+    shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
                         desc='specify one or more dw gradient shells')
     in_mask = File(exists=True, argstr='-mask %s',
                    desc='provide initial mask image')
