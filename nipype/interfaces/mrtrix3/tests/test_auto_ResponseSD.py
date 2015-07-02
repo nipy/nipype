@@ -33,6 +33,8 @@ def test_ResponseSD_inputs():
     ),
     max_sh=dict(argstr='-lmax %d',
     ),
+    nthreads=dict(argstr='-nthreads %d',
+    ),
     out_file=dict(argstr='%s',
     mandatory=True,
     position=-1,

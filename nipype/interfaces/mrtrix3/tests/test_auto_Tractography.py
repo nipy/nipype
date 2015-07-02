@@ -56,6 +56,8 @@ def test_Tractography_inputs():
     ),
     noprecompt=dict(argstr='-noprecomputed',
     ),
+    nthreads=dict(argstr='-nthreads %d',
+    ),
     out_file=dict(argstr='%s',
     mandatory=True,
     position=-1,

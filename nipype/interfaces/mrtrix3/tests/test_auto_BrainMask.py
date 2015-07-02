@@ -21,6 +21,8 @@ def test_BrainMask_inputs():
     mandatory=True,
     position=-2,
     ),
+    nthreads=dict(argstr='-nthreads %d',
+    ),
     out_file=dict(argstr='%s',
     mandatory=True,
     position=-1,

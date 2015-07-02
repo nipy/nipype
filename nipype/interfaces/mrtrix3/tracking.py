@@ -14,6 +14,7 @@
 import os
 import os.path as op
 
+from base import MRTrix3BaseInputSpec, MRTrix3Base
 from nipype.interfaces.base import (
     CommandLineInputSpec, CommandLine, traits, TraitedSpec, File)
 
@@ -21,7 +22,7 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
 
-class TractographyInputSpec(CommandLineInputSpec):
+class TractographyInputSpec(MRTrix3BaseInputSpec):
     sph_trait = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              traits.Float, argstr='%f,%f,%f,%f')
 
@@ -120,7 +121,7 @@ class TractographyInputSpec(CommandLineInputSpec):
               'include regions'))
     downsample = traits.Float(
         argstr='-downsample %f',
-        desc=('downsample the generated streamlines to reduce output file size'))
+        desc='downsample the generated streamlines to reduce output file size')
 
     # Anatomically-Constrained Tractography options
     act_file = File(
@@ -171,7 +172,8 @@ class TractographyInputSpec(CommandLineInputSpec):
               ' while this seeding mechanism improves the distribution of'
               ' reconstructed streamlines density, it should NOT be used '
               'as a substitute for the SIFT method itself.'))
-    max_seed_attempts = traits.Int(argstr='-max_seed_attempts %d',
+    max_seed_attempts = traits.Int(
+        argstr='-max_seed_attempts %d',
         desc=('set the maximum number of times that the tracking '
               'algorithm should attempt to find an appropriate tracking'
               ' direction from a given seed point'))
@@ -180,21 +182,6 @@ class TractographyInputSpec(CommandLineInputSpec):
         desc=('output the seed location of all successful streamlines to'
               ' a file'))
 
-    # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
-    grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
-    bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
-        desc=('specifies whether the b - values should be scaled by the square'
-              ' of the corresponding DW gradient norm, as often required for '
-              'multishell or DSI DW acquisition schemes. The default action '
-              'can also be set in the MRtrix config file, under the '
-              'BValueScaling entry. Valid choices are yes / no, true / '
-              'false, 0 / 1 (default: true).'))
-
 
 class TractographyOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output filtered tracks')
@@ -202,7 +189,7 @@ class TractographyOutputSpec(TraitedSpec):
                            ' streamlines to a file'))
 
 
-class Tractography(CommandLine):
+class Tractography(MRTrix3Base):
 
     """
     Performs streamlines tractography after selecting the appropriate

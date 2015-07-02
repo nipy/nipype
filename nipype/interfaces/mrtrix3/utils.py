@@ -14,6 +14,7 @@
 import os
 import os.path as op
 
+from base import MRTrix3BaseInputSpec, MRTrix3Base
 from nipype.interfaces.base import (
     CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
     InputMultiPath)
@@ -22,26 +23,12 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
 
-class BrainMaskInputSpec(CommandLineInputSpec):
+class BrainMaskInputSpec(MRTrix3BaseInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input diffusion weighted images')
     out_file = File(
         'brainmask.mif', argstr='%s', mandatory=True, position=-1,
         usedefault=True, desc='output brain mask')
-    # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
-    grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
-    bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
-        desc=('specifies whether the b - values should be scaled by the square'
-              ' of the corresponding DW gradient norm, as often required for '
-              'multishell or DSI DW acquisition schemes. The default action '
-              'can also be set in the MRtrix config file, under the '
-              'BValueScaling entry. Valid choices are yes / no, true / '
-              'false, 0 / 1 (default: true).'))
 
 
 class BrainMaskOutputSpec(TraitedSpec):

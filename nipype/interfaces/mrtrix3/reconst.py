@@ -14,6 +14,7 @@
 import os
 import os.path as op
 
+from base import MRTrix3BaseInputSpec, MRTrix3Base
 from nipype.interfaces.base import (
     CommandLineInputSpec, CommandLine, traits, TraitedSpec, File,
     InputMultiPath)
@@ -22,7 +23,7 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
 
-class FitTensorInputSpec(CommandLineInputSpec):
+class FitTensorInputSpec(MRTrix3BaseInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input diffusion weighted images')
     out_file = File(
@@ -42,27 +43,12 @@ class FitTensorInputSpec(CommandLineInputSpec):
               'magnitude of the tensor elements (default = 5000). This '
               'only applies to the non-linear methods'))
 
-    # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
-    grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
-    bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
-        desc=('specifies whether the b - values should be scaled by the square'
-              ' of the corresponding DW gradient norm, as often required for '
-              'multishell or DSI DW acquisition schemes. The default action '
-              'can also be set in the MRtrix config file, under the '
-              'BValueScaling entry. Valid choices are yes / no, true / '
-              'false, 0 / 1 (default: true).'))
-
 
 class FitTensorOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output DTI file')
 
 
-class FitTensor(CommandLine):
+class FitTensor(MRTrix3Base):
 
     """
     Convert diffusion-weighted images to tensor images
@@ -91,7 +77,7 @@ class FitTensor(CommandLine):
         return outputs
 
 
-class EstimateFODInputSpec(CommandLineInputSpec):
+class EstimateFODInputSpec(MRTrix3BaseInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
                    desc='input diffusion weighted images')
     response = File(
@@ -102,21 +88,6 @@ class EstimateFODInputSpec(CommandLineInputSpec):
         'fods.mif', argstr='%s', mandatory=True, position=-1,
         usedefault=True, desc=('the output spherical harmonics coefficients'
                                ' image'))
-
-    # DW gradient table import options
-    grad_file = File(exists=True, argstr='-grad %s',
-                     desc='dw gradient scheme (MRTrix format')
-    grad_fsl = traits.Tuple(
-        File(exists=True), File(exists=True), argstr='-fslgrad %s %s',
-        desc='(bvecs, bvals) dw gradient scheme (FSL format')
-    bval_scale = traits.Enum(
-        'yes', 'no', argstr='-bvalue_scaling %s',
-        desc=('specifies whether the b - values should be scaled by the square'
-              ' of the corresponding DW gradient norm, as often required for '
-              'multishell or DSI DW acquisition schemes. The default action '
-              'can also be set in the MRtrix config file, under the '
-              'BValueScaling entry. Valid choices are yes / no, true / '
-              'false, 0 / 1 (default: true).'))
 
     # DW Shell selection options
     shell = traits.List(traits.Float, sep=',', argstr='-shell %s',
@@ -130,34 +101,35 @@ class EstimateFODInputSpec(CommandLineInputSpec):
     in_dirs = File(
         exists=True, argstr='-directions %s',
         desc=('specify the directions over which to apply the non-negativity '
-              'constraint (by default, the built-in 300 direction set is used). '
-              'These should be supplied as a text file containing the [ az el ] '
-              'pairs for the directions.'))
+              'constraint (by default, the built-in 300 direction set is '
+              'used). These should be supplied as a text file containing the '
+              '[ az el ] pairs for the directions.'))
     sh_filter = File(
         exists=True, argstr='-filter %s',
         desc=('the linear frequency filtering parameters used for the initial '
               'linear spherical deconvolution step (default = [ 1 1 1 0 0 ]). '
-              'These should be supplied as a text file containing the filtering '
-              'coefficients for each even harmonic order.'))
+              'These should be supplied as a text file containing the '
+              'filtering coefficients for each even harmonic order.'))
 
     neg_lambda = traits.Float(
         1.0, argstr='-neg_lambda %f',
-        desc=('the regularisation parameter lambda that controls the strength of '
-              'the non-negativity constraint'))
+        desc=('the regularisation parameter lambda that controls the strength'
+              ' of the non-negativity constraint'))
     thres = traits.Float(
         0.0, argstr='-threshold %f',
-        desc=('the threshold below which the amplitude of the FOD is assumed to be '
-              'zero, expressed as an absolute amplitude'))
+        desc=('the threshold below which the amplitude of the FOD is assumed '
+              'to be zero, expressed as an absolute amplitude'))
 
-    n_iter = traits.Int(50, argstr='-niter %d', desc=('the maximum number of iterat'
-                                                      'ions to perform for each voxel'))
+    n_iter = traits.Int(
+        50, argstr='-niter %d', desc=('the maximum number of iterations '
+                                      'to perform for each voxel'))
 
 
 class EstimateFODOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output response file')
 
 
-class EstimateFOD(CommandLine):
+class EstimateFOD(MRTrix3Base):
 
     """
     Convert diffusion-weighted images to tensor images
