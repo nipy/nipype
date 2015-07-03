@@ -26,21 +26,21 @@ def print_inputs(tool_name, module=None, function=None):
     if module and function:
         __import__(module)
         interface = getattr(sys.modules[module],function)()
-        
+
         inputs = interface.input_spec()
         outputs = interface.output_spec()
-        
+
         command_line = "nipype_cmd "+str(module)+" "+tool_name+" "
         tool_desc = {}
         tool_desc['name'] = tool_name
         tool_desc['description'] = "Tool description goes here"
-        
+
         tool_inputs = []
         input_counter = 0
         tool_outputs = []
-                            
+
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-            
+
             input = {}
 
             input['name'] = name
@@ -48,7 +48,7 @@ def print_inputs(tool_name, module=None, function=None):
             if "an existing file name" in type:
                 type = "File"
             else:
-                type = "String"            
+                type = "String"
             input['type'] = type
             input['description'] = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:].replace("\n\t\t",". ")
             command_line_key = "["+str(input_counter)+"_"+name.upper()+"]"
@@ -58,7 +58,7 @@ def print_inputs(tool_name, module=None, function=None):
             if not ( hasattr(spec, "mandatory") and spec.mandatory ):
                 input['optional'] = "true"
                 input['command-line-flag'] = "--%s"%name+" "
-                
+
             tool_inputs.append(input)
 
             command_line+= command_line_key+" "
@@ -68,7 +68,7 @@ def print_inputs(tool_name, module=None, function=None):
             input['tempfile_name'] = tempfile_name
             if type == "File":
                 setattr(interface.inputs,name,os.path.abspath(tempfile_name))
-            
+
         for name,spec in sorted(outputs.traits(transient=None).items()):
 
             output = {}
@@ -85,14 +85,14 @@ def print_inputs(tool_name, module=None, function=None):
                     if base_file_name in output_value:
                         output_value = os.path.basename(output_value.replace(base_file_name,input['command-line-key'])) # FIXME: this only works if output is written in the current directory
                 output['value-template'] = os.path.basename(output_value)
-                    
+
             output['cardinality'] = "Single"
             tool_outputs.append(output)
 
         # remove all temporary file names from inputs
         for input in tool_inputs:
             del input['tempfile_name']
-            
+
         tool_desc['inputs'] = tool_inputs
         tool_desc['outputs'] = tool_outputs
         tool_desc['command-line'] = command_line
@@ -100,14 +100,14 @@ def print_inputs(tool_name, module=None, function=None):
         tool_desc['docker-index'] = 'http://index.docker.io'
         tool_desc['schema-version'] = '0.2-snapshot'
         print json.dumps(tool_desc, indent=4, separators=(',', ': '))
-                        
+
 def main(argv):
-        
+
     parser = argparse.ArgumentParser(description='Nipype Boutiques exporter', prog=argv[0])
     parser.add_argument("module", type=str, help="Module name")
     parser.add_argument("interface", type=str, help="Interface name")
     parsed = parser.parse_args(args=argv[1:3])
-    
+
     _, prog = os.path.split(argv[0])
     interface_parser = argparse.ArgumentParser(description="Run %s"%parsed.interface, prog=" ".join([prog] + argv[1:3]))
     print_inputs(argv[2],parsed.module, parsed.interface)

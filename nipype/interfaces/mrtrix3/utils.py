@@ -188,7 +188,7 @@ class TensorMetricsOutputSpec(TraitedSpec):
 class TensorMetrics(CommandLine):
 
     """
-    Convert a mesh surface to a partial volume estimation image
+    Compute metrics from tensors
 
 
     Example
@@ -214,4 +214,140 @@ class TensorMetrics(CommandLine):
             if isdefined(getattr(self.inputs, k)):
                 outputs[k] = op.abspath(getattr(self.inputs, k))
 
+        return outputs
+
+
+class ComputeTDIInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='input tractography')
+    out_file = File('tdi.mif', argstr='%s', usedefault=True, position=-1,
+                    desc='output TDI file')
+    reference = File(
+        exists=True, argstr='-template %s', desc='a reference'
+        'image to be used as template')
+    vox_size = traits.List(traits.Int, argstr='-vox %s', sep=',',
+                           desc='voxel dimensions')
+    data_type = traits.Enum('float', 'unsigned int', argstr='-datatype %s',
+                            desc='specify output image data type')
+    use_dec = traits.Bool(argstr='-dec', desc='perform mapping in DEC space')
+    dixel = File('dixels.txt', argstr='-dixel %s', desc='map streamlines to'
+                 'dixels within each voxel. Directions are stored as'
+                 'azimuth elevation pairs.')
+    max_tod = traits.Int(argstr='-tod %d', desc='generate a Track Orientation '
+                         'Distribution (TOD) in each voxel.')
+
+    contrast = traits.Enum('tdi', 'length', 'invlength', 'scalar_map',
+                           'scalar_map_conut', 'fod_amp', 'curvature',
+                           argstr='-constrast %s', desc='define the desired '
+                           'form of contrast for the output image')
+    in_map = File(exists=True, argstr='-image %s', desc='provide the'
+                  'scalar image map for generating images with '
+                  '\'scalar_map\' contrasts, or the SHs image for fod_amp')
+
+    stat_vox = traits.Enum('sum', 'min', 'mean', 'max', argstr='-stat_vox %s',
+                           desc='define the statistic for choosing the final'
+                           'voxel intesities for a given contrast')
+    stat_tck = traits.Enum(
+        'mean', 'sum', 'min', 'max', 'median', 'mean_nonzero', 'gaussian',
+        'ends_min', 'ends_mean', 'ends_max', 'ends_prod',
+        argstr='-stat_tck %s', desc='define the statistic for choosing '
+        'the contribution to be made by each streamline as a function of'
+        ' the samples taken along their lengths.')
+
+    fwhm_tck = traits.Float(
+        argstr='-fwhm_tck %f', desc='define the statistic for choosing the'
+        ' contribution to be made by each streamline as a function of the '
+        'samples taken along their lengths')
+
+    map_zero = traits.Bool(
+        argstr='-map_zero', desc='if a streamline has zero contribution based '
+        'on the contrast & statistic, typically it is not mapped; use this '
+        'option to still contribute to the map even if this is the case '
+        '(these non-contributing voxels can then influence the mean value in '
+        'each voxel of the map)')
+
+    upsample = traits.Int(argstr='-upsample %d', desc='upsample the tracks by'
+                          ' some ratio using Hermite interpolation before '
+                          'mappping')
+
+    precise = traits.Bool(
+        argstr='-precise', desc='use a more precise streamline mapping '
+        'strategy, that accurately quantifies the length through each voxel '
+        '(these lengths are then taken into account during TWI calculation)')
+    ends_only = traits.Bool(argstr='-ends_only', desc='only map the streamline'
+                            ' endpoints to the image')
+
+    tck_weights = File(exists=True, argstr='-tck_weights_in %s', desc='specify'
+                       ' a text scalar file containing the streamline weights')
+    nthreads = traits.Int(
+        argstr='-nthreads %d', desc='number of threads. if zero, the number'
+        ' of available cpus will be used')
+
+
+class ComputeTDIOutputSpec(TraitedSpec):
+    out_file = File(desc='output TDI file')
+
+
+class ComputeTDI(MRTrix3Base):
+
+    """
+    Use track data as a form of contrast for producing a high-resolution
+    image.
+
+    .. admonition:: References
+
+      * For TDI or DEC TDI: Calamante, F.; Tournier, J.-D.; Jackson, G. D. &
+        Connelly, A. Track-density imaging (TDI): Super-resolution white
+        matter imaging using whole-brain track-density mapping. NeuroImage,
+        2010, 53, 1233-1243
+
+      * If using -contrast length and -stat_vox mean: Pannek, K.; Mathias,
+        J. L.; Bigler, E. D.; Brown, G.; Taylor, J. D. & Rose, S. E. The
+        average pathlength map: A diffusion MRI tractography-derived index
+        for studying brain pathology. NeuroImage, 2011, 55, 133-141
+
+      * If using -dixel option with TDI contrast only: Smith, R.E., Tournier,
+        J-D., Calamante, F., Connelly, A. A novel paradigm for automated
+        segmentation of very large whole-brain probabilistic tractography
+        data sets. In proc. ISMRM, 2011, 19, 673
+
+      * If using -dixel option with any other contrast: Pannek, K., Raffelt,
+        D., Salvado, O., Rose, S. Incorporating directional information in
+        diffusion tractography derived maps: angular track imaging (ATI).
+        In Proc. ISMRM, 2012, 20, 1912
+
+      * If using -tod option: Dhollander, T., Emsell, L., Van Hecke, W., Maes,
+        F., Sunaert, S., Suetens, P. Track Orientation Density Imaging (TODI)
+        and Track Orientation Distribution (TOD) based tractography.
+        NeuroImage, 2014, 94, 312-336
+
+      * If using other contrasts / statistics: Calamante, F.; Tournier, J.-D.;
+        Smith, R. E. & Connelly, A. A generalised framework for
+        super-resolution track-weighted imaging. NeuroImage, 2012, 59,
+        2494-2503
+
+      * If using -precise mapping option: Smith, R. E.; Tournier, J.-D.;
+        Calamante, F. & Connelly, A. SIFT: Spherical-deconvolution informed
+        filtering of tractograms. NeuroImage, 2013, 67, 298-312 (Appendix 3)
+
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> tdi = mrt.ComputeTDI()
+    >>> tdi.inputs.in_file = 'dti.mif'
+    >>> tdi.cmdline                               # doctest: +ELLIPSIS
+    'tckmap dti.mif tdi.mif'
+    >>> tdi.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'tckmap'
+    input_spec = ComputeTDIInputSpec
+    output_spec = ComputeTDIOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
