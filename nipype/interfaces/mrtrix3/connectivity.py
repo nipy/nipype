@@ -95,10 +95,10 @@ class BuildConnectome(MRTrix3Base):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> mat = mrt.BuildConnectome()
-    >>> mat.inputs.in_file = 'tracked.tck'
-    >>> mat.inputs.in_parc = 'aparc+aseg.nii.gz'
+    >>> mat.inputs.in_file = 'tracks.tck'
+    >>> mat.inputs.in_parc = 'aparc+aseg.nii'
     >>> mat.cmdline                               # doctest: +ELLIPSIS
-    'tck2connectome tracked.tck aparc+aseg.nii.gz connectome.csv'
+    'tck2connectome tracks.tck aparc+aseg.nii connectome.csv'
     >>> mat.run()                                 # doctest: +SKIP
     """
 
@@ -154,10 +154,10 @@ class LabelConfig(MRTrix3Base):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> labels = mrt.LabelConfig()
-    >>> labels.inputs.in_file = 'aparc+aseg.nii.gz'
+    >>> labels.inputs.in_file = 'aparc+aseg.nii'
     >>> labels.inputs.in_config = 'mrtrix3_labelconfig.txt'
     >>> labels.cmdline                               # doctest: +ELLIPSIS
-    'labelconfig aparc+aseg.nii.gz mrtrix3_labelconfig.txt parcellation.mif'
+    'labelconfig aparc+aseg.nii mrtrix3_labelconfig.txt parcellation.mif'
     >>> labels.run()                                 # doctest: +SKIP
     """
 

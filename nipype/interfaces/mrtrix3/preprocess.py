@@ -183,11 +183,11 @@ class ReplaceFSwithFIRST(CommandLine):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> prep = mrt.ReplaceFSwithFIRST()
-    >>> prep.inputs.in_file = 'aparc+aseg.nii.gz'
+    >>> prep.inputs.in_file = 'aparc+aseg.nii'
     >>> prep.inputs.in_t1w = 'T1.nii.gz'
     >>> prep.inputs.in_config = 'mrtrix3_labelconfig.txt'
     >>> prep.cmdline                               # doctest: +ELLIPSIS
-    'fs_parc_replace_sgm_first aparc+aseg.nii.gz T1.nii.gz \
+    'fs_parc_replace_sgm_first aparc+aseg.nii T1.nii.gz \
 mrtrix3_labelconfig.txt aparc+first.mif'
     >>> prep.run()                                 # doctest: +SKIP
     """
