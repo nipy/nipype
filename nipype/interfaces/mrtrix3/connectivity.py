@@ -22,6 +22,114 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.traits_extension import isdefined
 
 
+class BuildConnectomeInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
+                   desc='input tractography')
+    in_parc = File(exists=True, argstr='%s', position=-2,
+                   desc='parcellation file')
+    out_file = File(
+        'connectome.csv', argstr='%s', mandatory=True, position=-1,
+        usedefault=True, desc='output file after processing')
+
+    nthreads = traits.Int(
+        argstr='-nthreads %d', desc='number of threads. if zero, the number'
+        ' of available cpus will be used')
+
+    vox_lookup = traits.Bool(
+        argstr='-assignment_voxel_lookup',
+        desc='use a simple voxel lookup value at each streamline endpoint')
+    search_radius = traits.Float(
+        argstr='-assignment_radial_search %f',
+        desc='perform a radial search from each streamline endpoint to locate '
+        'the nearest node. Argument is the maximum radius in mm; if no node is'
+        ' found within this radius, the streamline endpoint is not assigned to'
+        ' any node.')
+    search_reverse = traits.Float(
+        argstr='-assignment_reverse_search %f',
+        desc='traverse from each streamline endpoint inwards along the '
+        'streamline, in search of the last node traversed by the streamline. '
+        'Argument is the maximum traversal length in mm (set to 0 to allow '
+        'search to continue to the streamline midpoint).')
+    search_forward = traits.Float(
+        argstr='-assignment_forward_search %f',
+        desc='project the streamline forwards from the endpoint in search of a'
+        'parcellation node voxel. Argument is the maximum traversal length in '
+        'mm.')
+
+    metric = traits.Enum(
+        'count', 'meanlength', 'invlength', 'invnodevolume', 'mean_scalar',
+        'invlength_invnodevolume', argstr='-metric %s', desc='specify the edge'
+        ' weight metric')
+
+    in_scalar = File(
+        exists=True, argstr='-image %s', desc='provide the associated image '
+        'for the mean_scalar metric')
+
+    in_weights = File(
+        exists=True, argstr='-tck_weights_in %s', desc='specify a text scalar '
+        'file containing the streamline weights')
+
+    keep_unassigned = traits.Bool(
+        argstr='-keep_unassigned', desc='By default, the program discards the'
+        ' information regarding those streamlines that are not successfully '
+        'assigned to a node pair. Set this option to keep these values (will '
+        'be the first row/column in the output matrix)')
+    zero_diagonal = traits.Bool(
+        argstr='-zero_diagonal', desc='set all diagonal entries in the matrix '
+        'to zero (these represent streamlines that connect to the same node at'
+        ' both ends)')
+
+
+class BuildConnectomeOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output response file')
+
+
+class BuildConnectome(MRTrix3Base):
+
+    """
+    Generate a connectome matrix from a streamlines file and a node
+    parcellation image
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> mat = mrt.BuildConnectome()
+    >>> mat.inputs.in_file = 'aparc+aseg.nii.gz'
+    >>> mat.inputs.in_config = 'mrtrix3_labelconfig.txt'
+    >>> mat.cmdline                               # doctest: +ELLIPSIS
+    'labelconfig aparc+aseg.nii.gz mrtrix3_labelconfig.txt parcellation.mif'
+    >>> mat.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'labelconfig'
+    input_spec = BuildConnectomeInputSpec
+    output_spec = BuildConnectomeOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if not isdefined(self.inputs.in_config):
+            from distutils.spawn import find_executable
+            path = find_executable(self._cmd)
+            if path is None:
+                path = os.getenv(MRTRIX3_HOME, '/opt/mrtrix3')
+            else:
+                path = op.dirname(op.dirname(path))
+
+            self.inputs.in_config = op.join(
+                path, 'src/dwi/tractography/connectomics/'
+                      'example_configs/fs_default.txt')
+
+        return super(BuildConnectome, self)._parse_inputs(skip=skip)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
+
+
 class LabelConfigInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
                    desc='input anatomical image')
