@@ -95,34 +95,16 @@ class BuildConnectome(MRTrix3Base):
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> mat = mrt.BuildConnectome()
-    >>> mat.inputs.in_file = 'aparc+aseg.nii.gz'
-    >>> mat.inputs.in_config = 'mrtrix3_labelconfig.txt'
+    >>> mat.inputs.in_file = 'tracked.tck'
+    >>> mat.inputs.in_parc = 'aparc+aseg.nii.gz'
     >>> mat.cmdline                               # doctest: +ELLIPSIS
-    'labelconfig aparc+aseg.nii.gz mrtrix3_labelconfig.txt parcellation.mif'
+    'tck2connectome tracked.tck aparc+aseg.nii.gz connectome.csv'
     >>> mat.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'labelconfig'
+    _cmd = 'tck2connectome'
     input_spec = BuildConnectomeInputSpec
     output_spec = BuildConnectomeOutputSpec
-
-    def _parse_inputs(self, skip=None):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.in_config):
-            from distutils.spawn import find_executable
-            path = find_executable(self._cmd)
-            if path is None:
-                path = os.getenv(MRTRIX3_HOME, '/opt/mrtrix3')
-            else:
-                path = op.dirname(op.dirname(path))
-
-            self.inputs.in_config = op.join(
-                path, 'src/dwi/tractography/connectomics/'
-                      'example_configs/fs_default.txt')
-
-        return super(BuildConnectome, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
