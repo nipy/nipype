@@ -72,7 +72,7 @@ class LabelConfig(MRTrix3Base):
     >>> labels.run()                                 # doctest: +SKIP
     """
 
-    _cmd = 'labelconfig:'
+    _cmd = 'labelconfig'
     input_spec = LabelConfigInputSpec
     output_spec = LabelConfigOutputSpec
 
@@ -82,10 +82,16 @@ class LabelConfig(MRTrix3Base):
 
         if not isdefined(self.inputs.in_config):
             from distutils.spawn import find_executable
-            path = op.dirname(find_executable(self._cmd))
-            self.inputs.in_config = op.abspath(
-                op.join(path, '../src/dwi/tractography/connectomics/'
-                              'example_configs/fs_default.txt'))
+            path = find_executable(self._cmd)
+            if path is None:
+                path = os.getenv(MRTRIX3_HOME, '/opt/mrtrix3')
+            else:
+                path = op.dirname(op.dirname(path))
+
+            self.inputs.in_config = op.join(
+                path, 'src/dwi/tractography/connectomics/'
+                      'example_configs/fs_default.txt')
+
         return super(LabelConfig, self)._parse_inputs(skip=skip)
 
     def _list_outputs(self):
