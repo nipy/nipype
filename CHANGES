@@ -55,6 +55,7 @@ Next release
 * FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
 * FIX: Add QA output for TSNR to resting workflow (https://github.com/nipy/nipype/pull/1088)
 * FIX: Change N4BiasFieldCorrection to use short tag for dimensionality (backward compatible) (https://github.com/nipy/nipype/pull/1096)
+* ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (https://github.com/nipy/nipype/pull/1128)
 
 Release 0.10.0 (October 10, 2014)
 ============

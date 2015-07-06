@@ -233,6 +233,9 @@ class WarpInputSpec(AFNICommandInputSpec):
                    argstr="-gridset %s",
                    exists=True)
 
+    newgrid = traits.Float(desc="specify grid of this size (mm)",
+                           argstr="-newgrid %f")
+
     zpad = traits.Int(desc="pad input dataset with N planes" +
                       " of zero on all sides.",
                       argstr="-zpad %d")
@@ -254,7 +257,13 @@ class Warp(AFNICommand):
     >>> warp.inputs.out_file = "trans.nii.gz"
     >>> warp.cmdline
     '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
-    >>> res = warp.run() # doctest: +SKIP
+
+    >>> warp_2 = afni.Warp()
+    >>> warp_2.inputs.in_file = 'structural.nii'
+    >>> warp_2.inputs.newgrid = 1.0
+    >>> warp_2.inputs.out_file = "trans.nii.gz"
+    >>> warp_2.cmdline
+    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
 
     """
 
