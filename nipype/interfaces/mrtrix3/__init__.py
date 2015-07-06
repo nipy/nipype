@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 from utils import Mesh2PVE, Generate5tt, BrainMask, TensorMetrics, ComputeTDI
-from preprocess import ResponseSD, ACTPrepareFSL
+from preprocess import ResponseSD, ACTPrepareFSL, ReplaceFSwithFIRST
 from tracking import Tractography
 from reconst import FitTensor, EstimateFOD
 from connectivity import LabelConfig

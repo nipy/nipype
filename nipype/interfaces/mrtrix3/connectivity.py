@@ -57,8 +57,7 @@ class LabelConfigOutputSpec(TraitedSpec):
 class LabelConfig(MRTrix3Base):
 
     """
-    Generate anatomical information necessary for Anatomically
-    Constrained Tractography (ACT).
+    Re-configure parcellation to be incrementally defined.
 
     Example
     -------

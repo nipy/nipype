@@ -153,3 +153,50 @@ class ACTPrepareFSL(CommandLine):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-4,
+                   desc='input anatomical image')
+    in_t1w = File(exists=True, argstr='%s', mandatory=True, position=-3,
+                  desc='input T1 image')
+    in_config = File(exists=True, argstr='%s', position=-2,
+                     desc='connectome configuration file')
+
+    out_file = File(
+        'aparc+first.mif', argstr='%s', mandatory=True, position=-1,
+        usedefault=True, desc='output file after processing')
+
+
+class ReplaceFSwithFIRSTOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='the output response file')
+
+
+class ReplaceFSwithFIRST(CommandLine):
+
+    """
+    Replace deep gray matter structures segmented with FSL FIRST in a
+    FreeSurfer parcellation.
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> prep = mrt.ReplaceFSwithFIRST()
+    >>> prep.inputs.in_file = 'aparc+aseg.nii.gz'
+    >>> prep.inputs.in_t1w = 'T1.nii.gz'
+    >>> prep.inputs.in_config = 'mrtrix3_labelconfig.txt'
+    >>> prep.cmdline                               # doctest: +ELLIPSIS
+    'fs_parc_replace_sgm_first aparc+aseg.nii.gz T1.nii.gz \
+mrtrix3_labelconfig.txt aparc+first.mif'
+    >>> prep.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'fs_parc_replace_sgm_first'
+    input_spec = ReplaceFSwithFIRSTInputSpec
+    output_spec = ReplaceFSwithFIRSTOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
