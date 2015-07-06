@@ -283,14 +283,14 @@ class N4BiasFieldCorrection(ANTSCommand):
 --shrink-factor 3'
 
 	>>> n4_2 = copy.deepcopy(n4)
-    >>> n4.inputs.convergence_threshold = 1e-6
+    >>> n4_2.inputs.convergence_threshold = 1e-6
     >>> n4_2.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
 -d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
-    >>> n4_3 = copy.deepcopy(n4)
+    >>> n4_3 = copy.deepcopy(n4_2)
     >>> n4_3.inputs.bspline_order = 5
     >>> n4_3.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
