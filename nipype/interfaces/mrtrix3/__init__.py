@@ -6,3 +6,4 @@ from utils import Mesh2PVE, Generate5tt, BrainMask, TensorMetrics, ComputeTDI
 from preprocess import ResponseSD, ACTPrepareFSL
 from tracking import Tractography
 from reconst import FitTensor, EstimateFOD
+from connectivity import LabelConfig
