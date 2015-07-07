@@ -276,11 +276,14 @@ class QstatSubstitute:
 
     def is_job_pending(self, task_id):
         task_id = int(task_id)  # Ensure that it is an integer
-        self._run_qstat("checking job pending status {0}".format(task_id), False)
         # Check if the task is in the dictionary first (before running qstat)
         if task_id in self._task_dictionary:
             # Trust the cache, only False if state='zombie'
             job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
+            # Double check pending jobs in case of change (since we don't check at the beginning)
+            if job_is_pending:
+                self._run_qstat("checking job pending status {0}".format(task_id), False)
+                job_is_pending = self._task_dictionary[task_id].is_job_state_pending()
         else:
             self._run_qstat("checking job pending status {0}".format(task_id), True)
             if task_id in self._task_dictionary:
