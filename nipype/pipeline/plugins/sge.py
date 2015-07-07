@@ -196,12 +196,12 @@ class QstatSubstitute:
                     job_queue_state, job_time, job_queue_name, job_slots)
                 sge_debug_print("Updating job:  {0}".format(
                     self._task_dictionary[task_id]))
-                current_jobs_parsed.append(job_num)
+                current_jobs_parsed.append(task_id)
                 # Changed from job_num as "in" is used to check which does not cast
             else:
                 # Any Job that was not explicitly added with qsub command is
                 # out of scope
-                self._out_of_scope_jobs.append(int(task_id))
+                self._out_of_scope_jobs.append(task_id)
 
         # To ensure that every job is in the dictionary has a state reported
         # by the SGE environment, it is necessary to explicitly check jobs
