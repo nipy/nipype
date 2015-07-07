@@ -2,6 +2,7 @@
 """
 
 import os
+import pwd
 import re
 import subprocess
 import time
@@ -146,7 +147,7 @@ class QstatSubstitute:
             qacct_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [this_command, '-o', os.getlogin(), '-j', str(taskid)],
+                    [this_command, '-o', pwd.getpwuid(os.getuid())[0], '-j', str(taskid)],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qacct_result, _ = proc.communicate()
@@ -248,7 +249,7 @@ class QstatSubstitute:
             qstat_retries -= 1
             try:
                 proc = subprocess.Popen(
-                    [this_command, '-u', os.getlogin(), '-xml', '-s', 'psrz'],
+                    [this_command, '-u', pwd.getpwuid(os.getuid())[0], '-xml', '-s', 'psrz'],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
                 qstat_xml_result, _ = proc.communicate()
