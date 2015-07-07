@@ -176,7 +176,7 @@ class QstatSubstitute:
                 job_slots = current_job_element.getElementsByTagName(
                     'slots')[0].childNodes[0].data
             except:
-                job_slots = "uknown"
+                job_slots = "unknown"
             job_queue_state = current_job_element.getAttribute('state')
             job_num = int(current_job_element.getElementsByTagName(
                 'JB_job_number')[0].childNodes[0].data)
