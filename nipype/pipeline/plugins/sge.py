@@ -273,7 +273,7 @@ class QstatSubstitute:
         for vv in self._task_dictionary.values():
             sge_debug_print(str(vv))
 
-    def is_job_pending(self, task_id, recursion_number=12):
+    def is_job_pending(self, task_id):
         task_id = int(task_id)  # Ensure that it is an integer
         self._run_qstat("checking job pending status {0}".format(task_id), False)
         # Check if the task is in the dictionary first (before running qstat)
