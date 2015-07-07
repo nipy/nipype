@@ -17,6 +17,7 @@ from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
+from .filemanip import mkdir_p
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -62,8 +63,7 @@ class NipypeConfig(object):
     def __init__(self, *args, **kwargs):
         self._config = ConfigParser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
+        mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
         new_config_file = os.path.join(config_dir, 'nipype.cfg')
         # To be deprecated in two releases
