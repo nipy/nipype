@@ -676,7 +676,7 @@ class CopyInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=False)
     out_file = File(name_template="%s_copy", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+                    argstr='%s', position=-1, name_source="in_file")
 
 
 class Copy(AFNICommand):
@@ -690,11 +690,26 @@ class Copy(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> copy = afni.Copy()
-    >>> copy.inputs.in_file = 'functional.nii'
-    >>> copy.inputs.out_file = 'new_func.nii'
-    >>> res = copy.run() # doctest: +SKIP
+    >>> copy3d = afni.Copy()
+    >>> copy3d.inputs.in_file = 'functional.nii'
+    >>> copy3d.cmdline
+    '3dcopy functional.nii functional_copy'
 
+    >>> from copy import deepcopy
+    >>> copy3d_2 = deepcopy(copy3d)
+    >>> copy3d_2.inputs.outputtype = 'NIFTI'
+    >>> copy3d_2.cmdline
+    '3dcopy functional.nii functional_copy.nii'
+
+    >>> copy3d_3 = deepcopy(copy3d)
+    >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
+    >>> copy3d_3.cmdline
+    '3dcopy functional.nii functional_copy.nii.gz'
+
+    >>> copy3d_4 = deepcopy(copy3d)
+    >>> copy3d_4.inputs.out_file = 'new_func.nii'
+    >>> copy3d_4.cmdline
+    '3dcopy functional.nii new_func.nii'
     """
 
     _cmd = '3dcopy'
