@@ -58,9 +58,8 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline #doctest: +ELLIPSIS
+    >>> converter.cmdline
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
-    >>> converter.run() # doctest: +SKIP
     """
 
     input_spec = Dcm2niiInputSpec
@@ -83,11 +82,14 @@ class Dcm2nii(CommandLine):
         return super(Dcm2nii, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
+        self._config_created = False
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
         (self.output_files,
          self.reoriented_files,
          self.reoriented_and_cropped_files,
          self.bvecs, self.bvals) = self._parse_stdout(new_runtime.stdout)
+        if self._config_created:
+            os.remove('config.ini')
         return new_runtime
 
     def _parse_stdout(self, stdout):
@@ -156,6 +158,7 @@ class Dcm2nii(CommandLine):
         if name == 'output_dir':
             return os.getcwd()
         elif name == 'config_file':
+            self._config_created = True
             config_file = "config.ini"
             f = open(config_file, "w")
             # disable interactive mode
