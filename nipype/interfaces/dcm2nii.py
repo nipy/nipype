@@ -16,6 +16,7 @@ from copy import deepcopy
 from nipype.utils.filemanip import split_filename
 import re
 
+
 class Dcm2niiInputSpec(CommandLineInputSpec):
     source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1,
                                   copyfile=False, mandatory=True, xor=['source_dir'])
@@ -37,12 +38,14 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     convert_all_pars = traits.Bool(True, argstr='-v', usedefault=True)
     reorient_and_crop = traits.Bool(False, argstr='-x', usedefault=True)
 
+
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
     reoriented_files = OutputMultiPath(File(exists=True))
     reoriented_and_cropped_files = OutputMultiPath(File(exists=True))
     bvecs = OutputMultiPath(File(exists=True))
     bvals = OutputMultiPath(File(exists=True))
+
 
 class Dcm2nii(CommandLine):
     """Uses MRICRON's dcm2nii to convert dicom files
@@ -60,9 +63,8 @@ class Dcm2nii(CommandLine):
     >>> converter.run() # doctest: +SKIP
     """
 
-    input_spec=Dcm2niiInputSpec
-    output_spec=Dcm2niiOutputSpec
-
+    input_spec = Dcm2niiInputSpec
+    output_spec = Dcm2niiOutputSpec
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
@@ -81,7 +83,6 @@ class Dcm2nii(CommandLine):
         return super(Dcm2nii, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
-
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
         (self.output_files,
          self.reoriented_files,
@@ -99,22 +100,21 @@ class Dcm2nii(CommandLine):
         last_added_file = None
         for line in stdout.split("\n"):
             if not skip:
-                file = None
+                out_file = None
                 if line.startswith("Saving "):
-                    file = line[len("Saving "):]
+                    out_file = line[len("Saving "):]
                 elif line.startswith("GZip..."):
-                    #for gzipped outpus files are not absolute
+                    # for gzipped outpus files are not absolute
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
-                    file = os.path.abspath(os.path.join(output_dir,
-                                                        line[len("GZip..."):]))
+                    out_file = os.path.abspath(os.path.join(output_dir, line[len("GZip..."):]))
                 elif line.startswith("Number of diffusion directions "):
                     if last_added_file:
                         base, filename, ext = split_filename(last_added_file)
-                        bvecs.append(os.path.join(base,filename + ".bvec"))
-                        bvals.append(os.path.join(base,filename + ".bval"))
+                        bvecs.append(os.path.join(base, filename + ".bvec"))
+                        bvals.append(os.path.join(base, filename + ".bval"))
                 elif re.search('.*-->(.*)', line):
                     val = re.search('.*-->(.*)', line)
                     val = val.groups()[0]
@@ -123,11 +123,11 @@ class Dcm2nii(CommandLine):
                     else:
                         output_dir = self._gen_filename('output_dir')
                     val = os.path.join(output_dir, val)
-                    file = val
+                    out_file = val
 
-                if file:
-                    files.append(file)
-                    last_added_file = file
+                if out_file:
+                    files.append(out_file)
+                    last_added_file = out_file
                     continue
 
                 if line.startswith("Reorienting as "):
@@ -163,4 +163,3 @@ class Dcm2nii(CommandLine):
             f.close()
             return config_file
         return None
-
