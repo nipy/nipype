@@ -131,7 +131,8 @@ class SLURMGraphPlugin(GraphPluginBase):
                             if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
                                 values += "${{{0}}}:".format(make_job_name(jobid, nodes))
                         if values != ' ': # i.e. if some jobs were added to dependency list
-                            values = values.rstrip(',')
+                            values = values.rstrip(':')
+                            values = values.rstrip(' ')
                             deps = '--dependency=afterok:%s' % values
                     jobname = make_job_name(idx, nodes)
                     # Do not use default output locations if they are set in self._sbatch_args
