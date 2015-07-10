@@ -356,7 +356,7 @@ class ComputeTDI(MRTrix3Base):
 class TCK2VTKInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input tractography')
-    out_file = File('tracked.vtk', argstr='%s', usedefault=True, position=-1,
+    out_file = File('tracks.vtk', argstr='%s', usedefault=True, position=-1,
                     desc='output VTK file')
     reference = File(
         exists=True, argstr='-image %s', desc='if specified, the properties of'
@@ -379,17 +379,18 @@ class TCK2VTKOutputSpec(TraitedSpec):
 class TCK2VTK(MRTrix3Base):
 
     """
-
+    Convert a track file to a vtk format, cave: coordinates are in XYZ
+    coordinates not reference
 
     Example
     -------
 
     >>> import nipype.interfaces.mrtrix3 as mrt
     >>> vtk = mrt.TCK2VTK()
-    >>> vtk.inputs.in_file = 'tracked.tck'
-    >>> vtk.inputs.reference = 'dwi.nii.gz'
+    >>> vtk.inputs.in_file = 'tracks.tck'
+    >>> vtk.inputs.reference = 'b0.nii'
     >>> vtk.cmdline                               # doctest: +ELLIPSIS
-    'tck2vtk -image dwi.nii.gz tracked.tck tracked.vtk'
+    'tck2vtk -image b0.nii tracks.tck tracks.vtk'
     >>> vtk.run()                                 # doctest: +SKIP
     """
 
