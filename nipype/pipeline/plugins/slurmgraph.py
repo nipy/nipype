@@ -1,4 +1,4 @@
-"""Parallel workflow execution via SGE
+"""Parallel workflow execution via SLURM
 """
 
 import os
@@ -29,7 +29,7 @@ def node_completed_status( checknode):
 
 
 class SLURMGraphPlugin(GraphPluginBase):
-    """Execute using SGE
+    """Execute using SLURM
 
     The plugin_args input to run can be used to control the SGE execution.
     Currently supported options are:
@@ -60,14 +60,14 @@ class SLURMGraphPlugin(GraphPluginBase):
                 self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
             else:
                 self._dont_resubmit_completed_jobs = False
-        super(SGEGraphPlugin, self).__init__(**kwargs)
+        super(SLURMGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         def make_job_name(jobnumber, nodeslist):
             """
             - jobnumber: The index number of the job to create
             - nodeslist: The name of the node being processed
-            - return: A string representing this job to be displayed by SGE
+            - return: A string representing this job to be displayed by SLURM
             """
             job_name='j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
