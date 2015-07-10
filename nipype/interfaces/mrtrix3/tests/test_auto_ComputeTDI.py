@@ -32,6 +32,7 @@ def test_ComputeTDI_inputs():
     max_tod=dict(argstr='-tod %d',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     position=-1,

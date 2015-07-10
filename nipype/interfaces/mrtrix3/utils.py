@@ -281,7 +281,7 @@ class ComputeTDIInputSpec(CommandLineInputSpec):
                        ' a text scalar file containing the streamline weights')
     nthreads = traits.Int(
         argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used')
+        ' of available cpus will be used', nohash=True)
 
 
 class ComputeTDIOutputSpec(TraitedSpec):

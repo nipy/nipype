@@ -32,6 +32,7 @@ def test_EstimateFOD_inputs():
     neg_lambda=dict(argstr='-neg_lambda %f',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,

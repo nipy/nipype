@@ -28,7 +28,7 @@ logger = logging.getLogger('interface')
 class MRTrix3BaseInputSpec(CommandLineInputSpec):
     nthreads = traits.Int(
         argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used')
+        ' of available cpus will be used', nohash=True)
     # DW gradient table import options
     grad_file = File(exists=True, argstr='-grad %s',
                      desc='dw gradient scheme (MRTrix format')

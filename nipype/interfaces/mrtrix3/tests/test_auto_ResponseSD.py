@@ -34,6 +34,7 @@ def test_ResponseSD_inputs():
     max_sh=dict(argstr='-lmax %d',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,

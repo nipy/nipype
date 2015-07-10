@@ -27,6 +27,7 @@ def test_BuildConnectome_inputs():
     metric=dict(argstr='-metric %s',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,

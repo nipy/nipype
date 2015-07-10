@@ -27,6 +27,7 @@ def test_LabelConfig_inputs():
     lut_itksnap=dict(argstr='-lut_itksnap %s',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,

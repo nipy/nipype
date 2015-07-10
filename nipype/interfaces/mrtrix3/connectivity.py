@@ -33,7 +33,7 @@ class BuildConnectomeInputSpec(CommandLineInputSpec):
 
     nthreads = traits.Int(
         argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used')
+        ' of available cpus will be used', nohash=True)
 
     vox_lookup = traits.Bool(
         argstr='-assignment_voxel_lookup',
@@ -137,7 +137,7 @@ class LabelConfigInputSpec(CommandLineInputSpec):
                  ' matrix.')
     nthreads = traits.Int(
         argstr='-nthreads %d', desc='number of threads. if zero, the number'
-        ' of available cpus will be used')
+        ' of available cpus will be used', nohash=True)
 
 
 class LabelConfigOutputSpec(TraitedSpec):

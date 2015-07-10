@@ -26,6 +26,7 @@ def test_FitTensor_inputs():
     method=dict(argstr='-method %s',
     ),
     nthreads=dict(argstr='-nthreads %d',
+    nohash=True,
     ),
     out_file=dict(argstr='%s',
     mandatory=True,
