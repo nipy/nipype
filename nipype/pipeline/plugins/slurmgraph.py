@@ -44,7 +44,6 @@ class SLURMGraphPlugin(GraphPluginBase):
 """
 
     def __init__(self, **kwargs):
-        self._qsub_args = ''
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
@@ -131,7 +130,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                         values = ' '
                         for jobid in dependencies[idx]:
                             ## Avoid dependancies of done jobs
-                            if cache_doneness_per_node[jobid] == False:
+                            if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
                                 values += "${{{0}}}:".format(make_job_name(jobid, nodes))
                         if values != ' ': # i.e. if some jobs were added to dependency list
                             values = values.rstrip(',')
