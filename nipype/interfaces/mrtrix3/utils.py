@@ -351,3 +351,53 @@ class ComputeTDI(MRTrix3Base):
         outputs = self.output_spec().get()
         outputs['out_file'] = op.abspath(self.inputs.out_file)
         return outputs
+
+
+class TCK2VTKInputSpec(CommandLineInputSpec):
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
+                   desc='input tractography')
+    out_file = File('tracked.vtk', argstr='%s', usedefault=True, position=-1,
+                    desc='output VTK file')
+    reference = File(
+        exists=True, argstr='-image %s', desc='if specified, the properties of'
+        ' this image will be used to convert track point positions from real '
+        '(scanner) coordinates into image coordinates (in mm).')
+    voxel = File(
+        exists=True, argstr='-image %s', desc='if specified, the properties of'
+        ' this image will be used to convert track point positions from real '
+        '(scanner) coordinates into image coordinates.')
+
+    nthreads = traits.Int(
+        argstr='-nthreads %d', desc='number of threads. if zero, the number'
+        ' of available cpus will be used', nohash=True)
+
+
+class TCK2VTKOutputSpec(TraitedSpec):
+    out_file = File(desc='output VTK file')
+
+
+class TCK2VTK(MRTrix3Base):
+
+    """
+
+
+    Example
+    -------
+
+    >>> import nipype.interfaces.mrtrix3 as mrt
+    >>> vtk = mrt.TCK2VTK()
+    >>> vtk.inputs.in_file = 'tracked.tck'
+    >>> vtk.inputs.reference = 'dwi.nii.gz'
+    >>> vtk.cmdline                               # doctest: +ELLIPSIS
+    'tck2vtk -image dwi.nii.gz tracked.tck tracked.vtk'
+    >>> vtk.run()                                 # doctest: +SKIP
+    """
+
+    _cmd = 'tck2vtk'
+    input_spec = TCK2VTKInputSpec
+    output_spec = TCK2VTKOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        return outputs
