@@ -56,7 +56,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                     self._template = open(self._template).read()
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
-            if 'dont_resubmit_completed_jobs' in plugin_args:
+            if 'dont_resubmit_completed_jobs' in kwargs['plugin_args']:
                 self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
             else:
                 self._dont_resubmit_completed_jobs = False
