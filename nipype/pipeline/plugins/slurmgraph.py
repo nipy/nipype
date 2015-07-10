@@ -39,9 +39,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                   qsub call
 
     """
-    _template = """
-#!/bin/bash
-"""
+    _template="#!/bin/bash"
 
     def __init__(self, **kwargs):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
