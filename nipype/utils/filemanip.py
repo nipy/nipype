@@ -18,6 +18,7 @@ import numpy as np
 
 from ..interfaces.traits_extension import isdefined
 from .misc import is_container
+from .config import mkdir_p
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
