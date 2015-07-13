@@ -257,8 +257,8 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
     elif originalfile.endswith(".BRIK"):
-        hdrofile = originalfile[:-4] + ".HEAD"
-        hdrnfile = newfile[:-4] + ".HEAD"
+        hdrofile = originalfile[:-5] + ".HEAD"
+        hdrnfile = newfile[:-5] + ".HEAD"
         copyfile(hdrofile, hdrnfile, copy)
 
     return newfile
