@@ -13,11 +13,11 @@ import ConfigParser
 from json import load, dump
 import os
 import shutil
+import errno
 from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
-from .filemanip import mkdir_p
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -55,6 +55,17 @@ poll_sleep_duration = 60
 [check]
 interval = 1209600
 """ % (homedir, os.getcwd())
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
 
 class NipypeConfig(object):
     """Base nipype config class

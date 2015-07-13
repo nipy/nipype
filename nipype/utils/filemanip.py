@@ -13,12 +13,12 @@ import json
 import os
 import re
 import shutil
-import errno
 
 import numpy as np
 
 from ..interfaces.traits_extension import isdefined
 from .misc import is_container
+from .config import mkdir_p
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
@@ -431,13 +431,3 @@ def write_rst_dict(info, prefix=''):
     for key, value in sorted(info.items()):
         out.append(prefix + '* ' + key + ' : ' + str(value))
     return '\n'.join(out)+'\n\n'
-
-
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
