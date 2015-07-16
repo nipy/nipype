@@ -58,6 +58,8 @@ Next release
 * ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (https://github.com/nipy/nipype/pull/1128)
 * FIX: Fixed AFNI Copy interface to use positional inputs as required (https://github.com/nipy/nipype/pull/1131)
 * ENH: Added a check in Dcm2nii to check if nipype created the config.ini file and remove if true (https://github.com/nipy/nipype/pull/1132)
+* ENH: Use a while loop to wait for Xvfb (up to a max wait time "xvfb_max_wait" in config file, default 10)
+       (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
 ============
