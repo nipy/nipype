@@ -51,6 +51,7 @@ stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 60
+xvfb_max_wait = 10
 
 [check]
 interval = 1209600

@@ -995,10 +995,9 @@ class BaseInterface(Interface):
                                                  stdout=open(os.devnull),
                                                  stderr=open(os.devnull))
                     wait_step = 0.2
-                    max_wait = 10
                     wait_time = 0
                     while xvfb_proc.poll() is not None:
-                        if wait_time > max_wait:  # raise Exception if past maximum wait time
+                        if wait_time > config.get('execution', 'xvfb_max_wait'):
                             raise Exception('Error: Xvfb did not start')
                         time.sleep(wait_step)  # give Xvfb time to start
                         wait_time += wait_step
