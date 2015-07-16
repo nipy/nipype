@@ -994,9 +994,14 @@ class BaseInterface(Interface):
                     xvfb_proc = subprocess.Popen(xvfb_cmd,
                                                  stdout=open(os.devnull),
                                                  stderr=open(os.devnull))
-                    time.sleep(0.2)  # give Xvfb time to start
-                    if xvfb_proc.poll() is not None:
-                        raise Exception('Error: Xvfb did not start')
+                    wait_step = 0.2
+                    max_wait = 10
+                    wait_time = 0
+                    while xvfb_proc.poll() is not None:
+                        if wait_time > max_wait:  # raise Exception if past maximum wait time
+                            raise Exception('Error: Xvfb did not start')
+                        time.sleep(wait_step)  # give Xvfb time to start
+                        wait_time += wait_step
 
                     runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
 
