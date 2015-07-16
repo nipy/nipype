@@ -125,6 +125,9 @@ Execution
     all pending jobs and checking for job completion. To be nice to cluster
     schedulers the default is set to 60 seconds.
 
+*xvfb_max_wait*
+    Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.
+
 Example
 ~~~~~~~
 
