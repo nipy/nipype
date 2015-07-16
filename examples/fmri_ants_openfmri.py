@@ -124,6 +124,7 @@ def create_reg_workflow(name='registration'):
                                                                  'transformed_files',
                                                                  'transformed_mean',
                                                                  'anat2target',
+                                                                 'mean2anat_mask'
                                                                  ]),
                          name='outputspec')
 
@@ -170,6 +171,13 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
     register.connect(mean2anat, 'out_matrix_file',
                      mean2anatbbr, 'in_matrix_file')
+
+    """
+    Create a mask of the median image coregistered to the anatomical image
+    """
+    
+    mean2anat_mask = Node(fsl.BET(mask=True), name='mean2anat_mask')
+    register.connect(mean2anatbbr, 'out_file', mean2anat_mask, 'in_file')
 
     """
     Convert the BBRegister transformation to ANTS ITK format
@@ -276,6 +284,8 @@ def create_reg_workflow(name='registration'):
     register.connect(warpall, 'output_image', outputnode, 'transformed_files')
     register.connect(mean2anatbbr, 'out_matrix_file',
                      outputnode, 'func2anat_transform')
+    register.connect(mean2anat_mask, 'mask_file',
+                     outputnode, 'mean2anat_mask')
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
 
@@ -333,7 +343,8 @@ def create_fs_reg_workflow(name='registration'):
                                                           'transformed_files',
                                                           'min_cost_file',
                                                           'anat2target',
-                                                          'aparc'
+                                                          'aparc',
+                                                          'mean2anat_mask'
                                                           ]),
                       name='outputspec')
 
@@ -349,7 +360,7 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(fssource, 'T1', convert, 'in_file')
 
     # Coregister the median to the surface
-    bbregister = Node(freesurfer.BBRegister(),
+    bbregister = Node(freesurfer.BBRegister(registered_file=True),
                     name='bbregister')
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
@@ -358,6 +369,10 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(inputnode, 'subject_id', bbregister, 'subject_id')
     register.connect(inputnode, 'mean_image', bbregister, 'source_file')
     register.connect(inputnode, 'subjects_dir', bbregister, 'subjects_dir')
+
+    # Create a mask of the median coregistered to the anatomical image
+    mean2anat_mask = Node(fsl.BET(mask=True), name='mean2anat_mask')
+    register.connect(bbregister, 'registered_file', mean2anat_mask, 'in_file')
 
     """
     use aparc+aseg's brain mask
@@ -500,6 +515,8 @@ def create_fs_reg_workflow(name='registration'):
                      outputnode, 'out_reg_file')
     register.connect(bbregister, 'min_cost_file',
                      outputnode, 'min_cost_file')
+    register.connect(mean2anat_mask, 'mask_file',
+                     outputnode, 'mean2anat_mask')
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
@@ -964,6 +981,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         subs.append(('/model%03d/task%03d_' % (model_id, task_id), '/'))
         subs.append(('_bold_dtype_mcf_bet_thresh_dil', '_mask'))
         subs.append(('_output_warped_image', '_anat2target'))
+        subs.append(('median_flirt_brain_mask', 'median_brain_mask'))
+        subs.append(('median_bbreg_brain_mask', 'median_brain_mask'))
         return subs
 
     subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds', 'run_id',
@@ -998,6 +1017,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                      ('outputspec.motion_plots',
                                       'qa.motion.plots'),
                                      ('outputspec.mask', 'qa.mask')])])
+    wf.connect(registration, 'outputspec.mean2anat_mask', datasink, 'qa.mask.mean2anat')
     wf.connect(art, 'norm_files', datasink, 'qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'qa.art.@outlier_files')
