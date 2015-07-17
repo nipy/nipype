@@ -55,6 +55,12 @@ Next release
 * FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 * FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
 * FIX: Add QA output for TSNR to resting workflow (https://github.com/nipy/nipype/pull/1088)
+* FIX: Change N4BiasFieldCorrection to use short tag for dimensionality (backward compatible) (https://github.com/nipy/nipype/pull/1096)
+* ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (https://github.com/nipy/nipype/pull/1128)
+* FIX: Fixed AFNI Copy interface to use positional inputs as required (https://github.com/nipy/nipype/pull/1131)
+* ENH: Added a check in Dcm2nii to check if nipype created the config.ini file and remove if true (https://github.com/nipy/nipype/pull/1132)
+* ENH: Use a while loop to wait for Xvfb (up to a max wait time "xvfb_max_wait" in config file, default 10)
+       (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
 ============
