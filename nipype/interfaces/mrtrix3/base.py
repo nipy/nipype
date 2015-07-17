@@ -70,16 +70,20 @@ class MRTrix3Base(CommandLine):
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
-        if (isdefined(self.inputs.grad_file) or
-                isdefined(self.inputs.grad_fsl)):
-            skip += ['in_bvec', 'in_bval']
 
-        is_bvec = isdefined(self.inputs.in_bvec)
-        is_bval = isdefined(self.inputs.in_bval)
-        if is_bvec or is_bval:
-            if not is_bvec or not is_bval:
-                raise RuntimeError('If using bvecs and bvals inputs, both'
-                                   'should be defined')
-            skip += ['in_bval']
+        try:
+            if (isdefined(self.inputs.grad_file) or
+                    isdefined(self.inputs.grad_fsl)):
+                skip += ['in_bvec', 'in_bval']
+
+            is_bvec = isdefined(self.inputs.in_bvec)
+            is_bval = isdefined(self.inputs.in_bval)
+            if is_bvec or is_bval:
+                if not is_bvec or not is_bval:
+                    raise RuntimeError('If using bvecs and bvals inputs, both'
+                                       'should be defined')
+                skip += ['in_bval']
+        except AttributeError:
+            pass
 
         return super(MRTrix3Base, self)._parse_inputs(skip=skip)
