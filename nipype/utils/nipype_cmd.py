@@ -42,7 +42,11 @@ def run_instance(interface, options):
                     value = float(value)
                 except:
                     pass
-
+                # try to cast string input to boolean 
+                if value == "true" or value == "True":
+                    value = True
+                if value == "false" or value == "False":
+                    value = False
                 try:
                     setattr(interface.inputs, input_name,
                             value)
