@@ -58,12 +58,9 @@ class CopyGeom(FSLCommand):
     output_spec = CopyGeomOutputSpec
 
     def _run_interface(self, runtime):
-        if not isdefined(self.inputs.out_file):
-            self.inputs.out_file = self._gen_filename('out_file')
-        else:
-            self.inputs.out_file = self._gen_fname(self.inputs.out_file)
-        copyfile(self.inputs.dest_file, self.inputs.out_file, copy=True)
-        self.inputs.dest_file = self.inputs.out_file
+        out_file = self._gen_filename('out_file')
+        copyfile(self.inputs.dest_file, out_file, copy=True)
+        self.inputs.dest_file = out_file
         return super(CopyGeom, self)._run_interface(runtime)
 
     def _gen_filename(self, name):
@@ -73,10 +70,7 @@ class CopyGeom(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
-        else:
-            outputs['out_file'] = self._gen_fname(self.inputs.out_file)
+        outputs['out_file'] = self._gen_filename('out_file')
         return outputs
 
 
