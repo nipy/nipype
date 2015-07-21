@@ -31,6 +31,37 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class CopyGeomInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
+                   desc="source image")
+    out_file = File(exists=True, argstr="%s", position=1, 
+                    desc="destination image", copyfile=True)
+    ignore_dims = traits.Bool(desc=('Do not copy image dimensions'), 
+                              argstr='-d', position="-1")
+
+class CopyGeomOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="image with new geometry")
+
+
+class CopyGeom(FSLCommand):
+    """Use fslcpgeom to copy the header geometry information to another image.
+
+    Copy certain parts of the header information (image dimensions, voxel dimensions, 
+    voxel dimensions units string, image orientation/origin or qform/sform info)
+    from one image to another. Note that only copies from Analyze to Analyze 
+    or Nifti to Nifti will work properly. Copying from different files will result
+    in loss of information or potentially incorrect settings.
+
+    """
+    _cmd = "fslcpgeom"
+    input_spec = CopyGeomInputSpec
+    output_spec = CopyGeomOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+        
 class RobustFOVInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                    desc='input filename',
