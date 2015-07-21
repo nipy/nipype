@@ -74,14 +74,15 @@ class CopyGeom(FSLCommand):
         outputs['out_file'] = self.inputs.dest_file
         return outputs
 
-
-=======
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_filename('out_file')
+        else:
+            outputs['out_file'] = self._gen_fname(self.inputs.out_file)
         return outputs
-        
->>>>>>> New interface for fslcpgeom
+
+
 class RobustFOVInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                    desc='input filename',
