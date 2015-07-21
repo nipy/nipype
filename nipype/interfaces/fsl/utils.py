@@ -65,7 +65,7 @@ class CopyGeom(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file, suffix="_newhd")
+            return self._gen_fname(self.inputs.dest_file, suffix="_newhd")
         return None
 
     def _list_outputs(self):
