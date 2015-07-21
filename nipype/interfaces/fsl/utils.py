@@ -26,7 +26,7 @@ from .base import FSLCommand, FSLCommandInputSpec, Info
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
                     CommandLine, CommandLineInputSpec, isdefined)
 from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix)
+                                fname_presuffix, copyfile)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -34,13 +34,13 @@ warnings.filterwarnings('always', category=UserWarning)
 class CopyGeomInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                    desc="source image")
-    out_file = File(exists=True, mandatory=True, argstr="%s", position=1, 
+    dest_file = File(exists=True, mandatory=True, argstr="%s", position=1, 
                     desc="destination image", copyfile=True)
     ignore_dims = traits.Bool(desc=('Do not copy image dimensions'), 
                               argstr='-d', position="-1")
 
 class CopyGeomOutputSpec(TraitedSpec):
-    out_file = File(exists=True, desc="image with new geometry")
+    out_file = File(exists=True, desc="image with new geometry header")
 
 
 class CopyGeom(FSLCommand):
@@ -57,11 +57,29 @@ class CopyGeom(FSLCommand):
     input_spec = CopyGeomInputSpec
     output_spec = CopyGeomOutputSpec
 
+    def _run_interface(self, runtime):
+        if not isdefined(self.inputs.out_file):
+            self.inputs.out_file = self._gen_filename('out_file')
+        else:
+            self.inputs.out_file = self._gen_fname(self.inputs.out_file)
+        copyfile(self.inputs.dest_file, self.inputs.out_file, copy=True)
+        self.inputs.dest_file = self.inputs.out_file
+        return super(CopyGeom, self)._run_interface(runtime)
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._gen_fname(self.inputs.in_file, suffix="_newhd")
+        return None
+
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        outputs = self.output_spec().get()
+        if not isdefined(self.inputs.out_file):
+            outputs['out_file'] = self._gen_filename('out_file')
+        else:
+            outputs['out_file'] = self._gen_fname(self.inputs.out_file)
         return outputs
-        
+
+
 class RobustFOVInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                    desc='input filename',
