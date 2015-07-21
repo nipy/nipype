@@ -3,7 +3,7 @@ import argparse
 import inspect
 import sys
 from nipype.interfaces.base import Interface
-
+from nipype.utils.misc import str2bool
 
 def listClasses(module=None):
     if module:
@@ -42,7 +42,11 @@ def run_instance(interface, options):
                     value = float(value)
                 except:
                     pass
-
+                #try to cast string input to boolean
+                try:
+                    value = str2bool(value)
+                except:
+                    pass
                 try:
                     setattr(interface.inputs, input_name,
                             value)
