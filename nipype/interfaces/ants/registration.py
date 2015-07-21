@@ -446,7 +446,7 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed2.nii, moving2.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -466,14 +466,12 @@ class Registration(ANTSCommand):
         ----------
         index: the stage index
         """
-        # The common fixed image.
-        fixed = self.inputs.fixed_image[0]
-        # The common moving image.
-        moving = self.inputs.moving_image[0]
         # The metric name input for the current stage.
         name_input = self.inputs.metric[index]
         # The stage-specific input dictionary.
         stage_inputs = dict(
+            fixed_image=self.inputs.fixed_image[0],
+            moving_image=self.inputs.moving_image[0],
             metric=name_input,
             weight=self.inputs.metric_weight[index],
             radius_or_bins=self.inputs.radius_or_number_of_bins[index],
@@ -502,16 +500,32 @@ class Registration(ANTSCommand):
             # dict-comprehension only works with python 2.7 and up
             #specs = [{k: v[i] for k, v in items} for i in indexes]
             specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
+            specs = list()
+            for i in indexes:
+                temp = dict([(k, v[i]) for k, v in items])
+                if i > len( self.inputs.fixed_image ):
+                    temp["fixed_image"] = self.inputs.fixed_image[0]
+                else:
+                    temp["fixed_image"] = self.inputs.fixed_image[i]
+
+                if i > len( self.inputs.moving_image ):
+                    temp["moving_image"] = self.inputs.moving_image[0]
+                else:
+                    temp["moving_image"] = self.inputs.moving_image[i]
+
+                specs.append( temp )
         else:
             specs = [stage_inputs]
 
         # Format the --metric command line metric arguments, one per
         # specification.
-        return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
+        return [self._formatMetricArgument(**spec) for spec in specs]
 
-    def _formatMetricArgument(self, fixed, moving, **kwargs):
+    def _formatMetricArgument(self, **kwargs):
         retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
-                                         fixed, moving, kwargs['weight'],
+                                         kwargs['fixed_image'],
+                                         kwargs['moving_image'],
+                                         kwargs['weight'],
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
