@@ -17,7 +17,7 @@ from .utils import (Smooth, Merge, ExtractROI, Split, ImageMaths, ImageMeants,
                     PlotTimeSeries, PlotMotionParams, ConvertXFM,
                     SwapDimensions, PowerSpectrum, Reorient2Std,
                     Complex, InvWarp, WarpUtils, ConvertWarp, WarpPoints,
-                    WarpPointsToStd, RobustFOV)
+                    WarpPointsToStd, RobustFOV, CopyGeom)
 
 from .epi import (PrepareFieldmap, TOPUP, ApplyTOPUP, Eddy, EPIDeWarp,
                   SigLoss, EddyCorrect, EpiReg)
