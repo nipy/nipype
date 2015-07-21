@@ -58,6 +58,8 @@ class CopyGeom(FSLCommand):
     output_spec = CopyGeomOutputSpec
 
     def _run_interface(self, runtime):
+        # Copy destination file to new local file to prevent overwriting
+        # and update destination file
         out_file = self._gen_filename('out_file')
         copyfile(self.inputs.dest_file, out_file, copy=True)
         self.inputs.dest_file = out_file
@@ -70,7 +72,8 @@ class CopyGeom(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self._gen_filename('out_file')
+        # Use the new destination file updated by _run_interface
+        outputs['out_file'] = self.inputs.dest_file
         return outputs
 
 
