@@ -34,7 +34,7 @@ warnings.filterwarnings('always', category=UserWarning)
 class CopyGeomInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                    desc="source image")
-    out_file = File(exists=True, argstr="%s", position=1, 
+    out_file = File(exists=True, mandatory=True, argstr="%s", position=1, 
                     desc="destination image", copyfile=True)
     ignore_dims = traits.Bool(desc=('Do not copy image dimensions'), 
                               argstr='-d', position="-1")
