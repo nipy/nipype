@@ -42,13 +42,18 @@ class CopyGeomInputSpec(FSLCommandInputSpec):
 class CopyGeomOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="image with new geometry header")
 
-
 class CopyGeom(FSLCommand):
     """Use fslcpgeom to copy the header geometry information to another image.
 
+<<<<<<< HEAD
     Copy certain parts of the header information (image dimensions, voxel dimensions,
     voxel dimensions units string, image orientation/origin or qform/sform info)
     from one image to another. Note that only copies from Analyze to Analyze
+=======
+    Copy certain parts of the header information (image dimensions, voxel dimensions, 
+    voxel dimensions units string, image orientation/origin or qform/sform info)
+    from one image to another. Note that only copies from Analyze to Analyze 
+>>>>>>> New interface for fslcpgeom
     or Nifti to Nifti will work properly. Copying from different files will result
     in loss of information or potentially incorrect settings.
 
@@ -57,6 +62,7 @@ class CopyGeom(FSLCommand):
     input_spec = CopyGeomInputSpec
     output_spec = CopyGeomOutputSpec
 
+<<<<<<< HEAD
     def _run_interface(self, runtime):
         # Copy destination file to new local file to prevent overwriting
         # and update destination file
@@ -77,6 +83,13 @@ class CopyGeom(FSLCommand):
         return outputs
 
 
+=======
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+        
+>>>>>>> New interface for fslcpgeom
 class RobustFOVInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                    desc='input filename',
