@@ -139,9 +139,11 @@ particular node might use more resources than other nodes in a workflow.
 	 
 SGEGraph
 ~~~~~~~~
-SGEGraph_ is a exuction plugin working with Sun Grid Engine that allows for
+SGEGraph_ is an execution plugin working with Sun Grid Engine that allows for
 submitting entire graph of dependent jobs at once. This way Nipype does not 
-need to run a monitoring process - SGE takes care of this.
+need to run a monitoring process - SGE takes care of this. The use of SGEGraph_
+is preferred over SGE_ since the latter adds unnecessary load on the submit 
+machine.
 
 .. note::
 
@@ -175,6 +177,26 @@ Optional arguments::
 
   template: custom template file to use
   sbatch_args: any other command line args to be passed to bsub.
+  
+  
+SLURMGraph
+~~~~~~~~~~
+SLURMGraph_ is an execution plugin working with SLURM that allows for
+submitting entire graph of dependent jobs at once. This way Nipype does not 
+need to run a monitoring process - SLURM takes care of this. The use of SLURMGraph_
+plugin is preferred over the vanilla SLURM_ plugin since the latter adds 
+unnecessary load on the submit machine. 
+
+
+.. note::
+
+  When rerunning unfinished workflows using SLURMGraph you may decide not to 
+  submit jobs for Nodes that previously finished running. This can speed up
+  execution, but new or modified inputs that would previously trigger a Node
+  to rerun will be ignored. The following option turns on this functionality::
+
+     workflow.run(plugin='SLURMGraph', plugin_args = {'dont_resubmit_completed_jobs': True})
+
 
 HTCondor
 --------
@@ -183,12 +205,12 @@ DAGMan
 ~~~~~~
 
 With its DAGMan_ component HTCondor_ (previously Condor) allows for submitting
-entire graphs of dependent jobs at once (similar to SGEGraph_). With the ``CondorDAGMan`` plug-in
-Nipype can utilize this functionality to submit complete workflows directly and
-in a single step.  Consequently, and in contrast to other plug-ins, workflow
-execution returns almost instantaneously -- Nipype is only used to generate the
-workflow graph, while job scheduling and dependency resolution are entirely
-managed by HTCondor_.
+entire graphs of dependent jobs at once (similar to SGEGraph_ and SLURMGaaoh_). 
+With the ``CondorDAGMan`` plug-in Nipype can utilize this functionality to 
+submit complete workflows directly and in a single step.  Consequently, and 
+in contrast to other plug-ins, workflow execution returns almost 
+instantaneously -- Nipype is only used to generate the workflow graph, 
+while job scheduling and dependency resolution are entirely managed by HTCondor_.
 
 Please note that although DAGMan_ supports specification of data dependencies
 as well as data provisioning on compute nodes this functionality is currently
