@@ -80,14 +80,6 @@ class SGEGraphPlugin(GraphPluginBase):
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
-                ## If a node has no dependencies, and it is requested to run_without_submitting
-                ## then run this node in place
-                if (not node_status_done) and (len(dependencies[idx]) == 0 ) and (node.run_without_submitting == True):
-                    try:
-                        node.run()
-                    except Exception:
-                        node._clean_queue(idx, nodes)
-                    node_status_done = True # if successfully run locally, then claim true
 
                 #if the node itself claims done, then check to ensure all
                 #dependancies are also done
