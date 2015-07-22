@@ -32,7 +32,7 @@ else:
 def tensor_fitting(data, bvals, bvecs, mask_file=None):
     """
     Use dipy to fit DTI
-    
+
     Parameters
     ----------
     in_file : str
@@ -58,7 +58,7 @@ def tensor_fitting(data, bvals, bvecs, mask_file=None):
 
     # Load information about the gradients:
     gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
-        
+
     # Fit it
     tenmodel = dti.TensorModel(gtab)
     return tenmodel.fit(data, mask), affine
@@ -84,7 +84,7 @@ class DTIOutputSpec(TraitedSpec):
 class DTI(BaseInterface):
     """
     Calculates the diffusion tensor model parameters
-    
+
     Example
     -------
 
@@ -99,7 +99,7 @@ class DTI(BaseInterface):
     output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
-        ten_fit, affine = tensor_fitting(self.inputs.in_file, 
+        ten_fit, affine = tensor_fitting(self.inputs.in_file,
                                          self.inputs.bvals,
                                          self.inputs.bvecs,
                                          self.inputs.mask_file)
@@ -124,7 +124,7 @@ class DTI(BaseInterface):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_dti.nii'
-    
+
 
 class TensorModeInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,

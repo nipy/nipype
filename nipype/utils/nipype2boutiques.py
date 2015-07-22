@@ -22,7 +22,7 @@ from nipype.interfaces.base import Interface
 def main(argv):
 
   # Parses arguments
-  parser = argparse.ArgumentParser(description='Nipype Boutiques exporter. See Boutiques specification at https://github.com/boutiques/schema.', prog=argv[0])  
+  parser = argparse.ArgumentParser(description='Nipype Boutiques exporter. See Boutiques specification at https://github.com/boutiques/schema.', prog=argv[0])
   parser.add_argument("-i" , "--interface"               , type=str, help="Name of the Nipype interface to export."                       , required=True)
   parser.add_argument("-m" , "--module"                  , type=str, help="Module where the interface is defined."                        , required=True)
   parser.add_argument("-o" , "--output"                  , type=str, help="JSON file name where the Boutiques descriptor will be written.", required=True)
@@ -31,9 +31,9 @@ def main(argv):
   parser.add_argument("-r"  , "--docker-index"           , type=str, help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
   parser.add_argument("-n" , "--ignore-template-numbers" , action='store_true', default=False, help="Ignore all numbers in path template creations.")
   parser.add_argument("-v"  , "--verbose"                , action='store_true', default=False, help="Enable verbose output.")
-  
+
   parsed = parser.parse_args()
-  
+
   # Generates JSON string
   json_string = generate_boutiques_descriptor(parsed.module,
                                               parsed.interface,
@@ -41,7 +41,7 @@ def main(argv):
                                               parsed.docker_image,parsed.docker_index,
                                               parsed.verbose,
                                               parsed.ignore_template_numbers)
-  
+
   # Writes JSON string to file
   f = open(parsed.output,'w')
   f.write(json_string)
@@ -78,8 +78,8 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
   if docker_image:
     tool_desc['docker-image'] = docker_image
   if docker_index:
-    tool_desc['docker-index'] = docker_index 
-  
+    tool_desc['docker-index'] = docker_index
+
   # Generates tool inputs
   for name, spec in sorted(interface.inputs.traits(transient=None).items()):
     input = get_boutiques_input(inputs, interface, name, spec,ignored_template_inputs,verbose,ignore_template_numbers)
@@ -99,25 +99,25 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
       print "xx Skipping output "+output['name']+" with no path template."
   if tool_desc['outputs'] == []:
     raise Exception("Tool has no output.")
-      
+
   # Removes all temporary values from inputs (otherwise they will
   # appear in the JSON output)
   for input in tool_desc['inputs']:
     del input['tempvalue']
-      
+
   return json.dumps(tool_desc, indent=4, separators=(',', ': '))
-  
+
 def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs,verbose,ignore_template_numbers):
   """
   Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
-  
-  Args: 
+
+  Args:
     * inputs: inputs of the Nipype interface.
     * interface: Nipype interface.
     * input_name: name of the Nipype input.
     * spec: Nipype input spec.
     * ignored_template_inputs: input names for which no temporary value must be generated.
-    * ignore_template_numbers: True if numbers must be ignored in output path creations.  
+    * ignore_template_numbers: True if numbers must be ignored in output path creations.
 
   Assumes that:
     * Input names are unique.
@@ -125,7 +125,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
   if not spec.desc:
     spec.desc = "No description provided."
   spec_info         = spec.full_info(inputs, input_name, None)
-  
+
   input     = {}
   input['id']                = input_name
   input['name']              = input_name.replace('_',' ').capitalize()
@@ -144,10 +144,10 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
   if spec.usedefault:
     input['default-value']   = spec.default_value()[1]
 
-    
+
   # Create unique, temporary value.
   temp_value = must_generate_value(input_name,input['type'],ignored_template_inputs,spec_info,spec,ignore_template_numbers)
-  if temp_value: 
+  if temp_value:
     tempvalue = get_unique_value(input['type'],input_name)
     setattr(interface.inputs,input_name,tempvalue)
     input['tempvalue'] = tempvalue
@@ -158,18 +158,18 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
   # Number (there is no Boolean type in Boutiques)
   if input['type'] == "Boolean":
     input['type'] = "Number"
-    
+
   return input
 
 def get_boutiques_output(name,interface,tool_inputs,verbose=False):
   """
   Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
-  
-  Args: 
+
+  Args:
     * name: name of the Nipype output.
     * interface: Nipype interface.
     * tool_inputs: list of tool inputs (as produced by method get_boutiques_input).
-  
+
   Assumes that:
     * Output names are unique.
     * Input values involved in the path template are defined.
@@ -199,7 +199,7 @@ def get_boutiques_output(name,interface,tool_inputs,verbose=False):
         output_value = os.path.basename(output_value.replace(input_value,input['command-line-key'])) # FIXME: this only works if output is written in the current directory
     output['path-template'] = os.path.basename(output_value)
   return output
-                        
+
 def get_type_from_spec_info(spec_info):
   '''
   Returns an input type from the spec info. There must be a better
@@ -258,7 +258,7 @@ def must_generate_value(name,type,ignored_template_inputs,spec_info,spec,ignore_
   if ignore_template_numbers and type == "Number":
     return False
   # Only generate value for the first element of mutually exclusive inputs.
-  if spec.xor and spec.xor[0]!=name: 
+  if spec.xor and spec.xor[0]!=name:
     return False
   # Directory types are not supported
   if "an existing directory name" in spec_info:
