@@ -34,9 +34,9 @@ warnings.filterwarnings('always', category=UserWarning)
 class CopyGeomInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                    desc="source image")
-    dest_file = File(exists=True, mandatory=True, argstr="%s", position=1, 
+    dest_file = File(exists=True, mandatory=True, argstr="%s", position=1,
                     desc="destination image", copyfile=True)
-    ignore_dims = traits.Bool(desc=('Do not copy image dimensions'), 
+    ignore_dims = traits.Bool(desc=('Do not copy image dimensions'),
                               argstr='-d', position="-1")
 
 class CopyGeomOutputSpec(TraitedSpec):
@@ -46,9 +46,9 @@ class CopyGeomOutputSpec(TraitedSpec):
 class CopyGeom(FSLCommand):
     """Use fslcpgeom to copy the header geometry information to another image.
 
-    Copy certain parts of the header information (image dimensions, voxel dimensions, 
+    Copy certain parts of the header information (image dimensions, voxel dimensions,
     voxel dimensions units string, image orientation/origin or qform/sform info)
-    from one image to another. Note that only copies from Analyze to Analyze 
+    from one image to another. Note that only copies from Analyze to Analyze
     or Nifti to Nifti will work properly. Copying from different files will result
     in loss of information or potentially incorrect settings.
 
