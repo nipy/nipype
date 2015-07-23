@@ -49,8 +49,7 @@ def test_BBRegister_inputs():
     mandatory=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BBRegister.input_spec()

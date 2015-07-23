@@ -38,8 +38,7 @@ def test_ContrastMgr_inputs():
     mandatory=True,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ContrastMgr.input_spec()

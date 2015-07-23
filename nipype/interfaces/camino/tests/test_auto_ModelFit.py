@@ -48,8 +48,7 @@ def test_ModelFit_inputs():
     ),
     tau=dict(argstr='-tau %G',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ModelFit.input_spec()

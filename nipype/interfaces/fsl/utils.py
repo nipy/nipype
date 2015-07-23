@@ -31,6 +31,24 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+class RobustFOVInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True,
+                   desc='input filename',
+                   argstr='-i %s', position=0, mandatory=True)
+    out_roi = File(desc="ROI volume output name", argstr="-r %s",
+                   name_source=['in_file'], hash_files=False,
+                   name_template='%s_ROI')
+
+
+class RobustFOVOutputSpec(TraitedSpec):
+    out_roi = File(exists=True, desc="ROI volume output name")
+
+
+class RobustFOV(FSLCommand):
+    _cmd = 'robustfov'
+    input_spec = RobustFOVInputSpec
+    output_spec = RobustFOVOutputSpec
+
 
 class ImageMeantsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,

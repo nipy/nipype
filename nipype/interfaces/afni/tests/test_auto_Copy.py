@@ -16,13 +16,13 @@ def test_Copy_inputs():
     mandatory=True,
     position=-2,
     ),
-    out_file=dict(argstr='-prefix %s',
+    out_file=dict(argstr='%s',
     name_source='in_file',
     name_template='%s_copy',
+    position=-1,
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Copy.input_spec()

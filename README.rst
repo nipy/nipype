@@ -77,10 +77,10 @@ to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.or
        http://neurostars.org/t/nipype/
 	   
 
-To participate in the Nipype development related discussion please use the following mailing list::
+To participate in the Nipype development related discussions please use the following mailing list::
        
-       http://projects.scipy.org/mailman/listinfo/nipy-devel
-	   
+       http://mail.python.org/mailman/listinfo/neuroimaging
+
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
 
@@ -124,5 +124,5 @@ There are interfaces to some GNU code but these are entirely optional.
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2009-2014, NIPY Developers
+Copyright (c) 2009-2015, NIPY Developers
 All rights reserved.

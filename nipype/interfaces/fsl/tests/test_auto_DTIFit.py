@@ -54,8 +54,7 @@ def test_DTIFit_inputs():
     ),
     sse=dict(argstr='--sse',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTIFit.input_spec()

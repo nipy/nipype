@@ -995,9 +995,13 @@ class BaseInterface(Interface):
                     xvfb_proc = subprocess.Popen(xvfb_cmd,
                                                  stdout=open(os.devnull),
                                                  stderr=open(os.devnull))
-                    time.sleep(0.2)  # give Xvfb time to start
-                    if xvfb_proc.poll() is not None:
-                        raise Exception('Error: Xvfb did not start')
+                    wait_step = 0.2
+                    wait_time = 0
+                    while xvfb_proc.poll() is not None:
+                        if wait_time > config.get('execution', 'xvfb_max_wait'):
+                            raise Exception('Error: Xvfb did not start')
+                        time.sleep(wait_step)  # give Xvfb time to start
+                        wait_time += wait_step
 
                     runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
 
@@ -1278,14 +1282,16 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
+    # This input does not have a "usedefault=True" so the set_default_terminal_output()
+    # method would work
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
                                   desc=('Control terminal output: `stream` - '
-                                        'displays to terminal immediately, '
+                                        'displays to terminal immediately (default), '
                                         '`allatonce` - waits till command is '
                                         'finished to display output, `file` - '
                                         'writes output to file, `none` - output'
                                         ' is ignored'),
-                                  nohash=True, mandatory=True)
+                                  nohash=True)
 
 
 class CommandLine(BaseInterface):
@@ -1346,12 +1352,12 @@ class CommandLine(BaseInterface):
 
     @classmethod
     def set_default_terminal_output(cls, output_type):
-        """Set the default output type for FSL classes.
+        """Set the default terminal output for CommandLine Interfaces.
 
-        This method is used to set the default output type for all fSL
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.output_type.
+        This method is used to set default terminal output for
+        CommandLine Interfaces.  However, setting this will not
+        update the output type for any existing instances.  For these,
+        assign the <instance>.inputs.terminal_output.
         """
 
         if output_type in ['stream', 'allatonce', 'file', 'none']:

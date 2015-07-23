@@ -39,8 +39,7 @@ def test_Means_inputs():
     ),
     summ=dict(argstr='-sum',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Means.input_spec()

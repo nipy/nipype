@@ -223,7 +223,7 @@ class LaplacianThickness(ANTSCommand):
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--image-dimension %d',
+    dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input-image %s', mandatory=True,
@@ -237,8 +237,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
     bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence %s",
-                               requires=['convergence_threshold'])
+    n_iterations = traits.List(traits.Int(), argstr="--convergence %s")
     convergence_threshold = traits.Float(requires=['n_iterations'])
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
@@ -277,26 +276,33 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.bspline_fitting_distance = 300
     >>> n4.inputs.shrink_factor = 3
     >>> n4.inputs.n_iterations = [50,50,30,20]
-    >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
---image-dimension 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+-d 3 --input-image structural.nii \
+--convergence [ 50x50x30x20 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
 	>>> n4_2 = copy.deepcopy(n4)
-    >>> n4_2.inputs.bspline_order = 5
+    >>> n4_2.inputs.convergence_threshold = 1e-6
     >>> n4_2.cmdline
-    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
---image-dimension 3 --input-image structural.nii \
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
+-d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
-    >>> n4_3 = N4BiasFieldCorrection()
-    >>> n4_3.inputs.input_image = 'structural.nii'
-    >>> n4_3.inputs.save_bias = True
+    >>> n4_3 = copy.deepcopy(n4_2)
+    >>> n4_3.inputs.bspline_order = 5
     >>> n4_3.cmdline
-    'N4BiasFieldCorrection --image-dimension 3 --input-image structural.nii \
+    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
+-d 3 --input-image structural.nii \
+--convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+--shrink-factor 3'
+
+    >>> n4_4 = N4BiasFieldCorrection()
+    >>> n4_4.inputs.input_image = 'structural.nii'
+    >>> n4_4.inputs.save_bias = True
+    >>> n4_4.cmdline
+    'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
     """
 
@@ -335,10 +341,12 @@ class N4BiasFieldCorrection(ANTSCommand):
                 newval = '[ %g ]' % value
             return trait_spec.argstr % newval
 
-        if ((name == 'n_iterations') and
-           (isdefined(self.inputs.convergence_threshold))):
-            newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
-                                     self.inputs.convergence_threshold)
+        if name == 'n_iterations':
+            if isdefined(self.inputs.convergence_threshold):
+                newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
+                                         self.inputs.convergence_threshold)
+            else:
+                newval = '[ %s ]' % 'x'.join([str(elt) for elt in value])
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection,
