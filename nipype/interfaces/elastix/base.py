@@ -19,8 +19,9 @@ logger = logging.getLogger('interface')
 class ElastixBaseInputSpec(CommandLineInputSpec):
     output_path = Directory('./', exists=True, mandatory=True, usedefault=True,
                             argstr='-out %s', desc='output directory')
-    num_threads = traits.Int(1, argstr='-threads %01d', usedefault=True,
-                             desc='set the maximum number of threads of elastix')
+    num_threads = traits.Int(
+        1, argstr='-threads %01d', nohash=True,
+        desc='set the maximum number of threads of elastix')
 
 
 class ElastixBaseInterface(CommandLine):
@@ -30,4 +31,5 @@ class ElastixBaseInterface(CommandLine):
         if name == 'num_threads' and value > 1:
             self._singleworker = False
 
-        return super(ElastixBaseInterface, self)._format_arg(name, trait_spec, value)
+        return super(ElastixBaseInterface, self)._format_arg(
+            name, trait_spec, value)
