@@ -24,8 +24,7 @@ def test_TCat_inputs():
     rlt=dict(argstr='-rlt%s',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = TCat.input_spec()

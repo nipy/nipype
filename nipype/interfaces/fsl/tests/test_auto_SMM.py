@@ -25,8 +25,7 @@ def test_SMM_inputs():
     mandatory=True,
     position=0,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SMM.input_spec()

@@ -31,8 +31,7 @@ def test_ImageMaths_inputs():
     ),
     output_type=dict(),
     suffix=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageMaths.input_spec()

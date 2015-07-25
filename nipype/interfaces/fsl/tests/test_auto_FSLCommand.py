@@ -12,8 +12,7 @@ def test_FSLCommand_inputs():
     usedefault=True,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FSLCommand.input_spec()

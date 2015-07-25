@@ -23,8 +23,7 @@ def test_Image2Voxel_inputs():
     position=2,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Image2Voxel.input_spec()

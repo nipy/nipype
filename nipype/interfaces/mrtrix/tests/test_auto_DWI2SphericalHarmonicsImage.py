@@ -28,8 +28,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
     genfile=True,
     position=-1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWI2SphericalHarmonicsImage.input_spec()

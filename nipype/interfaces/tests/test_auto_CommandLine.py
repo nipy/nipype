@@ -11,8 +11,7 @@ def test_CommandLine_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = CommandLine.input_spec()

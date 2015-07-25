@@ -40,8 +40,7 @@ def test_ApplyTOPUP_inputs():
     name_template='%s_corrected',
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ApplyTOPUP.input_spec()

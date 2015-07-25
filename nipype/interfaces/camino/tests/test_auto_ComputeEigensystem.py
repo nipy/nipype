@@ -29,8 +29,7 @@ def test_ComputeEigensystem_inputs():
     outputdatatype=dict(argstr='-outputdatatype %s',
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ComputeEigensystem.input_spec()

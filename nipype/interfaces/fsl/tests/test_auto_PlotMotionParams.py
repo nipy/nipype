@@ -27,8 +27,7 @@ def test_PlotMotionParams_inputs():
     plot_type=dict(argstr='%s',
     mandatory=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PlotMotionParams.input_spec()

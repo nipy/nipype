@@ -13,12 +13,14 @@ import ConfigParser
 from json import load, dump
 import os
 import shutil
+import errno
 from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
 
-homedir = os.environ['HOME']
+# Get home directory in platform-agnostic way
+homedir = os.path.expanduser('~')
 default_cfg = """
 [logging]
 workflow_level = INFO
@@ -48,10 +50,23 @@ use_relative_paths = false
 stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
+poll_sleep_duration = 60
+xvfb_max_wait = 10
 
 [check]
 interval = 1209600
 """ % (homedir, os.getcwd())
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
 
 class NipypeConfig(object):
     """Base nipype config class
@@ -60,8 +75,7 @@ class NipypeConfig(object):
     def __init__(self, *args, **kwargs):
         self._config = ConfigParser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
+        mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
         new_config_file = os.path.join(config_dir, 'nipype.cfg')
         # To be deprecated in two releases

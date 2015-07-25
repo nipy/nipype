@@ -31,8 +31,7 @@ def test_AverageImages_inputs():
     position=1,
     usedefault=True,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AverageImages.input_spec()

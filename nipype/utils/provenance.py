@@ -1,7 +1,7 @@
 from cPickle import dumps
 import json
 import os
-import pwd
+import getpass
 from socket import getfqdn
 from uuid import uuid1
 from nipype.external import six
@@ -363,9 +363,8 @@ class ProvStore(object):
 
         # create agents
         user_attr = {pm.PROV["type"]: pm.PROV["Person"],
-                     pm.PROV["label"]: pwd.getpwuid(os.geteuid()).pw_name,
-                     foaf["name"]:
-                         safe_encode(pwd.getpwuid(os.geteuid()).pw_name)}
+                     pm.PROV["label"]: getpass.getuser(),
+                     foaf["name"]: safe_encode(getpass.getuser())}
         user_agent = self.g.agent(get_attr_id(user_attr), user_attr)
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",

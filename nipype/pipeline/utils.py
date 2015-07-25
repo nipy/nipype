@@ -7,28 +7,24 @@ from copy import deepcopy
 from glob import glob
 from collections import defaultdict
 import os
-import pwd
 import re
-from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
 from nipype.external import six
 
 package_check('networkx', '1.3')
-from socket import gethostname
 
 import networkx as nx
 
 from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
                                filename_to_list, get_related_files)
 from ..utils.misc import create_function_from_source, str2bool
-from ..interfaces.base import (CommandLine, isdefined, Undefined, Bunch,
+from ..interfaces.base import (CommandLine, isdefined, Undefined,
                                InterfaceResult)
 from ..interfaces.utility import IdentityInterface
 from ..utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-from .. import get_info
 from .. import logging, config
 logger = logging.getLogger('workflow')
 
@@ -920,7 +916,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 
 
 def format_dot(dotfilename, format=None):
-    cmd = 'dot -T%s -O %s' % (format, dotfilename)
+    cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
     CommandLine(cmd).run()
     logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
 
@@ -1101,11 +1097,12 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                 subresult = InterfaceResult(result.interface[idx],
                                             runtime, outputs={})
                 if result.inputs:
-                    subresult.inputs = result.inputs[idx]
+                    if idx < len(result.inputs):
+                        subresult.inputs = result.inputs[idx]
                 if result.outputs:
                     for key, value in result.outputs.items():
                         values = getattr(result.outputs, key)
-                        if isdefined(values):
+                        if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
                 sub_bundle = ProvStore().add_results(subresult)
                 ps.g = merge_bundles(ps.g, sub_bundle)

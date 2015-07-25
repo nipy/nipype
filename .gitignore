@@ -13,3 +13,5 @@
 .settings
 .pydevproject
 .idea/
+/documentation.zip
+.DS_Store
