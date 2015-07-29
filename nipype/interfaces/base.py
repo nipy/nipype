@@ -983,32 +983,12 @@ class BaseInterface(Interface):
                         version=self.version)
         try:
             if self._redirect_x:
-                exist_val, _ = self._exists_in_path('Xvfb',
-                                                    runtime.environ)
-                if not exist_val:
-                    raise IOError("Xvfb could not be found on host %s" %
-                                  (runtime.hostname))
-                else:
-                    vdisplay_num = _search_for_free_display()
-                    xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
-                    xvfb_proc = subprocess.Popen(xvfb_cmd,
-                                                 stdout=open(os.devnull),
-                                                 stderr=open(os.devnull))
-                    wait_step = 0.2
-                    wait_time = 0
-                    while xvfb_proc.poll() is not None:
-                        if wait_time > config.get('execution', 'xvfb_max_wait'):
-                            raise Exception('Error: Xvfb did not start')
-                        time.sleep(wait_step)  # give Xvfb time to start
-                        wait_time += wait_step
-
-                    runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
-
-            runtime = self._run_interface(runtime)
-
-            if self._redirect_x:
-                xvfb_proc.kill()
-                xvfb_proc.wait()
+                from xvfbwrapper import Xvfb
+                with Xvfb() as xvfb:
+                    runtime = self._run_interface(runtime)
+            else:
+                iflogger.warn('Error redirecting X, trying without xvfb...')
+                runtime = self._run_interface(runtime)
 
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())

@@ -5,3 +5,4 @@ traits>=4.0
 python-dateutil>=1.5
 nibabel>=1.0
 nose>=1.0
+xvfbwrapper>=0.2
