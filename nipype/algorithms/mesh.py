@@ -25,7 +25,6 @@ from warnings import warn
 iflogger = logging.getLogger('interface')
 
 
-<<<<<<< HEAD
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
     points = File(exists=True, mandatory=True,
                   desc=('file containing the point set'))
@@ -43,6 +42,7 @@ class WarpPointsOutputSpec(TraitedSpec):
 
 
 class WarpPoints(BaseInterface):
+
     """
     Applies a displacement field to a point set in vtk
 
@@ -57,6 +57,7 @@ class WarpPoints(BaseInterface):
     """
     input_spec = WarpPointsInputSpec
     output_spec = WarpPointsOutputSpec
+    _redirect_x = True
 
     def _gen_fname(self, in_file, suffix='generated', ext=None):
         import os.path as op
@@ -114,7 +115,7 @@ class WarpPoints(BaseInterface):
         ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3, 3]
         voxpoints = np.array([np.dot(ras2vox,
-                             (p-origin)) for p in points])
+                                     (p-origin)) for p in points])
 
         warps = []
         for axis in warp_dims:
@@ -151,22 +152,12 @@ class WarpPoints(BaseInterface):
         return outputs
 
 
-class P2PDistanceInputSpec(BaseInterfaceInputSpec):
-=======
 class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
->>>>>>> master
     surface1 = File(exists=True, mandatory=True,
                     desc=('Reference surface (vtk format) to which compute '
                           'distance.'))
     surface2 = File(exists=True, mandatory=True,
-<<<<<<< HEAD
-                    desc=("Test surface (vtk format) from which compute "
-                          "distance."))
-    weighting = traits.Enum("none", "surface", usedefault=True,
-                            desc=('"none": no weighting is performed, '
-                                  '"surface": edge distance is weighted by the'
-                                  ' corresponding surface area'))
-=======
+
                     desc=('Test surface (vtk format) from which compute '
                           'distance.'))
     metric = traits.Enum('euclidean', 'sqeuclidean', usedefault=True,
@@ -180,7 +171,6 @@ class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
                     'to surface2')
     out_file = File('distance.npy', usedefault=True,
                     desc='numpy file keeping computed distances and weights')
->>>>>>> master
 
 
 class ComputeMeshWarpOutputSpec(TraitedSpec):
