@@ -26,10 +26,53 @@ from .base import FSLCommand, FSLCommandInputSpec, Info
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
                     CommandLine, CommandLineInputSpec, isdefined)
 from ...utils.filemanip import (load_json, save_json, split_filename,
-                                fname_presuffix)
+                                fname_presuffix, copyfile)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
+
+class CopyGeomInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
+                   desc="source image")
+    dest_file = File(exists=True, mandatory=True, argstr="%s", position=1,
+                     desc="destination image", copyfile=True, output_name='out_file',
+                     name_source='dest_file', name_template='%s')
+    ignore_dims = traits.Bool(desc=('Do not copy image dimensions'),
+                              argstr='-d', position="-1")
+
+class CopyGeomOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc="image with new geometry header")
+
+class CopyGeom(FSLCommand):
+    """Use fslcpgeom to copy the header geometry information to another image.
+    Copy certain parts of the header information (image dimensions, voxel dimensions,
+    voxel dimensions units string, image orientation/origin or qform/sform info)
+    from one image to another. Note that only copies from Analyze to Analyze
+    or Nifti to Nifti will work properly. Copying from different files will result
+    in loss of information or potentially incorrect settings.
+    """
+    _cmd = "fslcpgeom"
+    input_spec = CopyGeomInputSpec
+    output_spec = CopyGeomOutputSpec
+
+
+class RobustFOVInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True,
+                   desc='input filename',
+                   argstr='-i %s', position=0, mandatory=True)
+    out_roi = File(desc="ROI volume output name", argstr="-r %s",
+                   name_source=['in_file'], hash_files=False,
+                   name_template='%s_ROI')
+
+
+class RobustFOVOutputSpec(TraitedSpec):
+    out_roi = File(exists=True, desc="ROI volume output name")
+
+
+class RobustFOV(FSLCommand):
+    _cmd = 'robustfov'
+    input_spec = RobustFOVInputSpec
+    output_spec = RobustFOVOutputSpec
 
 
 class ImageMeantsInputSpec(FSLCommandInputSpec):

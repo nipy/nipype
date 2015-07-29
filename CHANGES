@@ -1,13 +1,11 @@
 Next release
 ============
 
-* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets.
-* FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089)
-* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets.
-* ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions
-       in EPI seqs. (https://github.com/nipy/nipype/pull/1019)
-* ENH: Added interface to simulate DWIs using the multi-tensor model
-       (https://github.com/nipy/nipype/pull/1085)
+* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets
+       (https://github.com/nipy/nipype/pull/889).
+* ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
+* FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089,
+       replaced by https://github.com/nipy/nipype/pull/1093)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
        (https://github.com/nipy/nipype/pull/1016)
 * FIX: Refactor P2PDistance, change name to ComputeMeshWarp, add regression tests,
@@ -17,10 +15,10 @@ Next release
 * FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
+* FIX: In the FSLXcommand _list_outputs function fixed for loop range (https://github.com/nipy/nipype/pull/1071)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
 * FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
->>>>>>> master
 * FIX: Fixed Camino output naming (https://github.com/nipy/nipype/pull/1061)
 * ENH: Add the average distance to ErrorMap (https://github.com/nipy/nipype/pull/1039)
 * ENH: Inputs with name_source can be now chained in cascade (https://github.com/nipy/nipype/pull/938)
@@ -59,6 +57,13 @@ Next release
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 * FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 * FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
+* FIX: Add QA output for TSNR to resting workflow (https://github.com/nipy/nipype/pull/1088)
+* FIX: Change N4BiasFieldCorrection to use short tag for dimensionality (backward compatible) (https://github.com/nipy/nipype/pull/1096)
+* ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (https://github.com/nipy/nipype/pull/1128)
+* FIX: Fixed AFNI Copy interface to use positional inputs as required (https://github.com/nipy/nipype/pull/1131)
+* ENH: Added a check in Dcm2nii to check if nipype created the config.ini file and remove if true (https://github.com/nipy/nipype/pull/1132)
+* ENH: Use a while loop to wait for Xvfb (up to a max wait time "xvfb_max_wait" in config file, default 10)
+       (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
 ============

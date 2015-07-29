@@ -9,6 +9,8 @@ def test_TensorMode_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
+    mask_file=dict(mandatory=False,
+    ),
     out_filename=dict(genfile=True,
     ),
     )
