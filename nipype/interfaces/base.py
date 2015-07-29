@@ -61,6 +61,17 @@ def _lock_files():
     ls = [p for p in ls if os.path.isfile(p)]
     return ls
 
+def _unlock_display(ndisplay):
+    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
+    try:
+        os.remove(lockf)
+    except:
+        return False
+
+    return True
+
+
+
 def _search_for_free_display():
     ls = [int(x.split('X')[1].split('-')[0]) for x in _lock_files()]
     min_display_num = 1000
@@ -946,6 +957,36 @@ class BaseInterface(Interface):
                                      version, max_ver))
         return unavailable_traits
 
+    def _run_wrapper(self, runtime):
+        sysdisplay = os.getenv('DISPLAY')
+        if self._redirect_x:
+            try:
+                from xvfbwrapper import Xvfb
+            except ImportError:
+                iflogger.error('Xvfb wrapper could not be imported')
+                raise
+
+            vdisp = Xvfb(nolisten='tcp')
+            vdisp.start()
+            vdisp_num = vdisp.vdisplay_num
+
+            iflogger.info('Redirecting X to :%d' % vdisp_num)
+            runtime.environ['DISPLAY'] = ':%d' % vdisp_num
+
+        runtime = self._run_interface(runtime)
+
+        if self._redirect_x:
+            if sysdisplay is None:
+                os.unsetenv('DISPLAY')
+            else:
+                os.environ['DISPLAY'] = sysdisplay
+
+            iflogger.info('Freeing X :%d' % vdisp_num)
+            vdisp.stop()
+            _unlock_display(vdisp_num)
+
+        return runtime
+
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -982,14 +1023,7 @@ class BaseInterface(Interface):
                         hostname=getfqdn(),
                         version=self.version)
         try:
-            if self._redirect_x:
-                from xvfbwrapper import Xvfb
-                with Xvfb() as xvfb:
-                    runtime = self._run_interface(runtime)
-            else:
-                iflogger.warn('Error redirecting X, trying without xvfb...')
-                runtime = self._run_interface(runtime)
-
+            runtime = self._run_wrapper(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -1097,6 +1131,25 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
+    def _exists_in_path(self, cmd, environ):
+        '''
+        Based on a code snippet from
+         http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+        '''
+
+        if 'PATH' in environ:
+            input_environ = environ.get("PATH")
+        else:
+            input_environ = os.environ.get("PATH", "")
+        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+        for directory in input_environ.split(os.pathsep):
+            base = os.path.join(directory, cmd)
+            options = [base] + [(base + ext) for ext in extensions]
+            for filename in options:
+                if os.path.exists(filename):
+                    return True, filename
+        return False, None
+
 
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
@@ -1149,12 +1202,19 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, output=None, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
     PIPE = subprocess.PIPE
+
+    cmdline = runtime.cmdline
+    if redirect_x:
+        exist_xvfb, _ = self._exists_in_path('xvfb-run', runtime.environ)
+        if not exist_val:
+            raise RuntimeError('Xvfb was not found, X redirection aborted')
+        cmdline = 'xvfb-run -a ' + cmdline
 
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
@@ -1162,19 +1222,19 @@ def run_command(runtime, output=None, timeout=0.01):
         stderr = open(errfile, 'wt')
         stdout = open(outfile, 'wt')
 
-        proc = subprocess.Popen(runtime.cmdline,
+        proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
                                 env=runtime.environ)
     else:
-        proc = subprocess.Popen(runtime.cmdline,
-                                 stdout=PIPE,
-                                 stderr=PIPE,
-                                 shell=True,
-                                 cwd=runtime.cwd,
-                                 env=runtime.environ)
+        proc = subprocess.Popen(cmdline,
+                                stdout=PIPE,
+                                stderr=PIPE,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1405,6 +1465,10 @@ class CommandLine(BaseInterface):
             o, e = proc.communicate()
             return o
 
+    def _run_wrapper(self, runtime):
+        runtime = self._run_interface(runtime)
+        return runtime
+
     def _run_interface(self, runtime, correct_return_codes=[0]):
         """Execute command via subprocess
 
@@ -1432,31 +1496,13 @@ class CommandLine(BaseInterface):
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
                                                           runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output)
+        runtime = run_command(runtime, output=self.inputs.terminal_output,
+                              redirect_x=self._redirect_x)
         if runtime.returncode is None or \
                         runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
-
-    def _exists_in_path(self, cmd, environ):
-        '''
-        Based on a code snippet from
-         http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-        '''
-
-        if 'PATH' in environ:
-            input_environ = environ.get("PATH")
-        else:
-            input_environ = os.environ.get("PATH", "")
-        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-        for directory in input_environ.split(os.pathsep):
-            base = os.path.join(directory, cmd)
-            options = [base] + [(base + ext) for ext in extensions]
-            for filename in options:
-                if os.path.exists(filename):
-                    return True, filename
-        return False, None
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
