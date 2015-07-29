@@ -53,13 +53,6 @@ class NipypeInterfaceError(Exception):
     def __str__(self):
         return repr(self.value)
 
-def _lock_files():
-    tmpdir = '/tmp'
-    pattern = '.X*-lock'
-    names = fnmatch.filter(os.listdir(tmpdir), pattern)
-    ls = [os.path.join(tmpdir, child) for child in names]
-    ls = [p for p in ls if os.path.isfile(p)]
-    return ls
 
 def _unlock_display(ndisplay):
     lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
@@ -70,19 +63,24 @@ def _unlock_display(ndisplay):
 
     return True
 
+def _exists_in_path(cmd, environ):
+    '''
+    Based on a code snippet from
+     http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+    '''
 
-
-def _search_for_free_display():
-    ls = [int(x.split('X')[1].split('-')[0]) for x in _lock_files()]
-    min_display_num = 1000
-    if len(ls):
-        display_num = max(min_display_num, max(ls) + 1)
+    if 'PATH' in environ:
+        input_environ = environ.get("PATH")
     else:
-        display_num = min_display_num
-    random.seed()
-    display_num += random.randint(0, 100)
-    return display_num
-
+        input_environ = os.environ.get("PATH", "")
+    extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+    for directory in input_environ.split(os.pathsep):
+        base = os.path.join(directory, cmd)
+        options = [base] + [(base + ext) for ext in extensions]
+        for filename in options:
+            if os.path.exists(filename):
+                return True, filename
+    return False, None
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -1131,25 +1129,6 @@ class BaseInterface(Interface):
                                  self.__class__.__name__)
         return self._version
 
-    def _exists_in_path(self, cmd, environ):
-        '''
-        Based on a code snippet from
-         http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-        '''
-
-        if 'PATH' in environ:
-            input_environ = environ.get("PATH")
-        else:
-            input_environ = os.environ.get("PATH", "")
-        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-        for directory in input_environ.split(os.pathsep):
-            base = os.path.join(directory, cmd)
-            options = [base] + [(base + ext) for ext in extensions]
-            for filename in options:
-                if os.path.exists(filename):
-                    return True, filename
-        return False, None
-
 
 class Stream(object):
     """Function to capture stdout and stderr streams with timestamps
@@ -1211,8 +1190,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     cmdline = runtime.cmdline
     if redirect_x:
-        exist_xvfb, _ = self._exists_in_path('xvfb-run', runtime.environ)
-        if not exist_val:
+        exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
+        if not exist_xvfb:
             raise RuntimeError('Xvfb was not found, X redirection aborted')
         cmdline = 'xvfb-run -a ' + cmdline
 
@@ -1452,7 +1431,7 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if self._exists_in_path(cmdname):
+        if _exists_in_path(cmdname):
             env = deepcopy(os.environ.data)
             out_environ = self._get_environ()
             env.update(out_environ)
@@ -1488,8 +1467,8 @@ class CommandLine(BaseInterface):
         out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         executable_name = self.cmd.split()[0]
-        exist_val, cmd_path = self._exists_in_path(executable_name,
-                                                   runtime.environ)
+        exist_val, cmd_path = _exists_in_path(executable_name,
+                                              runtime.environ)
         if not exist_val:
             raise IOError("%s could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
