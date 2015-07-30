@@ -2,6 +2,7 @@ Next release
 ============
 
 * ENH: New interfaces for MRTrix3 (https://github.com/nipy/nipype/pull/1126)
+* ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
 * FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089,
        replaced by https://github.com/nipy/nipype/pull/1093)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
@@ -13,6 +14,7 @@ Next release
 * FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
+* FIX: In the FSLXcommand _list_outputs function fixed for loop range (https://github.com/nipy/nipype/pull/1071)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
 * FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)

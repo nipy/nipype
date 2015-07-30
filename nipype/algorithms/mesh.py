@@ -78,6 +78,7 @@ class ComputeMeshWarp(BaseInterface):
 
     input_spec = ComputeMeshWarpInputSpec
     output_spec = ComputeMeshWarpOutputSpec
+    _redirect_x = True
 
     def _triangle_area(self, A, B, C):
         A = np.array(A)
@@ -221,6 +222,7 @@ class MeshWarpMaths(BaseInterface):
 
     input_spec = MeshWarpMathsInputSpec
     output_spec = MeshWarpMathsOutputSpec
+    _redirect_x = True
 
     def _run_interface(self, runtime):
         try:

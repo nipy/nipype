@@ -14,6 +14,7 @@ The `Workflow` class provides core functionality for batch processing.
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
+from nipype.interfaces.traits_extension import File
 try:
     from collections import OrderedDict
 except ImportError:
@@ -1947,6 +1948,7 @@ class JoinNode(Node):
             if name in fields and len(trait.inner_traits) == 1:
                 item_trait = trait.inner_traits[0]
                 dyntraits.add_trait(name, item_trait)
+                setattr(dyntraits, name, Undefined)
                 logger.debug("Converted the join node %s field %s"
                              " trait type from %s to %s"
                              % (self, name, trait.trait_type.info(),
