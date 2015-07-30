@@ -36,8 +36,7 @@ def test_MultiImageMaths_inputs():
     position=-1,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MultiImageMaths.input_spec()

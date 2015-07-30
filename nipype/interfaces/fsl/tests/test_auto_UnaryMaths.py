@@ -34,8 +34,7 @@ def test_UnaryMaths_inputs():
     position=-1,
     ),
     output_type=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = UnaryMaths.input_spec()

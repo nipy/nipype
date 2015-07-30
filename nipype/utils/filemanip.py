@@ -18,6 +18,7 @@ import numpy as np
 
 from ..interfaces.traits_extension import isdefined
 from .misc import is_container
+from .config import mkdir_p
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
@@ -61,10 +62,8 @@ def split_filename(fname):
 
     special_extensions = [".nii.gz", ".tar.gz"]
 
-    if fname and fname.endswith(os.path.sep):
-        fname = fname[:-1]
-
-    pth, fname = os.path.split(fname)
+    pth = os.path.dirname(fname)
+    fname = os.path.basename(fname)
 
     ext = None
     for special_ext in special_extensions:
@@ -258,8 +257,8 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             copyfile(matofile, matnfile, copy)
         copyfile(hdrofile, hdrnfile, copy)
     elif originalfile.endswith(".BRIK"):
-        hdrofile = originalfile[:-4] + ".HEAD"
-        hdrnfile = newfile[:-4] + ".HEAD"
+        hdrofile = originalfile[:-5] + ".HEAD"
+        hdrnfile = newfile[:-5] + ".HEAD"
         copyfile(hdrofile, hdrnfile, copy)
 
     return newfile

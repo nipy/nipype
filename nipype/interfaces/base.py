@@ -47,25 +47,40 @@ iflogger = logging.getLogger('interface')
 
 __docformat__ = 'restructuredtext'
 
-def _lock_files():
-    tmpdir = '/tmp'
-    pattern = '.X*-lock'
-    names = fnmatch.filter(os.listdir(tmpdir), pattern)
-    ls = [os.path.join(tmpdir, child) for child in names]
-    ls = [p for p in ls if os.path.isfile(p)]
-    return ls
+class NipypeInterfaceError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
-def _search_for_free_display():
-    ls = [int(x.split('X')[1].split('-')[0]) for x in _lock_files()]
-    min_display_num = 1000
-    if len(ls):
-        display_num = max(min_display_num, max(ls) + 1)
+
+def _unlock_display(ndisplay):
+    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
+    try:
+        os.remove(lockf)
+    except:
+        return False
+
+    return True
+
+def _exists_in_path(cmd, environ):
+    '''
+    Based on a code snippet from
+     http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+    '''
+
+    if 'PATH' in environ:
+        input_environ = environ.get("PATH")
     else:
-        display_num = min_display_num
-    random.seed()
-    display_num += random.randint(0, 100)
-    return display_num
-
+        input_environ = os.environ.get("PATH", "")
+    extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+    for directory in input_environ.split(os.pathsep):
+        base = os.path.join(directory, cmd)
+        options = [base] + [(base + ext) for ext in extensions]
+        for filename in options:
+            if os.path.exists(filename):
+                return True, filename
+    return False, None
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -940,6 +955,36 @@ class BaseInterface(Interface):
                                      version, max_ver))
         return unavailable_traits
 
+    def _run_wrapper(self, runtime):
+        sysdisplay = os.getenv('DISPLAY')
+        if self._redirect_x:
+            try:
+                from xvfbwrapper import Xvfb
+            except ImportError:
+                iflogger.error('Xvfb wrapper could not be imported')
+                raise
+
+            vdisp = Xvfb(nolisten='tcp')
+            vdisp.start()
+            vdisp_num = vdisp.vdisplay_num
+
+            iflogger.info('Redirecting X to :%d' % vdisp_num)
+            runtime.environ['DISPLAY'] = ':%d' % vdisp_num
+
+        runtime = self._run_interface(runtime)
+
+        if self._redirect_x:
+            if sysdisplay is None:
+                os.unsetenv('DISPLAY')
+            else:
+                os.environ['DISPLAY'] = sysdisplay
+
+            iflogger.info('Freeing X :%d' % vdisp_num)
+            vdisp.stop()
+            _unlock_display(vdisp_num)
+
+        return runtime
+
     def _run_interface(self, runtime):
         """ Core function that executes interface
         """
@@ -976,30 +1021,7 @@ class BaseInterface(Interface):
                         hostname=getfqdn(),
                         version=self.version)
         try:
-            if self._redirect_x:
-                exist_val, _ = self._exists_in_path('Xvfb',
-                                                    runtime.environ)
-                if not exist_val:
-                    raise IOError("Xvfb could not be found on host %s" %
-                                  (runtime.hostname))
-                else:
-                    vdisplay_num = _search_for_free_display()
-                    xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
-                    xvfb_proc = subprocess.Popen(xvfb_cmd,
-                                                 stdout=open(os.devnull),
-                                                 stderr=open(os.devnull))
-                    time.sleep(0.2)  # give Xvfb time to start
-                    if xvfb_proc.poll() is not None:
-                        raise Exception('Error: Xvfb did not start')
-
-                    runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
-
-            runtime = self._run_interface(runtime)
-
-            if self._redirect_x:
-                xvfb_proc.kill()
-                xvfb_proc.wait()
-
+            runtime = self._run_wrapper(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -1159,12 +1181,19 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, output=None, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
     PIPE = subprocess.PIPE
+
+    cmdline = runtime.cmdline
+    if redirect_x:
+        exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
+        if not exist_xvfb:
+            raise RuntimeError('Xvfb was not found, X redirection aborted')
+        cmdline = 'xvfb-run -a ' + cmdline
 
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
@@ -1172,19 +1201,19 @@ def run_command(runtime, output=None, timeout=0.01):
         stderr = open(errfile, 'wt')
         stdout = open(outfile, 'wt')
 
-        proc = subprocess.Popen(runtime.cmdline,
+        proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
                                 env=runtime.environ)
     else:
-        proc = subprocess.Popen(runtime.cmdline,
-                                 stdout=PIPE,
-                                 stderr=PIPE,
-                                 shell=True,
-                                 cwd=runtime.cwd,
-                                 env=runtime.environ)
+        proc = subprocess.Popen(cmdline,
+                                stdout=PIPE,
+                                stderr=PIPE,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1271,14 +1300,16 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
     environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
                                 nohash=True)
+    # This input does not have a "usedefault=True" so the set_default_terminal_output()
+    # method would work
     terminal_output = traits.Enum('stream', 'allatonce', 'file', 'none',
                                   desc=('Control terminal output: `stream` - '
-                                        'displays to terminal immediately, '
+                                        'displays to terminal immediately (default), '
                                         '`allatonce` - waits till command is '
                                         'finished to display output, `file` - '
                                         'writes output to file, `none` - output'
                                         ' is ignored'),
-                                  nohash=True, mandatory=True)
+                                  nohash=True)
 
 
 class CommandLine(BaseInterface):
@@ -1339,12 +1370,12 @@ class CommandLine(BaseInterface):
 
     @classmethod
     def set_default_terminal_output(cls, output_type):
-        """Set the default output type for FSL classes.
+        """Set the default terminal output for CommandLine Interfaces.
 
-        This method is used to set the default output type for all fSL
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.output_type.
+        This method is used to set default terminal output for
+        CommandLine Interfaces.  However, setting this will not
+        update the output type for any existing instances.  For these,
+        assign the <instance>.inputs.terminal_output.
         """
 
         if output_type in ['stream', 'allatonce', 'file', 'none']:
@@ -1400,7 +1431,7 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if self._exists_in_path(cmdname):
+        if _exists_in_path(cmdname):
             env = deepcopy(os.environ.data)
             out_environ = self._get_environ()
             env.update(out_environ)
@@ -1412,6 +1443,10 @@ class CommandLine(BaseInterface):
                                     )
             o, e = proc.communicate()
             return o
+
+    def _run_wrapper(self, runtime):
+        runtime = self._run_interface(runtime)
+        return runtime
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         """Execute command via subprocess
@@ -1432,39 +1467,21 @@ class CommandLine(BaseInterface):
         out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         executable_name = self.cmd.split()[0]
-        exist_val, cmd_path = self._exists_in_path(executable_name,
-                                                   runtime.environ)
+        exist_val, cmd_path = _exists_in_path(executable_name,
+                                              runtime.environ)
         if not exist_val:
             raise IOError("%s could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
                                                           runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output)
+        runtime = run_command(runtime, output=self.inputs.terminal_output,
+                              redirect_x=self._redirect_x)
         if runtime.returncode is None or \
                         runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
-
-    def _exists_in_path(self, cmd, environ):
-        '''
-        Based on a code snippet from
-         http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-        '''
-
-        if 'PATH' in environ:
-            input_environ = environ.get("PATH")
-        else:
-            input_environ = os.environ.get("PATH", "")
-        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-        for directory in input_environ.split(os.pathsep):
-            base = os.path.join(directory, cmd)
-            options = [base] + [(base + ext) for ext in extensions]
-            for filename in options:
-                if os.path.exists(filename):
-                    return True, filename
-        return False, None
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
@@ -1510,9 +1527,13 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
-    def _filename_from_source(self, name):
+    def _filename_from_source(self, name, chain=None):
+        if chain is None:
+            chain = []
+
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
+
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
@@ -1522,26 +1543,42 @@ class CommandLine(BaseInterface):
                 name_template = trait_spec.name_template
             if not name_template:
                 name_template = "%s_generated"
-            if isinstance(trait_spec.name_source, list):
-                for ns in trait_spec.name_source:
-                    if isdefined(getattr(self.inputs, ns)):
-                        name_source = ns
-                        break
+
+            ns = trait_spec.name_source
+            while isinstance(ns, list):
+                if len(ns) > 1:
+                    iflogger.warn('Only one name_source per trait is allowed')
+                ns = ns[0]
+
+            if not isinstance(ns, six.string_types):
+                raise ValueError(('name_source of \'%s\' trait sould be an '
+                                 'input trait name') % name)
+
+            if isdefined(getattr(self.inputs, ns)):
+                name_source = ns
+                source = getattr(self.inputs, name_source)
+                while isinstance(source, list):
+                    source = source[0]
+
+                # special treatment for files
+                try:
+                    _, base, _ = split_filename(source)
+                except AttributeError:
+                    base = source
             else:
-                name_source = trait_spec.name_source
-            source = getattr(self.inputs, name_source)
-            while isinstance(source, list):
-                source = source[0]
-            #special treatment for files
-            try:
-                _, base, _ = split_filename(source)
-            except AttributeError:
-                base = source
+                if name in chain:
+                    raise NipypeInterfaceError('Mutually pointing name_sources')
+
+                chain.append(name)
+                base = self._filename_from_source(ns, chain)
+
+            chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
                 return retval
             return self._overload_extension(retval, name)
+
         return retval
 
     def _gen_filename(self, name):
@@ -1557,7 +1594,7 @@ class CommandLine(BaseInterface):
             outputs = self.output_spec().get()
             for name, trait_spec in traits.iteritems():
                 out_name = name
-                if trait_spec.output_name != None:
+                if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
                 outputs[out_name] = \
                     os.path.abspath(self._filename_from_source(name))

@@ -8,6 +8,7 @@ def test_SplitNifti_inputs():
     out_ext=dict(usedefault=True,
     ),
     out_format=dict(),
+    out_path=dict(),
     split_dim=dict(),
     )
     inputs = SplitNifti.input_spec()

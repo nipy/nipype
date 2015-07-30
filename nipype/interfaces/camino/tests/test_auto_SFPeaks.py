@@ -52,8 +52,7 @@ def test_SFPeaks_inputs():
     stdsfrommean=dict(argstr='-stdsfrommean %f',
     units='NA',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SFPeaks.input_spec()

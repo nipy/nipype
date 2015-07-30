@@ -31,8 +31,7 @@ def test_Automask_inputs():
     name_template='%s_mask',
     ),
     outputtype=dict(),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Automask.input_spec()

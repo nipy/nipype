@@ -488,6 +488,7 @@ class ErrorMapInputSpec(BaseInterfaceInputSpec):
 
 class ErrorMapOutputSpec(TraitedSpec):
     out_map = File(exists=True, desc="resulting error map")
+    distance = traits.Float(desc="Average distance between volume 1 and 2")
 
 
 class ErrorMap(BaseInterface):
@@ -506,12 +507,13 @@ class ErrorMap(BaseInterface):
     _out_file = ''
 
     def _run_interface(self, runtime):
-        from scipy.spatial.distance import cdist, pdist
+        # Get two numpy data matrices
         nii_ref = nb.load(self.inputs.in_ref)
         ref_data = np.squeeze(nii_ref.get_data())
         tst_data = np.squeeze(nb.load(self.inputs.in_tst).get_data())
         assert(ref_data.ndim == tst_data.ndim)
 
+        # Load mask
         comps = 1
         mapshape = ref_data.shape
 
@@ -528,25 +530,28 @@ class ErrorMap(BaseInterface):
         else:
             msk = np.ones(shape=mapshape)
 
+        # Flatten both volumes and make the pixel differennce
         mskvector = msk.reshape(-1)
         msk_idxs = np.where(mskvector==1)
         refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
 
+        # Scale the difference
         if self.inputs.metric == 'sqeuclidean':
             errvector = diffvector**2
+            if (comps > 1):
+                errvector = np.sum(errvector, axis=1)
+            else:
+                errvector = np.squeeze(errvector)
         elif self.inputs.metric == 'euclidean':
-            X = np.hstack((refvector, tstvector))
-            errvector = np.linalg.norm(X, axis=1)
+            errvector = np.linalg.norm(diffvector, axis=1)
 
-        if (comps > 1):
-            errvector = np.sum(errvector, axis=1)
-        else:
-            errvector = np.squeeze(errvector)
-
-        errvectorexp = np.zeros_like(mskvector)
+        errvectorexp = np.zeros_like(mskvector, dtype=np.float32) # The default type is uint8
         errvectorexp[msk_idxs] = errvector
+
+        # Get averaged error
+        self._distance = np.average(errvector) # Only average the masked voxels
 
         errmap = errvectorexp.reshape(mapshape)
 
@@ -572,6 +577,7 @@ class ErrorMap(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_map'] = self._out_file
+        outputs['distance'] = self._distance
         return outputs
 
 

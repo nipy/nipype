@@ -39,8 +39,7 @@ def test_Eval_inputs():
     ),
     stop_idx=dict(requires=['start_idx'],
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Eval.input_spec()

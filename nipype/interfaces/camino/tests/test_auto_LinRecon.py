@@ -33,8 +33,7 @@ def test_LinRecon_inputs():
     mandatory=True,
     position=2,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LinRecon.input_spec()

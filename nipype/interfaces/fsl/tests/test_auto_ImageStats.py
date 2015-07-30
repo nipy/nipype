@@ -25,8 +25,7 @@ def test_ImageStats_inputs():
     split_4d=dict(argstr='-t',
     position=1,
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageStats.input_spec()

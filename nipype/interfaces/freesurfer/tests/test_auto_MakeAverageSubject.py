@@ -19,8 +19,7 @@ def test_MakeAverageSubject_inputs():
     mandatory=True,
     sep=' ',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MakeAverageSubject.input_spec()

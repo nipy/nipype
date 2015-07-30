@@ -6,8 +6,7 @@
 from copy import deepcopy
 from glob import glob
 import os
-import pickle
-import pwd
+import getpass
 import shutil
 from socket import gethostname
 import sys
@@ -23,8 +22,6 @@ from ..utils import (nx, dfs_preorder, topological_sort)
 from ..engine import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
-from nipype.interfaces.utility import Function
-
 
 from ... import logging
 logger = logging.getLogger('workflow')
@@ -55,7 +52,7 @@ def report_crash(node, traceback=None, hostname=None):
                                      exc_value,
                                      exc_traceback)
     timeofcrash = strftime('%Y%m%d-%H%M%S')
-    login_name = pwd.getpwuid(os.geteuid())[0]
+    login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
                                         login_name,
                                         name)
@@ -112,11 +109,15 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+
+can_import_matplotlib = True #Silently allow matplotlib to be ignored
 try:
     import matplotlib
     matplotlib.use('%s')
 except ImportError:
+    can_import_matplotlib = False
     pass
+
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
 from socket import gethostname
@@ -130,7 +131,9 @@ try:
         from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
-    config.update_matplotlib()
+    ## Only configure matplotlib if it was successfully imported, matplotlib is an optional component to nipype
+    if can_import_matplotlib:
+        config.update_matplotlib()
     logging.update_logging(config)
     traceback=None
     cwd = os.getcwd()

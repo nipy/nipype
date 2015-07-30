@@ -35,8 +35,7 @@ def test_Directions2Amplitude_inputs():
     ),
     quiet_display=dict(argstr='-quiet',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Directions2Amplitude.input_spec()

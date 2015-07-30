@@ -22,8 +22,7 @@ def test_ParseDICOMDir_inputs():
     subjects_dir=dict(),
     summarize=dict(argstr='--summarize',
     ),
-    terminal_output=dict(mandatory=True,
-    nohash=True,
+    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ParseDICOMDir.input_spec()
