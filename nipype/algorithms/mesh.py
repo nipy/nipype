@@ -44,7 +44,11 @@ class WarpPointsOutputSpec(TraitedSpec):
 class WarpPoints(BaseInterface):
 
     """
-    Applies a displacement field to a point set in vtk
+    Applies a displacement field to a point set given in vtk format.
+    Any discrete deformation field, given in physical coordinates and
+    which volume covers the extent of the vtk point set, is a valid
+    ``warp`` file. FSL interfaces are compatible, for instance any
+    field computed with :class:`nipype.interfaces.fsl.utils.ConvertWarp`.
 
     Example
     -------
