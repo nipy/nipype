@@ -43,6 +43,7 @@ matplotlib_backend = Agg
 plugin = Linear
 remove_node_directories = false
 remove_unnecessary_outputs = true
+try_hard_link_datasink = true
 single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
