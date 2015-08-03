@@ -7,28 +7,24 @@ from copy import deepcopy
 from glob import glob
 from collections import defaultdict
 import os
-import pwd
 import re
-from uuid import uuid1
 
 import numpy as np
 from nipype.utils.misc import package_check
 from nipype.external import six
 
 package_check('networkx', '1.3')
-from socket import gethostname
 
 import networkx as nx
 
 from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
                                filename_to_list, get_related_files)
 from ..utils.misc import create_function_from_source, str2bool
-from ..interfaces.base import (CommandLine, isdefined, Undefined, Bunch,
+from ..interfaces.base import (CommandLine, isdefined, Undefined,
                                InterfaceResult)
 from ..interfaces.utility import IdentityInterface
 from ..utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-from .. import get_info
 from .. import logging, config
 logger = logging.getLogger('workflow')
 

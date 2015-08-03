@@ -13,8 +13,7 @@ def test_DcmStack_inputs():
     out_ext=dict(usedefault=True,
     ),
     out_format=dict(),
-    use_cwd=dict(usedefault=True,
-    ),
+    out_path=dict(),
     )
     inputs = DcmStack.input_spec()
 
