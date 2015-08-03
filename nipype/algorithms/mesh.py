@@ -86,7 +86,6 @@ class WarpPoints(BaseInterface):
             vtk_major = vtk.VTK_MAJOR_VERSION
         except ImportError:
             iflogger.warn(('python-vtk could not be imported'))
-            pass
 
         try:
             from tvtk.api import tvtk
@@ -98,10 +97,8 @@ class WarpPoints(BaseInterface):
             ETSConfig.toolkit = 'null'
         except ImportError:
             iflogger.warn(('ETS toolkit could not be imported'))
-            pass
         except ValueError:
             iflogger.warn(('ETS toolkit could not be set to null'))
-            pass
 
         import nibabel as nb
         import numpy as np
@@ -233,10 +230,8 @@ class ComputeMeshWarp(BaseInterface):
             ETSConfig.toolkit = 'null'
         except ImportError:
             iflogger.warn(('ETS toolkit could not be imported'))
-            pass
         except ValueError:
             iflogger.warn(('ETS toolkit is already set'))
-            pass
 
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
@@ -256,7 +251,6 @@ class ComputeMeshWarp(BaseInterface):
             errvector = nla.norm(diff, axis=1)
         except TypeError:  # numpy < 1.9
             errvector = np.apply_along_axis(nla.norm, 1, diff)
-            pass
 
         if self.inputs.metric == 'sqeuclidean':
             errvector = errvector ** 2
@@ -367,10 +361,8 @@ class MeshWarpMaths(BaseInterface):
             ETSConfig.toolkit = 'null'
         except ImportError:
             iflogger.warn(('ETS toolkit could not be imported'))
-            pass
         except ValueError:
             iflogger.warn(('ETS toolkit is already set'))
-            pass
 
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
         vtk1 = r1.output
