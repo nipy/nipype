@@ -2,6 +2,8 @@ Next release
 ============
 
 * ENH: Improved TrackDensityMap of dipy (https://github.com/nipy/nipype/pull/1091)
+* ENH: Added interface to simulate DWIs using the multi-tensor model
+       (https://github.com/nipy/nipype/pull/1085)
 * ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
 * FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089,
        replaced by https://github.com/nipy/nipype/pull/1093)
