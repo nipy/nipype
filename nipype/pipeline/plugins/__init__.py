@@ -15,3 +15,4 @@ from .pbsgraph import PBSGraphPlugin
 from .sgegraph import SGEGraphPlugin
 from .lsf import LSFPlugin
 from .slurm import SLURMPlugin
+from .slurmgraph import SLURMGraphPlugin

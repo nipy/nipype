@@ -1,4 +1,4 @@
-"""Parallel workflow execution via SGE
+"""Parallel workflow execution via SLURM
 """
 
 import os
@@ -28,8 +28,8 @@ def node_completed_status( checknode):
     return (hash_exists and node_state_does_not_require_overwrite )
 
 
-class SGEGraphPlugin(GraphPluginBase):
-    """Execute using SGE
+class SLURMGraphPlugin(GraphPluginBase):
+    """Execute using SLURM
 
     The plugin_args input to run can be used to control the SGE execution.
     Currently supported options are:
@@ -39,34 +39,32 @@ class SGEGraphPlugin(GraphPluginBase):
                   qsub call
 
     """
-    _template = """
-#!/bin/bash
-#$ -V
-#$ -S /bin/bash
-"""
+    _template="#!/bin/bash"
 
     def __init__(self, **kwargs):
-        self._qsub_args = ''
-        if 'plugin_args' in kwargs:
-            plugin_args = kwargs['plugin_args']
-            if 'template' in plugin_args:
-                self._template = plugin_args['template']
+        if 'plugin_args' in kwargs and kwargs['plugin_args']:
+            if 'retry_timeout' in kwargs['plugin_args']:
+                self._retry_timeout = kwargs['plugin_args']['retry_timeout']
+            if  'max_tries' in kwargs['plugin_args']:
+                self._max_tries = kwargs['plugin_args']['max_tries']
+            if 'template' in kwargs['plugin_args']:
+                self._template = kwargs['plugin_args']['template']
                 if os.path.isfile(self._template):
                     self._template = open(self._template).read()
-            if 'qsub_args' in plugin_args:
-                self._qsub_args = plugin_args['qsub_args']
-            if 'dont_resubmit_completed_jobs' in plugin_args:
-                self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
+            if 'sbatch_args' in kwargs['plugin_args']:
+                self._sbatch_args = kwargs['plugin_args']['sbatch_args']
+            if 'dont_resubmit_completed_jobs' in kwargs['plugin_args']:
+                self._dont_resubmit_completed_jobs = kwargs['plugin_args']['dont_resubmit_completed_jobs']
             else:
                 self._dont_resubmit_completed_jobs = False
-        super(SGEGraphPlugin, self).__init__(**kwargs)
+        super(SLURMGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
         def make_job_name(jobnumber, nodeslist):
             """
             - jobnumber: The index number of the job to create
             - nodeslist: The name of the node being processed
-            - return: A string representing this job to be displayed by SGE
+            - return: A string representing this job to be displayed by SLURM
             """
             job_name='j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
@@ -101,8 +99,8 @@ class SGEGraphPlugin(GraphPluginBase):
                 if cache_doneness_per_node.get(idx,False):
                     continue
                 else:
-                    template, qsub_args = self._get_args(
-                        node, ["template", "qsub_args"])
+                    template, sbatch_args = self._get_args(
+                        node, ["template", "sbatch_args"])
 
                     batch_dir, name = os.path.split(pyscript)
                     name = '.'.join(name.split('.')[:-1])
@@ -119,29 +117,29 @@ class SGEGraphPlugin(GraphPluginBase):
                         batchfp.close()
                     deps = ''
                     if idx in dependencies:
-                        values = ' '
+                        values = ''
                         for jobid in dependencies[idx]:
                             ## Avoid dependancies of done jobs
                             if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
-                                values += "${{{0}}},".format(make_job_name(jobid, nodes))
-                        if values != ' ': # i.e. if some jobs were added to dependency list
-                            values = values.rstrip(',')
-                            deps = '-hold_jid%s' % values
+                                values += "${{{0}}}:".format(make_job_name(jobid, nodes))
+                        if values != '': # i.e. if some jobs were added to dependency list
+                            values = values.rstrip(':')
+                            deps = '--dependency=afterok:%s' % values
                     jobname = make_job_name(idx, nodes)
-                    # Do not use default output locations if they are set in self._qsub_args
+                    # Do not use default output locations if they are set in self._sbatch_args
                     stderrFile = ''
-                    if self._qsub_args.count('-e ') == 0:
+                    if self._sbatch_args.count('-e ') == 0:
                         stderrFile = '-e {errFile}'.format(
                             errFile=batchscripterrfile)
                     stdoutFile = ''
-                    if self._qsub_args.count('-o ') == 0:
+                    if self._sbatch_args.count('-o ') == 0:
                         stdoutFile = '-o {outFile}'.format(
                             outFile=batchscriptoutfile)
-                    full_line = '{jobNm}=$(qsub {outFileOption} {errFileOption} {extraQSubArgs} {dependantIndex} -N {jobNm} {batchscript} | awk \'{{print $3}}\')\n'.format(
+                    full_line = '{jobNm}=$(sbatch {outFileOption} {errFileOption} {extraSBatchArgs} {dependantIndex} -J {jobNm} {batchscript} | awk \'{{print $4}}\')\n'.format(
                         jobNm=jobname,
                         outFileOption=stdoutFile,
                         errFileOption=stderrFile,
-                        extraQSubArgs=qsub_args,
+                        extraSBatchArgs=sbatch_args,
                         dependantIndex=deps,
                         batchscript=batchscriptfile)
                     fp.writelines(full_line)
