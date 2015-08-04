@@ -855,3 +855,138 @@ class MS_LDA(FSCommand):
 
     def _gen_filename(self, name):
         pass
+
+class Label2LabelInputSpec(FSTraitedSpec):
+    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
+                               desc="Input hemisphere")
+    subject_id = traits.String(argstr="--trgsubject %s", mandatory=True,
+                                   desc="Target subject")
+    label = traits.String(mandatory=True, desc="Input label name")
+    sphere_reg = File(mandatory=True, exists=True,
+                      desc="Implicit input <hemisphere>.sphere.reg")
+    white = File(mandatory=True, exists=True,
+                 desc="Implicit input <hemisphere>.white")
+    #optional
+    source_subject = traits.String(argstr="--srcsubject %s", mandatory=False, genfile=True,
+                                   desc="Source subject")
+    source_label = File(argstr="--srclabel %s", mandatory=False, genfile=True, exists=True,
+                        desc="Source label")
+    target_label  = File(argstr="--trglabel %s", mandatory=False, genfile=True,
+                        desc="Source label")
+    registration_method = traits.String(argstr="--regmethod %s", mandatory=False, genfile=True,
+                                   desc="Target subject")
+    threshold = traits.Bool(mandatory=False, desc="Specifies whether source label should be the threshold label")
+
+class Label2LabelOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output label')
+
+
+class Label2Label(FSCommand):
+    """
+    Converts a label in one subject's space to a label
+    in another subject's space using either talairach or spherical
+    as an intermediate registration space. 
+
+    If a source mask is used, then the input label must have been
+    created from a surface (ie, the vertex numbers are valid). The 
+    format can be anything supported by mri_convert or curv or paint.
+    Vertices in the source label that do not meet threshold in the
+    mask will be removed from the label.
+    """
+
+    _cmd = 'mri_label2label'
+    input_spec = Label2LabelInputSpec
+    output_spec = Label2LabelOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.target_label):
+            outputs['out_file'] = self.inputs.target_label
+        else:
+            out_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+            if self.inputs.threshold:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.thresh.label'
+            else:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+            outputs['out_file'] = os.path.join(out_dir, basename)
+        return outputs
+
+    def _gen_filename(self, name):
+        # deterimine source subject
+        if not isdefined(self.inputs.source_subject):
+            # by default, the source subject is 'fsaverage'
+            src_subject = 'fsaverage'
+        else:
+            src_subject = self.inputs.source_subject
+        # if generating the source subject string
+        if name == 'source_subject':
+            return src_subject
+        # if generating the source label
+        elif name == 'source_label':
+            # source label will be locaed in the source subject directory
+            fsaverage = os.path.join(self.inputs.subjects_dir, src_subject)
+            # if this directory doesn't exist, we need to create it
+            if not os.path.isdir(fsaverage):
+                fs_home = os.path.abspath( os.environ.get('FREESURFER_HOME') )
+                fsaverage_home = os.path.join(fs_home, 'subjects', 'fsaverage')
+                # Create a symlink
+                os.symlink(fsaverage_home, fsaverage)
+            # input label will be different depending on the whether it is a threshold or not
+            if self.inputs.threshold:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.thresh.label'
+            else:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+            return os.path.join(fsaverage, 'label', basename) 
+        elif name == 'target_label':
+            return self._list_outputs()['out_file']
+        elif name == 'registration_method':
+            return 'surface'
+        else:
+            return None
+
+class Label2AnnotInputSpec(FSTraitedSpec):
+    #required
+    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
+                               desc="Input hemisphere")
+    subject_id = traits.String(argstr="--s %s", mandatory=True,
+                               desc="Subject name/ID")
+    in_labels = traits.List(argstr="%s", mandatory=True,
+                            desc="List of input label files")
+    out_annot = traits.String(argstr="--a %s", mandatory=True,
+                             desc="Name of the annotation to create")
+    #optional
+    keep_max = traits.Bool(argstr="--maxstatwinner", mandatory=False,
+                           desc="Keep label with highest 'stat' value")
+    verbose_off = traits.Bool(argstr="--noverbose", mandatory=False,
+                              desc="Turn off overlap and stat override messages")
+    color_table = File(argstr="--ctab %s", mandatory=False, exists=True, genfile=True,
+                     desc="File that defines the structure names, their indices, and their color")
+
+class Label2AnnotOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output annotation file')
+
+
+class Label2Annot(FSCommand):
+    """
+    Converts a set of surface labels to an annotation file
+    """
+
+    _cmd = 'mris_label2annot'
+    input_spec = Label2AnnotInputSpec
+    output_spec = Label2AnnotOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name is 'in_labels':
+            argstr = ""
+            for label in value:
+                argstr = argstr + "--l " + label + " "
+            return spec.argstr % argstr
+        return super(Label2Annot, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs["out_file"] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label',
+                                           self.inputs.hemisphere + '.' + self.inputs.out_annot + '.annot')
+        return outputs

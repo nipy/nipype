@@ -15,7 +15,7 @@ import os
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename
 
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
+from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec, FSScriptCommand, FSScriptOutputSpec
 from nipype.interfaces.base import TraitedSpec, File, traits, OutputMultiPath, isdefined, CommandLine, CommandLineInputSpec
 
 filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
@@ -876,7 +876,7 @@ class MRITessellateInputSpec(FSTraitedSpec):
     in_file = File(exists=True, mandatory=True, position=-3, argstr='%s', desc='Input volume to tesselate voxels from.')
     label_value = traits.Int(position=-2, argstr='%d', mandatory=True,
         desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)')
-    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
+    out_file = File(argstr='%s', position=-1, genfile=True, desc='output filename or True to generate one')
     tesselate_all_voxels = traits.Bool(argstr='-a', desc='Tessellate the surface of all voxels with different labels')
     use_real_RAS_coordinates = traits.Bool(argstr='-n', desc='Saves surface with real RAS coordinates where c_(r,a,s) != 0')
 
@@ -918,7 +918,7 @@ class MRITessellate(FSCommand):
 
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):
-            return self.inputs.out_file
+            return os.path.abspath(self.inputs.out_file)
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return name + ext + '_' + str(self.inputs.label_value)
@@ -1277,3 +1277,1107 @@ class Tkregister2(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
+
+
+class AddXFormToHeaderInputSpec(FSTraitedSpec):
+
+    # required
+    in_file = File(exists=True, mandatory=True, position=-2, argstr="%s", desc="input volume")
+    # transform file does NOT need to exist at the time if using copy_name
+    transform = File(exists=False, mandatory=True, position=-3, argstr="%s", desc="xfm file")
+    out_file = File('output.mgz', position=-1, argstr="%s", usedefault=True, desc="output volume")
+    # optional
+    copy_name = traits.Bool(argstr="-c", desc="do not try to load the xfmfile, just copy name")
+    verbose = traits.Bool(argstr="-v", desc="be verbose")
+
+
+class AddXFormToHeaderOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="output volume")
+
+
+class AddXFormToHeader(FSCommand):
+    """ Just adds specified xform to the volume header
+
+    (!) WARNING: transform input **MUST** be an absolute path to a DataSink'ed transform or
+    the output will reference a transform in the workflow cache directory!
+
+    >>> from nipype.interfaces.freesurfer import AddXFormToHeader
+    >>> adder = AddXFormToHeader()
+    >>> adder.inputs.in_file = 'norm.mgz'
+    >>> adder.inputs.transform = 'talairach.xfm'
+    >>> adder.cmdline
+    'mri_add_xform_to_header talairach.xfm norm.mgz output.mgz'
+
+    >>> adder.inputs.copy_name = True
+    >>> adder.cmdline
+    'mri_add_xform_to_header -c talairach.xfm norm.mgz output.mgz'
+
+    >>> adder.run()   #doctest: +SKIP
+
+    References:
+    ----------
+    [https://surfer.nmr.mgh.harvard.edu/fswiki/mri_add_xform_to_header]
+
+    """
+    _cmd = "mri_add_xform_to_header"
+    input_spec = AddXFormToHeaderInputSpec
+    output_spec = AddXFormToHeaderOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'transform':
+            return value  # os.path.abspath(value)
+        # if name == 'copy_name' and value:
+        #     self.input_spec.transform
+        return super(AddXFormToHeader, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
+    in_file = File(argstr='-xfm %s', xor=['subject'], exists=True, mandatory=True, position=-1,
+                   desc="specify the talairach.xfm file to check")
+    subject = traits.String(argstr='-subj %s', xor=['in_file'], mandatory=True, position=-1,
+                            desc="specify subject's name")
+    # optional
+    threshold = traits.Float(default=0.010, argstr='-T %.3f', desc="Talairach transforms for subjects with p-values <= T " +\
+                             "are considered as very unlikely default=0.010")
+
+
+class CheckTalairachAlignmentOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=True, desc="The input file for CheckTalairachAlignment")
+
+
+class CheckTalairachAlignment(FSCommand):
+    """
+    This program detects Talairach alignment failures
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import CheckTalairachAlignment
+    >>> checker = CheckTalairachAlignment()
+
+    >>> checker.inputs.in_file = 'talairach.xfm'
+    >>> checker.inputs.threshold = 0.005
+    >>> checker.cmdline
+    'talairach_afd -T 0.005 -xfm talairach.xfm'
+
+    >>> checker.run() # doctest: +SKIP
+    """
+    _cmd = "talairach_afd"
+    input_spec = CheckTalairachAlignmentInputSpec
+    output_spec = CheckTalairachAlignmentOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self.inputs.in_file
+        return outputs
+
+
+class TalairachQCInputSpec(FSTraitedSpec):
+    log_file = File(argstr='%s', mandatory=True, exists=True, position=0, desc="The log file for TalairachQC")
+
+
+class TalairachQC(FSScriptCommand):
+    """
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import TalairachQC
+    >>> qc = TalairachQC()
+
+    >>> qc.inputs.log_file = 'talairach.log'
+    >>> qc.cmdline
+    'tal_QC_AZS talairach.log'
+
+    >>> qc.run() # doctest: +SKIP
+    """
+    _cmd = "tal_QC_AZS"
+    input_spec = TalairachQCInputSpec
+    output_spec = FSScriptOutputSpec
+
+
+class RemoveNeckInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", exisits=True, madatory=True, position=-4, desc="Input file for RemoveNeck")
+    out_file = File(argstr="%s", exists=False, mandatory=True, genfile=True, position=-1, desc="Output file for RemoveNeck")
+    transform = File(argstr="%s", exists=True, mandatory=True, position=-3, desc="Input transform file for RemoveNeck")
+    template = File(argstr="%s", exists=True, mandatory=True, position=-2, desc="Input template file for RemoveNeck")
+    #optional
+    radius = traits.Int(argstr="-radius %d", mandatory=False, desc="Radius")
+
+
+class RemoveNeckOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file with neck removed")
+    
+class RemoveNeck(FSCommand):
+    """
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import TalairachQC
+    >>> remove_neck = RemoveNeck()
+
+    >>> remove_neck.inputs.in_file = 'nu.mgz'
+    >>> remove_neck.inputs.out_file = 'nu_noneck.mgz'
+    >>> remove_neck.run() # doctest: +SKIP
+    """
+    _cmd = "mri_remove_neck"
+    input_spec = RemoveNeckInputSpec
+    output_spec = RemoveNeckOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('nu_noneck.mgz')
+        return None
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class MRIFillInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", mandatory=True, exists=True, position=-2,
+                   desc="Input white matter file")
+    out_file = File(argstr="%s", mandatory=True, exists=False, position=-1,
+                    desc="Output filled volume file name for MRIFill")
+    #optional
+    segmentation = File(argstr="-segmentation %s", mandatory=False, exists=True,
+                        desc="Input segmentation file for MRIFill")
+    transform = File(argstr="-xform %s", mandatory=False, exists=True,
+                        desc="Input transform file for MRIFill")
+    log_file = File(argstr="-a %s", mandatory=False, exists=False,
+                        desc="Input segmentation file for MRIFill")
+    
+class MRIFillOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file from MRIFill")
+    
+class MRIFill(FSCommand):
+
+    _cmd = "mri_fill"
+    input_spec = MRIFillInputSpec
+    output_spec = MRIFillOutputSpec
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class ExtractMainComponentInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for ExtractMainComponent")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                   desc="Output file for ExtractMainComponent")
+    
+class ExtractMainComponentOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for ExtractMainComponent")
+    
+class ExtractMainComponent(FSCommand):
+
+    _cmd = 'mris_extract_main_component'
+    input_spec = ExtractMainComponentInputSpec
+    output_spec = ExtractMainComponentOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRIsInflateInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for MRIsInflate")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                   desc="Output file for MRIsInflate")
+    #optional
+    out_sulc = File(mandatory=False, exists=False,
+                    desc="Future filename of the sulc file. Location is {SUBJECTS_DIR}/{SUBJID}/surf/<hemisphere>.sulc")
+    no_save_sulc = traits.Bool(argstr='-no-save-sulc', mandatory=False,
+                               desc="Do not save sulc file as output")
+    
+class MRIsInflateOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for MRIsInflate")
+    out_sulc = File(exists=False, desc="Output sulc file")
+    
+class MRIsInflate(FSCommand):
+    
+    _cmd = 'mris_inflate'
+    input_spec = MRIsInflateInputSpec
+    output_spec = MRIsInflateOutputSpec
+
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        if not self.inputs.no_save_sulc:
+            #if the sulc file will be saved
+            outputs["out_sulc"] = os.path.abspath(self.inputs.out_sulc)
+        return outputs
+
+    
+class SphereInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for Sphere")
+    
+    #optional
+    out_file = File(argstr="%s", position=-1, mandatory=False, exists=False, genfile=True,
+                    desc="Output file for Sphere")
+    seed = traits.Int(argstr="-seed %d", mandatory=False, desc="Seed for setting random number generator")
+    magic = traits.Bool(argstr="-q", mandatory=False,
+                        desc="Magic. No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    in_smoothwm = File(mandatory=False, exists=True,
+                       desc="Input surface required when -q flag is not selected")
+
+class SphereOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for Sphere")
+    
+class Sphere(FSCommand):
+    
+    _cmd = 'mris_sphere'
+    input_spec = SphereInputSpec
+    output_spec = SphereOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        else:
+            #save file with hemisphere label and to same directoyr as input
+            head, tail = os.path.split(self.inputs.in_file)
+            hemisphere = tail.split('.')[0]
+            basename = hemisphere + '.sphere'
+            outputs["out_file"] = os.path.join(head, basename)
+        return outputs
+    
+class FixTopologyInputSpec(FSTraitedSpec):
+    in_orig = File(exists=True, mandatory=True, desc="Undocumented input file <hemisphere>.orig")
+    in_inflated = File(exists=True, mandatory=True, desc="Undocumented input file <hemisphere>.inflated")
+    hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    #optional
+    seed = traits.Int(argstr="-seed %d", mandatory=False, desc="Seed for setting random number generator")
+    ga = traits.Bool(argstr="-ga", mandatory=False,
+                        desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+                        desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    sphere = traits.File(argstr="-sphere %s", mandatory=False,
+                         desc="Sphere input file")
+    
+
+class FixTopologyOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for FixTopology")
+    
+class FixTopology(FSCommand):
+    """
+    This program computes a mapping from the unit sphere onto the surface 
+    of the cortex from a previously generated approximation of the 
+    cortical surface, thus guaranteeing a topologically correct surface.
+    """
+    
+    _cmd = 'mris_fix_topology'
+    input_spec = FixTopologyInputSpec
+    output_spec = FixTopologyOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'sphere':
+            #get the basename and take out the hemisphere
+            suffix = os.path.basename(value).split('.',1)[1]
+            return spec.argstr % suffix
+        return super(FixTopology, self)._format_arg(name, spec, value) 
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_orig)
+        return outputs
+
+
+class EulerNumberInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-1, mandatory=True, exists=True,
+                   desc="Input file for EulerNumber")
+    
+class EulerNumberOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for EulerNumber")
+    
+class EulerNumber(FSCommand):
+    
+    _cmd = 'mris_euler_number'
+    input_spec = EulerNumberInputSpec
+    output_spec = EulerNumberOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        return outputs
+
+class RemoveIntersectionInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for RemoveIntersection")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                   desc="Output file for RemoveIntersection")
+    
+class RemoveIntersectionOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for RemoveIntersection")
+    
+class RemoveIntersection(FSCommand):
+    
+    _cmd = 'mris_remove_intersection'
+    input_spec = RemoveIntersectionInputSpec
+    output_spec = RemoveIntersectionOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MakeSurfacesInputSpec(FSTraitedSpec):
+    #required
+    hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    #implicit
+    in_orig = File(exists=True, mandatory=True, desc="Implicit input file <hemisphere>.orig")
+    in_wm = File(exists=True, mandatory=True, desc="Implicit input file wm.mgz")
+    in_filled = File(exists=True, mandatory=True, desc="Implicit input file filled.mgz")
+    in_label = File(exists=True, mandatory=False,
+                    desc="Implicit input label/<hemisphere>.aparc.annot")
+    #optional
+    orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
+                      desc="Specify a white surface to start with")
+    orig_pial = File(argstr="-orig_pial %s", exists=True, mandatory=False, requires=['in_label'],
+                     desc="Specify a pial surface to start with")
+    fix_mtl = traits.Bool(argstr="-fix_mtl", mandatory=False,
+                          desc="Undocumented flag")
+    no_white = traits.Bool(argstr="-nowhite", mandatory=False,
+                           desc="Undocumented flag")
+    in_aseg = File(argstr="-aseg %s", exists=True, mandatory=False, desc="Input segmentation file")
+    in_T1 = File(argstr="-T1 %s", exists=True, mandatory=False, desc="Input brain or T1 file")
+    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+                         desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    noaparc = traits.Bool(argstr="-noaparc", mandatory=False,
+                          desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+
+class MakeSurfacesOutputSpec(TraitedSpec):
+    out_white = File(exists=False, desc="Output white matter hemisphere surface")
+    out_curv = File(exists=False, desc="Output curv file for MakeSurfaces")
+    out_area = File(exists=False, desc="Output area file for MakeSurfaces")
+    out_cortex = File(exists=False, desc="Output cortex file for MakeSurfaces")
+    out_pial = File(exists=False, desc="Output pial surface for MakeSurfaces")
+    out_thickness = File(exists=False, desc="Output thickness file for MakeSurfaces")
+        
+class MakeSurfaces(FSCommand):
+    """
+    This program positions the tessellation of the cortical surface at the
+    white matter surface, then the gray matter surface and generate 
+    surface files for these surfaces as well as a 'curvature' file for the
+    cortical thickness, and a surface file which approximates layer IV of 
+    the cortical sheet.
+    """
+    
+    _cmd = 'mris_make_surfaces'
+    input_spec = MakeSurfacesInputSpec
+    output_spec = MakeSurfacesOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name in ['in_T1', 'in_aseg']:
+            #These inputs do not take full paths as inputs or even basenames
+            basename = os.path.basename(value)
+            #whent he -mgz flag is specified, it assumes the mgz extension
+            if self.inputs.mgz:
+                prefix = basename.rstrip('.mgz')
+            else:
+                prefix = basename
+            return spec.argstr % prefix
+        elif name in ['orig_white', 'orig_pial']:
+            #these inputs do take full file paths or even basenames
+            basename = os.path.basename(value)
+            suffix = basename.split('.')[1]
+            return spec.argstr % suffix
+        return super(MakeSurfaces, self)._format_arg(name, spec, value)    
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        #Outputs are saved in the toward the surf directory
+        dest_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'surf')
+        if not self.inputs.no_white:
+            outputs["out_white"] = os.path.join(dest_dir, self.inputs.hemisphere + '.white')
+        #The curv and area files must have the hemisphere names as a prefix
+        outputs["out_curv"] = os.path.join(dest_dir, self.inputs.hemisphere + '.curv')
+        outputs["out_area"] = os.path.join(dest_dir, self.inputs.hemisphere + '.area')
+        #Something determines when a pial surface and thickness file is generated, but documentation doesn't say what
+        #The orig_pial flag is just a guess
+        if isdefined(self.inputs.orig_pial):
+            outputs["out_curv"] =  outputs["out_curv"] + ".pial"
+            outputs["out_area"] =  outputs["out_area"] + ".pial"
+            outputs["out_pial"] = os.path.join(dest_dir, self.inputs.hemisphere + '.pial')
+            outputs["out_thickness"] = os.path.join(dest_dir, self.inputs.hemisphere + '.thickness')
+        else:
+            #when a pial surface is generated, the cortex label file is not generated
+            outputs["out_cortex"] = os.path.join(dest_dir, self.inputs.hemisphere + '.cortex.label')
+        return outputs
+
+
+class CurvatureInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for Curvature")
+    #optional
+    threshold = traits.Float(argstr="-thresh %.3f", mandatory=False, desc="Undocumented input threshold")
+    n = traits.Bool(argstr="-n", mandatory=False, desc="Undocumented boolean flag")
+    averages = traits.Int(argstr="-a %d", mandatory=False,
+                          desc="Perform this number iterative averages of curvature measure before saving")
+    save = traits.Bool(argstr="-w", mandatory=False,
+                       desc="Save curvature files (will only generate screen output without this option)")
+    distances = traits.Tuple(traits.Int, traits.Int, argstr="-distances %d %d",
+                             desc="Undocumented input integer distances")
+    
+    
+class CurvatureOutputSpec(TraitedSpec):
+    out_mean = File(exists=False, desc="Mean curvature output file")
+    out_gauss = File(exists=False, desc="Gaussian curvature output file")
+    
+class Curvature(FSCommand):
+    """
+    This program will compute the second fundamental form of a cortical 
+    surface. It will create two new files <hemi>.<surface>.H and 
+    <hemi>.<surface>.K with the mean and Gaussian curvature respectively.
+    """
+    
+    _cmd = 'mris_curvature'
+    input_spec = CurvatureInputSpec
+    output_spec = CurvatureOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_mean"] = os.path.abspath(self.inputs.in_file) + '.H'
+        outputs["out_gauss"] = os.path.abspath(self.inputs.in_file) + '.K'
+        return outputs
+    
+class CurvatureStatsInputSpec(FSTraitedSpec):
+    surface = File(argstr="-F %s", mandatory=False, exists=True,
+                   desc="Specify surface file for CurvatureStats")
+    in_curv = File(argstr="curv", position=-2, mandatory=True, exists=True,
+                   desc="Input file for CurvatureStats")
+    in_sulc = File(argstr="sulc", position=-1, mandatory=True, exists=True,
+                   desc="Input file for CurvatureStats")
+    hemisphere = traits.String(position=-3, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-4, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    out_file = File(argstr="-o %s", mandatory=True, exists=False,
+                    desc="Output curvature stats file")
+    #optional
+    min_max = traits.Bool(argstr="-m", mandatory=False, desc="Output min / max information for the processed curvature.")
+    values = traits.Bool(argstr="-G", mandatory=False,
+                    desc="Triggers a series of derived curvature values")
+    write = traits.Bool(argstr="--writeCurvatureFiles", mandatory=False,
+                       desc="Write curvature files")
+    
+    
+class CurvatureStatsOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output curvature stats file")
+    
+class CurvatureStats(FSCommand):
+    """
+    In its simplest usage, 'mris_curvature_stats' will compute a set 
+    of statistics on its input <curvFile>. These statistics are the 
+    mean and standard deviation of the particular curvature on the 
+    surface, as well as the results from several surface-based 
+    integrals. 
+ 
+    Additionally, 'mris_curvature_stats' can report the max/min 
+    curvature values, and compute a simple histogram based on 
+    all curvature values. 
+    
+    Curvatures can also be normalised and constrained to a given 
+    range before computation. 
+ 
+    Principal curvature (K, H, k1 and k2) calculations on a surface 
+    structure can also be performed, as well as several functions 
+    derived from k1 and k2. 
+ 
+    Finally, all output to the console, as well as any new 
+    curvatures that result from the above calculations can be 
+    saved to a series of text and binary-curvature files.
+    """
+    
+    _cmd = 'mris_curvature_stats'
+    input_spec = CurvatureStatsInputSpec
+    output_spec = CurvatureStatsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'surface':
+            prefix = os.path.basename(value).split('.')[1]
+            return spec.argstr % prefix
+        elif name in ['in_curv', 'in_sulc']:
+            return spec.argstr
+        else:
+            return super(CurvatureStats, self)._format_arg(name, spec, value)
+
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class JacobianInputSpec(FSTraitedSpec):
+    #required
+    in_origsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                   desc="Original surface")
+    in_mappedsurf = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Mapped surface")
+    #optional
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+                    desc="Output Jacobian of the surface mapping")
+    
+class JacobianOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output Jacobian of the surface mapping")
+    
+class Jacobian(FSCommand):
+    """
+    This program computes the Jacobian of a surface mapping.
+    """
+    
+    _cmd = 'mris_jacobian'
+    input_spec = JacobianInputSpec
+    output_spec = JacobianOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            head, tail = os.path.split(self.inputs.in_origsurf)
+            hemisphere = tail.split('.')[0]
+            filename = hemisphere + '.jacobian_white'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
+    
+class MRIsCalcInputSpec(FSTraitedSpec):
+    #required
+    in_file1 = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                   desc="Input file 1")
+    action = traits.String(argstr="%s", position=-2, mandatory=True,
+                   desc="Action to perform on input file(s)")
+    #optional
+    in_file2 = File(argstr="%s", exists=True, position=-1, mandatory=False,
+                    xor=['in_float', 'in_int'], desc="Input file 2")
+    in_float = traits.Float(argstr="%f", position=-1, mandatory=False,
+                            xor=['in_file2', 'in_int'], desc="Input float")
+    in_int = traits.Int(argstr="%d", position=-1, mandatory=False,
+                            xor=['in_file2', 'in_float'], desc="Input integer")
+    out_file = File(argstr="-o %s", mandatory=False, genfile=True,
+                    desc="Output file after calculation")
+    
+class MRIsCalcOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file after calculation")
+    
+class MRIsCalc(FSCommand):
+    """
+    'mris_calc' is a simple calculator that operates on FreeSurfer 
+    curvatures and volumes. In most cases, the calculator functions with 
+    three arguments: two inputs and an <ACTION> linking them. Some 
+    actions, however, operate with only one input <file1>. In all cases, 
+    the first input <file1> is the name of a FreeSurfer curvature overlay 
+    (e.g. rh.curv) or volume file (e.g. orig.mgz). For two inputs, the 
+    calculator first assumes that the second input is a file. If, however,
+    this second input file doesn't exist, the calculator assumes it refers
+    to a float number, which is then processed according to <ACTION>.Note:
+    <file1> and <file2> should typically be generated on the same subject.
+    """
+    
+    _cmd = 'mris_calc'
+    input_spec = MRIsCalcInputSpec
+    output_spec = MRIsCalcOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_file':
+            return spec.argstr % self._list_outputs()[name]        
+        else:
+            return super(MRIsCalc, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            if os.path.isabs(self.inputs.out_file):
+                outputs['out_file'] = self.inputs.out_file
+            else:
+                basename = os.path.basename(self.inputs.out_file)
+                prefix = os.path.basename(self.inputs.in_file1).split('.')[0]
+                if prefix in ['lh', 'rh']:
+                    #add hemisphere label to output
+                    basename = prefix + '.' + basename
+                #Write output to same directory as input
+                dirname = os.path.dirname(self.inputs.in_file1)
+                outputs['out_file'] = os.path.join(dirname, basename)
+        else:
+            #if the output file is not predefined
+            outputs['out_file'] = self.inputs.in_file1 + '.' + self.inputs.action
+        return outputs
+
+class VolumeMaskInputSpec(FSTraitedSpec):
+    left_whitelabel = traits.Int(argstr="--label_left_white %d", mandatory=True,
+                            desc="Left white matter label")
+    left_ribbonlabel = traits.Int(argstr="--label_left_ribbon %d", mandatory=True,
+                            desc="Left cortical ribbon label")
+    right_whitelabel = traits.Int(argstr="--label_right_white %d", mandatory=True,
+                             desc="Right white matter label")
+    right_ribbonlabel = traits.Int(argstr="--label_right_white %d", mandatory=True,
+                              desc="Right cortical ribbon label")
+    lh_pial = File(mandatory=True, exists=True,
+                     desc="Implicit input left pial surface")
+    rh_pial = File(mandatory=True, exists=True,
+                      desc="Implicit input right pial surface")
+    lh_white = File(mandatory=True, exists=True,
+                      desc="Implicit input left white matter surface")
+    rh_white = File(mandatory=True, exists=True,
+                       desc="Implicit input right white matter surface")
+    subject_id = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    #optional
+    in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
+                   desc="Input aseg file for VolumeMask")
+    save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
+                       desc="option to save just the ribbon for the hemispheres in the format ?h.ribbon.mgz")
+    
+    
+class VolumeMaskOutputSpec(TraitedSpec):
+    out_ribbon = File(exists=False, desc="Output cortical ribbon mask")
+    lh_ribbon = File(exists=False, desc="Output left cortical ribbon mask")
+    rh_ribbon = File(exists=False, desc="Output right cortical ribbon mask")
+    
+class VolumeMask(FSCommand):
+    """
+    Computes a volume mask, at the same resolution as the
+    <subject>/mri/brain.mgz.  The volume mask contains 4 values: LH_WM 
+    (default 10), LH_GM (default 100), RH_WM (default 20), RH_GM (default 
+    200).
+    The algorithm uses the 4 surfaces situated in <subject>/surf/
+    [lh|rh].[white|pial] and labels voxels based on the 
+    signed-distance function from the surface.
+    """
+    
+    _cmd = 'mris_volmask'
+    input_spec = VolumeMaskInputSpec
+    output_spec = VolumeMaskOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_aseg':
+            return spec.argstr % os.path.basename(value).rstrip('.mgz')
+        else:
+            return super(VolumeMask, self)._format_arg(name, spec, value)
+        
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'mri')
+        outputs["out_ribbon"] = os.path.join(out_dir, 'ribbon.mgz')
+        if self.inputs.save_ribbon:
+            outputs["rh_ribbon"] = os.path.join(out_dir, 'rh.ribbon.mgz')
+            outputs["lh_ribbon"] = os.path.join(out_dir, 'lh.ribbon.mgz')    
+        return outputs
+
+class ParcellationStatsInputSpec(FSTraitedSpec):
+    #required
+    subject_id = traits.String(position=-3, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    hemisphere = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    wm = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/wm.mgz")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    transform  = File(mandatory=True, exists=True,
+                      desc="Input file must be <subject_id>/mri/transforms/talairach.xfm")
+    thickness = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/surf/?h.thickness")
+    brainmask = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/brainmask.mgz")
+    aseg = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/aseg.presurf.mgz")
+    ribbon = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/ribbon.mgz")
+    
+    #optional
+    surface = traits.String(position=-1, argstr="%s", mandatory=False,
+                               desc="Input surface (e.g. 'white')")
+    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+                      desc="Look for mgz files")
+    in_cortex = traits.File(argstr="-cortex %s", mandatory=False, exists=True,
+                         desc="Input cortex label")
+    in_annotation = traits.File(argstr="-a %s", mandatory=False, exists=True,
+                               desc="compute properties for each label in the annotation file separately")
+    tabular_output = traits.Bool(argstr="-b", mandatory=False,
+                                 desc="Tabular output")
+    out_table = traits.File(argstr="-f %s", mandatory=False, exists=False, requires=['in_annotation'],
+                            desc="Table output to tablefile")
+    out_color = traits.File(argstr="-c %s", mandatory=False, exists=False, 
+                            desc="Output annotation files's colortable to text file")
+    
+class ParcellationStatsOutputSpec(TraitedSpec):
+    out_table = File(exists=False, desc="Table output to tablefile")
+    out_color = File(exists=False, desc="Output annotation files's colortable to text file")
+    
+class ParcellationStats(FSCommand):
+    """
+    This program computes a number of anatomical properties.
+    """
+    
+    _cmd = 'mris_anatomical_stats'
+    input_spec = ParcellationStatsInputSpec
+    output_spec = ParcellationStatsOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_color':
+            out_color = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label', value)
+            return spec.argstr % out_color
+        else:
+            return super(ParcellationStats, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+        stats_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'stats')
+        if not os.path.isdir(stats_dir):
+            os.mkdir(stats_dir)
+        if isdefined(self.inputs.out_table):
+            outputs["out_table"] = os.path.abspath(self.inputs.out_table)
+        else:
+            basename = os.path.basename(self.inputs.in_annotation).replace('.annot', '.stats')
+            outputs["out_table"] = os.path.join(stats_dir, basename)
+        if isdefined(self.inputs.out_color):
+            if os.path.isabs(self.inputs.out_color):
+                outputs["out_color"] = os.path.abspath(self.inputs.out_color)
+            else:
+                outputs["out_color"] = os.path.join(out_dir, self.inputs.out_color)
+        else:
+            outputs["out_color"] = os.path.join(out_dir, 'aparc.annot.ctab')
+        return outputs
+
+class ContrastInputSpec(FSTraitedSpec):
+    #required
+    subject_id = traits.String(argstr="--s %s", mandatory=True, desc="Subject being processed")
+    thickness = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/surf/?h.thickness")
+    white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/<hemisphere>.white")
+    annotation = traits.File(mandatory=True, exists=True,
+                             desc="Input annotation file")
+    cortex = traits.File(mandatory=True, exists=True,
+                         desc="Input cortex label")
+    orig = File(exists=True, mandatory=True, desc="Implicit input file mri/orig.mgz")
+    rawavg = File(exists=True, mandatory=True, desc="Implicit input file mri/rawavg.mgz")
+    #optional
+    hemisphere = traits.String(argstr="%s", mandatory=False, desc="Hemisphere being processed")
+    
+class ContrastOutputSpec(TraitedSpec):
+    out_contrast = File(exists=False, desc="Output contrast file from Contrast")
+    out_stats = File(exists=False, desc="Output stats file from Contrast")
+    out_log = File(exists=True, desc="Output log from Contrast")
+    
+class Contrast(FSCommand):
+    """
+    Compute surface-wise gray/white contrast  
+    """
+    
+    _cmd = 'pctsurfcon'
+    input_spec = ContrastInputSpec
+    output_spec = ContrastOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'hemisphere':
+            flag = '--' + self.inputs.hemisphere + '-only'
+            return spec.argstr % flag
+        else:
+            return super(Contrast, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        subject_dir = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id)
+        for folder in ['stats', 'scripts', 'surf']:
+            out_dir = os.path.join(subject_dir, folder)
+            if not os.path.isdir(out_dir):
+                os.mkdir(out_dir)
+        outputs["out_contrast"] = os.path.join(subject_dir, 'surf', self.inputs.hemisphere + '.w-g.pct.mgh')
+        outputs["out_stats"] = os.path.join(subject_dir, 'stats', self.inputs.hemisphere +'.w-g.pct.stats')
+        outputs["out_log"] = os.path.join(subject_dir, 'scripts', 'pctsurfcon.log')
+        return outputs
+
+class RelabelHypointensitiesInputSpec(FSTraitedSpec):
+    #required
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    aseg = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                desc="Input aseg file")
+    #optional
+    surf_directory = traits.Directory(argstr="%s", position=-2, exists=True, mandatory=False, genfile=True,
+                                      desc="Directory containing lh.white and rh.white")
+    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False, genfile=True,
+                    desc="Output aseg file")                    
+        
+class RelabelHypointensitiesOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")                    
+    
+class RelabelHypointensities(FSCommand):
+    """
+    Relabel Hypointensities
+    """
+    
+    _cmd = 'mri_relabel_hypointensities'
+    input_spec = RelabelHypointensitiesInputSpec
+    output_spec = RelabelHypointensitiesOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'surf_directory':
+            return os.path.dirname(self.inputs.lh_white)
+        elif name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = self.inputs.aseg.rstrip('mgz') + 'hypos.mgz'
+        return outputs
+
+class Aparc2AsegInputSpec(FSTraitedSpec):
+    #required
+    subject_id = traits.String(argstr="--s %s", mandatory=True, desc="Subject being processed")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    lh_ribbon = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/lh.ribbon.mgz")
+    rh_ribbon = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/rh.ribbon.mgz")
+    ribbon = File(mandatory=True, exists=True,
+                  desc="Input file must be <subject_id>/surf/ribbon.mgz")
+    lh_annotation = File(argstr="%s", mandatory=True, exists=True,
+                         desc="Input file must be <subject_id>/label/lh.aparc.annot")
+    rh_annotation = File(mandatory=True, exists=True,
+                         desc="Input file must be <subject_id>/label/rh.aparc.annot")    
+    #optional
+    out_file = File(argstr="--o %s", mandatory=False, exists=False, genfile=True,
+                    desc="Full path of file to save the output segmentation in")
+    aseg = File(argstr="--aseg %s", mandatory=False, exists=True,
+                desc="Input aseg file")
+    volmask = traits.Bool(argstr="--volmask", mandatory=False,
+                          desc="Volume mask flag")
+    ctxseg = File(argstr="--ctxseg %s", mandatory=False, exists=True,
+                  desc="")
+    label_wm = traits.Bool(argstr="--labelwm", mandatory=False,
+                           desc="""
+                           For each voxel labeled as white matter in the aseg, re-assign
+                           its label to be that of the closest cortical point if its 
+                           distance is less than dmaxctx
+                           """)
+    hypo_wm = traits.Bool(argstr="--hypo-as-wm", mandatory=False,
+                           desc="Label hypointensities as WM")
+    rip_unknown = traits.Bool(argstr="--rip-unknown", mandatory=False,
+                             desc="Do not label WM based on 'unknown' corical label")
+    
+    
+        
+class Aparc2AsegOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")                    
+    
+class Aparc2Aseg(FSCommand):
+    """
+    Maps the cortical labels from the automatic cortical parcellation 
+    (aparc) to the automatic segmentation volume (aseg). The result can be
+    used as the aseg would. The algorithm is to find each aseg voxel 
+    labeled as cortex (3 and 42) and assign it the label of the closest 
+    cortical vertex. If the voxel is not in the ribbon (as defined by mri/
+    lh.ribbon and rh.ribbon), then the voxel is marked as unknown (0). 
+    This can be turned off with --noribbon. The cortical parcellation is 
+    obtained from subject/label/hemi.aparc.annot which should be based on 
+    the curvature.buckner40.filled.desikan_killiany.gcs atlas. The aseg is
+    obtained from subject/mri/aseg.mgz and should be based on the RB40_
+    talairach_2005-07-20.gca atlas. If these atlases are used, then the 
+    segmentations can be viewed with tkmedit and the 
+    FreeSurferColorLUT.txt color table found in $FREESURFER_HOME. These 
+    are the default atlases used by recon-all.
+    """
+    
+    _cmd = 'mri_aparc2aseg'
+    input_spec = Aparc2AsegInputSpec
+    output_spec = Aparc2AsegOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None    
+
+    def _format_arg(self, name, spec, value):
+        if name == 'lh_annotation':
+            if 'a2009s' in value:
+                return spec.argstr % "--a2009s"
+            else:
+                return spec.argstr % ""
+        elif name == 'aseg':
+            return spec.argstr % os.path.basename(value).replace('.mgz', '')
+        else:
+            return super(Aparc2Aseg, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if self.inputs.label_wm:
+            basename = 'wmparc.mgz'
+        elif 'a2009s' in self.inputs.lh_annotation:
+            basename = 'aparc.a2009s+aseg.mgz'
+        else:
+            basename = 'aparc+aseg.mgz'
+        out_dir = os.path.dirname(self.inputs.ribbon)
+        outputs["out_file"] = os.path.join(out_dir, basename)
+        return outputs
+
+class Apas2AsegInputSpec(FSTraitedSpec):
+    #required
+    in_file = File(argstr="--i %s", mandatory=True, exists=True,
+                   desc="Input aparc+aseg.mgz")
+    #optional
+    out_file = File(argstr="--o %s", mandatory=False, exists=True, genfile=True,
+                    desc="Input aparc+aseg.mgz")
+        
+class Apas2AsegOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")                    
+    
+class Apas2Aseg(FSCommand):
+    """
+    Converts aparc+aseg.mgz into something like aseg.mgz by replacing the
+    cortical segmentations 1000-1035 with 3 and 2000-2035 with 42. The
+    advantage of this output is that the cortical label conforms to the
+    actual surface (this is not the case with aseg.mgz).
+    """
+    
+    _cmd = 'apas2aseg'
+    input_spec = Apas2AsegInputSpec
+    output_spec = Apas2AsegOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        else:
+            return None
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.join(os.path.dirname(self.inputs.in_file), 'aseg.mgz')
+        return outputs
+
+class SegStatsInputSpec(FSTraitedSpec):
+    #required
+    segmentation = File(argstr="--seg %s", mandatory=True, exists=True,
+                   desc="Input segmentation volume")
+    out_file = File(argstr="--sum %s", mandatory=False, exists=False, genfile=True,
+                    desc="ASCII file in which summary statistics are saved")
+    subject_id = traits.String(argstr="--subject %s", mandatory=True,
+                             desc="Subject id being processed")
+    ribbon = traits.File(mandatory=True, exists=True,
+                         desc="Input file mri/ribbon.mgz")
+    presurf_seg = File(mandatory=True, exists=True,
+                       desc="Input segmentation volume")
+    transform = File(mandatory=True, exists=True,
+                     desc="Input transform file")
+    lh_orig_nofix = File(mandatory=True, exists=True, desc="Input lh.orig.nofix")
+    rh_orig_nofix = File(mandatory=True, exists=True, desc="Input rh.orig.nofix")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    
+    #optional
+    in_intensity = File(argstr="--in %s", mandatory=False,
+                        desc="Undocumented input norm.mgz file")
+    part_vol = File(argstr="--pv %s", mandatory=False, exists=False,
+                    desc="Use pvvol to compensate for partial voluming")
+    brainmask = File(argstr="--brainmask %s", mandatory=False, exists=False,
+                     desc="Load brain mask and compute the volume of the brain as the non-zero voxels in this volume")
+    color_table = File(argstr="--ctab %s", mandatory=False, exists=False,
+                       desc="FreeSurfer color table file")
+    empty = traits.Bool(argstr="--empty", mandatory=False,
+                        desc="Report on segmentations listed in the color table")
+    vol_from_seg = traits.Bool(argstr="--brain-vol-from-seg", mandatory=False,
+                               desc="Get volume of brain as the sum of the volumes of the segmentationss in the brain")
+    exclude_ctx = traits.Bool(argstr="--excl-ctxgmwm", mandatory=False,
+                              desc="Exclude cortical gray and white matter")
+    supratent = traits.Bool(argstr="--supratent", mandatory=False, requires=['ctx_vol'],
+                            desc="Undocumented input flag")
+    subcort_gm = traits.Bool(argstr="--subcortgray", mandatory=False,
+                             desc="Compute volume of subcortical gray matter")
+    intensity_name = traits.String(argstr="--in-intensity-name %s", mandatory=False, requires=["in_intensity"],
+                                   genfile=True, desc="Name of in_intensity")
+    intensity_units = traits.String(argstr="--in-intensity-units %s", mandatory=False,
+                                    requires=["in_intensity"], desc="Intensity units")
+    intercran_vol = traits.Bool(argstr="--etiv", mandatory=False,
+                                desc="Compute intracranial volume from <subject>/mri/transforms/talairach.xfm")
+    wm_vol = traits.Bool(argstr="--surf-wm-vol", mandatory=False,
+                         desc="Compute cortical matter volume based on the volume encompassed by the white surface")
+    ctx_vol = traits.Bool(argstr="--surf-ctx-vol", mandatory=False,
+                          desc="Compute cortical volumes from surf")
+    total_gray = traits.Bool(argstr="--totalgray", mandatory=False,
+                             desc="Compute volume of total gray matter")
+    euler = traits.Bool(argstr="--euler", mandatory=False,
+                        desc="Write out number of defect holes in orig.nofix based on the euler number")
+    exclude_id = traits.Int(argstr="--excludeid %d", mandatory=False,
+                            desc="Exclude the given segmentation id(s) from report")
+   
+class SegStatsOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")                    
+    
+class SegStats(FSCommand):
+    """
+    Segmentation Statistics
+    """
+    
+    _cmd = 'mri_segstats'
+    input_spec = SegStatsInputSpec
+    output_spec = SegStatsOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'intensity_name':
+            return os.path.basename(self.inputs.in_intensity).replace('.mgz', '')
+        elif name == 'out_file':
+            return self._list_outputs()[name]
+        else:
+            return None
+    
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        basename = os.path.basename(self.inputs.segmentation).replace('.mgz', '.stats')
+        outputs["out_file"] = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'stats', basename)
+        return outputs

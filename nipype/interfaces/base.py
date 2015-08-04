@@ -1576,7 +1576,7 @@ class CommandLine(BaseInterface):
             retval = name_template % base
             _, _, ext = split_filename(retval)
             if trait_spec.keep_extension and ext:
-                return retval
+                return retval + ext
             return self._overload_extension(retval, name)
 
         return retval

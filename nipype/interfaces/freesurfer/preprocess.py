@@ -18,10 +18,11 @@ from glob import glob
 import numpy as np
 
 from nibabel import load
-from nipype.utils.filemanip import fname_presuffix
+from nipype.external import six
+from nipype.utils.filemanip import fname_presuffix, split_filename
 from nipype.interfaces.io import FreeSurferSource
 
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
+from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec, Info
 from nipype.interfaces.base import (TraitedSpec, File, traits,
                                     Directory, InputMultiPath,
                                     OutputMultiPath, CommandLine,
@@ -1349,3 +1350,497 @@ class SynthesizeFLASH(FSCommand):
         if name == "out_file":
             return self._list_outputs()["out_file"]
         return None
+
+
+class MNIBiasCorrectionInputSpec(FSTraitedSpec):
+
+    # required
+    in_file = File(exists=True, mandatory=True, argstr="--i %s",
+                   desc="input volume. Input can be any format accepted by mri_convert.")
+    out_file = File(mandatory=False, argstr="--o %s", name_source=['in_file'], name_template='%s_output',
+                    hash_files=False, keep_extension=True,
+                    desc="output volume. Output can be any format accepted by mri_convert. " +\
+                    "If the output format is COR, then the directory must exist.")
+    # optional
+    iterations = traits.Int(4, argstr="--n %d",
+                            desc="Number of iterations to run nu_correct. Default is 4. This is the number of times " + \
+                            "that nu_correct is repeated (ie, using the output from the previous run as the input for " + \
+                            "the next). This is different than the -iterations option to nu_correct.")
+    protocol_iterations = traits.Int(argstr="--proto-iters %d",
+                                     desc="Passes Np as argument of the -iterations flag of nu_correct. This is different " + \
+                                     "than the --n flag above. Default is not to pass nu_correct the -iterations flag.")
+    distance = traits.Int(argstr="--distance %d", desc="N3 -distance option")  # TODO: update with N3 help text
+    if int(Info.major()) > 5:
+        no_rescale = traits.Bool(False, argstr="--no-rescale",
+                                 desc="do not rescale so that global mean of output == input global mean")
+    # TODO add description to mask and uchar flags
+    mask = File(exists=True, mandatory=False, argstr="--mask %s",
+                desc="") 
+
+    transform = File(exists=True, mandatory=False, argstr="--uchar %s",
+                     desc="")
+    
+
+class MNIBiasCorrectionOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="output volume")
+
+
+class MNIBiasCorrection(FSCommand):
+    """ Wrapper for nu_correct, a program from the Montreal Neurological Insitute (MNI)
+    used for correcting intensity non-uniformity (ie, bias fields). You must have the
+    MNI software installed on your system to run this. See [www.bic.mni.mcgill.ca/software/N3]
+    for more info.
+
+    mri_nu_correct.mni uses float internally instead of uchar. It also rescales the output so
+    that the global mean is the same as that of the input. These two changes are linked and
+    can be turned off with --no-float
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
+    >>> correct = MNIBiasCorrection()
+    >>> correct.inputs.in_file = "structural.mgz"
+    >>> correct.inputs.iterations = 6
+    >>> correct.inputs.protocol_iterations = 1000
+    >>> correct.inputs.distance = 50
+    >>> correct.inputs.no_rescale = True
+    >>> correct.cmdline
+    'mri_nu_correct.mni --distance 50 --i structural.mgz --n 6 --no-rescale --o structural_output.mgz --proto-iters 1000'
+
+    References:
+    ----------
+    [http://freesurfer.net/fswiki/mri_nu_correct.mni]
+    [http://www.bic.mni.mcgill.ca/software/N3]
+    [https://github.com/BIC-MNI/N3]
+
+    """
+    _cmd = "mri_nu_correct.mni"
+    input_spec = MNIBiasCorrectionInputSpec
+    output_spec = MNIBiasCorrectionOutputSpec
+
+    def _filename_from_source(self, name, chain=None):
+        if chain is None:
+            chain = []
+
+        trait_spec = self.inputs.trait(name)
+        retval = getattr(self.inputs, name)
+
+        if not isdefined(retval) or "%s" in retval:
+            if not trait_spec.name_source:
+                return retval
+            if isdefined(retval) and "%s" in retval:
+                name_template = retval
+            else:
+                name_template = trait_spec.name_template
+            if not name_template:
+                name_template = "%s_generated"
+
+            ns = trait_spec.name_source
+            while isinstance(ns, list):
+                if len(ns) > 1:
+                    iflogger.warn('Only one name_source per trait is allowed')
+                ns = ns[0]
+
+            if not isinstance(ns, six.string_types):
+                raise ValueError(('name_source of \'%s\' trait sould be an '
+                                 'input trait name') % name)
+
+            if isdefined(getattr(self.inputs, ns)):
+                name_source = ns
+                source = getattr(self.inputs, name_source)
+                while isinstance(source, list):
+                    source = source[0]
+
+                # special treatment for files
+                try:
+                    _, base, ext = split_filename(source)  # get file extension
+                except AttributeError:
+                    base = source
+            else:
+                if name in chain:
+                    raise NipypeInterfaceError('Mutually pointing name_sources')
+
+                chain.append(name)
+                base = self._filename_from_source(ns, chain)
+
+            chain = None
+            retval = name_template % base
+            if trait_spec.keep_extension and ext:
+                return retval + ext
+            return self._overload_extension(retval, name)
+
+        return retval
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class WatershedSkullStripInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr="%s", exists=True, mandatory=True, position=-2, desc="input volume")
+    out_file = File(argstr="%s", exists=False, mandatory=True, position=-1, genfile=True, desc="output volume")
+    # optional
+    t1 = traits.Bool(argstr="-T1", desc="specify T1 input volume (T1 grey value = 110)")
+    brain_atlas = File(argstr="-brain_atlas %s", exists=True, position=-4, desc="")
+    transform = File(argstr="%s", exists=False, position=-3, desc="undocumented")
+    # brain_surface = File(argstr="-brainsurf %s", exists=False, desc="save the brain surface")
+
+
+class WatershedSkullStripOutputSpec(TraitedSpec):
+    brain_vol = File(exists=False, desc="skull stripped brain volume")
+    # bem_surface = File(exists=False, desc="when you specify the option -brainsurf surfname")
+
+
+class WatershedSkullStrip(FSCommand):
+    """ This program creates a tranform in lta format
+    """
+    _cmd = 'mri_watershed'
+    input_spec = WatershedSkullStripInputSpec
+    output_spec = WatershedSkullStripOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['brain_vol'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['brain_vol'] = 'brainmask.auto.mgz'
+        # if isdefined(self.inputs.brainsurf):
+        #     outputs['bem_surface'] = os.path.abspath(self.inputs.brainsurf)
+        return outputs
+
+
+class NormalizeInputSpec(FSTraitedSpec):
+    in_file = File(argstr='%s', exists=True, mandatory=True, position=-2, desc="The input file for Normalize")
+    out_file = File(argstr='%s', mandatory=True, position=-1, genfile=True, desc="The output file for Normalize")
+    # optional
+    gradient = traits.Float(1.0, argstr="-g %.3f", usedefault=True, desc="use max intensity/mm gradient g (default=1.000)")
+    mask = File(argstr="-mask %s", mandatory=False, exists=True, desc="The input mask file for Normalize")
+    segmentation = File(argstr="-aseg %s", mandatory=False, exists=True, desc="The input segmentation for Normalize")
+
+class NormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+
+
+class Normalize(FSCommand):
+    """
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_normalize>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import fs
+    >>> normalize = fs.Normalize()
+
+    >>> normalize.inputs.
+    >>> normalize.cmdline
+
+    >>> normalize.run() # doctest: +SKIP
+    """
+    _cmd = "mri_normalize"
+    input_spec = NormalizeInputSpec
+    output_spec = NormalizeOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('T1.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class CANormalizeInputSpec(FSTraitedSpec):
+    in_file = File(argstr='%s', exists=True, mandatory=True, position=-4, desc="The input file for CANormalize")
+    out_file = File(argstr='%s', mandatory=True, position=-1, genfile=True, desc="The output file for CANormalize")
+    atlas = File(argstr='%s', exists=True, mandatory=True, position=-3, desc="The atlas file in gca format")
+    transform = File(argstr='%s', exists=True, mandatory=True, position=-2, desc="The tranform file in lta format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True, mandatory=False, desc="Specifies volume to use as mask")
+    control_points = File(argstr='-c %s', mandatory=False, desc="File name for the output control points")
+
+class CANormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+    control_points = File(exists=False, desc="The output control points for Normalize")
+
+class CANormalize(FSCommand):
+    """
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_normalize>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import fs
+    >>> ca_normalize = fs.CANormalize()
+
+    >>> ca_normalize.inputs.
+    >>> ca_normalize.cmdline
+
+    >>> ca_normalize.run() # doctest: +SKIP
+    """
+    _cmd = "mri_ca_normalize"
+    input_spec = CANormalizeInputSpec
+    output_spec = CANormalizeOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('norm.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['control_points'] = os.path.abspath(self.inputs.control_points)
+        return outputs
+
+
+class CARegisterInputSpec(FSTraitedSpec):
+    in_file = File(argstr='%s', exists=True, mandatory=True, position=-3, desc="The input volume for CARegister")
+    out_file = File(argstr='%s', mandatory=False, position=-1, genfile=True, desc="The output volume for CARegister")
+    template = File(argstr='%s', exists=True, mandatory=False, position=-2, desc="The template file in gca format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True, mandatory=False, desc="Specifies volume to use as mask")
+    invert_and_save = traits.Bool(argstr='-invert-and-save', mandatory=False, position=-4,
+                         desc="Invert and save the .m3z multi-dimensional talaraich transform to x, y, and z .mgz files")
+    no_big_ventricles = traits.Bool(argstr='-nobigventricles', mandatory=False, desc="No big ventricles")
+    transform = File(argstr='-T %s', exists=True, mandatory=False, desc="Specifies transform in lta format")
+    align = traits.String(argstr='-align-%s', mandatory=False, desc="Specifies when to perform alignment")
+
+class CARegisterOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for CARegister")
+
+
+class CARegister(FSCommand):
+    """
+    mri_ca_register - generates a multi-dimensional talairach transform from a gca file and talairach.lta file
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import fs
+    >>> ca_register = fs.CARegister()
+
+    >>> ca_register.inputs.
+    >>> ca_register.cmdline
+
+    >>> ca_register.run() # doctest: +SKIP
+    """
+    _cmd = "mri_ca_register"
+    input_spec = CARegisterInputSpec
+    output_spec = CARegisterOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('talairach.m3z')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class CALabelInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-4, mandatory=True, exists=True, desc="Input volume for CALabel")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False, genfile=True,
+                    desc="Output file for CALabel")
+    transform = File(argstr="%s", position=-3, mandatory=True, exists=False, desc="Input transform for CALabel")
+    template = File(argstr="%s", position=-2, mandatory=True, exists=False, desc="Input template for CALabel")
+    #optional
+    no_big_ventricles = traits.Bool(argstr="-nobigventricles", mandatory=False, desc="No big ventricles")
+    align = traits.Bool(argstr="-align", mandatory=False, desc="Align CALabel")
+    prior = traits.Float(argstr="-prior %.1f", mandatory=False, desc="Prior for CALabel")
+    relabel_unlikely = traits.Tuple(traits.Int, traits.Float,
+                                    argstr="-relabel_unlikely %d %.1f",
+                                    desc="Reclassify voxels at least some std devs from the mean using some size Gaussian window",
+                                    mandatory=False)
+    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+
+class CALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from CALabel")
+
+class CALabel(FSCommand):
+    """
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import fs
+    >>> ca_label = fs.CALabel()
+    >>> ca_label.inputs.
+    >>> ca_label.cmdline
+    >>> ca_label.run() # doctest: +SKIP
+    """
+    _cmd = "mri_ca_label"
+    input_spec = CALabelInputSpec
+    output_spec = CALabelOutputSpec
+    
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('aseg.auto_noCCseg.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+    
+class MRIsCALabelInputSpec(FSTraitedSpec):
+    subject_id = traits.String(argstr="%s", position=-5, mandatory=True, desc="Subject name or ID")
+    hemisphere = traits.String(argstr="%s", position=-4, mandatory=True, desc="Hemisphere ('lh' or 'rh')")
+    canonsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                     desc="Input canonical surface file")
+    classifier = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                      desc="Classifier array input file")
+    smoothwm = File(mandatory=True, exists=True,
+                    desc="Undocumented input {hemisphere}.smoothwm must exist in the subjects directory")
+    #optional
+    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False, genfile=True,
+                    desc="Annotated surface output file")
+    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+    seed = traits.Int(argstr="-seed %d", mandatory=False,
+                      desc="")
+
+class MRIsCALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from MRIsCALabel")
+
+class MRIsCALabel(FSCommand):
+    """
+    For a single subject, produces an annotation file, in which each 
+    cortical surface vertex is assigned a neuroanatomical label.This 
+    automatic procedure employs data from a previously-prepared atlas 
+    file. An atlas file is created from a training set, capturing region 
+    data manually drawn by neuroanatomists combined with statistics on 
+    variability correlated to geometric information derived from the 
+    cortical model (sulcus and curvature). Besides the atlases provided 
+    with FreeSurfer, new ones can be prepared using mris_ca_train).
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import fs
+    >>> ca_label = fs.MRIsCALabel()
+    >>> ca_label.inputs.
+    >>> ca_label.cmdline
+    >>> ca_label.run() # doctest: +SKIP
+    """
+    _cmd = "mris_ca_label"
+    input_spec = MRIsCALabelInputSpec
+    output_spec = MRIsCALabelOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "out_file":
+            return spec.argstr % self._list_outputs()[name]
+        return super(MRIsCALabel, self)._format_arg(name, spec, value)
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            if os.path.isabs(self.inputs.out_file):
+                outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            else:
+                head = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+                hemisphere = self.inputs.hemisphere
+                filename = hemisphere + '.' + os.path.basename(self.inputs.out_file)
+                outputs['out_file'] = os.path.join(head, filename)
+        else:
+            head = os.path.join(self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+            hemisphere = self.inputs.hemisphere
+            filename = hemisphere + '.aparc.annot'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
+
+class SegmentCCInputSpec(FSTraitedSpec):
+    in_file = File(argstr="-aseg %s", mandatory=True, exists=True, desc="Input aseg file to read from subjects directory")
+    out_file = File(argstr="-o %s", mandatory=True, exists=False, desc="Filename to write aseg including CC")
+    out_rotation = File(argstr="-lta %s", mandatory=True, exists=False, desc="Global filepath for writing rotation lta")
+    subject_id = traits.String(argstr="%s", mandatory=True, position=-1, desc="Subject name")
+
+class SegmentCCOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output segmentation uncluding corpus collosum")
+    out_rotation = File(exists=False, desc="Output lta rotation file")
+
+class SegmentCC(FSCommand):
+
+    _cmd = "mri_cc"
+    input_spec = SegmentCCInputSpec
+    output_spec = SegmentCCOutputSpec
+
+    # remove absolute filepath names for in_file because mri_cc will look for the file in
+    # <SUBJECTS_DIR>/<subject_id>/<filename>
+    def _format_arg(self, name, spec, value):
+        if name in ["in_file", "out_file"]:
+            return spec.argstr % os.path.basename(value)
+        return super(SegmentCC, self)._format_arg(name, spec, value)
+    
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['out_rotation'] = os.path.abspath(self.inputs.out_rotation)
+        return outputs
+
+class SegmentWMInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", exists=True, mandatory=True, position=-2, desc="Input file for SegmentWM")
+    out_file = File(argstr="%s", exists=False, mandatory=True, position=-1, desc="File to be written as output for SegmentWM")
+    
+class SegmentWMOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output white matter segmentation")
+
+class SegmentWM(FSCommand):
+
+    _cmd = "mri_segment"
+    input_spec = SegmentWMInputSpec
+    output_spec = SegmentWMOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+class EditWMwithAsegInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-4, mandatory=True, exists=True,
+                   desc="Input white matter segmentation file")
+    brain_file = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                      desc="Input brain/T1 file")
+    seg_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                    desc="Input presurf segmentation file")
+    out_file = File(argstr="%s", position=-1, mandtaory=True, exists=False,
+                    desc="File to be written as output")
+    #optional
+    keep_in = traits.Bool(argstr="-keep-in", mandatory=False,
+                          desc="Keep edits as found in input volume")
+
+class EditWMwithAsegOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output edited WM file")
+    
+class EditWMwithAseg(FSCommand):
+
+    _cmd = 'mri_edit_wm_with_aseg'
+    input_spec = EditWMwithAsegInputSpec
+    output_spec = EditWMwithAsegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
