@@ -84,6 +84,17 @@ Execution
 	other nodes) will never be deleted independent of this parameter. (possible 
 	values: ``true`` and ``false``; default value: ``true``)
 
+*try_hard_link_datasink*
+	When the DataSink is used to produce an orginized output file outside
+	of nipypes internal cache structure, a file system hard link will be
+	attempted first. A hard link allow multiple file paths to point to the
+	same physical storage location on disk if the condisions allow. By
+	refering to the same physical file on disk (instead of copying files
+	byte-by-byte) we can avoid unnecessary data duplication.  If hard links
+	are not supported for the source or destination paths specified, then
+	a standard byte-by-byte copy is used.  (possible values: ``true`` and
+	``false``; default value: ``true``)
+
 *use_relative_paths*
 	Should the paths stored in results (and used to look for inputs)
 	be relative or absolute. Relative paths allow moving the whole
