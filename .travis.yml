@@ -1,42 +1,48 @@
 cache:
-  - apt
+- apt
 language: python
 python:
-  - 2.7
+- 2.7
 env:
-  - INSTALL_DEB_DEPENDECIES=true
-  - INSTALL_DEB_DEPENDECIES=false
-# Setup anaconda
+- INSTALL_DEB_DEPENDECIES=true
+- INSTALL_DEB_DEPENDECIES=false
 before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.6.0-Linux-x86_64.sh -O miniconda.sh; fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
-  - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
-  - if $INSTALL_DEB_DEPENDECIES; then bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh); fi
-  - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq --no-install-recommends fsl afni elastix; fi
-  - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases; fi
-  - if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
-
-# Install packages
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.6.0-Linux-x86_64.sh
+  -O miniconda.sh; fi
+- chmod +x miniconda.sh
+- "./miniconda.sh -b"
+- export PATH=/home/travis/miniconda/bin:$PATH
+- if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
+- if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
+- if $INSTALL_DEB_DEPENDECIES; then bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh);
+  fi
+- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq --no-install-recommends
+  fsl afni elastix; fi
+- if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases;
+  fi
+- if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
 install:
-  - conda update --yes conda
-  - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
-  - source activate testenv
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
-  - conda install --yes numpy scipy nose traits networkx dateutil
-  - pip install nibabel
-  - pip install python-coveralls
-  - pip install nose-cov
-  - pip install https://github.com/RDFLib/rdflib/archive/master.zip
-  - pip install https://github.com/trungdong/prov/archive/rdf.zip
-  - python setup.py install
-
-# Run test
+- conda update --yes conda
+- conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
+- source activate testenv
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
+- conda install --yes numpy scipy nose traits networkx dateutil
+- pip install nibabel
+- pip install python-coveralls
+- pip install nose-cov
+- pip install https://github.com/RDFLib/rdflib/archive/master.zip
+- pip install https://github.com/trungdong/prov/archive/rdf.zip
+- python setup.py install
 script:
-  - nosetests --with-doctest --with-cov --cov nipype --cov-config .coveragerc --logging-level=INFO
-
-# Calculate coverage
+- nosetests --with-doctest --with-cov --cov nipype --cov-config .coveragerc --logging-level=INFO
 after_success:
-  - coveralls --config_file .coveragerc
+- coveralls --config_file .coveragerc
+deploy:
+  provider: pypi
+  user: satra
+  password:
+    secure: ZaN6Y4hfybPMi1rW3Qe03irCe/3GU4J4BJsjG+tClVN5Fjc3FCJaYU0k4wNd9q2kMjuRDv1efA9BN/5QasJS32oqs6wHvxzIWA18ucel4BBnAAkuviC1vqi/8Hk/DGB6e1gnmZ1Nv58zVLfn0MwlOKmsGDtvGQWc+HbaV2fS5NA=
+  on:
+    tags: true
+    branch: master
