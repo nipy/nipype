@@ -16,13 +16,13 @@ import nipype.testing as nit
 from nipype.algorithms import mesh as m
 
 notvtk = True
-"""
-try:
-    from tvtk.api import tvtk
-    notvtk = False
-except ImportError:
-    pass
-"""
+import platform
+if 'darwin' not in platform.system().lower():
+    try:
+        from tvtk.api import tvtk
+        notvtk = False
+    except ImportError:
+        pass
 
 @skipif(notvtk)
 def test_ident_distances():
