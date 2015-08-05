@@ -22,14 +22,3 @@ class ElastixBaseInputSpec(CommandLineInputSpec):
     num_threads = traits.Int(
         1, argstr='-threads %01d', nohash=True,
         desc='set the maximum number of threads of elastix')
-
-
-class ElastixBaseInterface(CommandLine):
-    _singleworker = True
-
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'num_threads' and value > 1:
-            self._singleworker = False
-
-        return super(ElastixBaseInterface, self)._format_arg(
-            name, trait_spec, value)
