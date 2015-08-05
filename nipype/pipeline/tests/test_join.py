@@ -549,7 +549,7 @@ def test_itersource_two_join_nodes():
 
     os.chdir(cwd)
     rmtree(wd)
-    
+
 def test_set_join_node_file_input():
     """Test collecting join inputs to a set."""
     cwd = os.getcwd()

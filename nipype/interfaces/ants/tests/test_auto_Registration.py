@@ -24,6 +24,8 @@ def test_Registration_inputs():
     ),
     fixed_image_mask=dict(argstr='%s',
     ),
+    float=dict(argstr='--float %d',
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
