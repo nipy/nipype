@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: MultiProc with multithreaded nodes (https://github.com/nipy/nipype/pull/1162)
 * ENH: Added interface to simulate DWIs using the multi-tensor model
        (https://github.com/nipy/nipype/pull/1085)
 * ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
