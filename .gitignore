@@ -15,3 +15,8 @@
 .idea/
 /documentation.zip
 .DS_Store
+
+# Temporary test files should be ignored
+test_auto*.py
+nipype/testing/data/von-ray_errmap.nii.gz
+nipype/testing/data/von_errmap.nii.gz
