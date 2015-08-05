@@ -1,5 +1,4 @@
-from nose import with_setup
-from nipype.testing import assert_equal, assert_raises
+from nipype.testing import assert_equal, assert_raises, example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError
 from nipype.interfaces.ants import JointFusion
@@ -54,24 +53,24 @@ def test_JointFusion_cmd():
     at.inputs.dimension = 3
     at.inputs.modalities = 1
     at.inputs.method = 'Joint[0.1,2]'
-    at.inputs.output_label_image ='fusion_labelimage_output.nii'
-    at.inputs.warped_intensity_images = ['im1.nii',
-                                         'im2.nii']
-    at.inputs.warped_label_images = ['segmentation0.nii.gz',
-                                     'segmentation1.nii.gz']
-    at.inputs.target_image = 'T1.nii'
+    at.inputs.output_label_image = 'fusion_labelimage_output.nii'
+    warped_intensity_images = [example_data('im1.nii'),
+                               example_data('im2.nii')]
+    at.inputs.warped_intensity_images = warped_intensity_images
+    segmentation_images = [example_data('segmentation0.nii.gz'),
+                           example_data('segmentation1.nii.gz')]
+    at.inputs.warped_label_images = segmentation_images
+    T1_image = example_data('T1.nii')
+    at.inputs.target_image = T1_image
     at.inputs.patch_radius = [3,2,1]
     at.inputs.search_radius = [1,2,3]
-    yield assert_equal, at.cmdline, 'jointfusion 3 1' + \
-      ' -m Joint[0.1,2]' + \
-      ' -rp 3x2x1' + \
-      ' -rs 1x2x3' + \
-      ' -tg T1.nii' + \
-      ' -g im1.nii' + \
-      ' -g im2.nii' + \
-      ' -l segmentation0.nii.gz' + \
-      ' -l segmentation1.nii.gz' + \
-      ' fusion_labelimage_output.nii',
-    "Command line generation failure", True
+    expected_command = ('jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3'
+                        ' -tg %s -g %s -g %s -l %s -l %s'
+                        ' fusion_labelimage_output.nii') % (T1_image,
+                                                            warped_intensity_images[0],
+                                                            warped_intensity_images[1],
+                                                            segmentation_images[0],
+                                                            segmentation_images[1])
+    yield assert_equal, at.cmdline, expected_command
     # setting intensity or labels with unequal lengths raises error
-    yield assert_raises, AssertionError, at._format_arg, 'warped_intensity_images', InputMultiPath, ['im1.nii', 'im2.nii', 'im3.nii']
+    yield assert_raises, AssertionError, at._format_arg, 'warped_intensity_images', InputMultiPath, warped_intensity_images + [example_data('im3.nii')]

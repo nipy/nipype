@@ -15,7 +15,7 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 import numpy as np
 from numpy import linalg as nla
 import os.path as op
-from nipype.external import six
+from ..external import six
 
 from .. import logging
 

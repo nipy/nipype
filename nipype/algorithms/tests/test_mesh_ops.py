@@ -16,12 +16,13 @@ import nipype.testing as nit
 from nipype.algorithms import mesh as m
 
 notvtk = True
-try:
-    from tvtk.api import tvtk
-    notvtk = False
-except ImportError:
-    pass
-
+import platform
+if 'darwin' not in platform.system().lower():
+    try:
+        from tvtk.api import tvtk
+        notvtk = False
+    except ImportError:
+        pass
 
 @skipif(notvtk)
 def test_ident_distances():
@@ -29,7 +30,6 @@ def test_ident_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
     in_surf = example_data('surf01.vtk')
-
     dist_ident = m.ComputeMeshWarp()
     dist_ident.inputs.surface1 = in_surf
     dist_ident.inputs.surface2 = in_surf
