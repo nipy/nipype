@@ -1,6 +1,7 @@
 Next release
 ============
 
+* FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
 * ENH: Attempt to use hard links for data sink.
     (https://github.com/nipy/nipype/pull/1161)
 * FIX: Updates to SGE Plugins

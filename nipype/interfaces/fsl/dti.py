@@ -111,8 +111,9 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
                  desc='b values file')
 
     logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
-    n_fibres = traits.Range(low=1, argstr='--nfibres=%d', desc=('Maximum '
-                            'number of fibres to fit in each voxel'))
+    n_fibres = traits.Range(
+        usedefault=True, low=1, default=2, argstr='--nfibres=%d',
+        desc=('Maximum number of fibres to fit in each voxel'))
     model = traits.Enum(1, 2, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
                               'single-shell) or multiexponential (2, multi-'
@@ -200,7 +201,9 @@ class FSLXCommand(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        out_dir = self._out_dir
+        n_fibres = 2
+        if isdefined(self.inputs.n_fibres):
+            n_fibres = self.inputs.n_fibres
 
         if isdefined(self.inputs.logdir):
             out_dir = os.path.abspath(self.inputs.logdir)
@@ -222,13 +225,13 @@ class FSLXCommand(FSLCommand):
         for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(1, self.inputs.n_fibres + 1):
+        for i in xrange(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                        cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
                                             'samples') % i, cwd=out_dir))
 
-        for i in xrange(1, self.inputs.n_fibres + 1):
+        for i in xrange(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
                                     cwd=out_dir))
             outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
