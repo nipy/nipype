@@ -1,10 +1,11 @@
 dependencies:
   cache_directories:
-    - "~/nipype_data"
+    - "~/data"
+    - "~/fsdata"
   override:
     - pip install --upgrade pip
     - pip install -e .
-
+    - if [[ ! -d ~/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mv nipype-tutorial/* .; fi
 test:
   override:
     - make html
