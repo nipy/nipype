@@ -2,7 +2,7 @@ import os
 import argparse
 import inspect
 import sys
-from nipype.interfaces.base import Interface
+from nipype.interfaces.base import Interface, InputMultiPath
 from nipype.utils.misc import str2bool
 
 def listClasses(module=None):
@@ -23,11 +23,14 @@ def add_options(parser=None, module=None, function=None):
         inputs = interface.input_spec()
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
             desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:]
+            args = {}
+            if spec.is_trait_type(InputMultiPath):
+                args["nargs"]="*"
             if hasattr(spec, "mandatory") and spec.mandatory:
-                parser.add_argument(name, help=desc)
+                parser.add_argument(name, help=desc, **args)
             else:
                 parser.add_argument("--%s"%name, dest=name,
-                                    help=desc)
+                                    help=desc, **args)
     return parser, interface
 
 def run_instance(interface, options):
