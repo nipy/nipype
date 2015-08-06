@@ -91,7 +91,7 @@ optional arguments:
                                                        [--start START]
                                                        [--time_interp TIME_INTERP]
                                                        [--tr_slices TR_SLICES]
-                                                       [in_file [in_file ...]]
+                                                       in_file [in_file ...]
                                                        tr
 nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
 """)
