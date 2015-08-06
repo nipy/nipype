@@ -52,6 +52,7 @@ def test_BEDPOSTX5_inputs():
     model=dict(argstr='--model=%d',
     ),
     n_fibres=dict(argstr='--nfibres=%d',
+    usedefault=True,
     ),
     n_jumps=dict(argstr='--njumps=%d',
     ),
