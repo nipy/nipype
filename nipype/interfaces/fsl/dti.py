@@ -112,7 +112,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
     logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
     n_fibres = traits.Range(
-        2, usedefault=True, low=1, argstr='--nfibres=%d',
+        usedefault=True, low=1, default=2, argstr='--nfibres=%d',
         desc=('Maximum number of fibres to fit in each voxel'))
     model = traits.Enum(1, 2, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
