@@ -5,9 +5,16 @@ dependencies:
   override:
     - pip install --upgrade pip
     - pip install -e .
+    - pip install matplotlib sphinx
     - if [[ ! -d ~/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mv nipype-tutorial/* .; fi
+    - wget -O- http://neuro.debian.net/lists/trusty.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+    - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
+    - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
+    - export FSLDIR=/usr/share/fsl/5.0
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh
 test:
   override:
+    - fslinfo
     - make html
 
 general:
