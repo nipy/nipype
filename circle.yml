@@ -1,0 +1,14 @@
+dependencies:
+  cache_directories:
+    - "~/nipype_data"
+  override:
+    - pip install --upgrade pip
+    - pip install -e .
+
+test:
+  override:
+    - make html
+
+general:
+  artifacts:
+    - "doc/_build/html"
