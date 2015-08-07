@@ -13,13 +13,23 @@ dependencies:
     - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
     - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases fsl-feeds
     - bash ~/nipype/tools/install_spm_mcr.sh
-    - mkdir ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+    #- mkdir ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
 test:
   override:
-    - cd ~/examples && . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && SPMMCRCMD="$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script" FORCE_SPMMCR=1 python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && make html
-    - cd ~/examples && . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && SPMMCRCMD="$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script" FORCE_SPMMCR=1 python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow
-    - cd ~/examples && . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && SPMMCRCMD="$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script" FORCE_SPMMCR=1 python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline
+    - python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
+      pwd: $HOME/examples
+      environment:
+        SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+        FORCE_SPMMCR: 1
+      timeout: 1600
+    - make html
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
+      pwd: $HOME/examples
+    - python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
+      pwd: $HOME/examples
+      environment:
+        SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+        FORCE_SPMMCR: 1
 
 general:
   artifacts:
