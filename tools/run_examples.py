@@ -22,12 +22,12 @@ def run_examples(example, pipelines, plugin):
 if __name__ == '__main__':
     path, file = os.path.split(__file__)
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
-    examples = {#'fmri_fsl_reuse':['level1_workflow'],
+    examples = {'fmri_fsl_reuse':['level1_workflow'],
                 'fmri_spm_nested':['level1','l2pipeline'],
-                #'fmri_spm_dartel':['level1','l2pipeline'],
+                'fmri_spm_dartel':['level1','l2pipeline'],
                 #'fmri_fsl_feeds':['l1pipeline']
                 }
-    plugins = ['Linear']#, 'MultiProc']
+    plugins = ['Linear', 'MultiProc']
     for plugin in plugins:
         for example, pipelines in examples.items():
             run_examples(example, pipelines, plugin)
