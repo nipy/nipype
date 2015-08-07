@@ -17,19 +17,19 @@ dependencies:
 test:
   override:
     - python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
-      pwd: $HOME/examples
-      environment:
-        SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-        FORCE_SPMMCR: 1
-      timeout: 1600
+        pwd: $HOME/examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
+        timeout: 1600
     - make html
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
-      pwd: $HOME/examples
+        pwd: $HOME/examples
     - python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
-      pwd: $HOME/examples
-      environment:
-        SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
-        FORCE_SPMMCR: 1
+        pwd: $HOME/examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
 
 general:
   artifacts:
