@@ -11,7 +11,7 @@ dependencies:
     - pip install matplotlib sphinx ipython
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
     # we download this manually because CircleCI does not cache apt
-    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.8-feeds.tar.gz"; tar jxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
+    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.8-feeds.tar.gz"; tar zxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
     - wget -O- http://neuro.debian.net/lists/trusty.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
     - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
     - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
