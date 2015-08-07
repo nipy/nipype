@@ -1,6 +1,3 @@
-from nipype import config
-config.enable_debug_mode()
-
 import os
 import sys
 from shutil import rmtree
@@ -8,8 +5,7 @@ from shutil import rmtree
 
 def run_examples(example, pipelines, plugin):
     print 'running example: %s with plugin: %s'%(example, plugin)
-    from nipype.utils.config import NipypeConfig
-    config = NipypeConfig()
+    from nipype.utils.config import config
     config.enable_debug_mode()
     __import__(example)
     for pipeline in pipelines:
