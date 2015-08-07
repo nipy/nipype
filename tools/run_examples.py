@@ -27,7 +27,7 @@ if __name__ == '__main__':
                 #'fmri_spm_dartel':['level1','l2pipeline'],
                 #'fmri_fsl_feeds':['l1pipeline']
                 }
-    plugins = ['Linear']
-    for plugin in plugins:
-        for example, pipelines in examples.items():
-            run_examples(example, pipelines, plugin)
+    example = sys.argv[1]
+    plugin = sys.argv[2]
+    pipelines = sys.argv[3:]
+    run_examples(example, pipelines, plugin)
