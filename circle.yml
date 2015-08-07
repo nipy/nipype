@@ -16,7 +16,7 @@ dependencies:
 test:
   override:
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && make html
-    - cd ~/examples && . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py
+    - cd ~/examples && . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && SPMMCRCMD="$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script" FORCE_SPMMCR=1 python ~/nipype/tools/run_examples.py
 
 general:
   artifacts:
