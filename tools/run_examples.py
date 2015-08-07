@@ -1,3 +1,6 @@
+from nipype import config
+config.enable_debug_mode()
+
 import os
 import sys
 from shutil import rmtree
