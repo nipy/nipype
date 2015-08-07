@@ -5,7 +5,7 @@ from shutil import rmtree
 
 def run_examples(example, pipelines, plugin):
     print 'running example: %s with plugin: %s'%(example, plugin)
-    from nipype.utils import config
+    from nipype import config
     config.enable_debug_mode()
     __import__(example)
     for pipeline in pipelines:
