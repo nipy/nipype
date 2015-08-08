@@ -8,7 +8,7 @@ def run_examples(example, pipelines, plugin):
     from nipype import config
     config.enable_debug_mode()
     from nipype.interfaces.base import CommandLine
-    CommandLineInterface.set_default_terminal_output("stream")
+    CommandLine.set_default_terminal_output("stream")
 
     __import__(example)
     for pipeline in pipelines:
