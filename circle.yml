@@ -31,7 +31,7 @@ test:
         timeout: 1600
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
         pwd: ../examples
-    - python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
