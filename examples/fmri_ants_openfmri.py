@@ -106,8 +106,6 @@ def create_reg_workflow(name='registration'):
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
 
-    Example
-    -------
     """
 
     register = pe.Workflow(name=name)
@@ -304,8 +302,6 @@ def create_fs_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -320,9 +316,6 @@ def create_fs_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
 
     """
 
@@ -1106,7 +1099,7 @@ if __name__ == '__main__':
                           'task%03d' % int(args.task))
     derivatives = args.derivatives
     if derivatives is None:
-       derivatives = False
+        derivatives = False
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                                   subject=args.subject,
                                   model_id=int(args.model),
