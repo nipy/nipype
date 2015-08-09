@@ -14,7 +14,6 @@ dependencies:
     # we download this manually because CircleCI does not cache apt
     - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.8-feeds.tar.gz"; tar zxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
     - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" ; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz"; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz"; mkdir ~/examples/fsl_course_data; tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data; tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data; tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
-    - wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data
     - wget -O- http://neuro.debian.net/lists/trusty.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
     - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
     - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
