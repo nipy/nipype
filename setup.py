@@ -11,7 +11,7 @@ Much of the machinery at the beginning of this file has been copied over from
 nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
-from __future__ import unicode_literals
+#from __future__ import unicode_literals
 from future.utils import exec_
 import os
 from os.path import join as pjoin
@@ -295,7 +295,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = [ 'nipype',
+          packages = [     'nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
