@@ -83,7 +83,7 @@ def main(**extra_args):
           author_email=AUTHOR_EMAIL,
           platforms=PLATFORMS,
           version=VERSION,
-          requires=REQUIRES,
+          install_requires=REQUIRES,
           provides=PROVIDES,
           packages     = [ 'nipype',
                            'nipype.algorithms',
