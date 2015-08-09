@@ -218,6 +218,7 @@ def main(**extra_args):
                            pjoin('workflows', 'data', '*'),
                            pjoin('pipeline', 'report_template.html'),
                            pjoin('external', 'd3.js'),
+                           pjoin('interfaces', 'script_templates', '*'),
                            pjoin('interfaces', 'tests', 'realign_json.json')
                           ]},
           scripts      = glob('bin/*'),
