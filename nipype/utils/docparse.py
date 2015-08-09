@@ -148,7 +148,7 @@ def insert_doc(doc, new_items):
     >>> new_items = ['infile : str', '    The name of the input file']
     >>> new_items.extend(['outfile : str', '    The name of the output file'])
     >>> newdoc = insert_doc(doc, new_items)
-    >>> print newdoc
+    >>> print(newdoc)
     Parameters
     ----------
     infile : str
