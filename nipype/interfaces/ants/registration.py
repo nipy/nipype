@@ -6,6 +6,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 from ..base import (TraitedSpec, File, traits)
 from .base import ANTSCommand, ANTSCommandInputSpec
@@ -497,8 +500,8 @@ class Registration(ANTSCommand):
         # Otherwise, make a singleton list of the metric specification
         # from the non-list inputs.
         if isinstance(name_input, list):
-            items = stage_inputs.items()
-            indexes = range(0, len(name_input))
+            items = list(stage_inputs.items())
+            indexes = list(range(0, len(name_input)))
             # dict-comprehension only works with python 2.7 and up
             #specs = [{k: v[i] for k, v in items} for i in indexes]
             specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
@@ -676,7 +679,7 @@ class Registration(ANTSCommand):
                                            'Translation': 'Translation.mat',
                                            'BSpline': 'BSpline.txt',
                                            'Initial': 'DerivedInitialMovingTranslation.mat'}
-        if transform in self.lowDimensionalTransformMap.keys():
+        if transform in list(self.lowDimensionalTransformMap.keys()):
             suffix = self.lowDimensionalTransformMap[transform]
             inverse_mode = inverse
         else:

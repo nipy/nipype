@@ -96,6 +96,8 @@ Using interfaces
 Having interfaces allows us to use third party software (like FSL BET) as function. Look how simple it is.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 
 import nipype.interfaces.fsl as fsl
 result = fsl.BET(in_file='data/s1/struct.nii').run()

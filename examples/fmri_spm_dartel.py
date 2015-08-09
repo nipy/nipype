@@ -15,6 +15,9 @@ nipype tutorial directory::
 
 Import necessary modules from nipype."""
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -328,7 +331,7 @@ def subjectinfo(subject_id):
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
+        onsets = [list(range(15,240,60)),list(range(45,240,60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
@@ -480,7 +483,7 @@ contrasts.
 """
 
 # collect all the con images for each contrast.
-contrast_ids = range(1,len(contrasts)+1)
+contrast_ids = list(range(1,len(contrasts)+1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
 l2source.inputs.template=os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')

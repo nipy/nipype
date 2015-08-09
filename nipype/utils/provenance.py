@@ -1,4 +1,10 @@
-from cPickle import dumps
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+from pickle import dumps
 import json
 import os
 import getpass
@@ -118,7 +124,7 @@ def safe_encode(x, as_literal=True):
         else:
             return value
     try:
-        if isinstance(x, (str, unicode)):
+        if isinstance(x, (str, str)):
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
@@ -145,7 +151,7 @@ def safe_encode(x, as_literal=True):
             return pm.Literal(x, pm.XSD['float'])
         if isinstance(x, dict):
             outdict = {}
-            for key, value in x.items():
+            for key, value in list(x.items()):
                 encoded_value = safe_encode(value, as_literal=False)
                 if isinstance(encoded_value, pm.Literal):
                     outdict[key] = encoded_value.json_representation()
@@ -369,7 +375,7 @@ class ProvStore(object):
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",
                       foaf["name"]: safe_encode("Nipype")}
-        for key, value in get_info().items():
+        for key, value in list(get_info().items()):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,

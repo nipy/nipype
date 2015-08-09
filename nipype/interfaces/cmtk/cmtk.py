@@ -9,6 +9,10 @@
 
 """
 from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import range
+from past.utils import old_div
 
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath, Directory,
@@ -72,14 +76,14 @@ def length(xyz, along=False):
 def get_rois_crossed(pointsmm, roiData, voxelSize):
 	n_points = len(pointsmm)
 	rois_crossed = []
-	for j in xrange(0, n_points):
+	for j in range(0, n_points):
 		# store point
-		x = int(pointsmm[j, 0] / float(voxelSize[0]))
-		y = int(pointsmm[j, 1] / float(voxelSize[1]))
-		z = int(pointsmm[j, 2] / float(voxelSize[2]))
+		x = int(old_div(pointsmm[j, 0], float(voxelSize[0])))
+		y = int(old_div(pointsmm[j, 1], float(voxelSize[1])))
+		z = int(old_div(pointsmm[j, 2], float(voxelSize[2])))
 		if not roiData[x, y, z] == 0:
 			rois_crossed.append(roiData[x, y, z])
-	rois_crossed = dict.fromkeys(rois_crossed).keys() #Removed duplicates from the list
+	rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
 	return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
@@ -102,7 +106,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 	final_fiber_ids = []
 	list_of_roi_crossed_lists = []
 	for i, fiber in enumerate(streamlines):
-		pcN = int(round(float(100 * i) / n_fib))
+		pcN = int(round(old_div(float(100 * i), n_fib)))
 		if pcN > pc and pcN % 1 == 0:
 			pc = pcN
 			print('%4.0f%%' % (pc))
@@ -152,12 +156,12 @@ def create_endpoints_array(fib, voxelSize):
         endpointsmm[i, 1, :] = f[-1, :]
 
         # Translate from mm to index
-        endpoints[i, 0, 0] = int(endpoints[i, 0, 0] / float(voxelSize[0]))
-        endpoints[i, 0, 1] = int(endpoints[i, 0, 1] / float(voxelSize[1]))
-        endpoints[i, 0, 2] = int(endpoints[i, 0, 2] / float(voxelSize[2]))
-        endpoints[i, 1, 0] = int(endpoints[i, 1, 0] / float(voxelSize[0]))
-        endpoints[i, 1, 1] = int(endpoints[i, 1, 1] / float(voxelSize[1]))
-        endpoints[i, 1, 2] = int(endpoints[i, 1, 2] / float(voxelSize[2]))
+        endpoints[i, 0, 0] = int(old_div(endpoints[i, 0, 0], float(voxelSize[0])))
+        endpoints[i, 0, 1] = int(old_div(endpoints[i, 0, 1], float(voxelSize[1])))
+        endpoints[i, 0, 2] = int(old_div(endpoints[i, 0, 2], float(voxelSize[2])))
+        endpoints[i, 1, 0] = int(old_div(endpoints[i, 1, 0], float(voxelSize[0])))
+        endpoints[i, 1, 1] = int(old_div(endpoints[i, 1, 1], float(voxelSize[1])))
+        endpoints[i, 1, 2] = int(old_div(endpoints[i, 1, 2], float(voxelSize[2])))
 
     # Return the matrices
     iflogger.info('Returning the endpoint matrix')
@@ -228,7 +232,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         I.add_weighted_edges_from(((u, v, d['weight']) for u, v, d in H.edges(data=True)))
 
     dis = 0
-    for i in xrange(endpoints.shape[0]):
+    for i in range(endpoints.shape[0]):
 
         # ROI start => ROI end
         try:
@@ -647,7 +651,7 @@ class ROIGen(BaseInterface):
             LUTlabelDict = {}
 
             """ Create dictionary for input LUT table"""
-            for labels in xrange(0, numLUTLabels):
+            for labels in range(0, numLUTLabels):
                 LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1], LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3], LUTlabelsRGBA[labels][4], LUTlabelsRGBA[labels][5]]
 
             iflogger.info('Printing LUT label dictionary')

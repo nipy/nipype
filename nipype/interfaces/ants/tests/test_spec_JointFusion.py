@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import range
+from past.utils import old_div
 from nipype.testing import assert_equal, assert_raises, example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError
@@ -26,7 +30,7 @@ def test_JointFusion_method():
     at = JointFusion()
     set_method = lambda a, b: setattr(at.inputs, 'method', 'Joint[%.1f,%d]'.format(a, b))
     for a in range(10):
-        _a = a / 10.0
+        _a = old_div(a, 10.0)
         for b in range(10):
             set_method(_a, b)
             # set directly

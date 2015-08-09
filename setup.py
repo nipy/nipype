@@ -11,8 +11,8 @@ Much of the machinery at the beginning of this file has been copied over from
 nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
-"""Build helper."""
-
+from __future__ import unicode_literals
+from future.utils import exec_
 import os
 from os.path import join as pjoin
 from glob import glob
@@ -39,7 +39,7 @@ cmdclass = {'build_py': get_comrec_build('nipype'),
 
 # Get version and release info, which is all stored in nipype/info.py
 ver_file = os.path.join('nipype', 'info.py')
-exec(open(ver_file).read())
+exec_(open(ver_file).read())
 
 # Prepare setuptools args
 if 'setuptools' in sys.modules:

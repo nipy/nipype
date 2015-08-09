@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from nipype.interfaces.slicer.generate_classes import generate_all_classes
 
 

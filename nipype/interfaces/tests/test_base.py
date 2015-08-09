@@ -1,18 +1,20 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import tempfile
 import shutil
-
-from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                        assert_true, assert_false, with_setup, package_check,
-                        skipif)
-import nipype.interfaces.base as nib
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import Undefined, config
-from traits.testing.nose_tools import skip
 import traits.api as traits
+
+from ...testing import (assert_equal, assert_not_equal, assert_raises,
+                        assert_true, assert_false, skipif)
+from .. import base as nib
+from ...utils.filemanip import split_filename
+from ..base import Undefined, config
+
 #test Bunch
 def test_bunch():
     b = nib.Bunch()
@@ -53,9 +55,8 @@ def test_bunch_hash():
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nib.md5()
-    fp = file(json_pth)
-    jshash.update(fp.read())
-    fp.close()
+    with open(json_pth, 'rb') as fp:
+        jshash.update(fp.read())
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
 
@@ -94,9 +95,9 @@ def test_TraitedSpec():
     #yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
-@skip
+@skipif(True)
 def test_TraitedSpec_dynamic():
-    from cPickle import dumps, loads
+    from pickle import dumps, loads
     a = nib.BaseTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
     a.foo = 1
@@ -297,15 +298,6 @@ def test_cycle_namesource2():
     teardown_file(tmpd)
 
 
-def checknose():
-    """check version of nose for known incompatability"""
-    mod = __import__('nose')
-    if mod.__versioninfo__[1] <= 11:
-        return 0
-    else:
-        return 1
-
-@skipif(checknose)
 def test_TraitedSpec_withFile():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
@@ -318,7 +310,6 @@ def test_TraitedSpec_withFile():
     yield assert_equal, hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
     teardown_file(tmpd)
 
-@skipif(checknose)
 def test_TraitedSpec_withNoFileHashing():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
@@ -420,7 +411,7 @@ def test_input_version():
     except:
         not_raised = False
     yield assert_true, not_raised
-    config.set('execution', 'stop_on_unknown_version', True)
+    config.set('execution', 'stop_on_unknown_version', "True")
     try:
         obj._check_version_requirements(obj.inputs)
     except:

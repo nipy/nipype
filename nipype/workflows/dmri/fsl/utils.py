@@ -2,6 +2,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import next
+from builtins import range
+from past.utils import old_div
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as niu
 from nipype.interfaces import fsl
@@ -492,7 +498,7 @@ def rotate_bvecs(in_bvec, in_matrix):
         else:
             invrot = np.linalg.inv(np.loadtxt(mat))[:3, :3]
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append((old_div(newbvec,np.linalg.norm(newbvec))))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -542,7 +548,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
 
             invrot = np.linalg.inv(R)
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append((old_div(newbvec,np.linalg.norm(newbvec))))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -566,7 +572,7 @@ def compute_readout(params):
         pass
     try:
         if params['acc_factor'] > 1:
-            acc_factor = 1.0 / params['acc_factor']
+            acc_factor = old_div(1.0, params['acc_factor'])
     except:
         pass
     return acc_factor * epi_factor * params['echospacing']
@@ -624,7 +630,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
         out_file = op.abspath('./%s_radsec.nii.gz' % fname)
 
     im = nb.load(in_file)
-    data = im.get_data().astype(np.float32) * (1.0/delta_te)
+    data = im.get_data().astype(np.float32) * (old_div(1.0,delta_te))
     nb.Nifti1Image(data, im.get_affine(),
                    im.get_header()).to_filename(out_file)
     return out_file
@@ -705,7 +711,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
     S = np.ones_like(RS)
     S[sc_idx] = RS[sc_idx]
-    R = RS/S
+    R = old_div(RS,S)
 
     new_bvecs = [R.dot(b) for b in bvecs]
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
@@ -782,7 +788,7 @@ def _checkinitxfm(in_bval, excl_nodiff, in_xfms=None):
     if excl_nodiff:
         dws = np.where(bvals != 0)[0].tolist()
     else:
-        dws = range(len(bvals))
+        dws = list(range(len(bvals)))
 
     if gen_id:
         for i in dws:

@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """reST directive for syntax-highlighting ipython interactive sessions.
 """
+from __future__ import unicode_literals
 
 #-----------------------------------------------------------------------------
 # Needed modules

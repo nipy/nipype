@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for join expansion
 """
+from __future__ import unicode_literals
 from copy import deepcopy
 import os
 from shutil import rmtree

@@ -21,6 +21,7 @@ Can be executed in command line using ``python dmri_preprocessing.py``
 
 Import necessary modules from nipype.
 """
+from __future__ import unicode_literals
 
 import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o
@@ -81,7 +82,7 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                     outfields=info.keys()), name='datasource')
+                     outfields=list(info.keys())), name='datasource')
 
 datasource.inputs.template = "%s/%s"
 

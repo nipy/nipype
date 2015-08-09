@@ -1,4 +1,7 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 #################################################################################
 ## Program:   Build Template Parallel
 ## Language:  Python
@@ -52,7 +55,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes,
         curr_name=flattened_image_nametypes[index]
         curr_file=deformedPassiveImages[index]
         image_dictionary_of_lists[curr_name].append(curr_file)
-    for image_type,image_list in image_dictionary_of_lists.items():
+    for image_type,image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
@@ -104,7 +107,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
         subjImgDictionary=ListOfPassiveImagesDictionaries[subjIndex]
         subjToAtlasTransform=transforms[subjIndex]
         subjToAtlasInvertFlags=invert_transform_flags[subjIndex]
-        for imgname,img in subjImgDictionary.items():
+        for imgname,img in list(subjImgDictionary.items()):
             flattened_images.append(img)
             flattened_image_nametypes.append(imgname)
             flattened_transforms.append(subjToAtlasTransform)
@@ -139,7 +142,7 @@ def GetPassiveImages(ListOfImagesDictionaries,registrationImageTypes):
     passive_images=list()
     for mdict in ListOfImagesDictionaries:
         ThisSubjectPassiveImages=dict()
-        for key,value in mdict.items():
+        for key,value in list(mdict.items()):
             if key not in registrationImageTypes:
                 ThisSubjectPassiveImages[key]=value
         passive_images.append(ThisSubjectPassiveImages)

@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -6,9 +8,10 @@ import shutil
 from tempfile import mkdtemp, mkstemp
 
 import numpy as np
-from nipype.testing import assert_equal, assert_true, assert_raises
-from nipype.interfaces import utility
-import nipype.pipeline.engine as pe
+
+from ...testing import assert_equal, assert_true, assert_raises
+from .. import utility
+from ...pipeline import engine as pe
 
 
 def test_rename():
@@ -51,7 +54,10 @@ def test_function():
         import numpy as np
         return np.random.rand(size, size)
 
-    f1 = pe.MapNode(utility.Function(input_names=['size'], output_names=['random_array'], function=gen_random_array), name='random_array', iterfield=['size'])
+    f1 = pe.MapNode(utility.Function(input_names=['size'],
+                                     output_names=['random_array'],
+                                     function=gen_random_array),
+                    name='random_array', iterfield=['size'])
     f1.inputs.size = [2, 3, 5]
 
     wf = pe.Workflow(name="test_workflow")
@@ -59,7 +65,10 @@ def test_function():
     def increment_array(in_array):
         return in_array + 1
 
-    f2 = pe.MapNode(utility.Function(input_names=['in_array'], output_names=['out_array'], function=increment_array), name='increment_array', iterfield=['in_array'])
+    f2 = pe.MapNode(utility.Function(input_names=['in_array'],
+                                     output_names=['out_array'],
+                                     function=increment_array),
+                    name='increment_array', iterfield=['in_array'])
 
     wf.connect(f1, 'random_array', f2, 'in_array')
 
@@ -71,12 +80,10 @@ def test_function():
 
 
 def make_random_array(size):
-
     return np.random.randn(size, size)
 
 
 def should_fail():
-
     tempdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(tempdir)
@@ -92,8 +99,8 @@ def should_fail():
         os.chdir(origdir)
         shutil.rmtree(tempdir)
 
-
-assert_raises(NameError, should_fail)
+def test_should_fail():
+    yield assert_raises, NameError, should_fail
 
 
 def test_function_with_imports():
@@ -122,14 +129,14 @@ def test_split():
     os.chdir(tempdir)
 
     try:
-        node = pe.Node(utility.Split(inlist=range(4),
+        node = pe.Node(utility.Split(inlist=list(range(4)),
                                      splits=[1, 3]),
                        name='split_squeeze')
         res = node.run()
         yield assert_equal, res.outputs.out1, [0]
         yield assert_equal, res.outputs.out2, [1, 2, 3]
 
-        node = pe.Node(utility.Split(inlist=range(4),
+        node = pe.Node(utility.Split(inlist=list(range(4)),
                                      splits=[1, 3],
                                      squeeze=True),
                        name='split_squeeze')
@@ -151,9 +158,9 @@ def test_csvReader():
         with open(name, 'w+b') as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:
-                fid.write(header)
+                fid.write(header.encode())
                 reader.inputs.header = True
-            fid.writelines(lines)
+            fid.writelines([val.encode() for val in lines])
             fid.flush()
             reader.inputs.in_file = name
             out = reader.run()

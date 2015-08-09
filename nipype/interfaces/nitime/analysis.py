@@ -9,6 +9,9 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 - nitime.viz.drawmatrix_channels
 
 """
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import object
 
 import warnings
 import numpy as np
@@ -245,14 +248,14 @@ class CoherenceAnalyzer(BaseInterface):
                                     suffix='_delay'))
 
 
-class GetTimeSeriesInputSpec():
+class GetTimeSeriesInputSpec(object):
     pass
 
 
-class GetTimeSeriesOutputSpec():
+class GetTimeSeriesOutputSpec(object):
     pass
 
 
-class GetTimeSeries():
+class GetTimeSeries(object):
     # getting time series data from nifti files and ROIs
     pass

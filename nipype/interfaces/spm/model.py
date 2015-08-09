@@ -10,6 +10,8 @@ and spm to access spm tools.
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import str
 
 __docformat__ = 'restructuredtext'
 
@@ -765,7 +767,7 @@ class FactorialDesign(SPMCommand):
                        'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
-                for key, keyval in dictitem.items():
+                for key, keyval in list(dictitem.items()):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
@@ -921,7 +923,7 @@ class MultipleRegressionDesign(FactorialDesign):
                        'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
-                for key, keyval in dictitem.items():
+                for key, keyval in list(dictitem.items()):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist

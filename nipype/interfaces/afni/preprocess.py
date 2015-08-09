@@ -8,6 +8,7 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
 import warnings
 
 import os
@@ -1838,7 +1839,7 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                for k in d.keys():
+                for k in list(d.keys()):
                     d[k] = int(d[k])
                 outputs.set(**d)
         outputs.set(out_file=self._gen_filename('out_file'))

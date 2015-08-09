@@ -5,6 +5,8 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 import re

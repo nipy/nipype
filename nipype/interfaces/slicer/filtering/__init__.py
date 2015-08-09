@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import unicode_literals
 from .morphology import GrayscaleGrindPeakImageFilter, GrayscaleFillHoleImageFilter
 from .denoising import GradientAnisotropicDiffusion, CurvatureAnisotropicDiffusion, GaussianBlurImageFilter, MedianImageFilter
 from .arithmetic import MultiplyScalarVolumes, MaskScalarVolume, SubtractScalarVolumes, AddScalarVolumes, CastScalarVolume

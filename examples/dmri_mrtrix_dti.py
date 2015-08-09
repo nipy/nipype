@@ -18,6 +18,7 @@ We perform this analysis using the FSL course data, which can be acquired from h
 
 Import necessary modules from nipype.
 """
+from __future__ import unicode_literals
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
@@ -57,7 +58,7 @@ Templates for the associated images are used to obtain the correct images.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
+                                               outfields=list(info.keys())),
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"

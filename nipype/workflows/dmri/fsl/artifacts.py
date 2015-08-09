@@ -1,6 +1,9 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
+from __future__ import unicode_literals
+from past.utils import old_div
 import os
 
 import nipype.pipeline.engine as pe
@@ -861,7 +864,7 @@ def remove_bias(name='bias_correct'):
 
 
 def _eff_t_echo(echospacing, acc_factor):
-    eff_echo = echospacing / (1.0 * acc_factor)
+    eff_echo = old_div(echospacing, (1.0 * acc_factor))
     return eff_echo
 
 

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
 import nipype.interfaces.cmtk as cmtk

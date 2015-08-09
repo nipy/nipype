@@ -12,6 +12,9 @@ create a template out of multiple T1 volumes.
 1. Tell python where to find the appropriate functions.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
 import os
 import nipype.interfaces.utility as util
@@ -25,7 +28,7 @@ from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 2. Download T1 volumes into home directory
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 homeDir=os.getenv("HOME")
 requestedPath=os.path.join(homeDir,'nipypeTestPath')
 mydatadir=os.path.realpath(requestedPath)
@@ -45,7 +48,7 @@ for tt in MyFileURLs:
     myURL=tt[0]
     localFilename=os.path.join(mydatadir,tt[1])
     if not os.path.exists(localFilename):
-        remotefile = urllib2.urlopen(myURL)
+        remotefile = urllib.request.urlopen(myURL)
 
         localFile = open(localFilename, 'wb')
         localFile.write(remotefile.read())

@@ -14,6 +14,11 @@ See the docstrings of the individual classes for examples.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import map
+from builtins import range
+from past.utils import old_div
 
 import os
 from glob import glob
@@ -167,7 +172,7 @@ class Smooth(FSLCommand):
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'fwhm':
-            sigma = float(value) / np.sqrt(8 * np.log(2))
+            sigma = old_div(float(value), np.sqrt(8 * np.log(2)))
             return super(Smooth, self)._format_arg(name, trait_spec, sigma)
         return super(Smooth, self)._format_arg(name, trait_spec, value)
 
@@ -290,7 +295,7 @@ class ExtractROI(FSLCommand):
     def _format_arg(self, name, spec, value):
 
         if name == "crop_list":
-            return " ".join(map(str, sum(map(list, value), [])))
+            return " ".join(map(str, sum(list(map(list, value)), [])))
         return super(ExtractROI, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -480,7 +485,7 @@ class FilterRegressor(FSLCommand):
                 n_cols = design.shape[1]
             except IndexError:
                 n_cols = 1
-            return trait_spec.argstr % ",".join(map(str, range(1, n_cols + 1)))
+            return trait_spec.argstr % ",".join(map(str, list(range(1, n_cols + 1))))
         return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
@@ -1144,7 +1149,7 @@ class ConvertXFM(FSLCommand):
 
 class SwapDimensionsInputSpec(FSLCommandInputSpec):
 
-    in_file = File(exists=True, mandatory=True, argstr="%s", position="1",
+    in_file = File(exists=True, mandatory=True, argstr="%s", position=1,
                    desc="input image")
     _dims = ["x", "-x", "y", "-y", "z",
              "-z", "RL", "LR", "AP", "PA", "IS", "SI"]

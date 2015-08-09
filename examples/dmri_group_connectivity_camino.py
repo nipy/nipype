@@ -52,6 +52,7 @@ Import the workflows
 --------------------
 First, we import the necessary modules from nipype.
 """
+from __future__ import unicode_literals
 
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer
@@ -126,7 +127,7 @@ using the NBS plugin in ConnectomeViewer.
 title = ''
 for idx, group_id in enumerate(group_list.keys()):
     title += group_id
-    if not idx == len(group_list.keys()) - 1:
+    if not idx == len(list(group_list.keys())) - 1:
         title += '-'
 
     info = dict(dwi=[['subject_id', 'dti']],

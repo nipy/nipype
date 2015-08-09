@@ -39,6 +39,9 @@ Defining the workflow
 
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 import os                                    # system functions
 
@@ -451,7 +454,7 @@ def subjectinfo(subject_id):
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
+        onsets = [list(range(15,240,60)),list(range(45,240,60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
@@ -575,7 +578,7 @@ Setup a dummy node to iterate over contrasts and hemispheres
 l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['contrasts',
                                                                'hemi']),
                       name='inputnode')
-l2inputnode.iterables = [('contrasts', range(1,len(contrasts)+1)),
+l2inputnode.iterables = [('contrasts', list(range(1,len(contrasts)+1))),
                          ('hemi', ['lh','rh'])]
 
 """

@@ -1,5 +1,7 @@
 """Parallel workflow execution via Condor
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 

@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import numpy as np
 from nipype.testing import assert_true
 import tempfile
@@ -127,7 +128,7 @@ def test_skew():
 3.622185659  0.4716627142  -10.92515308  -3.705286841  -2.776089545  2.271920902  9.251504922  5.744980887
 """
     with tempfile.NamedTemporaryFile(delete=True) as f:
-        f.write(data)
+        f.write(data.encode())
         f.flush()
         skewness = calc_moments(f.name, 3)
         yield assert_true, np.allclose(skewness, np.array(

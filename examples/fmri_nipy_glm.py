@@ -16,6 +16,9 @@ the nipype tutorial directory::
 
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
 from nipype.interfaces.nipy.preprocess import ComputeMask
@@ -161,7 +164,7 @@ def subjectinfo(subject_id):
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
+        onsets = [list(range(15,240,60)),list(range(45,240,60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),

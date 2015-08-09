@@ -2,7 +2,12 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from cPickle import dumps, loads
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from builtins import str
+from pickle import dumps, loads
 import inspect
 
 from distutils.version import LooseVersion
@@ -10,7 +15,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
-from nipype.external.six import Iterator
+from ..external.six import Iterator
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -76,10 +81,10 @@ def create_function_from_source(function_source, imports=None):
     try:
         if imports is not None:
             for statement in imports:
-                exec statement in ns
-            import_keys = ns.keys()
+                exec(statement, ns)
+            import_keys = list(ns.keys())
 
-        exec loads(function_source) in ns
+        exec(loads(function_source), ns)
 
     except Exception as msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
@@ -114,7 +119,9 @@ def is_container(item):
        True if container
        False if not (eg string)
    """
-   if hasattr(item, '__iter__'):
+   if isinstance(item, str):
+       return False
+   elif hasattr(item, '__iter__'):
       return True
    else:
       return False

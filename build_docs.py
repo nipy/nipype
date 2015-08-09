@@ -8,6 +8,7 @@ To use this code, run::
     python setup.py build_sphinx
 """
 from __future__ import print_function
+from __future__ import unicode_literals
 
 # Standard library imports
 import sys
@@ -44,7 +45,7 @@ class TempInstall(Command):
         install.run()
 
         # Horrible trick to reload nipype with our temporary instal
-        for key in sys.modules.keys():
+        for key in list(sys.modules.keys()):
             if key.startswith('nipype'):
                 sys.modules.pop(key, None)
         sys.path.append(os.path.abspath(self.temp_install_dir))

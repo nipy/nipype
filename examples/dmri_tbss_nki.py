@@ -9,6 +9,7 @@ dMRI: TBSS on NKI RS data
 A pipeline to do a TBSS analysis on the NKI rockland sample data
 
 """
+from __future__ import unicode_literals
 
 from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 from nipype.workflows.dmri.fsl.tbss import create_tbss_non_FA, create_tbss_all

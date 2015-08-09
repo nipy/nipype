@@ -3,8 +3,12 @@
 """Miscellaneous file manipulation functions
 
 """
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 
-import cPickle
+import pickle
 from glob import glob
 import gzip
 import hashlib
@@ -172,13 +176,12 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
     hex = None
     if os.path.isfile(afile):
         crypto_obj = crypto()
-        fp = file(afile, 'rb')
-        while True:
-            data = fp.read(chunk_len)
-            if not data:
-                break
-            crypto_obj.update(data)
-        fp.close()
+        with open(afile, 'rb') as fp:
+            while True:
+                data = fp.read(chunk_len)
+                if not data:
+                    break
+                crypto_obj.update(data)
         hex = crypto_obj.hexdigest()
     return hex
 
@@ -189,8 +192,8 @@ def hash_timestamp(afile):
     if os.path.isfile(afile):
         md5obj = md5()
         stat = os.stat(afile)
-        md5obj.update(str(stat.st_size))
-        md5obj.update(str(stat.st_mtime))
+        md5obj.update(str(stat.st_size).encode())
+        md5obj.update(str(stat.st_mtime).encode())
         md5hex = md5obj.hexdigest()
     return md5hex
 
@@ -348,7 +351,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, unicode)):
+    if isinstance(filename, (str, str)):
         return [filename]
     elif isinstance(filename, list):
         return filename
@@ -380,9 +383,8 @@ def save_json(filename, data):
 
     """
 
-    fp = file(filename, 'w')
-    json.dump(data, fp, sort_keys=True, indent=4)
-    fp.close()
+    with open(filename, 'w') as fp:
+        json.dump(data, fp, sort_keys=True, indent=4)
 
 
 def load_json(filename):
@@ -399,9 +401,8 @@ def load_json(filename):
 
     """
 
-    fp = file(filename, 'r')
-    data = json.load(fp)
-    fp.close()
+    with open (filename, 'r') as fp:
+        data = json.load(fp)
     return data
 
 def loadcrash(infile, *args):
@@ -427,7 +428,7 @@ def loadpkl(infile):
         pkl_file = gzip.open(infile, 'rb')
     else:
         pkl_file = open(infile)
-    return cPickle.load(pkl_file)
+    return pickle.load(pkl_file)
 
 
 def savepkl(filename, record):
@@ -435,7 +436,7 @@ def savepkl(filename, record):
         pkl_file = gzip.open(filename, 'wb')
     else:
         pkl_file = open(filename, 'wb')
-    cPickle.dump(record, pkl_file)
+    pickle.dump(record, pkl_file)
     pkl_file.close()
 
 rst_levels = ['=', '-', '~', '+']

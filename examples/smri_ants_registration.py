@@ -12,9 +12,12 @@ coregister two T1 volumes.
 1. Tell python where to find the appropriate functions.
 """
 from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from nipype.interfaces.ants import Registration
 
 """
@@ -36,7 +39,7 @@ for tt in MyFileURLs:
     myURL=tt[0]
     localFilename=os.path.join(mydatadir,tt[1])
     if not os.path.exists(localFilename):
-        remotefile = urllib2.urlopen(myURL)
+        remotefile = urllib.request.urlopen(myURL)
 
         localFile = open(localFilename, 'wb')
         localFile.write(remotefile.read())

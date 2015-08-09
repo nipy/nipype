@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -306,7 +307,7 @@ def test_convertxfm():
 @skipif(no_fsl)
 def test_swapdims():
     files, testdir, origdir = create_files_in_directory()
-    swap = fsl.SwapDimensions()
+    swap = fsl.SwapDimensions(output_type='NIFTI')
 
     # Test the underlying command
     yield assert_equal, swap.cmd, "fslswapdim"

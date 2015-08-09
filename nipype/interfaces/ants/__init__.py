@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 """Top-level namespace for ants."""
+from __future__ import unicode_literals
 
 # Registraiton programs
 from .registration import ANTS, Registration

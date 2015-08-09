@@ -5,6 +5,10 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import range
+from past.utils import old_div
 
 from nipype.interfaces.base import (
     traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File,
@@ -290,7 +294,7 @@ def _compute_voxel(args):
     # Simulate dwi signal
     sf_vf = np.sum(ffs)
     if sf_vf > 0.0:
-        ffs = ((np.array(ffs) / sf_vf) * 100)
+        ffs = ((old_div(np.array(ffs), sf_vf)) * 100)
         snr = args['snr'] if args['snr'] > 0 else None
 
         try:
@@ -328,7 +332,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
         bvecs = np.vstack((bvecs, vertices))
         bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
 
-    for i in xrange(0, nb0s):
+    for i in range(0, nb0s):
         bvals = bvals.tolist()
         bvals.insert(0, 0)
 

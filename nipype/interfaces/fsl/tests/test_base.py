@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -19,13 +20,13 @@ def test_fslversion():
 
 @skipif(no_fsl)#skip if fsl not installed)
 def test_fsloutputtype():
-    types = fsl.Info.ftypes.keys()
+    types = list(fsl.Info.ftypes.keys())
     orig_out_type = fsl.Info.output_type()
     yield assert_true, orig_out_type in types
 
 
 def test_outputtype_to_ext():
-    for ftype, ext in fsl.Info.ftypes.items():
+    for ftype, ext in list(fsl.Info.ftypes.items()):
         res = fsl.Info.output_type_to_ext(ftype)
         yield assert_equal, res, ext
 

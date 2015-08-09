@@ -16,6 +16,8 @@ Hettinger. http://users.rcn.com/python/download/Descriptor.htm
 
 [2] Python data model, http://docs.python.org/reference/datamodel.html
 """
+from __future__ import unicode_literals
+from builtins import object
 
 class OneTimeProperty(object):
    """A descriptor to make special properties that become normal attributes.
