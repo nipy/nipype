@@ -15,6 +15,7 @@ the nipype tutorial directory::
     python fmri_nipy_glm.py
 
 """
+from __future__ import print_function
 
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
 from nipype.interfaces.nipy.preprocess import ComputeMask
@@ -156,7 +157,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print "Subject ID: %s\n"%str(subject_id)
+    print("Subject ID: %s\n"%str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):

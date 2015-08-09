@@ -20,7 +20,7 @@ def get_matlab_command():
         res = CommandLine(command='which', args=matlab_cmd,
                           terminal_output='allatonce').run()
         matlab_path = res.runtime.stdout.strip()
-    except Exception, e:
+    except Exception as e:
         return None
     return matlab_cmd
 

@@ -21,7 +21,7 @@ iflogger = logging.getLogger('interface')
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     import dipy.reconst.dti as dti

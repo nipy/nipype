@@ -2,13 +2,14 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import absolute_import
 
 import sys
 
 IPython_not_loaded = False
 try:
-    from IPython import __version__ as IPyversion
-    from IPython.kernel.contexts import ConnectionRefusedError
+    from .IPython import __version__ as IPyversion
+    from .IPython.kernel.contexts import ConnectionRefusedError
 except:
     IPython_not_loaded = True
 
@@ -40,7 +41,7 @@ class IPythonXPlugin(DistributedPluginBase):
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, ConnectionRefusedError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):

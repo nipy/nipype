@@ -15,7 +15,7 @@ iflogger = logging.getLogger('interface')
 have_cv = True
 try:
     package_check('cviewer')
-except Exception, e:
+except Exception as e:
     have_cv = False
 else:
     import cviewer.libs.pyconto.groupstatistics.nbs as nbs

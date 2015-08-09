@@ -108,7 +108,7 @@ class Logging(object):
                     # tuples, we might need to cast them into the same type
                     # as the last resort.  And lets try to be more generic
                     same = old.__class__(new) == old
-            except Exception, e:
+            except Exception as e:
                 same = False
             if not same:
                 msgs += ["%s: %r != %r"

@@ -11,6 +11,7 @@ create a template out of multiple T1 volumes.
 
 1. Tell python where to find the appropriate functions.
 """
+from __future__ import print_function
 
 import os
 import nipype.interfaces.utility as util
@@ -30,7 +31,7 @@ requestedPath=os.path.join(homeDir,'nipypeTestPath')
 mydatadir=os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
-print mydatadir
+print(mydatadir)
 
 MyFileURLs=[
            ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),

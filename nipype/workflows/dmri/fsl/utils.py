@@ -372,7 +372,7 @@ def recompose_xfm(in_bval, in_xfms):
         if b == 0.0:
             mat = np.eye(4)
         else:
-            mat = xfms.next()
+            mat = next(xfms)
 
         out_name = op.abspath('eccor_%04d.mat' % i)
         out_files.append(out_name)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 #################################################################################
 ## Program:   Build Template Parallel
 ## Language:  Python
@@ -48,10 +49,10 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
-    print "\n"*10
-    print "HACK: ", nested_imagetype_list
-    print "HACK: ", outputAverageImageName_list
-    print "HACK: ", image_type_list
+    print("\n"*10)
+    print("HACK: ", nested_imagetype_list)
+    print("HACK: ", outputAverageImageName_list)
+    print("HACK: ", image_type_list)
     return nested_imagetype_list,outputAverageImageName_list,image_type_list
 
 ## Utility Function
@@ -71,7 +72,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation
     subjCount=len(ListOfPassiveImagesDictionaries)
     tranCount=len(transformation_series)
     if subjCount != tranCount:
-        print "ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount)
+        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount))
         sys.exit(-1)
     flattened_images=list()
     flattened_image_nametypes=list()

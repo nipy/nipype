@@ -73,10 +73,10 @@ def _write_inputs(node):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError, e:
+                except RuntimeError as e:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
-                    funcname = [name for name in func.func_globals
+                    funcname = [name for name in func.__globals__
                                 if name != '__builtins__'][0]
                     lines.append(cPickle.loads(val))
                     if funcname == nodename:
@@ -626,7 +626,7 @@ connected.
                                 funcname = functions[args[1]]
                             else:
                                 func = create_function_from_source(args[1])
-                                funcname = [name for name in func.func_globals
+                                funcname = [name for name in func.__globals__
                                             if name != '__builtins__'][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
@@ -1518,7 +1518,7 @@ class Node(WorkflowBase):
             logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError, e:
+            except traits.TraitError as e:
                 msg = ['Error setting node input:',
                        'Node: %s' % self.name,
                        'input: %s' % key,
@@ -1576,7 +1576,7 @@ class Node(WorkflowBase):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
                 result = cPickle.load(pkl_file)
-            except (traits.TraitError, AttributeError, ImportError), err:
+            except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug(('attribute error: %s probably using '
@@ -1649,7 +1649,7 @@ class Node(WorkflowBase):
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
-                except Exception, msg:
+                except Exception as msg:
                     self._result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
@@ -1659,7 +1659,7 @@ class Node(WorkflowBase):
                 logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
-            except Exception, msg:
+            except Exception as msg:
                 self._result.runtime.stderr = msg
                 raise
 
@@ -2180,7 +2180,7 @@ class MapNode(Node):
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception, err:
+            except Exception as err:
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise

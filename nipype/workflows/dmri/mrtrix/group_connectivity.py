@@ -9,7 +9,7 @@ from nipype.utils.misc import package_check
 import warnings
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     warnings.warn('cmp not installed')
 else:
     import cmp

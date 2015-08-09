@@ -27,7 +27,7 @@ iflogger = logging.getLogger('interface')
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp

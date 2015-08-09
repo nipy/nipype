@@ -19,7 +19,7 @@ from ...utils.filemanip import split_filename, fname_presuffix
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy

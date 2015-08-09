@@ -66,7 +66,7 @@ from nipype.workflows.smri.freesurfer import create_tessellation_flow
 
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     warnings.warn('cmp not installed')
 else:
     import cmp

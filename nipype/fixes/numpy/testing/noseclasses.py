@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # These classes implement a doctest runner plugin for nose, a "known failure"
 # error class, and a customized TestProgram for NumPy.
 
@@ -14,7 +15,7 @@ from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 from nose.plugins.base import Plugin
 from nose.util import src
 import numpy
-from nosetester import get_package_name
+from .nosetester import get_package_name
 import inspect
 
 # Some of the classes in this module begin with 'Numpy' to clearly distinguish
@@ -35,7 +36,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
             return True
         elif inspect.isfunction(object):
             #print '_fm C2'  # dbg
-            return module.__dict__ is object.func_globals
+            return module.__dict__ is object.__globals__
         elif inspect.isbuiltin(object):
             #print '_fm C2-1'  # dbg
             return module.__name__ == object.__module__
@@ -48,7 +49,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
             # to make by extension code writers, having this safety in place
             # isn't such a bad idea
             #print '_fm C3-1'  # dbg
-            return module.__name__ == object.im_class.__module__
+            return module.__name__ == object.__self__.__class__.__module__
         elif inspect.getmodule(object) is not None:
             #print '_fm C4'  # dbg
             #print 'C4 mod',module,'obj',object # dbg
@@ -100,7 +101,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
                 if isinstance(val, staticmethod):
                     val = getattr(obj, valname)
                 if isinstance(val, classmethod):
-                    val = getattr(obj, valname).im_func
+                    val = getattr(obj, valname).__func__
 
                 # Recurse to methods, properties, and nested classes.
                 if ((isfunction(val) or isclass(val) or

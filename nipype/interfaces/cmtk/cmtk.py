@@ -8,6 +8,7 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import print_function
 
 from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath, Directory,
@@ -104,7 +105,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 		pcN = int(round(float(100 * i) / n_fib))
 		if pcN > pc and pcN % 1 == 0:
 			pc = pcN
-			print '%4.0f%%' % (pc)
+			print('%4.0f%%' % (pc))
 		rois_crossed = get_rois_crossed(fiber[0], roiData, voxelSize)
 		if len(rois_crossed) > 0:
 			list_of_roi_crossed_lists.append(list(rois_crossed))
@@ -204,7 +205,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     nROIs = len(gp.nodes())
 
     # add node information from parcellation
-    if gp.node[gp.nodes()[0]].has_key('dn_position'):
+    if 'dn_position' in gp.node[gp.nodes()[0]]:
         G = gp.copy()
     else:
         G = nx.Graph()
@@ -264,7 +265,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         final_fibers_idx.append(i)
 
         # Add edge to graph
-        if G.has_edge(startROI, endROI) and G.edge[startROI][endROI].has_key('fiblist'):
+        if G.has_edge(startROI, endROI) and 'fiblist' in G.edge[startROI][endROI]:
             G.edge[startROI][endROI]['fiblist'].append(i)
         else:
             G.add_edge(startROI, endROI, fiblist=[i])
@@ -297,7 +298,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     for u, v, d in G.edges_iter(data=True):
         G.remove_edge(u, v)
         di = {}
-        if d.has_key('fiblist'):
+        if 'fiblist' in d:
             di['number_of_fibers'] = len(d['fiblist'])
             idx = np.where((final_fiberlabels_array[:, 0] == int(u)) & (final_fiberlabels_array[:, 1] == int(v)))[0]
             di['fiber_length_mean'] = float(np.mean(final_fiberlength_array[idx]))
@@ -310,7 +311,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             di['fiber_length_std'] = 0
         if not u == v: #Fix for self loop problem
             G.add_edge(u, v, di)
-            if d.has_key('fiblist'):
+            if 'fiblist' in d:
                 numfib.add_edge(u, v, weight=di['number_of_fibers'])
                 fibmean.add_edge(u, v, weight=di['fiber_length_mean'])
                 fibmedian.add_edge(u, v, weight=di['fiber_length_median'])

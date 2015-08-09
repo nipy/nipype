@@ -7,6 +7,7 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
+from __future__ import print_function
 
 from ConfigParser import NoOptionError
 from copy import deepcopy
@@ -1034,7 +1035,7 @@ class BaseInterface(Interface):
             if str2bool(config.get('execution', 'write_provenance')):
                 prov_record = write_provenance(results)
             results.provenance = prov_record
-        except Exception, e:
+        except Exception as e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
@@ -1064,7 +1065,7 @@ class BaseInterface(Interface):
             inputs = None
             try:
                 inputs = self.inputs.get_traitsfree()
-            except Exception, e:
+            except Exception as e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
             prov_record = None
@@ -1111,7 +1112,7 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
-                except TraitError, error:
+                except TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
                         msg = ("File/Directory '%s' not found for %s output "
@@ -1223,7 +1224,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error, e:
+            except select.error as e:
                 iflogger.info(str(e))
                 if e[0] == errno.EINTR:
                     return

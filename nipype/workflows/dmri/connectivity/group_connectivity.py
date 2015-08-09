@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os.path as op
 import nipype.interfaces.io as nio  # Data i/o
 import nipype.interfaces.utility as util  # utility
@@ -10,7 +11,7 @@ from nipype.utils.misc import package_check
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
@@ -458,7 +459,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
         l4infosource.inputs.group_id1 = group_list.keys()[0]
         l4infosource.inputs.group_id2 = group_list.keys()[1]
     except IndexError:
-        print 'The create_average_networks_by_group_workflow requires 2 groups'
+        print('The create_average_networks_by_group_workflow requires 2 groups')
         raise Exception
 
     l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],

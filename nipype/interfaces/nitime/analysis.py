@@ -23,7 +23,7 @@ from ...utils.filemanip import fname_presuffix
 have_nitime = True
 try:
     package_check('nitime')
-except Exception, e:
+except Exception as e:
     have_nitime = False
 else:
     import nitime.analysis as nta
@@ -143,7 +143,7 @@ class CoherenceAnalyzer(BaseInterface):
             TS = self.inputs.in_TS
 
         # deal with creating or storing ROI names:
-        if not TS.metadata.has_key('ROIs'):
+        if 'ROIs' not in TS.metadata:
             self.ROIs = ['roi_%d' % x for x, _ in enumerate(TS.data)]
         else:
             self.ROIs = TS.metadata['ROIs']

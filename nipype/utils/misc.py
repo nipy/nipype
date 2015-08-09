@@ -31,14 +31,14 @@ def trim(docstring, marker=None):
     # and split into a list of lines:
     lines = docstring.expandtabs().splitlines()
     # Determine minimum indentation (first line doesn't count):
-    indent = sys.maxint
+    indent = sys.maxsize
     for line in lines[1:]:
         stripped = line.lstrip()
         if stripped:
             indent = min(indent, len(line) - len(stripped))
     # Remove indentation (first line is special):
     trimmed = [lines[0].strip()]
-    if indent < sys.maxint:
+    if indent < sys.maxsize:
         for line in lines[1:]:
             # replace existing REST marker with doc level marker
             stripped = line.lstrip().strip().rstrip()
@@ -81,7 +81,7 @@ def create_function_from_source(function_source, imports=None):
 
         exec loads(function_source) in ns
 
-    except Exception, msg:
+    except Exception as msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
                           "They cannot be declared either interactively or inside",
@@ -219,7 +219,7 @@ def unflatten(in_list, prev_structure):
         in_list = iter(in_list)
 
     if not isinstance(prev_structure, list):
-        return in_list.next()
+        return next(in_list)
     else:
         out = []
         for item in prev_structure:

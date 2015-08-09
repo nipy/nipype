@@ -26,7 +26,7 @@ import warnings
 have_dipy = True
 try:
     package_check('dipy')
-except Exception, e:
+except Exception as e:
     False
 else:
     from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file

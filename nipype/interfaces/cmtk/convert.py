@@ -21,7 +21,7 @@ from nipype.utils.misc import package_check
 have_cfflib = True
 try:
     package_check('cfflib')
-except Exception, e:
+except Exception as e:
     have_cfflib = False
 else:
     import cfflib as cf

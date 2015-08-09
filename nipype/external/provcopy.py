@@ -9,6 +9,7 @@ PROV-DM: http://www.w3.org/TR/prov-dm/
 @author: Trung Dong Huynh <trungdong@donggiang.com>
 @copyright: University of Southampton 2013
 '''
+from __future__ import absolute_import
 
 import logging
 import datetime
@@ -17,7 +18,7 @@ import re
 import dateutil.parser
 import collections
 from collections import defaultdict
-import six
+from . import six
 
 try:
     from rdflib.term import URIRef, BNode
@@ -767,7 +768,7 @@ class ProvRecord(object):
                 try:
                     # try if there is a RDF representation defined
                     obj = value.rdf_representation()
-                except Exception, e:
+                except Exception as e:
                     obj = RDFLiteral(value)
                 if attr == PROV['location']:
                     pred = PROV['atLocation'].rdf_representation()

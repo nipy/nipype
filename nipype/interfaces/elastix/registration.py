@@ -7,13 +7,14 @@ Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
+from __future__ import absolute_import
 
 import os.path as op
 import re
 
 from ..base import (CommandLine, CommandLineInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
-from base import ElastixBaseInputSpec
+from .base import ElastixBaseInputSpec
 
 from ... import logging
 logger = logging.getLogger('interface')

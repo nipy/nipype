@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import absolute_import
 
 from cPickle import dumps
 
@@ -9,8 +10,8 @@ import sys
 
 IPython_not_loaded = False
 try:
-    from IPython import __version__ as IPyversion
-    from IPython.parallel.error import TimeoutError
+    from .IPython import __version__ as IPyversion
+    from .IPython.parallel.error import TimeoutError
 except:
     IPython_not_loaded = True
 
@@ -63,7 +64,7 @@ class IPythonPlugin(DistributedPluginBase):
                               "will be unavailable")
         try:
             self.taskclient = self.iparallel.Client()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, IOError):

@@ -8,6 +8,7 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import print_function
 
 import os
 import hashlib
@@ -123,7 +124,7 @@ def rm_all_but(base_dir, dirs_to_keep, warn=False):
         dir_name = os.path.join(base_dir, dir_name)
         if os.path.exists(dir_name):
             if warn:
-                print 'removing directory: %s' % dir_name
+                print('removing directory: %s' % dir_name)
             shutil.rmtree(dir_name)
 
 

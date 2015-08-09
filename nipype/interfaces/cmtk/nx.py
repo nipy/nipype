@@ -27,7 +27,7 @@ iflogger = logging.getLogger('interface')
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
@@ -62,22 +62,22 @@ def fix_keys_for_gexf(orig):
     for node in nodes:
         newnodedata = {}
         newnodedata.update(orig.node[node])
-        if orig.node[node].has_key('dn_fsname'):
+        if 'dn_fsname' in orig.node[node]:
 			newnodedata['label'] = orig.node[node]['dn_fsname']
         ntwk.add_node(str(node), newnodedata)
-        if ntwk.node[str(node)].has_key('dn_position') and newnodedata.has_key('dn_position'):
+        if 'dn_position' in ntwk.node[str(node)] and 'dn_position' in newnodedata:
             ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
     for edge in edges:
         data = {}
         data = orig.edge[edge[0]][edge[1]]
         ntwk.add_edge(str(edge[0]), str(edge[1]), data)
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_mean'):
+        if 'fiber_length_mean' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_mean'] = str(data['fiber_length_mean'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('fiber_length_std'):
+        if 'fiber_length_std' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['fiber_length_std'] = str(data['fiber_length_std'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('number_of_fibers'):
+        if 'number_of_fibers' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['number_of_fibers'] = str(data['number_of_fibers'])
-        if ntwk.edge[str(edge[0])][str(edge[1])].has_key('value'):
+        if 'value' in ntwk.edge[str(edge[0])][str(edge[1])]:
             ntwk.edge[str(edge[0])][str(edge[1])]['value'] = str(data['value'])
     return ntwk
 
@@ -130,7 +130,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             for node in nodes:
                 data = {}
                 data = ntwk.node[node]
-                if tmp.node[node].has_key('value'):
+                if 'value' in tmp.node[node]:
                     data['value'] = data['value'] + tmp.node[node]['value']
                 ntwk.add_node(node, data)
 
@@ -143,7 +143,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
         for node in nodes:
             data = ntwk.node[node]
             newdata = data
-            if data.has_key('value'):
+            if 'value' in data:
                 newdata['value'] = data['value'] / len(in_files)
                 ntwk.node[node]['value'] = newdata
             avg_ntwk.add_node(node, newdata)

@@ -515,9 +515,9 @@ class Registration(ANTSCommand):
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
-        if kwargs.has_key('sampling_strategy'):
+        if 'sampling_strategy' in kwargs:
             sampling_strategy = kwargs['sampling_strategy']
-        elif kwargs.has_key('sampling_percentage'):
+        elif 'sampling_percentage' in kwargs:
             # The sampling percentage is specified but not the
             # sampling strategy. Use the default strategy.
             sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
@@ -526,7 +526,7 @@ class Registration(ANTSCommand):
         # Format the optional sampling arguments.
         if sampling_strategy:
             retval += ', %s' % sampling_strategy
-            if kwargs.has_key('sampling_percentage'):
+            if 'sampling_percentage' in kwargs:
                 retval += ', %g' % kwargs['sampling_percentage']
 
         retval += ' ]'

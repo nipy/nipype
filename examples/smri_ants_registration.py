@@ -11,6 +11,7 @@ coregister two T1 volumes.
 
 1. Tell python where to find the appropriate functions.
 """
+from __future__ import print_function
 
 import os
 import urllib2
@@ -25,7 +26,7 @@ requestedPath=os.path.join(homeDir,'nipypeTestPath')
 mydatadir=os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
-print mydatadir
+print(mydatadir)
 
 MyFileURLs=[
            ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
@@ -81,7 +82,7 @@ reg.inputs.use_estimate_learning_rate_once = [True] * 4
 reg.inputs.use_histogram_matching = [False] * 3 + [True]
 reg.inputs.initial_moving_transform_com = True
 
-print reg.cmdline
+print(reg.cmdline)
 
 
 """

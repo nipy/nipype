@@ -10,6 +10,7 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import print_function
 
 import os
 from glob import glob
@@ -404,7 +405,7 @@ class FEAT(FSLCommand):
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        print 'Outputs from FEATmodel:',outputs
+        print('Outputs from FEATmodel:',outputs)
         return outputs
 
 

@@ -12,6 +12,7 @@ import re
 import numpy as np
 from nipype.utils.misc import package_check
 from nipype.external import six
+from functools import reduce
 
 package_check('networkx', '1.3')
 
@@ -634,7 +635,7 @@ def generate_expanded_graph(graph_in):
             iter_dict = dict([(field, lookup[key]) for field, lookup in
                               inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
-            iter_items = map(lambda(field, value): (field, lambda: value),
+            iter_items = map(lambda field_value: (field_value[0], lambda: field_value[1]),
                              iter_dict.iteritems())
             iterables = dict(iter_items)
         else:
@@ -800,7 +801,7 @@ def _standardize_iterables(node):
         # Convert a values list to a function. This is a legacy
         # Nipype requirement with unknown rationale.
         if not node.itersource:
-            iter_items = map(lambda(field, value): (field, lambda: value),
+            iter_items = map(lambda field_value1: (field_value1[0], lambda: field_value1[1]),
                              iterables)
             iterables = dict(iter_items)
     node.iterables = iterables
@@ -824,7 +825,7 @@ def _validate_iterables(node, iterables, fields):
             if len(item) != 2:
                 raise ValueError("The %s iterables is not a [(field, values)]"
                                  " list" % node.name)
-        except TypeError, e:
+        except TypeError as e:
             raise TypeError("A %s iterables member is not iterable: %s"
                             % (node.name, e))
         field, _ = item
@@ -851,7 +852,7 @@ def _transpose_iterables(fields, values):
                         transposed[fields[idx]][key].append(val)
         return transposed.items()
     else:
-        return zip(fields, [filter(lambda(v): v != None, list(transpose))
+        return zip(fields, [filter(lambda v: v != None, list(transpose))
                             for transpose in zip(*values)])
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,

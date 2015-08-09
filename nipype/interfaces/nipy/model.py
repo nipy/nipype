@@ -11,7 +11,7 @@ from ...utils.misc import package_check
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy.modalities.fmri.design_matrix as dm

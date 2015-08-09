@@ -270,7 +270,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
                     nipype_hardlink_wrapper(originalfile, newfile)
                 else:
                     shutil.copyfile(originalfile, newfile)
-            except shutil.Error, e:
+            except shutil.Error as e:
                 fmlogger.warn(e.message)
         else:
             fmlogger.debug("File: %s already exists, not overwriting, copy:%d"

@@ -10,6 +10,8 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
+from __future__ import print_function
+from __future__ import absolute_import
 
 import os
 import os.path as op
@@ -30,7 +32,7 @@ from nipype import logging
 
 import warnings
 
-import metrics as nam
+from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
@@ -495,10 +497,10 @@ def merge_csvs(in_list):
     for idx, in_file in enumerate(in_list):
         try:
             in_array = np.loadtxt(in_file, delimiter=',')
-        except ValueError, ex:
+        except ValueError as ex:
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-            except ValueError, ex:
+            except ValueError as ex:
                 first = open(in_file, 'r')
                 header_line = first.readline()
                 header_list = header_line.split(',')
@@ -508,7 +510,7 @@ def merge_csvs(in_list):
                         in_file, delimiter=',', skiprows=1,
                         usecols=range(1, n_cols)
                     )
-                except ValueError, ex:
+                except ValueError as ex:
                     in_array = np.loadtxt(
                         in_file, delimiter=',', skiprows=1, usecols=range(1, n_cols-1))
         if idx == 0:

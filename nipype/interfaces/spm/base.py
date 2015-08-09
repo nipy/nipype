@@ -13,6 +13,7 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
+from __future__ import print_function
 
 __docformat__ = 'restructuredtext'
 
@@ -181,7 +182,7 @@ exit;
         """
         try:
             out = mlab.run()
-        except (IOError, RuntimeError), e:
+        except (IOError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug(str(e))
@@ -376,7 +377,7 @@ class SPMCommand(BaseInterface):
 
             return [newdict]
         except TypeError:
-            print 'Requires dict input'
+            print('Requires dict input')
 
     def _generate_job(self, prefix='', contents=None):
         """Recursive function to generate spm job specification as a string

@@ -630,7 +630,7 @@ class Similarity(BaseInterface):
     def __init__(self, **inputs):
         try:
             package_check('nipy')
-        except Exception, e:
+        except Exception as e:
             self._have_nipy = False
         super(Similarity,self).__init__(**inputs)
 

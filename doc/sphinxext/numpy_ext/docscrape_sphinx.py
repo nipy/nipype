@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 import re, inspect, textwrap, pydoc
 import sphinx
-from docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from nipype.external import six
 
 class SphinxDocString(NumpyDocString):

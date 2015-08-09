@@ -3,6 +3,7 @@
 
 """Attempt to check each interface in nipype
 """
+from __future__ import print_function
 
 # Stdlib imports
 import inspect
@@ -380,7 +381,7 @@ class InterfaceChecker(object):
             if bad_specs:
                 checked_modules.extend(bad_specs)
         for bad_spec in checked_modules:
-            print ':'.join(bad_spec)
+            print(':'.join(bad_spec))
 
 if __name__ == "__main__":
     package = 'nipype'

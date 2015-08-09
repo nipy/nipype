@@ -1,3 +1,4 @@
+from __future__ import print_function
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -106,7 +107,7 @@ def test_function_with_imports():
                                     function=make_random_array,
                                     imports=["import numpy as np"]),
                    name="should_not_fail")
-    print node.inputs.function_str
+    print(node.inputs.function_str)
     try:
         node.inputs.size = 10
         node.run()

@@ -2,6 +2,7 @@
 modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
 correctly you must have your CLI executabes in $PATH"""
+from __future__ import print_function
 
 import xml.dom.minidom
 import subprocess
@@ -344,8 +345,8 @@ def grab_xml(module, launcher, mipav_hacks=False):
             xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
     try:
         dom = xml.dom.minidom.parseString(xmlReturnValue.strip())
-    except Exception, e:
-        print xmlReturnValue.strip()
+    except Exception as e:
+        print(xmlReturnValue.strip())
         raise e
     return dom
 #        if ret.runtime.returncode == 0:
