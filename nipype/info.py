@@ -58,6 +58,7 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "License :: OSI Approved :: BSD License",
                "Operating System :: OS Independent",
                "Programming Language :: Python",
+               "Programming Language :: Python :: 2.7",
                "Topic :: Scientific/Engineering"]
 
 description  = 'Neuroimaging in Python: Pipelines and Interfaces'
