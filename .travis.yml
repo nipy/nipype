@@ -28,7 +28,8 @@ install:
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
-- conda install --yes numpy scipy nose traits networkx dateutil
+- conda install --yes numpy scipy nose networkx dateutil
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
 - pip install nibabel
 - pip install python-coveralls
 - pip install nose-cov
