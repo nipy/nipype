@@ -14,7 +14,6 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import str
 from builtins import range
-from past.utils import old_div
 from builtins import object
 
 from configparser import NoOptionError
@@ -1037,7 +1036,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                old_div(timediff.microseconds,100000.)
+                timediff.microseconds / 100000.
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1049,7 +1048,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                old_div(timediff.microseconds,100000.)
+                timediff.microseconds / 100000.
             if len(e.args) == 0:
                 e.args = ("")
 
