@@ -245,8 +245,7 @@ def _package_status(pkg_name, version, version_getter, checker):
         return 'low-version', have_version
     return 'satisfied', have_version
     
-cmdclass = {'build_py': get_comrec_build('nipype'),
-            'install_scripts': install_scripts_bat}
+cmdclass = {'build_py': get_comrec_build('nipype')}
 
 # Get version and release info, which is all stored in nipype/info.py
 ver_file = os.path.join('nipype', 'info.py')
