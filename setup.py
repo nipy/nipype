@@ -226,7 +226,7 @@ def package_check(pkg_name, version=None,
                         optional,
                         dependency)
         return
-    _add_append_key(setuptools_args, 'install_requires', dependency)
+    #_add_append_key(setuptools_args, 'install_requires', dependency)
     return
 
 
