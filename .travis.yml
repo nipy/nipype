@@ -13,7 +13,7 @@ before_install:
   -O miniconda.sh; fi
 - chmod +x miniconda.sh
 - "./miniconda.sh -b"
-- export PATH=/home/travis/miniconda/bin:$PATH
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh);
