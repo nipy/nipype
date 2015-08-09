@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from shutil import rmtree
 from tempfile import mkdtemp
 from nipype.testing import (assert_equal, example_data)
@@ -11,6 +10,9 @@ def test_split_and_merge():
     import numpy as np
     import nibabel as nb
     import os.path as op
+    import os
+    cwd = os.getcwd()
+
     from nipype.algorithms.misc import split_rois, merge_rois
     tmpdir = mkdtemp()
 
@@ -21,7 +23,6 @@ def test_split_and_merge():
 
     dwshape = (mskdata.shape[0], mskdata.shape[1], mskdata.shape[2], 6)
     dwdata = np.random.normal(size=dwshape)
-
     os.chdir(tmpdir)
     nb.Nifti1Image(dwdata.astype(np.float32),
                    aff, None).to_filename(dwfile)
@@ -30,8 +31,8 @@ def test_split_and_merge():
     merged = merge_rois(resdw, resid, in_mask)
     dwmerged = nb.load(merged).get_data()
 
-    dwmasked = np.zeros_like(dwdata)
     dwmasked = dwdata * mskdata[:, :, :, np.newaxis]
+    os.chdir(cwd)
     rmtree(tmpdir)
 
     yield assert_equal, np.allclose(dwmasked, dwmerged), True

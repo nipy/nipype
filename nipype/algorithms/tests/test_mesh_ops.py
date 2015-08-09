@@ -6,12 +6,10 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal, assert_raises, skipif,
+from nipype.testing import (assert_equal, skipif,
                             assert_almost_equal, example_data)
 
 import numpy as np
-import nibabel as nb
-import nipype.testing as nit
 
 from nipype.algorithms import mesh as m
 

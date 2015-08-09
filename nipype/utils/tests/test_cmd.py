@@ -59,6 +59,10 @@ optional arguments:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
 
+        # repeat twice in case nipy raises warnings
+        with self.assertRaises(SystemExit) as cm:
+            with capture_sys_output() as (stdout, stderr):
+                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
         exit_exception = cm.exception
         self.assertEqual(exit_exception.code, 0)
 
