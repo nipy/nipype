@@ -69,8 +69,6 @@ custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
 pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
         messages = custom_dateutil_messages)
 
-print REQUIRES
-
 def main(**extra_args):
     setup(name=NAME,
           maintainer=MAINTAINER,
