@@ -3,12 +3,13 @@ cache:
 language: python
 python:
 - 2.7
+- 3.4
 env:
 - INSTALL_DEB_DEPENDECIES=true
 - INSTALL_DEB_DEPENDECIES=false
 before_install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.6.0-Linux-x86_64.sh
+  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
   -O miniconda.sh; fi
 - chmod +x miniconda.sh
 - "./miniconda.sh -b"
@@ -32,6 +33,7 @@ install:
 - pip install python-coveralls
 - pip install nose-cov
 - pip install https://github.com/RDFLib/rdflib/archive/master.zip
+- pip install future
 - pip install https://github.com/trungdong/prov/archive/rdf.zip
 - python setup.py install
 script:
