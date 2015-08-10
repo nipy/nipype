@@ -121,13 +121,13 @@ def _tbss_test_helper(estimate_skeleton):
     shutil.rmtree(test_dir)
 
 
-#@skipif(no_fsl)
+@skipif(no_fsl)
 @skipif(no_fsl_course_data)
 def test_tbss_est_skeleton():
     _tbss_test_helper(True)
 
 
-#@skipif(no_fsl)
+@skipif(no_fsl)
 @skipif(no_fsl_course_data)
 def test_tbss_est_skeleton_use_precomputed_skeleton():
     _tbss_test_helper(False)
