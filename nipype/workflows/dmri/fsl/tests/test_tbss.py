@@ -54,7 +54,7 @@ def _tbss_test_helper(estimate_skeleton):
     tbss.inputs.inputnode.fa_list = FA_list
     tbss.inputs.inputnode.skeleton_thresh = 0.2
 
-    tbss1_original_datasource = pe.Node(nio.DataGrabber(outfields=['fa_list', 'mask_list']), name='tbss1_original_datasource')
+    tbss1_original_datasource = pe.Node(nio.DataGrabber(outfields=['fa_list', 'mask_list'], sort_filelist=False), name='tbss1_original_datasource')
     tbss1_original_datasource.inputs.base_directory = tbss1_orig_dir
     tbss1_original_datasource.inputs.template = 'FA/%s_FA%s.nii.gz'
     tbss1_original_datasource.inputs.template_args = dict(fa_list=[[subjects, '']],
@@ -67,7 +67,7 @@ def _tbss_test_helper(estimate_skeleton):
     pipeline.connect(tbss, 'tbss1.outputnode.mask_list', tbss1_test_mask, 'volume1')
     pipeline.connect(tbss1_original_datasource, 'fa_list', tbss1_test_fa, 'volume2')
     pipeline.connect(tbss1_original_datasource, 'mask_list', tbss1_test_mask, 'volume2')
-    tbss2_original_datasource = pe.Node(nio.DataGrabber(outfields=['field_list']), name='tbss2_original_datasource')
+    tbss2_original_datasource = pe.Node(nio.DataGrabber(outfields=['field_list'], sort_filelist=False), name='tbss2_original_datasource')
 
     tbss2_original_datasource.inputs.base_directory = tbss2_orig_dir
     tbss2_original_datasource.inputs.template = 'FA/%s_FA%s.nii.gz'
@@ -80,7 +80,7 @@ def _tbss_test_helper(estimate_skeleton):
     tbss3_original_datasource = pe.Node(nio.DataGrabber(outfields=['groupmask',
                 'skeleton_file',
                 'meanfa_file',
-                'mergefa_file']), name='tbss3_original_datasource')
+                'mergefa_file'], sort_filelist=False), name='tbss3_original_datasource')
     tbss3_original_datasource.inputs.base_directory = tbss3_orig_dir
     tbss3_original_datasource.inputs.template = 'stats/%s.nii.gz'
     tbss3_original_datasource.inputs.template_args = dict(groupmask=[['mean_FA_mask']],
@@ -103,7 +103,7 @@ def _tbss_test_helper(estimate_skeleton):
     pipeline.connect(tbss3_original_datasource, 'mergefa_file', tbss3_test_mergefa_file, 'volume2')
 
     tbss4_original_datasource = pe.Node(nio.DataGrabber(outfields=['all_FA_skeletonised',
-                'mean_FA_skeleton_mask']), name='tbss4_original_datasource')
+                'mean_FA_skeleton_mask'], sort_filelist=False), name='tbss4_original_datasource')
     tbss4_original_datasource.inputs.base_directory = tbss4_orig_dir
     tbss4_original_datasource.inputs.template = 'stats/%s.nii.gz'
     tbss4_original_datasource.inputs.template_args = dict(all_FA_skeletonised=[['all_FA_skeletonised']],

@@ -18,7 +18,7 @@ from nipype.workflows.dmri.fsl.epi import create_eddy_correct_pipeline
 def test_create_eddy_correct_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
-    dwi_file = os.path.join(fsl_course_dir, "fdt/subj1/data.nii.gz")
+    dwi_file = os.path.join(fsl_course_dir, "fdt1/subj1/data.nii.gz")
 
     nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
     nipype_eddycorrect.inputs.inputnode.in_file = dwi_file

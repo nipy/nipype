@@ -18,10 +18,10 @@ from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 def test_create_bedpostx_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
-    mask_file = os.path.join(fsl_course_dir, "fdt/subj1.bedpostX/nodif_brain_mask.nii.gz")
-    bvecs_file = os.path.join(fsl_course_dir, "fdt/subj1/bvecs")
-    bvals_file = os.path.join(fsl_course_dir, "fdt/subj1/bvals")
-    dwi_file = os.path.join(fsl_course_dir, "fdt/subj1/data.nii.gz")
+    mask_file = os.path.join(fsl_course_dir, "fdt2/subj1.bedpostX/nodif_brain_mask.nii.gz")
+    bvecs_file = os.path.join(fsl_course_dir, "fdt2/subj1/bvecs")
+    bvals_file = os.path.join(fsl_course_dir, "fdt2/subj1/bvals")
+    dwi_file = os.path.join(fsl_course_dir, "fdt2/subj1/data.nii.gz")
 
     nipype_bedpostx = create_bedpostx_pipeline("nipype_bedpostx")
     nipype_bedpostx.inputs.inputnode.dwi = dwi_file
