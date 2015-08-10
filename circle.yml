@@ -27,7 +27,7 @@ test:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
         timeout: 1600
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --no-skip $HOME/nipype/ --exclude=external --exclude=testing:
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --with-cov --cov nipype --logging-level=INFO:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
