@@ -175,7 +175,14 @@ class Bunch(object):
         for k, v in sorted(self.items()):
             if not first:
                 outstr.append(', ')
-            outstr.append('%s=%r' % (k, v))
+            if isinstance(v, dict):
+                pairs = []
+                for key, value in sorted(v.items()):
+                    pairs.append("'%s': %s" % (key, value))
+                v = '{' + ', '.join(pairs) + '}'
+                outstr.append('%s=%s' % (k, v))
+            else:
+                outstr.append('%s=%r' % (k, v))
             first = False
         outstr.append(')')
         return ''.join(outstr)
@@ -537,8 +544,8 @@ class BaseTraitedSpec(traits.HasTraits):
 
         """
 
-        dict_withhash = {}
-        dict_nofilename = {}
+        dict_withhash = []
+        dict_nofilename = []
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
@@ -548,24 +555,24 @@ class BaseTraitedSpec(traits.HasTraits):
                                                False)
                               and not has_metadata(trait.trait_type,
                                                    "name_source"))
-                dict_nofilename[name] = \
+                dict_nofilename.append((name,
                     self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)
-                dict_withhash[name] = \
+                                         hash_files=hash_files)))
+                dict_withhash.append((name,
                     self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)
-        return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+                                         hash_files=hash_files)))
+        return dict_withhash, md5(str(dict_nofilename)).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
         if isinstance(object, dict):
-            out = {}
+            out = []
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = \
+                    out.append((key,
                         self._get_sorteddict(val, dictwithhash,
                                              hash_method=hash_method,
-                                             hash_files=hash_files)
+                                             hash_files=hash_files)))
         elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
@@ -1340,7 +1347,7 @@ class CommandLine(BaseInterface):
      'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
     >>> cli.inputs.get_hashval()
-    ({'args': '-al'}, 'a2f45e04a34630c5f33a75ea2a533cdd')
+    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
 
     """
 
