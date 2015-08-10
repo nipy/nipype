@@ -42,11 +42,11 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.bvecs = bvecs_file
     original_bedpostx.inputs.bvals = bvals_file
     original_bedpostx.inputs.environ['FSLPARALLEL'] = ""
-    original_bedpostx.inputs.fibres = 2
-    original_bedpostx.inputs.weight = 1
-    original_bedpostx.inputs.burn_period = 1000
-    original_bedpostx.inputs.jumps = 1250
-    original_bedpostx.inputs.sampling = 25
+    original_bedpostx.inputs.n_fibres = 2
+    original_bedpostx.inputs.fudge = 1
+    original_bedpostx.inputs.burn_in = 1000
+    original_bedpostx.inputs.n_jumps = 1250
+    original_bedpostx.inputs.sample_every = 25
 
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
     test_f2 = pe.Node(util.AssertEqual(), name="mean_f2_test")

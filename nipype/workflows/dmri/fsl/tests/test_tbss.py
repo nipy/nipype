@@ -116,7 +116,7 @@ def _tbss_test_helper(estimate_skeleton):
     pipeline.connect(tbss, 'tbss4.outputnode.skeleton_mask', tbss4_test_mean_FA_skeleton_mask, 'volume1')
     pipeline.connect(tbss4_original_datasource, 'mean_FA_skeleton_mask', tbss4_test_mean_FA_skeleton_mask, 'volume2')
 
-    pipeline.run(plugin='Linear')
+    pipeline.run(plugin='MultiProc')
     os.chdir(old_dir)
     shutil.rmtree(test_dir)
 
