@@ -15,7 +15,7 @@ from nipype.interfaces import fsl
 
 
 def _tbss_test_helper(estimate_skeleton):
-    fsl_course_dir = os.path.abspath('fsl_course_data')
+    fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
     fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
     test_dir = tempfile.mkdtemp(prefix="nipype_test_tbss_")
     tbss_orig_dir = os.path.join(test_dir, "tbss_all_original")
@@ -121,13 +121,13 @@ def _tbss_test_helper(estimate_skeleton):
     shutil.rmtree(test_dir)
 
 
-@skipif(no_fsl)
+#@skipif(no_fsl)
 @skipif(no_fsl_course_data)
 def test_tbss_est_skeleton():
     _tbss_test_helper(True)
 
 
-@skipif(no_fsl)
+#@skipif(no_fsl)
 @skipif(no_fsl_course_data)
 def test_tbss_est_skeleton_use_precomputed_skeleton():
     _tbss_test_helper(False)

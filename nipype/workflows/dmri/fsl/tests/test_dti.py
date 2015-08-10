@@ -16,7 +16,7 @@ from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
 @skipif(no_fsl)
 @skipif(no_fsl_course_data)
 def test_create_bedpostx_pipeline():
-    fsl_course_dir = os.path.abspath('fsl_course_data')
+    fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
     mask_file = os.path.join(fsl_course_dir, "fdt/subj1.bedpostX/nodif_brain_mask.nii.gz")
     bvecs_file = os.path.join(fsl_course_dir, "fdt/subj1/bvecs")

@@ -13,10 +13,10 @@ import shutil
 from nipype.workflows.dmri.fsl.epi import create_eddy_correct_pipeline
 
 
-#@skipif(no_fsl)
-#@skipif(no_fsl_course_data)
+@skipif(no_fsl)
+@skipif(no_fsl_course_data)
 def test_create_eddy_correct_pipeline():
-    fsl_course_dir = os.path.abspath('fsl_course_data')
+    fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
     dwi_file = os.path.join(fsl_course_dir, "fdt/subj1/data.nii.gz")
 

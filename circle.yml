@@ -32,6 +32,7 @@ test:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
+          FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
         timeout: 1600
     - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
     - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
