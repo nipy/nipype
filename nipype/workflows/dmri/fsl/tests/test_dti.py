@@ -28,10 +28,10 @@ def test_create_bedpostx_pipeline():
     nipype_bedpostx.inputs.inputnode.mask = mask_file
     nipype_bedpostx.inputs.inputnode.bvecs = bvecs_file
     nipype_bedpostx.inputs.inputnode.bvals = bvals_file
-    nipype_bedpostx.inputs.xfibres.n_fibres = 2
+    nipype_bedpostx.inputs.xfibres.n_fibres = 1
     nipype_bedpostx.inputs.xfibres.fudge = 1
-    nipype_bedpostx.inputs.xfibres.burn_in = 1000
-    nipype_bedpostx.inputs.xfibres.n_jumps = 1250
+    nipype_bedpostx.inputs.xfibres.burn_in = 10
+    nipype_bedpostx.inputs.xfibres.n_jumps = 25
     nipype_bedpostx.inputs.xfibres.sample_every = 25
 
     with warnings.catch_warnings():
@@ -42,10 +42,10 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.bvecs = bvecs_file
     original_bedpostx.inputs.bvals = bvals_file
     original_bedpostx.inputs.environ['FSLPARALLEL'] = ""
-    original_bedpostx.inputs.n_fibres = 2
+    original_bedpostx.inputs.n_fibres = 1
     original_bedpostx.inputs.fudge = 1
-    original_bedpostx.inputs.burn_in = 1000
-    original_bedpostx.inputs.n_jumps = 1250
+    original_bedpostx.inputs.burn_in = 10
+    original_bedpostx.inputs.n_jumps = 25
     original_bedpostx.inputs.sample_every = 25
 
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
