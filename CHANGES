@@ -1,6 +1,8 @@
 Next release
 ============
 
+* BUG: ANTs Registration interface failed with multi-modal inputs
+    (https://github.com/nipy/nipype/pull/1176) (https://github.com/nipy/nipype/issues/1175)
 * FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
 * ENH: Attempt to use hard links for data sink.
     (https://github.com/nipy/nipype/pull/1161)
