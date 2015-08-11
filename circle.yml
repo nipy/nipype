@@ -19,9 +19,11 @@ dependencies:
     - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
     - bash ~/nipype/tools/install_spm_mcr.sh
     - mkdir ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+    - curl http://www.jpm4j.org/install/script | sh
+    - jpm install com.codacy:codacy-coverage-reporter
 test:
   override:
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3 --with-cov --cov nipype --cover-xml-file=coverage.xml:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
