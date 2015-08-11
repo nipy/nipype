@@ -10,22 +10,24 @@ was written to work with FSL version 4.1.4.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
+from past.utils import old_div
 
 import os
 import os.path as op
 import warnings
-import glob
-
-import numpy as np
-
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
-                                    isdefined, OutputMultiPath)
-from nipype.utils.filemanip import split_filename
 
 from nibabel import load
+import numpy as np
 
+from .base import FSLCommand, FSLCommandInputSpec
+from ..base import (TraitedSpec, File, InputMultiPath, Undefined, traits,
+                    isdefined, OutputMultiPath)
+from ...utils.filemanip import split_filename
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
@@ -892,7 +894,7 @@ class FNIRT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for key, suffix in self.filemap.items():
+        for key, suffix in list(self.filemap.items()):
             inval = getattr(self.inputs, key)
             change_ext = True
             if key in ['warped_file', 'log_file']:
@@ -915,7 +917,7 @@ class FNIRT(FSLCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self.filemap.keys():
+        if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]
         return super(FNIRT, self)._format_arg(name, spec, value)
 
@@ -938,7 +940,7 @@ class FNIRT(FSLCommand):
         except IOError:
             print ('unable to create config_file %s' % (configfile))
 
-        for item in self.inputs.get().items():
+        for item in list(self.inputs.get().items()):
             fid.write('%s\n' % (item))
         fid.close()
 
@@ -1135,7 +1137,7 @@ class SUSAN(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'fwhm':
-            return spec.argstr % (float(value) / np.sqrt(8 * np.log(2)))
+            return spec.argstr % (old_div(float(value), np.sqrt(8 * np.log(2))))
         if name == 'usans':
             if not value:
                 return '0'

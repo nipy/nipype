@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Additional handy utilities for testing
 """
+from __future__ import unicode_literals
 __docformat__ = 'restructuredtext'
 
 from ..utils.misc import package_check

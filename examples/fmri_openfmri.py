@@ -11,6 +11,10 @@ This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_openfmri.py --datasetdir ds107
 """
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import range
+from past.utils import old_div
 
 from nipype import config
 #config.enable_provenance()
@@ -82,7 +86,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
                                   subject_id,
                                   'BOLD',
                                   'task%03d_run*' % (idx + 1)))
-        run_ids.insert(idx, range(1, len(files) + 1))
+        run_ids.insert(idx, list(range(1, len(files) + 1)))
     TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
@@ -186,7 +190,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                 ])
 
     def get_highpass(TR, hpcutoff):
-        return hpcutoff / (2 * TR)
+        return old_div(hpcutoff, (2 * TR))
     gethighpass = pe.Node(niu.Function(input_names=['TR', 'hpcutoff'],
                                        output_names=['highpass'],
                                        function=get_highpass),

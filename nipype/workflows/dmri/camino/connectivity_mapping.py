@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine

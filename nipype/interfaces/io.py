@@ -17,6 +17,11 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import filter
+from builtins import str
+from builtins import range
 import glob
 import fnmatch
 import string
@@ -67,7 +72,7 @@ def copytree(src, dst, use_hardlink=False):
     names = os.listdir(src)
     try:
         os.makedirs(dst)
-    except OSError, why:
+    except OSError as why:
         if 'File exists' in why:
             pass
         else:
@@ -82,11 +87,11 @@ def copytree(src, dst, use_hardlink=False):
             else:
                 copyfile(srcname, dstname, True, hashmethod='content',
                          use_hardlink=use_hardlink)
-        except (IOError, os.error), why:
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Exception, err:
+        except Exception as err:
             errors.extend(err.args[0])
     if errors:
         raise Exception(errors)
@@ -305,14 +310,14 @@ class DataSink(IOBase):
         if not os.path.exists(outdir):
             try:
                 os.makedirs(outdir)
-            except OSError, inst:
+            except OSError as inst:
                 if 'File exists' in inst:
                     pass
                 else:
                     raise(inst)
         use_hardlink = str2bool(config.get('execution',
                                            'try_hard_link_datasink') )
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
@@ -338,7 +343,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError, inst:
+                        except OSError as inst:
                             if 'File exists' in inst:
                                 pass
                             else:
@@ -355,7 +360,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError, inst:
+                        except OSError as inst:
                             if 'File exists' in inst:
                                 pass
                             else:
@@ -486,7 +491,7 @@ class DataGrabber(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.template_args.keys())
+        return add_traits(base, list(self.inputs.template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
@@ -500,7 +505,7 @@ class DataGrabber(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -642,7 +647,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in templates.iteritems():
+        for name, template in templates.items():
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None and field_name not in infields:
                     infields.append(field_name)
@@ -660,12 +665,12 @@ class SelectFiles(IOBase):
 
     def _add_output_traits(self, base):
         """Add the dynamic output fields"""
-        return add_traits(base, self._templates.keys())
+        return add_traits(base, list(self._templates.keys()))
 
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = dict([(k, v) for k, v in self.inputs.__dict__.items()
+        info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
                      if k in self._infields])
 
         force_lists = self.inputs.force_lists
@@ -680,7 +685,7 @@ class SelectFiles(IOBase):
                    "'templates'.") % (plural, bad_fields, verb)
             raise ValueError(msg)
 
-        for field, template in self._templates.iteritems():
+        for field, template in self._templates.items():
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
@@ -786,10 +791,10 @@ class DataFinder(IOBase):
             match_dict = match.groupdict()
             if self.result is None:
                 self.result = {'out_paths': []}
-                for key in match_dict.keys():
+                for key in list(match_dict.keys()):
                     self.result[key] = []
             self.result['out_paths'].append(target_path)
-            for key, val in match_dict.iteritems():
+            for key, val in match_dict.items():
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
@@ -840,15 +845,15 @@ class DataFinder(IOBase):
         if (self.inputs.unpack_single and
             len(self.result['out_paths']) == 1
             ):
-            for key, vals in self.result.iteritems():
+            for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
             #sort all keys acording to out_paths
-            for key in self.result.keys():
+            for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
-                sort_tuples = human_order_sorted(zip(self.result["out_paths"],
-                                                     self.result[key]))
+                sort_tuples = human_order_sorted(list(zip(self.result["out_paths"],
+                                                     self.result[key])))
                 self.result[key] = [x for (_, x) in sort_tuples]
             self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
 
@@ -998,7 +1003,7 @@ class FreeSurferSource(IOBase):
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         outputs = output_traits.get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             val = self._get_files(subject_path, k,
                                   output_traits.traits()[k].loc,
                                   output_traits.traits()[k].altkey)
@@ -1114,7 +1119,7 @@ class XNATSource(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.query_template_args.keys())
+        return add_traits(base, list(self.inputs.query_template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out
@@ -1142,7 +1147,7 @@ class XNATSource(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.query_template_args.items():
+        for key, args in list(self.inputs.query_template_args.items()):
             outputs[key] = []
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
@@ -1340,7 +1345,7 @@ class XNATSink(IOBase):
             uri_template_args['reconstruction_id'] = quote_id(self.inputs.reconstruction_id)
 
         # gather outputs and upload them
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
 
             for name in filename_to_list(files):
 
@@ -1371,7 +1376,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                 if part.startswith('_') and len(part.split('_')) % 2
                 ]
 
-    keymap = dict(zip(val_list[1::2], val_list[2::2]))
+    keymap = dict(list(zip(val_list[1::2], val_list[2::2])))
 
     _label = []
     for key, val in sorted(keymap.items()):
@@ -1418,7 +1423,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
     )
 
     # unquote values before uploading
-    for key in uri_template_args.keys():
+    for key in list(uri_template_args.keys()):
         uri_template_args[key] = unquote_id(uri_template_args[key])
 
     # upload file
@@ -1697,7 +1702,7 @@ class SSHDataGrabber(DataGrabber):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -1713,7 +1718,7 @@ class SSHDataGrabber(DataGrabber):
                     filelist = fnmatch.filter(filelist, template)
                 elif self.inputs.template_expression == 'regexp':
                     regexp = re.compile(template)
-                    filelist = filter(regexp.match, filelist)
+                    filelist = list(filter(regexp.match, filelist))
                 else:
                     raise ValueError('template_expression value invalid')
                 if len(filelist) == 0:
@@ -1766,7 +1771,7 @@ class SSHDataGrabber(DataGrabber):
                         outfiles = fnmatch.filter(filelist, filledtemplate_base)
                     elif self.inputs.template_expression == 'regexp':
                         regexp = re.compile(filledtemplate_base)
-                        outfiles = filter(regexp.match, filelist)
+                        outfiles = list(filter(regexp.match, filelist))
                     else:
                         raise ValueError('template_expression value invalid')
                     if len(outfiles) == 0:
@@ -1793,7 +1798,7 @@ class SSHDataGrabber(DataGrabber):
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
 
-        for k, v in outputs.items():
+        for k, v in list(outputs.items()):
             outputs[k] = os.path.join(os.getcwd(), v)
 
         return outputs
@@ -1860,13 +1865,13 @@ class JSONFileGrabber(IOBase):
             if not isinstance(data, dict):
                 raise RuntimeError('JSON input has no dictionary structure')
 
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 outputs[key] = value
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
-            for key, value in defaults.iteritems():
-                if key not in outputs.keys():
+            for key, value in defaults.items():
+                if key not in list(outputs.keys()):
                     outputs[key] = value
 
         return outputs
@@ -1963,7 +1968,7 @@ class JSONFileSink(IOBase):
         out_dict = self.inputs.in_dict
 
         # Overwrite in_dict entries automatically
-        for key, val in self.inputs._outputs.items():
+        for key, val in list(self.inputs._outputs.items()):
             if not isdefined(val) or key == 'trait_added':
                 continue
             key, val = self._process_name(key, val)

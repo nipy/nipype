@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import unicode_literals
+from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -26,7 +29,7 @@ def pickmiddle(files):
     import numpy as np
     middlevol = []
     for f in files:
-        middlevol.append(int(np.ceil(load(f).get_shape()[3]/2)))
+        middlevol.append(int(np.ceil(old_div(load(f).get_shape()[3],2))))
     return middlevol
 
 def pickvol(filenames, fileidx, which):
@@ -35,7 +38,7 @@ def pickvol(filenames, fileidx, which):
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3]/2))
+        idx = int(np.ceil(old_div(load(filenames[fileidx]).get_shape()[3],2)))
     else:
         raise Exception('unknown value for volume selection : %s'%which)
     return idx
@@ -50,7 +53,7 @@ def chooseindex(fwhm):
         return [1]
 
 def getmeanscale(medianvals):
-    return ['-mul %.10f'%(10000./val) for val in medianvals]
+    return ['-mul %.10f'%(old_div(10000.,val)) for val in medianvals]
 
 def getusans(x):
     return [[tuple([val[0],0.75*val[1]])] for val in x]

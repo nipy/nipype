@@ -3,6 +3,9 @@
 
 """Attempt to check each interface in nipype
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import object
 
 # Stdlib imports
 import inspect
@@ -228,8 +231,8 @@ class InterfaceChecker(object):
                     cmd += ['    input_map = dict(%s)' % input_fields]
                     cmd += ['    inputs = %s.input_spec()' % c]
                     cmd += ["""
-    for key, metadata in input_map.items():
-        for metakey, value in metadata.items():
+    for key, metadata in list(input_map.items()):
+        for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n\n')
             else:
@@ -241,7 +244,7 @@ class InterfaceChecker(object):
                         continue
                     parent_metadata = []
                     if 'parent' in trait.__dict__:
-                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                        parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
                         + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
@@ -272,8 +275,8 @@ class InterfaceChecker(object):
                     cmd += ['    output_map = dict(%s)' % input_fields]
                     cmd += ['    outputs = %s.output_spec()' % c]
                     cmd += ["""
-    for key, metadata in output_map.items():
-        for metakey, value in metadata.items():
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n\n')
 
@@ -283,7 +286,7 @@ class InterfaceChecker(object):
                         continue
                     parent_metadata = []
                     if 'parent' in trait.__dict__:
-                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                        parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
                             + parent_metadata:
                         bad_specs.append([uri, c, 'Outputs', traitname, key])
@@ -380,7 +383,7 @@ class InterfaceChecker(object):
             if bad_specs:
                 checked_modules.extend(bad_specs)
         for bad_spec in checked_modules:
-            print ':'.join(bad_spec)
+            print(':'.join(bad_spec))
 
 if __name__ == "__main__":
     package = 'nipype'

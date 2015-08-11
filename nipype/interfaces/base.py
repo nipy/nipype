@@ -7,8 +7,16 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
@@ -24,7 +32,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from nipype.external import six
+from ..external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -141,12 +149,7 @@ class Bunch(object):
 
     def items(self):
         """iterates over bunch attributes as key, value pairs"""
-        return self.__dict__.items()
-
-    def iteritems(self):
-        """iterates over bunch attributes as key, value pairs"""
-        warn('iteritems is deprecated, use items instead')
-        return self.items()
+        return list(self.__dict__.items())
 
     def get(self, *args):
         '''Support dictionary get() functionality
@@ -175,7 +178,12 @@ class Bunch(object):
         for k, v in sorted(self.items()):
             if not first:
                 outstr.append(', ')
-            outstr.append('%s=%r' % (k, v))
+            if isinstance(v, dict):
+                v = "{" + ", ".join(["'%s': %s" % (key, val) for key, val in
+                                     sorted(list(v.items()))]) + "}"
+                outstr.append('%s=%s' % (k, v))
+            else:
+                outstr.append('%s=%r' % (k, v))
             first = False
         outstr.append(')')
         return ''.join(outstr)
@@ -189,13 +197,12 @@ class Bunch(object):
         for afile in stuff:
             if os.path.isfile(afile):
                 md5obj = md5()
-                fp = file(afile, 'rb')
-                while True:
-                    data = fp.read(8192)
-                    if not data:
-                        break
-                    md5obj.update(data)
-                fp.close()
+                with open(afile, 'rb') as fp:
+                    while True:
+                        data = fp.read(8192)
+                        if not data:
+                            break
+                        md5obj.update(data)
                 md5hex = md5obj.hexdigest()
             else:
                 md5hex = None
@@ -224,7 +231,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in self.items():
+        for key, val in list(self.items()):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either.
@@ -252,7 +259,7 @@ class Bunch(object):
         # representation so we get a predictable order of the
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
-        return (dict_withhash, md5(sorted_dict).hexdigest())
+        return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
@@ -489,7 +496,7 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         if isinstance(object, TraitDictObject) or isinstance(object, dict):
             out = {}
-            for key, val in object.items():
+            for key, val in list(object.items()):
                 if isdefined(val):
                     out[key] = self._clean_container(val, undefinedval)
                 else:
@@ -537,8 +544,8 @@ class BaseTraitedSpec(traits.HasTraits):
 
         """
 
-        dict_withhash = {}
-        dict_nofilename = {}
+        dict_withhash = [] #OrderedDict()
+        dict_nofilename = [] #OrderedDict()
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
@@ -548,24 +555,24 @@ class BaseTraitedSpec(traits.HasTraits):
                                                False)
                               and not has_metadata(trait.trait_type,
                                                    "name_source"))
-                dict_nofilename[name] = \
+                dict_nofilename.append((name,
                     self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)
-                dict_withhash[name] = \
+                                         hash_files=hash_files)))
+                dict_withhash.append((name,
                     self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)
-        return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+                                         hash_files=hash_files)))
+        return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
         if isinstance(object, dict):
-            out = {}
+            out = []
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = \
+                    out.append((key,
                         self._get_sorteddict(val, dictwithhash,
                                              hash_method=hash_method,
-                                             hash_files=hash_files)
+                                             hash_files=hash_files)))
         elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
@@ -577,7 +584,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, six.string_types) and
+                if (hash_files and isinstance(object, str) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -822,7 +829,7 @@ class BaseInterface(Interface):
         helpstr = ['Inputs::']
 
         inputs = cls.input_spec()
-        if len(inputs.traits(transient=None).items()) == 0:
+        if len(list(inputs.traits(transient=None).items())) == 0:
             helpstr += ['', '\tNone']
             return helpstr
 
@@ -907,7 +914,7 @@ class BaseInterface(Interface):
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        for name, spec in self.inputs.traits(mandatory=True).items():
+        for name, spec in list(self.inputs.traits(mandatory=True).items()):
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
             if not isdefined(value) and spec.xor is None:
@@ -917,17 +924,20 @@ class BaseInterface(Interface):
                 raise ValueError(msg)
             if isdefined(value):
                 self._check_requires(spec, name, value)
-        for name, spec in self.inputs.traits(mandatory=None,
-                                             transient=None).items():
+        for name, spec in list(self.inputs.traits(mandatory=None,
+                                             transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
         """ Raises an exception on version mismatch
         """
         unavailable_traits = []
-        version = LooseVersion(str(self.version))
-        if not version:
-            return
+        if self.version is None:
+            return unavailable_traits
+        try:
+            version = LooseVersion(str(self.version))
+        except AttributeError:
+            return unavailable_traits
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
@@ -1010,7 +1020,7 @@ class BaseInterface(Interface):
         self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
-        env = deepcopy(os.environ.data)
+        env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1026,7 +1036,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+                timediff.microseconds / 100000.
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1034,11 +1044,11 @@ class BaseInterface(Interface):
             if str2bool(config.get('execution', 'write_provenance')):
                 prov_record = write_provenance(results)
             results.provenance = prov_record
-        except Exception, e:
+        except Exception as e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+                timediff.microseconds / 100000.
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -1064,7 +1074,7 @@ class BaseInterface(Interface):
             inputs = None
             try:
                 inputs = self.inputs.get_traitsfree()
-            except Exception, e:
+            except Exception as e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
             prov_record = None
@@ -1100,7 +1110,7 @@ class BaseInterface(Interface):
             if outputs:
                 _unavailable_outputs = \
                     self._check_version_requirements(self._outputs())
-            for key, val in predicted_outputs.items():
+            for key, val in list(predicted_outputs.items()):
                 if needed_outputs and key not in needed_outputs:
                     continue
                 if key in _unavailable_outputs:
@@ -1111,7 +1121,7 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
-                except TraitError, error:
+                except TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
                         msg = ("File/Directory '%s' not found for %s output "
@@ -1156,7 +1166,7 @@ class Stream(object):
     def _read(self, drain):
         "Read from the file descriptor"
         fd = self.fileno()
-        buf = os.read(fd, 4096)
+        buf = os.read(fd, 4096).decode()
         if not buf and not self._buf:
             return None
         if '\n' not in buf:
@@ -1223,7 +1233,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error, e:
+            except select.error as e:
                 iflogger.info(str(e))
                 if e[0] == errno.EINTR:
                     return
@@ -1249,8 +1259,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.split('\n')
-        result['stderr'] = stderr.split('\n')
+        result['stdout'] = stdout.decode().split('\n')
+        result['stderr'] = stderr.decode().split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
@@ -1592,7 +1602,7 @@ class CommandLine(BaseInterface):
         traits = self.inputs.traits(**metadata)
         if traits:
             outputs = self.output_spec().get()
-            for name, trait_spec in traits.iteritems():
+            for name, trait_spec in traits.items():
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
@@ -1712,7 +1722,7 @@ class SEMLikeCommandLine(CommandLine):
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
-        for name in outputs.keys():
+        for name in list(outputs.keys()):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
@@ -1728,7 +1738,7 @@ class SEMLikeCommandLine(CommandLine):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
+        if name in list(self._outputs_filenames.keys()):
             if isinstance(value, bool):
                 if value:
                     value = os.path.abspath(self._outputs_filenames[name])

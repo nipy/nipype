@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import range
+from past.utils import old_div
 import warnings
 import os
 
@@ -11,7 +15,7 @@ from ...utils.misc import package_check
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy.modalities.fmri.design_matrix as dm
@@ -105,7 +109,7 @@ class FitGLM(BaseInterface):
 
         nscans = timeseries.shape[1]
 
-        if 'hpf' in session_info[0].keys():
+        if 'hpf' in list(session_info[0].keys()):
             hpf = session_info[0]['hpf']
             drift_model=self.inputs.drift_model
         else:
@@ -147,7 +151,7 @@ class FitGLM(BaseInterface):
                )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
-                design_matrix[:,i] = (design_matrix[:,i]-design_matrix[:,i].mean())/design_matrix[:,i].std()
+                design_matrix[:,i] = old_div((design_matrix[:,i]-design_matrix[:,i].mean()),design_matrix[:,i].std())
 
         if self.inputs.plot_design_matrix:
             import pylab

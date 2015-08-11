@@ -5,6 +5,7 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
 from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                                     File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
@@ -19,7 +20,7 @@ iflogger = logging.getLogger('interface')
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     from dipy.tracking.utils import density_map

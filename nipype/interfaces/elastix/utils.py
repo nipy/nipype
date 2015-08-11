@@ -7,6 +7,7 @@ Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
+from __future__ import unicode_literals
 
 import os.path as op
 import re

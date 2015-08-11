@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -21,7 +22,8 @@ def setup_infile():
     ext = Info.output_type_to_ext(Info.output_type())
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
-    file(tmp_infile, 'w')
+    with open(tmp_infile, 'w') as fp:
+        pass
     os.chdir(tmp_dir)
     return tmp_infile, tmp_dir
 

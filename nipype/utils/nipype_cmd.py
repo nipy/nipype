@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 import os
 import argparse
 import inspect
@@ -9,10 +12,10 @@ def listClasses(module=None):
     if module:
         __import__(module)
         pkg = sys.modules[module]
-        print "Available Interfaces:"
-        for k,v in pkg.__dict__.items():
+        print("Available Interfaces:")
+        for k,v in list(pkg.__dict__.items()):
             if inspect.isclass(v) and issubclass(v, Interface):
-                print "\t%s"%k
+                print("\t%s"%k)
 
 def add_options(parser=None, module=None, function=None):
     interface = None
@@ -38,9 +41,9 @@ def add_options(parser=None, module=None, function=None):
 
 def run_instance(interface, options):
     if interface:
-        print "setting function inputs"
+        print("setting function inputs")
 
-        for input_name, _ in interface.inputs.items():
+        for input_name, _ in list(interface.inputs.items()):
             if getattr(options, input_name) != None:
                 value = getattr(options, input_name)
                 #traits cannot cast from string to float or int
@@ -56,12 +59,12 @@ def run_instance(interface, options):
                 try:
                     setattr(interface.inputs, input_name,
                             value)
-                except ValueError, e:
-                    print "Error when setting the value of %s: '%s'"%(input_name, str(e))
+                except ValueError as e:
+                    print("Error when setting the value of %s: '%s'"%(input_name, str(e)))
 
-        print interface.inputs
+        print(interface.inputs)
         res = interface.run()
-        print res.outputs
+        print(res.outputs)
 
 
 def main(argv):

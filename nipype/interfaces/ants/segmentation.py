@@ -7,6 +7,9 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
                     isdefined)

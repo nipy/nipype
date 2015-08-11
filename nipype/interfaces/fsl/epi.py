@@ -11,19 +11,18 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os
-from glob import glob
 import warnings
 
 import numpy as np
 import nibabel as nib
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
-                                    isdefined, Undefined)
-from nipype.utils.filemanip import (load_json, save_json, split_filename,
-                                    fname_presuffix)
+from .base import FSLCommand, FSLCommandInputSpec
+from ..base import (traits, TraitedSpec, InputMultiPath, File, isdefined)
+from ...utils.filemanip import split_filename
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

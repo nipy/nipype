@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from builtins import map
+from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -50,7 +53,7 @@ def region_list_from_volume(in_file):
     region_list = list(rois)
     region_list.sort()
     region_list.remove(0)
-    region_list = map(int, region_list)
+    region_list = list(map(int, region_list))
     return region_list
 
 
@@ -68,5 +71,5 @@ def id_list_from_lookup_table(lookup_file, region_list):
     for region in region_list:
         label = LUTlabelDict[region][0]
         id_list.append(label)
-    id_list = map(str, id_list)
+    id_list = list(map(str, id_list))
     return id_list

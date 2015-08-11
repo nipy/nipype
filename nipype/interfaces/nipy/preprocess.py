@@ -6,6 +6,7 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
 import os
 import warnings
 
@@ -19,7 +20,7 @@ from ...utils.filemanip import split_filename, fname_presuffix
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy
@@ -53,7 +54,7 @@ class ComputeMask(BaseInterface):
     def _run_interface(self, runtime):
         from nipy.labs.mask import compute_mask
         args = {}
-        for key in [k for k, _ in self.inputs.items()
+        for key in [k for k, _ in list(self.inputs.items())
                     if k not in BaseInterfaceInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):

@@ -6,6 +6,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 from ..base import (TraitedSpec, File, traits)
 from .base import ANTSCommand, ANTSCommandInputSpec
@@ -495,8 +498,8 @@ class Registration(ANTSCommand):
         # Otherwise, make a singleton list of the metric specification
         # from the non-list inputs.
         if isinstance(name_input, list):
-            items = stage_inputs.items()
-            indexes = range(0, len(name_input))
+            items = list(stage_inputs.items())
+            indexes = list(range(0, len(name_input)))
             # dict-comprehension only works with python 2.7 and up
             #specs = [{k: v[i] for k, v in items} for i in indexes]
             specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
@@ -529,9 +532,9 @@ class Registration(ANTSCommand):
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
-        if kwargs.has_key('sampling_strategy'):
+        if 'sampling_strategy' in kwargs:
             sampling_strategy = kwargs['sampling_strategy']
-        elif kwargs.has_key('sampling_percentage'):
+        elif 'sampling_percentage' in kwargs:
             # The sampling percentage is specified but not the
             # sampling strategy. Use the default strategy.
             sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
@@ -540,7 +543,7 @@ class Registration(ANTSCommand):
         # Format the optional sampling arguments.
         if sampling_strategy:
             retval += ', %s' % sampling_strategy
-            if kwargs.has_key('sampling_percentage'):
+            if 'sampling_percentage' in kwargs:
                 retval += ', %g' % kwargs['sampling_percentage']
 
         retval += ' ]'
@@ -690,7 +693,7 @@ class Registration(ANTSCommand):
                                            'Translation': 'Translation.mat',
                                            'BSpline': 'BSpline.txt',
                                            'Initial': 'DerivedInitialMovingTranslation.mat'}
-        if transform in self.lowDimensionalTransformMap.keys():
+        if transform in list(self.lowDimensionalTransformMap.keys()):
             suffix = self.lowDimensionalTransformMap[transform]
             inverse_mode = inverse
         else:

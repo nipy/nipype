@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from .cmtk import ROIGen, CreateMatrix, CreateNodes
 from .nx import NetworkXMetrics, AverageNetworks
 from .parcellation import Parcellate

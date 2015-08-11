@@ -1,14 +1,16 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 
-from info import (LONG_DESCRIPTION as __doc__,
+from .info import (LONG_DESCRIPTION as __doc__,
                   URL as __url__,
                   STATUS as __status__,
                   __version__)
-from utils.config import NipypeConfig
+from .utils.config import NipypeConfig
 config = NipypeConfig()
-from utils.logger import Logging
+from .utils.logger import Logging
 logging = Logging(config)
 
 from distutils.version import LooseVersion
@@ -55,12 +57,12 @@ def _test_local_install():
                             os.path.abspath(__file__).split(os.sep)[:-2]):
         import warnings
         warnings.warn('Running the tests from the install directory may '
-                     'trigger some failures')
+                      'trigger some failures')
 
 _test_local_install()
 
 # Set up package information function
-from pkg_info import get_pkg_info as _get_pkg_info
+from .pkg_info import get_pkg_info as _get_pkg_info
 get_info = lambda: _get_pkg_info(os.path.dirname(__file__))
 
 # Cleanup namespace
@@ -74,6 +76,6 @@ except:
     pass
 
 
-from pipeline import Node, MapNode, JoinNode, Workflow
-from interfaces import (DataGrabber, DataSink, SelectFiles,
+from .pipeline import Node, MapNode, JoinNode, Workflow
+from .interfaces import (DataGrabber, DataSink, SelectFiles,
                         IdentityInterface, Rename, Function, Select, Merge)

@@ -15,6 +15,7 @@ variable::
 
     out.runtime.cwd
 """
+from __future__ import unicode_literals
 
 from nipype.interfaces import fsl
 fsl.FSLCommand.set_default_output_type('NIFTI')

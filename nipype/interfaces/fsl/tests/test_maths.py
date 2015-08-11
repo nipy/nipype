@@ -1,3 +1,6 @@
+from __future__ import division
+from __future__ import unicode_literals
+from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -8,10 +11,10 @@ from shutil import rmtree
 import numpy as np
 
 import nibabel as nb
-from nipype.testing import (assert_equal, assert_raises, skipif)
-from nipype.interfaces.base import Undefined
-import nipype.interfaces.fsl.maths as fsl
-from nipype.interfaces.fsl import no_fsl
+from ....testing import (assert_equal, assert_raises, skipif)
+from ...base import Undefined
+from .. import maths as fsl
+from .. import no_fsl
 
 
 def create_files_in_directory():
@@ -20,7 +23,7 @@ def create_files_in_directory():
     os.chdir(testdir)
 
     ftype = os.environ["FSLOUTPUTTYPE"]
-    os.environ["FSLOUTPUTTYPE"] = "NIFTI"
+    fsl.FSLCommand.set_default_output_type('NIFTI')
 
     filelist = ['a.nii','b.nii']
     for f in filelist:
@@ -36,7 +39,7 @@ def clean_directory(testdir, origdir, ftype):
     if os.path.exists(testdir):
         rmtree(testdir)
     os.chdir(origdir)
-    os.environ["FSLOUTPUTTYPE"] = ftype
+    fsl.FSLCommand.set_default_output_type(ftype)
 
 
 @skipif(no_fsl)
@@ -77,6 +80,7 @@ def test_maths_base():
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
+
 
 @skipif(no_fsl)
 def test_changedt():
@@ -210,11 +214,11 @@ def test_smooth():
 
     # Test smoothing kernels
     cmdline = "fslmaths a.nii -s %.5f b.nii"
-    for val in [0,1.,1,25,0.5,8/3]:
+    for val in [0,1.,1,25,0.5,old_div(8,3)]:
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",sigma=val)
         yield assert_equal, smoother.cmdline, cmdline%val
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",fwhm=val)
-        val = float(val)/np.sqrt(8 * np.log(2))
+        val = old_div(float(val),np.sqrt(8 * np.log(2)))
         yield assert_equal, smoother.cmdline, cmdline%val
 
     # Test automatic naming
@@ -439,7 +443,7 @@ def test_tempfilt():
     files, testdir, origdir, ftype = create_files_in_directory()
 
     # Get the command
-    filt = fsl.TemporalFilter(in_file="a.nii",out_file="b.nii")
+    filt = fsl.TemporalFilter(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, filt.cmd, "fslmaths"
@@ -452,14 +456,17 @@ def test_tempfilt():
     for win in windows:
         filt.inputs.highpass_sigma = win[0]
         filt.inputs.lowpass_sigma = win[1]
-        yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf %.6f %.6f b.nii"%win
+        yield assert_equal, filt.cmdline, \
+              "fslmaths a.nii -bptf %.6f %.6f b.nii" % win
 
     # Test that we don't need to ask for an out file
-    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
+    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)
     yield assert_equal, filt.cmdline, \
-    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt.nii")
+    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,
+                                                               "a_filt.nii")
 
     # Clean up our mess
     clean_directory(testdir, origdir, ftype)
+
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from nipype.testing import (assert_equal, example_data)
 from nipype.algorithms.metrics import ErrorMap
 import nibabel as nib

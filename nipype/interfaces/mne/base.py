@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,
                                     OutputMultiPath)
 import os.path as op
@@ -79,7 +80,7 @@ class WatershedBEM(FSCommand):
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         mesh_paths = []
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if k != 'mesh_files':
                 val = self._get_files(subject_path, k,
                                       output_traits.traits()[k].loc,

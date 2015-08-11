@@ -2,6 +2,7 @@
 settings in setup.py, the nipy top-level docstring, and for building the
 docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 """
+from __future__ import unicode_literals
 
 
 # nipy version information.  An empty _version_extra corresponds to a
@@ -38,7 +39,7 @@ def get_nipype_gitversion():
     except Exception:
         pass
     else:
-        ver = o.strip().split('-')[-1]
+        ver = o.decode().strip().split('-')[-1]
     return ver
 
 if 'dev' in _version_extra:

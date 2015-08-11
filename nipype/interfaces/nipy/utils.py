@@ -6,6 +6,7 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
 import warnings
 
 import nibabel as nb
@@ -15,7 +16,7 @@ from ...utils.misc import package_check
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     from nipy.algorithms.registration.histogram_registration import HistogramRegistration

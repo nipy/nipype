@@ -1,10 +1,12 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 import os
 import sys
 from shutil import rmtree
 
 
 def run_examples(example, pipelines, plugin):
-    print 'running example: %s with plugin: %s'%(example, plugin)
+    print('running example: %s with plugin: %s'%(example, plugin))
     from nipype.utils.config import NipypeConfig
     config = NipypeConfig()
     config.enable_debug_mode()
@@ -28,6 +30,6 @@ if __name__ == '__main__':
                 'fmri_fsl_feeds':['l1pipeline']}
     plugins = ['IPython']
     for plugin in plugins:
-        for example, pipelines in examples.items():
+        for example, pipelines in list(examples.items()):
             run_examples(example, pipelines, plugin)
 

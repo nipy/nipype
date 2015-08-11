@@ -14,6 +14,12 @@ tutorial data set::
 
 First tell python where to find the appropriate functions.
 """
+from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
+from past.utils import old_div
 
 import os                                    # system functions
 
@@ -181,7 +187,7 @@ inputnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120.
 TR = 3.
-inputnode.inputs.highpass = hpcutoff/(2*TR)
+inputnode.inputs.highpass = old_div(hpcutoff,(2*TR))
 
 """
 Setup a function that returns subject-specific information about the
@@ -195,11 +201,11 @@ for every participant. Other examples of this function are available in the
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print "Subject ID: %s\n"%str(subject_id)
+    print("Subject ID: %s\n"%str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
+        onsets = [list(range(15,240,60)),list(range(45,240,60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),

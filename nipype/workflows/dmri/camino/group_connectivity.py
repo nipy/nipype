@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os.path as op                      # system functions
 
 import nipype.interfaces.io as nio           # Data i/o
@@ -55,7 +56,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
         info = template_args_dict
 
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                   outfields=info.keys()),
+                                                   outfields=list(info.keys())),
                          name = 'datasource')
 
     datasource.inputs.template = "%s/%s"

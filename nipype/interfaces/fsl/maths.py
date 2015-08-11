@@ -4,12 +4,13 @@
     The maths module provides higher-level interfaces to some of the operations
     that can be performed with the fslmaths command-line program.
 """
+from __future__ import division
+from __future__ import unicode_literals
 import os
 import numpy as np
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
-                                    isdefined)
+from .base import FSLCommand, FSLCommandInputSpec
+from ..base import (TraitedSpec, File, traits, InputMultiPath, isdefined)
 
 
 class MathsInput(FSLCommandInputSpec):

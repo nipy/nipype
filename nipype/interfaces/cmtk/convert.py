@@ -6,6 +6,8 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os, os.path as op
 import datetime
@@ -21,7 +23,7 @@ from nipype.utils.misc import package_check
 have_cfflib = True
 try:
     package_check('cfflib')
-except Exception, e:
+except Exception as e:
     have_cfflib = False
 else:
     import cfflib as cf

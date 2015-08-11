@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Local serial workflow execution
 """
+from __future__ import unicode_literals
 import os
 
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,

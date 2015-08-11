@@ -10,6 +10,14 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import unicode_literals
+from builtins import zip
+from builtins import str
+from builtins import range
+from past.utils import old_div
 
 import os
 import os.path as op
@@ -30,7 +38,7 @@ from nipype import logging
 
 import warnings
 
-import metrics as nam
+from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
@@ -98,9 +106,9 @@ class PickAtlas(BaseInterface):
         for lab in labels:
             newdata[origdata == lab] = 1
         if self.inputs.hemi == 'right':
-            newdata[floor(float(origdata.shape[0]) / 2):, :, :] = 0
+            newdata[floor(old_div(float(origdata.shape[0]), 2)):, :, :] = 0
         elif self.inputs.hemi == 'left':
-            newdata[:ceil(float(origdata.shape[0]) / 2), :, :] = 0
+            newdata[:ceil(old_div(float(origdata.shape[0]), 2)), :, :] = 0
 
         if self.inputs.dilation_size != 0:
             newdata = grey_dilation(
@@ -321,7 +329,7 @@ class TSNR(BaseInterface):
             nb.save(img, self._gen_output_file_name('detrended'))
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
-        tsnr = meanimg / stddevimg
+        tsnr = old_div(meanimg, stddevimg)
         img = nb.Nifti1Image(tsnr, img.get_affine(), header)
         nb.save(img, self._gen_output_file_name())
         img = nb.Nifti1Image(meanimg, img.get_affine(), header)
@@ -439,7 +447,7 @@ class Matlab2CSV(BaseInterface):
         # name and a .csv extension.
 
         saved_variables = list()
-        for key in in_dict.keys():
+        for key in list(in_dict.keys()):
             if not key.startswith('__'):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
@@ -473,7 +481,7 @@ class Matlab2CSV(BaseInterface):
         outputs = self.output_spec().get()
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
         saved_variables = list()
-        for key in in_dict.keys():
+        for key in list(in_dict.keys()):
             if not key.startswith('__'):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
@@ -495,10 +503,10 @@ def merge_csvs(in_list):
     for idx, in_file in enumerate(in_list):
         try:
             in_array = np.loadtxt(in_file, delimiter=',')
-        except ValueError, ex:
+        except ValueError as ex:
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-            except ValueError, ex:
+            except ValueError as ex:
                 first = open(in_file, 'r')
                 header_line = first.readline()
                 header_list = header_line.split(',')
@@ -506,11 +514,11 @@ def merge_csvs(in_list):
                 try:
                     in_array = np.loadtxt(
                         in_file, delimiter=',', skiprows=1,
-                        usecols=range(1, n_cols)
+                        usecols=list(range(1, n_cols))
                     )
-                except ValueError, ex:
+                except ValueError as ex:
                     in_array = np.loadtxt(
-                        in_file, delimiter=',', skiprows=1, usecols=range(1, n_cols-1))
+                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols-1)))
         if idx == 0:
             out_array = in_array
         else:
@@ -865,7 +873,7 @@ class AddCSVRow(BaseInterface):
                   ' thread-safe in multi-processor execution'))
 
         input_dict = {}
-        for key, val in self.inputs._outputs.items():
+        for key, val in list(self.inputs._outputs.items()):
             # expand lists to several columns
             if key == 'trait_added' and val in self.inputs.copyable_trait_names():
                 continue
@@ -970,7 +978,7 @@ def calc_moments(timeseries_file, moment):
     m2 = stats.moment(timeseries, 2, axis=0)
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
-    return np.where(zero, 0, m3 / m2**(moment/2.0))
+    return np.where(zero, 0, old_div(m3, m2**(old_div(moment,2.0))))
 
 
 class AddNoiseInputSpec(TraitedSpec):
@@ -1045,7 +1053,7 @@ class AddNoise(BaseInterface):
         added gaussian noise (rayleigh for background in mask)
         """
         from math import sqrt
-        snr = sqrt(np.power(10.0, snr_db/10.0))
+        snr = sqrt(np.power(10.0, old_div(snr_db,10.0)))
 
         if mask is None:
             mask = np.ones_like(image)
@@ -1060,7 +1068,7 @@ class AddNoise(BaseInterface):
 
         if dist == 'normal':
             signal = signal - signal.mean()
-            sigma_n = sqrt(signal.var()/snr)
+            sigma_n = sqrt(old_div(signal.var(),snr))
             noise = np.random.normal(size=image.shape, scale=sigma_n)
 
             if (np.any(mask == 0)) and (bg_dist == 'rayleigh'):
@@ -1070,11 +1078,11 @@ class AddNoise(BaseInterface):
             im_noise = image + noise
 
         elif dist == 'rician':
-            sigma_n = signal.mean()/snr
+            sigma_n = old_div(signal.mean(),snr)
             n_1 = np.random.normal(size=image.shape, scale=sigma_n)
             n_2 = np.random.normal(size=image.shape, scale=sigma_n)
-            stde_1 = n_1/sqrt(2.0)
-            stde_2 = n_2/sqrt(2.0)
+            stde_1 = old_div(n_1,sqrt(2.0))
+            stde_2 = old_div(n_2,sqrt(2.0))
             im_noise = np.sqrt((image + stde_1)**2 + (stde_2)**2)
         else:
             raise NotImplementedError(('Only normal and rician distributions '
@@ -1180,7 +1188,7 @@ class SplitROIs(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for k, v in self._outnames.iteritems():
+        for k, v in self._outnames.items():
             outputs[k] = v
         return outputs
 
@@ -1279,7 +1287,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
 
     for i,out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
-        probmap = data / weights
+        probmap = old_div(data, weights)
         hdr = imgs[i].get_header().copy()
         hdr['data_type']= 16
         hdr.set_data_dtype('float32')
@@ -1317,7 +1325,7 @@ def split_rois(in_file, mask=None, roishape=None):
     mask = mask.reshape(-1).astype(np.uint8)
     nzels = np.nonzero(mask)
     els = np.sum(mask)
-    nrois = int(ceil(els/roisize))
+    nrois = int(ceil(old_div(els,roisize)))
 
     data = im.get_data().reshape((mask.size, -1))
     data = np.squeeze(data.take(nzels, axis=0))
@@ -1331,7 +1339,7 @@ def split_rois(in_file, mask=None, roishape=None):
     out_mask = []
     out_idxs = []
 
-    for i in xrange(nrois):
+    for i in range(nrois):
         first = i * roisize
         last = (i+1) * roisize
         fill = 0
@@ -1428,7 +1436,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     else:
         hdr.set_data_shape(rsh[:3])
         nii = []
-        for d in xrange(ndirs):
+        for d in range(ndirs):
             fname = op.abspath('vol%06d.nii' % d)
             nb.Nifti1Image(np.zeros(rsh[:3]), aff, hdr).to_filename(fname)
             nii.append(fname)
