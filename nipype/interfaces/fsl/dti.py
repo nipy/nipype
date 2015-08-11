@@ -310,8 +310,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
-    'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
---forcedir --logdir=. --mask=mask.nii --nfibres=1'
+    'bedpostx bedpostx --forcedir -n 1'
 
     """
 
