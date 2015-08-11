@@ -21,8 +21,7 @@ dependencies:
     - mkdir ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
 test:
   override:
-    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --processes=1 --process-restartworker --process-timeout=2600 --with-doctest nipype --logging-level=DEBUG --verbosity=3:
-        pwd: ../examples
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
