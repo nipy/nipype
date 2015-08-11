@@ -23,7 +23,7 @@ def _tbss_test_helper(estimate_skeleton):
     old_dir = os.getcwd()
     os.chdir(tbss_orig_dir)
 
-    subjects = ['1260', '1549', '1636']
+    subjects = ['1260', '1549']
     FA_list = [os.path.join(fsl_course_dir, 'tbss', subject_id + '.nii.gz') for subject_id in subjects]
     for f in FA_list:
         shutil.copy(f, os.getcwd())

@@ -21,7 +21,7 @@ def test_create_eddy_correct_pipeline():
     dwi_file = os.path.join(fsl_course_dir, "fdt1/subj1/data.nii.gz")
     
     trim_dwi = pe.Node(fsl.ExtractROI(t_min=0, 
-                                      t_size=3), name="trim_dwi")
+                                      t_size=2), name="trim_dwi")
     trim_dwi.inputs.in_file = dwi_file
 
     nipype_eddycorrect = create_eddy_correct_pipeline("nipype_eddycorrect")
