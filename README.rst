@@ -4,9 +4,15 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 
 .. image:: https://travis-ci.org/nipy/nipype.png?branch=master
   :target: https://travis-ci.org/nipy/nipype
+  
+.. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
+  :target: https://circleci.com/gh/nipy/nipype/tree/master
 
 .. image:: https://coveralls.io/repos/nipy/nipype/badge.png
   :target: https://coveralls.io/r/nipy/nipype
+  
+.. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
+  :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
 
 .. image:: https://img.shields.io/pypi/v/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
