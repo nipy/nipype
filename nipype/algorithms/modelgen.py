@@ -72,9 +72,10 @@ def spm_hrf(RT, P=None, fMRI_T=16):
     % p    - parameters of the response function
 
     the following code using scipy.stats.distributions.gamma
-    doesn't return the same result as the spm_Gpdf function
-    hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
-          gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
+    doesn't return the same result as the spm_Gpdf function ::
+    
+        hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
+              gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
 
     >>> print spm_hrf(2)
     [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01

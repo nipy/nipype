@@ -80,8 +80,8 @@ Execution
 *remove_unnecessary_outputs*
 	This will remove any interface outputs not needed by the workflow. If the
 	required outputs from a node changes, rerunning the workflow will rerun the
-	node. Outputs of leaf nodes (nodes whose outputs are not connected to any 
-	other nodes) will never be deleted independent of this parameter. (possible 
+	node. Outputs of leaf nodes (nodes whose outputs are not connected to any
+	other nodes) will never be deleted independent of this parameter. (possible
 	values: ``true`` and ``false``; default value: ``true``)
 
 *try_hard_link_datasink*
@@ -129,7 +129,7 @@ Execution
     If this is set to True, the node's output directory will contain full
     parameterization of any iterable, otherwise parameterizations over 32
     characters will be replaced by their hash. (possible values: ``true`` and
-	``false``; default value: ``true``)
+    ``false``; default value: ``true``)
 
 *poll_sleep_duration*
     This controls how long the job submission loop will sleep between submitting
@@ -146,7 +146,7 @@ Example
 
 	[logging]
 	workflow_level = DEBUG
-	
+
 	[execution]
 	stop_on_first_crash = true
 	hash_method = timestamp
@@ -156,9 +156,9 @@ Workflow.config property has a form of a nested dictionary reflecting the
 structure of the .cfg file.
 
 ::
-  
+
   myworkflow = pe.Workflow()
-  myworkflow.config['execution'] = {'stop_on_first_rerun': 'True', 
+  myworkflow.config['execution'] = {'stop_on_first_rerun': 'True',
                                      'hash_method': 'timestamp'}
 
 You can also directly set global config options in your workflow script. An

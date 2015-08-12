@@ -21,15 +21,15 @@ grouped into separate classes (usually suffixed with InputSpec and OutputSpec).
 For example:
 
 .. testcode::
-	
+
 	class ExampleInputSpec(TraitedSpec):
 		input_volume = File(desc = "Input volume", exists = True,
 		                    mandatory = True)
 		parameter = traits.Int(desc = "some parameter")
-		
+
 	class ExampleOutputSpec(TraitedSpec):
 		output_volume = File(desc = "Output volume", exists = True)
-		
+
 For the Traits (and Nipype) to work correctly output and input spec has to be
 inherited from TraitedSpec (however, this does not have to be direct
 inheritance).
@@ -39,7 +39,7 @@ above example we have used the ``desc`` metadata which holds human readable
 description of the input. The ``mandatory`` flag forces Nipype to throw an
 exception if the input was not set. ``exists`` is a special flag that works only
 for ``File traits`` and checks if the provided file exists. More details can be
-found at `interface_specs`_.
+found at :doc:`interface_specs`.
 
 The input and output specifications have to be connected to the our example
 interface class:
@@ -49,13 +49,13 @@ interface class:
 	class Example(Interface):
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
-		
+
 Where the names of the classes grouping inputs and outputs were arbitrary the
 names of the fields within the interface they are assigned are not (it always
 has to be input_spec and output_spec). Of course this interface does not do much
 because we have not specified how to process the inputs and create the outputs.
 This can be done in many ways.
- 
+
 Command line executable
 =======================
 
@@ -67,20 +67,20 @@ between the inputs and the generated command line. To achieve this we have
 added two metadata: ``argstr`` (string defining how the argument should be
 formated) and ``position`` (number defining the order of the arguments).
 For example
- 
+
 .. testcode::
 
 	class ExampleInputSpec(CommandLineSpec):
 		input_volume = File(desc = "Input volume", exists = True,
 		                    mandatory = True, position = 0, argstr="%s")
 		parameter = traits.Int(desc = "some parameter", argstr = "--param %d")
-		
+
 As you probably noticed the ``argstr`` is a printf type string with formatting
 symbols. For an input defined in InputSpec to be included into the executed
 commandline ``argstr`` has to be included. Additionally inside the main
 interface class you need to specify the name of the executable by assigning it
 to the ``_cmd`` field. Also the main interface class needs to inherit from
-`CommandLine`_:
+:class:`nipype.interfaces.base.CommandLine`:
 
 .. testcode::
 
@@ -88,11 +88,11 @@ to the ``_cmd`` field. Also the main interface class needs to inherit from
 		_cmd = 'my_command'
 		input_spec = ExampleInputSpec
 		output_spec = ExampleOutputSpec
-		
+
 There is one more thing we need to take care of. When the executable finishes
 processing it will presumably create some output files. We need to know which
 files to look for, check if they exist and expose them to whatever node would
-like to use them. This is done by implementing `_list_outputs`_ method in the
+like to use them. This is done by implementing ``_list_outputs`` method in the
 main interface class. Basically what it does is assigning the expected output
 files to the fields of our output spec:
 
@@ -102,7 +102,7 @@ files to the fields of our output spec:
 		outputs = self.output_spec().get()
 		outputs['output_volume'] = os.path.abspath('name_of_the_file_this_cmd_made.nii')
 		return outputs
-		
+
 Sometimes the inputs need extra parsing before turning into command line
 parameters. For example imagine a parameter selecting between three methods:
 "old", "standard" and "new". Imagine also that the command line accept this as
@@ -122,42 +122,42 @@ numbers. We need to do additional parsing by overloading the following method
 in the main interface class:
 
 .. testcode::
-	
+
 	def _format_arg(self, name, spec, value):
 		if name == 'method':
 		    return spec.argstr%{"old":0, "standard":1, "new":2}[value]
 		return super(Example, self)._format_arg(name, spec, value)
-		
+
 Here is a minimalistic interface for the gzip command:
 
 .. testcode::
-	
+
 	from nipype.interfaces.base import (
-	    TraitedSpec, 
+	    TraitedSpec,
 	    CommandLineInputSpec,
-	    CommandLine, 
+	    CommandLine,
 	    File
 	)
 	import os
-	
+
 	class GZipInputSpec(CommandLineInputSpec):
 	    input_file = File(desc="File", exists=True, mandatory=True, argstr="%s")
-	        
+
 	class GZipOutputSpec(TraitedSpec):
 	    output_file = File(desc = "Zip file", exists = True)
-	        
+
 	class GZipTask(CommandLine):
 	    input_spec = GZipInputSpec
 	    output_spec = GZipOutputSpec
 	    cmd = 'gzip'
-	    
+
 	    def _list_outputs(self):
 	            outputs = self.output_spec().get()
 	            outputs['output_file'] = os.path.abspath(self.inputs.input_file + ".gz")
 	            return outputs
-	            
+
 	if __name__ == '__main__':
-	    
+
 	    zipper = GZipTask(input_file='an_existing_file')
 	    print zipper.cmdline
 	    zipper.run()
@@ -193,9 +193,9 @@ hash_files
 
 name_template (optional)
      overrides the default ``_generated`` suffix
-     
+
 output_name (optional)
-     name of the output (if this is not set same name as the input will be 
+     name of the output (if this is not set same name as the input will be
      assumed)
 
 keep_extension (optional - not used)

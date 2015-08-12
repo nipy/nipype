@@ -50,6 +50,7 @@ def test_FSLXCommand_inputs():
     model=dict(argstr='--model=%d',
     ),
     n_fibres=dict(argstr='--nfibres=%d',
+    mandatory=True,
     usedefault=True,
     ),
     n_jumps=dict(argstr='--njumps=%d',
@@ -82,12 +83,9 @@ def test_FSLXCommand_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_FSLXCommand_outputs():
-    output_map = dict(d_stdsamples=dict(),
-    dsamples=dict(),
-    dyads=dict(),
+    output_map = dict(dyads=dict(),
     fsamples=dict(),
     mean_S0samples=dict(),
-    mean_d_stdsamples=dict(),
     mean_dsamples=dict(),
     mean_fsamples=dict(),
     mean_tausamples=dict(),
