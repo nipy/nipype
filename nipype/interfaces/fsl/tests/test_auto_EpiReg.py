@@ -29,6 +29,7 @@ def test_EpiReg_inputs():
     ),
     out_base=dict(argstr='--out=%s',
     position=-1,
+    usedefault=True,
     ),
     output_type=dict(),
     pedir=dict(argstr='--pedir=%s',
