@@ -16,7 +16,7 @@ import warnings
 
 import numpy as np
 
-from nipype.interfaces.fsl.base import BROCCOLICommand, BROCCOLICommandInputSpec
+from nipype.interfaces.broccoli.base import BROCCOLICommand, BROCCOLICommandInputSpec, BROCCOLICommandOutputSpec
 from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
                                     OutputMultiPath, Undefined, traits,
                                     isdefined, OutputMultiPath)
@@ -54,6 +54,14 @@ class RegisterTwoVolumesInputSpec(BROCCOLICommandInputSpec):
 
     iterationsnonlinear = traits.Int(argstr='-iterationsnonlinear %d', desc='Number of iterations for non-linear registration')
 
+    sigma = traits.Float(argstr='-sigma %s', desc='Amount of Gaussian smoothing for regularization of displacement field (default 5.0)')
+
+    quiet = traits.Bool(argstr='-quiet', desc='Dont print anything')
+
+    verbose = traits.Bool(argstr='-verbose', desc='Print extra stuff')
+
+
+
 class RegisterTwoVolumes(BROCCOLICommand):
     """This program performs linear and non-linear registration of two volumes
 
@@ -65,8 +73,8 @@ class RegisterTwoVolumes(BROCCOLICommand):
     >>> reg = broccoli.RegisterTwoVolumes()
     >>> reg.inputs.in_file = 'structural.nii'
     >>> reg.inputs.reference = 'mni.nii'
-    >>> reg.platform = 1
-    >>> reg.device = 2
+    >>> reg.intputs.platform = 1
+    >>> reg.inputs.device = 2
     >>> reg.cmdline
     'RegisterTwoVolumes structural.nii mni.nii -platform 1 -device 2'
     >>> res = reg.run() # doctest: +SKIP

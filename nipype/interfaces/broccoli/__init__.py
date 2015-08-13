@@ -8,4 +8,5 @@ Top-level namespace for BROCCOLI.
 
 from .base import (BROCCOLICommand, Info)
 from .preprocess import (RegisterTwoVolumes)
+from .utils import (GetOpenCLInfo)
 

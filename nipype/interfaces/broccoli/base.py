@@ -80,8 +80,7 @@ class Info(object):
         try:
             return os.environ['BROCCOLIOUTPUTTYPE']
         except KeyError:
-            warnings.warn(('BROCCOLI environment variables not set. setting output '
-                           'type to NIFTI'))
+            warnings.warn(('BROCCOLI environment variables not set. setting output type to NIFTI'))
             return 'NIFTI'
 
 
@@ -100,6 +99,10 @@ class BROCCOLICommandInputSpec(CommandLineInputSpec):
     output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
                               desc='BROCCOLI output type')
 
+
+class BROCCOLICommandOutputSpec(TraitedSpec):
+    out_file = File(desc='output file',
+                    exists=True)
 
 class BROCCOLICommand(CommandLine):
     """Base support for BROCCOLI commands.

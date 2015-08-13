@@ -9,6 +9,7 @@ def configuration(parent_package='', top_path=None):
 
     config.add_subpackage('afni')
     config.add_subpackage('ants')
+    config.add_subpackage('broccoli')
     config.add_subpackage('camino')
     config.add_subpackage('camino2trackvis')
     config.add_subpackage('cmtk')
