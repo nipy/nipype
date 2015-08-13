@@ -41,6 +41,6 @@ def example_data(infile='functional.nii'):
     basedir = os.path.dirname(filepath)
     outfile = os.path.join(basedir, 'data', infile)
     if not os.path.exists(outfile):
-        raise IOError('%s empty data file does NOT exist'%(outfile))
+        raise IOError('%s empty data file does NOT exist' % outfile)
 
     return outfile

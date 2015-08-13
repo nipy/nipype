@@ -2,6 +2,15 @@ Next release
 ============
 
 * ENH: New interfaces for MRTrix3 (https://github.com/nipy/nipype/pull/1126)
+* FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
+* ENH: Attempt to use hard links for data sink.
+    (https://github.com/nipy/nipype/pull/1161)
+* FIX: Updates to SGE Plugins
+    (https://github.com/nipy/nipype/pull/1129)
+* ENH: Add ants JointFusion() node with testing
+    (https://github.com/nipy/nipype/pull/1160)
+* ENH: Add --float option for antsRegistration calls
+    (https://github.com/nipy/nipype/pull/1159)
 * ENH: Added interface to simulate DWIs using the multi-tensor model
        (https://github.com/nipy/nipype/pull/1085)
 * ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)

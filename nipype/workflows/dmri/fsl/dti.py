@@ -16,7 +16,9 @@ def transpose(samples_over_fibres):
     return np.squeeze(a.T).tolist()
 
 
-def create_bedpostx_pipeline(name='bedpostx', params={}):
+def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres':2, 'fudge':1, 'burn_in':1000,
+                                                      'n_jumps':1250, 'sample_every':25, 'model':1,
+                                                      'cnlinear':True}):
     """
     Creates a pipeline that does the same as bedpostx script from FSL -
     calculates diffusion model parameters (distributions not MLE) voxelwise for
@@ -126,7 +128,9 @@ def merge_and_mean(name='mm'):
 
 def bedpostx_parallel(name='bedpostx_parallel',
                       compute_all_outputs=True,
-                      params=None):
+                      params={'n_fibres':2, 'fudge':1, 'burn_in':1000,
+                              'n_jumps':1250, 'sample_every':25, 'model':1,
+                              'cnlinear':True}):
     """
     Does the same as :func:`.create_bedpostx_pipeline` by splitting
     the input dMRI in small ROIs that are better suited for parallel

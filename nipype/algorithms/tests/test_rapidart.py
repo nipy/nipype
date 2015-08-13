@@ -1,10 +1,11 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.testing import (assert_equal, assert_false, assert_true,
-                            assert_almost_equal)
-import nipype.algorithms.rapidart as ra
-from nipype.interfaces.base import Bunch
 import numpy as np
+
+from ...testing import (assert_equal, assert_false, assert_true,
+                        assert_almost_equal)
+from .. import rapidart as ra
+from ...interfaces.base import Bunch
 
 
 def test_ad_init():

@@ -576,36 +576,51 @@ class antsCorticalThickness(ANTSCommand):
 
 
 class JointFusionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, 4, argstr='%d', position=0, usedefault=True, mandatory=True,
+    dimension = traits.Enum(3, 2, 4, argstr='%d', position=0, usedefault=True,
+                            mandatory=True,
                             desc='image dimension (2, 3, or 4)')
-    modalities = traits.Int(argstr='%d', position=1, mandatory=True, desc='Number of modalities or features')
-    warped_intensity_images = InputMultiPath(File(exists=True), argstr="-g %s...", mandatory=True, desc='Warped atlas images')
-    target_image = InputMultiPath(File(exists=True), argstr='-tg %s...', mandatory=True, desc='Target image(s)')
-    warped_label_images = InputMultiPath(File(exists=True), argstr="-l %s...", mandatory=True, desc='Warped atlas segmentations')
-    method = traits.Str(default='Joint', argstr='-m %s', usedefault=True, desc='Select voting method. Options: Joint (Joint Label Fusion). May be followed by optional parameters in brackets, e.g., -m Joint[0.1,2]')
-    alpha = traits.Float(default=0.1, usedefault=True, requires=['method'], desc='Regularization term added to matrix Mx for inverse')
-    beta = traits.Int(default=2, usedefault=True, requires=['method'], desc='Exponent for mapping intensity difference to joint error')
-    output_label_image = File(argstr='%s', mandatory=True, position=-1, desc='Output fusion label map image')
-    patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rp %s', desc='Patch radius for similarity measures, scalar or vector. Default: 2x2x2')
-    search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s', desc='Local search radius. Default: 3x3x3')
-    exclusion_region = File(exists=True, argstr='-x %s', desc='Specify an exclusion region for the given label.')
-    # TODO: These are almost never needed except for debugging
-    # output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz', argstr='-p %s',
-    #                                              desc="Save the posterior maps (probability that each voxel belongs to each " +\
-    #                                              "label) as images. The number of images saved equals the number of labels. " +\
-    #                                              "The filename pattern must be in C printf format, e.g. posterior%04d.nii.gz")
-    # output_voting_weights_name_template = traits.Str('WEIGHTED_%04d.nii.gz', argstr='-w %s', desc="Save the voting weights as " +\
-    #                                                  "images. The number of images saved equals the number of atlases. The " +\
-    #                                                  "filename pattern must be in C printf format, e.g. weight%04d.nii.gz")
-    atlas_group_id = traits.ListInt(argstr='-gp %d...', desc='Assign a group ID for each atlas')
-    atlas_group_weights = traits.ListInt(argstr='-gpw %d...', desc='Assign the voting weights to each atlas group')
+    modalities = traits.Int(argstr='%d', position=1, mandatory=True,
+                            desc='Number of modalities or features')
+    warped_intensity_images = InputMultiPath(File(exists=True),
+                                             argstr="-g %s...", mandatory=True,
+                                             desc='Warped atlas images')
+    target_image = InputMultiPath(File(exists=True), argstr='-tg %s...',
+                                  mandatory=True, desc='Target image(s)')
+    warped_label_images = InputMultiPath(File(exists=True), argstr="-l %s...",
+                                         mandatory=True,
+                                         desc='Warped atlas segmentations')
+    method = traits.Str(default='Joint', argstr='-m %s', usedefault=True,
+                        desc=('Select voting method. Options: Joint (Joint '
+                              'Label Fusion). May be followed by optional '
+                              'parameters in brackets, e.g., -m Joint[0.1,2]'))
+    alpha = traits.Float(default=0.1, usedefault=True, requires=['method'],
+                         desc=('Regularization term added to matrix Mx for '
+                               'inverse'))
+    beta = traits.Int(default=2, usedefault=True, requires=['method'],
+                      desc=('Exponent for mapping intensity difference to joint'
+                            ' error'))
+    output_label_image = File(argstr='%s', mandatory=True, position=-1,
+                              name_template='%s',
+                              output_name='output_label_image',
+                              desc='Output fusion label map image')
+    patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rp %s',
+                                  desc=('Patch radius for similarity measures, '
+                                        'scalar or vector. Default: 2x2x2'))
+    search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s',
+                                   desc='Local search radius. Default: 3x3x3')
+    exclusion_region = File(exists=True, argstr='-x %s',
+                            desc=('Specify an exclusion region for the given '
+                                  'label.'))
+    atlas_group_id = traits.ListInt(argstr='-gp %d...',
+                                    desc=('Assign a group ID for each atlas'))
+    atlas_group_weights = traits.ListInt(argstr='-gpw %d...',
+                                         desc=('Assign the voting weights to '
+                                               'each atlas group'))
 
 
 class JointFusionOutputSpec(TraitedSpec):
-    output_label_image = File(exists=True)
-    # TODO: These are almost never needed except for debugging,
-    #       so delay complicated implementation until a need arises
-    #       optional outputs - output_posteriors, output_voting_weights
+    output_label_image = File(exists=True, desc='Output fusion label map image')
+
 
 class JointFusion(ANTSCommand):
     """
@@ -657,8 +672,3 @@ class JointFusion(ANTSCommand):
                 assert len(val) == len(self.inputs.warped_label_images), "Number of intensity images and label maps must be the same"
             return super(ANTSCommand, self)._format_arg(opt, spec, val)
         return retval
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_label_image'] = os.path.abspath(self.inputs.output_label_image)
-        return outputs

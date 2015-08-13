@@ -7,8 +7,8 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 # nipy version information.  An empty _version_extra corresponds to a
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
-_version_major = 1
-_version_minor = 0
+_version_major = 0
+_version_minor = 11
 _version_micro = 0
 _version_extra = 'dev'
 
@@ -41,13 +41,13 @@ def get_nipype_gitversion():
         ver = o.strip().split('-')[-1]
     return ver
 
-if '.dev' in _version_extra:
+if 'dev' in _version_extra:
     gitversion = get_nipype_gitversion()
     if gitversion:
-        _version_extra = '.' + gitversion + '-' + 'dev'
+        _version_extra = gitversion + '.dev'
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
-__version__ = "%s.%s.%s%s" % (_version_major,
+__version__ = "%s.%s.%s-%s" % (_version_major,
                               _version_minor,
                               _version_micro,
                               _version_extra)
@@ -58,6 +58,7 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "License :: OSI Approved :: BSD License",
                "Operating System :: OS Independent",
                "Programming Language :: Python",
+               "Programming Language :: Python :: 2.7",
                "Topic :: Scientific/Engineering"]
 
 description  = 'Neuroimaging in Python: Pipelines and Interfaces'
@@ -77,15 +78,15 @@ resulted in a heterogeneous collection of specialized applications
 without transparent interoperability or a uniform operating interface.
 
 *Nipype*, an open-source, community-developed initiative under the
-umbrella of NiPy, is a Python project that provides a uniform interface
+umbrella of NiPy_, is a Python project that provides a uniform interface
 to existing neuroimaging software and facilitates interaction between
 these packages within a single workflow. Nipype provides an environment
 that encourages interactive exploration of algorithms from different
-packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer), eases the
-design of workflows within and between packages, and reduces the
-learning curve necessary to use different packages. Nipype is creating a
-collaborative platform for neuroimaging software development in a
-high-level language and addressing limitations of existing pipeline
+packages (e.g., ANTS, SPM, FSL, FreeSurfer, Camino, MRtrix, MNE, AFNI, BRAINS,
+Slicer), eases the design of workflows within and between packages, and
+reduces the learning curve necessary to use different packages. Nipype is
+creating a collaborative platform for neuroimaging software development
+in a high-level language and addressing limitations of existing pipeline
 systems.
 
 *Nipype* allows you to:
@@ -99,17 +100,17 @@ systems.
 """
 
 # versions
-NIBABEL_MIN_VERSION = '1.0'
-NETWORKX_MIN_VERSION = '1.0'
-NUMPY_MIN_VERSION = '1.3'
-SCIPY_MIN_VERSION = '0.7'
-TRAITS_MIN_VERSION = '4.0'
-DATEUTIL_MIN_VERSION = '1.0'
-NOSE_MIN_VERSION = '1.0'
+NIBABEL_MIN_VERSION = '2.0.1'
+NETWORKX_MIN_VERSION = '1.7'
+NUMPY_MIN_VERSION = '1.6.2'
+SCIPY_MIN_VERSION = '0.11'
+TRAITS_MIN_VERSION = '4.3'
+DATEUTIL_MIN_VERSION = '1.5'
+NOSE_MIN_VERSION = '1.2'
 
 NAME                = 'nipype'
 MAINTAINER          = "nipype developers"
-MAINTAINER_EMAIL    = "nipy-devel@neuroimaging.scipy.org"
+MAINTAINER_EMAIL    = "neuroimaging@python.org"
 DESCRIPTION         = description
 LONG_DESCRIPTION    = long_description
 URL                 = "http://nipy.org/nipype"
@@ -117,14 +118,26 @@ DOWNLOAD_URL        = "http://github.com/nipy/nipype/archives/master"
 LICENSE             = "BSD license"
 CLASSIFIERS         = CLASSIFIERS
 AUTHOR              = "nipype developers"
-AUTHOR_EMAIL        = "nipy-devel@neuroimaging.scipy.org"
+AUTHOR_EMAIL        = "neuroimaging@python.org"
 PLATFORMS           = "OS Independent"
 MAJOR               = _version_major
 MINOR               = _version_minor
 MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
-REQUIRES            = ["nibabel>=1.0", "networkx>=1.0", "numpy>=1.3",
-                       "python-dateutil>1.0", "scipy>=0.7", "traits>=4.0",
-                       "nose>=1.0"]
+PROVIDES            = ['nipype']
+REQUIRES            = ["nibabel (>=%s)" % NIBABEL_MIN_VERSION,
+                       "networkx (>=%s)" % NETWORKX_MIN_VERSION,
+                       "numpy (>=%s)" % NUMPY_MIN_VERSION,
+                       "python-dateutil (>=%s)" % DATEUTIL_MIN_VERSION,
+                       "scipy (>=%s)" % SCIPY_MIN_VERSION,
+                       "traits (>=%s)" % TRAITS_MIN_VERSION,
+                       "nose (>=%s)" % NOSE_MIN_VERSION]
+REQUIRES            = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
+                       "networkx>=%s" % NETWORKX_MIN_VERSION,
+                       "numpy>=%s" % NUMPY_MIN_VERSION,
+                       "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+                       "scipy>=%s" % SCIPY_MIN_VERSION,
+                       "traits>=%s" % TRAITS_MIN_VERSION,
+                       "nose>=%s" % NOSE_MIN_VERSION]
 STATUS              = 'stable'
