@@ -9,11 +9,11 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-				    traits, TraitedSpec, isdefined,
-				    File)
-import os, os.path as op
-from nipype.utils.filemanip import split_filename
+from .base import (CommandLine, CommandLineInputSpec,
+                   traits, TraitedSpec, isdefined,
+                   File)
+import os.path as op
+from ..utils.filemanip import split_filename
 
 class MeshFixInputSpec(CommandLineInputSpec):
     number_of_biggest_shells = traits.Int(argstr='--shells %d', desc="Only the N biggest shells are kept")
@@ -100,40 +100,43 @@ class MeshFix(CommandLine):
     >>> fix.inputs.in_file1 = 'lh-pial.stl'
     >>> fix.inputs.in_file2 = 'rh-pial.stl'
     >>> fix.run()                                    # doctest: +SKIP
+    >>> fix.cmdline
+    'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
     """
     _cmd = 'meshfix'
     input_spec=MeshFixInputSpec
     output_spec=MeshFixOutputSpec
 
     def _list_outputs(self):
-	outputs = self.output_spec().get()
-	if isdefined(self.inputs.out_filename):
-	    path, name, ext = split_filename(self.inputs.out_filename)
-	    ext = ext.replace('.', '')
-	    out_types = ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off']
-	    # Make sure that the output filename uses one of the possible file types
-	    if any(ext == out_type.lower() for out_type in out_types):
-		outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
-	    else:
-		outputs['mesh_file'] = op.abspath(name + '.' + self.inputs.output_type)
-	else:
-	    outputs['mesh_file'] = op.abspath(self._gen_outfilename())
-	return outputs
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_filename):
+            path, name, ext = split_filename(self.inputs.out_filename)
+            ext = ext.replace('.', '')
+            out_types = ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off']
+            # Make sure that the output filename uses one of the possible file types
+            if any(ext == out_type.lower() for out_type in out_types):
+                outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
+            else:
+                outputs['mesh_file'] = op.abspath(name + '.' + self.inputs.output_type)
+        else:
+            outputs['mesh_file'] = op.abspath(self._gen_outfilename())
+        return outputs
 
     def _gen_filename(self, name):
-	if name is 'out_filename':
-	    return self._gen_outfilename()
-	else:
-	    return None
+        if name is 'out_filename':
+            return self._gen_outfilename()
+        else:
+            return None
+
     def _gen_outfilename(self):
-	_, name , _ = split_filename(self.inputs.in_file1)
-	if self.inputs.save_as_freesurfer_mesh or self.inputs.output_type == 'fs':
-	    self.inputs.output_type = 'fs'
-	    self.inputs.save_as_freesurfer_mesh = True
-	if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
-	    self.inputs.output_type = 'stl'
-	    self.inputs.save_as_stl = True
-	if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
-	    self.inputs.output_type = 'vmrl'
-	    self.inputs.save_as_vmrl = True
-	return name + '_fixed.' + self.inputs.output_type
+        _, name , _ = split_filename(self.inputs.in_file1)
+        if self.inputs.save_as_freesurfer_mesh or self.inputs.output_type == 'fs':
+            self.inputs.output_type = 'fs'
+            self.inputs.save_as_freesurfer_mesh = True
+        if self.inputs.save_as_stl or self.inputs.output_type == 'stl':
+            self.inputs.output_type = 'stl'
+            self.inputs.save_as_stl = True
+        if self.inputs.save_as_vmrl or self.inputs.output_type == 'vmrl':
+            self.inputs.output_type = 'vmrl'
+            self.inputs.save_as_vmrl = True
+        return name + '_fixed.' + self.inputs.output_type

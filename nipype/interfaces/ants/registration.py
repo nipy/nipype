@@ -367,8 +367,8 @@ class Registration(ANTSCommand):
     >>> import copy
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
-    >>> reg.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
-    >>> reg.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg.inputs.fixed_image = 'fixed1.nii'
+    >>> reg.inputs.moving_image = 'moving1.nii'
     >>> reg.inputs.output_transform_prefix = "output_"
     >>> reg.inputs.initial_moving_transform = 'trans.mat'
     >>> reg.inputs.invert_initial_moving_transform = True

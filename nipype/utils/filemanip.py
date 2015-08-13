@@ -28,6 +28,29 @@ class FileNotFoundError(Exception):
     pass
 
 
+def nipype_hardlink_wrapper(raw_src, raw_dst):
+    """Attempt to use hard link instead of file copy.
+    The intent is to avoid unnnecessary duplication
+    of large files when using a DataSink.
+    Hard links are not supported on all file systems
+    or os environments, and will not succeed if the
+    src and dst are not on the same physical hardware
+    partition.
+    If the hardlink fails, then fall back to using
+    a standard copy.
+    """
+    src = os.path.normpath(raw_src)
+    dst = os.path.normpath(raw_dst)
+    del raw_src
+    del raw_dst
+    if src != dst and os.path.exists(dst):
+        os.unlink(dst)  # First remove destination
+    try:
+        os.link(src, dst)  # Reference same inode to avoid duplication
+    except:
+        shutil.copyfile(src, dst)  # Fall back to traditional copy
+
+
 def split_filename(fname):
     """Split a filename into parts: path, base filename and extension.
 
@@ -173,7 +196,7 @@ def hash_timestamp(afile):
 
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None):
+             hashmethod=None, use_hardlink=False):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -241,8 +264,12 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
                 orighash = hash_infile(originalfile)
         if (newhash is None) or (newhash != orighash):
             try:
-                fmlogger.debug("Copying File: %s->%s" % (newfile, originalfile))
-                shutil.copyfile(originalfile, newfile)
+                fmlogger.debug("Copying File: %s->%s" %
+                               (newfile, originalfile))
+                if use_hardlink:
+                    nipype_hardlink_wrapper(originalfile, newfile)
+                else:
+                    shutil.copyfile(originalfile, newfile)
             except shutil.Error, e:
                 fmlogger.warn(e.message)
         else:

@@ -144,9 +144,9 @@ def test_BRAINSFit_inputs():
     ),
     useScaleVersor3D=dict(argstr='--useScaleVersor3D ',
     ),
-    writeTransformOnFailure=dict(argstr='--writeTransformOnFailure ',
-    ),
     writeOutputTransformInFloat=dict(argstr='--writeOutputTransformInFloat ',
+    ),
+    writeTransformOnFailure=dict(argstr='--writeTransformOnFailure ',
     ),
     )
     inputs = BRAINSFit.input_spec()

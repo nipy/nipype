@@ -370,8 +370,6 @@ def create_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
