@@ -426,7 +426,7 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': []}
+    {'reverse_invert_flags': [], 'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5', 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': '.../nipype/testing/data/output_Composite.h5', 'forward_transforms': []}
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
