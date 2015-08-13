@@ -703,8 +703,7 @@ class Registration(ANTSCommand):
             outputs['composite_transform'] = os.path.abspath(fileName)
             fileName = self.inputs.output_transform_prefix + \
                 'InverseComposite.h5'
-            outputs['inverse_composite_transform'] = 
-                os.path.abspath(fileName)
+            outputs['inverse_composite_transform'] = os.path.abspath(fileName)
         else:  # If composite transforms are written, then individuals are not written (as of 2014-10-26
             if not self.inputs.collapse_output_transforms:
                 transformCount = 0
