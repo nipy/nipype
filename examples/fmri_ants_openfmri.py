@@ -105,9 +105,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
     """
 
     register = pe.Workflow(name=name)
@@ -231,7 +228,6 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image_brain', reg,'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -241,7 +237,6 @@ def create_reg_workflow(name='registration'):
     merge = pe.Node(niu.Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
-
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -274,7 +269,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode,'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
 
-
     """
     Assign all the output files
     """
@@ -304,8 +298,6 @@ def create_fs_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -320,10 +312,6 @@ def create_fs_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -388,6 +376,7 @@ def create_fs_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+    
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -448,7 +437,6 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -459,10 +447,10 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
 
-
     """
     Transform the mean image. First to anatomical and then to target
     """
+    
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
@@ -500,7 +488,6 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(inputnode,'target_image', warpall,'reference_image')
     register.connect(inputnode,'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
-
 
     """
     Assign all the output files
@@ -668,6 +655,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
+    
     contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
                                  'task_contrasts.txt')
     has_contrast = os.path.exists(contrast_file)
@@ -1106,7 +1094,7 @@ if __name__ == '__main__':
                           'task%03d' % int(args.task))
     derivatives = args.derivatives
     if derivatives is None:
-       derivatives = False
+        derivatives = False
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                                   subject=args.subject,
                                   model_id=int(args.model),

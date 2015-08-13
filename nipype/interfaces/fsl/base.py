@@ -73,10 +73,7 @@ class Info(object):
             basedir = os.environ['FSLDIR']
         except KeyError:
             return None
-        clout = CommandLine(command='cat',
-                            args='%s/etc/fslversion' % (basedir),
-                            terminal_output='allatonce').run()
-        out = clout.runtime.stdout
+        out = open('%s/etc/fslversion' % (basedir)).read()
         return out.strip('\n')
 
     @classmethod
@@ -266,5 +263,4 @@ def no_fsl():
 
 def no_fsl_course_data():
     """check if fsl_course data is present"""
-
-    return not (os.path.isdir(os.path.abspath('fsl_course_data')))
+    return not ('FSL_COURSE_DATA' in os.environ and os.path.isdir(os.path.abspath(os.environ['FSL_COURSE_DATA'])))

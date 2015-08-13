@@ -59,6 +59,10 @@ optional arguments:
             with capture_sys_output() as (stdout, stderr):
                 nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
 
+        # repeat twice in case nipy raises warnings
+        with self.assertRaises(SystemExit) as cm:
+            with capture_sys_output() as (stdout, stderr):
+                nipype_cmd.main(['nipype_cmd', 'nipype.interfaces.nipy'])
         exit_exception = cm.exception
         self.assertEqual(exit_exception.code, 0)
 
@@ -83,15 +87,16 @@ optional arguments:
 
         self.assertEqual(stderr.getvalue(),
 """usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
-                                                       [--between_loops BETWEEN_LOOPS]
+                                                       [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
                                                        [--ignore_exception IGNORE_EXCEPTION]
-                                                       [--loops LOOPS]
+                                                       [--loops [LOOPS [LOOPS ...]]]
                                                        [--slice_order SLICE_ORDER]
-                                                       [--speedup SPEEDUP]
+                                                       [--speedup [SPEEDUP [SPEEDUP ...]]]
                                                        [--start START]
                                                        [--time_interp TIME_INTERP]
                                                        [--tr_slices TR_SLICES]
-                                                       in_file tr
+                                                       in_file [in_file ...]
+                                                       tr
 nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
 """)
         self.assertEqual(stdout.getvalue(), '')

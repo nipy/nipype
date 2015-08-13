@@ -1,7 +1,7 @@
-numpy>=1.3
-scipy>=0.7
-networkx>=1.0
-traits>=4.0
+numpy>=1.6.2
+scipy>=0.11
+networkx>=1.7
+traits>=4.3
 python-dateutil>=1.5
-nibabel>=1.0
-nose>=1.0
+nibabel>=2.0.1
+nose>=1.2

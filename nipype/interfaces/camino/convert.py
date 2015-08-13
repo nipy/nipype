@@ -635,7 +635,7 @@ class Shredder(StdOutCommandLine):
     Shredder makes an initial offset of offset bytes. It then reads and outputs
     chunksize bytes, skips space bytes, and repeats until there is no more input.
 
-    If  the  chunksize  is  negative, chunks of size |chunksize| are read and the
+    If  the  chunksize  is  negative, chunks of size chunksize are read and the
     byte ordering of each chunk is reversed. The whole chunk will be reversed, so
     the chunk must be the same size as the data type, otherwise the order of the
     values in the chunk, as well as their endianness, will be reversed.

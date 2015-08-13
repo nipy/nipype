@@ -553,7 +553,7 @@ def test_fugue():
 
     res = fugue.run()
 
-    if not isdefined(res.outputs.warped_file):
+    if not isdefined(res.outputs.unwarped_file):
         yield False
     else:
         trait_spec = fugue.inputs.trait('unwarped_file')

@@ -348,8 +348,6 @@ def create_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -365,10 +363,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -439,6 +433,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to take segmentations to functional space
     """
+    
     applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
                                                     interp='nearest'),
                        iterfield=['target_file'],
@@ -451,6 +446,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+    
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -525,6 +521,7 @@ def create_reg_workflow(name='registration'):
     """
     Transform the mean image. First to anatomical and then to target
     """
+    
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
@@ -614,6 +611,7 @@ def create_workflow(files,
 
     """Segment and Register
     """
+    
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id
@@ -622,6 +620,7 @@ def create_workflow(files,
 
     """Quantify TSNR in each freesurfer ROI
     """
+    
     get_roi_tsnr = MapNode(fs.SegStats(default_color_table=True),
                            iterfield=['in_file'], name='get_aparc_tsnr')
     get_roi_tsnr.inputs.avgwf_txt_file = True
@@ -956,7 +955,6 @@ def create_workflow(files,
 """
 Creates the full workflow including getting information from dicom files
 """
-
 
 def create_resting_workflow(args, name=None):
     TR = args.TR

@@ -107,25 +107,23 @@ class DTMetric(CommandLine):
     typically obtained from ComputeEigensystem.
 
     The full list of statistics is:
+    
+     - <cl> = (l1 - l2) / l1 , a measure of linearity
+     - <cp> = (l2 - l3) / l1 , a measure of planarity
+     - <cs> = l3 / l1 , a measure of isotropy
+       with: cl + cp + cs = 1
+     - <l1> = first eigenvalue
+     - <l2> = second eigenvalue
+     - <l3> = third eigenvalue
+     - <tr> = l1 + l2 + l3
+     - <md> = tr / 3
+     - <rd> = (l2 + l3) / 2
+     - <fa> = fractional anisotropy. (Basser et al, J Magn Reson B 1996)
+     - <ra> = relative anisotropy (Basser et al, J Magn Reson B 1996)
+     - <2dfa> = 2D FA of the two minor eigenvalues l2 and l3
+       i.e. sqrt( 2 * [(l2 - <l>)^2 + (l3 - <l>)^2] / (l2^2 + l3^2) )
+       with: <l> = (l2 + l3) / 2
 
-     <cl> = (l1 - l2) / l1 , a measure of linearity
-     <cp> = (l2 - l3) / l1 , a measure of planarity
-     <cs> = l3 / l1 , a measure of isotropy
-      with: cl + cp + cs = 1
-
-     <l1> = first eigenvalue
-     <l2> = second eigenvalue
-     <l3> = third eigenvalue
-
-     <tr> = l1 + l2 + l3
-     <md> = tr / 3
-     <rd> = (l2 + l3) / 2
-     <fa> = fractional anisotropy. (Basser et al, J Magn Reson B 1996)
-     <ra> = relative anisotropy (Basser et al, J Magn Reson B 1996)
-
-     <2dfa> = 2D FA of the two minor eigenvalues l2 and l3
-      i.e. sqrt( 2 * [(l2 - <l>)^2 + (l3 - <l>)^2] / (l2^2 + l3^2) )
-           with: <l> = (l2 + l3) / 2
 
     Example
     -------

@@ -1,0 +1,51 @@
+dependencies:
+  cache_directories:
+    - "~/examples/data"
+    - "~/examples/fsdata"
+    - "~/examples/feeds"
+    - "~/mcr"
+    - "~/spm12"
+    - "~/examples/fsl_course_data"
+  override:
+    - pip install --upgrade pip
+    - pip install -e .
+    - pip install matplotlib sphinx ipython
+    - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
+    # we download this manually because CircleCI does not cache apt
+    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.8-feeds.tar.gz"; tar zxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
+    - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" ; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz"; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz"; mkdir ~/examples/fsl_course_data; tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data; tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data; tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
+    - wget -O- http://neuro.debian.net/lists/trusty.us-nh.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
+    - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
+    - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
+    - bash ~/nipype/tools/install_spm_mcr.sh
+    - mkdir -p ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+test:
+  override:
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
+          FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
+        timeout: 2600
+    - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
+    - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
+        pwd: ../examples
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
+        pwd: ../examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
+        timeout: 1600
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
+        pwd: ../examples
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
+        pwd: ../examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
+
+general:
+  artifacts:
+    - "doc/_build/html"
+    - "~/log.txt"
