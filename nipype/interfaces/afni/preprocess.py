@@ -567,6 +567,7 @@ class VolregInputSpec(AFNICommandInputSpec):
                    copyfile=False)
     out_file = File(name_template="%s_volreg", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
+
     basefile = File(desc='base file for registration',
                     argstr='-base %s',
                     position=-6,
@@ -923,20 +924,26 @@ if not given the reference will be the first volume of in_file.""")
         desc='output file from 3dAllineate',
         argstr='-prefix %s',
         position=-2,
-        name_source='%s_allineate',
+        name_template='%s_allineate',
+        name_source='in_file',
         genfile=True)
 
     out_param_file = File(
         argstr='-1Dparam_save %s',
         desc='Save the warp parameters in ASCII (.1D) format.')
+
     in_param_file = File(
         exists=True,
         argstr='-1Dparam_apply %s',
         desc="""Read warp parameters from file and apply them to
                   the source dataset, and produce a new dataset""")
     out_matrix = File(
+        name_template='%s.aff12.1D',
+        name_source="in_file",
         argstr='-1Dmatrix_save %s',
+        keep_extension=True,
         desc='Save the transformation matrix for each volume.')
+
     in_matrix = File(desc='matrix to align input file',
                      argstr='-1Dmatrix_apply %s',
                      position=-3)
@@ -1100,7 +1107,7 @@ if not given the reference will be the first volume of in_file.""")
 
 
 class AllineateOutputSpec(TraitedSpec):
-    out_file = File(desc='output image file name')
+    out_file = File(desc='output image file name', exists=True)
     matrix = File(desc='matrix to align input file')
 
 
