@@ -10,7 +10,7 @@ import tempfile
 
 import numpy as np
 
-from .base import BROCCOLICommand, BROCCOLICommandInputSpec, BROCCOLICommandOutputSpec, Info
+from .base import BROCCOLICommand
 from ..base import (traits, TraitedSpec, OutputMultiPath, File,
                     CommandLine, CommandLineInputSpec, isdefined)
 from ...utils.filemanip import (load_json, save_json, split_filename,
@@ -21,17 +21,30 @@ warnings.filterwarnings('always', category=UserWarning)
 
 
 
-class GetOpenCLInfoInputSpec(BROCCOLICommandInputSpec):
-
-    platform = traits.Int(argstr='-platform %d', desc='OpenCL platform to use')
-
 class GetOpenCLInfo(BROCCOLICommand):
     '''Print info about OpenCL platforms and devices
     '''
 
-    input_spec = GetOpenCLInfoInputSpec
-    output_spec = BROCCOLICommandOutputSpec
+    input_spec = CommandLineInputSpec
+    output_spec = None
     _cmd = 'GetOpenCLInfo'
+
+class BandwidthCommandInputSpec(CommandLineInputSpec):
+    """
+    OpenCL platform and device only
+    """
+
+    platform = traits.Int(argstr='-platform %d', desc='OpenCL platform to use',mandatory=True)
+
+    device = traits.Int(argstr='-device %d', desc='OpenCL device to use',mandatory=True)
+
+class GetBandwidth(BROCCOLICommand):
+    '''Print info about OpenCL platforms and devices
+    '''
+
+    input_spec = BandwidthCommandInputSpec
+    output_spec = None
+    _cmd = 'GetBandwidth'
 
 
 

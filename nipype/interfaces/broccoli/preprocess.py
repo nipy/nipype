@@ -45,25 +45,18 @@ class RegisterTwoVolumesInputSpec(BROCCOLICommandInputSpec):
                    exists=True,
                    copyfile=False)
 
-
-    platform = traits.Int(argstr='-platform %d', desc='OpenCL platform to use')
-
-    device = traits.Int(argstr='-device %d', desc='OpenCL device to use')
-
+   
     iterationslinear = traits.Int(argstr='-iterationslinear %d', desc='Number of iterations for linear registration')
 
     iterationsnonlinear = traits.Int(argstr='-iterationsnonlinear %d', desc='Number of iterations for non-linear registration')
 
-    sigma = traits.Float(argstr='-sigma %s', desc='Amount of Gaussian smoothing for regularization of displacement field (default 5.0)')
+    sigma = traits.Float(argstr='-sigma %f', desc='Amount of Gaussian smoothing for regularization of displacement field (default 5.0)')
 
-    quiet = traits.Bool(argstr='-quiet', desc='Dont print anything')
-
-    verbose = traits.Bool(argstr='-verbose', desc='Print extra stuff')
-
+    mask = traits.Str(argstr='-mask %s', desc='Mask to apply after linear and non-linear registration')
 
 
 class RegisterTwoVolumes(BROCCOLICommand):
-    """This program performs linear and non-linear registration of two volumes
+    """This function performs linear and non-linear registration of two volumes
 
     Examples
     ========
@@ -73,7 +66,7 @@ class RegisterTwoVolumes(BROCCOLICommand):
     >>> reg = broccoli.RegisterTwoVolumes()
     >>> reg.inputs.in_file = 'structural.nii'
     >>> reg.inputs.reference = 'mni.nii'
-    >>> reg.intputs.platform = 1
+    >>> reg.inputs.platform = 1
     >>> reg.inputs.device = 2
     >>> reg.cmdline
     'RegisterTwoVolumes structural.nii mni.nii -platform 1 -device 2'
@@ -85,6 +78,93 @@ class RegisterTwoVolumes(BROCCOLICommand):
     input_spec = RegisterTwoVolumesInputSpec
     output_spec = BROCCOLICommandOutputSpec
 
+
+
+
+class SmoothingInputSpec(BROCCOLICommandInputSpec):
+    in_file = File(desc='input volume(s) to smooth',
+                   argstr='%s',
+                   position=0,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+   
+    fwhm = traits.Float(argstr='-fwhm %f', desc='Amount of Gaussian smoothing, in mm FWHM')
+
+    sigma = traits.Float(argstr='-sigma %s', desc='Amount of Gaussian smoothing for regularization of displacement field (default 5.0)')
+
+    mask = traits.Str(argstr='-mask %s', desc='Perform smoothing inside mask (normalized convolution)')
+
+    automask = traits.Bool(argstr='-automask', desc='Generate a mask and apply smoothing inside mask (normalized convolution)')
+
+
+class Smoothing(BROCCOLICommand):
+    """This function performs smoothing of one or several volumes
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import broccoli
+    >>> from nipype.testing import example_data
+    >>> sm = broccoli.Smoothing()
+    >>> sm.inputs.in_file = 'functional.nii'
+    >>> sm.inputs.fwhm = 4
+    >>> sm.inputs.platform = 1
+    >>> sm.inputs.device = 2
+    >>> sm.cmdline
+    'Smoothing functional.nii -fwhm 4 -platform 1 -device 2'
+    >>> res = sm.run() # doctest: +SKIP
+
+    """
+
+    _cmd = 'Smoothing'
+    input_spec = SmoothingInputSpec
+    output_spec = BROCCOLICommandOutputSpec
+
+
+
+
+
+
+
+class MotionCorrectionInputSpec(BROCCOLICommandInputSpec):
+    in_file = File(desc='input volumes to apply motion correction to',
+                   argstr='%s',
+                   position=0,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+   
+
+    iterations = traits.Int(argstr='-iterations %d', desc='Number of iterations for motion correction algorithm')
+
+    referencevolume = traits.Str(argstr='-referencevolume %s', desc='Volume to align all other volumes to')
+
+    
+
+class MotionCorrection(BROCCOLICommand):
+    """This function performs motion correction for an fMRI dataset
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import broccoli
+    >>> from nipype.testing import example_data
+    >>> mc = broccoli.MotionCorrection()
+    >>> mc.inputs.in_file = 'functional.nii'
+    >>> mc.inputs.platform = 1
+    >>> mc.inputs.device = 2
+    >>> mc.cmdline
+    'MotionCorrection functional.nii -platform 1 -device 2'
+    >>> res = mc.run() # doctest: +SKIP
+
+    """
+
+    _cmd = 'MotionCorrection'
+    input_spec = MotionCorrectionInputSpec
+    output_spec = BROCCOLICommandOutputSpec
 
 
 
