@@ -92,8 +92,6 @@ class SmoothingInputSpec(BROCCOLICommandInputSpec):
    
     fwhm = traits.Float(argstr='-fwhm %f', desc='Amount of Gaussian smoothing, in mm FWHM')
 
-    sigma = traits.Float(argstr='-sigma %s', desc='Amount of Gaussian smoothing for regularization of displacement field (default 5.0)')
-
     mask = traits.Str(argstr='-mask %s', desc='Perform smoothing inside mask (normalized convolution)')
 
     automask = traits.Bool(argstr='-automask', desc='Generate a mask and apply smoothing inside mask (normalized convolution)')
