@@ -130,8 +130,8 @@ base class down to subclasses).:
   ``TraitedSpec``: Nipype's primary base class for all Specs.
   Provides initialization, some nipype-specific methods and any trait
   handlers we define. Inherits from traits.HasTraits.
-  
-	  ``BaseInterfaceInputSpec``: Defines inputs common to all 
+
+	  ``BaseInterfaceInputSpec``: Defines inputs common to all
 	  Interfaces (``ignore_exception``). If in doubt inherit from this.
 
 	      ``CommandLineInputSpec``: Defines inputs common to all
@@ -141,12 +141,12 @@ base class down to subclasses).:
 	        (``outputtype``)
 		  		
 	        ``SPMCommandInputSpec``: Defines inputs common to all SPM classes (``matlab_cmd``, ``path``, and ``mfile``)
-	        
+	
 	        ``FSTraitedSpec``: Defines inputs common to all FreeSurfer classes
 	        (``sbjects_dir``)
-	        
+	
 	        ``MatlabInputSpec``: Defines inputs common to all Matlab classes (``script``, ``nodesktop``, ``nosplash``, ``logfile``, ``single_comp_thread``, ``mfile``, ``script_file``, and ``paths``)
-	        
+	
 	        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
 
 Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).
@@ -199,15 +199,15 @@ Common
 	        self.error( object, name, value )
 	      File "/Users/cburns/local/lib/python2.5/site-packages/enthought/traits/trait_handlers.py", line 175, in error
 	        value )
-	    TraitError: The 'infile' trait of a BetInputSpec instance must be a file 
+	    TraitError: The 'infile' trait of a BetInputSpec instance must be a file
 	    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
-	    
+	
 ``hash_files``
 	To be used with inputs that are defining output filenames. When this flag
 	is set to false any Nipype will not try to hash any files described by this
 	input. This is useful to avoid rerunning when the specified output file
 	already exists and has changed.
-	    
+	
 ``desc``
 	All trait objects have a set of default metadata attributes.  ``desc``
 	is one of those and is used as a simple, one-line docstring.  The
@@ -215,7 +215,7 @@ Common
 	
 	**Required:** This metadata is required by all nipype interface
 	  classes.
-	  
+	
 ``usedefault``
 	Set this metadata to True when the *default value* for the trait type
 	of this attribute is an acceptable value.  All trait objects have a
@@ -257,7 +257,7 @@ Common
 	    <undefined>
 	    >>> rlgn.inputs.jobtype
 	    'estwrite'
-	    
+	
 ``xor`` and ``requires``
 	Both of these accept a list of trait names. The ``xor`` metadata reflects
 	mutually exclusive traits, while the requires metadata reflects traits
@@ -268,10 +268,10 @@ Common
 	the help function.
 
 ``copyfile``
-	This is metadata for a File or Directory trait that is relevant only in 
-	the context of wrapping an interface in a `Node` and `MapNode`. `copyfile` 
-	can be set to either `True` or `False`. `False` indicates that contents 
-	should be symlinked, while `True` indicates that the contents should be 
+	This is metadata for a File or Directory trait that is relevant only in
+	the context of wrapping an interface in a `Node` and `MapNode`. `copyfile`
+	can be set to either `True` or `False`. `False` indicates that contents
+	should be symlinked, while `True` indicates that the contents should be
 	copied over.
 
 ``min_ver`` and ``max_ver``
@@ -346,10 +346,10 @@ CommandLine
 	generated for this parameter *if-and-only-if* the user did not provide
 	one.  The nipype convention is to automatically generate output
 	filenames when not specified by the user both as a convenience for the
-	user and so the pipeline can easily gather the outputs. Requires 
+	user and so the pipeline can easily gather the outputs. Requires
 	``_gen_filename()`` method to be implemented. This way should be used if the
 	desired file name is dependent on some runtime variables (such as file name
-	of one of the inputs, or current working directory). In case when it should 
+	of one of the inputs, or current working directory). In case when it should
 	be fixed it's recommended to just use ``usedefault``.
 	
 ``sep``
@@ -393,7 +393,7 @@ and methods:
 * ``output_spec``: the OutputSpec
 * ``_list_outputs()``: Returns a dictionary containing names of generated files that are expected after package completes execution.  This is used by ``BaseInterface.aggregate_outputs`` to gather all output files for the pipeline.
 
-  
+
 CommandLine
 ^^^^^^^^^^^
 

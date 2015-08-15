@@ -73,7 +73,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
 
     the following code using scipy.stats.distributions.gamma
     doesn't return the same result as the spm_Gpdf function ::
-    
+
         hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
               gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
 

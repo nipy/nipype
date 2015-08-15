@@ -58,11 +58,11 @@ performance issues.
    you will get a `ConcurrentLogHandler` error. Simply remove the pypeline.lock
    file in your home directory and continue.
 
-#. One many clusters with shared NFS mounts synchronization of files across 
-   clusters may not happen before the typical NFS cache timeouts. When using 
-   PBS/LSF/SGE/Condor plugins in such cases the workflow may crash because it 
+#. One many clusters with shared NFS mounts synchronization of files across
+   clusters may not happen before the typical NFS cache timeouts. When using
+   PBS/LSF/SGE/Condor plugins in such cases the workflow may crash because it
    cannot retrieve the node result. Setting the `job_finished_timeout` can help::
-   
+
    workflow.config['execution']['job_finished_timeout'] = 65
 
 .. include:: ../links_names.txt
