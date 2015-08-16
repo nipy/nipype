@@ -1,6 +1,7 @@
 Next release
 ============
 
+* FIX: ants.Registration composite transform outputs are no longer returned as lists (https://github.com/nipy/nipype/pull/1183)
 * FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
 * ENH: Attempt to use hard links for data sink.
     (https://github.com/nipy/nipype/pull/1161)
