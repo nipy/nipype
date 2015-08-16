@@ -170,6 +170,20 @@ class RefitInputSpec(CommandLineInputSpec):
     zorigin = traits.Str(desc='z distance for edge voxel offset',
                          argstr='-zorigin %s')
 
+    xdel = traits.Float(desc='new x voxel dimension in mm',
+                        argstr='-xdel %f')
+
+    ydel = traits.Float(desc='new y voxel dimension in mm',
+                        argstr='-ydel %f')
+
+    zdel = traits.Float(desc='new z voxel dimension in mm',
+                        argstr='-zdel %f')
+
+    space = traits.Enum('TLRC', 'MNI', 'ORIG',
+                        argstr='-space %s',
+                        desc='Associates the dataset with a specific' +
+                         ' template type, e.g. TLRC, MNI, ORIG')
+
 
 class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
