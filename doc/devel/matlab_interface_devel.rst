@@ -17,18 +17,18 @@ Example 1
 	from nipype.interfaces.base import TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File
 	import os
 	from string import Template
-	
+
 	class ConmapTxt2MatInputSpec(BaseInterfaceInputSpec):
 	    in_file = File(exists=True, mandatory=True)
 	    out_file = File('cmatrix.mat', usedefault=True)
-	
+
 	class ConmapTxt2MatOutputSpec(TraitedSpec):
 	    out_file = File(exists=True)
-	
+
 	class ConmapTxt2Mat(BaseInterface):
 	    input_spec = ConmapTxt2MatInputSpec
 	    output_spec = ConmapTxt2MatOutputSpec
-	
+
 	    def _run_interface(self, runtime):
 	        d = dict(in_file=self.inputs.in_file,
 	        out_file=self.inputs.out_file)
@@ -38,7 +38,7 @@ Example 1
 	ConmapTxt2Mat(in_file, out_file);
 	exit;
 	""").substitute(d)
-	
+
 	        # mfile = True  will create an .m file with your script and executed.
 		# Alternatively
 	        # mfile can be set to False which will cause the matlab code to be
@@ -52,7 +52,7 @@ Example 1
 	        mlab = MatlabCommand(script=script, mfile=True)
 		result = mlab.run()
 	        return result.runtime
-	
+
 	    def _list_outputs(self):
 	        outputs = self._outputs().get()
 	        outputs['out_file'] = os.path.abspath(self.inputs.out_file)

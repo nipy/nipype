@@ -14,8 +14,8 @@ To run Nipype Interafces you need to use the nipype_cmd tool that should already
 The tool allows you to list Interfaces available in a certain package:
 
 .. testcode::
-	
-	
+
+
 	$nipype_cmd nipype.interfaces.nipy
 
 	Available Interfaces:
@@ -25,14 +25,14 @@ The tool allows you to list Interfaces available in a certain package:
 	    FitGLM
 	    EstimateContrast
 	    FmriRealign4d
-		
+
 After selecting a particular Interface you can learn what inputs it requires:
 
 .. testcode::
-	
-	
+
+
 	$nipype_cmd nipype.interfaces.nipy ComputeMask --help
-	
+
 	usage:nipype_cmd nipype.interfaces.nipy ComputeMask [-h] [--M M] [--cc CC]
 	                                                     [--ignore_exception IGNORE_EXCEPTION]
 	                                                     [--m M]
@@ -56,11 +56,11 @@ After selecting a particular Interface you can learn what inputs it requires:
 	  --reference_volume REFERENCE_VOLUME
 	                        reference volume used to compute the mask. If none is
 	                        give, the mean volume is used.
-							
+
 Finally you can run run the Interface:
 
 .. testcode::
-	
+
 	$nipype_cmd nipype.interfaces.nipy ComputeMask mean.nii.gz
 
 All that from the command line without having to start python interpreter manually.

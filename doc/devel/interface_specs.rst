@@ -136,17 +136,17 @@ base class down to subclasses).:
 
 	      ``CommandLineInputSpec``: Defines inputs common to all
 	      command-line classes (``args`` and ``environ``)
-	
+
 	        ``FSLTraitedSpec``: Defines inputs common to all FSL classes
 	        (``outputtype``)
-		  		
+
 	        ``SPMCommandInputSpec``: Defines inputs common to all SPM classes (``matlab_cmd``, ``path``, and ``mfile``)
-	
+
 	        ``FSTraitedSpec``: Defines inputs common to all FreeSurfer classes
 	        (``sbjects_dir``)
-	
+
 	        ``MatlabInputSpec``: Defines inputs common to all Matlab classes (``script``, ``nodesktop``, ``nosplash``, ``logfile``, ``single_comp_thread``, ``mfile``, ``script_file``, and ``paths``)
-	
+
 	        ``SlicerCommandLineInputSpec``: Defines inputs common to all Slicer classes (``module``)
 
 Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).
@@ -190,7 +190,7 @@ Common
 	will trigger the underlying traits code to confirm the file assigned
 	to that *input* actually exists.  If it does not exist, the user will
 	be presented with an error message::
-	
+
 	    >>> bet.inputs.infile = 'does_not_exist.nii'
 	    ------------------------------------------------------------
 	    Traceback (most recent call last):
@@ -201,21 +201,21 @@ Common
 	        value )
 	    TraitError: The 'infile' trait of a BetInputSpec instance must be a file
 	    name, but a value of 'does_not_exist.nii' <type 'str'> was specified.
-	
+
 ``hash_files``
 	To be used with inputs that are defining output filenames. When this flag
 	is set to false any Nipype will not try to hash any files described by this
 	input. This is useful to avoid rerunning when the specified output file
 	already exists and has changed.
-	
+
 ``desc``
 	All trait objects have a set of default metadata attributes.  ``desc``
 	is one of those and is used as a simple, one-line docstring.  The
 	``desc`` is printed when users use the ``help()`` methods.
-	
+
 	**Required:** This metadata is required by all nipype interface
 	  classes.
-	
+
 ``usedefault``
 	Set this metadata to True when the *default value* for the trait type
 	of this attribute is an acceptable value.  All trait objects have a
@@ -223,7 +223,7 @@ Common
 	has a default of ``0.0``, etc...  You can also define a default value
 	when you define the class.  For example, in the code below all objects
 	of ``Foo`` will have a default value of 12 for ``x``::
-	
+
 	    >>> import enthought.traits.api as traits
 	    >>> class Foo(traits.HasTraits):
 	    ...     x = traits.Int(12)
@@ -234,30 +234,30 @@ Common
 	    12
 	    >>> foo.y
 	    0
-	
+
 	Nipype only passes ``inputs`` on to the underlying package if they
 	have been defined (more on this later).  So if you specify
 	``usedefault = True``, you are telling the parser to pass the default
 	value on to the underlying package.  Let's look at the InputSpec for
 	SPM Realign::
-	
+
 	    class RealignInputSpec(BaseInterfaceInputSpec):
 	        jobtype = traits.Enum('estwrite', 'estimate', 'write',
 	                              desc='one of: estimate, write, estwrite',
 	                              usedefault=True)
-	
+
 	Here we've defined ``jobtype`` to be an enumerated trait type,
 	``Enum``, which can be set to one of the following: ``estwrite``,
 	``estimate``, or ``write``.  In a container, the default is always the
 	first element.  So in this case, the default will be ``estwrite``::
-	
+
 	    >>> from nipype.interfaces import spm
 	    >>> rlgn = spm.Realign()
 	    >>> rlgn.inputs.infile
 	    <undefined>
 	    >>> rlgn.inputs.jobtype
 	    'estwrite'
-	
+
 ``xor`` and ``requires``
 	Both of these accept a list of trait names. The ``xor`` metadata reflects
 	mutually exclusive traits, while the requires metadata reflects traits
@@ -327,11 +327,11 @@ CommandLine
 	``FlirtInputSpec``, the ``argstr`` for the reference file corresponds
 	to the argument string I would need to provide with the command-line
 	version of ``flirt``::
-	
+
 	    class FlirtInputSpec(FSLTraitedSpec):
 	        reference = File(exists = True, argstr = '-ref %s', mandatory = True,
 	                         position = 1, desc = 'reference file')
-	
+
 	**Required:** This metadata is required by all command-line interface classes.
 
 ``position``
@@ -340,7 +340,7 @@ CommandLine
 	position this argument as the first parameter after the command
 	name. ``position = -1`` will position this argument as the last
 	parameter, after all other parameters.
-	
+
 ``genfile``
 	If True, the ``genfile`` metadata specifies that a filename should be
 	generated for this parameter *if-and-only-if* the user did not provide
@@ -351,7 +351,7 @@ CommandLine
 	desired file name is dependent on some runtime variables (such as file name
 	of one of the inputs, or current working directory). In case when it should
 	be fixed it's recommended to just use ``usedefault``.
-	
+
 ``sep``
 	For List traits the string with witch elements of the list will be joined.
 
@@ -375,7 +375,7 @@ SPM
 
 ``field``
 	name of the structure refered by the SPM job manager
-	
+
 	**Required:** This metadata is required by all SPM-mediated
 	  interface classes.
 

@@ -14,7 +14,7 @@ the following commands are executed at the beginning of your script:
 
 .. testcode::
 
-	
+
     # location of additional JAVA libraries to use
     JAVALIB=/Applications/mipav/jre/Contents/Home/lib/ext/
 
