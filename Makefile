@@ -5,6 +5,8 @@
 PYTHON ?= python
 NOSETESTS ?= nosetests
 
+.PHONY: zipdoc sdist egg upload_to_pypi trailing-spaces clean-pyc clean-so clean-build clean-ctags clean in inplace test-code test-doc test-coverage test html specs check-before-commit check
+
 zipdoc: html
 	zip documentation.zip doc/_build/html
 
@@ -26,7 +28,7 @@ upload_to_pypi: zipdoc
 	python setup.py sdist --formats=zip,gztar upload
 
 trailing-spaces:
-	find . -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
+	find . -name "*[.py|.rst]" -type f | xargs perl -pi -e 's/[ \t]*$$//'
 	@echo "Reverting test_docparse"
 	git checkout nipype/utils/tests/test_docparse.py
 
@@ -70,6 +72,7 @@ specs:
 	@echo "Checking specs and autogenerating spec tests"
 	python tools/checkspecs.py
 
+check: check-before-commit # just a shortcut
 check-before-commit: specs trailing-spaces html test
 	@echo "removed spaces"
 	@echo "built docs"
