@@ -116,15 +116,15 @@ class LinRecon(StdOutCommandLine):
     imaging scheme specified in the scheme file. Performs the linear
     transformation on the data in every voxel and outputs the result to
     the standard output. The ouput in every voxel is actually: ::
-    
+
         [exit code, ln(S(0)), p1, ..., pR]
-        
+
     where p1, ..., pR are the parameters of the reconstruction.
     Possible exit codes are:
-    
+
         - 0. No problems.
         - 6. Bad data replaced by substitution of zero.
-        
+
     The matrix must be R by N+M where N+M is the number of measurements
     and R is the number of parameters of the reconstruction. The matrix
     file contains binary double-precision floats. The matrix elements
@@ -220,7 +220,7 @@ class MESD(StdOutCommandLine):
     failed.
 
     Other possible exitcodes are:
-    
+
         - 5 - The optimization failed to converge
         - -1 - Background
         - -100 - Something wrong in the MRI data, e.g. negative or zero measurements,
@@ -368,7 +368,7 @@ class SFPeaks(StdOutCommandLine):
     still expect similar performance levels.
 
     The output for each voxel is:
-    
+
     - exitcode (inherited from the input data).
     - ln(A(0))
     - number of peaks found.
@@ -381,7 +381,7 @@ class SFPeaks(StdOutCommandLine):
     - direction 3 (x, y, z, f, H00, H01, H10, H11).
 
     H is the Hessian of f at the peak. It is the matrix: ::
-    
+
         [d^2f/ds^2 d^2f/dsdt]
         [d^2f/dtds d^2f/dt^2]
         = [H00 H01]

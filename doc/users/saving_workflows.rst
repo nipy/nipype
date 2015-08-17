@@ -4,10 +4,10 @@
 Saving Workflows and Nodes to a file (experimental)
 ===================================================
 
-On top of the standard way of saving (i.e. serializing) objects in Python 
-(see `pickle <http://docs.python.org/2/library/pickle.html>`_) Nipype 
-provides methods to turn Workflows and nodes into human readable code. 
-This is useful if you want to save a Workflow that you have generated 
+On top of the standard way of saving (i.e. serializing) objects in Python
+(see `pickle <http://docs.python.org/2/library/pickle.html>`_) Nipype
+provides methods to turn Workflows and nodes into human readable code.
+This is useful if you want to save a Workflow that you have generated
 on the fly for future use.
 
 To generate Python code for a Workflow use the export method:

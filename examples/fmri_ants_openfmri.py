@@ -376,7 +376,7 @@ def create_fs_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
-    
+
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -450,7 +450,7 @@ def create_fs_reg_workflow(name='registration'):
     """
     Transform the mean image. First to anatomical and then to target
     """
-    
+
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
@@ -655,7 +655,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
-    
+
     contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
                                  'task_contrasts.txt')
     has_contrast = os.path.exists(contrast_file)

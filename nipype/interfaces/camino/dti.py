@@ -107,7 +107,7 @@ class DTMetric(CommandLine):
     typically obtained from ComputeEigensystem.
 
     The full list of statistics is:
-    
+
      - <cl> = (l1 - l2) / l1 , a measure of linearity
      - <cp> = (l2 - l3) / l1 , a measure of planarity
      - <cs> = l3 / l1 , a measure of isotropy

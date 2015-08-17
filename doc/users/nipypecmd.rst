@@ -6,7 +6,7 @@ Running Nipype Interfaces from the command line (nipype_cmd)
 
 The primary use of Nipype_ is to build automated non-interactive pipelines.
 However, sometimes there is a need to run some interfaces quickly from the command line.
-This is especially useful when running Interfaces wrapping code that does not have 
+This is especially useful when running Interfaces wrapping code that does not have
 command line equivalents (nipy or SPM). Being able to run Nipype interfaces opens new
 possibilities such as inclusion of SPM processing steps in bash scripts.
 

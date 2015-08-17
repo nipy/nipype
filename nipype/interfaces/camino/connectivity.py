@@ -66,12 +66,12 @@ class Conmat(CommandLine):
     point. Streamlines are counted if they connect two target regions, one on
     either side of the seed point. Only the labeled region closest to the seed
     is counted, for example if the  input contains two streamlines: ::
-    
+
          1: A-----B------SEED---C
          2: A--------SEED-----------
-         
+
     then the output would be ::
-    
+
          A,B,C
          0,0,0
          0,0,1
@@ -84,7 +84,7 @@ class Conmat(CommandLine):
     The connected target regions can have the same label, as long as the seed
     point is outside of the labeled region and both ends connect to the same
     label (which may  be in different locations). Therefore this is allowed: ::
-    
+
          A------SEED-------A
 
     Such fibers will add to the diagonal elements of the matrix. To remove
@@ -92,13 +92,13 @@ class Conmat(CommandLine):
 
     If the seed point is inside a labled region, it counts as one end of the
     connection.  So ::
-    
+
          ----[SEED inside A]---------B
-         
+
     counts as a connection between A and B, while ::
-    
+
          C----[SEED inside A]---------B
-         
+
     counts as a connection between A and C, because C is closer to the seed point.
 
     In all cases, distance to the seed point is defined along the streamline path.
