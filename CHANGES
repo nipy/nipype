@@ -3,6 +3,8 @@ Next release
 
 * ENH: New option in afni.3dRefit - zdel, ydel, zdel etc. (https://github.com/nipy/nipype/pull/1079)
 * FIX: ants.Registration composite transform outputs are no longer returned as lists (https://github.com/nipy/nipype/pull/1183)
+* BUG: ANTs Registration interface failed with multi-modal inputs
+    (https://github.com/nipy/nipype/pull/1176) (https://github.com/nipy/nipype/issues/1175)
 * FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
 * ENH: Attempt to use hard links for data sink.
     (https://github.com/nipy/nipype/pull/1161)
