@@ -4,16 +4,14 @@
     The gif module provides higher-level interfaces to some of the operations
     that can be performed with the niftyseggif (seg_gif) command-line program.
 """
+
 import os
-import numpy as np
-from nibabel import load
-import os.path as op
 import warnings
 import glob
 
 from nipype.interfaces.niftyseg.base import NIFTYSEGCommandInputSpec, NIFTYSEGCommand,getNiftySegPath
 from nipype.interfaces.base import (TraitedSpec, File, Directory, traits, InputMultiPath,
-                                    isdefined)
+                                    isdefined, OutputMultiPath)
 
 
 warn = warnings.warn
@@ -22,7 +20,7 @@ warnings.filterwarnings('always', category=UserWarning)
 class GifInputSpec(NIFTYSEGCommandInputSpec):
     
     in_file = File(argstr='-in %s', exists=True, mandatory=True,
-                desc='Input target image filename')
+                   desc='Input target image filename')
     
     database_file = File(argstr='-db %s', exists=True, 
                          mandatory=True,
@@ -161,4 +159,47 @@ class Gif(NIFTYSEGCommand):
         outputs['synth_file']  = self._find_file_from_patterns(outputs['out_dir'], basename, '.nii.gz')
 
         return outputs
-        
+
+class GifRobustGroupwiseInputSpec(NIFTYSEGCommandInputSpec):
+
+    in_file = File(argstr='-in %s', exists=True, mandatory=True,
+                   desc='Input target image filename')
+
+    database_file = File(argstr='-db %s', exists=True,
+                         mandatory=True,
+                         desc='Path to database <XML> file')
+
+    mask_file = File(exists=True, argstr='-mask %s',
+                     desc='Mask over the input image [default: none]')
+
+    out_dir = Directory(exists=True, argstr='-out %s',
+                        desc='Output folder [default: ./]')
+
+
+class GifRobustGroupwiseOutputSpec(TraitedSpec):
+
+    affine_files = OutputMultiPath(exists=True, desc='Affine transformation files')
+
+class GifRobustGroupwise(NIFTYSEGCommand):
+
+    """
+    GIF Robust Affine Groupwise:
+    """
+
+    temporary_output_dir = os.path.join(os.getcwd(), 'affines')
+    _cmd = 'seg_GIF --aff_only 1 -cpp ' + temporary_output_dir
+
+    input_spec = GifRobustGroupwiseInputSpec
+    output_spec = GifRobustGroupwiseOutputSpec
+
+    def _run_interface(self, runtime):
+
+        os.mkdir('affines')
+        return super(GifRobustGroupwise, self)._run_interface(runtime)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        transformation_files = sorted(glob.glob(os.path.join(os.getcwd(), 'affines', '*.txt')))
+        outputs['affine_files'] = transformation_files
+
+        return outputs
