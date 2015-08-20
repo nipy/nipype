@@ -331,7 +331,7 @@ class BEDPOSTX5(FSLXCommand):
             self._cmd = self._default_cmd
 
     def _run_interface(self, runtime):
-        
+
         subjectdir = os.path.abspath(self.inputs.out_dir)
         if not os.path.exists(subjectdir):
             os.makedirs(subjectdir)
@@ -348,7 +348,7 @@ class BEDPOSTX5(FSLXCommand):
                  os.path.join(subjectdir, 'bvecs'))
 
         retval = super(BEDPOSTX5, self)._run_interface(runtime)
-        
+
         self._out_dir = subjectdir + '.bedpostX'
         return retval
 
@@ -357,10 +357,10 @@ class BEDPOSTX5(FSLXCommand):
         n_fibres = self.inputs.n_fibres
 
         multi_out = ['merged_thsamples', 'merged_fsamples',
-                     'merged_phsamples', 'mean_phsamples', 
+                     'merged_phsamples', 'mean_phsamples',
                      'mean_thsamples', 'mean_fsamples',
                      'dyads_dispersion', 'dyads']
-        
+
         single_out = ['mean_dsamples', 'mean_S0samples']
 
         for k in single_out:
@@ -377,7 +377,7 @@ class BEDPOSTX5(FSLXCommand):
                                        cwd=self._out_dir))
             outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
                                        cwd=self._out_dir))
-            
+
             outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
                                        cwd=self._out_dir))
             outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,

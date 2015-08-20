@@ -18,7 +18,7 @@ dependencies:
     - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
     - sudo apt-get update -y; sudo apt-get install -y fsl-core fsl-atlases
     - bash ~/nipype/tools/install_spm_mcr.sh
-    - mkdir ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
+    - mkdir -p ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
 test:
   override:
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && nosetests --with-doctest --logging-level=DEBUG --verbosity=3:

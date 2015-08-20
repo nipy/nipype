@@ -67,4 +67,4 @@ The Stanford CNI MRS Library (SMAL)
 tract_querier
 -------------
 
-`tract_querier <https://github.com/demianw/tract_querier>`_ is a White Matter Query Language tool. It provides Nipype interfaces. 
+`tract_querier <https://github.com/demianw/tract_querier>`_ is a White Matter Query Language tool. It provides Nipype interfaces.
