@@ -3,7 +3,7 @@
 ============
  User Guide
 ============
-	
+
 :Release: |version|
 :Date: |today|
 

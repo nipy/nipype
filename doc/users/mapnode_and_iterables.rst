@@ -40,7 +40,7 @@ The code to achieve this is quite simple
 	a = pe.Node(interface=A(), name="a")
 	b = pe.MapNode(interface=B(), name="b", iterfield=['in_file'])
 	c = pe.Node(interface=C(), name="c")
-	
+
 	my_workflow = pe.Workflow(name="my_workflow")
 	my_workflow.connect([(a,b,[('out_files','in_file')]),
                              (b,c,[('out_file','in_files')])
@@ -73,7 +73,7 @@ of parameters. For example, this code:
 	b.inputs.in_file = ['file', 'another_file', 'different_file']
 	b.inputs.n = [1,2,3]
 	b.run()
-	
+
 is almost the same as running
 
 ::
@@ -81,15 +81,15 @@ is almost the same as running
 	b1 = pe.Node(interface=B(), name="b1")
 	b1.inputs.in_file = 'file'
 	b1.inputs.n = 1
-	
+
 	b2 = pe.Node(interface=B(), name="b2")
 	b2.inputs.in_file = 'another_file'
 	b2.inputs.n = 2
-	
+
 	b3 = pe.Node(interface=B(), name="b3")
 	b3.inputs.in_file = 'different_file'
 	b3.inputs.n = 3
-	
+
 It is a rarely used feature, but you can sometimes find it useful.
 
 In more advanced applications it is useful to be able to iterate over items
@@ -130,7 +130,7 @@ scenario! Its called iterables and and you use it this way:
 	b = pe.Node(interface=B(), name="b")
 	b.iterables = ("n", [1, 2, 3])
 	c = pe.Node(interface=C(), name="c")
-	
+
 	my_workflow = pe.Workflow(name="my_workflow")
 	my_workflow.connect([(a,b,[('out_file','in_file')]),
                              (b,c,[('out_file','in_file')])
