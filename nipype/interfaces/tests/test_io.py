@@ -12,11 +12,22 @@ from nipype.testing import assert_equal, assert_true, assert_false
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
+try:
+    import boto3
+except:
+    pass
+
 
 def test_datagrabber():
     dg = nio.DataGrabber()
     yield assert_equal, dg.inputs.template, Undefined
     yield assert_equal, dg.inputs.base_directory, Undefined
+    yield assert_equal, dg.inputs.template_args, {'outfiles': []}
+
+def test_s3datagrabber():
+    dg = nio.S3DataGrabber()
+    yield assert_equal, dg.inputs.template, Undefined
+    yield assert_equal, dg.inputs.local_directory, Undefined
     yield assert_equal, dg.inputs.template_args, {'outfiles': []}
 
 
@@ -72,6 +83,36 @@ def test_selectfiles_valueerror():
                          force_lists=force_lists)
     yield assert_raises, ValueError, sf.run
 
+def test_s3datagrabber_communication():
+    dg = nio.S3DataGrabber(infields=['subj_id','run_num'], outfields=['func','struct'])
+    dg.inputs.bucket = 'nipype-test'
+    dg.inputs.bucket_path = 'data/'
+    tempdir = mkdtemp()
+    dg.inputs.local_directory = tempdir
+    dg.inputs.sort_filelist = True
+    dg.inputs.template = '*'
+    dg.inputs.field_template = dict(func='%s/%s.txt',
+                                    struct='%s/struct.txt')
+    dg.inputs.subj_id = ['subj1','subj2']
+    dg.inputs.run_num = ['run1', 'run2']
+    dg.inputs.template_args = dict(func=[['subj_id','run_num']],
+                                       struct=[['subj_id']])
+    res = dg.run()
+    func_outfiles = res.outputs.func
+    struct_outfiles = res.outputs.struct
+
+    # check for all files
+    yield assert_true, 'subj1/run1' in func_outfiles[0]
+    yield assert_true, os.path.exists(func_outfiles[0])
+    yield assert_true, 'subj1/struct' in struct_outfiles[0]
+    yield assert_true, os.path.exists(struct_outfiles[0])
+    yield assert_true, 'subj2/run2' in func_outfiles[1]
+    yield assert_true, os.path.exists(func_outfiles[1])
+    yield assert_true, 'subj2/struct' in struct_outfiles[1]
+    yield assert_true, os.path.exists(struct_outfiles[1])
+
+    shutil.rmtree(tempdir)
+
 
 def test_datagrabber_order():
     tempdir = mkdtemp()
@@ -109,6 +150,17 @@ def test_datasink():
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
 
+def test_s3datasink():
+    ds = nio.S3DataSink()
+    yield assert_true, ds.inputs.parameterization
+    yield assert_equal, ds.inputs.base_directory, Undefined
+    yield assert_equal, ds.inputs.strip_dir, Undefined
+    yield assert_equal, ds.inputs._outputs, {}
+    ds = nio.S3DataSink(base_directory='foo')
+    yield assert_equal, ds.inputs.base_directory, 'foo'
+    ds = nio.S3DataSink(infields=['test'])
+    yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+
 
 def test_datasink_substitutions():
     indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
@@ -138,6 +190,57 @@ def test_datasink_substitutions():
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
+def test_s3datasink_substitutions():
+    indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
+    outdir = mkdtemp(prefix='-Tmp-nipype_ds_subs_out')
+    files = []
+    for n in ['ababab.n', 'xabababyz.n']:
+        f = os.path.join(indir, n)
+        files.append(f)
+        open(f, 'w')
+    ds = nio.S3DataSink(
+        bucket='nipype-test',
+        bucket_path='output/',
+        parametrization=False,
+        base_directory=outdir,
+        substitutions=[('ababab', 'ABABAB')],
+        # end archoring ($) is used to assure operation on the filename
+        # instead of possible temporary directories names matches
+        # Patterns should be more comprehendable in the real-world usage
+        # cases since paths would be quite more sensible
+        regexp_substitutions=[(r'xABABAB(\w*)\.n$', r'a-\1-b.n'),
+                              ('(.*%s)[-a]([^%s]*)$' % ((os.path.sep,) * 2),
+                               r'\1!\2')])
+    setattr(ds.inputs, '@outdir', files)
+    ds.run()
+    yield assert_equal, \
+          sorted([os.path.basename(x) for
+                  x in glob.glob(os.path.join(outdir, '*'))]), \
+          ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+
+    s3 = boto3.resource('s3')
+    bkt = s3.Bucket(ds.inputs.bucket)
+    bkt_files = list(k.key for k in bkt.objects.all())
+
+    found = [False, False]
+    del_dict = {'Objects':[],'Quiet': True}
+    for key in bkt_files:
+        if '!-yz-b.n' in key:
+            found[0] = True
+            del_dict["Objects"].append({'Key': key})
+        if 'ABABAB.n' in key:
+            found[1] = True
+            del_dict["Objects"].append({'Key': key})
+
+    # ensure both keys are found in bucket
+    yield assert_equal, found.count(True), 2
+
+    resp = bkt.delete_objects(Delete=del_dict, RequestPayer='requester')
+    # ensure delete request was successful
+    yield assert_equal, resp["ResponseMetadata"]["HTTPStatusCode"], 200
+
+    shutil.rmtree(indir)
+    shutil.rmtree(outdir)
 
 def _temp_analyze_files():
     """Generate temporary analyze file pair."""
