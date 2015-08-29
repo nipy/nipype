@@ -44,6 +44,14 @@ def test_modelgen1():
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6.])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][0]['duration']), np.array([6.])
+    info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]])]
+    s.inputs.subject_info = deepcopy(info)
+    s.inputs.input_units = 'scans'
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6., 6.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([6., 6.])
     rmtree(tempdir)
 
 
@@ -80,6 +88,14 @@ def test_modelgen_spm_concat():
     s.inputs.output_units = 'secs'
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0])
+    info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]])]
+    s.inputs.subject_info = deepcopy(info)
+    res = s.run()
+    yield assert_equal, res.outputs.session_info, 1
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([1., 1.])
     rmtree(tempdir)
 
 
