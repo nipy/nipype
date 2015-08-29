@@ -38,6 +38,12 @@ def test_modelgen1():
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 0
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([12, 300, 600, 1080])
+    info = [Bunch(conditions=['cond1'], onsets=[[2]], durations=[[1]]),
+            Bunch(conditions=['cond1'], onsets=[[3]], durations=[[1]])]
+    s.inputs.subject_info = deepcopy(info)
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][0]['duration']), np.array([6.])
     rmtree(tempdir)
 
 
