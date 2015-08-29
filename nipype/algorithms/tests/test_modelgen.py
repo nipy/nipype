@@ -92,7 +92,6 @@ def test_modelgen_spm_concat():
             Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]])]
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
-    yield assert_equal, res.outputs.session_info, 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1.])
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1.,])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([1., 1.])
