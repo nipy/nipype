@@ -993,7 +993,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
         inputdict = inputs.get()
         input_files.extend(walk_outputs(inputdict))
         needed_files += [path for path, type in input_files if type == 'f']
-    for extra in ['_0x*.json', 'provenance.*', 'pyscript*.m',
+    for extra in ['_0x*.json', 'provenance.*', 'pyscript*.m', 'pyjobs*.mat',
                   'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz']:
         needed_files.extend(glob(os.path.join(cwd, extra)))
     if files2keep:

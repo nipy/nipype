@@ -766,7 +766,8 @@ class Segment(SPMCommand):
 
     """
 
-    if Info.version() and Info.version()['name'] == "SPM12":
+    _local_version = SPMCommand().version
+    if _local_version and _local_version['name'] == "SPM12":
         _jobtype = 'tools'
         _jobname = 'oldseg'
     else:
@@ -893,7 +894,8 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-    if Info.version() and Info.version()['name'] == "SPM12":
+    _local_version = SPMCommand().version
+    if _local_version and _local_version['name'] == "SPM12":
         _jobtype = 'spatial'
         _jobname = 'preproc'
     else:
