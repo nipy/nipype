@@ -477,6 +477,8 @@ class SpecifySPMModel(SpecifyModel):
                         infoout.onsets[j].extend(onsets.tolist())
                 for j, val in enumerate(info.durations):
                     if len(val) > 1:
+                        print 'new script installed'
+                        import pdb; pdb.set_trace()  # breakpoint aaf99b04 //
                         infoout.durations[j].extend(info.durations[j])
                 if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j, val in enumerate(info.amplitudes):
