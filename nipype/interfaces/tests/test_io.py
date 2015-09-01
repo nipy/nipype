@@ -84,31 +84,31 @@ def test_selectfiles_valueerror():
     yield assert_raises, ValueError, sf.run
 
 def test_s3datagrabber_communication():
-    dg = nio.S3DataGrabber(infields=['subj_id','run_num'], outfields=['func','struct'])
-    dg.inputs.bucket = 'nipype-test'
-    dg.inputs.bucket_path = 'data/'
+    dg = nio.S3DataGrabber(infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
+    dg.inputs.bucket = 'openfmri'
+    dg.inputs.bucket_path = 'ds001/'
     tempdir = mkdtemp()
     dg.inputs.local_directory = tempdir
     dg.inputs.sort_filelist = True
     dg.inputs.template = '*'
-    dg.inputs.field_template = dict(func='%s/%s.txt',
-                                    struct='%s/struct.txt')
-    dg.inputs.subj_id = ['subj1','subj2']
-    dg.inputs.run_num = ['run1', 'run2']
-    dg.inputs.template_args = dict(func=[['subj_id','run_num']],
-                                       struct=[['subj_id']])
+    dg.inputs.field_template = dict(func='%s/BOLD/task001_%s/bold.nii.gz',
+                                    struct='%s/anatomy/highres001_brain.nii.gz')
+    dg.inputs.subj_id = ['sub001', 'sub002']
+    dg.inputs.run_num = ['run001', 'run003']
+    dg.inputs.template_args = dg.inputs.template_args = dict(
+        func=[['subj_id', 'run_num']], struct=[['subj_id']])
     res = dg.run()
     func_outfiles = res.outputs.func
     struct_outfiles = res.outputs.struct
 
     # check for all files
-    yield assert_true, 'subj1/run1' in func_outfiles[0]
+    yield assert_true, '/sub001/BOLD/task001_run001/bold.nii.gz' in func_outfiles[0]
     yield assert_true, os.path.exists(func_outfiles[0])
-    yield assert_true, 'subj1/struct' in struct_outfiles[0]
+    yield assert_true, '/sub001/anatomy/highres001_brain.nii.gz' in struct_outfiles[0]
     yield assert_true, os.path.exists(struct_outfiles[0])
-    yield assert_true, 'subj2/run2' in func_outfiles[1]
+    yield assert_true, '/sub002/BOLD/task001_run003/bold.nii.gz' in func_outfiles[1]
     yield assert_true, os.path.exists(func_outfiles[1])
-    yield assert_true, 'subj2/struct' in struct_outfiles[1]
+    yield assert_true, '/sub002/anatomy/highres001_brain.nii.gz' in struct_outfiles[1]
     yield assert_true, os.path.exists(struct_outfiles[1])
 
     shutil.rmtree(tempdir)
