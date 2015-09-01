@@ -79,6 +79,7 @@ def test_modelgen_spm_concat():
     yield assert_equal, np.sum(res.outputs.session_info[0]['regress'][0]['val']), 30
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1., 1., 1., 1., 1., 1., 1.])
     # Test case of scans as output units instead of seconds
     setattr(s.inputs, 'output_units', 'scans')
     yield assert_equal, s.inputs.output_units, 'scans'
