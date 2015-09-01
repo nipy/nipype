@@ -476,9 +476,7 @@ class SpecifySPMModel(SpecifyModel):
                                  sum(nscans[0:(i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
                 for j, val in enumerate(info.durations):
-                    if len(val) > 1:
-                        print 'new script installed'
-                        import pdb; pdb.set_trace()  # breakpoint aaf99b04 //
+                    if len(val) > 0:
                         infoout.durations[j].extend(info.durations[j])
                 if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j, val in enumerate(info.amplitudes):
@@ -499,7 +497,7 @@ class SpecifySPMModel(SpecifyModel):
             onelist = np.zeros((1, sum(nscans)))
             onelist[0, sum(nscans[0:i]):sum(nscans[0:(i + 1)])] = 1
             infoout.regressors.insert(len(infoout.regressors),
-                                      onelist.tolist()[0])
+                                      onelist.tolist()[0])        
         return [infoout], nscans
 
     def _generate_design(self, infolist=None):
