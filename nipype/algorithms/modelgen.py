@@ -476,7 +476,7 @@ class SpecifySPMModel(SpecifyModel):
                                  sum(nscans[0:(i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
                 for j, val in enumerate(info.durations):
-                    if len(val) > 1:
+                    if len(val):
                         infoout.durations[j].extend(info.durations[j])
                 if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j, val in enumerate(info.amplitudes):
