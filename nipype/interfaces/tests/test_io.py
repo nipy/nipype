@@ -8,13 +8,15 @@ from tempfile import mkstemp, mkdtemp
 
 from nose.tools import assert_raises
 import nipype
-from nipype.testing import assert_equal, assert_true, assert_false
+from nipype.testing import assert_equal, assert_true, assert_false, skipif
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
+noboto = False
 try:
     import boto3
 except:
+    noboto = True
     pass
 
 
@@ -24,6 +26,7 @@ def test_datagrabber():
     yield assert_equal, dg.inputs.base_directory, Undefined
     yield assert_equal, dg.inputs.template_args, {'outfiles': []}
 
+@skipif(noboto)
 def test_s3datagrabber():
     dg = nio.S3DataGrabber()
     yield assert_equal, dg.inputs.template, Undefined
@@ -83,6 +86,7 @@ def test_selectfiles_valueerror():
                          force_lists=force_lists)
     yield assert_raises, ValueError, sf.run
 
+@skipif(noboto)
 def test_s3datagrabber_communication():
     dg = nio.S3DataGrabber(infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
     dg.inputs.bucket = 'openfmri'
@@ -112,7 +116,6 @@ def test_s3datagrabber_communication():
     yield assert_true, os.path.exists(struct_outfiles[1])
 
     shutil.rmtree(tempdir)
-
 
 def test_datagrabber_order():
     tempdir = mkdtemp()
@@ -150,6 +153,7 @@ def test_datasink():
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
 
+@skipif(noboto)
 def test_s3datasink():
     ds = nio.S3DataSink()
     yield assert_true, ds.inputs.parameterization
@@ -190,6 +194,7 @@ def test_datasink_substitutions():
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
+@skipif(noboto)
 def test_s3datasink_substitutions():
     indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
     outdir = mkdtemp(prefix='-Tmp-nipype_ds_subs_out')
