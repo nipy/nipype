@@ -17,7 +17,6 @@ try:
     import boto3
 except:
     noboto = True
-    pass
 
 
 def test_datagrabber():
