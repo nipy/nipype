@@ -196,3 +196,4 @@ def test_MRIConvert_outputs():
     for key, metadata in output_map.items():
         for metakey, value in metadata.items():
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
+
