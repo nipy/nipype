@@ -498,7 +498,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
     reg.inputs.winsorize_upper_quantile = 0.995
-    reg.inputs.args = '--float'
+    reg.inputs.float = True
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
     reg.plugin_args = {'sbatch_args': '-c%d' % 4}
@@ -510,11 +510,9 @@ def create_reg_workflow(name='registration'):
     Concatenate the affine and ants transforms into a list
     """
 
-    pickfirst = lambda x: x[0]
-
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
-    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+    register.connect(reg, 'composite_transform', merge, 'in1')
 
 
     """
