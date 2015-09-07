@@ -10,7 +10,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 _version_major = 0
 _version_minor = 11
 _version_micro = 0
-_version_extra = 'dev'
+_version_extra = 'rc1'
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
