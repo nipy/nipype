@@ -57,13 +57,13 @@ Checklist for analysis tutorials
 ================================
 
 For the analysis tutorials, we will be using a slightly modified version of the
-FBIRN Phase I travelling data set. 
+FBIRN Phase I travelling data set.
 
 Step 0
 ~~~~~~
 
-Download and extract the `Pipeline tutorial data (429MB). 
-<http://sourceforge.net/projects/nipy/files/nipype/nipype-0.2/nipype-tutorial.tar.bz2/download>`_  
+Download and extract the `Pipeline tutorial data (429MB).
+<http://sourceforge.net/projects/nipy/files/nipype/nipype-0.2/nipype-tutorial.tar.bz2/download>`_
 
 (checksum: 56ed4b7e0aac5627d1724e9c10cd26a7)
 

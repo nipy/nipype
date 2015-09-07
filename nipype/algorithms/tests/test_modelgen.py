@@ -38,6 +38,20 @@ def test_modelgen1():
     yield assert_equal, len(res.outputs.session_info[0]['regress']), 0
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([12, 300, 600, 1080])
+    info = [Bunch(conditions=['cond1'], onsets=[[2]], durations=[[1]]),
+            Bunch(conditions=['cond1'], onsets=[[3]], durations=[[1]])]
+    s.inputs.subject_info = deepcopy(info)
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][0]['duration']), np.array([6.])
+    info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]])]
+    s.inputs.subject_info = deepcopy(info)
+    s.inputs.input_units = 'scans'
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6., 6.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([6., 6.])
     rmtree(tempdir)
 
 
@@ -47,6 +61,7 @@ def test_modelgen_spm_concat():
     filename2 = os.path.join(tempdir, 'test2.nii')
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename1)
     Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename2)
+    # Test case when only one duration is passed, as being the same for all onsets.
     s = SpecifySPMModel()
     s.inputs.input_units = 'secs'
     s.inputs.concatenate_runs = True
@@ -64,16 +79,41 @@ def test_modelgen_spm_concat():
     yield assert_equal, np.sum(res.outputs.session_info[0]['regress'][0]['val']), 30
     yield assert_equal, len(res.outputs.session_info[0]['cond']), 1
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1., 1., 1., 1., 1., 1., 1.])
+    # Test case of scans as output units instead of seconds
     setattr(s.inputs, 'output_units', 'scans')
     yield assert_equal, s.inputs.output_units, 'scans'
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])/6
+    # Test case for no concatenation with seconds as output units
     s.inputs.concatenate_runs = False
     s.inputs.subject_info = deepcopy(info)
     s.inputs.output_units = 'secs'
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0])
+    # Test case for variable number of events in separate runs, sometimes unique.
+    filename3 = os.path.join(tempdir, 'test3.nii')
+    Nifti1Image(np.random.rand(10, 10, 10, 30), np.eye(4)).to_filename(filename3)
+    s.inputs.functional_runs = [filename1, filename2, filename3]
+    info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]])]
+    s.inputs.subject_info = deepcopy(info)
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([1., 1.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[2]['cond'][1]['duration']), np.array([1.,])
+    # Test case for variable number of events in concatenated runs, sometimes unique.
+    s.inputs.concatenate_runs = True
+    info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2, 4]], durations=[[1, 1], [1, 1]]),
+            Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]])]
+    s.inputs.subject_info = deepcopy(info)
+    res = s.run()
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1., 1., 1., 1., 1.])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1., 1., 1., 1.])
     rmtree(tempdir)
 
 
