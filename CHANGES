@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: New interfaces for MRTrix3 (https://github.com/nipy/nipype/pull/1126)
 * ENH: New option in afni.3dRefit - zdel, ydel, zdel etc. (https://github.com/nipy/nipype/pull/1079)
 * FIX: ants.Registration composite transform outputs are no longer returned as lists (https://github.com/nipy/nipype/pull/1183)
 * BUG: ANTs Registration interface failed with multi-modal inputs
