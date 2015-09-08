@@ -656,7 +656,7 @@ class EpiReg(FSLCommand):
                                     self.inputs.out_base + '.nii.gz')
         outputs['out_1vol'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_1vol.nii.gz')
-        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg):
+        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) or not isdefined(self.inputs.fmap):
             outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
                                         self.inputs.out_base + '_fieldmap2str.mat')
             outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
