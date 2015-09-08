@@ -510,8 +510,7 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True,
                     desc='path/name of registered file (if generated)')
-    out_matrix_file = File(exists=True,
-                           desc='path/name of calculated affine transform '
+    out_matrix_file = File(desc='path/name of calculated affine transform '
                            '(if generated)')
     out_log = File(desc='path/name of output log (if generated)')
 
