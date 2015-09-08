@@ -240,18 +240,10 @@ class Realign(SPMCommand):
                         for i, inner_imgf in enumerate(filename_to_list(imgf)):
                             newfile = fname_presuffix(inner_imgf,
                                                       prefix=self.inputs.out_prefix)
-                            if os.path.exists(newfile):
-                                realigned_run.append(newfile)
-                                continue
-                            if (idx == 0) and (i == 0) and \
-                                    func_is_3d(inner_imgf):
-                                realigned_run.append(fname_presuffix(inner_imgf,
-                                                                     prefix=''))
+                            realigned_run.append(newfile)
                     else:
                         realigned_run = fname_presuffix(imgf,
                                                         prefix=self.inputs.out_prefix)
-                        if (idx == 0) and func_is_3d(imgf):
-                            realigned_run = fname_presuffix(imgf, prefix='')
                     outputs['realigned_files'].append(realigned_run)
         return outputs
 
