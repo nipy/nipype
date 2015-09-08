@@ -106,20 +106,20 @@ def test_normalize12_list_outputs():
 @skipif(no_spm)
 def test_segment():
     if spm.Info.version()['name'] == "SPM12":
-        yield assert_equal, spm.Segment._jobtype, 'tools'
-        yield assert_equal, spm.Segment._jobname, 'oldseg'
+        yield assert_equal, spm.Segment()._jobtype, 'tools'
+        yield assert_equal, spm.Segment()._jobname, 'oldseg'
     else:
-        yield assert_equal, spm.Segment._jobtype, 'spatial'
-        yield assert_equal, spm.Segment._jobname, 'preproc'
+        yield assert_equal, spm.Segment()._jobtype, 'spatial'
+        yield assert_equal, spm.Segment()._jobname, 'preproc'
 
 @skipif(no_spm)
 def test_newsegment():
     if spm.Info.version()['name'] == "SPM12":
-        yield assert_equal, spm.NewSegment._jobtype, 'spatial'
-        yield assert_equal, spm.NewSegment._jobname, 'preproc'
+        yield assert_equal, spm.NewSegment()._jobtype, 'spatial'
+        yield assert_equal, spm.NewSegment()._jobname, 'preproc'
     else:
-        yield assert_equal, spm.NewSegment._jobtype, 'tools'
-        yield assert_equal, spm.NewSegment._jobname, 'preproc8'
+        yield assert_equal, spm.NewSegment()._jobtype, 'tools'
+        yield assert_equal, spm.NewSegment()._jobname, 'preproc8'
 
 
 def test_smooth():

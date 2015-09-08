@@ -902,11 +902,11 @@ class NewSegment(SPMCommand):
     def __init__(self, **inputs):
         version = Info.version()
         if version and version['name'] == "SPM12":
-            self._jobtype = 'tools'
-            self._jobname = 'oldseg'
-        else:
             self._jobtype = 'spatial'
             self._jobname = 'preproc'
+        else:
+            self._jobtype = 'tools'
+            self._jobname = 'preproc8'
         
         SPMCommand.__init__(self, **inputs)
 
