@@ -667,14 +667,14 @@ class EpiReg(FSLCommand):
                                         self.inputs.out_base + '_fieldmaprads2str.nii.gz')
             outputs['fmapmag_str'] = os.path.join(os.getcwd(),
                                         self.inputs.out_base + '_fieldmap2str.nii.gz')
+            outputs['shiftmap'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+            outputs['fullwarp'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_warp.nii.gz')
         outputs['epi2str_inv'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_inv.mat')
         outputs['epi2str_mat'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '.mat')
-        outputs['shiftmap'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-        outputs['fullwarp'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_warp.nii.gz')
         outputs['wmedge'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_fast_wmedge.nii.gz')
         outputs['wmseg'] = os.path.join(os.getcwd(),
