@@ -925,34 +925,36 @@ class BaseInterface(Interface):
         """ Raises an exception on version mismatch
         """
         unavailable_traits = []
-        version = LooseVersion(str(self.version))
-        if not version:
-            return
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-        for name in names:
-            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
-            if min_ver > version:
-                unavailable_traits.append(name)
-                if not isdefined(getattr(trait_object, name)):
-                    continue
-                if raise_exception:
-                    raise Exception('Trait %s (%s) (version %s < required %s)' %
-                                    (name, self.__class__.__name__,
-                                     version, min_ver))
-        check = dict(max_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-        for name in names:
-            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
-            if max_ver < version:
-                unavailable_traits.append(name)
-                if not isdefined(getattr(trait_object, name)):
-                    continue
-                if raise_exception:
-                    raise Exception('Trait %s (%s) (version %s > required %s)' %
-                                    (name, self.__class__.__name__,
-                                     version, max_ver))
+        
+        if names:
+            version = LooseVersion(str(self.version))
+            if not version:
+                return
+            for name in names:
+                min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+                if min_ver > version:
+                    unavailable_traits.append(name)
+                    if not isdefined(getattr(trait_object, name)):
+                        continue
+                    if raise_exception:
+                        raise Exception('Trait %s (%s) (version %s < required %s)' %
+                                        (name, self.__class__.__name__,
+                                         version, min_ver))
+            check = dict(max_ver=lambda t: t is not None)
+            names = trait_object.trait_names(**check)
+            for name in names:
+                max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+                if max_ver < version:
+                    unavailable_traits.append(name)
+                    if not isdefined(getattr(trait_object, name)):
+                        continue
+                    if raise_exception:
+                        raise Exception('Trait %s (%s) (version %s > required %s)' %
+                                        (name, self.__class__.__name__,
+                                         version, max_ver))
         return unavailable_traits
 
     def _run_wrapper(self, runtime):
