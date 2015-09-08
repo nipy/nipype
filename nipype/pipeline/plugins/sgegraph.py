@@ -47,7 +47,8 @@ class SGEGraphPlugin(GraphPluginBase):
 
     def __init__(self, **kwargs):
         self._qsub_args = ''
-        if 'plugin_args' in kwargs:
+        self._dont_resubmit_completed_jobs = False
+        if 'plugin_args' in kwargs and kwargs['plugin_args']:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
@@ -57,8 +58,6 @@ class SGEGraphPlugin(GraphPluginBase):
                 self._qsub_args = plugin_args['qsub_args']
             if 'dont_resubmit_completed_jobs' in plugin_args:
                 self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
-            else:
-                self._dont_resubmit_completed_jobs = False
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
