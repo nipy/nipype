@@ -450,7 +450,7 @@ class DicomImport(SPMCommand):
         from glob import glob
         outputs = self._outputs().get()
         od = os.path.abspath(self.inputs.output_dir)
-        
+
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":
             outputs['out_files'] = glob(os.path.join(od, '*.%s'%ext))
