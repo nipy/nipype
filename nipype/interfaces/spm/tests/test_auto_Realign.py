@@ -26,8 +26,6 @@ def test_Realign_inputs():
     quality=dict(field='eoptions.quality',
     ),
     register_to_mean=dict(field='eoptions.rtm',
-    mandatory=True,
-    usedefault=True,
     ),
     separation=dict(field='eoptions.sep',
     ),
