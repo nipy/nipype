@@ -15,6 +15,7 @@ def tbss1_op_string(in_files):
     for infile in in_files:
         img = nib.load(infile)
         dimtup = tuple([d - 2 for d in img.get_shape()])
+        dimtup = dimtup[0:3]
         op_str = '-min 1 -ero -roi 1 %d 1 %d 1 %d 0 1' % dimtup
         op_strings.append(op_str)
     return op_strings
