@@ -654,26 +654,28 @@ class EpiReg(FSLCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '.nii.gz')
-        outputs['out_1vol'] = os.path.join(os.getcwd(),
+        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
+            outputs['out_1vol'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_1vol.nii.gz')
-        outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmap2str.mat')
-        outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2epi.mat')
-        outputs['fmap_epi'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
-        outputs['fmap_str'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2str.nii.gz')
-        outputs['fmapmag_str'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmap2str.nii.gz')
-        outputs['epi2str_inv'] = os.path.join(os.getcwd(),
+            outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
+                                        self.inputs.out_base + '_fieldmap2str.mat')
+            outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
+                                        self.inputs.out_base + '_fieldmaprads2epi.mat')
+            outputs['fmap_epi'] = os.path.join(os.getcwd(),
+                                        self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
+            outputs['fmap_str'] = os.path.join(os.getcwd(),
+                                        self.inputs.out_base + '_fieldmaprads2str.ni    `i.gz')
+            outputs['fmapmag_str'] = os.path.join(os.getcwd(),
+                                        self.inputs.out_base + '_fieldmap2str.nii.gz')
+            outputs['shiftmap'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+            outputs['fullwarp'] = os.path.join(os.getcwd(),
+                                    self.inputs.out_base + '_warp.nii.gz')
+            outputs['epi2str_inv'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_inv.mat')
+
         outputs['epi2str_mat'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '.mat')
-        outputs['shiftmap'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-        outputs['fullwarp'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_warp.nii.gz')
         outputs['wmedge'] = os.path.join(os.getcwd(),
                                     self.inputs.out_base + '_fast_wmedge.nii.gz')
         outputs['wmseg'] = os.path.join(os.getcwd(),

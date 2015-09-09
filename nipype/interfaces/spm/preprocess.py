@@ -765,19 +765,18 @@ class Segment(SPMCommand):
     >>> seg.run() # doctest: +SKIP
 
     """
-    
 
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
     
     def __init__(self, **inputs):
-        version = Info.version()
-        if version and version['name'] == "SPM12":
-            self._jobtype = 'tools'
-            self._jobname = 'oldseg'
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            _jobtype = 'tools'
+            _jobname = 'oldseg'
         else:
-            self._jobtype = 'spatial'
-            self._jobname = 'preproc'
+            _jobtype = 'spatial'
+            _jobname = 'preproc'
         
         SPMCommand.__init__(self, **inputs)
 
@@ -900,13 +899,13 @@ class NewSegment(SPMCommand):
     output_spec = NewSegmentOutputSpec
         
     def __init__(self, **inputs):
-        version = Info.version()
-        if version and version['name'] == "SPM12":
-            self._jobtype = 'spatial'
-            self._jobname = 'preproc'
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            _jobtype = 'spatial'
+            _jobname = 'preproc'
         else:
-            self._jobtype = 'tools'
-            self._jobname = 'preproc8'
+            _jobtype = 'tools'
+            _jobname = 'preproc8'
         
         SPMCommand.__init__(self, **inputs)
 
