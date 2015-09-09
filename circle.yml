@@ -29,6 +29,12 @@ test:
         timeout: 2600
     - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
     - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
+    - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py test_spm Linear workflow3d workflow4d:
+        pwd: ../examples
+        environment:
+          SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
+          FORCE_SPMMCR: 1
+        timeout: 1600
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
         pwd: ../examples
     - . /usr/share/fsl/5.0/etc/fslconf/fsl.sh && python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
