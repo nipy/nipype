@@ -462,6 +462,10 @@ class SpecifySPMModel(SpecifyModel):
         # names, onsets, durations, amplitudes, pmod, tmod, regressor_names,
         # regressors
         infoout = infolist[0]
+        for j, val in enumerate(infolist[0].durations):
+            if len(infolist[0].onsets[j]) > 1 and len(val) == 1:
+                infoout.durations[j] = (infolist[0].durations[j] *
+                                        len(infolist[0].onsets[j]))
         for i, info in enumerate(infolist[1:]):
             #info.[conditions, tmod] remain the same
             if info.onsets:
@@ -476,8 +480,15 @@ class SpecifySPMModel(SpecifyModel):
                                  sum(nscans[0:(i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
                 for j, val in enumerate(info.durations):
-                    if len(val) > 1:
+                    if len(info.onsets[j]) > 1 and len(val) == 1:
+                        infoout.durations[j].extend(info.durations[j] *
+                                                    len(info.onsets[j]))
+                    elif len(info.onsets[j]) == len(val):
                         infoout.durations[j].extend(info.durations[j])
+                    else:
+                        raise ValueError('Mismatch in number of onsets and \
+                                         durations for run {0}, condition \
+                                         {1}'.format(i+2, j+1))
                 if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j, val in enumerate(info.amplitudes):
                         infoout.amplitudes[j].extend(info.amplitudes[j])
