@@ -1,6 +1,7 @@
 import nipype.pipeline.engine as pe
 from nipype.interfaces import spm
 from nipype.interfaces import fsl
+from nipype.algorithms.misc import Gunzip
 import os
 
 in_file = "feeds/data/fmri.nii.gz"
@@ -40,8 +41,10 @@ workflow3d.connect([(split, stc, [("out_files", "in_files")]),
 workflow3d.run()
 
 
+gunzip = pe.Node(Gunzip(), name="gunzip")
+gunzip.inputs.in_file = os.path.abspath(in_file)
+
 stc = pe.Node(interface=spm.SliceTiming(), name='stc')
-stc.inputs.in_files = os.path.abspath(in_file)
 stc.inputs.num_slices = 25
 stc.inputs.time_repetition = 3.0
 stc.inputs.time_acquisition = 2. - 2./32
@@ -63,7 +66,8 @@ smooth.inputs.fwhm = [6, 6, 6]
 workflow4d = pe.Workflow(name='test_4d')
 workflow4d.base_dir = "/tmp"
 
-workflow4d.connect([(stc, realign_estimate, [('timecorrected_files','in_files')]),
+workflow4d.connect([(gunzip, stc, [("out_file", "in_files")]),
+                    (stc, realign_estimate, [('timecorrected_files','in_files')]),
                     (realign_estimate, realign_write, [('modified_in_files','in_files')]),
                     (stc, realign_estwrite,  [('timecorrected_files','in_files')]),
                     (realign_write, smooth, [('realigned_files','in_files')])])
