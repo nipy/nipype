@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
+"""
+Change directory to provide relative paths for doctests
    >>> import os
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
-                                    File, isdefined, traits)
+from nipype.interfaces.base import (
+    TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+    File, isdefined, traits)
 from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb, nibabel.trackvis as trk
+import nibabel as nb
+import nibabel.trackvis as nbt
 from nipype.utils.misc import package_check
 import warnings
 
@@ -27,60 +30,85 @@ else:
 
 class TrackDensityMapInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
-    desc='The input TrackVis track file')
+                   desc='The input TrackVis track file')
+    reference = File(exists=True,
+                     desc='A reference file to define RAS coordinates space')
+    points_space = traits.Enum('rasmm', 'voxel', None, usedefault=True,
+                               desc='coordinates of trk file')
+
     voxel_dims = traits.List(traits.Float, minlen=3, maxlen=3,
-    desc='The size of each voxel in mm.')
+                             desc='The size of each voxel in mm.')
     data_dims = traits.List(traits.Int, minlen=3, maxlen=3,
-    desc='The size of the image in voxels.')
-    out_filename = File('tdi.nii', usedefault=True, desc='The output filename for the tracks in TrackVis (.trk) format')
+                            desc='The size of the image in voxels.')
+    out_filename = File('tdi.nii', usedefault=True,
+                        desc=('The output filename for the tracks in TrackVis '
+                              '(.trk) format'))
+
 
 class TrackDensityMapOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
+
 class TrackDensityMap(BaseInterface):
-	"""
-	Creates a tract density image from a TrackVis track file using functions from dipy
 
-	Example
-	-------
+    """
+    Creates a tract density image from a TrackVis track file using functions
+    from dipy
 
-	>>> import nipype.interfaces.dipy as dipy
-	>>> trk2tdi = dipy.TrackDensityMap()
-	>>> trk2tdi.inputs.in_file = 'converted.trk'
-	>>> trk2tdi.run()                                   # doctest: +SKIP
-	"""
-	input_spec = TrackDensityMapInputSpec
-	output_spec = TrackDensityMapOutputSpec
 
-	def _run_interface(self, runtime):
-		tracks, header = trk.read(self.inputs.in_file)
-		if not isdefined(self.inputs.data_dims):
-			data_dims = header['dim']
-		else:
-			data_dims = self.inputs.data_dims
+    Example
+    -------
 
-		if not isdefined(self.inputs.voxel_dims):
-			voxel_size = header['voxel_size']
-		else:
-			voxel_size = self.inputs.voxel_dims
+    >>> import nipype.interfaces.dipy as dipy
+    >>> trk2tdi = dipy.TrackDensityMap()
+    >>> trk2tdi.inputs.in_file = 'converted.trk'
+    >>> trk2tdi.run()                                   # doctest: +SKIP
 
-		affine = header['vox_to_ras']
+    """
+    input_spec = TrackDensityMapInputSpec
+    output_spec = TrackDensityMapOutputSpec
 
-		streams = ((ii[0]) for ii in tracks)
-		data = density_map(streams, data_dims, voxel_size)
-		if data.max() < 2**15:
-		   data = data.astype('int16')
+    def _run_interface(self, runtime):
+        tracks, header = nbt.read(self.inputs.in_file)
+        streams = ((ii[0]) for ii in tracks)
 
-		img = nb.Nifti1Image(data,affine)
-		out_file = op.abspath(self.inputs.out_filename)
-		nb.save(img, out_file)
-		iflogger.info('Track density map saved as {i}'.format(i=out_file))
-		iflogger.info('Data Dimensions {d}'.format(d=data_dims))
-		iflogger.info('Voxel Dimensions {v}'.format(v=voxel_size))
-		return runtime
+        if isdefined(self.inputs.reference):
+            refnii = nb.load(self.inputs.reference)
+            affine = refnii.get_affine()
+            data_dims = refnii.get_shape()[:3]
+            kwargs = dict(affine=affine)
+        else:
+            iflogger.warn(('voxel_dims and data_dims are deprecated'
+                           'as of dipy 0.7.1. Please use reference '
+                           'input instead'))
 
-	def _list_outputs(self):
-		outputs = self._outputs().get()
-		outputs['out_file'] = op.abspath(self.inputs.out_filename)
-		return outputs
+            if not isdefined(self.inputs.data_dims):
+                data_dims = header['dim']
+            else:
+                data_dims = self.inputs.data_dims
+            if not isdefined(self.inputs.voxel_dims):
+                voxel_size = header['voxel_size']
+            else:
+                voxel_size = self.inputs.voxel_dims
 
+            affine = header['vox_to_ras']
+            kwargs = dict(voxel_size=voxel_size)
+
+        data = density_map(streams, data_dims, **kwargs)
+        data = data.astype(np.min_scalar_type(data.max()))
+        img = nb.Nifti1Image(data, affine)
+        out_file = op.abspath(self.inputs.out_filename)
+        nb.save(img, out_file)
+
+        iflogger.info(
+            ('Track density map saved as {i}, size={d}, '
+             'dimensions={v}').format(
+                i=out_file,
+                d=img.get_shape(),
+                v=img.get_header().get_zooms()))
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = op.abspath(self.inputs.out_filename)
+        return outputs
