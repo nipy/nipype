@@ -521,7 +521,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     featpreproc.connect(plot_motion, 'out_file', outputnode, 'motion_plots')
 
     """
-    Extract the mean volume of the first functional runpreproc
+    Extract the mean volume of the first functional run
     """
 
     meanfunc = pe.Node(interface=fsl.ImageMaths(op_string = '-Tmean',
