@@ -45,10 +45,10 @@ gunzip = pe.Node(Gunzip(), name="gunzip")
 gunzip.inputs.in_file = os.path.abspath(in_file)
 
 stc = pe.Node(interface=spm.SliceTiming(), name='stc')
-stc.inputs.num_slices = 25
-stc.inputs.time_repetition = 3.0
+stc.inputs.num_slices = 21
+stc.inputs.time_repetition = 1.0
 stc.inputs.time_acquisition = 2. - 2./32
-stc.inputs.slice_order = range(25,0,-1) 
+stc.inputs.slice_order = range(21,0,-1) 
 stc.inputs.ref_slice = 10 
 
 realign_estimate = pe.Node(interface=spm.Realign(), name='realign_estimate')
