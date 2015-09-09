@@ -58,6 +58,11 @@ OpenfMRI
 
 `OpenfMRI <https://openfmri.org/>`_ is a repository for task based fMRI datasets. It uses Nipype for automated analysis of the deposited data.
 
+serial functional Diffusion Mapping (sfDM)
+------------------------------------------
+
+'sfDM <http://github.com/PIRCImagingTools/sfDM>'_ is a software package for looking at changes in diffusion profiles of different tissue types across time. It uses Nipype to process the data.
+
 
 The Stanford CNI MRS Library (SMAL)
 -----------------------------------
