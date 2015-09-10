@@ -772,11 +772,11 @@ class Segment(SPMCommand):
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
-            _jobtype = 'tools'
-            _jobname = 'oldseg'
+            self._jobtype = 'tools'
+            self._jobname = 'oldseg'
         else:
-            _jobtype = 'spatial'
-            _jobname = 'preproc'
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
         
         SPMCommand.__init__(self, **inputs)
 
@@ -901,11 +901,11 @@ class NewSegment(SPMCommand):
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
-            _jobtype = 'spatial'
-            _jobname = 'preproc'
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
         else:
-            _jobtype = 'tools'
-            _jobname = 'preproc8'
+            self._jobtype = 'tools'
+            self._jobname = 'preproc8'
         
         SPMCommand.__init__(self, **inputs)
 
