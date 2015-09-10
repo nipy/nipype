@@ -47,7 +47,8 @@ class SGEGraphPlugin(GraphPluginBase):
 
     def __init__(self, **kwargs):
         self._qsub_args = ''
-        if 'plugin_args' in kwargs:
+        self._dont_resubmit_completed_jobs = False
+        if 'plugin_args' in kwargs and kwargs['plugin_args']:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 self._template = plugin_args['template']
@@ -57,8 +58,6 @@ class SGEGraphPlugin(GraphPluginBase):
                 self._qsub_args = plugin_args['qsub_args']
             if 'dont_resubmit_completed_jobs' in plugin_args:
                 self._dont_resubmit_completed_jobs = plugin_args['dont_resubmit_completed_jobs']
-            else:
-                self._dont_resubmit_completed_jobs = False
         super(SGEGraphPlugin, self).__init__(**kwargs)
 
     def _submit_graph(self, pyfiles, dependencies, nodes):
@@ -80,14 +79,6 @@ class SGEGraphPlugin(GraphPluginBase):
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
-                ## If a node has no dependencies, and it is requested to run_without_submitting
-                ## then run this node in place
-                if (not node_status_done) and (len(dependencies[idx]) == 0 ) and (node.run_without_submitting == True):
-                    try:
-                        node.run()
-                    except Exception:
-                        node._clean_queue(idx, nodes)
-                    node_status_done = True # if successfully run locally, then claim true
 
                 #if the node itself claims done, then check to ensure all
                 #dependancies are also done
@@ -130,7 +121,7 @@ class SGEGraphPlugin(GraphPluginBase):
                         values = ' '
                         for jobid in dependencies[idx]:
                             ## Avoid dependancies of done jobs
-                            if cache_doneness_per_node[jobid] == False:
+                            if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
                                 values += "${{{0}}},".format(make_job_name(jobid, nodes))
                         if values != ' ': # i.e. if some jobs were added to dependency list
                             values = values.rstrip(',')

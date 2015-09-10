@@ -12,7 +12,7 @@ Why do we need these interfaces?
 
 A typical workflow takes data as input and produces data as the result of one or
 more operations. One can set the data required by a workflow directly as
-illustrated below. 
+illustrated below.
 
 ::
 
@@ -74,7 +74,7 @@ string template to match. So in the previous case datagrabber is looking for
 path matches of the form `/mass/data/s*/f*`.
 
 .. note::
-  
+
   When used with wildcards (e.g., s* and f* above) DataGrabber does not return
   data in sorted order. In order to force it to return data in sorted order, one
   needs to set the input `sorted = True`. However, when explicitly specifying an
@@ -128,14 +128,14 @@ while the `template_args` reflect the inputs that satisfy the template. The
 inputs can either be one of the named inputs specified by the `infields` keyword
 arg or it can be raw strings or integers corresponding to the template. For the
 `func` output, the **%s** in the `field_template` is satisfied by `subject_id`
-and the **%d** is field in by the list of numbers. 
+and the **%d** is field in by the list of numbers.
 
 .. note::
 
   We have not set `sorted` to `True` as we want the DataGrabber to return the
   functional files in the order it was specified rather than in an alphabetic
   sorted order.
- 
+
 DataSink
 ========
 
@@ -149,7 +149,7 @@ preserving only a small percentage of these outputs. The :ref:`DataSink <nipype.
 be used to extract components from this `cache` and store it at a different
 location. For XNAT-based storage, see :ref:`XNATSink <nipype.interfaces.io.XNATSink>` .
 
-.. note:: 
+.. note::
 
    Unlike other interfaces, a :ref:`DataSink <nipype.interfaces.io.DataSink>`'s inputs are defined and created by using
    the workflow connect statement. Currently disconnecting an input from the
@@ -165,7 +165,7 @@ Let's assume we have the following workflow.
 The following code segment defines the :ref:`DataSink <nipype.interfaces.io.DataSink>` node and sets the `base_directory`
 in which all outputs will be stored. The `container` input creates a
 subdirectory within the `base_directory`. If you are iterating a workflow over
-subjects, it may be useful to save it within a folder with the subject id. 
+subjects, it may be useful to save it within a folder with the subject id.
 
 ::
 
@@ -175,7 +175,7 @@ subjects, it may be useful to save it within a folder with the subject id.
 
 If we wanted to save the realigned files and the realignment parameters to the
 same place the most intuitive option would be:
- 
+
 ::
 
   workflow.connect(realigner, 'realigned_files', datasink, 'motion')
@@ -233,7 +233,7 @@ Substitutions
 The `substitutions` and `substitutions_regexp` inputs allow users to modify the
 output destination path and name of a file. Substitutions are a list of 2-tuples
 and are carried out in the order in which they were entered. Assuming that the
-output path of a file is: 
+output path of a file is:
 
 ::
 
@@ -257,6 +257,6 @@ This will rewrite the file as:
 
    In order to figure out which substitutions are needed it is often useful to
    run the workflow on a limited set of iterables and then determine the
-   substitutions. 
+   substitutions.
 
 .. include:: ../links_names.txt

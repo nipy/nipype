@@ -12,6 +12,7 @@ def test_PointsWarp_inputs():
     usedefault=True,
     ),
     num_threads=dict(argstr='-threads %01d',
+    nohash=True,
     ),
     output_path=dict(argstr='-out %s',
     mandatory=True,

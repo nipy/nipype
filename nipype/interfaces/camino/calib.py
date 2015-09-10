@@ -187,22 +187,27 @@ class SFLUTGen(StdOutCommandLine):
 
     The utility outputs two lut's, *_oneFibreSurfaceCoeffs.Bdouble and
     *_twoFibreSurfaceCoeffs.Bdouble. Each of these files contains big-
-    endian doubles as standard. The format of the output is:
-      dimensions    (1 for Watson, 2 for Bingham)
-      order         (the order of the polynomial)
-      coefficient_1
-      coefficient_2
-      ...
-      coefficient_N
+    endian doubles as standard. The format of the output is: ::
+
+          dimensions    (1 for Watson, 2 for Bingham)
+          order         (the order of the polynomial)
+          coefficient_1
+          coefficient_2
+          ...
+          coefficient_N
+
     In  the case of the Watson, there is a single set of coefficients,
-    which are ordered:
-      constant, x, x^2, ..., x^order.
+    which are ordered: ::
+
+          constant, x, x^2, ..., x^order.
+
     In the case of the Bingham, there are two sets of coefficients (one
-    for each surface), ordered so that:
-      for j = 1 to order
-        for k = 1 to order
-          coeff_i = x^j * y^k
-      where j+k < order
+    for each surface), ordered so that: ::
+
+          for j = 1 to order
+            for k = 1 to order
+              coeff_i = x^j * y^k
+          where j+k < order
 
     Example
     ---------

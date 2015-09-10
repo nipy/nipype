@@ -71,7 +71,7 @@ class DTIInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
-    mask_file = File(exists=True, mandatory=False,
+    mask_file = File(exists=True,
                  desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the DTI parameters image')
@@ -133,7 +133,7 @@ class TensorModeInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
-    mask_file = File(exists=True, mandatory=False,
+    mask_file = File(exists=True,
                      desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the Tensor mode image')

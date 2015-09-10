@@ -450,5 +450,14 @@ class DicomImport(SPMCommand):
         from glob import glob
         outputs = self._outputs().get()
         od = os.path.abspath(self.inputs.output_dir)
-        outputs['out_files'] = glob(os.path.join(od, '*'))
+
+        ext = self.inputs.format
+        if self.inputs.output_dir_struct == "flat":
+            outputs['out_files'] = glob(os.path.join(od, '*.%s'%ext))
+        elif self.inputs.output_dir_struct == 'series':
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*.%s'%ext)))
+        elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*','*.%s'%ext)))
+        elif self.inputs.output_dir_struct == 'patid_date':
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*','*','*.%s'%ext)))
         return outputs

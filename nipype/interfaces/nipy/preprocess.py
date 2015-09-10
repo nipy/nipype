@@ -242,7 +242,7 @@ class SpaceTimeRealigner(BaseInterface):
     If slice_times is not specified, this algorithm performs spatial motion
     correction
 
-    This interface wraps nipy's SpaceTimeRealign algorithm [1]_ or simply the
+    This interface wraps nipy's SpaceTimeRealign algorithm [Roche2011]_ or simply the
     SpatialRealign algorithm when timing info is not provided.
 
     Examples
@@ -263,7 +263,7 @@ class SpaceTimeRealigner(BaseInterface):
 
     References
     ----------
-    .. [1] Roche A. A four-dimensional registration algorithm with \
+    .. [Roche2011] Roche A. A four-dimensional registration algorithm with \
        application to joint correction of motion and slice timing \
        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. DOI_.
 
