@@ -1471,7 +1471,7 @@ class Node(WorkflowBase):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     def _save_hashfile(self, hashfile, hashed_inputs):
@@ -2136,7 +2136,7 @@ class MapNode(Node):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     @property
