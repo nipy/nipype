@@ -763,16 +763,19 @@ class Segment(SPMCommand):
 
     """
 
-    _local_version = SPMCommand().version
-    if _local_version and '12.' in _local_version:
-        _jobtype = 'tools'
-        _jobname = 'oldseg'
-    else:
-        _jobtype = 'spatial'
-        _jobname = 'preproc'
-
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
+    
+    def __init__(self, **inputs):
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            self._jobtype = 'tools'
+            self._jobname = 'oldseg'
+        else:
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
+        
+        SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -891,13 +894,17 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-    _local_version = SPMCommand().version
-    if _local_version and '12.' in _local_version:
-        _jobtype = 'spatial'
-        _jobname = 'preproc'
-    else:
-        _jobtype = 'tools'
-        _jobname = 'preproc8'
+        
+    def __init__(self, **inputs):
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
+        else:
+            self._jobtype = 'tools'
+            self._jobname = 'preproc8'
+        
+        SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
