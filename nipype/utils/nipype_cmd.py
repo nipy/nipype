@@ -2,7 +2,7 @@ import os
 import argparse
 import inspect
 import sys
-from nipype.interfaces.base import Interface, InputMultiPath
+from nipype.interfaces.base import Interface, InputMultiPath, traits
 from nipype.utils.misc import str2bool
 
 def listClasses(module=None):
@@ -24,6 +24,9 @@ def add_options(parser=None, module=None, function=None):
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
             desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:]
             args = {}
+            
+            if spec.is_trait_type(traits.Bool):
+                args["action"] = 'store_true'
 
             if hasattr(spec, "mandatory") and spec.mandatory:
                 if spec.is_trait_type(InputMultiPath):
@@ -43,16 +46,17 @@ def run_instance(interface, options):
         for input_name, _ in interface.inputs.items():
             if getattr(options, input_name) != None:
                 value = getattr(options, input_name)
-                #traits cannot cast from string to float or int
-                try:
-                    value = float(value)
-                except:
-                    pass
-                #try to cast string input to boolean
-                try:
-                    value = str2bool(value)
-                except:
-                    pass
+                if not isinstance(value, bool):
+                    #traits cannot cast from string to float or int
+                    try:
+                        value = float(value)
+                    except:
+                        pass
+                    #try to cast string input to boolean
+                    try:
+                        value = str2bool(value)
+                    except:
+                        pass
                 try:
                     setattr(interface.inputs, input_name,
                             value)
