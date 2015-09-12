@@ -2005,6 +2005,7 @@ class MotionOutliersOutputSpec(TraitedSpec):
     out_metric_values = File(exists=True)
     out_metric_plot = File(exists=True)
 
+
 class MotionOutliers(FSLCommand):
     """
     Use FSL fsl_motion_outliers`http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLMotionOutliers`_ to find outliers in timeseries (4d) data.
