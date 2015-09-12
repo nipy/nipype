@@ -2013,9 +2013,9 @@ class MotionOutliers(FSLCommand):
     --------
     >>> from nipype.interfaces.fsl import MotionOutliers
     >>> mo = MotionOutliers()
-    >>> mo.inputs.in_file = "epi.nii.gz"
+    >>> mo.inputs.in_file = "epi.nii"
     >>> mo.cmdline # doctest: +ELLIPSIS
-    'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
+    'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
     >>> res = mo.run() # doctest: +SKIP
     """
 
