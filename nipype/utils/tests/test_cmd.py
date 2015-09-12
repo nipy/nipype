@@ -88,7 +88,7 @@ optional arguments:
         self.assertEqual(stderr.getvalue(),
 """usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
                                                        [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
-                                                       [--ignore_exception IGNORE_EXCEPTION]
+                                                       [--ignore_exception]
                                                        [--loops [LOOPS [LOOPS ...]]]
                                                        [--slice_order SLICE_ORDER]
                                                        [--speedup [SPEEDUP [SPEEDUP ...]]]
