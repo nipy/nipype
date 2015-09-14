@@ -5,6 +5,7 @@ import glob
 import shutil
 import os.path as op
 from tempfile import mkstemp, mkdtemp
+from subprocess import Popen
 
 from nose.tools import assert_raises
 import nipype
@@ -14,7 +15,8 @@ from nipype.interfaces.base import Undefined
 
 noboto = False
 try:
-    import boto3
+    import boto
+    from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 except:
     noboto = True
 
@@ -88,6 +90,7 @@ def test_selectfiles_valueerror():
 @skipif(noboto)
 def test_s3datagrabber_communication():
     dg = nio.S3DataGrabber(infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
+    dg.inputs.anon = True
     dg.inputs.bucket = 'openfmri'
     dg.inputs.bucket_path = 'ds001/'
     tempdir = mkdtemp()
@@ -202,8 +205,19 @@ def test_s3datasink_substitutions():
         f = os.path.join(indir, n)
         files.append(f)
         open(f, 'w')
+
+    # run fakes3 server and set up bucket
+    fakes3dir = op.expanduser('~/fakes3')
+    proc = Popen(['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+    conn = S3Connection(anon=True, is_secure=False, port=4567,
+                          host='localhost',
+                          calling_format=OrdinaryCallingFormat())
+    conn.create_bucket('test')
+
     ds = nio.S3DataSink(
-        bucket='nipype-test',
+        testing=True,
+        anon=True,
+        bucket='test',
         bucket_path='output/',
         parametrization=False,
         base_directory=outdir,
@@ -222,27 +236,33 @@ def test_s3datasink_substitutions():
                   x in glob.glob(os.path.join(outdir, '*'))]), \
           ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
-    s3 = boto3.resource('s3')
-    bkt = s3.Bucket(ds.inputs.bucket)
-    bkt_files = list(k.key for k in bkt.objects.all())
+    bkt = conn.get_bucket(ds.inputs.bucket)
+    bkt_files = list(k for k in bkt.list())
 
     found = [False, False]
-    del_dict = {'Objects':[],'Quiet': True}
-    for key in bkt_files:
-        if '!-yz-b.n' in key:
+    failed_deletes = 0
+    for k in bkt_files:
+        if '!-yz-b.n' in k.key:
             found[0] = True
-            del_dict["Objects"].append({'Key': key})
-        if 'ABABAB.n' in key:
+            try:
+                bkt.delete_key(k)
+            except:
+                failed_deletes += 1
+        elif 'ABABAB.n' in k.key:
             found[1] = True
-            del_dict["Objects"].append({'Key': key})
+            try:
+                bkt.delete_key(k)
+            except:
+                failed_deletes += 1
+
+    # ensure delete requests were successful
+    yield assert_equal, failed_deletes, 0
 
     # ensure both keys are found in bucket
     yield assert_equal, found.count(True), 2
 
-    resp = bkt.delete_objects(Delete=del_dict, RequestPayer='requester')
-    # ensure delete request was successful
-    yield assert_equal, resp["ResponseMetadata"]["HTTPStatusCode"], 200
-
+    proc.kill()
+    shutil.rmtree(fakes3dir)
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 

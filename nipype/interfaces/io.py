@@ -46,7 +46,8 @@ except:
     pass
 
 try:
-    import boto3
+    import boto
+    from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 except:
     pass
 
@@ -377,13 +378,16 @@ class DataSink(IOBase):
 
 
 class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    testing = traits.Bool(False, usedefault=True,
+                                   desc='Flag for using local fakes3 server.'
+                                        ' (for testing purposes only)')
+    anon = traits.Bool(False, usedefault=True,
+                                   desc='Use anonymous connection to s3')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket to store '
                                    'data.')
-    region = traits.Str('us-east-1', usedefault=True,
-                             desc='Region of s3 bucket')
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -435,8 +439,14 @@ class S3DataSink(DataSink):
         return outputs
 
     def localtos3(self, paths):
-        client = boto3.client('s3', self.inputs.region)
-        transfer = boto3.s3.transfer.S3Transfer(client)
+        if self.inputs.testing:
+            conn = S3Connection(anon=True, is_secure=False, port=4567,
+                                host='localhost',
+                                calling_format=OrdinaryCallingFormat())
+
+        else:
+            conn = S3Connection(anon=self.inputs.anon)
+        bkt = conn.get_bucket(self.inputs.bucket)
         s3paths = []
 
         for path in paths:
@@ -446,17 +456,23 @@ class S3DataSink(DataSink):
                 s3path = path[bd_index+len(self.inputs.base_directory):]  # cut out base directory
                 if s3path[0] == os.path.sep:
                     s3path = s3path[1:]
-            else: # base_directory isn't in path, simply place all files in bucket_path folder
-                s3path = os.path.split(path)[1] # take filename from path
-            s3path = os.path.join(self.inputs.bucket_path, path)
+            else:  # base_directory isn't in path, simply place all files in bucket_path folder
+                s3path = os.path.split(path)[1]  # take filename from path
+            s3path = os.path.join(self.inputs.bucket_path, s3path)
+            if s3path[-1] == os.path.sep:
+                s3path = s3path[:-1]
             s3paths.append(s3path)
 
-            transfer.upload_file(path, self.inputs.bucket, s3path)
+            k = boto.s3.key.Key(bkt)
+            k.key = s3path
+            k.set_contents_from_filename(path)
 
         return s3paths
 
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    anon = traits.Bool(False, usedefault=True,
+                                   desc='Use anonymous connection to s3')
     region = traits.Str('us-east-1', usedefault=True,
                              desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
@@ -557,9 +573,9 @@ class S3DataGrabber(IOBase):
 
         outputs = {}
         # get list of all files in s3 bucket
-        s3 = boto3.resource('s3')
-        bkt = s3.Bucket(self.inputs.bucket)
-        bkt_files = list(k.key for k in bkt.objects.all())
+        conn = boto.connect_s3(anon=self.inputs.anon)
+        bkt = conn.get_bucket(self.inputs.bucket)
+        bkt_files = list(k.key for k in bkt.list())
 
         # keys are outfields, args are template args for the outfield
         for key, args in self.inputs.template_args.items():
@@ -642,15 +658,15 @@ class S3DataGrabber(IOBase):
                 paths = outputs[key]
                 for i in range(len(paths)):
                     path = paths[i]
-                    outputs[key][i] = self.s3tolocal(path)
+                    outputs[key][i] = self.s3tolocal(path, bkt)
             elif type(outputs[key]) == str:
-                outputs[key] = self.s3tolocal(outputs[key])
+                outputs[key] = self.s3tolocal(outputs[key], bkt)
 
         return outputs
 
     # Takes an s3 address and downloads the file to a local
     # directory, returning the local path.
-    def s3tolocal(self, s3path):
+    def s3tolocal(self, s3path, bkt):
         # path formatting
         if not os.path.split(self.inputs.local_directory)[1] == '':
             self.inputs.local_directory += '/'
@@ -663,9 +679,9 @@ class S3DataGrabber(IOBase):
         localdir = os.path.split(localpath)[0]
         if not os.path.exists(localdir):
             os.makedirs(localdir)
-        client = boto3.client('s3', self.inputs.region)
-        transfer = boto3.s3.transfer.S3Transfer(client)
-        transfer.download_file(self.inputs.bucket, s3path, localpath)
+        k = boto.s3.key.Key(bkt)
+        k.key = s3path
+        k.get_contents_to_filename(localpath)
         return localpath
 
 
