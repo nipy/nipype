@@ -39,7 +39,11 @@ above example we have used the ``desc`` metadata which holds human readable
 description of the input. The ``mandatory`` flag forces Nipype to throw an
 exception if the input was not set. ``exists`` is a special flag that works only
 for ``File traits`` and checks if the provided file exists. More details can be
+<<<<<<< HEAD
 found at :doc:`interface_specs`.
+=======
+found at :ref:`interface_specs`.
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
 The input and output specifications have to be connected to the our example
 interface class:

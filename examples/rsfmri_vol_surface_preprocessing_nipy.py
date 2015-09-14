@@ -528,7 +528,11 @@ def create_reg_workflow(name='registration'):
 
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
+<<<<<<< HEAD
     register.connect(reg, 'composite_transform', merge, 'in1')
+=======
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -619,8 +623,12 @@ def create_workflow(files,
                        name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
-    """Segment and Register
     """
+<<<<<<< HEAD
+=======
+    Segment and Register
+    """
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
@@ -628,6 +636,7 @@ def create_workflow(files,
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
+<<<<<<< HEAD
     """Quantify TSNR in each freesurfer ROI
     """
 
@@ -637,6 +646,8 @@ def create_workflow(files,
     wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
     wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
 
+=======
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
     intensity or movement.

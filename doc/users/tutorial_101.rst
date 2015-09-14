@@ -43,7 +43,11 @@ This would be equivalent to:
 .. testcode::
    
    realigner = pe.Node(interface=spm.Realign(infile=os.abspath('somefuncrun.nii'),
+<<<<<<< HEAD
                                              register_to_mean = True),
+=======
+                                             register_to_mean = True), 
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
                        name='realign')
 
 In Pythonic terms, this is saying that interface option in Node accepts
@@ -93,8 +97,13 @@ This results in a workflow containing two isolated nodes:
 
 **5. Connecting nodes to each other**
 
+<<<<<<< HEAD
 We want to connect the output produced by the node realignment to the input of
 the node smoothing. This is done as follows:
+=======
+We want to connect the output produced by realignment to the input of
+smoothing. This is done as follows:
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
 .. literalinclude:: tutorial_101.py
    :lines: 31
